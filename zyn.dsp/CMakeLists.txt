@@ -29,5 +29,5 @@ target_link_libraries(zyn.dsp
     zyn.common
     )
 
-install(FILES ${zyn_dsp_HDRS} DESTINATION include/zyn/dsp)
-install(TARGETS zyn.dsp DESTINATION lib)
+install(FILES ${zyn_dsp_HDRS} DESTINATION include/zyn/dsp COMPONENT develop)
+install(TARGETS zyn.dsp DESTINATION lib COMPONENT develop)

@@ -80,5 +80,5 @@ target_link_libraries(zyn.nio
     ${zyn_nio_LIB}
     )
 
-install(FILES ${zyn_nio_HDRS} DESTINATION include/zyn/nio)
-install(TARGETS zyn.nio DESTINATION lib)
+install(FILES ${zyn_nio_HDRS} DESTINATION include/zyn/nio COMPONENT develop)
+install(TARGETS zyn.nio DESTINATION lib COMPONENT develop)

@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 2.8)
 
 project(zyn.common)
@@ -36,5 +37,5 @@ target_link_libraries(zyn.common
     ${MXML_LIBRARIES}
     )
 
-install(FILES ${zyn_common_HDRS} DESTINATION include/zyn/common)
-install(TARGETS zyn.common DESTINATION lib)
+install(FILES ${zyn_common_HDRS} DESTINATION include/zyn/common COMPONENT develop)
+install(TARGETS zyn.common DESTINATION lib COMPONENT develop)

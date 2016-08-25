@@ -40,5 +40,5 @@ target_link_libraries(zyn.fx
     zyn.common
     )
 
-install(FILES ${zyn_fx_HDRS} DESTINATION include/zyn/common)
-install(TARGETS zyn.fx DESTINATION lib)
+install(FILES ${zyn_fx_HDRS} DESTINATION include/zyn/common COMPONENT develop)
+install(TARGETS zyn.fx DESTINATION lib COMPONENT develop)

@@ -34,5 +34,5 @@ target_link_libraries(zyn.mixer
     zyn.common
     )
 
-install(FILES ${zyn_mixer_HDRS} DESTINATION include/zyn/mixer)
-install(TARGETS zyn.mixer DESTINATION lib)
+install(FILES ${zyn_mixer_HDRS} DESTINATION include/zyn/mixer COMPONENT develop)
+install(TARGETS zyn.mixer DESTINATION lib COMPONENT develop)

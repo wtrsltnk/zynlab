@@ -53,5 +53,5 @@ target_link_libraries(zyn.synth
     ${FFTW_LIBRARIES}
     )
 
-install(FILES ${zyn_synth_HDRS} DESTINATION include/zyn/synth)
-install(TARGETS zyn.synth DESTINATION lib)
+install(FILES ${zyn_synth_HDRS} DESTINATION include/zyn/synth COMPONENT develop)
+install(TARGETS zyn.synth DESTINATION lib COMPONENT develop)
