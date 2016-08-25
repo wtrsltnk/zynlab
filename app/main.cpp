@@ -70,7 +70,7 @@ MasterUI *ui;
 
 using namespace std;
 
-IMixer   *globalMixer;
+Master *mixer;
 SYNTH_T  *synth;
 int       swaplr = 0; //1 for left-right swapping
 
@@ -134,8 +134,8 @@ void initprogram(void)
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
-    globalMixer = &Master::getInstance();
-    ((Master*)globalMixer)->swaplr = swaplr;
+    mixer = &Master::getInstance();
+    ((Master*)mixer)->swaplr = swaplr;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
@@ -147,8 +147,8 @@ void initprogram(void)
 void exitprogram()
 {
     //ensure that everything has stopped with the mutex wait
-    globalMixer->Lock();
-    globalMixer->Unlock();
+    mixer->Lock();
+    mixer->Unlock();
 
     Nio::stop();
 
@@ -399,21 +399,21 @@ int main(int argc, char *argv[])
     initprogram();
 
     if(!loadfile.empty()) {
-        int tmp = ((Master*)globalMixer)->loadXML(loadfile.c_str());
+        int tmp = ((Master*)mixer)->loadXML(loadfile.c_str());
         if(tmp < 0) {
             cerr << "ERROR: Could not load master file " << loadfile
                  << "." << endl;
             exit(1);
         }
         else {
-            ((Master*)globalMixer)->applyparameters();
+            ((Master*)mixer)->applyparameters();
             cout << "Master file loaded." << endl;
         }
     }
 
     if(!loadinstrument.empty()) {
         int loadtopart = 0;
-        int tmp = ((Master*)globalMixer)->part[loadtopart]->loadXMLinstrument(
+        int tmp = ((Master*)mixer)->part[loadtopart]->loadXMLinstrument(
                     loadinstrument.c_str());
         if(tmp < 0) {
             cerr << "ERROR: Could not load instrument file "
@@ -421,13 +421,13 @@ int main(int argc, char *argv[])
             exit(1);
         }
         else {
-            ((Master*)globalMixer)->part[loadtopart]->applyparameters();
+            mixer->part[loadtopart]->applyparameters();
             cout << "Instrument file loaded." << endl;
         }
     }
 
     //Run the Nio system
-    bool ioGood = Nio::start();
+    bool ioGood = Nio::start(mixer);
 
     if(!execAfterInit.empty()) {
         cout << "Executing user supplied command: " << execAfterInit << endl;
@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
     Fl::foreground( 255,255,255 );
 #endif
 
-    ui = new MasterUI(((Master*)globalMixer), &Pexitprogram);
+    ui = new MasterUI(((Master*)mixer), &Pexitprogram);
     
     if ( !noui)
     {

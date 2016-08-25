@@ -1,47 +1,49 @@
 #ifndef NIO_H
 #define NIO_H
+
 #include <string>
 #include <set>
+#include "zyn.common/globals.h"
 
 class WavFile;
 
 /**Interface to Nio Subsystem
  *
  * Should be only externally included header */
-namespace Nio
+class Nio
 {
-    void init(void);
-    bool start(void);
-    void stop(void);
+public:
+    static bool start(IMixer* mixer);
+    static void stop(void);
 
-    void setDefaultSource(std::string name);
-    void setDefaultSink(std::string name);
+    static void setDefaultSource(std::string name);
+    static void setDefaultSink(std::string name);
 
-    bool setSource(std::string name);
-    bool setSink(std::string name);
+    static bool setSource(std::string name);
+    static bool setSink(std::string name);
 
-    void setPostfix(std::string post);
-    std::string getPostfix(void);
+    static void setPostfix(std::string post);
+    static std::string getPostfix(void);
 
-    std::set<std::string> getSources(void);
-    std::set<std::string> getSinks(void);
+    static std::set<std::string> getSources(void);
+    static std::set<std::string> getSinks(void);
 
-    std::string getSource(void);
-    std::string getSink(void);
+    static std::string getSource(void);
+    static std::string getSink(void);
 
     //Get the prefered sample rate from jack (if running)
-    void preferedSampleRate(unsigned &rate);
+    static void preferedSampleRate(unsigned &rate);
 
 
     //Wave writing
-    void waveNew(class WavFile *wave);
-    void waveStart(void);
-    void waveStop(void);
-    void waveEnd(void);
+    static void waveNew(class WavFile *wave);
+    static void waveStart(void);
+    static void waveStop(void);
+    static void waveEnd(void);
 
-    extern bool autoConnect;
-    extern std::string defaultSource;
-    extern std::string defaultSink;
+    static bool autoConnect;
+    static std::string defaultSource;
+    static std::string defaultSink;
 };
 
 #endif

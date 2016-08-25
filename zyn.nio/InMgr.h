@@ -26,6 +26,9 @@ struct MidiEvent {
 //super simple class to manage the inputs
 class InMgr
 {
+    friend class Nio;
+
+    static InMgr* _instance;
     public:
         static InMgr &getInstance();
         ~InMgr();
@@ -43,7 +46,7 @@ class InMgr
 
         friend class EngineMgr;
     private:
-        InMgr();
+        InMgr(IMixer* mixer);
         class MidiIn *getIn(std::string name);
         SafeQueue<MidiEvent> queue;
         mutable ZynSema work;

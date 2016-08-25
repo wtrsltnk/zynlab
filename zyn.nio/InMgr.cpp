@@ -34,14 +34,15 @@ MidiEvent::MidiEvent()
     :channel(0), type(0), num(0), value(0), time(0)
 {}
 
+InMgr *InMgr::_instance = 0;
+
 InMgr &InMgr::getInstance()
 {
-    static InMgr instance;
-    return instance;
+    return *InMgr::_instance;
 }
 
-InMgr::InMgr()
-    :queue(100), mixer(globalMixer)
+InMgr::InMgr(IMixer* mixer)
+    :queue(100), mixer(mixer)
 {
     current = NULL;
     work.init(PTHREAD_PROCESS_PRIVATE, 0);

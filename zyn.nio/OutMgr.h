@@ -10,6 +10,9 @@
 class AudioOut;
 class OutMgr
 {
+    friend class Nio;
+
+    static OutMgr* _instance;
     public:
         static OutMgr &getInstance();
         virtual ~OutMgr();
@@ -41,7 +44,7 @@ class OutMgr
         class WavEngine * wave;     /**<The Wave Recorder*/
         friend class EngineMgr;
     private:
-        OutMgr();
+        OutMgr(IMixer* mixer);
         void addSmps(float *l, float *r);
         unsigned int  storedSmps() const {return priBuffCurrent.l - priBuf.l; }
         void removeStaleSmps();

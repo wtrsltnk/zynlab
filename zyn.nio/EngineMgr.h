@@ -12,6 +12,7 @@ class OutMgr;
 /**Container/Owner of the long lived Engines*/
 class EngineMgr
 {
+    friend class Nio;
     public:
         static EngineMgr &getInstance();
         ~EngineMgr();

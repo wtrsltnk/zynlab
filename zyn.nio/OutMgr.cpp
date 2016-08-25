@@ -8,22 +8,22 @@
 #include "EngineMgr.h"
 #include "InMgr.h"
 #include "WavEngine.h"
-//#include "../Misc/Master.h"
 #include "zyn.common/Util.h" //for set_realtime()
 
 using namespace std;
 
+OutMgr *OutMgr::_instance = 0;
+
 OutMgr &OutMgr::getInstance()
 {
-    static OutMgr instance;
-    return instance;
+    return *OutMgr::_instance;
 }
 
-OutMgr::OutMgr()
+OutMgr::OutMgr(IMixer* mixer)
     :wave(new WavEngine()),
       priBuf(new float[4096],
              new float[4096]), priBuffCurrent(priBuf),
-      mixer(globalMixer)
+      mixer(mixer)
 {
     currentOut = NULL;
     stales     = 0;

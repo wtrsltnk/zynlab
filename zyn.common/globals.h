@@ -267,6 +267,4 @@ public:
     virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr) = 0;
 };
 
-extern IMixer* globalMixer;
-
 #endif

@@ -21,16 +21,14 @@ bool   Nio::autoConnect   = false;
 string Nio::defaultSource = IN_DEFAULT;
 string Nio::defaultSink   = OUT_DEFAULT;
 
-void Nio::init(void)
+bool Nio::start(IMixer* mixer)
 {
+    InMgr::_instance = new InMgr(mixer);
     in  = &InMgr::getInstance(); //Enable input wrapper
+    OutMgr::_instance = new OutMgr(mixer);
     out = &OutMgr::getInstance(); //Initialize the Output Systems
     eng = &EngineMgr::getInstance(); //Initialize The Engines
-}
 
-bool Nio::start()
-{
-    init();
     return eng->start();
 }
 
