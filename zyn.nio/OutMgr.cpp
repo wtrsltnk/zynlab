@@ -14,9 +14,21 @@ using namespace std;
 
 OutMgr *OutMgr::_instance = 0;
 
+OutMgr &OutMgr::createInstance(IMixer* mixer)
+{
+    if (OutMgr::_instance == 0) OutMgr::_instance = new OutMgr(mixer);
+    return *OutMgr::_instance;
+}
+
 OutMgr &OutMgr::getInstance()
 {
     return *OutMgr::_instance;
+}
+
+void OutMgr::destroyInstance()
+{
+    if (OutMgr::_instance != 0) delete OutMgr::_instance;
+    OutMgr::_instance = 0;
 }
 
 OutMgr::OutMgr(IMixer* mixer)

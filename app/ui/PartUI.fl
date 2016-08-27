@@ -39,7 +39,7 @@ decl {\#include "zyn.common/Config.h"} {public
 decl {\#include "zyn.mixer/Mixer.h"} {public
 } 
 
-decl {\#include "zyn.mixer/Part.h"} {public
+decl {\#include "zyn.mixer/Instrument.h"} {public
 } 
 
 class PartSysEffSend {open : {public Fl_Group}
@@ -66,7 +66,7 @@ class PartSysEffSend {open : {public Fl_Group}
 neff=0;
 npart=0;} {}
   }
-  Function {init(Master *master_,int npart_,int neff_)} {} {
+  Function {init(Mixer *master_,int npart_,int neff_)} {} {
     code {npart=npart_;
 neff=neff_;
 master=master_;
@@ -78,7 +78,7 @@ end();} {}
     code {syseffsend->hide();
 //delete(syseffsend);} {}
   }
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {int neff;} {}
   decl {int npart;} {}
 } 
@@ -249,7 +249,7 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
 } else o->value(1);}
     }
   }
-  Function {init(Part *part_,int n_,Master *master_,class PartUI *partui_)} {} {
+  Function {init(Instrument *part_,int n_,Mixer *master_,class PartUI *partui_)} {} {
     code {part=part_;
 n=n_;
 partui=partui_;
@@ -262,9 +262,9 @@ end();} {}
     code {partkititem->hide();
 //delete(partkititem);} {}
   }
-  decl {Part *part;} {}
+  decl {Instrument *part;} {}
   decl {int n;} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {char label[10];} {}
   decl {class PartUI *partui;} {}
 } 
@@ -1020,7 +1020,7 @@ subnoteui=NULL;
 padnoteui=NULL;
 lastkititem=-1;} {}
   }
-  Function {init(Part *part_,Master *master_,int npart_,BankUI *bankui_)} {} {
+  Function {init(Instrument *part_,Mixer *master_,int npart_,BankUI *bankui_)} {} {
     code {bankui=bankui_;
 part=part_;
 npart=npart_;
@@ -1111,8 +1111,8 @@ delete(instrumentkitlist);
 instrumenteditwindow->hide();
 delete(instrumenteditwindow);} {}
   }
-  decl {Part *part;} {}
-  decl {Master *master;} {}
+  decl {Instrument *part;} {}
+  decl {Mixer *master;} {}
   decl {BankUI *bankui;} {}
   decl {ADnoteUI *adnoteui;} {}
   decl {SUBnoteUI *subnoteui;} {}

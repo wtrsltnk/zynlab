@@ -23,7 +23,7 @@
 
 #include "Mixer.h"
 
-#include "Part.h"
+#include "Instrument.h"
 
 #include "zyn.synth/LFOParams.h"
 #include "zyn.fx/EffectMgr.h"
@@ -45,9 +45,9 @@ vuData::vuData(void)
       rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
 
-static Master* masterInstance = NULL;
+static Mixer* masterInstance = NULL;
 
-Master::Master()
+Mixer::Mixer()
 {
     swaplr = 0;
     off  = 0;
@@ -66,7 +66,7 @@ Master::Master()
     }
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        part[npart] = new Part(&microtonal, fft, &mutex);
+        part[npart] = new Instrument(&microtonal, fft, &mutex);
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -80,7 +80,7 @@ Master::Master()
     defaults();
 }
 
-void Master::defaults()
+void Mixer::defaults()
 {
     volume = 1.0f;
     setPvolume(80);
@@ -112,7 +112,7 @@ void Master::defaults()
     ShutUp();
 }
 
-bool Master::mutexLock(lockset request)
+bool Mixer::mutexLock(lockset request)
 {
     switch(request) {
         case MUTEX_TRYLOCK:
@@ -125,25 +125,25 @@ bool Master::mutexLock(lockset request)
     return false;
 }
 
-void Master::Lock()
+void Mixer::Lock()
 {
     pthread_mutex_lock(&mutex);
 }
 
-void Master::Unlock()
+void Mixer::Unlock()
 {
     pthread_mutex_unlock(&mutex);
 }
 
-Master &Master::getInstance()
+Mixer &Mixer::getInstance()
 {
     if (!masterInstance)
-        masterInstance = new Master;
+        masterInstance = new Mixer;
 
     return *masterInstance;
 }
 
-void Master::deleteInstance()
+void Mixer::deleteInstance()
 {
     if (masterInstance)
     {
@@ -155,7 +155,7 @@ void Master::deleteInstance()
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
-void Master::noteOn(char chan, char note, char velocity)
+void Mixer::NoteOn(char chan, char note, char velocity)
 {
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
@@ -166,14 +166,14 @@ void Master::noteOn(char chan, char note, char velocity)
             }
     }
     else
-        this->noteOff(chan, note);
+        this->NoteOff(chan, note);
     HDDRecorder.triggernow();
 }
 
 /*
  * Note Off Messages
  */
-void Master::noteOff(char chan, char note)
+void Mixer::NoteOff(char chan, char note)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
@@ -183,7 +183,7 @@ void Master::noteOff(char chan, char note)
 /*
  * Pressure Messages (velocity=0 for NoteOff)
  */
-void Master::polyphonicAftertouch(char chan, char note, char velocity)
+void Mixer::PolyphonicAftertouch(char chan, char note, char velocity)
 {
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
@@ -193,13 +193,13 @@ void Master::polyphonicAftertouch(char chan, char note, char velocity)
 
     }
     else
-        this->noteOff(chan, note);
+        this->NoteOff(chan, note);
 }
 
 /*
  * Controllers
  */
-void Master::setController(char chan, int type, int par)
+void Mixer::SetController(char chan, int type, int par)
 {
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
@@ -243,7 +243,7 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
-void Master::setProgram(char chan, unsigned int pgm)
+void Mixer::SetProgram(char chan, unsigned int pgm)
 {
     if(config.cfg.IgnoreProgramChange)
         return;
@@ -261,7 +261,7 @@ void Master::setProgram(char chan, unsigned int pgm)
         }
 }
 
-void Master::vuUpdate(const float *outl, const float *outr)
+void Mixer::vuUpdate(const float *outl, const float *outr)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
@@ -311,7 +311,7 @@ void Master::vuUpdate(const float *outl, const float *outr)
 /*
  * Enable/Disable a part
  */
-void Master::partonoff(int npart, int what)
+void Mixer::partonoff(int npart, int what)
 {
     if(npart >= NUM_MIDI_PARTS)
         return;
@@ -334,7 +334,7 @@ void Master::partonoff(int npart, int what)
 /*
  * Master audio out (the final sound)
  */
-void Master::AudioOut(float *outl, float *outr)
+void Mixer::AudioOut(float *outl, float *outr)
 {
     //Swaps the Left channel with Right Channel
     if(swaplr)
@@ -491,7 +491,7 @@ void Master::AudioOut(float *outl, float *outr)
 
 //TODO review the respective code from yoshimi for this
 //If memory serves correctly, libsamplerate was used
-void Master::GetAudioOutSamples(size_t nsamples,
+void Mixer::GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
                                 float *outr)
@@ -527,7 +527,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
     }
 }
 
-Master::~Master()
+Mixer::~Mixer()
 {
     delete []bufl;
     delete []bufr;
@@ -549,26 +549,26 @@ Master::~Master()
 /*
  * Parameter control
  */
-void Master::setPvolume(char Pvolume_)
+void Mixer::setPvolume(char Pvolume_)
 {
     Pvolume = Pvolume_;
     volume  = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
 }
 
-void Master::setPkeyshift(char Pkeyshift_)
+void Mixer::setPkeyshift(char Pkeyshift_)
 {
     Pkeyshift = Pkeyshift_;
     keyshift  = (int)Pkeyshift - 64;
 }
 
 
-void Master::setPsysefxvol(int Ppart, int Pefx, char Pvol)
+void Mixer::setPsysefxvol(int Ppart, int Pefx, char Pvol)
 {
     Psysefxvol[Pefx][Ppart] = Pvol;
     sysefxvol[Pefx][Ppart]  = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
-void Master::setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol)
+void Mixer::setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol)
 {
     Psysefxsend[Pefxfrom][Pefxto] = Pvol;
     sysefxsend[Pefxfrom][Pefxto]  = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
@@ -578,7 +578,7 @@ void Master::setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol)
 /*
  * Panic! (Clean up all parts and effects)
  */
-void Master::ShutUp()
+void Mixer::ShutUp()
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         part[npart]->cleanup();
@@ -596,7 +596,7 @@ void Master::ShutUp()
 /*
  * Reset peaks and clear the "cliped" flag (for VU-meter)
  */
-void Master::vuresetpeaks()
+void Mixer::vuresetpeaks()
 {
     pthread_mutex_lock(&vumutex);
     vu.outpeakl    = 1e-9;
@@ -607,7 +607,7 @@ void Master::vuresetpeaks()
     pthread_mutex_unlock(&vumutex);
 }
 
-vuData Master::getVuData()
+vuData Mixer::getVuData()
 {
     vuData tmp;
     pthread_mutex_lock(&vumutex);
@@ -616,13 +616,13 @@ vuData Master::getVuData()
     return tmp;
 }
 
-void Master::applyparameters(bool lockmutex)
+void Mixer::applyparameters(bool lockmutex)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         part[npart]->applyparameters(lockmutex);
 }
 
-void Master::add2XML(XMLwrapper *xml)
+void Mixer::add2XML(XMLwrapper *xml)
 {
     xml->addpar("volume", Pvolume);
     xml->addpar("key_shift", Pkeyshift);
@@ -677,7 +677,7 @@ void Master::add2XML(XMLwrapper *xml)
 }
 
 
-int Master::getalldata(char **data)
+int Mixer::getalldata(char **data)
 {
     XMLwrapper *xml = new XMLwrapper();
 
@@ -694,7 +694,7 @@ int Master::getalldata(char **data)
     return strlen(*data) + 1;
 }
 
-void Master::putalldata(char *data, int /*size*/)
+void Mixer::putalldata(char *data, int /*size*/)
 {
     XMLwrapper *xml = new XMLwrapper();
     if(!xml->putXMLdata(data)) {
@@ -714,7 +714,7 @@ void Master::putalldata(char *data, int /*size*/)
     delete (xml);
 }
 
-int Master::saveXML(const char *filename)
+int Mixer::saveXML(const char *filename)
 {
     XMLwrapper *xml = new XMLwrapper();
 
@@ -729,7 +729,7 @@ int Master::saveXML(const char *filename)
 
 
 
-int Master::loadXML(const char *filename)
+int Mixer::loadXML(const char *filename)
 {
     XMLwrapper *xml = new XMLwrapper();
     if(xml->loadXMLfile(filename) < 0) {
@@ -746,7 +746,7 @@ int Master::loadXML(const char *filename)
     return 0;
 }
 
-void Master::getfromXML(XMLwrapper *xml)
+void Mixer::getfromXML(XMLwrapper *xml)
 {
     setPvolume(xml->getpar127("volume", Pvolume));
     setPkeyshift(xml->getpar127("key_shift", Pkeyshift));

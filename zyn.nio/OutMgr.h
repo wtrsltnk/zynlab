@@ -10,11 +10,11 @@
 class AudioOut;
 class OutMgr
 {
-    friend class Nio;
-
     static OutMgr* _instance;
     public:
+        static OutMgr &createInstance(IMixer* mixer);
         static OutMgr &getInstance();
+        static void destroyInstance();
         virtual ~OutMgr();
 
         /**Execute a tick*/

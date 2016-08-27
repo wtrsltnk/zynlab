@@ -58,7 +58,7 @@ class OscilSpectrum {: {public Fl_Box}
   Function {OscilSpectrum(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {oscil=NULL;} {}
   }
-  Function {init(OscilGen *oscil_,int oscbase_,Master *master_)} {} {
+  Function {init(OscilGen *oscil_,int oscbase_,Mixer *master_)} {} {
     code {oscil=oscil_;
 oscbase=oscbase_;
 master=master_;} {}
@@ -126,7 +126,7 @@ delete [] spc;} {}
   }
   decl {OscilGen *oscil;} {}
   decl {int oscbase;} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
 } 
 
 class PSlider {: {public Fl_Slider}
@@ -168,16 +168,16 @@ phase=64;
 oscbase=0;
 box(FL_FLAT_BOX);} {}
   }
-  Function {init(OscilGen *oscil_,Master *master_)} {} {
+  Function {init(OscilGen *oscil_,Mixer *master_)} {} {
     code {oscil=oscil_;
 master=master_;} {}
   }
-  Function {init(OscilGen *oscil_,int oscbase_,Master *master_)} {} {
+  Function {init(OscilGen *oscil_,int oscbase_,Mixer *master_)} {} {
     code {oscil=oscil_;
 oscbase=oscbase_;
 master=master_;} {}
   }
-  Function {init(OscilGen *oscil_,int oscbase_,int phase_,Master *master_)} {} {
+  Function {init(OscilGen *oscil_,int oscbase_,int phase_,Mixer *master_)} {} {
     code {oscil=oscil_;
 oscbase=oscbase_;
 phase=phase_;
@@ -246,7 +246,7 @@ fl_line_style(FL_SOLID,0);} {}
   decl {int oscbase;} {}
   decl {int phase;} {public
   }
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
 } 
 
 class Oscilharmonic {: {public Fl_Group}
@@ -331,7 +331,7 @@ display=NULL;
 applybutton=NULL;
 cbwidget=NULL;} {}
   }
-  Function {init(OscilGen *oscil_,int n_,Fl_Group *display_,Fl_Widget *oldosc_,Fl_Widget *cbwidget_,Fl_Widget *applybutton_, Master *master_)} {} {
+  Function {init(OscilGen *oscil_,int n_,Fl_Group *display_,Fl_Widget *oldosc_,Fl_Widget *cbwidget_,Fl_Widget *applybutton_, Mixer *master_)} {} {
     code {oscil=oscil_;
 n=n_;
 display=display_;
@@ -358,7 +358,7 @@ if (oscil->Phmag[n]==64) mag->selection_color(0);
   decl {Fl_Group *display;} {}
   decl {int n;} {}
   decl {Fl_Widget *oldosc,*cbwidget,*applybutton;} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
 } 
 
 class OscilEditor {open : {public PresetsUI_}
@@ -1067,7 +1067,7 @@ refresh();}
       }
     }
   }
-  Function {OscilEditor(OscilGen *oscil_,Fl_Widget *oldosc_,Fl_Widget *cbwidget_,Fl_Widget *cbapplywidget_,Master *master_)} {} {
+  Function {OscilEditor(OscilGen *oscil_,Fl_Widget *oldosc_,Fl_Widget *cbwidget_,Fl_Widget *cbapplywidget_,Mixer *master_)} {} {
     code {oscil=oscil_;
 oldosc=oldosc_;
 cbwidget=cbwidget_;
@@ -1146,5 +1146,5 @@ if (cbwidget!=NULL) {
   decl {OscilGen *oscil;} {}
   decl {Fl_Widget *oldosc,*cbwidget,*cbapplywidget;} {}
   decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
 } 

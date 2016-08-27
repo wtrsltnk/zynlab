@@ -7,7 +7,7 @@ set(zyn_mixer_SRCS
     Dump.cpp
     Mixer.cpp
     Microtonal.cpp
-    Part.cpp
+    Instrument.cpp
     Recorder.cpp
 )
 
@@ -16,7 +16,7 @@ set(zyn_mixer_HDRS
     Dump.h
     Mixer.h
     Microtonal.h
-    Part.h
+    Instrument.h
     Recorder.h
     )
 

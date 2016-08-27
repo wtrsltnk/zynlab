@@ -137,7 +137,7 @@ o->redraw();}
     code {nvoice=0;
 pars=NULL;} {}
   }
-  Function {init(ADnoteParameters *parameters,int nvoice_,Master *master_)} {} {
+  Function {init(ADnoteParameters *parameters,int nvoice_,Mixer *master_)} {} {
     code {pars=parameters;
 nvoice=nvoice_;
 master=master_;
@@ -169,7 +169,7 @@ ADnoteVoiceListItem->redraw();} {}
   decl {ADnoteParameters *pars;} {}
   decl {int nvoice;} {}
   decl {Oscilloscope *osc;} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
 } 
 
 class ADvoiceUI {open : {public Fl_Group}
@@ -787,7 +787,7 @@ o->redraw();}
 pars=NULL;
 oscedit=NULL;} {}
   }
-  Function {init(ADnoteParameters *parameters,int nvoice_,Master *master_)} {open
+  Function {init(ADnoteParameters *parameters,int nvoice_,Mixer *master_)} {open
   } {
     code {pars=parameters;
 nvoice=nvoice_;
@@ -810,7 +810,7 @@ if (oscedit!=NULL) {
   decl {OscilEditor *oscedit;} {}
   decl {Oscilloscope *osc;} {}
   decl {Oscilloscope *oscFM;} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
 } 
 
 class ADnoteUI {open : {public PresetsUI_}
@@ -1109,7 +1109,7 @@ ADnoteVoice->redraw();}
       }
     }
   }
-  Function {ADnoteUI(ADnoteParameters *parameters,Master *master_)} {} {
+  Function {ADnoteUI(ADnoteParameters *parameters,Mixer *master_)} {} {
     code {pars=parameters;
 master=master_;
 nvoice=0;
@@ -1163,7 +1163,7 @@ currentvoicecounter->do_callback();} {}
   }
   decl {ADnoteParameters *pars;} {}
   decl {ResonanceUI *resui;} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {int nvoice;} {}
   decl {ADvoicelistitem *voicelistitem[NUM_VOICES];} {}
 } 

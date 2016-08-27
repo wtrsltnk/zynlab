@@ -24,7 +24,7 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public
 decl {\#include "zyn.mixer/Mixer.h"} {public
 } 
 
-decl {\#include "zyn.mixer/Part.h"} {public
+decl {\#include "zyn.mixer/Instrument.h"} {public
 } 
 
 decl {\#include "zyn.mixer/Bank.h"} {public
@@ -228,7 +228,7 @@ refreshmainwindow();}
       }
     }
   }
-  Function {BankUI(Master *master_,int *npart_)} {} {
+  Function {BankUI(Mixer *master_,int *npart_)} {} {
     code {fnc=&BankProcess_::process;
 master=master_;
 npart=npart_;
@@ -361,7 +361,7 @@ if (beginnerui) modeselect->hide();
   decl {BankSlot *bs[BANK_SIZE];} {}
   decl {int slot,what;//"what"=what button is pressed} {}
   decl {int mode,*npart,nselected;} {}
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {void (BankProcess_::* fnc)(void);} {}
   decl {Fl_Valuator *cbwig;} {public
   }

@@ -20,7 +20,7 @@
 
 */
 
-#include "Part.h"
+#include "Instrument.h"
 #include "Microtonal.h"
 #include "zyn.common/Util.h"
 #include "zyn.common/XMLwrapper.h"
@@ -36,7 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 
-Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
+Instrument::Instrument(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 {
     microtonal = microtonal_;
     fft      = fft_;
@@ -93,7 +93,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     defaults();
 }
 
-void Part::defaults()
+void Instrument::defaults()
 {
     Penabled    = 0;
     Pminkey     = 0;
@@ -112,7 +112,7 @@ void Part::defaults()
     ctl.defaults();
 }
 
-void Part::defaultsinstrument()
+void Instrument::defaultsinstrument()
 {
     ZERO(Pname, PART_MAX_NAME_LEN);
 
@@ -153,7 +153,7 @@ void Part::defaultsinstrument()
 /*
  * Cleanup the part
  */
-void Part::cleanup(bool final_)
+void Instrument::cleanup(bool final_)
 {
     for(int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
@@ -171,7 +171,7 @@ void Part::cleanup(bool final_)
         }
 }
 
-Part::~Part()
+Instrument::~Instrument()
 {
     cleanup(true);
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
@@ -201,7 +201,7 @@ Part::~Part()
 /*
  * Note On Messages
  */
-void Part::NoteOn(unsigned char note,
+void Instrument::NoteOn(unsigned char note,
                   unsigned char velocity,
                   int masterkeyshift)
 {
@@ -624,7 +624,7 @@ void Part::NoteOn(unsigned char note,
 /*
  * Note Off Messages
  */
-void Part::NoteOff(unsigned char note) //relase the key
+void Instrument::NoteOff(unsigned char note) //relase the key
 {
     int i;
 
@@ -646,7 +646,7 @@ void Part::NoteOff(unsigned char note) //relase the key
         }
 }
 
-void Part::PolyphonicAftertouch(unsigned char note,
+void Instrument::PolyphonicAftertouch(unsigned char note,
                                 unsigned char velocity,
                                 int masterkeyshift)
 {
@@ -701,7 +701,7 @@ void Part::PolyphonicAftertouch(unsigned char note,
 /*
  * Controllers
  */
-void Part::SetController(unsigned int type, int par)
+void Instrument::SetController(unsigned int type, int par)
 {
     switch(type) {
         case C_pitchwheel:
@@ -793,7 +793,7 @@ void Part::SetController(unsigned int type, int par)
  * Relase the sustained keys
  */
 
-void Part::RelaseSustainedKeys()
+void Instrument::RelaseSustainedKeys()
 {
     // Let's call MonoMemRenote() on some conditions:
     if((Ppolymode == 0) && (not monomemnotes.empty()))
@@ -809,7 +809,7 @@ void Part::RelaseSustainedKeys()
  * Relase all keys
  */
 
-void Part::RelaseAllKeys()
+void Instrument::RelaseAllKeys()
 {
     for(int i = 0; i < POLIPHONY; ++i)
         if((partnote[i].status != KEY_RELASED)
@@ -819,7 +819,7 @@ void Part::RelaseAllKeys()
 
 // Call NoteOn(...) with the most recent still held key as new note
 // (Made for Mono/Legato).
-void Part::MonoMemRenote()
+void Instrument::MonoMemRenote()
 {
     unsigned char mmrtempnote = monomemnotes.back(); // Last list element.
     monomemnotes.pop_back(); // We remove it, will be added again in NoteOn(...).
@@ -833,7 +833,7 @@ void Part::MonoMemRenote()
 /*
  * Release note at position
  */
-void Part::RelaseNotePos(int pos)
+void Instrument::RelaseNotePos(int pos)
 {
     for(int j = 0; j < NUM_KIT_ITEMS; ++j) {
         if(partnote[pos].kititem[j].adnote != NULL)
@@ -855,7 +855,7 @@ void Part::RelaseNotePos(int pos)
 /*
  * Kill note at position
  */
-void Part::KillNotePos(int pos)
+void Instrument::KillNotePos(int pos)
 {
     partnote[pos].status = KEY_OFF;
     partnote[pos].note   = -1;
@@ -886,7 +886,7 @@ void Part::KillNotePos(int pos)
 /*
  * Set Part's key limit
  */
-void Part::setkeylimit(unsigned char Pkeylimit)
+void Instrument::setkeylimit(unsigned char Pkeylimit)
 {
     this->Pkeylimit = Pkeylimit;
     int keylimit = Pkeylimit;
@@ -921,12 +921,12 @@ void Part::setkeylimit(unsigned char Pkeylimit)
 /*
  * Prepare all notes to be turned off
  */
-void Part::AllNotesOff()
+void Instrument::AllNotesOff()
 {
     killallnotes = 1;
 }
 
-void Part::RunNote(unsigned int k)
+void Instrument::RunNote(unsigned int k)
 {
     unsigned noteplay = 0;
     for(int item = 0; item < partnote[k].itemsplaying; ++item) {
@@ -970,7 +970,7 @@ void Part::RunNote(unsigned int k)
 /*
  * Compute Part samples and store them in the partoutl[] and partoutr[]
  */
-void Part::ComputePartSmps()
+void Instrument::ComputePartSmps()
 {
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx)
         for(int i = 0; i < synth->buffersize; ++i) {
@@ -1027,14 +1027,14 @@ void Part::ComputePartSmps()
 /*
  * Parameter control
  */
-void Part::setPvolume(char Pvolume_)
+void Instrument::setPvolume(char Pvolume_)
 {
     Pvolume = Pvolume_;
     volume  =
         dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;
 }
 
-void Part::setPpanning(char Ppanning_)
+void Instrument::setPpanning(char Ppanning_)
 {
     Ppanning = Ppanning_;
     panning  = Ppanning / 127.0f + ctl.panning.pan;
@@ -1048,7 +1048,7 @@ void Part::setPpanning(char Ppanning_)
 /*
  * Enable or disable a kit item
  */
-void Part::setkititemstatus(int kititem, int Penabled_)
+void Instrument::setkititemstatus(int kititem, int Penabled_)
 {
     if((kititem == 0) || (kititem >= NUM_KIT_ITEMS))
         return;                                        //nonexistent kit item and the first kit item is always enabled
@@ -1083,7 +1083,7 @@ void Part::setkititemstatus(int kititem, int Penabled_)
             KillNotePos(k);
 }
 
-void Part::add2XMLinstrument(XMLwrapper *xml)
+void Instrument::add2XMLinstrument(XMLwrapper *xml)
 {
     xml->beginbranch("INFO");
     xml->addparstr("name", (char *)Pname);
@@ -1149,7 +1149,7 @@ void Part::add2XMLinstrument(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void Part::add2XML(XMLwrapper *xml)
+void Instrument::add2XML(XMLwrapper *xml)
 {
     //parameters
     xml->addparbool("enabled", Penabled);
@@ -1181,7 +1181,7 @@ void Part::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-int Part::saveXML(const char *filename)
+int Instrument::saveXML(const char *filename)
 {
     XMLwrapper *xml;
     xml = new XMLwrapper();
@@ -1195,7 +1195,7 @@ int Part::saveXML(const char *filename)
     return result;
 }
 
-int Part::loadXMLinstrument(const char *filename) /*{*/
+int Instrument::loadXMLinstrument(const char *filename) /*{*/
 {
     XMLwrapper *xml = new XMLwrapper();
     if(xml->loadXMLfile(filename) < 0) {
@@ -1212,14 +1212,14 @@ int Part::loadXMLinstrument(const char *filename) /*{*/
     return 0;
 } /*}*/
 
-void Part::applyparameters(bool lockmutex) /*{*/
+void Instrument::applyparameters(bool lockmutex) /*{*/
 {
     for(int n = 0; n < NUM_KIT_ITEMS; ++n)
         if((kit[n].padpars != NULL) && (kit[n].Ppadenabled != 0))
             kit[n].padpars->applyparameters(lockmutex);
 } /*}*/
 
-void Part::getfromXMLinstrument(XMLwrapper *xml)
+void Instrument::getfromXMLinstrument(XMLwrapper *xml)
 {
     if(xml->enterbranch("INFO")) {
         xml->getparstr("name", (char *)Pname, PART_MAX_NAME_LEN);
@@ -1303,7 +1303,7 @@ void Part::getfromXMLinstrument(XMLwrapper *xml)
     }
 }
 
-void Part::getfromXML(XMLwrapper *xml)
+void Instrument::getfromXML(XMLwrapper *xml)
 {
     Penabled = xml->getparbool("enabled", Penabled);
 

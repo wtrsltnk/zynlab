@@ -36,9 +36,24 @@ MidiEvent::MidiEvent()
 
 InMgr *InMgr::_instance = 0;
 
+InMgr &InMgr::createInstance(IMixer* mixer)
+{
+    if (InMgr::_instance == 0) InMgr::_instance = new InMgr(mixer);
+
+    return *InMgr::_instance;
+}
+
+
 InMgr &InMgr::getInstance()
 {
     return *InMgr::_instance;
+}
+
+
+void InMgr::destroyInstance()
+{
+    if (InMgr::_instance != 0) delete InMgr::_instance;
+    InMgr::_instance = 0;
 }
 
 InMgr::InMgr(IMixer* mixer)
@@ -80,21 +95,21 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
 //                dump.dumpnote(ev.channel, ev.num, ev.value);
 
                 if(ev.value)
-                    this->mixer->noteOn(ev.channel, ev.num, ev.value);
+                    this->mixer->NoteOn(ev.channel, ev.num, ev.value);
                 else
-                    this->mixer->noteOff(ev.channel, ev.num);
+                    this->mixer->NoteOff(ev.channel, ev.num);
                 break;
 
             case M_CONTROLLER:
 //                dump.dumpcontroller(ev.channel, ev.num, ev.value);
-                this->mixer->setController(ev.channel, ev.num, ev.value);
+                this->mixer->SetController(ev.channel, ev.num, ev.value);
                 break;
 
             case M_PGMCHANGE:
-                this->mixer->setProgram(ev.channel, ev.num);
+                this->mixer->SetProgram(ev.channel, ev.num);
                 break;
             case M_PRESSURE:
-                this->mixer->polyphonicAftertouch(ev.channel, ev.num, ev.value);
+                this->mixer->PolyphonicAftertouch(ev.channel, ev.num, ev.value);
                 break;
         }
     }

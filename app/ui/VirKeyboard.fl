@@ -61,7 +61,7 @@ class VirKeys {: {public Fl_Box}
   Function {VirKeys(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {master=NULL;} {}
   }
-  Function {init(Master *master_)} {} {
+  Function {init(Mixer *master_)} {} {
     code {master=master_;
 for (int i=0;i<N_OCT*12+1;i++) pressed[i]=0;
 midich=0;
@@ -267,7 +267,7 @@ if (rndvelocity!=0){
 };
 
 pthread_mutex_lock(&master->mutex);
-master->noteOn(midich,nk+midioct*12,(int)vel);
+master->NoteOn(midich,nk+midioct*12,(int)vel);
 pthread_mutex_unlock(&master->mutex);} {}
   }
   Function {relasekey(int nk,int type)} {} {
@@ -281,13 +281,13 @@ pressed[nk]=0;
 damage(1);
 
 pthread_mutex_lock(&master->mutex);
-master->noteOff(midich,nk+12*midioct);
+master->NoteOff(midich,nk+12*midioct);
 pthread_mutex_unlock(&master->mutex);} {}
   }
   Function {relaseallkeys(int type)} {} {
     code {for (int i=0;i<N_OCT*12;i++) relasekey(i,type);} {}
   }
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {int pressed[N_OCT*12+1];} {}
   decl {unsigned char midich;} {public
   }
@@ -357,7 +357,7 @@ virkeyboardwindow->hide();}
         callback {int ctl=midictl;
 
 pthread_mutex_lock(&master->mutex);
-master->setController(virkeys->midich,ctl,(int) o->value());
+master->SetController(virkeys->midich,ctl,(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 virkeys->take_focus();}
         tooltip {Controller value} xywh {605 10 15 115} type {Vert Fill} box ENGRAVED_BOX selection_color 229 labelsize 8 align 5 minimum 127 maximum 0 step 1 value 64 textsize 7
@@ -439,7 +439,7 @@ virkeys->take_focus();}
       Fl_Roller pitchwheelroller {
         label Pwh
         callback {pthread_mutex_lock(&master->mutex);
-master->setController(virkeys->midich,C_pitchwheel,-(int) o->value());
+master->SetController(virkeys->midich,C_pitchwheel,-(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 virkeys->take_focus();}
         tooltip {Pitch Wheel} xywh {625 10 20 95} labelsize 8 align 1 when 3 minimum -8192 maximum 8192 step 64
@@ -468,7 +468,7 @@ virkeys->take_focus();} open
       } {}
     }
   }
-  Function {VirKeyboard(Master *master_)} {} {
+  Function {VirKeyboard(Mixer *master_)} {} {
     code {master=master_;
 midictl=75;
 make_window();} {}
@@ -482,6 +482,6 @@ make_window();} {}
   Function {relaseallkeys()} {} {
     code {virkeys->relaseallkeys(0);} {}
   }
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {int midictl;} {}
 } 

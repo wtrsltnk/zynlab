@@ -41,16 +41,16 @@ class XMLWrapper;
 class FFTwrapper;
 
 /** Part implementation*/
-class Part
+class Instrument
 {
     public:
         /**Constructor
          * @param microtonal_ Pointer to the microtonal object
          * @param fft_ Pointer to the FFTwrapper
          * @param mutex_ Pointer to the master pthread_mutex_t*/
-        Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
+        Instrument(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
         /**Destructor*/
-        ~Part();
+        ~Instrument();
 
         // Midi commands implemented
         void NoteOn(unsigned char note,
@@ -165,7 +165,7 @@ class Part
 
         int killallnotes; //is set to 1 if I want to kill all notes
 
-        struct PartNotes {
+        struct InstrumentNotes {
             NoteStatus status;
             int note; //if there is no note playing, the "note"=-1
             int itemsplaying;
@@ -192,7 +192,7 @@ class Part
            store the velocity and masterkeyshift values of a given note (the list only store note values).
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        PartNotes partnote[POLIPHONY];
+        InstrumentNotes partnote[POLIPHONY];
 
         float oldfreq;    //this is used for portamento
         Microtonal *microtonal;

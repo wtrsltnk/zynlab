@@ -14,8 +14,6 @@ SET (OssEnable ${OSS_FOUND} CACHE BOOL
     "Enable support for Open Sound System")
 SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
-SET (LashEnable ${LASH_FOUND} CACHE BOOL
-    "Enable LASH Audio Session Handler")
 SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
     "Enable DSSI Plugin compilation")
 SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL

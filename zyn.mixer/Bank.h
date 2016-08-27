@@ -49,9 +49,9 @@ class Bank
         /**Empties out the selected slot*/
         void clearslot(unsigned int ninstrument);
         /**Saves the given Part to slot*/
-        void savetoslot(unsigned int ninstrument, class Part * part);
+        void savetoslot(unsigned int ninstrument, class Instrument * part);
         /**Loads the given slot into a Part*/
-        void loadfromslot(unsigned int ninstrument, class Part * part);
+        void loadfromslot(unsigned int ninstrument, class Instrument * part);
 
         /**Swaps Slots*/
         void swapslot(unsigned int n1, unsigned int n2);

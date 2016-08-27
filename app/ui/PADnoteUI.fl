@@ -54,7 +54,7 @@ class PADnoteHarmonicProfile {: {public Fl_Box}
   Function {PADnoteHarmonicProfile(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {pars=NULL;} {}
   }
-  Function {init(PADnoteParameters *pars,Master *master_)} {} {
+  Function {init(PADnoteParameters *pars,Mixer *master_)} {} {
     code {master=master_;
 this->pars=pars;} {}
   }
@@ -128,7 +128,7 @@ fl_line(ox+lx/2+rbw,oy,ox+lx/2+rbw,oy+ly-1);
 
 fl_line_style(0);} {}
   }
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {PADnoteParameters *pars;} {public
   }
 } 
@@ -138,7 +138,7 @@ class PADnoteOvertonePosition {: {public Fl_Box}
   Function {PADnoteOvertonePosition(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {pars=NULL;} {}
   }
-  Function {init(PADnoteParameters *pars,Master *master_)} {} {
+  Function {init(PADnoteParameters *pars,Mixer *master_)} {} {
     code {master=master_;
 this->pars=pars;} {}
   }
@@ -223,14 +223,14 @@ for (int i=0;i<lx;i++){
       
 };} {}
   }
-  decl {Master *master;} {}
+  decl {Mixer *master;} {}
   decl {PADnoteParameters *pars;} {public
   }
 } 
 
 class PADnoteUI {open : {public PresetsUI_}
 } {
-  Function {PADnoteUI(PADnoteParameters *parameters,Master *master_)} {open
+  Function {PADnoteUI(PADnoteParameters *parameters,Mixer *master_)} {open
   } {
     code {pars=parameters;
 master=master_;
@@ -1109,7 +1109,7 @@ delete(padnotewindow);} {}
   }
   decl {PADnoteParameters *pars;} {public
   }
-  decl {Master *master;} {public
+  decl {Mixer *master;} {public
   }
   decl {OscilEditor *oscui;} {public
   }

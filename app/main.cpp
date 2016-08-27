@@ -38,7 +38,7 @@
 
 #include "zyn.synth/FFTwrapper.h"
 #include "zyn.mixer/Mixer.h"
-#include "zyn.mixer/Part.h"
+#include "zyn.mixer/Instrument.h"
 #include "zyn.common/Util.h"
 #include "zyn.mixer/Dump.h"
 extern Dump dump;
@@ -48,48 +48,28 @@ extern Dump dump;
 #include "zyn.nio/Nio.h"
 
 #ifndef DISABLE_GUI
-#ifdef QT_GUI
-
-#include <QApplication>
-#include "masterui.h"
-QApplication *app;
-
-#elif defined FLTK_GUI
 #include "MasterUI.h"
-#elif defined NTK_GUI
-#include "MasterUI.h"
+
+#ifdef NTK_GUI
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_Tiled_Image.H>
 #include <FL/Fl_Dial.H>
 #include <FL/Fl_Tooltip.H>
-#endif // FLTK_GUI
 
-MasterUI *ui;
+static Fl_Tiled_Image *module_backdrop;
+#endif // NTK_GUI
+
+static MasterUI *ui;
 
 #endif //DISABLE_GUI
 
 using namespace std;
 
-Master *mixer;
-SYNTH_T  *synth;
-int       swaplr = 0; //1 for left-right swapping
+static Mixer* mixer;
+SYNTH_T* synth;
+static int swaplr = 0; //1 for left-right swapping
 
-int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
-
-#if LASH
-#include "Misc/LASHClient.h"
-LASHClient *lash = NULL;
-#endif
-
-#if USE_NSM
-#include "UI/NSM.H"
-
-NSM_Client *nsm = 0;
-#endif
-
-char *instance_name = 0;
-
-void exitprogram();
+static int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
 
 //cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
@@ -99,13 +79,7 @@ void sigterm_exit(int /*sig*/)
 
 
 #ifndef DISABLE_GUI
-
-#ifdef NTK_GUI
-static Fl_Tiled_Image *module_backdrop;
-#endif
-
-void
-set_module_parameters ( Fl_Widget *o )
+void set_module_parameters ( Fl_Widget *o )
 {
 #ifdef NTK_GUI
     o->box( FL_DOWN_FRAME );
@@ -114,9 +88,9 @@ set_module_parameters ( Fl_Widget *o )
     o->image( module_backdrop );
     o->labeltype( FL_SHADOW_LABEL );
 #else
-    o->box( FL_PLASTIC_UP_BOX );
-    o->color( FL_CYAN );
-    o->labeltype( FL_EMBOSSED_LABEL );
+    o->box( FL_PLASTIC_THIN_UP_BOX );
+    o->color( FL_BLACK );
+    o->labeltype( FL_NORMAL_LABEL );
 #endif
 }
 #endif
@@ -126,16 +100,23 @@ set_module_parameters ( Fl_Widget *o )
  */
 void initprogram(void)
 {
+    synth->alias();
+
+    //produce denormal buf
+    denormalkillbuf = new float [synth->buffersize];
+    for(int i = 0; i < synth->buffersize; ++i)
+        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
+
     cerr.precision(1);
     cerr << std::fixed;
     cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
     cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
+    cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
-    mixer = &Master::getInstance();
-    ((Master*)mixer)->swaplr = swaplr;
+    mixer = &Mixer::getInstance();
+    mixer->swaplr = swaplr;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
@@ -144,7 +125,7 @@ void initprogram(void)
 /*
  * Program exit
  */
-void exitprogram()
+int exitprogram()
 {
     //ensure that everything has stopped with the mutex wait
     mixer->Lock();
@@ -154,19 +135,13 @@ void exitprogram()
 
 #ifndef DISABLE_GUI
     delete ui;
-#endif
-#if LASH
-    if(lash)
-        delete lash;
-#endif
-#if USE_NSM
-    if(nsm)
-        delete nsm;
-#endif
+#endif // DISABLE_GUI
 
     delete [] denormalkillbuf;
     FFT_cleanup();
-    Master::deleteInstance();
+    Mixer::deleteInstance();
+
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -361,8 +336,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    synth->alias();
-
     if(exitwithversion) {
         cout << "Version: " << VERSION << endl;
         return 0;
@@ -391,29 +364,23 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    //produce denormal buf
-    denormalkillbuf = new float [synth->buffersize];
-    for(int i = 0; i < synth->buffersize; ++i)
-        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
-
     initprogram();
 
     if(!loadfile.empty()) {
-        int tmp = ((Master*)mixer)->loadXML(loadfile.c_str());
+        int tmp = mixer->loadXML(loadfile.c_str());
         if(tmp < 0) {
             cerr << "ERROR: Could not load master file " << loadfile
                  << "." << endl;
             exit(1);
         }
         else {
-            ((Master*)mixer)->applyparameters();
+            mixer->applyparameters();
             cout << "Master file loaded." << endl;
         }
     }
 
     if(!loadinstrument.empty()) {
-        int loadtopart = 0;
-        int tmp = ((Master*)mixer)->part[loadtopart]->loadXMLinstrument(
+        int tmp = mixer->part[0]->loadXMLinstrument(
                     loadinstrument.c_str());
         if(tmp < 0) {
             cerr << "ERROR: Could not load instrument file "
@@ -421,7 +388,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
         else {
-            mixer->part[loadtopart]->applyparameters();
+            mixer->part[0]->applyparameters();
             cout << "Instrument file loaded." << endl;
         }
     }
@@ -429,6 +396,7 @@ int main(int argc, char *argv[])
     //Run the Nio system
     bool ioGood = Nio::start(mixer);
 
+    // Run a system command after starting zynaddsubfx
     if(!execAfterInit.empty()) {
         cout << "Executing user supplied command: " << execAfterInit << endl;
         if(system(execAfterInit.c_str()) == -1)
@@ -465,7 +433,7 @@ int main(int argc, char *argv[])
     Fl::foreground( 255,255,255 );
 #endif
 
-    ui = new MasterUI(((Master*)mixer), &Pexitprogram);
+    ui = new MasterUI(mixer, &Pexitprogram);
     
     if ( !noui)
     {
@@ -478,76 +446,13 @@ int main(int argc, char *argv[])
 
 #endif
 
-#ifndef DISABLE_GUI
-#if USE_NSM
-    char *nsm_url = getenv("NSM_URL");
-
-    if(nsm_url) {
-        nsm = new NSM_Client;
-
-        if(!nsm->init(nsm_url))
-            nsm->announce("ZynAddSubFX", ":switch:", argv[0]);
-        else {
-            delete nsm;
-            nsm = NULL;
-        }
-    }
-#endif
-#endif
-
-#if USE_NSM
-    if(!nsm)
-#endif
-    {
-#if LASH
-        lash = new LASHClient(&argc, &argv);
-#ifndef DISABLE_GUI
-        ui->sm_indicator1->value(1);
-        ui->sm_indicator2->value(1);
-        ui->sm_indicator1->tooltip("LASH");
-        ui->sm_indicator2->tooltip("LASH");
-#endif
-#endif
-    }
-
     while(Pexitprogram == 0) {
 #ifndef DISABLE_GUI
-#if USE_NSM
-        if(nsm) {
-            nsm->check();
-            goto done;
-        }
-#endif
-#if LASH
-        {
-            string filename;
-            switch(lash->checkevents(filename)) {
-            case LASHClient::Save:
-                ui->do_save_master(filename.c_str());
-                lash->confirmevent(LASHClient::Save);
-                break;
-            case LASHClient::Restore:
-                ui->do_load_master(filename.c_str());
-                lash->confirmevent(LASHClient::Restore);
-                break;
-            case LASHClient::Quit:
-                Pexitprogram = 1;
-            default:
-                break;
-            }
-        }
-#endif //LASH
-
-#if USE_NSM
-done:
-#endif
-
         Fl::wait(0.02f);
-#else
+#else // DISABLE_GUI
         usleep(100000);
-#endif
+#endif // DISABLE_GUI
     }
 
-    exitprogram();
-    return 0;
+    return exitprogram();
 }

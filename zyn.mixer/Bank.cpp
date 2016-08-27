@@ -38,7 +38,7 @@
 
 #include "zyn.common/Config.h"
 #include "zyn.common/Util.h"
-#include "Part.h"
+#include "Instrument.h"
 
 #define INSTRUMENT_EXTENSION ".xiz"
 
@@ -142,7 +142,7 @@ void Bank::clearslot(unsigned int ninstrument)
 /*
  * Save the instrument to a slot
  */
-void Bank::savetoslot(unsigned int ninstrument, Part *part)
+void Bank::savetoslot(unsigned int ninstrument, Instrument *part)
 {
     clearslot(ninstrument);
 
@@ -171,7 +171,7 @@ void Bank::savetoslot(unsigned int ninstrument, Part *part)
 /*
  * Loads the instrument from the bank
  */
-void Bank::loadfromslot(unsigned int ninstrument, Part *part)
+void Bank::loadfromslot(unsigned int ninstrument, Instrument *part)
 {
     if(emptyslot(ninstrument))
         return;

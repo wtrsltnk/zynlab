@@ -21,8 +21,8 @@
 
 */
 
-#ifndef MASTER_H
-#define MASTER_H
+#ifndef MIXER_H
+#define MIXER_H
 #include <pthread.h>
 
 #include "zyn.common/globals.h"
@@ -49,17 +49,17 @@ struct vuData {
 };
 
 
-/** It sends Midi Messages to Parts, receives samples from parts,
+/** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
-class Master : public IMixer
+class Mixer : public IMixer
 {
     public:
         /** Constructor TODO make private*/
-        Master();
+        Mixer();
         /** Destructor*/
-        ~Master();
+        virtual ~Mixer();
 
-        static Master &getInstance();
+        static Mixer &getInstance();
         static void deleteInstance();
 
         /**Saves all settings to a XML file
@@ -96,11 +96,11 @@ class Master : public IMixer
         virtual void Unlock();
 
         //Midi IN
-        virtual void noteOn(char chan, char note, char velocity);
-        virtual void noteOff(char chan, char note);
-        virtual void polyphonicAftertouch(char chan, char note, char velocity);
-        virtual void setController(char chan, int type, int par);
-        virtual void setProgram(char chan, unsigned int pgm);
+        virtual void NoteOn(char chan, char note, char velocity);
+        virtual void NoteOff(char chan, char note);
+        virtual void PolyphonicAftertouch(char chan, char note, char velocity);
+        virtual void SetController(char chan, int type, int par);
+        virtual void SetProgram(char chan, unsigned int pgm);
         //void NRPN...
 
 
@@ -121,7 +121,7 @@ class Master : public IMixer
         void partonoff(int npart, int what);
 
         /**parts \todo see if this can be made to be dynamic*/
-        class Part * part[NUM_MIDI_PARTS];
+        class Instrument * part[NUM_MIDI_PARTS];
 
         //parameters
 
@@ -184,4 +184,4 @@ class Master : public IMixer
         size_t smps;
 };
 
-#endif
+#endif // MIXER_H

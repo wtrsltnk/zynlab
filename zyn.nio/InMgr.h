@@ -26,11 +26,11 @@ struct MidiEvent {
 //super simple class to manage the inputs
 class InMgr
 {
-    friend class Nio;
-
     static InMgr* _instance;
     public:
+        static InMgr &createInstance(IMixer* mixer);
         static InMgr &getInstance();
+        static void destroyInstance();
         ~InMgr();
 
         void putEvent(MidiEvent ev);

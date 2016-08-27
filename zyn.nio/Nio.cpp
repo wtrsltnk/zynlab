@@ -23,10 +23,8 @@ string Nio::defaultSink   = OUT_DEFAULT;
 
 bool Nio::start(IMixer* mixer)
 {
-    InMgr::_instance = new InMgr(mixer);
-    in  = &InMgr::getInstance(); //Enable input wrapper
-    OutMgr::_instance = new OutMgr(mixer);
-    out = &OutMgr::getInstance(); //Initialize the Output Systems
+    in  = &InMgr::createInstance(mixer); //Enable input wrapper
+    out = &OutMgr::createInstance(mixer); //Initialize the Output Systems
     eng = &EngineMgr::getInstance(); //Initialize The Engines
 
     return eng->start();
