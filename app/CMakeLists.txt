@@ -60,7 +60,7 @@ add_executable(app
     ${app_FLTK_UI_SRCS}
     ui/NioUI.cpp
     ui/WidgetPDial.cpp
-    )
+	)
 
 target_link_libraries(app
     ${GUI_LIBRARIES}
