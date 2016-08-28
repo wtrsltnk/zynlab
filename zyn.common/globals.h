@@ -106,7 +106,16 @@
 #error "Too many EQ bands in globals.h"
 #endif
 
+/*
+ * Missing PI definitions when on c++11
+ */
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif // M_PI
 
+#ifndef M_PI_2
+#define M_PI_2 (M_PI*2.0)
+#endif // M_PI_2
 /*
  * Maximum filter stages
  */

@@ -44,6 +44,7 @@ add_subdirectory("zyn.mixer")
 add_subdirectory("zyn.nio")
 add_subdirectory("zyn.synth")
 add_subdirectory("app")
+add_subdirectory("app.threedee")
 
 if(WIN32)
 	add_subdirectory("zyn.vst")
