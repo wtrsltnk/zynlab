@@ -138,8 +138,8 @@ int exitprogram()
 #endif // DISABLE_GUI
 
     delete [] denormalkillbuf;
-    FFT_cleanup();
     Mixer::deleteInstance();
+    FFT_cleanup();
 
     return 0;
 }
