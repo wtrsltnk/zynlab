@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(zyn.plugin.vst)
+project(zyn.vst.effect)
 
 if(NOT EXISTS "VST3\ SDK")
 	if(NOT EXISTS "${CMAKE_BINARY_DIR}/vstsdk3.zip")
@@ -27,7 +27,7 @@ include_directories(
 	)
 
 set(app_SRCS
-	plugin.vst.cpp
+	vst.effect.cpp
 	${CMAKE_BINARY_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffect.cpp
 	${CMAKE_BINARY_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffectx.cpp
 #	${CMAKE_BINARY_DIR}/VST3\ SDK/public.sdk/source/vst2.x/vstplugmain.cpp
@@ -36,12 +36,12 @@ set(app_SRCS
 set(app_HDRS
 	)
 
-add_library(zyn.plugin.vst SHARED
+add_library(zyn.vst.effect SHARED
 	${app_SRCS}
 	${app_HDRS}
 	)
 
-target_link_libraries(zyn.plugin.vst
+target_link_libraries(zyn.vst.effect
 	zyn.mixer
 	zyn.synth
 	zyn.fx

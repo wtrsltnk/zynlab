@@ -3,9 +3,7 @@
 #include <math.h>
 #include "zyn.common/Util.h"
 #include "zyn.common/XMLwrapper.h"
-#include "zyn.synth/FFTwrapper.h"
-#include "zyn.mixer/Microtonal.h"
-#include "zyn.mixer/Instrument.h"
+#include "zyn.fx/EffectMgr.h"
 
 extern const char* synth_brazz;
 
@@ -14,110 +12,84 @@ SYNTH_T* synth;
 #define NUM_PROGRAMS    2
 #define NUM_PARAMS      0
 
-class YourProjectName : public AudioEffectX
+class Zynstrument : public AudioEffectX
 {
 public:
-    YourProjectName(audioMasterCallback audioMaster);
-    ~YourProjectName();
+    Zynstrument(audioMasterCallback audioMaster);
+    ~Zynstrument();
 
     void processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames);
     VstInt32 processEvents(VstEvents* ev);
 
-    virtual bool getEffectName (char* name) { strcpy(name, "zynstrument"); return true; }	///< Fill \e text with a string identifying the effect
+    virtual bool getEffectName (char* name) { strcpy(name, "zyffect"); return true; }	///< Fill \e text with a string identifying the effect
     virtual bool getVendorString (char* text) { strcpy(text, "zyn project"); return true; }	///< Fill \e text with a string identifying the vendor
-    virtual bool getProductString (char* text) { strcpy(text, "zynstrument"); return true; }///< Fill \e text with a string identifying the product name
+    virtual bool getProductString (char* text) { strcpy(text, "zyffect"); return true; }///< Fill \e text with a string identifying the product name
     virtual VstInt32 getVendorVersion () { return 0; }			///< Return vendor-specific version
 
     virtual bool getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text) { return false; } ///< Fill \e text with name of program \e index (\e category deprecated in VST 2.4)
     virtual void setProgram (VstInt32 program);	///< Set the current program to \e program
 
-    Microtonal microtonal;
-    FFTwrapper* fft;
     pthread_mutex_t mutex;
-    Instrument* instrument;
+    EffectMgr* effect;
 };
 
-YourProjectName::YourProjectName(audioMasterCallback audioMaster)
+Zynstrument::Zynstrument(audioMasterCallback audioMaster)
     : AudioEffectX(audioMaster, NUM_PROGRAMS, NUM_PARAMS)
 {
-    this->isSynth(true);
-
-    synth = new SYNTH_T;
-    synth->alias();
+    this->isSynth(false);
 
     //produce denormal buf
     denormalkillbuf = new float [synth->buffersize];
     for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
-    fft = new FFTwrapper(synth->oscilsize);
     pthread_mutex_init(&mutex, NULL);
-    instrument = new Instrument(&microtonal, fft, &mutex);
+    effect= new EffectMgr(false, &mutex);
 }
 
-YourProjectName::~YourProjectName()
-{ }
+Zynstrument::~Zynstrument()
+{
+    config.save();
+    delete []denormalkillbuf;
+    denormalkillbuf = 0;
+    delete synth;
+    synth = 0;
+}
 
-void YourProjectName::setProgram (VstInt32 program)
+void Zynstrument::setProgram (VstInt32 program)
 {
     curProgram = program;
-    if (curProgram == 0)
+    effect->defaults();
+    if (curProgram >= 0 &&  curProgram < 8)
     {
-        instrument->defaults();
-    }
-    else
-    {
-        XMLwrapper xml;
-        xml.putXMLdata(synth_brazz);
-        instrument->getfromXML(&xml);
+        effect->defaults();
+        effect->changeeffect(curProgram + 1);
     }
 }
 
-void YourProjectName::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
+void Zynstrument::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
 {
     float* l = outputs[0];
     float* r = outputs[1];
 
-    instrument->ComputePartSmps();
-    // Real processing goes here
-    for (int i = 0; i < sampleFrames; i++, l++, r++)
+    for (int i = 0; i < sampleFrames; i++)
     {
-//        l[0] = r[0] = float(1.0f * sin(float(i) / 10));
-        l[0] = instrument->partoutl[i];
-        r[0] = instrument->partoutr[i];
+        outputs[0][i] = inputs[0][i];
+        outputs[1][i] = inputs[1][i];
     }
+
+    effect->out(outputs[0], outputs[1]);
 }
 
-VstInt32 YourProjectName::processEvents (VstEvents* ev)
+VstInt32 Zynstrument::processEvents (VstEvents* ev)
 {
-    for (VstInt32 i = 0; i < ev->numEvents; i++)
-    {
-        if ((ev->events[i])->type != kVstMidiType)
-            continue;
-
-        VstMidiEvent* event = (VstMidiEvent*)ev->events[i];
-        char* midiData = event->midiData;
-        VstInt32 status = midiData[0] & 0xf0;	// ignoring channel
-        if (status == 0x90 || status == 0x80)	// we only look at notes
-        {
-            VstInt32 note = midiData[1] & 0x7f;
-            VstInt32 velocity = midiData[2] & 0x7f;
-            if (status == 0x90)
-                this->instrument->NoteOn(note, velocity, 0);
-            else
-            {
-                velocity = 0;	// note off by velocity 0
-                this->instrument->NoteOff(note);
-            }
-        }
-        event++;
-    }
-    return 1;
+    return 0;
 }
 
 AudioEffect* createEffectInstance(audioMasterCallback audioMaster)
 {
-    return new YourProjectName(audioMaster);
+    config.init();
+    return new Zynstrument(audioMaster);
 }
 
 extern "C" {
