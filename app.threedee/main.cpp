@@ -63,8 +63,8 @@ int exitprogram()
     Nio::stop();
 
     delete [] denormalkillbuf;
-    FFT_cleanup();
     Mixer::deleteInstance();
+    FFT_cleanup();
 
     return 0;
 }
