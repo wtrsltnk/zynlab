@@ -41,7 +41,7 @@ Zynstrument::Zynstrument(audioMasterCallback audioMaster)
     fGain = 0.5f;
     setNumInputs (2);		// stereo in
     setNumOutputs (2);		// stereo out
-    setUniqueID ('ZynEffects');	// identify
+//    setUniqueID ('ZynEffects');	// identify
     canProcessReplacing ();	// supports both accumulating and replacing output
     strcpy (programName, "Default");	// default program name
 

@@ -3,6 +3,10 @@
 #include <GL/glextl.h>
 #include <GLFW/glfw3.h>
 
+#include <imgui.h>
+#include "imgui_impl_glfw_gl3.h"
+
+
 #include "app.threedee.h"
 
 using namespace std;
@@ -86,6 +90,9 @@ int main(int argc, char *argv[])
         glfwTerminate();
         return -1;
     }
+
+    // Setup ImGui binding
+    ImGui_ImplGlfwGL3_Init(window, true);
 
     glfwSetKeyCallback(window, KeyActionCallback);
     glfwSetFramebufferSizeCallback(window, ResizeCallback);

@@ -1,6 +1,9 @@
 #ifndef _APP_THREE_DEE_H_
 #define _APP_THREE_DEE_H_
 
+#include <GL/glextl.h>
+#include <GLFW/glfw3.h>
+
 #include "zyn.synth/FFTwrapper.h"
 #include "zyn.mixer/Mixer.h"
 #include "zyn.common/Util.h"
@@ -9,7 +12,7 @@
 #include "zyn.nio/Nio.h"
 
 static Mixer* mixer;
-SYNTH_T* synth;
+extern SYNTH_T* synth;
 
 void KeyActionCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void ResizeCallback(GLFWwindow* window, int width, int height);
