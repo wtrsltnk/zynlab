@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 project(zyn)
 
-include(libs/win-cpp-deps.cmake/win-cpp-deps.cmake)
+#include(libs/win-cpp-deps.cmake/win-cpp-deps.cmake)
 
-install_dep("https://bitbucket.org/wincppdeps/portaudio.git")
-install_dep("https://bitbucket.org/wincppdeps/fltk.git")
-install_dep("https://bitbucket.org/wincppdeps/mxml.git")
-install_dep("https://bitbucket.org/wincppdeps/fftw.git")
-install_dep("https://bitbucket.org/wtrsltnk/glfw.git")
+#install_dep("https://bitbucket.org/wincppdeps/portaudio.git")
+#install_dep("https://bitbucket.org/wincppdeps/fltk.git")
+#install_dep("https://bitbucket.org/wincppdeps/mxml.git")
+#install_dep("https://bitbucket.org/wincppdeps/fftw.git")
+#install_dep("https://bitbucket.org/wtrsltnk/glfw.git")
 
 # Add version information
 set(VERSION "2.4.4")
