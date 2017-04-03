@@ -36,6 +36,7 @@ add_library(zyn.common
 target_link_libraries(zyn.common
     ${MXML_LIBRARIES}
 	${ZLIB_LIBRARIES}
+    z
     )
 
 install(FILES ${zyn_common_HDRS} DESTINATION include/zyn/common COMPONENT develop)

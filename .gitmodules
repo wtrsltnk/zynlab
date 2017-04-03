@@ -1,3 +1,6 @@
 [submodule "app.threedee/imgui"]
 	path = app.threedee/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "libs/win-cpp-deps.cmake"]
+	path = libs/win-cpp-deps.cmake
+	url = https://bitbucket.org/wincppdeps/win-cpp-deps.cmake.git

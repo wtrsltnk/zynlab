@@ -3,23 +3,18 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 project(zyn)
 
-set(WIN_CPP_PREFIX_PATH $ENV{WIN_CPP_PREFIX_PATH})
-if (NOT WIN_CPP_PREFIX_PATH)
-    message("Cannot find WIN_CPP_PREFIX_PATH")
-endif()
-if (NOT EXISTS "${WIN_CPP_PREFIX_PATH}")
-    message("${WIN_CPP_PREFIX_PATH} does not exist")
-else()
-    set(CMAKE_PREFIX_PATH "${WIN_CPP_PREFIX_PATH}")
-    set(CMAKE_MODULE_PATH "${WIN_CPP_PREFIX_PATH}/cmake-modules")
-    set(ZLIB_ROOT ${WIN_CPP_PREFIX_PATH})
-endif()
+include(libs/win-cpp-deps.cmake/win-cpp-deps.cmake)
+
+install_dep("https://bitbucket.org/wincppdeps/portaudio.git")
+install_dep("https://bitbucket.org/wincppdeps/fltk.git")
+install_dep("https://bitbucket.org/wincppdeps/mxml.git")
+install_dep("https://bitbucket.org/wincppdeps/fftw.git")
+install_dep("https://bitbucket.org/wtrsltnk/glfw.git")
 
 # Add version information
 set(VERSION "2.4.4")
 add_definitions(-DVERSION="${VERSION}")
 
-find_package(ZLIB REQUIRED)
 find_package(MXML REQUIRED)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
