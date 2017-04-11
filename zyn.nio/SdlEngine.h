@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  AudioOut.h - Audio Output superclass
-  Copyright (C) 2009-2010 Mark McCurry
-  Author: Mark McCurry
+  PAaudiooutput.h - Audio output for PortAudio
+  Copyright (C) 2002 Nasca Octavian Paul
+  Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -19,39 +19,32 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+#ifndef SDL2_ENGINE_H
+#define SDL2_ENGINE_H
 
-#include <iostream>
-#include <cstring>
-#include "SafeQueue.h"
+#include <SDL2/SDL.h>
 
-using namespace std;
-
-#include "OutMgr.h"
+#include "zyn.common/globals.h"
 #include "AudioOut.h"
 
-AudioOut::AudioOut()
-    :samplerate(synth->samplerate), bufferSize(synth->buffersize)
-{}
-
-AudioOut::~AudioOut()
-{}
-
-void AudioOut::setSamplerate(int _samplerate)
+class SdlEngine:public AudioOut
 {
-    samplerate = _samplerate;
-}
+    public:
+        SdlEngine();
+        ~SdlEngine();
 
-int AudioOut::getSampleRate()
-{
-    return samplerate;
-}
+        bool Start();
+        void Stop();
 
-void AudioOut::setBufferSize(int _bufferSize)
-{
-    bufferSize = _bufferSize;
-}
+        void setAudioEn(bool nval);
+        bool getAudioEn() const;
 
-const Stereo<float *> AudioOut::getNext()
-{
-    return OutMgr::getInstance().tick(bufferSize);
-}
+    protected:
+        static void my_audio_callback(void *userdata, Uint8 *stream, int len);
+        int process(Uint8 *stream, int len);
+
+    private:
+        SDL_AudioDeviceID _dev;
+};
+
+#endif

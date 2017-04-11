@@ -3,21 +3,15 @@ cmake_minimum_required(VERSION 2.8)
 project(zyn.nio)
 
 find_package(PORTAUDIO REQUIRED)
+find_package(SDL2)
 
-add_definitions(-DPORTAUDIO=1)
-
-SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
-    "Enable support for Advanced Linux Sound Architecture")
-SET (JackEnable ${JACK_FOUND} CACHE BOOL
-    "Enable support for JACK Audio Connection toolKit")
-SET (OssEnable ${OSS_FOUND} CACHE BOOL
-    "Enable support for Open Sound System")
-SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
-    "Enable support for Port Audio System")
-SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
-    "Enable DSSI Plugin compilation")
-SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
-    "Enable Liblo")
+set(AlsaEnable  ${ALSA_FOUND}      CACHE BOOL  "Enable support for Advanced Linux Sound Architecture")
+set(JackEnable  ${JACK_FOUND}      CACHE BOOL  "Enable support for JACK Audio Connection toolKit")
+set(OssEnable   ${OSS_FOUND}       CACHE BOOL  "Enable support for Open Sound System")
+set(PaEnable    ${PORTAUDIO_FOUND} CACHE BOOL  "Enable support for Port Audio System")
+set(SdlEnable   ${SDL2_FOUND}      CACHE BOOL  "Enable support for SDL Audio System")
+set(DssiEnable  ${DSSI_FOUND}      CACHE BOOL  "Enable DSSI Plugin compilation")
+set(LibloEnable ${LIBLO_FOUND}     CACHE BOOL  "Enable Liblo")
 
 set(zyn_nio_SRCS
     WavEngine.cpp
@@ -58,7 +52,15 @@ if(PaEnable)
     include_directories(${PORTAUDIO_INCLUDE_DIR})
     list(APPEND zyn_nio_SRCS PaEngine.cpp)
     list(APPEND zyn_nio_LIB ${PORTAUDIO_LIBRARIES})
+    add_definitions(-DPORTAUDIO=1)
 endif(PaEnable)
+
+if(SdlEnable)
+    include_directories(${SDL2_INCLUDE_DIR})
+    list(APPEND zyn_nio_SRCS SdlEngine.cpp)
+    list(APPEND zyn_nio_LIB ${SDL2_LIBRARY})
+    add_definitions(-DSDL2=1)
+endif(SdlEnable)
 
 if(AlsaEnable)
     list(APPEND zyn_nio_SRCS AlsaEngine.cpp)
@@ -74,7 +76,7 @@ add_library(zyn.nio
     )
 
 target_link_libraries(zyn.nio
-    ${zun.common}
+    ${zyn.common}
     ${zyn_nio_LIB}
     )
 

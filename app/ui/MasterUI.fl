@@ -1,73 +1,75 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
-decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {} 
+decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {private local
+}
 
-decl {//License: GNU GPL version 2 or later} {} 
+decl {//License: GNU GPL version 2 or later} {private local
+}
 
-decl {\#include <stdlib.h>} {public
-} 
+decl {\#include <stdlib.h>} {public local
+}
 
-decl {\#include <stdio.h>} {public
-} 
+decl {\#include <stdio.h>} {public local
+}
 
-decl {\#include <string.h>} {public
-} 
+decl {\#include <string.h>} {public local
+}
 
-decl {\#include "WidgetPDial.h"} {public
-} 
+decl {\#include "WidgetPDial.h"} {public local
+}
 
-decl {\#include "ADnoteUI.h"} {public
-} 
+decl {\#include "ADnoteUI.h"} {public local
+}
 
-decl {\#include "SUBnoteUI.h"} {public
-} 
+decl {\#include "SUBnoteUI.h"} {public local
+}
 
-decl {\#include "EffUI.h"} {public
-} 
+decl {\#include "EffUI.h"} {public local
+}
 
-decl {\#include "VirKeyboard.h"} {public
-} 
+decl {\#include "VirKeyboard.h"} {public local
+}
 
-decl {\#include "ConfigUI.h"} {public
-} 
+decl {\#include "ConfigUI.h"} {public local
+}
 
-decl {\#include "BankUI.h"} {public
-} 
+decl {\#include "BankUI.h"} {public local
+}
 
-decl {\#include "PartUI.h"} {public
-} 
+decl {\#include "PartUI.h"} {public local
+}
 
-decl {\#include "MicrotonalUI.h"} {public
-} 
+decl {\#include "MicrotonalUI.h"} {public local
+}
 
-decl {\#include "PresetsUI.h"} {public
-} 
+decl {\#include "PresetsUI.h"} {public local
+}
 
 decl {\#include "NioUI.h"} {public global
-} 
+}
 
-decl {\#include "zyn.mixer/Mixer.h"} {public
-} 
+decl {\#include "zyn.mixer/Mixer.h"} {public local
+}
 
-decl {\#include "zyn.mixer/Instrument.h"} {public
-} 
+decl {\#include "zyn.mixer/Instrument.h"} {public local
+}
 
-decl {\#include "zyn.common/Util.h"} {public
-} 
+decl {\#include "zyn.common/Util.h"} {public local
+}
 
-decl {\#include "common.H"} {public
-} 
+decl {\#include "common.H"} {public local
+}
 
 decl {\#if USE_NSM
 \#include "NSM.H"
 extern NSM_Client *nsm;
-\#endif} {public
-} 
+\#endif} {public local
+}
 
-decl {\#include "zyn.common/globals.h"} {public
-} 
+decl {\#include "zyn.common/globals.h"} {public local
+}
 
 class VUMeter {: {public Fl_Box}
 } {
@@ -266,11 +268,15 @@ float  tmp=ly*1.0/MIN_DB;
 };
 return(1);} {}
   }
-  decl {Mixer *master;} {}
-  decl {int npart;} {}
-  decl {float olddbl,olddbr;} {}
-  decl {float oldrmsdbl,oldrmsdbr;} {}
-} 
+  decl {Mixer *master;} {private local
+  }
+  decl {int npart;} {private local
+  }
+  decl {float olddbl,olddbr;} {private local
+  }
+  decl {float oldrmsdbl,oldrmsdbr;} {private local
+  }
+}
 
 class SysEffSend {open : {public WidgetPDial}
 } {
@@ -305,17 +311,20 @@ this->copy_label(tmp);} {}
 
 return(WidgetPDial::handle(event));} {}
   }
-  decl {Mixer *master;} {}
-  decl {int neff1;} {}
-  decl {int neff2;} {}
-} 
+  decl {Mixer *master;} {private local
+  }
+  decl {int neff1;} {private local
+  }
+  decl {int neff2;} {private local
+  }
+}
 
 class Panellistitem {open : {public Fl_Group}
 } {
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {open
-      private xywh {608 711 100 260} type Double box NO_BOX
+      private xywh {608 711 116 260} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group panellistitemgroup {open
@@ -362,7 +371,7 @@ bankui->show();}
           xywh {15 235 40 20} labelsize 10
         }
         Fl_Choice partrcv {
-          callback {master->part[npart]->Prcvchn=(int) o->value();}
+          callback {master->part[npart]->Prcvchn=(int) o->value();} open
           tooltip {receive from Midi channel} xywh {10 213 50 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
           code1 {o->value(master->part[npart]->Prcvchn);}
@@ -426,10 +435,13 @@ panellistitemgroup->redraw();} {}
     code {panellistitem->hide();
 //delete(panellistitem);} {}
   }
-  decl {int npart;} {}
-  decl {Mixer *master;} {}
-  decl {BankUI *bankui;} {}
-} 
+  decl {int npart;} {private local
+  }
+  decl {Mixer *master;} {private local
+  }
+  decl {BankUI *bankui;} {private local
+  }
+}
 
 class MasterUI {open
 } {
@@ -448,9 +460,8 @@ class MasterUI {open
  || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))) {
     config.save();
     *exitprogram=1;
-};
-} open
-      xywh {80 370 390 525} type Double xclass zynaddsubfx visible
+};}
+      xywh {834 303 390 524} type Double hide xclass zynaddsubfx
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -712,12 +723,12 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
 pthread_mutex_lock(&master->mutex);
 master->shutup=1;
 pthread_mutex_unlock(&master->mutex);}
-        xywh {280 29 105 53} color 90 labelfont 1
+        xywh {280 29 105 39} color 90 labelfont 1
       }
       Fl_Group partuigroup {open
         xywh {0 310 390 205}
       } {
-        Fl_Group partui {open selected
+        Fl_Group partui {open
           xywh {0 310 383 175}
           code0 {o->init(master->part[0],master,0,bankui);}
           code1 {o->show();}
@@ -930,7 +941,7 @@ pthread_mutex_unlock(&master->mutex);}
       Fl_Button {} {
         label Scales
         callback {microtonalui->show();}
-        xywh {320 87 65 23} color 51 labelfont 1
+        xywh {320 69 65 23} color 51 labelfont 1
       }
       Fl_Group {} {
         xywh {150 40 117 45} box UP_FRAME
@@ -973,7 +984,7 @@ mastermenu->redraw();}
           xywh {192 66 30 15} labelfont 1 labelsize 10 deactivate
         }
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {1 490 389 55}
       } {
         Fl_Box {} {
@@ -1010,9 +1021,9 @@ simplenpartcounter->do_callback();}
       Fl_Button {} {
         label vK
         callback {virkeyboard->show();}
-        tooltip {Virtual Keyboard} xywh {280 87 40 23} color 51 labelfont 1
+        tooltip {Virtual Keyboard} xywh {280 69 40 23} color 51 labelfont 1
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {85 32 55 110} box UP_FRAME
       } {
         Fl_Button {} {
@@ -1033,11 +1044,17 @@ globalfinedetuneslider->do_callback();}
         label {Panel Window}
         callback {updatepanel();
 panelwindow->show();}
-        tooltip {Panel Window} xywh {280 112 105 23} color 51 labelfont 1 labelsize 10
+        tooltip {Panel Window} xywh {280 94 105 23} color 51 labelfont 1 labelsize 10
       }
       Fl_Button sm_indicator1 {
         label SM
         xywh {350 5 35 15} box ROUNDED_BOX down_box ROUNDED_BOX color 45 selection_color 93 labelfont 3 labelcolor 39 deactivate
+      }
+      Fl_Button {} {
+        label {Sequence Window}
+        callback {updatepanel();
+sequencewindow->show();}
+        tooltip {Sequence Window} xywh {280 117 105 23} color 51 labelfont 1 labelsize 10
       }
     }
     Fl_Window aboutwindow {
@@ -1088,7 +1105,7 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel}
-      xywh {89 59 630 635} type Double hide
+      xywh {1134 284 630 635} type Double hide
     } {
       Fl_Scroll {} {
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
@@ -1126,9 +1143,8 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 {
 	config.save();
 	*exitprogram=1;
-};
-} open
-      xywh {283 262 600 335} type Double visible
+};}
+      xywh {1218 313 600 335} type Double hide
     } {
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 690 25}
@@ -1660,6 +1676,135 @@ config.cfg.UserInterfaceMode=2;}
         xywh {30 215 360 25} box BORDER_BOX color 51 labelfont 1 labelsize 11 align 144
       }
     }
+    Fl_Window sequencewindow {open
+      xywh {720 241 1121 183} type Double visible
+    } {
+      Fl_Box {} {
+        xywh {115 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 1
+        xywh {100 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {175 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 2
+        xywh {160 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {235 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 3
+        xywh {220 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {295 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 4
+        xywh {280 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {355 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 5
+        xywh {340 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {415 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 6
+        xywh {400 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {475 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 7
+        xywh {460 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {535 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 8
+        xywh {520 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {595 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 9
+        xywh {580 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {655 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 10
+        xywh {640 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {715 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 11
+        xywh {700 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {775 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 12
+        xywh {760 55 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {835 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 13
+        xywh {820 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {895 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 14
+        xywh {880 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {955 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 15
+        xywh {940 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {1015 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 16
+        xywh {1000 55 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {25 25 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label On
+        xywh {10 55 55 85} box FLAT_BOX color 55 align 2
+      }
+      Fl_Choice seqrcv {
+        callback {master->part[npart]->Prcvchn=(int) o->value();} open selected
+        tooltip {receive from Midi channel} xywh {15 158 50 17} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+        code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
+        code1 {o->value(master->part[npart]->Prcvchn);}
+      } {}
+    }
   }
   Function {updatesendwindow()} {} {
     code {for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
@@ -1729,7 +1874,8 @@ delete selectuiwindow;} {}
 	break;
 };} {}
   }
-  Function {simplerefresh()} {} {
+  Function {simplerefresh()} {open
+  } {
     code {partenabled->value(master->part[npart]->Penabled);
 if (master->part[npart]->Penabled!=0) simplelistitemgroup->activate();
      else simplelistitemgroup->deactivate();
@@ -1837,7 +1983,8 @@ if (result<0) fl_alert("Error: Could not save the file.");
 }
 updatepanel();} {}
   }
-  Function {refresh_master_ui()} {} {
+  Function {refresh_master_ui()} {open
+  } {
     code {ninseff=0;
 nsyseff=0;
 npart=0;
@@ -1869,17 +2016,30 @@ virkeys->midich=master->part[npart]->Prcvchn;
 simplerefresh();
 bankui->hide();} {}
   }
-  decl {Mixer *master;} {}
-  decl {MicrotonalUI *microtonalui;} {}
-  decl {BankUI *bankui;} {}
-  decl {int ninseff,npart;} {}
-  decl {int nsyseff;} {}
-  decl {int *exitprogram;} {}
-  decl {SysEffSend *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {}
-  decl {VirKeyboard *virkeyboard;} {}
-  decl {ConfigUI *configui;} {}
-  decl {int swapefftype;} {}
-  decl {char masterwindowlabel[100];} {}
-  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {}
-  decl {NioUI nioui;} {}
-} 
+  decl {Mixer *master;} {private local
+  }
+  decl {MicrotonalUI *microtonalui;} {private local
+  }
+  decl {BankUI *bankui;} {private local
+  }
+  decl {int ninseff,npart;} {private local
+  }
+  decl {int nsyseff;} {private local
+  }
+  decl {int *exitprogram;} {private local
+  }
+  decl {SysEffSend *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {private local
+  }
+  decl {VirKeyboard *virkeyboard;} {private local
+  }
+  decl {ConfigUI *configui;} {private local
+  }
+  decl {int swapefftype;} {private local
+  }
+  decl {char masterwindowlabel[100];} {private local
+  }
+  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {private local
+  }
+  decl {NioUI nioui;} {private local
+  }
+}

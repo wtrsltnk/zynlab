@@ -19,6 +19,9 @@
 #if PORTAUDIO
 #include "PaEngine.h"
 #endif
+#if SDL2
+#include "SdlEngine.h"
+#endif
 
 using namespace std;
 
@@ -45,6 +48,9 @@ EngineMgr::EngineMgr()
 #endif
 #if PORTAUDIO
     engines.push_back(new PaEngine());
+#endif
+#if SDL2
+    engines.push_back(new SdlEngine());
 #endif
 
     defaultOut = dynamic_cast<AudioOut *>(defaultEng);
