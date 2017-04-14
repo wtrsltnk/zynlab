@@ -62,6 +62,12 @@ add_executable(app
     ui/WidgetPDial.cpp
 	)
 
+target_compile_features(app
+    PRIVATE cxx_auto_type
+    PRIVATE cxx_nullptr
+    PRIVATE cxx_lambdas
+    )
+
 target_link_libraries(app
     ${GUI_LIBRARIES}
     ${ZLIB_LIBRARIES}
@@ -71,4 +77,5 @@ target_link_libraries(app
     zyn.fx
     zyn.dsp
     zyn.common
+    zyn.seq
     )

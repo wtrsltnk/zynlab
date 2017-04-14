@@ -50,7 +50,8 @@ EngineMgr::EngineMgr()
     engines.push_back(new PaEngine());
 #endif
 #if SDL2
-    engines.push_back(new SdlEngine());
+    // TODO Not working yet!
+    //engines.push_back(new SdlEngine());
 #endif
 
     defaultOut = dynamic_cast<AudioOut *>(defaultEng);

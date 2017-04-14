@@ -46,7 +46,7 @@ void initprogram(void)
     cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
-    mixer = &Mixer::getInstance();
+    mixer = new Mixer();
     mixer->swaplr = config.cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth->samplerate);
@@ -67,7 +67,7 @@ int exitprogram()
     Nio::stop();
 
     delete [] denormalkillbuf;
-    Mixer::deleteInstance();
+    delete mixer;
     FFT_cleanup();
 
     return 0;

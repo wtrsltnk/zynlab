@@ -231,9 +231,11 @@ void Instrument::NoteOn(unsigned char note,
             ismonofirstnote = true;  // No other keys are held or sustained.
     }
     else
-    // Poly mode is On so just make sure the list is empty.
-    if(not monomemnotes.empty())
-        monomemnotes.clear();
+    {
+        // Poly mode is On so just make sure the list is empty.
+        if(not monomemnotes.empty())
+            monomemnotes.clear();
+    }
 
     lastnote = note;
 

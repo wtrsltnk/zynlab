@@ -45,8 +45,6 @@ vuData::vuData(void)
       rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
 
-static Mixer* masterInstance = NULL;
-
 Mixer::Mixer()
 {
     swaplr = 0;
@@ -135,28 +133,12 @@ void Mixer::Unlock()
     pthread_mutex_unlock(&mutex);
 }
 
-Mixer &Mixer::getInstance()
-{
-    if (!masterInstance)
-        masterInstance = new Mixer;
-
-    return *masterInstance;
-}
-
-void Mixer::deleteInstance()
-{
-    if (masterInstance)
-    {
-        delete masterInstance;
-        masterInstance = NULL;
-    }
-}
-
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
 void Mixer::NoteOn(char chan, char note, char velocity)
 {
+//    std::cout << "Channel: " << int(chan) << ", Note: " << int(note) << ", Velocity: " << int(velocity) << std::endl;
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
             if(chan == part[npart]->Prcvchn) {
@@ -175,6 +157,7 @@ void Mixer::NoteOn(char chan, char note, char velocity)
  */
 void Mixer::NoteOff(char chan, char note)
 {
+//    std::cout << "Channel: " << int(chan) << ", Note: " << int(note) << std::endl;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
             part[npart]->NoteOff(note);

@@ -278,7 +278,7 @@ return(1);} {}
   }
 }
 
-class SysEffSend {open : {public WidgetPDial}
+class SysEffSend {: {public WidgetPDial}
 } {
   Function {SysEffSend(int x,int y, int w, int h, const char *label=0):WidgetPDial(x,y,w,h,label)} {} {
     code {master=NULL;
@@ -319,13 +319,13 @@ return(WidgetPDial::handle(event));} {}
   }
 }
 
-class Panellistitem {open : {public Fl_Group}
+class Panellistitem {: {public Fl_Group}
 } {
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {open
-      private xywh {608 711 116 260} type Double box NO_BOX
-      class Fl_Group visible
+      private xywh {608 711 116 260} type Double box NO_BOX hide
+      class Fl_Group
     } {
       Fl_Group panellistitemgroup {open
         private xywh {0 20 70 240} box UP_FRAME
@@ -460,14 +460,14 @@ class MasterUI {open
  || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))) {
     config.save();
     *exitprogram=1;
-};}
+};} open
       xywh {834 303 390 524} type Double hide xclass zynaddsubfx
     } {
-      Fl_Menu_Bar mastermenu {
+      Fl_Menu_Bar mastermenu {open
         xywh {-5 0 690 25}
       } {
         Submenu {} {
-          label {&File}
+          label {&File} open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -562,12 +562,6 @@ updatepanel();}
             label {&Settings...}
             callback {configui->show();}
             xywh {25 25 100 20}
-          }
-          MenuItem {} {
-            label {N&io Settings}
-            callback {nioui.refresh();
-nioui.show();}
-            xywh {0 0 36 21} divider
           }
           MenuItem {} {
             label {&Copyright...}
@@ -725,7 +719,7 @@ master->shutup=1;
 pthread_mutex_unlock(&master->mutex);}
         xywh {280 29 105 39} color 90 labelfont 1
       }
-      Fl_Group partuigroup {open
+      Fl_Group partuigroup {
         xywh {0 310 390 205}
       } {
         Fl_Group partui {open
@@ -735,7 +729,7 @@ pthread_mutex_unlock(&master->mutex);}
           class PartUI
         } {}
       }
-      Fl_Tabs {} {open
+      Fl_Tabs {} {
         xywh {0 145 390 165} box UP_FRAME
       } {
         Fl_Group {} {
@@ -1677,133 +1671,132 @@ config.cfg.UserInterfaceMode=2;}
       }
     }
     Fl_Window sequencewindow {open
-      xywh {720 241 1121 183} type Double visible
+      xywh {623 241 1069 159} type Double hide
     } {
       Fl_Box {} {
-        xywh {115 25 25 25} box OVAL_BOX color 92
+        xywh {95 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 1
-        xywh {100 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {80 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {175 25 25 25} box OVAL_BOX color 92
+        xywh {155 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 2
-        xywh {160 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {140 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {235 25 25 25} box OVAL_BOX color 92
+        xywh {215 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 3
-        xywh {220 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {200 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {295 25 25 25} box OVAL_BOX color 92
+        xywh {275 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 4
-        xywh {280 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {260 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {355 25 25 25} box OVAL_BOX color 92
+        xywh {335 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 5
-        xywh {340 55 55 85} box FLAT_BOX color 44 align 2
+        xywh {320 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box {} {
-        xywh {415 25 25 25} box OVAL_BOX color 92
+        xywh {395 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 6
-        xywh {400 55 55 85} box FLAT_BOX color 44 align 2
+        xywh {380 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box {} {
-        xywh {475 25 25 25} box OVAL_BOX color 92
+        xywh {455 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 7
-        xywh {460 55 55 85} box FLAT_BOX color 44 align 2
+        xywh {440 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box {} {
-        xywh {535 25 25 25} box OVAL_BOX color 92
+        xywh {515 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 8
-        xywh {520 55 55 85} box FLAT_BOX color 44 align 2
+        xywh {500 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box {} {
-        xywh {595 25 25 25} box OVAL_BOX color 92
+        xywh {575 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 9
-        xywh {580 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {560 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {655 25 25 25} box OVAL_BOX color 92
+        xywh {635 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 10
-        xywh {640 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {620 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {715 25 25 25} box OVAL_BOX color 92
+        xywh {695 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 11
-        xywh {700 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {680 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {775 25 25 25} box OVAL_BOX color 92
+        xywh {755 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 12
-        xywh {760 55 55 85} box FLAT_BOX color 37 align 2
+        xywh {740 40 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box {} {
-        xywh {835 25 25 25} box OVAL_BOX color 92
+        xywh {815 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 13
-        xywh {820 55 55 85} box FLAT_BOX color 44 align 2
+        xywh {800 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box {} {
-        xywh {895 25 25 25} box OVAL_BOX color 92
+        xywh {875 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 14
-        xywh {880 55 55 85} box FLAT_BOX color 44 align 2
+        xywh {860 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box {} {
-        xywh {955 25 25 25} box OVAL_BOX color 92
+        xywh {935 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 15
-        xywh {940 55 55 85} box FLAT_BOX color 44 align 2
+        xywh {920 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box {} {
-        xywh {1015 25 25 25} box OVAL_BOX color 92
+        xywh {995 10 25 25} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 16
-        xywh {1000 55 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {25 25 25 25} box OVAL_BOX color 92
+        xywh {980 40 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Button {} {
-        label On
-        xywh {10 55 55 85} box FLAT_BOX color 55 align 2
+        label Play
+        xywh {10 25 55 35}
       }
-      Fl_Choice seqrcv {
-        callback {master->part[npart]->Prcvchn=(int) o->value();} open selected
-        tooltip {receive from Midi channel} xywh {15 158 50 17} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
-        code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
-        code1 {o->value(master->part[npart]->Prcvchn);}
-      } {}
+      Fl_Button {} {
+        label Pause
+        xywh {10 95 55 35}
+      }
+      Fl_Button {} {
+        label Stop
+        xywh {10 60 55 35}
+      }
     }
   }
   Function {updatesendwindow()} {} {
@@ -1874,8 +1867,7 @@ delete selectuiwindow;} {}
 	break;
 };} {}
   }
-  Function {simplerefresh()} {open
-  } {
+  Function {simplerefresh()} {} {
     code {partenabled->value(master->part[npart]->Penabled);
 if (master->part[npart]->Penabled!=0) simplelistitemgroup->activate();
      else simplelistitemgroup->deactivate();
@@ -1894,6 +1886,7 @@ simplemaxkcounter->value(master->part[npart]->Pmaxkey);
 
 simplepartkeyshiftcounter->value(master->part[npart]->Pkeyshift-64);
 simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
+    code {nioui.refresh(this);} {}
   }
   Function {do_new_master_unconditional()} {} {
     code {delete microtonalui;
@@ -1983,8 +1976,7 @@ if (result<0) fl_alert("Error: Could not save the file.");
 }
 updatepanel();} {}
   }
-  Function {refresh_master_ui()} {open
-  } {
+  Function {refresh_master_ui()} {} {
     code {ninseff=0;
 nsyseff=0;
 npart=0;
@@ -2040,6 +2032,6 @@ bankui->hide();} {}
   }
   decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {private local
   }
-  decl {NioUI nioui;} {private local
+  decl {NioUI nioui} {selected private local
   }
 }

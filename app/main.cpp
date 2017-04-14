@@ -43,25 +43,18 @@
 #include "zyn.mixer/Dump.h"
 extern Dump dump;
 
+// Sequencer
+#include "zyn.seq/Sequencer.h"
 
 //Nio System
 #include "zyn.nio/Nio.h"
 
-#ifndef DISABLE_GUI
+#ifdef ENABLE_FLTKGUI
 #include "MasterUI.h"
-
-#ifdef NTK_GUI
-#include <FL/Fl_Shared_Image.H>
-#include <FL/Fl_Tiled_Image.H>
-#include <FL/Fl_Dial.H>
-#include <FL/Fl_Tooltip.H>
-
-static Fl_Tiled_Image *module_backdrop;
-#endif // NTK_GUI
 
 static MasterUI *ui;
 
-#endif //DISABLE_GUI
+#endif //ENABLE_FLTKGUI
 
 using namespace std;
 
@@ -78,20 +71,12 @@ void sigterm_exit(int /*sig*/)
 }
 
 
-#ifndef DISABLE_GUI
+#ifdef ENABLE_FLTKGUI
 void set_module_parameters ( Fl_Widget *o )
 {
-#ifdef NTK_GUI
-    o->box( FL_DOWN_FRAME );
-    o->align( o->align() | FL_ALIGN_IMAGE_BACKDROP );
-    o->color( FL_BLACK );
-    o->image( module_backdrop );
-    o->labeltype( FL_SHADOW_LABEL );
-#else
     o->box( FL_PLASTIC_THIN_UP_BOX );
     o->color( FL_BLACK );
     o->labeltype( FL_NORMAL_LABEL );
-#endif
 }
 #endif
 
@@ -115,7 +100,7 @@ void initprogram(void)
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
-    mixer = &Mixer::getInstance();
+    mixer = new Mixer();
     mixer->swaplr = swaplr;
 
     signal(SIGINT, sigterm_exit);
@@ -133,12 +118,12 @@ int exitprogram()
 
     Nio::stop();
 
-#ifndef DISABLE_GUI
+#ifdef ENABLE_FLTKGUI
     delete ui;
-#endif // DISABLE_GUI
+#endif // ENABLE_FLTKGUI
 
     delete [] denormalkillbuf;
-    Mixer::deleteInstance();
+    delete mixer;
     FFT_cleanup();
 
     return 0;
@@ -176,58 +161,24 @@ int main(int argc, char *argv[])
 
     /* Parse command-line options */
     struct option opts[] = {
-    {
-        "load", 2, NULL, 'l'
-    },
-    {
-        "load-instrument", 2, NULL, 'L'
-    },
-    {
-        "sample-rate", 2, NULL, 'r'
-    },
-    {
-        "buffer-size", 2, NULL, 'b'
-    },
-    {
-        "oscil-size", 2, NULL, 'o'
-    },
-    {
-        "dump", 2, NULL, 'D'
-    },
-    {
-        "swap", 2, NULL, 'S'
-    },
-    {
-        "no-gui", 2, NULL, 'U'
-    },
-    {
-        "dummy", 2, NULL, 'Y'
-    },
-    {
-        "help", 2, NULL, 'h'
-    },
-    {
-        "version", 2, NULL, 'v'
-    },
-    {
-        "named", 1, NULL, 'N'
-    },
-    {
-        "auto-connect", 0, NULL, 'a'
-    },
-    {
-        "output", 1, NULL, 'O'
-    },
-    {
-        "input", 1, NULL, 'I'
-    },
-    {
-        "exec-after-init", 1, NULL, 'e'
-    },
-    {
-        0, 0, 0, 0
-    }
-};
+        { "load", 2, NULL, 'l' },
+        { "load-instrument", 2, NULL, 'L' },
+        { "sample-rate", 2, NULL, 'r' },
+        { "buffer-size", 2, NULL, 'b' },
+        { "oscil-size", 2, NULL, 'o' },
+        { "dump", 2, NULL, 'D' },
+        { "swap", 2, NULL, 'S' },
+        { "no-gui", 2, NULL, 'U' },
+        { "dummy", 2, NULL, 'Y' },
+        { "help", 2, NULL, 'h' },
+        { "version", 2, NULL, 'v' },
+        { "named", 1, NULL, 'N' },
+        { "auto-connect", 0, NULL, 'a' },
+        { "output", 1, NULL, 'O' },
+        { "input", 1, NULL, 'I' },
+        { "exec-after-init", 1, NULL, 'e' },
+        { 0, 0, 0, 0 }
+    };
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
 
@@ -403,35 +354,7 @@ int main(int argc, char *argv[])
             cerr << "Command Failed..." << endl;
     }
 
-
-#ifndef DISABLE_GUI
-
-#ifdef NTK_GUI
-    fl_register_images();
-
-    Fl_Tooltip::textcolor(0x0);
-
-    Fl_Dial::default_style(Fl_Dial::PIXMAP_DIAL);
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/knob.png"))
-        Fl_Dial::default_image(img);
-    else
-        Fl_Dial::default_image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/knob.png"));
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/window_backdrop.png"))
-        Fl::scheme_bg(new Fl_Tiled_Image(img));
-    else
-        Fl::scheme_bg(new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/window_backdrop.png")));
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/module_backdrop.png"))
-        module_backdrop = new Fl_Tiled_Image(img);
-    else
-        module_backdrop = new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/module_backdrop.png"));
-
-    Fl::background(  50, 50, 50 );
-    Fl::background2(  70, 70, 70 );
-    Fl::foreground( 255,255,255 );
-#endif
+#ifdef ENABLE_FLTKGUI
 
     ui = new MasterUI(mixer, &Pexitprogram);
     
@@ -440,19 +363,23 @@ int main(int argc, char *argv[])
         ui->showUI();
 
         if(!ioGood)
-            fl_alert(
-                        "Default IO did not initialize.\nDefaulting to NULL backend.");
+            fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
     }
 
 #endif
 
+    Sequencer seq(mixer);
+    seq.Start();
+
     while(Pexitprogram == 0) {
-#ifndef DISABLE_GUI
+#ifdef ENABLE_FLTKGUI
         Fl::wait(0.02f);
-#else // DISABLE_GUI
+#else // ENABLE_FLTKGUI
         usleep(100000);
-#endif // DISABLE_GUI
+#endif // ENABLE_FLTKGUI
     }
+
+    seq.Stop();
 
     return exitprogram();
 }

@@ -4,17 +4,15 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 
-class NioUI:public Fl_Window
+class NioUI
 {
     public:
         NioUI();
         ~NioUI();
-        void refresh();
+        void refresh(class MasterUI* mui);
     private:
-        class Fl_Choice * midi;
-        class Fl_Choice * audio;
-        static void midiCallback(Fl_Widget *c);
-        static void audioCallback(Fl_Widget *c);
+        static void midiCallback_s(Fl_Widget *c, void* ptr);
+        static void audioCallback_s(Fl_Widget *c, void* ptr);
 };
 
 #endif
