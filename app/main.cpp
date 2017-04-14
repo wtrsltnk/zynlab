@@ -59,6 +59,7 @@ static MasterUI *ui;
 using namespace std;
 
 static Mixer* mixer;
+static Sequencer* seq;
 SYNTH_T* synth;
 static int swaplr = 0; //1 for left-right swapping
 
@@ -115,6 +116,8 @@ int exitprogram()
     //ensure that everything has stopped with the mutex wait
     mixer->Lock();
     mixer->Unlock();
+
+    seq->Quit();
 
     Nio::stop();
 
@@ -354,9 +357,11 @@ int main(int argc, char *argv[])
             cerr << "Command Failed..." << endl;
     }
 
+    seq = new Sequencer(mixer);
+
 #ifdef ENABLE_FLTKGUI
 
-    ui = new MasterUI(mixer, &Pexitprogram);
+    ui = new MasterUI(mixer, seq, &Pexitprogram);
     
     if ( !noui)
     {
@@ -368,9 +373,6 @@ int main(int argc, char *argv[])
 
 #endif
 
-    Sequencer seq(mixer);
-    seq.Start();
-
     while(Pexitprogram == 0) {
 #ifdef ENABLE_FLTKGUI
         Fl::wait(0.02f);
@@ -378,8 +380,6 @@ int main(int argc, char *argv[])
         usleep(100000);
 #endif // ENABLE_FLTKGUI
     }
-
-    seq.Stop();
 
     return exitprogram();
 }

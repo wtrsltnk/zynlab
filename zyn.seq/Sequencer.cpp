@@ -152,3 +152,16 @@ void Sequencer::Stop()
         this->_changeCurrentStep.unlock();
     }
 }
+
+void Sequencer::Quit()
+{
+    auto state = this->currentState();
+
+    // We do not change anymore when we are quitting.
+    if (state == PlayingStates::Quit) return;
+
+    this->_changePlayingState.lock();
+    this->_playingState = PlayingStates::Quit;
+    this->_changePlayingState.unlock();
+
+}

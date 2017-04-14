@@ -1,0 +1,156 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0304
+header_name {.h}
+code_name {.cc}
+decl {\#include "zyn.seq/Sequencer.h"} {public global
+}
+
+class SequencerUI {open
+} {
+  Function {make_window()} {open
+  } {
+    Fl_Window sequencerwindow {
+      xywh {295 414 1063 159} type Double hide
+    } {
+      Fl_Box {} {
+        xywh {100 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 1
+        xywh {85 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {160 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 2
+        xywh {145 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {220 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 3
+        xywh {205 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {280 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 4
+        xywh {265 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {340 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 5
+        xywh {325 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {400 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 6
+        xywh {385 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {460 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 7
+        xywh {445 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {520 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 8
+        xywh {505 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {580 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 9
+        xywh {565 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {640 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 10
+        xywh {625 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {700 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 11
+        xywh {685 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {760 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 12
+        xywh {745 45 55 85} box FLAT_BOX color 37 align 2
+      }
+      Fl_Box {} {
+        xywh {820 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 13
+        xywh {805 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {880 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 14
+        xywh {865 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {940 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 15
+        xywh {925 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Box {} {
+        xywh {1000 15 25 25} box OVAL_BOX color 92
+      }
+      Fl_Button {} {
+        label 16
+        xywh {985 45 55 85} box FLAT_BOX color 44 align 2
+      }
+      Fl_Button {} {
+        label Play
+        callback {seq->Start();}
+        xywh {15 30 55 35}
+      }
+      Fl_Button {} {
+        label Pause
+        callback {seq->Pause();}
+        xywh {15 100 55 35}
+      }
+      Fl_Button {} {
+        label Stop
+        callback {seq->Stop();}
+        xywh {15 65 55 35}
+      }
+    }
+  }
+  Function {SequencerUI(Sequencer* seq_)} {open
+  } {
+    code {seq=seq_;} {}
+    code {make_window();} {selected
+    }
+  }
+  decl {Sequencer* seq;} {private local
+  }
+  Function {show()} {open return_type void
+  } {
+    code {sequencerwindow->show();} {}
+  }
+}

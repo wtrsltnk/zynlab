@@ -18,8 +18,9 @@ if(FltkGui)
 		ui/PartUI.fl
 		ui/PresetsUI.fl
 		ui/ResonanceUI.fl
-		ui/SUBnoteUI.fl
-		ui/VirKeyboard.fl
+        ui/SUBnoteUI.fl
+        ui/VirKeyboard.fl
+        ui/SequencerUI.fl
 	)
 
 set_source_files_properties(ui/MasterUI.h PROPERTIES GENERATED 1)

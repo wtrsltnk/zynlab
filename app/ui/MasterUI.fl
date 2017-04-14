@@ -47,6 +47,9 @@ decl {\#include "MicrotonalUI.h"} {public local
 decl {\#include "PresetsUI.h"} {public local
 }
 
+decl {\#include "SequencerUI.h"} {public local
+}
+
 decl {\#include "NioUI.h"} {public global
 }
 
@@ -54,6 +57,9 @@ decl {\#include "zyn.mixer/Mixer.h"} {public local
 }
 
 decl {\#include "zyn.mixer/Instrument.h"} {public local
+}
+
+decl {\#include "zyn.seq/Sequencer.h"} {public global
 }
 
 decl {\#include "zyn.common/Util.h"} {public local
@@ -77,7 +83,8 @@ class VUMeter {: {public Fl_Box}
     code {master=NULL;
 npart=-1;} {}
   }
-  Function {init(Mixer *master_,int part_)} {} {
+  Function {init(Mixer *master_,int part_)} {open
+  } {
     code {//the "part_" parameters sets the part (if it is >=0), else it sets the master
 master=master_;
 label(NULL);
@@ -87,7 +94,8 @@ olddbr=0.0;
 oldrmsdbl=0.0;
 oldrmsdbr=0.0;} {}
   }
-  Function {draw_master()} {} {
+  Function {draw_master()} {open
+  } {
     code {\#define MIN_DB (-48)
 
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
@@ -195,7 +203,8 @@ if ((maxdbr>MIN_DB-20)){
   fl_draw(tmpstr,ox+VULENX+1,oy+ly/2+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
 };} {}
   }
-  Function {draw_part()} {} {
+  Function {draw_part()} {open
+  } {
     code {\#define MIN_DB (-48)
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
 
@@ -237,15 +246,16 @@ float  tmp=ly*1.0/MIN_DB;
     if (i%10==0) fl_rectf(ox,oy+ly-ty,lx,1,0,230,240);
 };} {}
   }
-  Function {draw()} {} {
+  Function {draw()} {open
+  } {
     code {if (npart>=0) draw_part();
    else draw_master();} {}
   }
-  Function {tickdraw(VUMeter *o)} {return_type {static void}
+  Function {tickdraw(VUMeter *o)} {open return_type {static void}
   } {
     code {o->damage(FL_DAMAGE_USER1);} {}
   }
-  Function {tick(void *v)} {return_type {static void}
+  Function {tick(void *v)} {open return_type {static void}
   } {
     code {tickdraw((VUMeter *) v);
           Fl::repeat_timeout(1.0/18.0,tick,v);//18 fps} {}
@@ -321,13 +331,13 @@ return(WidgetPDial::handle(event));} {}
 
 class Panellistitem {: {public Fl_Group}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
-    Fl_Window panellistitem {open
-      private xywh {608 711 116 260} type Double box NO_BOX hide
+    Fl_Window panellistitem {
+      private xywh {608 596 150 260} type Double box NO_BOX hide
       class Fl_Group
     } {
-      Fl_Group panellistitemgroup {open
+      Fl_Group panellistitemgroup {
         private xywh {0 20 70 240} box UP_FRAME
         code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
         code1 {set_module_parameters( o );}
@@ -460,8 +470,8 @@ class MasterUI {open
  || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))) {
     config.save();
     *exitprogram=1;
-};} open
-      xywh {834 303 390 524} type Double hide xclass zynaddsubfx
+};}
+      xywh {818 248 390 524} type Double hide xclass zynaddsubfx
     } {
       Fl_Menu_Bar mastermenu {open
         xywh {-5 0 690 25}
@@ -1047,7 +1057,7 @@ panelwindow->show();}
       Fl_Button {} {
         label {Sequence Window}
         callback {updatepanel();
-sequencewindow->show();}
+sequi->show();}
         tooltip {Sequence Window} xywh {280 117 105 23} color 51 labelfont 1 labelsize 10
       }
     }
@@ -1098,35 +1108,27 @@ GNU General Public License for details.}
       }
     }
     Fl_Window panelwindow {
-      label {ZynAddSubFX Panel}
-      xywh {1134 284 630 635} type Double hide
+      label {ZynAddSubFX Panel} open selected
+      xywh {288 204 1167 348} type Double visible
     } {
-      Fl_Scroll {} {
-        xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
+      Fl_Scroll {} {open
+        xywh {0 5 1160 305} type HORIZONTAL box THIN_UP_BOX
       } {
-        Fl_Pack {} {
-          xywh {5 10 560 285} type HORIZONTAL
-          code0 {for (int i=0;i<NUM_MIDI_PARTS/2;i++){panellistitem[i]=new Panellistitem(0,0,70,260,"");panellistitem[i]->init(master,i,bankui);}}
-        } {}
-      }
-      Fl_Scroll {} {
-        xywh {0 320 570 310} type HORIZONTAL box THIN_UP_BOX
-      } {
-        Fl_Pack {} {
-          xywh {5 325 560 285} type HORIZONTAL
-          code0 {for (int i=NUM_MIDI_PARTS/2;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,260,"");panellistitem[i]->init(master,i,bankui);}}
+        Fl_Pack {} {open
+          xywh {5 10 1150 295} type HORIZONTAL
+          code0 {for (int i=0;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,260,"");panellistitem[i]->init(master,i,bankui);}}
         } {}
       }
       Fl_Button {} {
         label Close
         callback {panelwindow->hide();
 updatepanel();}
-        xywh {575 605 50 25} box THIN_UP_BOX labelsize 13
+        xywh {1050 315 50 25} box THIN_UP_BOX labelsize 13
       }
       Fl_Button {} {
         label Refresh
         callback {updatepanel();}
-        xywh {575 570 55 25} box THIN_UP_BOX labelsize 13
+        xywh {1105 315 55 25} box THIN_UP_BOX labelsize 13
       }
     }
     Fl_Window simplemasterwindow {
@@ -1670,134 +1672,6 @@ config.cfg.UserInterfaceMode=2;}
         xywh {30 215 360 25} box BORDER_BOX color 51 labelfont 1 labelsize 11 align 144
       }
     }
-    Fl_Window sequencewindow {open
-      xywh {623 241 1069 159} type Double hide
-    } {
-      Fl_Box {} {
-        xywh {95 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 1
-        xywh {80 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {155 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 2
-        xywh {140 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {215 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 3
-        xywh {200 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {275 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 4
-        xywh {260 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {335 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 5
-        xywh {320 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {395 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 6
-        xywh {380 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {455 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 7
-        xywh {440 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {515 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 8
-        xywh {500 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {575 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 9
-        xywh {560 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {635 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 10
-        xywh {620 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {695 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 11
-        xywh {680 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {755 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 12
-        xywh {740 40 55 85} box FLAT_BOX color 37 align 2
-      }
-      Fl_Box {} {
-        xywh {815 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 13
-        xywh {800 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {875 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 14
-        xywh {860 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {935 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 15
-        xywh {920 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Box {} {
-        xywh {995 10 25 25} box OVAL_BOX color 92
-      }
-      Fl_Button {} {
-        label 16
-        xywh {980 40 55 85} box FLAT_BOX color 44 align 2
-      }
-      Fl_Button {} {
-        label Play
-        xywh {10 25 55 35}
-      }
-      Fl_Button {} {
-        label Pause
-        xywh {10 95 55 35}
-      }
-      Fl_Button {} {
-        label Stop
-        xywh {10 60 55 35}
-      }
-    }
   }
   Function {updatesendwindow()} {} {
     code {for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
@@ -1816,7 +1690,8 @@ masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
 simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
-  Function {MasterUI(Mixer *master_,int *exitprogram_)} {} {
+  Function {MasterUI(Mixer *master_,Sequencer* seq_,int *exitprogram_)} {open
+  } {
     code {master=master_;
 exitprogram=exitprogram_;
 ninseff=0;
@@ -1831,6 +1706,7 @@ microtonalui=new MicrotonalUI(&master->microtonal);
 virkeyboard=new VirKeyboard(master);
 bankui=new BankUI(master,&npart);
 configui=new ConfigUI();
+sequi=new SequencerUI(seq_);
 
 make_window();
 presetsui=new PresetsUI();
@@ -1857,7 +1733,8 @@ delete presetsui;
 delete panelwindow;
 delete selectuiwindow;} {}
   }
-  Function {showUI()} {} {
+  Function {showUI()} {open
+  } {
     code {switch (config.cfg.UserInterfaceMode){
 	case 0:selectuiwindow->show();
 	break;
@@ -2014,6 +1891,8 @@ bankui->hide();} {}
   }
   decl {BankUI *bankui;} {private local
   }
+  decl {SequencerUI* sequi;} {private local
+  }
   decl {int ninseff,npart;} {private local
   }
   decl {int nsyseff;} {private local
@@ -2032,6 +1911,6 @@ bankui->hide();} {}
   }
   decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {private local
   }
-  decl {NioUI nioui} {selected private local
+  decl {NioUI nioui} {private local
   }
 }

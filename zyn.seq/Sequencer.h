@@ -46,6 +46,7 @@ public:
     void Start();
     void Pause();
     void Stop();
+    void Quit();
 };
 
 #endif // SEQUENCER_H
