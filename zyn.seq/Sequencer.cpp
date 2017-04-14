@@ -2,6 +2,7 @@
 #include "SequencerStrip.h"
 #include <ctime>
 #include <chrono>
+#include <iostream>
 #include "zyn.mixer/Mixer.h"
 
 Sequencer::Sequencer(class IMixer* mixer)
@@ -21,13 +22,14 @@ void Sequencer::runThread()
     std::clock_t start = std::clock();
     std::clock_t lastCheck = start;
 
-    double stepTime = (double(this->bpm()) / 60.0) / 4.0;
-
     while (this->currentState() != PlayingStates::Quit)
     {
         std::clock_t check = std::clock();
         if (this->currentState() == PlayingStates::Playing)
         {
+            double stepTime = (60.0 / double(this->bpm())) / 4.0;
+            std::cout << stepTime << std::endl;
+
             bool doStepAction = false;
             this->_changeCurrentStep.lock();
             this->_currentStepTime += ((check - lastCheck) / double(CLOCKS_PER_SEC));
@@ -43,7 +45,7 @@ void Sequencer::runThread()
         }
         lastCheck = check;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 
@@ -88,6 +90,7 @@ int Sequencer::bpm()
 {
     this->_changeBpm.lock();
     auto result = this->_bpm;
+    std::cout << result << std::endl;
     this->_changeBpm.unlock();
 
     return result;

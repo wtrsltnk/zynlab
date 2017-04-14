@@ -65,7 +65,7 @@ decl {\#include "zyn.seq/Sequencer.h"} {public global
 decl {\#include "zyn.common/Util.h"} {public local
 }
 
-decl {\#include "common.H"} {public local
+decl {\#include "common.H"} {selected public local
 }
 
 decl {\#if USE_NSM
@@ -77,9 +77,10 @@ extern NSM_Client *nsm;
 decl {\#include "zyn.common/globals.h"} {public local
 }
 
-class VUMeter {: {public Fl_Box}
+class VUMeter {open : {public Fl_Box}
 } {
-  Function {VUMeter(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
+  Function {VUMeter(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {open
+  } {
     code {master=NULL;
 npart=-1;} {}
   }
@@ -203,8 +204,7 @@ if ((maxdbr>MIN_DB-20)){
   fl_draw(tmpstr,ox+VULENX+1,oy+ly/2+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
 };} {}
   }
-  Function {draw_part()} {open
-  } {
+  Function {draw_part()} {} {
     code {\#define MIN_DB (-48)
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
 
@@ -246,8 +246,7 @@ float  tmp=ly*1.0/MIN_DB;
     if (i%10==0) fl_rectf(ox,oy+ly-ty,lx,1,0,230,240);
 };} {}
   }
-  Function {draw()} {open
-  } {
+  Function {draw()} {} {
     code {if (npart>=0) draw_part();
    else draw_master();} {}
   }
@@ -260,7 +259,7 @@ float  tmp=ly*1.0/MIN_DB;
     code {tickdraw((VUMeter *) v);
           Fl::repeat_timeout(1.0/18.0,tick,v);//18 fps} {}
   }
-  Function {handle(int event)} {return_type int
+  Function {handle(int event)} {open return_type int
   } {
     code {switch(event){
    case FL_SHOW:
@@ -455,8 +454,7 @@ panellistitemgroup->redraw();} {}
 
 class MasterUI {open
 } {
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {if ((
@@ -1090,7 +1088,7 @@ GNU General Public License for details.}
     }
     Fl_Window syseffsendwindow {
       label {System Effects Send}
-      xywh {171 234 120 250} type Double hide resizable
+      xywh {171 234 150 250} type Double hide resizable
     } {
       Fl_Scroll {} {open
         xywh {0 45 120 170} box FLAT_BOX resizable
@@ -1108,8 +1106,8 @@ GNU General Public License for details.}
       }
     }
     Fl_Window panelwindow {
-      label {ZynAddSubFX Panel} open selected
-      xywh {288 204 1167 348} type Double visible
+      label {ZynAddSubFX Panel}
+      xywh {288 204 1167 348} type Double hide
     } {
       Fl_Scroll {} {open
         xywh {0 5 1160 305} type HORIZONTAL box THIN_UP_BOX
@@ -1140,7 +1138,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 	config.save();
 	*exitprogram=1;
 };}
-      xywh {1218 313 600 335} type Double hide
+      xywh {687 295 600 335} type Double hide
     } {
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 690 25}
@@ -1733,8 +1731,7 @@ delete presetsui;
 delete panelwindow;
 delete selectuiwindow;} {}
   }
-  Function {showUI()} {open
-  } {
+  Function {showUI()} {} {
     code {switch (config.cfg.UserInterfaceMode){
 	case 0:selectuiwindow->show();
 	break;
