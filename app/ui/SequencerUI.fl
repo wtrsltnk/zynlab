@@ -5,165 +5,319 @@ code_name {.cc}
 decl {\#include "zyn.seq/Sequencer.h"} {public global
 }
 
+decl {\#include "WidgetPDial.h"} {public global
+}
+
 class SequencerUI {open
 } {
   Function {make_window()} {open
   } {
     Fl_Window sequencerwindow {open
-      xywh {334 271 1063 159} type Double visible
+      xywh {396 516 965 283} type Double visible
     } {
       Fl_Box led01 {
-        xywh {105 27 15 15} box OVAL_BOX color 92
+        xywh {25 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 1
-        xywh {85 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {5 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led02 {
-        xywh {165 27 15 15} box OVAL_BOX color 92
+        xywh {85 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 2
-        xywh {145 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {65 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led03 {
-        xywh {225 27 15 15} box OVAL_BOX color 92
+        xywh {145 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 3
-        xywh {205 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {125 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led04 {
-        xywh {285 27 15 15} box OVAL_BOX color 92
+        xywh {205 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 4
-        xywh {265 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {185 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led05 {
-        xywh {345 27 15 15} box OVAL_BOX color 92
+        xywh {265 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 5
-        xywh {325 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {245 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box led06 {
-        xywh {405 27 15 15} box OVAL_BOX color 92
+        xywh {325 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 6
-        xywh {385 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {305 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box led07 {
-        xywh {465 27 15 15} box OVAL_BOX color 92
+        xywh {385 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 7
-        xywh {445 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {365 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box led08 {
-        xywh {525 27 15 15} box OVAL_BOX color 92
+        xywh {445 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 8
-        xywh {505 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {425 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box led09 {
-        xywh {585 27 15 15} box OVAL_BOX color 92
+        xywh {505 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 9
-        xywh {565 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {485 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led10 {
-        xywh {645 27 15 15} box OVAL_BOX color 92
+        xywh {565 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 10
-        xywh {625 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {545 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led11 {
-        xywh {705 27 15 15} box OVAL_BOX color 92
+        xywh {625 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 11
-        xywh {685 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {605 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led12 {
-        xywh {765 27 15 15} box OVAL_BOX color 92
+        xywh {685 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 12
-        xywh {745 45 55 85} box FLAT_BOX color 37 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {665 173 55 85} box FLAT_BOX color 37 align 2
       }
       Fl_Box led13 {
-        xywh {825 27 15 15} box OVAL_BOX color 92
+        xywh {745 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 13
-        xywh {805 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {725 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box led14 {
-        xywh {885 27 15 15} box OVAL_BOX color 92
+        xywh {805 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 14
-        xywh {865 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {785 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box led15 {
-        xywh {945 27 15 15} box OVAL_BOX color 92
+        xywh {865 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 15
-        xywh {925 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {845 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Box led16 {
-        xywh {1005 27 15 15} box OVAL_BOX color 92
+        xywh {925 155 15 15} box OVAL_BOX color 92
       }
       Fl_Button {} {
         label 16
-        xywh {985 45 55 85} box FLAT_BOX color 44 align 2
+        callback {enable_keyboard(((Fl_Button*)o)->label());}
+        xywh {905 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Button {} {
         label Play
         callback {seq->Start();}
-        xywh {15 50 55 20}
+        xywh {5 50 55 20}
       }
       Fl_Button {} {
         label Pause
         callback {seq->Pause();}
-        xywh {15 104 55 20}
+        xywh {115 50 55 20}
       }
       Fl_Button {} {
         label Stop
         callback {seq->Stop();}
-        xywh {15 78 55 20}
+        xywh {60 50 55 20}
       }
       Fl_Counter bpm {
         label BPM
-        callback {seq->setBpm(o->value());} selected
-        xywh {5 30 80 20} align 1 minimum 20 maximum 200 step 1 value 80
+        callback {seq->setBpm(o->value());}
+        xywh {47 25 80 20} align 1 minimum 20 maximum 200 step 1 value 80
+      }
+      Fl_Group {} {
+        label Display open
+        xywh {175 20 265 130} box PLASTIC_DOWN_BOX color 178
+      } {}
+      Fl_Group keyboard {open
+        xywh {445 5 515 145} box BORDER_BOX color 47 selection_color 43 deactivate
+      } {
+        Fl_Button kb_c {
+          label C
+          callback {this->selectedNote = 60;}
+          xywh {450 65 55 80} box FLAT_BOX color 55
+        }
+        Fl_Button kb_d {
+          label D
+          callback {this->selectedNote = 62;}
+          xywh {510 65 55 80} box FLAT_BOX color 55
+        }
+        Fl_Button kb_e {
+          label E
+          callback {this->selectedNote = 65;}
+          xywh {570 65 55 80} box FLAT_BOX color 55
+        }
+        Fl_Button kb_f {
+          label F
+          callback {this->selectedNote = 66;}
+          xywh {630 65 55 80} box FLAT_BOX color 55
+        }
+        Fl_Button kb_g {
+          label G
+          callback {this->selectedNote = 68;}
+          xywh {690 65 55 80} box FLAT_BOX color 55
+        }
+        Fl_Button kb_a {
+          label A
+          callback {this->selectedNote = 70;}
+          xywh {750 65 55 80} box FLAT_BOX color 55
+        }
+        Fl_Button kb_b {
+          label B
+          callback {this->selectedNote = 72;}
+          xywh {810 65 55 80} box FLAT_BOX color 55
+        }
+        Fl_Button kb_cs {
+          label {C\#}
+          callback {this->selectedNote = 61;}
+          xywh {475 10 55 50} box FLAT_BOX color 32 labelcolor 55
+        }
+        Fl_Button kb_ds {
+          label {D\#}
+          callback {this->selectedNote = 63;}
+          xywh {535 10 55 50} box FLAT_BOX color 32 labelcolor 55
+        }
+        Fl_Button kb_fs {
+          label {F\#}
+          callback {this->selectedNote = 67;}
+          xywh {655 10 55 50} box FLAT_BOX color 32 labelcolor 55
+        }
+        Fl_Button kb_gs {
+          label {G\#}
+          callback {this->selectedNote = 69;}
+          xywh {715 10 55 50} box FLAT_BOX color 32 labelcolor 55
+        }
+        Fl_Button kb_as {
+          label {A\#}
+          callback {this->selectedNote = 71;}
+          xywh {775 10 55 50} box FLAT_BOX color 32 labelcolor 55
+        }
+        Fl_Dial velocity {
+          label Velocity
+          xywh {885 10 60 60}
+          class WidgetPDial
+        }
+        Fl_Button {} {
+          label Save
+          callback {disable_keyboard();
+this->seq->setStep(this->selectedStep, this->selectedNote, velocity->value());
+this->update_leds();} selected
+          xywh {875 120 80 25}
+        }
+        Fl_Box step_lbl {
+          label 0
+          xywh {835 10 25 25}
+        }
+        Fl_Button {} {
+          label Clear
+          callback {disable_keyboard();
+this->seq->clearStep(this->selectedStep);}
+          xywh {875 90 80 25}
+        }
+      }
+      Fl_Box ledstate01 {
+        xywh {25 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate02 {
+        xywh {85 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate03 {
+        xywh {145 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate04 {
+        xywh {205 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate05 {
+        xywh {265 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate06 {
+        xywh {325 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate07 {
+        xywh {385 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate08 {
+        xywh {445 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate09 {
+        xywh {505 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate10 {
+        xywh {565 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate11 {
+        xywh {625 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate12 {
+        xywh {685 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate13 {
+        xywh {745 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate14 {
+        xywh {805 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate15 {
+        xywh {865 190 15 15} box OVAL_BOX color 59
+      }
+      Fl_Box ledstate16 {
+        xywh {925 190 15 15} box OVAL_BOX color 59
       }
     }
   }
-  Function {SequencerUI(Sequencer* seq_)} {open
-  } {
+  Function {SequencerUI(Sequencer* seq_)} {} {
     code {seq=seq_;} {}
     code {make_window();} {}
   }
-  decl {Sequencer* seq;} {private local
-  }
-  Function {show()} {open return_type void
+  Function {show()} {return_type void
   } {
     code {sequencerwindow->show();
 Fl::add_timeout(1.0/18.0,tick,this);} {}
   }
-  Function {tick(void* v)} {open return_type {static void}
+  Function {tick(void* v)} {return_type {static void}
   } {
     code {update_leds((SequencerUI*)v);
 Fl::repeat_timeout(1.0/18.0,tick,v);//18 fps} {}
   }
-  Function {update_leds(SequencerUI* sequi_)} {open return_type {static void}
+  Function {update_leds(SequencerUI* sequi_)} {return_type {static void}
   } {
     code {int step = sequi_->seq->currentStep();
 
@@ -186,5 +340,40 @@ Fl::repeat_timeout(1.0/18.0,tick,v);//18 fps} {}
   sequi_->led16->color(step % 16 == 15 ?FL_GREEN : FL_DARK_GREEN);
 
 sequi_->sequencerwindow->redraw();} {}
+  }
+  decl {Sequencer* seq;} {private local
+  }
+  Function {enable_keyboard(const char* step)} {open return_type void
+  } {
+    code {keyboard->activate();
+step_lbl->label(step);
+this->selectedStep = atoi(step);} {}
+  }
+  Function {disable_keyboard()} {open return_type void
+  } {
+    code {keyboard->deactivate();} {}
+  }
+  Function {update_leds()} {open return_type void
+  } {
+    code {this->ledstate01->color(seq->isStepOn(0) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate02->color(seq->isStepOn(1) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate03->color(seq->isStepOn(2) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate04->color(seq->isStepOn(3) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate05->color(seq->isStepOn(4) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate06->color(seq->isStepOn(5) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate07->color(seq->isStepOn(6) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate08->color(seq->isStepOn(7) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate09->color(seq->isStepOn(8) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate10->color(seq->isStepOn(9) ? FL_GREEN : FL_DARK_GREEN);
+  this->ledstate11->color(seq->isStepOn(10) ?FL_GREEN : FL_DARK_GREEN);
+  this->ledstate12->color(seq->isStepOn(11) ?FL_GREEN : FL_DARK_GREEN);
+  this->ledstate13->color(seq->isStepOn(12) ?FL_GREEN : FL_DARK_GREEN);
+  this->ledstate14->color(seq->isStepOn(13) ?FL_GREEN : FL_DARK_GREEN);
+  this->ledstate15->color(seq->isStepOn(14) ?FL_GREEN : FL_DARK_GREEN);
+  this->ledstate16->color(seq->isStepOn(15) ?FL_GREEN : FL_DARK_GREEN);} {}
+  }
+  decl {int selectedStep;} {private local
+  }
+  decl {int selectedNote;} {private local
   }
 }

@@ -59,6 +59,7 @@ add_executable(app
     ${app_HDRS}
     ${UI_objs}
     ${app_FLTK_UI_SRCS}
+    ${UI_fl_files}
     ui/NioUI.cpp
     ui/WidgetPDial.cpp
 	)

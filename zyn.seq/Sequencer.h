@@ -22,6 +22,7 @@ class Sequencer
     std::mutex _changePlayingState;
 
     int _currentStep;
+    int _prevStep;
     double _currentStepTime;
     std::mutex _changeCurrentStep;
 
@@ -47,6 +48,10 @@ public:
     void Pause();
     void Stop();
     void Quit();
+
+    void setStep(int step, int note, double velocity);
+    void clearStep(int step);
+    bool isStepOn(int step);
 };
 
 #endif // SEQUENCER_H
