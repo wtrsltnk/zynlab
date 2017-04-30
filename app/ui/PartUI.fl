@@ -49,21 +49,18 @@ class PartSysEffSend {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window syseffsend {open selected
-      private xywh {589 129 25 35} type Double box NO_BOX
+      private xywh {505 129 35 25} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Dial {} {
         label 01
         callback {master->setPsysefxvol(npart,neff,(int) o->value());}
-        xywh {0 0 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 130 maximum 127 step 1
+        xywh {10 0 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 132 maximum 127 step 1
         code0 {o->size(25,25);}
         code1 {o->value(master->Psysefxvol[neff][npart]);}
         code2 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
         class WidgetPDial
       }
-      Fl_Group {} {open
-        xywh {25 25 125 75}
-      } {}
     }
   }
   Function {PartSysEffSend(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
@@ -288,8 +285,8 @@ class PartUI {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partgroup {
-      private xywh {973 494 385 180} type Double box NO_BOX
-      class Fl_Group visible
+      private xywh {973 494 385 180} type Double box NO_BOX hide
+      class Fl_Group
     } {
       Fl_Group partgroupui {open
         xywh {0 0 385 180}

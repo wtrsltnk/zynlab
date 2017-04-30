@@ -329,82 +329,55 @@ class Panellistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {open
-      private xywh {882 254 379 464} type Double box NO_BOX color 51
+      private xywh {932 250 379 464} type Double box NO_BOX color 51
       class Fl_Group visible
     } {
       Fl_Group panellistitemgroup {open
-        private xywh {0 20 70 425} box UP_BOX
+        private xywh {0 20 70 400} box UP_BOX
         code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
         code1 {set_module_parameters( o );}
       } {
-        Fl_Group {} {
-          xywh {45 245 15 120} box ENGRAVED_FRAME
+        Fl_Group {} {open
+          xywh {45 215 15 174} box ENGRAVED_FRAME
         } {
           Fl_Box {} {
             label {V U}
-            xywh {45 255 15 110} box FLAT_BOX color 0 selection_color 75 labelcolor 55 align 128
+            xywh {45 215 15 174} box FLAT_BOX color 0 selection_color 75 labelcolor 55 align 128
             code0 {o->init(master,npart);}
             class VUMeter
           }
         }
         Fl_Button partname {
-          label {  }
+          label defaults
           callback {if ((int)bankui->cbwig->value()!=(npart+1)){
    bankui->cbwig->value(npart+1);
    bankui->cbwig->do_callback();
 };
-bankui->show();}
-          xywh {5 27 60 23} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
+bankui->show();} selected
+          xywh {5 43 60 26} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
         }
         Fl_Slider partvolume {
           callback {master->part[npart]->setPvolume((int) o->value());}
-          tooltip {Part volume} xywh {10 255 30 110} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
+          tooltip {Part volume} xywh {10 215 30 174} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
           code0 {o->value(master->part[npart]->Pvolume);}
         }
         Fl_Dial partpanning {
           callback {master->part[npart]->setPpanning((int) o->value());}
-          tooltip {Part panning} xywh {20 370 30 30} maximum 127 step 1
+          tooltip {Part panning} xywh {25 392 20 22} maximum 127 step 1
           code0 {o->value(master->part[npart]->Ppanning);}
           class WidgetPDial
         }
-        Fl_Button {} {
-          label edit
-          callback {if ((int)bankui->cbwig->value()!=(npart+1)){
-   bankui->cbwig->value(npart+1);
-   bankui->cbwig->do_callback();
-};}
-          xywh {15 420 40 20} labelsize 10
-        }
         Fl_Choice partrcv {
           callback {master->part[npart]->Prcvchn=(int) o->value();} open
-          tooltip {receive from Midi channel} xywh {10 400 50 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          tooltip {receive from Midi channel} xywh {5 25 60 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
           code1 {o->value(master->part[npart]->Prcvchn);}
         } {}
-        Fl_Group {} {
-          label Velocity open
-          xywh {5 210 60 40} box BORDER_BOX
-        } {
-          Fl_Dial partveloffs {
-            label {Ofs.}
-            callback {master->part[npart]->Pveloffs=(int) o->value();}
-            tooltip {Velocity Offset} xywh {40 215 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-            code0 {o->value(master->part[npart]->Pveloffs);}
-            class WidgetPDial
-          }
-          Fl_Dial partvelsns {
-            label {Sns.}
-            callback {master->part[npart]->Pvelsns=(int) o->value();}
-            tooltip {Velocity Sensing Function} xywh {10 215 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-            code0 {o->value(master->part[npart]->Pvelsns);}
-            class WidgetPDial
-          }
-        }
         Fl_Pack {} {
-          label Sends open selected
-          xywh {20 65 25 130}
+          label Sends open
+          xywh {5 85 60 125} color 41
           code0 {o->spacing(5);}
-          code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,25,35,"");psyef[i]->init(master,npart,i);}}
+          code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,35,25,"");psyef[i]->init(master,npart,i);}}
         } {}
       }
       Fl_Check_Button partenabled {
@@ -454,8 +427,6 @@ if (master->part[npart]->Penabled!=0) panellistitemgroup->activate();
 partvolume->value(master->part[npart]->Pvolume);
 partpanning->value(master->part[npart]->Ppanning);
 partrcv->value(master->part[npart]->Prcvchn);
-partveloffs->value((master->part[npart]->Pveloffs));
-partvelsns->value((master->part[npart]->Pvelsns));
 
 partname->label((char *)master->part[npart]->Pname);
 
