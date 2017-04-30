@@ -1,53 +1,55 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+}
 
-decl {//License: GNU GPL version 2 or later} {} 
+decl {//License: GNU GPL version 2 or later} {private local
+}
 
-decl {\#include <stdlib.h>} {public
-} 
+decl {\#include <stdlib.h>} {public local
+}
 
-decl {\#include <stdio.h>} {public
-} 
+decl {\#include <stdio.h>} {public local
+}
 
-decl {\#include <string.h>} {public
-} 
+decl {\#include <string.h>} {public local
+}
 
-decl {\#include "WidgetPDial.h"} {public
-} 
+decl {\#include "WidgetPDial.h"} {public local
+}
 
-decl {\#include "EffUI.h"} {public
-} 
+decl {\#include "EffUI.h"} {public local
+}
 
-decl {\#include "BankUI.h"} {public
-} 
+decl {\#include "BankUI.h"} {public local
+}
 
-decl {\#include "ADnoteUI.h"} {public
-} 
+decl {\#include "ADnoteUI.h"} {public local
+}
 
-decl {\#include "SUBnoteUI.h"} {public
-} 
+decl {\#include "SUBnoteUI.h"} {public local
+}
 
-decl {\#include "PADnoteUI.h"} {public
-} 
+decl {\#include "PADnoteUI.h"} {public local
+}
 
-decl {\#include "zyn.common/Config.h"} {public
-} 
+decl {\#include "zyn.common/Config.h"} {public local
+}
 
-decl {\#include "zyn.mixer/Mixer.h"} {public
-} 
+decl {\#include "zyn.mixer/Mixer.h"} {public local
+}
 
-decl {\#include "zyn.mixer/Instrument.h"} {public
-} 
+decl {\#include "zyn.mixer/Instrument.h"} {public local
+}
 
 class PartSysEffSend {open : {public Fl_Group}
 } {
   Function {make_window()} {open private
   } {
-    Fl_Window syseffsend {
-      private xywh {589 129 100 100} type Double box NO_BOX
+    Fl_Window syseffsend {open selected
+      private xywh {589 129 25 35} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Dial {} {
@@ -59,6 +61,9 @@ class PartSysEffSend {open : {public Fl_Group}
         code2 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
         class WidgetPDial
       }
+      Fl_Group {} {open
+        xywh {25 25 125 75}
+      } {}
     }
   }
   Function {PartSysEffSend(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
@@ -66,7 +71,8 @@ class PartSysEffSend {open : {public Fl_Group}
 neff=0;
 npart=0;} {}
   }
-  Function {init(Mixer *master_,int npart_,int neff_)} {} {
+  Function {init(Mixer *master_,int npart_,int neff_)} {open
+  } {
     code {npart=npart_;
 neff=neff_;
 master=master_;
@@ -78,18 +84,21 @@ end();} {}
     code {syseffsend->hide();
 //delete(syseffsend);} {}
   }
-  decl {Mixer *master;} {}
-  decl {int neff;} {}
-  decl {int npart;} {}
-} 
+  decl {Mixer *master;} {private local
+  }
+  decl {int neff;} {private local
+  }
+  decl {int npart;} {private local
+  }
+}
 
-class PartKitItem {open : {public Fl_Group}
+class PartKitItem {: {public Fl_Group}
 } {
   Function {make_window()} {open private
   } {
     Fl_Window partkititem {
-      private xywh {473 406 670 100} type Double box NO_BOX
-      class Fl_Group visible
+      private xywh {573 360 670 100} type Double box NO_BOX hide
+      class Fl_Group
     } {
       Fl_Group partkititemgroup {
         private xywh {55 0 605 20}
@@ -262,19 +271,24 @@ end();} {}
     code {partkititem->hide();
 //delete(partkititem);} {}
   }
-  decl {Instrument *part;} {}
-  decl {int n;} {}
-  decl {Mixer *master;} {}
-  decl {char label[10];} {}
-  decl {class PartUI *partui;} {}
-} 
+  decl {Instrument *part;} {private local
+  }
+  decl {int n;} {private local
+  }
+  decl {Mixer *master;} {private local
+  }
+  decl {char label[10];} {private local
+  }
+  decl {class PartUI *partui;} {private local
+  }
+}
 
 class PartUI {open : {public Fl_Group}
 } {
   Function {make_window()} {open private
   } {
-    Fl_Window partgroup {open
-      private xywh {688 264 385 180} type Double box NO_BOX
+    Fl_Window partgroup {
+      private xywh {973 494 385 180} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group partgroupui {open
@@ -451,8 +465,8 @@ if (part->Penabled==0) partgroupui->deactivate();
       }
     }
     Fl_Window ctlwindow {
-      label Controllers open
-      private xywh {777 261 500 130} type Double box NO_BOX visible
+      label Controllers
+      private xywh {821 210 500 130} type Double box NO_BOX hide
     } {
       Fl_Check_Button {} {
         label Expr
@@ -634,8 +648,8 @@ else {propta->deactivate();proptb->deactivate();}}
       }
     }
     Fl_Window partfx {
-      label {Part's Insert Effects} selected
-      private xywh {554 660 390 145} type Double box NO_BOX visible
+      label {Part's Insert Effects}
+      private xywh {554 660 390 145} type Double box NO_BOX hide
     } {
       Fl_Counter inseffnocounter {
         label {FX No.}
@@ -755,8 +769,8 @@ pthread_mutex_unlock(&master->mutex);}
       }
     }
     Fl_Window instrumentkitlist {
-      label {Instrument Kit} open
-      xywh {586 566 670 370} type Double box NO_BOX visible
+      label {Instrument Kit}
+      xywh {586 486 670 370} type Double box NO_BOX hide
     } {
       Fl_Button {} {
         label {Close Window}
@@ -836,8 +850,8 @@ if (part->Pkitmode==0) {
       }
     }
     Fl_Window instrumenteditwindow {
-      label {Instrument Edit} open
-      xywh {247 621 395 360} type Double box NO_BOX visible
+      label {Instrument Edit}
+      xywh {893 275 395 360} type Double box NO_BOX hide
     } {
       Fl_Group {} {
         xywh {0 220 395 110} box UP_FRAME
@@ -858,7 +872,7 @@ if (part->Pkitmode==0) {
 part->kit[0].Ppadenabled=x;
 if (x==0) padeditbutton->deactivate();
      else padeditbutton->activate();}
-            tooltip {enable/disable PADsynth} xywh {215 255 80 20} box UP_BOX down_box DOWN_BOX color 51 selection_color 0 labelfont 1 labelsize 11
+            tooltip {enable/disable PADsynth} xywh {215 255 80 20} box UP_BOX down_box DOWN_BOX color 51 labelfont 1 labelsize 11
             code1 {o->value(part->kit[0].Ppadenabled);}
           }
         }
@@ -872,7 +886,7 @@ if (x==0) padeditbutton->deactivate();
 part->kit[0].Padenabled=x;
 if (x==0) adeditbutton->deactivate();
      else adeditbutton->activate();}
-            tooltip {enable/disable ADsynth} xywh {15 255 80 20} box UP_BOX down_box DOWN_BOX color 51 selection_color 0 labelfont 1 labelsize 11
+            tooltip {enable/disable ADsynth} xywh {15 255 80 20} box UP_BOX down_box DOWN_BOX color 51 labelfont 1 labelsize 11
             code1 {o->value(part->kit[0].Padenabled);}
           }
           Fl_Button adeditbutton {
@@ -892,7 +906,7 @@ if (x==0) adeditbutton->deactivate();
 part->kit[0].Psubenabled=x;
 if (x==0) subeditbutton->deactivate();
      else subeditbutton->activate();}
-            tooltip {enable/disable SUBsynth} xywh {115 255 80 20} box UP_BOX down_box DOWN_BOX color 51 selection_color 0 labelfont 1 labelsize 11
+            tooltip {enable/disable SUBsynth} xywh {115 255 80 20} box UP_BOX down_box DOWN_BOX color 51 labelfont 1 labelsize 11
             code1 {o->value(part->kit[0].Psubenabled);}
           }
           Fl_Button subeditbutton {
@@ -1013,14 +1027,16 @@ if (x==0) subeditbutton->deactivate();
       }
     }
   }
-  Function {PartUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+  Function {PartUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {open
+  } {
     code {part=NULL;
 adnoteui=NULL;
 subnoteui=NULL;
 padnoteui=NULL;
 lastkititem=-1;} {}
   }
-  Function {init(Instrument *part_,Mixer *master_,int npart_,BankUI *bankui_)} {} {
+  Function {init(Instrument *part_,Mixer *master_,int npart_,BankUI *bankui_)} {open
+  } {
     code {bankui=bankui_;
 part=part_;
 npart=npart_;
@@ -1028,11 +1044,6 @@ master=master_;
 ninseff=0;
 
 make_window();
-\#ifdef NTK_GUI
-adsynenabledcheck->selection_color(55);
-subsynenabledcheck->selection_color(55);
-padsynenabledcheck->selection_color(55);
-\#endif
 partgroup->position(this->parent()->x()+2,this->parent()->y()+2);
 partgroup->show();
 end();
@@ -1058,7 +1069,8 @@ while (klimits[k]!=0){
 if (val==-1) val=k;
 keylimitlist->value(val);} {}
   }
-  Function {showparameters(int kititem,int engine)} {} {
+  Function {showparameters(int kititem,int engine)} {open
+  } {
     code {if (engine==-1){//this is used if I want to clear the engine from the part
    if (kititem==lastkititem) kititem=-1;
          else kititem=lastkititem;
@@ -1111,15 +1123,26 @@ delete(instrumentkitlist);
 instrumenteditwindow->hide();
 delete(instrumenteditwindow);} {}
   }
-  decl {Instrument *part;} {}
-  decl {Mixer *master;} {}
-  decl {BankUI *bankui;} {}
-  decl {ADnoteUI *adnoteui;} {}
-  decl {SUBnoteUI *subnoteui;} {}
-  decl {PADnoteUI *padnoteui;} {}
-  decl {PartSysEffSend *psyef[NUM_SYS_EFX];} {}
-  decl {int npart;} {}
-  decl {int ninseff;} {}
-  decl {int lastkititem;} {}
-  decl {PartKitItem *partkititem[NUM_KIT_ITEMS];} {}
-} 
+  decl {Instrument *part;} {private local
+  }
+  decl {Mixer *master;} {private local
+  }
+  decl {BankUI *bankui;} {private local
+  }
+  decl {ADnoteUI *adnoteui;} {private local
+  }
+  decl {SUBnoteUI *subnoteui;} {private local
+  }
+  decl {PADnoteUI *padnoteui;} {private local
+  }
+  decl {PartSysEffSend *psyef[NUM_SYS_EFX];} {private local
+  }
+  decl {int npart;} {private local
+  }
+  decl {int ninseff;} {private local
+  }
+  decl {int lastkititem;} {private local
+  }
+  decl {PartKitItem *partkititem[NUM_KIT_ITEMS];} {private local
+  }
+}
