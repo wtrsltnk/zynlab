@@ -11,13 +11,35 @@
 //Nio System
 #include "zyn.nio/Nio.h"
 
+#include "scenenode.h"
+
 static Mixer* mixer;
 extern SYNTH_T* synth;
 
-void KeyActionCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void ResizeCallback(GLFWwindow* window, int width, int height);
-bool SetUp();
-void Render();
-void CleanUp();
+class AppThreeDee
+{
+private:
+    GLFWwindow* _window;
+
+public:
+    static void KeyActionCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void ResizeCallback(GLFWwindow* window, int width, int height);
+
+protected:
+    int _display_w, _display_h;
+    SceneNode _root;
+
+    void onKeyAction(int key, int scancode, int action, int mods);
+    void onResize(int width, int height);
+
+public:
+    AppThreeDee(GLFWwindow* window);
+    virtual ~AppThreeDee();
+
+    bool SetUp();
+    void Render();
+    void CleanUp();
+
+};
 
 #endif // _APP_THREE_DEE_H_

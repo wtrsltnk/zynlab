@@ -4,24 +4,50 @@
 
 SYNTH_T* synth;
 
-int display_w, display_h;
-
-void KeyActionCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{ }
-
-void ResizeCallback(GLFWwindow* window, int width, int height)
+AppThreeDee::AppThreeDee(GLFWwindow* window)
+    : _window(window)
 {
-    glViewport(0, 0, width, height);
-    display_w = width;
-    display_h = height;
+    glfwSetWindowUserPointer(this->_window, static_cast<void*>(this));
 }
 
-bool SetUp()
+AppThreeDee::~AppThreeDee()
 {
+    glfwSetWindowUserPointer(this->_window, nullptr);
+}
+
+void AppThreeDee::KeyActionCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    auto app = static_cast<AppThreeDee*>(glfwGetWindowUserPointer(window));
+
+    if (app != nullptr) app->onKeyAction(key, scancode, action, mods);
+}
+
+void AppThreeDee::ResizeCallback(GLFWwindow* window, int width, int height)
+{
+    auto app = static_cast<AppThreeDee*>(glfwGetWindowUserPointer(window));
+
+    if (app != nullptr) app->onResize(width, height);
+}
+
+void AppThreeDee::onKeyAction(int key, int scancode, int action, int mods)
+{ }
+
+void AppThreeDee::onResize(int width, int height)
+{
+    this->_display_w = width;
+    this->_display_h = height;
+
+    glViewport(0, 0, width, height);
+}
+
+bool AppThreeDee::SetUp()
+{
+    SceneNode::Setup();
+
     return true;
 }
 
-void Render()
+void AppThreeDee::Render()
 {
     bool show_test_window = true;
     bool show_another_window = false;
@@ -42,11 +68,11 @@ void Render()
     }
 
     // Rendering
-    glViewport(0, 0, display_w, display_h);
+    glViewport(0, 0, this->_display_w, this->_display_h);
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui::Render();
 }
 
-void CleanUp()
+void AppThreeDee::CleanUp()
 { }

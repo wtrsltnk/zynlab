@@ -6,7 +6,6 @@
 #include <imgui.h>
 #include "imgui_impl_glfw_gl3.h"
 
-
 #include "app.threedee.h"
 
 using namespace std;
@@ -81,27 +80,33 @@ int main(int argc, char *argv[])
     if (!Nio::start(mixer))
         return -1;
 
+    Nio::setSink("PA");
+
+    mixer->NoteOn(0, 60, 200);
+
     if (glfwInit() == GLFW_FALSE)
         return -1;
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "zyn", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "zynlab", NULL, NULL);
     if (window == 0)
     {
         glfwTerminate();
         return -1;
     }
 
+    AppThreeDee app(window);
+
     // Setup ImGui binding
     ImGui_ImplGlfwGL3_Init(window, true);
 
-    glfwSetKeyCallback(window, KeyActionCallback);
-    glfwSetFramebufferSizeCallback(window, ResizeCallback);
+    glfwSetKeyCallback(window, AppThreeDee::KeyActionCallback);
+    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
 
     glfwMakeContextCurrent(window);
 
     glExtLoadAll((PFNGLGETPROC*)glfwGetProcAddress);
 
-    if (SetUp())
+    if (app.SetUp())
     {
         while (glfwWindowShouldClose(window) == 0)
         {
@@ -109,12 +114,12 @@ int main(int argc, char *argv[])
 
             glClear(GL_COLOR_BUFFER_BIT);
 
-            Render();
+            app.Render();
 
             glfwSwapBuffers(window);
 
         }
-        CleanUp();
+        app.CleanUp();
     }
 
     glfwTerminate();

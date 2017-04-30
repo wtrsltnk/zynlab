@@ -5,18 +5,22 @@ project(app.threedee)
 find_package(GLFW3)
 if(GLFW3_FOUND)
     find_package(OpenGL REQUIRED)
+    find_package(GLM REQUIRED)
 
     include_directories(
         imgui
+        ${GLM_INCLUDE_DIRS}
         )
 
     set(app_threedee_SRCS
         main.cpp
         app.threedee.cpp
+        scenenode.cpp
         )
 
     set(app_threedee_HDRS
         app.threedee.h
+        scenenode.h
         )
 
     set(app_threedee_imgui_SRCS
@@ -42,4 +46,12 @@ if(GLFW3_FOUND)
         zyn.dsp
         zyn.common
         )
+
+    target_compile_features(app.threedee
+        PRIVATE cxx_auto_type
+        PRIVATE cxx_nullptr
+        PRIVATE cxx_range_for
+        PRIVATE cxx_thread_local
+        )
+
 endif(GLFW3_FOUND)
