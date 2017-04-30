@@ -70,6 +70,7 @@ int Sequencer::currentStep()
 
 void Sequencer::doStep()
 {
+    this->_mixer->Lock();
     for (SequencerStrip* strip : this->_channels)
     {
         auto prev = strip->_steps.find(this->_prevStep % 16);
@@ -81,9 +82,10 @@ void Sequencer::doStep()
         auto curr = strip->_steps.find(this->_currentStep % 16);
         if (curr != strip->_steps.end())
         {
-            this->_mixer->NoteOn(strip->_targetMixerChannel, curr->second._note, curr->second._velocity);
+            this->_mixer->NoteOn(strip->_targetMixerChannel, curr->second._note, int(curr->second._velocity));
         }
     }
+    this->_mixer->Unlock();
 }
 
 void Sequencer::setBpm(int bpm)

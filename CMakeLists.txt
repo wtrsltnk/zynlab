@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(zyn)
+project(zynlab)
 
 option(BUILD_VST "enable building all projects using VST" OFF)
 

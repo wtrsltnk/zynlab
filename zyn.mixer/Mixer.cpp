@@ -138,7 +138,6 @@ void Mixer::Unlock()
  */
 void Mixer::NoteOn(char chan, char note, char velocity)
 {
-    std::cout << "Channel: " << int(chan) << ", Note: " << int(note) << ", Velocity: " << int(velocity) << std::endl;
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
             if(chan == part[npart]->Prcvchn) {
