@@ -1,61 +1,61 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+}
 
-decl {//License: GNU GPL version 2 or later} {} 
+decl {//License: GNU GPL version 2 or later} {private local
+}
 
-decl {\#include <stdlib.h>} {public
-} 
+decl {\#include <stdlib.h>} {public local
+}
 
-decl {\#include <stdio.h>} {public
-} 
+decl {\#include <stdio.h>} {public local
+}
 
-decl {\#include <string.h>} {public
-} 
+decl {\#include <string.h>} {public local
+}
 
-decl {\#include <FL/Fl_Button.H>} {public
-} 
+decl {\#include <FL/Fl_Button.H>} {public local
+}
 
-decl {\#include <FL/Fl_File_Chooser.H>} {public
-} 
+decl {\#include <FL/Fl_File_Chooser.H>} {public local
+}
 
-decl {\#include "zyn.mixer/Mixer.h"} {public
-} 
+decl {\#include "zyn.mixer/Mixer.h"} {public local
+}
 
-decl {\#include "zyn.mixer/Instrument.h"} {public
-} 
+decl {\#include "zyn.mixer/Instrument.h"} {public local
+}
 
-decl {\#include "zyn.mixer/Bank.h"} {public
-} 
+decl {\#include "zyn.mixer/Bank.h"} {public local
+}
 
-decl {\#include "zyn.common/Config.h"} {public
-} 
+decl {\#include "zyn.common/Config.h"} {public local
+}
 
-decl {\#include "zyn.common/Util.h"} {public
-} 
+decl {\#include "zyn.common/Util.h"} {public local
+}
 
 class BankProcess_ {} {
-  Function {process()} {open return_type {virtual void}
+  Function {process()} {return_type {virtual void}
   } {
     code {;} {}
   }
-  decl {Bank *bank;} {public
+  decl {Bank *bank;} {public local
   }
-} 
+}
 
-class BankSlot {open : {public Fl_Button,BankProcess_}
+class BankSlot {: {public Fl_Button,BankProcess_}
 } {
-  Function {BankSlot(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label)} {open
-  } {
+  Function {BankSlot(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label)} {} {
     code {what=NULL;
 whatslot=NULL;
 nslot=0;
-nselected=NULL;} {selected
-    }
+nselected=NULL;} {}
   }
-  Function {handle(int event)} {return_type int
+  Function {handle(int event)} {open return_type int
   } {
     code {if (what==NULL) return(0);
 if (Fl::event_inside(this)){
@@ -69,7 +69,8 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_,int *nselected_)} {} {
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_,int *nselected_)} {open
+  } {
     code {nslot=nslot_;
 what=what_;
 whatslot=whatslot_;
@@ -85,7 +86,8 @@ align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
 highlight=0;
 refresh();} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {if (bank->emptyslot(nslot))
     color(46);
 else if (bank->isPADsynth_used(nslot)) 
@@ -100,90 +102,95 @@ if (*nselected==nslot)
 
 copy_label(bank->getnamenumbered(nslot).c_str());} {}
   }
-  decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
-  decl {void (BankProcess_:: *fnc)(void);} {}
-  decl {BankProcess_ *bp;} {}
-} 
+  decl {int *what,*whatslot,nslot,highlight, *nselected;} {private local
+  }
+  decl {void (BankProcess_:: *fnc)(void);} {private local
+  }
+  decl {BankProcess_ *bp;} {private local
+  }
+}
 
 class BankUI {open : {public BankProcess_}
 } {
   Function {make_window()} {open
   } {
     Fl_Window bankuiwindow {
-      label Bank
-      xywh {492 406 785 575} type Double
+      label Bank open
+      xywh {564 105 803 671} type Double
       code0 {o->label(bank->bankfiletitle.c_str());}
       code1 {if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");} visible
     } {
-      Fl_Button {} {
-        label Close
-        callback {bankuiwindow->hide();}
-        xywh {705 546 70 24} box THIN_UP_BOX
-      }
-      Fl_Group {} {
-        xywh {5 34 772 491} box ENGRAVED_FRAME
+      Fl_Tabs {} {open
+        xywh {5 10 790 600}
       } {
-        Fl_Pack {} {
-          xywh {10 39 150 481} box BORDER_FRAME
-          code0 {o->box(FL_NO_BOX);}
-          code1 {for (int i=0;i<32;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
-        } {}
-        Fl_Pack {} {
-          xywh {163 39 150 481} box BORDER_FRAME
-          code0 {o->box(FL_NO_BOX);}
-          code1 {for (int i=32;i<64;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
-        } {}
-        Fl_Pack {} {
-          xywh {316 39 150 481} box BORDER_FRAME
-          code0 {o->box(FL_NO_BOX);}
-          code1 {for (int i=64;i<96;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
-        } {}
-        Fl_Pack {} {
-          xywh {469 39 150 481} box BORDER_FRAME
-          code0 {o->box(FL_NO_BOX);}
-          code1 {for (int i=96;i<128;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
-        } {}
-        Fl_Pack {} {
-          xywh {622 39 150 481} box BORDER_FRAME
-          code0 {o->box(FL_NO_BOX);}
-          code1 {for (int i=128;i<160;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
-        } {}
-      }
-      Fl_Group modeselect {
-        xywh {5 528 425 42} box ENGRAVED_BOX
-      } {
-        Fl_Check_Button writebutton {
-          label WRITE
-          callback {if (o->value()>0.5) mode=2;
+        Fl_Group {} {
+          label Banks open
+          xywh {5 28 790 582} box ENGRAVED_BOX hide
+        } {
+          Fl_Group {} {
+            xywh {15 65 772 490} box ENGRAVED_FRAME
+          } {
+            Fl_Pack {} {
+              xywh {20 70 150 485} box BORDER_FRAME
+              code0 {o->box(FL_NO_BOX);}
+              code1 {for (int i=0;i<32;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
+            } {}
+            Fl_Pack {} {
+              xywh {173 70 150 485} box BORDER_FRAME
+              code0 {o->box(FL_NO_BOX);}
+              code1 {for (int i=32;i<64;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
+            } {}
+            Fl_Pack {} {
+              xywh {326 70 150 485} box BORDER_FRAME
+              code0 {o->box(FL_NO_BOX);}
+              code1 {for (int i=64;i<96;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
+            } {}
+            Fl_Pack {} {
+              xywh {479 70 150 485} box BORDER_FRAME
+              code0 {o->box(FL_NO_BOX);}
+              code1 {for (int i=96;i<128;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
+            } {}
+            Fl_Pack {} {
+              xywh {632 70 150 485} box BORDER_FRAME
+              code0 {o->box(FL_NO_BOX);}
+              code1 {for (int i=128;i<160;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank,&nselected);};}
+            } {}
+          }
+          Fl_Group modeselect {
+            xywh {15 556 425 47} box ENGRAVED_BOX
+          } {
+            Fl_Check_Button writebutton {
+              label WRITE
+              callback {if (o->value()>0.5) mode=2;
 removeselection();}
-          xywh {116 534 99 30} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
-          code0 {if (bank->locked()) o->deactivate();}
-        }
-        Fl_Check_Button readbutton {
-          label READ selected
-          callback {if (o->value()>0.5) mode=1;
+              xywh {126 562 99 37} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
+              code0 {if (bank->locked()) o->deactivate();}
+            }
+            Fl_Check_Button readbutton {
+              label READ
+              callback {if (o->value()>0.5) mode=1;
 removeselection();}
-          xywh {11 534 99 30} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
-          code0 {o->value(1);}
-        }
-        Fl_Check_Button clearbutton {
-          label CLEAR
-          callback {if (o->value()>0.5) mode=3;
+              xywh {21 562 99 37} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
+              code0 {o->value(1);}
+            }
+            Fl_Check_Button clearbutton {
+              label CLEAR
+              callback {if (o->value()>0.5) mode=3;
 removeselection();}
-          xywh {221 534 99 30} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
-          code0 {if (bank->locked()) o->deactivate();}
-        }
-        Fl_Check_Button swapbutton {
-          label SWAP
-          callback {if (o->value()>0.5) mode=4;
+              xywh {231 562 99 37} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
+              code0 {if (bank->locked()) o->deactivate();}
+            }
+            Fl_Check_Button swapbutton {
+              label SWAP
+              callback {if (o->value()>0.5) mode=4;
 removeselection();}
-          xywh {325 534 99 30} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
-          code0 {if (bank->locked()) o->deactivate();}
-        }
-      }
-      Fl_Button {} {
-        label {New Bank...}
-        callback {const char *dirname;
+              xywh {335 562 99 37} type Radio box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 13
+              code0 {if (bank->locked()) o->deactivate();}
+            }
+          }
+          Fl_Button {} {
+            label {New Bank...}
+            callback {const char *dirname;
 
 dirname=fl_input("New empty Bank:");
 if (dirname==NULL) return;
@@ -194,37 +201,71 @@ int result=bank->newbank(dirname);
 if (result!=0) fl_alert("Error: Could not make a new bank (directory)..");
 
 refreshmainwindow();}
-        xywh {685 5 93 25} labelfont 1 labelsize 11 align 128
-      }
-      Fl_Check_Button {} {
-        label {auto close}
-        callback {config.cfg.BankUIAutoClose=(int) o->value();}
-        tooltip {automatically close the bank window if the instrument is loaded} xywh {705 529 60 15} down_box DOWN_BOX labelsize 10
-        code0 {o->value(config.cfg.BankUIAutoClose);}
-      }
-      Fl_Choice banklist {
-        callback {int n=o->value();
+            xywh {690 40 93 25} labelfont 1 labelsize 11 align 128
+          }
+          Fl_Choice banklist {
+            callback {int n=o->value();
 std::string dirname=bank->banks[n].dir;
 if (dirname.empty()) return;
 
 if (bank->loadbank(dirname)==2)
        fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());
 for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();
-refreshmainwindow();}
-        xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
-      } {}
-      Fl_Button {} {
-        label {Refresh bank list}
-        callback {rescan_for_banks();
+refreshmainwindow();} open
+            xywh {15 41 220 24} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
+          } {}
+          Fl_Button {} {
+            label {Refresh bank list}
+            callback {rescan_for_banks();
 banklist->value(0);}
-        tooltip {Refresh the bank list (rescan)} xywh {230 8 105 20} box THIN_UP_BOX color 50 labelsize 11
+            tooltip {Refresh the bank list (rescan)} xywh {240 41 105 24} box THIN_UP_BOX color 50 labelsize 11
+          }
+          Fl_Check_Button {} {
+            label {Show PADsynth status}
+            callback {config.cfg.CheckPADsynth=(int) o->value();
+refreshmainwindow();}
+            xywh {445 558 265 46} down_box DOWN_BOX labelsize 11
+            code0 {o->value(config.cfg.CheckPADsynth);}
+          }
+        }
+        Fl_Group {} {
+          label {Instrument search} open
+          xywh {5 30 790 580} box ENGRAVED_BOX
+        } {
+          Fl_Input searchFor {
+            callback {Fl::remove_timeout(BankUI::search);
+Fl::add_timeout(0.25, BankUI::search, (void*)this);}
+            xywh {30 55 385 25} when 1
+          }
+          Fl_Browser searchResult {
+            callback {for (int i = 0; i < o->size(); i++)
+{
+    if (o->selected(i))
+    {
+        Bank::banksearchstruct* sr = (Bank::banksearchstruct*)o->data(i);
+        master->bank.loadbank(sr->fullBankName);
+        pthread_mutex_lock(&master->part[*npart]->load_mutex);
+        bank->loadfromslot(sr->instrumentSlot,master->part[*npart]);
+        pthread_mutex_unlock(&master->part[*npart]->load_mutex);
+        master->part[*npart]->applyparameters();
+        break;
+    }
+};}
+            xywh {30 80 385 515} type Select when 1
+            code0 {o->column_char('\\t');}
+          }
+        }
+      }
+      Fl_Button {} {
+        label Close
+        callback {bankuiwindow->hide();}
+        xywh {720 637 75 23} box THIN_UP_BOX
       }
       Fl_Check_Button {} {
-        label {Show PADsynth status}
-        callback {config.cfg.CheckPADsynth=(int) o->value();
-refreshmainwindow();}
-        xywh {435 530 150 15} down_box DOWN_BOX labelsize 11
-        code0 {o->value(config.cfg.CheckPADsynth);}
+        label {auto close}
+        callback {config.cfg.BankUIAutoClose=(int) o->value();}
+        tooltip {automatically close the bank window if the instrument is loaded} xywh {720 613 75 26} down_box DOWN_BOX labelsize 10
+        code0 {o->value(config.cfg.BankUIAutoClose);}
       }
     }
   }
@@ -358,11 +399,29 @@ removeselection();
 if (beginnerui) modeselect->hide();
 	else modeselect->show();} {}
   }
-  decl {BankSlot *bs[BANK_SIZE];} {}
-  decl {int slot,what;//"what"=what button is pressed} {}
-  decl {int mode,*npart,nselected;} {}
-  decl {Mixer *master;} {}
-  decl {void (BankProcess_::* fnc)(void);} {}
-  decl {Fl_Valuator *cbwig;} {public
+  Function {search(void* data)} {open return_type {static void}
+  } {
+    code {auto bankUI = (BankUI*)data;
+bankUI->searchResult->clear();
+bankUI->results = bankUI->master->bank.search(bankUI->searchFor->value());
+for (const Bank::banksearchstruct& i : bankUI->results)
+{
+    bankUI->searchResult->add((i.shortBankName + " - " + i.instrumentName).c_str(), (void*)&i);
+}} {selected
+    }
   }
-} 
+  decl {BankSlot *bs[BANK_SIZE];} {private local
+  }
+  decl {int slot,what;//"what"=what button is pressed} {private local
+  }
+  decl {int mode,*npart,nselected;} {private local
+  }
+  decl {Mixer *master;} {private local
+  }
+  decl {void (BankProcess_::* fnc)(void);} {private local
+  }
+  decl {Fl_Valuator *cbwig;} {public local
+  }
+  decl {std::vector<Bank::banksearchstruct> results;} {private local
+  }
+}

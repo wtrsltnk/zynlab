@@ -34,5 +34,12 @@ target_link_libraries(zyn.mixer
     zyn.common
     )
 
+target_compile_features(zyn.mixer
+    PRIVATE cxx_auto_type
+    PRIVATE cxx_nullptr
+    PRIVATE cxx_range_for
+    PRIVATE cxx_thread_local
+    )
+
 install(FILES ${zyn_mixer_HDRS} DESTINATION include/zyn/mixer COMPONENT develop)
 install(TARGETS zyn.mixer DESTINATION lib COMPONENT develop)

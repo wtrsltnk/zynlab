@@ -68,9 +68,19 @@ class Bank
             bool operator<(const bankstruct &b) const;
             std::string dir;
             std::string name;
+            std::vector<std::string> instrumentNames;
         };
 
         std::vector<bankstruct> banks;
+
+        struct banksearchstruct {
+            std::string shortBankName;
+            std::string fullBankName;
+            int instrumentSlot;
+            std::string instrumentName;
+        };
+
+        std::vector<banksearchstruct> search(const char* searchFor);
 
     private:
 

@@ -349,6 +349,28 @@ void Bank::rescanforbanks()
         }
 }
 
+std::vector<Bank::banksearchstruct> Bank::search(const char* searchFor)
+{
+    std::vector<banksearchstruct> result;
+    std::string strSearchFor(searchFor);
+    transform(strSearchFor.begin(), strSearchFor.end(), strSearchFor.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    for (bankstruct b : this->banks)
+    {
+        for (std::string i : b.instrumentNames)
+        {
+            if (i.find(strSearchFor) != std::string::npos)
+            {
+                int slotnr = 0;
+                sscanf (i.c_str(), "%4d", &slotnr);
+                banksearchstruct sr = { b.name, b.dir, slotnr, i };
+                result.push_back(sr);
+            }
+        }
+    }
+
+    return result;
+}
 
 // private stuff
 
@@ -375,6 +397,7 @@ void Bank::scanrootdir(string rootdir)
 
         bank.dir  = rootdir + separator + dirname + '/';
         bank.name = dirname;
+        bank.instrumentNames.clear();
         //find out if the directory contains at least 1 instrument
         bool isbank = false;
 
@@ -388,7 +411,9 @@ void Bank::scanrootdir(string rootdir)
             if((strstr(fname->d_name, INSTRUMENT_EXTENSION) != NULL)
                || (strstr(fname->d_name, FORCE_BANK_DIR_FILE) != NULL)) {
                 isbank = true;
-                break; //could put a #instrument counter here instead
+                std::string name(fname->d_name);
+                transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
+                bank.instrumentNames.push_back(name);
             }
         }
 

@@ -17,7 +17,7 @@ if(FltkGui)
 		ui/PADnoteUI.fl
 		ui/PartUI.fl
 		ui/PresetsUI.fl
-		ui/ResonanceUI.fl
+        ui/ResonanceUI.fl
         ui/SUBnoteUI.fl
         ui/VirKeyboard.fl
         ui/SequencerUI.fl
