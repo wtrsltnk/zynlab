@@ -353,7 +353,7 @@ class Panellistitem {open : {public Fl_Group}
    bankui->cbwig->value(npart+1);
    bankui->cbwig->do_callback();
 };
-bankui->show();} selected
+bankui->show();}
           xywh {5 43 60 26} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
         }
         Fl_Slider partvolume {
@@ -1086,9 +1086,9 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel} open
-      xywh {330 104 1167 602} type Double hide
+      xywh {330 104 1167 602} type Double visible
     } {
-      Fl_Pack {} {open
+      Fl_Pack {} {open selected
         xywh {5 15 1155 550} type HORIZONTAL
         code0 {for (int i=0;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,550,"");panellistitem[i]->init(master,i,bankui);}}
       } {}

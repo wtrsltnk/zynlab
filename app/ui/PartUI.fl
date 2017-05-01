@@ -49,13 +49,13 @@ class PartSysEffSend {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window syseffsend {open selected
-      private xywh {505 129 35 25} type Double box NO_BOX
-      class Fl_Group visible
+      private xywh {505 129 35 25} type Double box NO_BOX hide
+      class Fl_Group
     } {
       Fl_Dial {} {
         label 01
         callback {master->setPsysefxvol(npart,neff,(int) o->value());}
-        xywh {10 0 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 132 maximum 127 step 1
+        xywh {10 0 23 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 132 maximum 127 step 1
         code0 {o->size(25,25);}
         code1 {o->value(master->Psysefxvol[neff][npart]);}
         code2 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
@@ -284,35 +284,36 @@ class PartUI {open : {public Fl_Group}
 } {
   Function {make_window()} {open private
   } {
-    Fl_Window partgroup {
-      private xywh {973 494 385 180} type Double box NO_BOX hide
-      class Fl_Group
+    Fl_Window partgroup {open
+      private xywh {783 334 390 185} type Double color 47
+      class Fl_Group visible
     } {
       Fl_Group partgroupui {open
-        xywh {0 0 385 180}
+        xywh {0 0 385 182}
         code0 {if (part->Penabled==0) o->deactivate();}
       } {
         Fl_Dial {} {
           label Pan
           callback {part->setPpanning((int) o->value());}
-          xywh {50 40 25 25} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          xywh {50 26 25 25} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
           code0 {o->value(part->Ppanning);}
           class WidgetPDial
         }
         Fl_Counter {} {
           label KeyShift
           callback {part->Pkeyshift=(int) o->value()+64;}
-          xywh {195 45 90 20} labelsize 11 align 1 minimum -64 maximum 64 step 1
+          xywh {295 59 85 20} box THIN_UP_BOX labelsize 11 align 1 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
           code1 {o->value(part->Pkeyshift-64);}
         }
-        Fl_Scroll {} {open
-          xywh {166 91 125 49} box UP_BOX labelfont 1 labelsize 10 align 21
+        Fl_Scroll {} {
+          label {To Sys.Efx.} open
+          xywh {220 20 55 144} box THIN_UP_BOX labelfont 1 labelsize 10
         } {
           Fl_Pack {} {open
-            xywh {171 96 115 35} type HORIZONTAL
+            xywh {230 28 35 125}
             code0 {o->spacing(5);}
-            code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,25,35,"");psyef[i]->init(master,npart,i);}}
+            code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,35,25,"");psyef[i]->init(master,npart,i);}}
           } {}
         }
         Fl_Button {} {
@@ -325,17 +326,13 @@ if (event==FL_RIGHT_MOUSE){
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
 };}
-          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box UP_FRAME down_box DOWN_FRAME labelfont 1 labelsize 11 align 84
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {5 103 200 20} box UP_FRAME down_box DOWN_FRAME labelfont 1 labelsize 11 align 84
           code0 {o->label((char *)part->Pname);}
-        }
-        Fl_Box {} {
-          label {To Sys.Efx.}
-          xywh {166 81 95 10} labelfont 1 labelsize 10
         }
         Fl_Check_Button {} {
           label NoteOn
           callback {part->Pnoteon=(int) o->value();}
-          tooltip {set if the part receives NoteOn messages} xywh {10 155 65 20} down_box DOWN_BOX labelfont 1 labelsize 11
+          tooltip {set if the part receives NoteOn messages} xywh {5 154 15 20} down_box DOWN_BOX labelfont 1 labelsize 11 align 8
           code0 {o->value(part->Pnoteon);}
         }
         Fl_Counter minkcounter {
@@ -343,7 +340,7 @@ if (event==FL_RIGHT_MOUSE){
           callback {part->Pminkey=(int) o->value();
 if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);}
-          tooltip {Minimum key (that the part receives NoteOn messages)} xywh {295 125 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          tooltip {Minimum key (that the part receives NoteOn messages)} xywh {295 131 40 15} type Simple box THIN_UP_BOX labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
           code0 {o->value(part->Pminkey);}
         }
         Fl_Counter maxkcounter {
@@ -352,59 +349,59 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
 
 if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);}
-          tooltip {Maximum key (that the part receives NoteOn messages)} xywh {340 125 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          tooltip {Maximum key (that the part receives NoteOn messages)} xywh {340 131 40 15} type Simple box THIN_UP_BOX labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
           code0 {o->value(part->Pmaxkey);}
         }
         Fl_Dial {} {
           label Volume
           callback {part->setPvolume((int) o->value());}
-          tooltip {Part Volume} xywh {10 35 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Part Volume} xywh {10 21 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
           code0 {o->value(part->Pvolume);}
           class WidgetPDial
         }
         Fl_Dial {} {
           label {Vel.Ofs.}
           callback {part->Pveloffs=(int) o->value();}
-          tooltip {Velocity Offset} xywh {135 40 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          tooltip {Velocity Offset} xywh {135 26 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(part->Pveloffs);}
           class WidgetPDial
         }
         Fl_Dial {} {
           label {Vel.Sns.}
           callback {part->Pvelsns=(int) o->value();}
-          tooltip {Velocity Sensing Function} xywh {95 40 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          tooltip {Velocity Sensing Function} xywh {95 26 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(part->Pvelsns);}
           class WidgetPDial
         }
         Fl_Button {} {
           label Controllers
           callback {ctlwindow->show();}
-          xywh {295 90 85 30} labelfont 1 labelsize 11
+          xywh {5 128 85 20} labelfont 1 labelsize 11
         }
         Fl_Check_Button {} {
           label Portamento
           callback {part->ctl.portamento.portamento=(int) o->value();}
-          tooltip {Enable/Disable the portamento} xywh {95 155 88 20} down_box DOWN_BOX labelfont 1 labelsize 11
+          tooltip {Enable/Disable the portamento} xywh {190 154 15 20} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->value(part->ctl.portamento.portamento);}
         }
         Fl_Button {} {
           label {Edit instrument}
           callback {instrumenteditwindow->show();}
-          xywh {15 90 130 30} color 52 labelfont 1 labelsize 13
+          xywh {5 70 200 30} color 52 labelfont 1 labelsize 13
         }
         Fl_Button {} {
           label m
           callback {if (part->lastnote>=0) minkcounter->value(part->lastnote);
 minkcounter->do_callback();
 maxkcounter->do_callback();}
-          tooltip {set the minimum key to the last pressed key} xywh {315 155 15 12} box THIN_UP_BOX labelsize 10
+          tooltip {set the minimum key to the last pressed key} xywh {315 161 15 12} box THIN_UP_BOX labelsize 10
         }
         Fl_Button {} {
           label M
           callback {if (part->lastnote>=0) maxkcounter->value(part->lastnote);
 maxkcounter->do_callback();
 minkcounter->do_callback();}
-          tooltip {set the maximum key to the last pressed key} xywh {345 155 15 12} box THIN_UP_BOX labelsize 10
+          tooltip {set the maximum key to the last pressed key} xywh {345 161 15 12} box THIN_UP_BOX labelsize 10
         }
         Fl_Button {} {
           label R
@@ -412,21 +409,21 @@ minkcounter->do_callback();}
 minkcounter->do_callback();
 maxkcounter->value(127);
 maxkcounter->do_callback();}
-          tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 155 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
+          tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 161 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
         }
         Fl_Choice {} {
           label {MIDI Chn.Rcv.}
           callback {part->Prcvchn=(int) o->value();} open
-          tooltip {receive from Midi channel} xywh {310 45 70 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          tooltip {receive from Midi channel} xywh {295 20 85 20} box THIN_UP_BOX down_box THIN_UP_BOX labelsize 10 align 1 textfont 1 textsize 10
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Chn%d",i+1);if (i!=9) o->add(nrstr); else o->add("Drms10");};}
           code1 {o->value(part->Prcvchn);}
         } {}
         Fl_Choice keylimitlist {
-          label KLmt
+          label {Key limit}
           callback {int val=0;
 val=atoi(o->text());
 part->setkeylimit(val);} open
-          tooltip {Key Limit} xywh {215 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
+          tooltip {Key Limit} xywh {295 98 85 20} box THIN_UP_BOX down_box THIN_UP_BOX labelsize 10 align 1 textfont 1 textsize 10
         } {}
         Fl_Choice {} {
           label {Mode :}
@@ -444,7 +441,7 @@ part->setkeylimit(val);} open
     };
   };
 };} open
-          tooltip {Poly, Mono or Legato mode} xywh {80 130 64 18} down_box BORDER_BOX labelfont 1 labelsize 11 textfont 1 textsize 10
+          tooltip {Poly, Mono or Legato mode} xywh {145 128 60 21} box THIN_UP_BOX down_box THIN_UP_BOX labelfont 1 labelsize 10 textfont 1 textsize 10
           code0 {o->add("Poly"); o->add("Mono"); o->add("Legato");}
           code1 {if (part->Ppolymode!=0) o->value(0); else o->value(1);}
           code2 {if (part->Ppolymode==0 && part->Plegatomode!=0) o->value(2);}
@@ -457,7 +454,7 @@ master->partonoff(npart,(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 if (part->Penabled==0) partgroupui->deactivate();
     else partgroupui->activate();}
-        xywh {90 5 75 20} down_box DOWN_BOX labelfont 1 labelsize 11
+        xywh {190 5 15 20} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
         code0 {o->value(part->Penabled);}
       }
     }
