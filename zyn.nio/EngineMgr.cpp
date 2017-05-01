@@ -7,6 +7,7 @@
 #include "AudioOut.h"
 #include "MidiIn.h"
 #include "NulEngine.h"
+#include "RtEngine.h"
 #if OSS
 #include "OssEngine.h"
 #endif
@@ -37,6 +38,7 @@ EngineMgr::EngineMgr()
 
     //conditional compiling mess (but contained)
     engines.push_back(defaultEng);
+    engines.push_back(new RtEngine());
 #if OSS
     engines.push_back(new OssEngine());
 #endif

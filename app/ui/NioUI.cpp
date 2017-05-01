@@ -22,7 +22,7 @@ void NioUI::refresh(MasterUI* mui)
     {
         set<string> midiList = Nio::getSources();
         for(auto midi : midiList)
-            mui->mastermenu->add((std::string("NIO/Midi - ") + midi).c_str(), midi.c_str(), NioUI::audioCallback_s);
+            mui->mastermenu->add((std::string("NIO/Midi - ") + midi).c_str(), midi.c_str(), NioUI::midiCallback_s);
     }
 }
 

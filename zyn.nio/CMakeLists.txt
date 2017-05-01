@@ -23,6 +23,8 @@ set(zyn_nio_SRCS
     Engine.cpp
     EngineMgr.cpp
     Nio.cpp
+    RtEngine.cpp
+    RtMidi.cpp
     )
 
 set(zyn_nio_HDRS
@@ -35,6 +37,9 @@ set(zyn_nio_HDRS
     Engine.h
     EngineMgr.h
     Nio.h
+    RtEngine.h
+    RtMidi.h
+    RtError.h
     )
 
 set(zyn_nio_LIB )
@@ -78,6 +83,11 @@ add_library(zyn.nio
 target_link_libraries(zyn.nio
     ${zyn.common}
     ${zyn_nio_LIB}
+    winmm
+    )
+
+target_compile_definitions(zyn.nio
+    PRIVATE -D__WINDOWS_MM__
     )
 
 install(FILES ${zyn_nio_HDRS} DESTINATION include/zyn/nio COMPONENT develop)
