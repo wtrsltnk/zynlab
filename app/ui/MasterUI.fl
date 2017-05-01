@@ -329,7 +329,7 @@ class Panellistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {
-      private xywh {932 250 379 464} type Double box NO_BOX color 51
+      private xywh {932 250 120 422} type Double box NO_BOX color 51
       class Fl_Group visible
     } {
       Fl_Group panellistitemgroup {open
@@ -381,7 +381,7 @@ bankui->show();}
         } {}
         Fl_Button {} {
           label Effects
-          callback {//partfx->show();} selected
+          callback {//partfx->show();}
           xywh {5 215 60 20} box THIN_UP_BOX
         }
       }
@@ -1090,23 +1090,23 @@ GNU General Public License for details.}
       }
     }
     Fl_Window panelwindow {
-      label {ZynAddSubFX Panel} open
-      xywh {330 104 1167 602} type Double hide
+      label {ZynAddSubFX Panel} open selected
+      xywh {330 104 1167 469} type Single visible
     } {
       Fl_Pack {} {open
-        xywh {5 15 1155 550} type HORIZONTAL
-        code0 {for (int i=0;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,550,"");panellistitem[i]->init(master,i,bankui);}}
+        xywh {5 5 1155 425} type HORIZONTAL
+        code0 {for (int i=0;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,422,"");panellistitem[i]->init(master,i,bankui);}}
       } {}
       Fl_Button {} {
         label Close
         callback {panelwindow->hide();
 updatepanel();}
-        xywh {1050 570 50 25} box THIN_UP_BOX labelsize 13
+        xywh {1050 435 50 25} box THIN_UP_BOX labelsize 13
       }
       Fl_Button {} {
         label Refresh
         callback {updatepanel();}
-        xywh {1105 570 55 25} box THIN_UP_BOX labelsize 13
+        xywh {1105 435 55 25} box THIN_UP_BOX labelsize 13
       }
     }
     Fl_Window simplemasterwindow {
