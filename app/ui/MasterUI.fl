@@ -328,7 +328,7 @@ class Panellistitem {open : {public Fl_Group}
 } {
   Function {make_window()} {open private
   } {
-    Fl_Window panellistitem {open
+    Fl_Window panellistitem {
       private xywh {932 250 379 464} type Double box NO_BOX color 51
       class Fl_Group visible
     } {
@@ -338,11 +338,11 @@ class Panellistitem {open : {public Fl_Group}
         code1 {set_module_parameters( o );}
       } {
         Fl_Group {} {open
-          xywh {45 215 15 174} box ENGRAVED_FRAME
+          xywh {45 236 15 153} box ENGRAVED_FRAME
         } {
           Fl_Box {} {
             label {V U}
-            xywh {45 215 15 174} box FLAT_BOX color 0 selection_color 75 labelcolor 55 align 128
+            xywh {45 236 15 153} box FLAT_BOX color 0 selection_color 75 labelcolor 55 align 128
             code0 {o->init(master,npart);}
             class VUMeter
           }
@@ -358,7 +358,7 @@ bankui->show();}
         }
         Fl_Slider partvolume {
           callback {master->part[npart]->setPvolume((int) o->value());}
-          tooltip {Part volume} xywh {10 215 30 174} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
+          tooltip {Part volume} xywh {10 236 30 153} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
           code0 {o->value(master->part[npart]->Pvolume);}
         }
         Fl_Dial partpanning {
@@ -375,10 +375,15 @@ bankui->show();}
         } {}
         Fl_Pack {} {
           label Sends open
-          xywh {5 85 60 125} color 41
+          xywh {5 86 60 125} color 41
           code0 {o->spacing(5);}
           code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,35,25,"");psyef[i]->init(master,npart,i);}}
         } {}
+        Fl_Button {} {
+          label Effects
+          callback {//partfx->show();} selected
+          xywh {5 215 60 20} box THIN_UP_BOX
+        }
       }
       Fl_Check_Button partenabled {
         label 01
@@ -716,7 +721,7 @@ pthread_mutex_unlock(&master->mutex);}
           class PartUI
         } {}
       }
-      Fl_Tabs {} {
+      Fl_Tabs {} {open
         xywh {0 145 390 165} box UP_FRAME
       } {
         Fl_Group {} {
@@ -1086,9 +1091,9 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel} open
-      xywh {330 104 1167 602} type Double visible
+      xywh {330 104 1167 602} type Double hide
     } {
-      Fl_Pack {} {open selected
+      Fl_Pack {} {open
         xywh {5 15 1155 550} type HORIZONTAL
         code0 {for (int i=0;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,550,"");panellistitem[i]->init(master,i,bankui);}}
       } {}
