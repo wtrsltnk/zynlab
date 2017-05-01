@@ -14,29 +14,29 @@ set(DssiEnable  ${DSSI_FOUND}      CACHE BOOL  "Enable DSSI Plugin compilation")
 set(LibloEnable ${LIBLO_FOUND}     CACHE BOOL  "Enable Liblo")
 
 set(zyn_nio_SRCS
+    Nio.cpp
+    AudioOutput.cpp
+    AudioOutputManager.cpp
+    MidiInput.cpp
+    MidiInputManager.cpp
+    Engine.cpp
+    EngineManager.cpp
     WavEngine.cpp
     NulEngine.cpp
-    AudioOut.cpp
-    MidiIn.cpp
-    OutMgr.cpp
-    InMgr.cpp
-    Engine.cpp
-    EngineMgr.cpp
-    Nio.cpp
     RtEngine.cpp
     RtMidi.cpp
     )
 
 set(zyn_nio_HDRS
+    Nio.h
+    AudioOutput.h
+    AudioOutputManager.h
+    MidiInput.h
+    MidiInputManager.h
+    Engine.h
+    EngineManager.h
     WavEngine.h
     NulEngine.h
-    AudioOut.h
-    MidiIn.h
-    OutMgr.h
-    InMgr.h
-    Engine.h
-    EngineMgr.h
-    Nio.h
     RtEngine.h
     RtMidi.h
     RtError.h
@@ -77,7 +77,7 @@ if(OssEnable)
 endif(OssEnable)
 
 add_library(zyn.nio
-    ${zyn_nio_SRCS} 
+    ${zyn_nio_SRCS}  ${zyn_nio_HDRS}
     )
 
 target_link_libraries(zyn.nio
@@ -88,6 +88,13 @@ target_link_libraries(zyn.nio
 
 target_compile_definitions(zyn.nio
     PRIVATE -D__WINDOWS_MM__
+    )
+
+target_compile_features(zyn.nio
+    PRIVATE cxx_auto_type
+    PRIVATE cxx_nullptr
+    PRIVATE cxx_lambdas
+    PRIVATE cxx_strong_enums
     )
 
 install(FILES ${zyn_nio_HDRS} DESTINATION include/zyn/nio COMPONENT develop)

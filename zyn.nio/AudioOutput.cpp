@@ -1,11 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  MidiIn.h - This class is inherited by all the Midi input classes
-  Copyright (C) 2002-2005 Nasca Octavian Paul
+  AudioOut.h - Audio Output superclass
   Copyright (C) 2009-2010 Mark McCurry
-  Author: Nasca Octavian Paula
-          Mark McCurry
+  Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -22,22 +20,35 @@
 
 */
 
-#ifndef MIDI_IN_H
-#define MIDI_IN_H
+#include "AudioOutput.h"
+#include "AudioOutputManager.h"
+#include "SafeQueue.h"
 
-#include "Engine.h"
+#include <iostream>
+#include <cstring>
 
-/**This class is inherited by all the Midi input classes*/
-class MidiIn:public virtual Engine
+using namespace std;
+
+AudioOutput::AudioOutput() : samplerate(synth->samplerate), bufferSize(synth->buffersize) { }
+
+AudioOutput::~AudioOutput() { }
+
+void AudioOutput::setSamplerate(int _samplerate)
 {
-    public:
-        /**Enables or disables driver based upon value*/
-        virtual void setMidiEn(bool nval) = 0;
-        /**Returns if driver is initialized*/
-        virtual bool getMidiEn() const = 0;
-        static void midiProcess(unsigned char head,
-                                unsigned char num,
-                                unsigned char value);
-};
+    samplerate = _samplerate;
+}
 
-#endif
+int AudioOutput::getSampleRate()
+{
+    return samplerate;
+}
+
+void AudioOutput::setBufferSize(int _bufferSize)
+{
+    bufferSize = _bufferSize;
+}
+
+const Stereo<float *> AudioOutput::getNext()
+{
+    return AudioOutputManager::getInstance().tick(bufferSize);
+}

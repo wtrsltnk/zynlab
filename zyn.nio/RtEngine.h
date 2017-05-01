@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  AudioOut.h - Audio Output superclass
-  Copyright (C) 2009-2010 Mark McCurry
-  Author: Mark McCurry
+  RtEngine.cpp - Midi input through RtMidi for Windows
+  Copyright (C) 2014 Wouter Saaltink
+  Author: Wouter Saaltink
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -19,39 +19,31 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+#ifndef RTENGINE_H
+#define RTENGINE_H
 
-#include <iostream>
-#include <cstring>
-#include "SafeQueue.h"
+#include "EngineManager.h"
+#include "MidiInput.h"
+#include "RtMidi.h"
 
-using namespace std;
-
-#include "OutMgr.h"
-#include "AudioOut.h"
-
-AudioOut::AudioOut()
-    :samplerate(synth->samplerate), bufferSize(synth->buffersize)
-{}
-
-AudioOut::~AudioOut()
-{}
-
-void AudioOut::setSamplerate(int _samplerate)
+class RtEngine : public MidiInput
 {
-    samplerate = _samplerate;
-}
+public:
+    RtEngine();
+    virtual ~RtEngine();
 
-int AudioOut::getSampleRate()
-{
-    return samplerate;
-}
+    virtual bool IsMidiIn() { return true; }
+    virtual bool IsAudioOut() { return false; }
 
-void AudioOut::setBufferSize(int _bufferSize)
-{
-    bufferSize = _bufferSize;
-}
+    virtual bool Start();
+    virtual void Stop();
 
-const Stereo<float *> AudioOut::getNext()
-{
-    return OutMgr::getInstance().tick(bufferSize);
-}
+    virtual void setMidiEn(bool nval);
+    virtual bool getMidiEn() const;
+
+    static void callback(double timeStamp, std::vector<unsigned char> *message, void *userData);
+private:
+    RtMidiIn* midiin;
+};
+
+#endif // RTENGINE_H

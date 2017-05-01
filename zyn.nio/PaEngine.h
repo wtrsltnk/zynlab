@@ -22,12 +22,12 @@
 #ifndef PA_ENGINE_H
 #define PA_ENGINE_H
 
+#include "AudioOutput.h"
+#include "zyn.common/globals.h"
+
 #include <portaudio.h>
 
-#include "zyn.common/globals.h"
-#include "AudioOut.h"
-
-class PaEngine:public AudioOut
+class PaEngine:public AudioOutput
 {
     public:
         PaEngine();

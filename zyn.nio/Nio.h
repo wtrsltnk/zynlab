@@ -1,9 +1,10 @@
 #ifndef NIO_H
 #define NIO_H
 
+#include "zyn.common/globals.h"
+
 #include <string>
 #include <set>
-#include "zyn.common/globals.h"
 
 class WavFile;
 

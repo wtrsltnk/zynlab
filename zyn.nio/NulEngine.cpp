@@ -29,7 +29,7 @@
 using namespace std;
 
 NulEngine::NulEngine()
-    :AudioOut(), pThread(NULL)
+    :AudioOutput(), pThread(NULL)
 {
     name = "NULL";
     playing_until.tv_sec  = 0;

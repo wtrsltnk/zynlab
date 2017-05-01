@@ -20,42 +20,42 @@
 
 */
 
-#ifndef AUDIO_OUT_H
-#define AUDIO_OUT_H
+#ifndef AUDIOOUTPUT_H
+#define AUDIOOUTPUT_H
 
+#include "Engine.h"
 #include "zyn.common/Stereo.h"
 #include "zyn.common/globals.h"
-#include "Engine.h"
 
-class AudioOut:public virtual Engine
+class AudioOutput : public virtual Engine
 {
-    public:
-        AudioOut();
-        virtual ~AudioOut();
+public:
+    AudioOutput();
+    virtual ~AudioOutput();
 
-        /**Sets the Sample Rate of this Output
+    /**Sets the Sample Rate of this Output
          * (used for getNext()).*/
-        void setSamplerate(int _samplerate);
+    void setSamplerate(int _samplerate);
 
-        /**Sets the Samples required per Out of this driver
+    /**Sets the Samples required per Out of this driver
          * not a realtime opperation */
-        int getSampleRate();
-        void setBufferSize(int _bufferSize);
+    int getSampleRate();
+    void setBufferSize(int _bufferSize);
 
-        /**Sets the Frame Size for output*/
-        void bufferingSize(int nBuffering);
-        int bufferingSize();
+    /**Sets the Frame Size for output*/
+    void bufferingSize(int nBuffering);
+    int bufferingSize();
 
-        virtual void setAudioEn(bool nval) = 0;
-        virtual bool getAudioEn() const    = 0;
+    virtual void setAudioEn(bool nval) = 0;
+    virtual bool getAudioEn() const    = 0;
 
-    protected:
-        /**Get the next sample for output.
+protected:
+    /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-        const Stereo<float *> getNext();
+    const Stereo<float *> getNext();
 
-        int samplerate;
-        int bufferSize;
+    int samplerate;
+    int bufferSize;
 };
 
-#endif
+#endif // AUDIOOUTPUT_H

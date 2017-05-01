@@ -1,9 +1,9 @@
 #include "Nio.h"
-#include "OutMgr.h"
-#include "InMgr.h"
-#include "EngineMgr.h"
-#include "MidiIn.h"
-#include "AudioOut.h"
+#include "AudioOutput.h"
+#include "AudioOutputManager.h"
+#include "MidiInput.h"
+#include "MidiInputManager.h"
+#include "EngineManager.h"
 #include "WavEngine.h"
 #include <iostream>
 #include <algorithm>
@@ -12,9 +12,9 @@ using std::set;
 using std::cerr;
 using std::endl;
 
-InMgr     *in  = NULL;
-OutMgr    *out = NULL;
-EngineMgr *eng = NULL;
+MidiInputManager     *in  = NULL;
+AudioOutputManager    *out = NULL;
+EngineManager *eng = NULL;
 string     postfix;
 
 bool   Nio::autoConnect   = false;
@@ -23,9 +23,9 @@ string Nio::defaultSink   = OUT_DEFAULT;
 
 bool Nio::start(IMixer* mixer)
 {
-    in  = &InMgr::createInstance(mixer); //Enable input wrapper
-    out = &OutMgr::createInstance(mixer); //Initialize the Output Systems
-    eng = &EngineMgr::getInstance(); //Initialize The Engines
+    in  = &MidiInputManager::createInstance(mixer); //Enable input wrapper
+    out = &AudioOutputManager::createInstance(mixer); //Initialize the Output Systems
+    eng = &EngineManager::getInstance(); //Initialize The Engines
 
     return eng->start();
 }
@@ -72,7 +72,7 @@ set<string> Nio::getSources(void)
     set<string> sources;
     for(std::list<Engine *>::iterator itr = eng->engines.begin();
         itr != eng->engines.end(); ++itr)
-        if(dynamic_cast<MidiIn *>(*itr))
+        if(dynamic_cast<MidiInput *>(*itr))
             sources.insert((*itr)->name);
     return sources;
 }
@@ -82,7 +82,7 @@ set<string> Nio::getSinks(void)
     set<string> sinks;
     for(std::list<Engine *>::iterator itr = eng->engines.begin();
         itr != eng->engines.end(); ++itr)
-        if(dynamic_cast<AudioOut *>(*itr))
+        if(dynamic_cast<AudioOutput *>(*itr))
             sinks.insert((*itr)->name);
     return sinks;
 }

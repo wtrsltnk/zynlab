@@ -17,16 +17,17 @@
 */
 
 #include "WavEngine.h"
+#include "zyn.common/WavFile.h"
+#include "zyn.common/Util.h"
+
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
-#include "zyn.common/WavFile.h"
-#include "zyn.common/Util.h"
 
 using namespace std;
 
 WavEngine::WavEngine()
-    :AudioOut(), file(NULL), buffer(synth->samplerate * 4), pThread(NULL)
+    :AudioOutput(), file(NULL), buffer(synth->samplerate * 4), pThread(NULL)
 {
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }

@@ -22,12 +22,12 @@
 #ifndef SDL2_ENGINE_H
 #define SDL2_ENGINE_H
 
+#include "AudioOutput.h"
+#include "zyn.common/globals.h"
+
 #include <SDL2/SDL.h>
 
-#include "zyn.common/globals.h"
-#include "AudioOut.h"
-
-class SdlEngine:public AudioOut
+class SdlEngine:public AudioOutput
 {
     public:
         SdlEngine();

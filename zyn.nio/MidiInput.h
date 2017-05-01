@@ -1,9 +1,11 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  NulEngine.h - Dummy In/Out driver
+  MidiIn.h - This class is inherited by all the Midi input classes
   Copyright (C) 2002-2005 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+  Copyright (C) 2009-2010 Mark McCurry
+  Author: Nasca Octavian Paula
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -20,38 +22,20 @@
 
 */
 
-#ifndef NUL_ENGINE_H
-#define NUL_ENGINE_H
+#ifndef MIDIINPUT_H
+#define MIDIINPUT_H
 
-#include "AudioOutput.h"
-#include "MidiInput.h"
-#include "zyn.common/globals.h"
+#include "Engine.h"
 
-#include <sys/time.h>
-#include <pthread.h>
-
-class NulEngine:public AudioOutput, MidiInput
+/**This class is inherited by all the Midi input classes*/
+class MidiInput:public virtual Engine
 {
-    public:
-        NulEngine();
-        ~NulEngine();
-
-        bool Start();
-        void Stop();
-
-        void setAudioEn(bool nval);
-        bool getAudioEn() const;
-
-        void setMidiEn(bool) {}
-        bool getMidiEn() const {return true; }
-
-    protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
-
-    private:
-        struct timeval playing_until;
-        pthread_t     *pThread;
+public:
+    /**Enables or disables driver based upon value*/
+    virtual void setMidiEn(bool nval) = 0;
+    /**Returns if driver is initialized*/
+    virtual bool getMidiEn() const = 0;
+    static void midiProcess(unsigned char head, unsigned char num, unsigned char value);
 };
 
-#endif
+#endif // MIDIINPUT_H

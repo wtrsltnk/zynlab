@@ -1,37 +1,38 @@
-#include "OutMgr.h"
+#include "AudioOutputManager.h"
+#include "AudioOutput.h"
+#include "Engine.h"
+#include "EngineManager.h"
+#include "MidiInputManager.h"
+#include "WavEngine.h"
+#include "zyn.common/Util.h" //for set_realtime()
+
 #include <algorithm>
 #include <iostream>
 #include <cassert>
 #include <memory.h>
-#include "AudioOut.h"
-#include "Engine.h"
-#include "EngineMgr.h"
-#include "InMgr.h"
-#include "WavEngine.h"
-#include "zyn.common/Util.h" //for set_realtime()
 
 using namespace std;
 
-OutMgr *OutMgr::_instance = 0;
+AudioOutputManager *AudioOutputManager::_instance = 0;
 
-OutMgr &OutMgr::createInstance(IMixer* mixer)
+AudioOutputManager &AudioOutputManager::createInstance(IMixer* mixer)
 {
-    if (OutMgr::_instance == 0) OutMgr::_instance = new OutMgr(mixer);
-    return *OutMgr::_instance;
+    if (AudioOutputManager::_instance == 0) AudioOutputManager::_instance = new AudioOutputManager(mixer);
+    return *AudioOutputManager::_instance;
 }
 
-OutMgr &OutMgr::getInstance()
+AudioOutputManager &AudioOutputManager::getInstance()
 {
-    return *OutMgr::_instance;
+    return *AudioOutputManager::_instance;
 }
 
-void OutMgr::destroyInstance()
+void AudioOutputManager::destroyInstance()
 {
-    if (OutMgr::_instance != 0) delete OutMgr::_instance;
-    OutMgr::_instance = 0;
+    if (AudioOutputManager::_instance != 0) delete AudioOutputManager::_instance;
+    AudioOutputManager::_instance = 0;
 }
 
-OutMgr::OutMgr(IMixer* mixer)
+AudioOutputManager::AudioOutputManager(IMixer* mixer)
     :wave(new WavEngine()),
       priBuf(new float[4096],
              new float[4096]), priBuffCurrent(priBuf),
@@ -47,7 +48,7 @@ OutMgr::OutMgr(IMixer* mixer)
     memset(outr, 0, synth->bufferbytes);
 }
 
-OutMgr::~OutMgr()
+AudioOutputManager::~AudioOutputManager()
 {
     delete wave;
     delete [] priBuf.l;
@@ -65,9 +66,9 @@ OutMgr::~OutMgr()
  * 6) Lets return those samples to the primary and secondary outputs
  * 7) Lets wait for another tick
  */
-const Stereo<float *> OutMgr::tick(unsigned int frameSize)
+const Stereo<float *> AudioOutputManager::tick(unsigned int frameSize)
 {
-    InMgr &midi = InMgr::getInstance();
+    MidiInputManager &midi = MidiInputManager::getInstance();
     //SysEv->execute();
     removeStaleSmps();
     int i=0;
@@ -87,19 +88,19 @@ const Stereo<float *> OutMgr::tick(unsigned int frameSize)
     return priBuf;
 }
 
-AudioOut *OutMgr::getOut(string name)
+AudioOutput *AudioOutputManager::getOut(string name)
 {
-    return dynamic_cast<AudioOut *>(EngineMgr::getInstance().getEng(name));
+    return dynamic_cast<AudioOutput *>(EngineManager::getInstance().getEng(name));
 }
 
-string OutMgr::getDriver() const
+string AudioOutputManager::getDriver() const
 {
     return currentOut->name;
 }
 
-bool OutMgr::setSink(string name)
+bool AudioOutputManager::setSink(string name)
 {
-    AudioOut *sink = getOut(name);
+    AudioOutput *sink = getOut(name);
 
     if(!sink)
         return false;
@@ -119,7 +120,7 @@ bool OutMgr::setSink(string name)
     return success;
 }
 
-string OutMgr::getSink() const
+string AudioOutputManager::getSink() const
 {
     if(currentOut)
         return currentOut->name;
@@ -147,7 +148,7 @@ static size_t resample(float *dest,
     return out_elms;
 }
 
-void OutMgr::addSmps(float *l, float *r)
+void AudioOutputManager::addSmps(float *l, float *r)
 {
     //allow wave file to syphon off stream
     wave->push(Stereo<float *>(l, r), synth->buffersize);
@@ -174,7 +175,7 @@ void OutMgr::addSmps(float *l, float *r)
     }
 }
 
-void OutMgr::removeStaleSmps()
+void AudioOutputManager::removeStaleSmps()
 {
     if(!stales)
         return;

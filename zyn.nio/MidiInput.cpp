@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  RtEngine.h - Midi input through RtMidi for Windows
-  Copyright (C) 2014 Wouter Saaltink
-  Author: Wouter Saaltink
+  MidiIn.C - This class is inherited by all the Midi input classes
+  Copyright (C) 2002-2005 Nasca Octavian Paul
+  Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -19,91 +19,49 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
-#include "RtEngine.h"
-#include "EngineManager.h"
+
+#include "MidiInput.h"
 #include "MidiInputManager.h"
-#include <iostream>
+#include "zyn.common/globals.h"
 
-RtEngine::RtEngine()
-    : midiin(0)
+void MidiInput::midiProcess(unsigned char head, unsigned char num, unsigned char value)
 {
-    this->name = "RT";
-}
-
-RtEngine::~RtEngine()
-{
-    this->Stop();
-}
-
-bool RtEngine::Start()
-{
-    this->midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynlab");
-    this->midiin->setCallback(RtEngine::callback, this);
-    this->midiin->openPort();
-
-    return true;
-}
-
-void RtEngine::Stop()
-{
-    if (this->midiin != 0)
-        delete this->midiin;
-    this->midiin = 0;
-}
-
-void RtEngine::setMidiEn(bool nval)
-{
-    if (nval)
-        this->Start();
-    else
-        this->Stop();
-}
-
-bool RtEngine::getMidiEn() const
-{
-    return (this->midiin != 0);
-}
-
-void RtEngine::callback(double timeStamp, std::vector<unsigned char> *message, void *userData)
-{
-    RtEngine* engine = (RtEngine*)userData;
-
-    MidiEvent ev;
-    unsigned char chan = message->at(0) & 0x0f;
-    switch(message->at(0) & 0xf0)
+    MidiEvent     ev;
+    unsigned char chan = head & 0x0f;
+    switch(head & 0xf0)
     {
     case 0x80: //Note Off
         ev.type    = MidiEventTypes::M_NOTE;
         ev.channel = chan;
-        ev.num     = message->at(1);
+        ev.num     = num;
         ev.value   = 0;
         MidiInputManager::getInstance().putEvent(ev);
         break;
     case 0x90: //Note On
         ev.type    = MidiEventTypes::M_NOTE;
         ev.channel = chan;
-        ev.num     = message->at(1);
-        ev.value   = message->at(2);
+        ev.num     = num;
+        ev.value   = value;
         MidiInputManager::getInstance().putEvent(ev);
         break;
     case 0xA0: /* pressure, aftertouch */
         ev.type    = MidiEventTypes::M_PRESSURE;
         ev.channel = chan;
-        ev.num     = message->at(1);
-        ev.value   = message->at(2);
+        ev.num     = num;
+        ev.value   = value;
         MidiInputManager::getInstance().putEvent(ev);
         break;
     case 0xb0: //Controller
         ev.type    = MidiEventTypes::M_CONTROLLER;
         ev.channel = chan;
-        ev.num     = message->at(1);
-        ev.value   = message->at(2);
+        ev.num     = num;
+        ev.value   = value;
         MidiInputManager::getInstance().putEvent(ev);
         break;
     case 0xc0: //Program Change
         ev.type    = MidiEventTypes::M_PGMCHANGE;
         ev.channel = chan;
-        ev.num     = message->at(1);
+        ev.num     = num;
         ev.value   = 0;
         MidiInputManager::getInstance().putEvent(ev);
         break;
@@ -111,7 +69,7 @@ void RtEngine::callback(double timeStamp, std::vector<unsigned char> *message, v
         ev.type    = MidiEventTypes::M_CONTROLLER;
         ev.channel = chan;
         ev.num     = C_pitchwheel;
-        ev.value   = (message->at(1) + message->at(2) * (int) 128) - 8192;
+        ev.value   = (num + value * (int) 128) - 8192;
         MidiInputManager::getInstance().putEvent(ev);
         break;
     }

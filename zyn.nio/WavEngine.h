@@ -22,14 +22,16 @@
 
 #ifndef WAVENGINE_H
 #define WAVENGINE_H
-#include "AudioOut.h"
-#include <string>
-#include <pthread.h>
+
+#include "AudioOutput.h"
 #include "ZynSema.h"
 #include "SafeQueue.h"
 
+#include <string>
+#include <pthread.h>
+
 class WavFile;
-class WavEngine:public AudioOut
+class WavEngine:public AudioOutput
 {
     public:
         WavEngine();
