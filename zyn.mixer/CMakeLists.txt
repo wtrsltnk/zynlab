@@ -20,11 +20,13 @@ set(zyn_mixer_HDRS
     Recorder.h
     )
 
-include_directories(${CMAKE_SOURCE_DIR})
-
 add_library(zyn.mixer
     ${zyn_mixer_SRCS}
     ${zyn_mixer_HDRS}
+    )
+
+target_include_directories(zyn.mixer
+    PRIVATE ${MXML_INCLUDE_DIRS}
     )
 
 target_link_libraries(zyn.mixer

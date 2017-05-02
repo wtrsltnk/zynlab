@@ -179,7 +179,6 @@ bool XMLwrapper::hasPadSynth() const
         return false;
 }
 
-
 /* SAVE XML members */
 
 int XMLwrapper::saveXMLfile(const string &filename) const

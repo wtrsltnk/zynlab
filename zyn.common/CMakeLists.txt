@@ -33,6 +33,10 @@ add_library(zyn.common
     ${zyn_common_HDRS}
     )
 
+target_include_directories(zyn.common
+    PRIVATE ${MXML_INCLUDE_DIRS}
+    )
+
 target_link_libraries(zyn.common
     ${MXML_LIBRARIES}
 	${ZLIB_LIBRARIES}

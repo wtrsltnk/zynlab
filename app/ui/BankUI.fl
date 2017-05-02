@@ -116,7 +116,7 @@ class BankUI {open : {public BankProcess_}
   } {
     Fl_Window bankuiwindow {
       label Bank open
-      xywh {564 105 803 671} type Double
+      xywh {392 123 803 671} type Double
       code0 {o->label(bank->bankfiletitle.c_str());}
       code1 {if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");} visible
     } {
@@ -238,7 +238,7 @@ Fl::add_timeout(0.25, BankUI::search, (void*)this);}
             xywh {30 55 385 25} when 1
           }
           Fl_Browser searchResult {
-            callback {for (int i = 0; i < o->size(); i++)
+            callback {for (int i = 0; i <= o->size(); i++)
 {
     if (o->selected(i))
     {
@@ -250,7 +250,7 @@ Fl::add_timeout(0.25, BankUI::search, (void*)this);}
         master->part[*npart]->applyparameters();
         break;
     }
-};}
+};} selected
             xywh {30 80 385 515} type Select when 1
             code0 {o->column_char('\\t');}
           }
@@ -407,8 +407,7 @@ bankUI->results = bankUI->master->bank.search(bankUI->searchFor->value());
 for (const Bank::banksearchstruct& i : bankUI->results)
 {
     bankUI->searchResult->add((i.shortBankName + " - " + i.instrumentName).c_str(), (void*)&i);
-}} {selected
-    }
+}} {}
   }
   decl {BankSlot *bs[BANK_SIZE];} {private local
   }
