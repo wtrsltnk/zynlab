@@ -33,8 +33,7 @@ void AudioOutputManager::destroyInstance()
 }
 
 AudioOutputManager::AudioOutputManager(IMixer* mixer)
-    : wave(new WavEngine()),
-      priBuf(new float[4096], new float[4096]),
+    : priBuf(new float[4096], new float[4096]),
       priBuffCurrent(priBuf),
       mixer(mixer)
 {
@@ -42,15 +41,14 @@ AudioOutputManager::AudioOutputManager(IMixer* mixer)
     stales     = 0;
 
     //init samples
-    outr = new float[synth->buffersize];
-    outl = new float[synth->buffersize];
-    memset(outl, 0, synth->bufferbytes);
-    memset(outr, 0, synth->bufferbytes);
+    outr = new float[this->mixer->_synth->buffersize];
+    outl = new float[this->mixer->_synth->buffersize];
+    memset(outl, 0, this->mixer->_synth->bufferbytes);
+    memset(outr, 0, this->mixer->_synth->bufferbytes);
 }
 
 AudioOutputManager::~AudioOutputManager()
 {
-    delete wave;
     delete [] priBuf.l;
     delete [] priBuf.r;
     delete [] outr;
@@ -75,7 +73,7 @@ const Stereo<float *> AudioOutputManager::tick(unsigned int frameSize)
     while(frameSize > storedSmps()) {
         if(!midi.empty()) {
             this->mixer->Lock();
-            midi.flush(i*synth->buffersize, (i+1)*synth->buffersize);
+            midi.flush(i*this->mixer->_synth->buffersize, (i+1)*this->mixer->_synth->buffersize);
             this->mixer->Unlock();
         }
         this->mixer->Lock();
@@ -84,7 +82,7 @@ const Stereo<float *> AudioOutputManager::tick(unsigned int frameSize)
         addSmps(outl, outr);
 
         //allow wave file to syphon off stream
-        wave->push(Stereo<float *>(outl, outr), synth->buffersize);
+//        wave->push(Stereo<float *>(outl, outr), synth->buffersize);
 
         i++;
     }
@@ -150,24 +148,24 @@ static size_t resample(float *dest,
 void AudioOutputManager::addSmps(float *l, float *r)
 {
     const int s_out = currentOut->getSampleRate(),
-              s_sys = synth->samplerate;
+              s_sys = this->mixer->_synth->samplerate;
 
     if(s_out != s_sys) { //we need to resample
         const size_t steps = resample(priBuffCurrent.l,
                                       l,
                                       s_sys,
                                       s_out,
-                                      synth->buffersize);
-        resample(priBuffCurrent.r, r, s_sys, s_out, synth->buffersize);
+                                      this->mixer->_synth->buffersize);
+        resample(priBuffCurrent.r, r, s_sys, s_out, this->mixer->_synth->buffersize);
 
         priBuffCurrent.l += steps;
         priBuffCurrent.r += steps;
     }
     else { //just copy the samples
-        memcpy(priBuffCurrent.l, l, synth->bufferbytes);
-        memcpy(priBuffCurrent.r, r, synth->bufferbytes);
-        priBuffCurrent.l += synth->buffersize;
-        priBuffCurrent.r += synth->buffersize;
+        memcpy(priBuffCurrent.l, l, this->mixer->_synth->bufferbytes);
+        memcpy(priBuffCurrent.r, r, this->mixer->_synth->bufferbytes);
+        priBuffCurrent.l += this->mixer->_synth->buffersize;
+        priBuffCurrent.r += this->mixer->_synth->buffersize;
     }
 }
 

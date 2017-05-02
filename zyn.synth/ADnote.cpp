@@ -760,34 +760,34 @@ void ADnote::initparameters()
 
         newamplitude[nvoice] = 1.0f;
         if(param.PAmpEnvelopeEnabled) {
-            vce.AmpEnvelope = new Envelope(param.AmpEnvelope, basefreq);
+            vce.AmpEnvelope = new Envelope(param.AmpEnvelope, basefreq, synth);
             vce.AmpEnvelope->envout_dB(); //discard the first envelope sample
             newamplitude[nvoice] *= vce.AmpEnvelope->envout_dB();
         }
 
         if(param.PAmpLfoEnabled) {
-            vce.AmpLfo = new LFO(param.AmpLfo, basefreq);
+            vce.AmpLfo = new LFO(param.AmpLfo, basefreq, synth);
             newamplitude[nvoice] *= vce.AmpLfo->amplfoout();
         }
 
         /* Voice Frequency Parameters Init */
         if(param.PFreqEnvelopeEnabled != 0)
-            vce.FreqEnvelope = new Envelope(param.FreqEnvelope, basefreq);
+            vce.FreqEnvelope = new Envelope(param.FreqEnvelope, basefreq, synth);
 
         if(param.PFreqLfoEnabled != 0)
-            vce.FreqLfo = new LFO(param.FreqLfo, basefreq);
+            vce.FreqLfo = new LFO(param.FreqLfo, basefreq, synth);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled != 0) {
-            vce.VoiceFilterL = Filter::generate(param.VoiceFilter);
-            vce.VoiceFilterR = Filter::generate(param.VoiceFilter);
+            vce.VoiceFilterL = Filter::generate(param.VoiceFilter, synth);
+            vce.VoiceFilterR = Filter::generate(param.VoiceFilter, synth);
         }
 
         if(param.PFilterEnvelopeEnabled != 0)
-            vce.FilterEnvelope = new Envelope(param.FilterEnvelope, basefreq);
+            vce.FilterEnvelope = new Envelope(param.FilterEnvelope, basefreq, synth);
 
         if(param.PFilterLfoEnabled != 0)
-            vce.FilterLfo = new LFO(param.FilterLfo, basefreq);
+            vce.FilterLfo = new LFO(param.FilterLfo, basefreq, synth);
 
         vce.FilterFreqTracking =
             param.VoiceFilter->getfreqtracking(basefreq);
@@ -831,13 +831,12 @@ void ADnote::initparameters()
         }
 
         if(param.PFMFreqEnvelopeEnabled != 0)
-            vce.FMFreqEnvelope = new Envelope(param.FMFreqEnvelope, basefreq);
+            vce.FMFreqEnvelope = new Envelope(param.FMFreqEnvelope, basefreq, synth);
 
         FMnewamplitude[nvoice] = vce.FMVolume * ctl->fmamp.relamp;
 
         if(param.PFMAmpEnvelopeEnabled != 0) {
-            vce.FMAmpEnvelope = new Envelope(param.FMAmpEnvelope,
-                                             basefreq);
+            vce.FMAmpEnvelope = new Envelope(param.FMAmpEnvelope, basefreq, synth);
             FMnewamplitude[nvoice] *= vce.FMAmpEnvelope->envout_dB();
         }
     }
@@ -1799,23 +1798,23 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     float basefreq, float velocity,
                                     bool stereo)
 {
-    FreqEnvelope = new Envelope(param.FreqEnvelope, basefreq);
-    FreqLfo      = new LFO(param.FreqLfo, basefreq);
+    FreqEnvelope = new Envelope(param.FreqEnvelope, basefreq, synth);
+    FreqLfo      = new LFO(param.FreqLfo, basefreq, synth);
 
-    AmpEnvelope = new Envelope(param.AmpEnvelope, basefreq);
-    AmpLfo      = new LFO(param.AmpLfo, basefreq);
+    AmpEnvelope = new Envelope(param.AmpEnvelope, basefreq, synth);
+    AmpLfo      = new LFO(param.AmpLfo, basefreq, synth);
 
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
 
-    GlobalFilterL = Filter::generate(param.GlobalFilter);
+    GlobalFilterL = Filter::generate(param.GlobalFilter, synth);
     if(stereo)
-        GlobalFilterR = Filter::generate(param.GlobalFilter);
+        GlobalFilterR = Filter::generate(param.GlobalFilter, synth);
     else
         GlobalFilterR = NULL;
 
-    FilterEnvelope = new Envelope(param.FilterEnvelope, basefreq);
-    FilterLfo      = new LFO(param.FilterLfo, basefreq);
+    FilterEnvelope = new Envelope(param.FilterEnvelope, basefreq, synth);
+    FilterLfo      = new LFO(param.FilterLfo, basefreq, synth);
     FilterQ = param.GlobalFilter->getq();
     FilterFreqTracking = param.GlobalFilter->getfreqtracking(basefreq);
 }

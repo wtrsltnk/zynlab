@@ -26,8 +26,8 @@
 
 #include <cmath>
 
-Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, srate, bufsize),
+Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       Pvolume(50),
       Pdrive(90),
       Plevel(64),
@@ -38,10 +38,10 @@ Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, unsign
       Pstereo(0),
       Pprefiltering(0)
 {
-    lpfl = new AnalogFilter(2, 22000, 1, 0, srate, bufsize);
-    lpfr = new AnalogFilter(2, 22000, 1, 0, srate, bufsize);
-    hpfl = new AnalogFilter(3, 20, 1, 0, srate, bufsize);
-    hpfr = new AnalogFilter(3, 20, 1, 0, srate, bufsize);
+    lpfl = new AnalogFilter(2, 22000, 1, 0, synth_);
+    lpfr = new AnalogFilter(2, 22000, 1, 0, synth_);
+    hpfl = new AnalogFilter(3, 20, 1, 0, synth_);
+    hpfr = new AnalogFilter(3, 20, 1, 0, synth_);
     setpreset(Ppreset);
     cleanup();
 }
@@ -84,29 +84,29 @@ void Distorsion::out(const Stereo<float *> &smp)
         inputvol *= -1.0f;
 
     if(Pstereo) //Stereo
-        for(int i = 0; i < buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             efxoutl[i] = smp.l[i] * inputvol * pangainL;
             efxoutr[i] = smp.r[i] * inputvol * pangainR;
         }
     else //Mono
-        for(int i = 0; i < buffersize; ++i)
+        for(int i = 0; i < this->_synth->buffersize; ++i)
             efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
 
     if(Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive);
+    waveShapeSmps(this->_synth->buffersize, efxoutl, Ptype + 1, Pdrive);
     if(Pstereo)
-        waveShapeSmps(buffersize, efxoutr, Ptype + 1, Pdrive);
+        waveShapeSmps(this->_synth->buffersize, efxoutr, Ptype + 1, Pdrive);
 
     if(!Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
     if(!Pstereo)
-        memcpy(efxoutr, efxoutl, bufferbytes);
+        memcpy(efxoutr, efxoutl, this->_synth->bufferbytes);
 
     float level = dB2rap(60.0f * Plevel / 127.0f - 40.0f);
-    for(int i = 0; i < buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         float lout = efxoutl[i];
         float rout = efxoutr[i];
         float l    = lout * (1.0f - lrcross) + rout * lrcross;

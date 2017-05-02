@@ -42,7 +42,7 @@ set(zyn_synth_HDRS
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_library(zyn.synth
+add_library(zyn.synth STATIC
     ${zyn_synth_SRCS}
     ${zyn_synth_HDRS}
     )

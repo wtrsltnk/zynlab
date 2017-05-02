@@ -137,11 +137,11 @@ void PADnote::setup(float freq,
         else
             NoteGlobalPar.Punch.Enabled = 0;
 
-        NoteGlobalPar.FreqEnvelope = new Envelope(pars->FreqEnvelope, basefreq);
-        NoteGlobalPar.FreqLfo      = new LFO(pars->FreqLfo, basefreq);
+        NoteGlobalPar.FreqEnvelope = new Envelope(pars->FreqEnvelope, basefreq, synth);
+        NoteGlobalPar.FreqLfo      = new LFO(pars->FreqLfo, basefreq, synth);
 
-        NoteGlobalPar.AmpEnvelope = new Envelope(pars->AmpEnvelope, basefreq);
-        NoteGlobalPar.AmpLfo      = new LFO(pars->AmpLfo, basefreq);
+        NoteGlobalPar.AmpEnvelope = new Envelope(pars->AmpEnvelope, basefreq, synth);
+        NoteGlobalPar.AmpLfo      = new LFO(pars->AmpLfo, basefreq, synth);
     }
 
     NoteGlobalPar.Volume = 4.0f
@@ -155,12 +155,11 @@ void PADnote::setup(float freq,
                                               * NoteGlobalPar.AmpLfo->amplfoout();
 
     if(!legato) {
-        NoteGlobalPar.GlobalFilterL = Filter::generate(pars->GlobalFilter);
-        NoteGlobalPar.GlobalFilterR = Filter::generate(pars->GlobalFilter);
+        NoteGlobalPar.GlobalFilterL = Filter::generate(pars->GlobalFilter, synth);
+        NoteGlobalPar.GlobalFilterR = Filter::generate(pars->GlobalFilter, synth);
 
-        NoteGlobalPar.FilterEnvelope = new Envelope(pars->FilterEnvelope,
-                                                    basefreq);
-        NoteGlobalPar.FilterLfo = new LFO(pars->FilterLfo, basefreq);
+        NoteGlobalPar.FilterEnvelope = new Envelope(pars->FilterEnvelope, basefreq, synth);
+        NoteGlobalPar.FilterLfo = new LFO(pars->FilterLfo, basefreq, synth);
     }
     NoteGlobalPar.FilterQ = pars->GlobalFilter->getq();
     NoteGlobalPar.FilterFreqTracking = pars->GlobalFilter->getfreqtracking(

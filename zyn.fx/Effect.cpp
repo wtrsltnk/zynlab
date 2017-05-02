@@ -28,17 +28,14 @@
 
 Effect::Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
                FilterParams *filterpars_, unsigned char Ppreset_,
-               unsigned int srate, int bufsize)
+               SYNTH_T* synth_)
     :Ppreset(Ppreset_),
       efxoutl(efxoutl_),
       efxoutr(efxoutr_),
       filterpars(filterpars_),
       insertion(insertion_),
-      samplerate(srate),
-      buffersize(bufsize)
-{
-    alias();
-}
+      _synth(synth_)
+{ }
 
 void Effect::out(float *const smpsl, float *const smpsr)
 {

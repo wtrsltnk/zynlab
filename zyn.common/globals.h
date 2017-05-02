@@ -274,6 +274,8 @@ public:
     virtual void AudioOut(float *outl, float *outr) = 0;
     /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
     virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr) = 0;
+
+    SYNTH_T* _synth;
 };
 
 #endif

@@ -23,7 +23,8 @@
 #include <cmath>
 #include "Envelope.h"
 
-Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
+Envelope::Envelope(EnvelopeParams *envpars, float basefreq, SYNTH_T* synth_)
+    : _synth(synth_)
 {
     int i;
     envpoints = envpars->Penvpoints;
@@ -37,7 +38,7 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
     if(envpars->Pfreemode == 0)
         envpars->converttofree();
 
-    float bufferdt = synth->buffersize_f / synth->samplerate_f;
+    float bufferdt = this->_synth->buffersize_f / this->_synth->samplerate_f;
 
     int mode = envpars->Envmode;
 

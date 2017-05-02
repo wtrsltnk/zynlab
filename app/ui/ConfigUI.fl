@@ -1,54 +1,56 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
-} 
+}
 
 decl {//License: GNU GPL version 2 or later} {private local
-} 
+}
 
 decl {\#include <stdio.h>} {public local
-} 
+}
 
 decl {\#include <math.h>} {public local
-} 
+}
 
 decl {\#include <stdlib.h>} {public local
-} 
+}
 
 decl {\#include <FL/Fl_File_Chooser.H>} {public local
-} 
+}
 
 decl {\#include "zyn.common/globals.h"} {public local
-} 
+}
 
 decl {\#include "zyn.common/Util.h"} {public local
-} 
+}
 
-decl {\#include "zyn.mixer/Dump.h"} {public local
-} 
+decl {//\#include "zyn.mixer/Dump.h"} {public local
+}
 
-decl {extern Dump dump;} {public local
-} 
+decl {//extern Dump dump;} {public local
+}
 
-class ConfigUI {} {
-  Function {make_window()} {} {
+class ConfigUI {open
+} {
+  Function {make_window()} {open
+  } {
     Fl_Window configwindow {
       label {ZynAddSubFX Settings}
       callback {writebankcfg();
-o->hide();}
+o->hide();} open
       xywh {554 443 510 370} type Double visible
     } {
-      Fl_Tabs {} {
+      Fl_Tabs {} {open
         xywh {5 5 500 330}
       } {
         Fl_Group {} {
-          label {Main settings}
+          label {Main settings} open
           xywh {5 25 500 310}
         } {
           Fl_Group {} {
-            label {Sample Rate}
+            label {Sample Rate} selected
             xywh {15 45 165 30} box ENGRAVED_FRAME
           } {
             Fl_Choice {} {
@@ -115,7 +117,7 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
           Fl_Check_Button {} {
             label {Swap Stereo }
             callback {config.cfg.SwapStereo=(int) o->value();}
-            xywh {15 80 95 20} box NO_BOX labelsize 11
+            xywh {15 80 95 20} down_box DOWN_BOX labelsize 11
             code0 {o->value(config.cfg.SwapStereo);}
           }
           Fl_Choice {} {
@@ -165,7 +167,7 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
             label {Read the Readme.txt for other settings}
             xywh {10 280 240 15} labelfont 1 labelsize 11 align 128
           }
-          Fl_Group {} {
+          Fl_Group {} {open
             xywh {15 125 230 85} box ENGRAVED_BOX
           } {
             Fl_File_Input {} {
@@ -177,7 +179,7 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
             Fl_Check_Button {} {
               label {Dump notes}
               callback {config.cfg.DumpNotesToFile=(int) o->value();
-dump.startnow();//this has effect only if this option was disabled}
+//dump.startnow();//this has effect only if this option was disabled}
               xywh {20 130 110 20} down_box DOWN_BOX
               code0 {o->value(config.cfg.DumpNotesToFile);}
             }
@@ -412,4 +414,4 @@ delete []tmpbuf;} {}
   Function {show()} {} {
     code {configwindow->show();} {}
   }
-} 
+}

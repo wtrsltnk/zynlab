@@ -59,7 +59,7 @@ ADnoteGlobalParam::ADnoteGlobalParam()
     AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
     AmpLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 1);
 
-    GlobalFilter   = new FilterParams(2, 94, 40);
+    GlobalFilter   = new FilterParams(synth, 2, 94, 40);
     FilterEnvelope = new EnvelopeParams(0, 1);
     FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
@@ -207,7 +207,7 @@ void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson)
     FreqEnvelope->ASRinit(30, 40, 64, 60);
     FreqLfo = new LFOParams(50, 40, 0, 0, 0, 0, 0, 0);
 
-    VoiceFilter    = new FilterParams(2, 50, 60);
+    VoiceFilter    = new FilterParams(synth, 2, 50, 60);
     FilterEnvelope = new EnvelopeParams(0, 0);
     FilterEnvelope->ADSRinit_filter(90, 70, 40, 70, 10, 40);
     FilterLfo = new LFOParams(50, 20, 64, 0, 0, 0, 0, 2);

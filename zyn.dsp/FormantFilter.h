@@ -30,8 +30,8 @@
 class FormantFilter:public Filter
 {
     public:
-        FormantFilter(class FilterParams *pars, unsigned int srate, int bufsize);
-        ~FormantFilter();
+        FormantFilter(class FilterParams *pars, SYNTH_T* synth_);
+        virtual ~FormantFilter();
         void filterout(float *smp);
         void setfreq(float frequency);
         void setfreq_and_q(float frequency, float q_);

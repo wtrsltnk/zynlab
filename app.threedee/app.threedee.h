@@ -19,6 +19,7 @@ extern SYNTH_T* synth;
 class AppThreeDee
 {
 private:
+    Mixer* _mixer;
     GLFWwindow* _window;
 
 public:
@@ -33,7 +34,7 @@ protected:
     void onResize(int width, int height);
 
 public:
-    AppThreeDee(GLFWwindow* window);
+    AppThreeDee(GLFWwindow* window, Mixer* mixer);
     virtual ~AppThreeDee();
 
     bool SetUp();

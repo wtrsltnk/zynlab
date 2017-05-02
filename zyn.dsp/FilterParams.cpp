@@ -27,10 +27,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-FilterParams::FilterParams(unsigned char Ptype_,
+FilterParams::FilterParams(SYNTH_T* synth_,
+                           unsigned char Ptype_,
                            unsigned char Pfreq_,
                            unsigned char Pq_)
-    :PresetsArray()
+    :PresetsArray(), _synth(synth_)
 {
     setpresettype("Pfilter");
     Dtype = Ptype_;

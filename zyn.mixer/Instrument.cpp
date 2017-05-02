@@ -37,14 +37,15 @@
 #include <stdio.h>
 #include <string.h>
 
-Instrument::Instrument(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
+Instrument::Instrument(SYNTH_T* synth_, Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
+    : _synth(synth_), ctl(synth_)
 {
     microtonal = microtonal_;
     fft      = fft_;
     mutex    = mutex_;
     pthread_mutex_init(&load_mutex, NULL);
-    partoutl = new float [synth->buffersize];
-    partoutr = new float [synth->buffersize];
+    partoutl = new float [this->_synth->buffersize];
+    partoutr = new float [this->_synth->buffersize];
 
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
         kit[n].Pname   = new unsigned char [PART_MAX_NAME_LEN];
@@ -59,13 +60,13 @@ Instrument::Instrument(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
-        partefx[nefx]    = new EffectMgr(1, mutex);
+        partefx[nefx]    = new EffectManager(1, mutex, this->_synth);
         Pefxbypass[nefx] = false;
     }
 
     for(int n = 0; n < NUM_PART_EFX + 1; ++n) {
-        partfxinputl[n] = new float [synth->buffersize];
-        partfxinputr[n] = new float [synth->buffersize];
+        partfxinputl[n] = new float [this->_synth->buffersize];
+        partfxinputr[n] = new float [this->_synth->buffersize];
     }
 
     killallnotes = 0;
@@ -158,7 +159,7 @@ void Instrument::cleanup(bool final_)
 {
     for(int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
-    for(int i = 0; i < synth->buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         partoutl[i] = final_ ? 0.0f : denormalkillbuf[i];
         partoutr[i] = final_ ? 0.0f : denormalkillbuf[i];
     }
@@ -166,7 +167,7 @@ void Instrument::cleanup(bool final_)
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
         partefx[nefx]->cleanup();
     for(int n = 0; n < NUM_PART_EFX + 1; ++n)
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             partfxinputl[n][i] = final_ ? 0.0f : denormalkillbuf[i];
             partfxinputr[n][i] = final_ ? 0.0f : denormalkillbuf[i];
         }
@@ -950,15 +951,15 @@ void Instrument::RunNote(unsigned int k)
                 continue;
             noteplay++;
 
-            float tmpoutr[synth->buffersize];
-            float tmpoutl[synth->buffersize];
+            float tmpoutr[this->_synth->buffersize];
+            float tmpoutl[this->_synth->buffersize];
             (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
 
             if((*note)->finished()) {
                 delete (*note);
                 (*note) = NULL;
             }
-            for(int i = 0; i < synth->buffersize; ++i) { //add the note to part(mix)
+            for(int i = 0; i < this->_synth->buffersize; ++i) { //add the note to part(mix)
                 partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
                 partfxinputr[sendcurrenttofx][i] += tmpoutr[i];
             }
@@ -976,7 +977,7 @@ void Instrument::RunNote(unsigned int k)
 void Instrument::ComputePartSmps()
 {
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx)
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             partfxinputl[nefx][i] = 0.0f;
             partfxinputr[nefx][i] = 0.0f;
         }
@@ -995,26 +996,26 @@ void Instrument::ComputePartSmps()
         if(!Pefxbypass[nefx]) {
             partefx[nefx]->out(partfxinputl[nefx], partfxinputr[nefx]);
             if(Pefxroute[nefx] == 2)
-                for(int i = 0; i < synth->buffersize; ++i) {
+                for(int i = 0; i < this->_synth->buffersize; ++i) {
                     partfxinputl[nefx + 1][i] += partefx[nefx]->efxoutl[i];
                     partfxinputr[nefx + 1][i] += partefx[nefx]->efxoutr[i];
                 }
         }
         int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_PART_EFX);
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             partfxinputl[routeto][i] += partfxinputl[nefx][i];
             partfxinputr[routeto][i] += partfxinputr[nefx][i];
         }
     }
-    for(int i = 0; i < synth->buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         partoutl[i] = partfxinputl[NUM_PART_EFX][i];
         partoutr[i] = partfxinputr[NUM_PART_EFX][i];
     }
 
     //Kill All Notes if killallnotes!=0
     if(killallnotes != 0) {
-        for(int i = 0; i < synth->buffersize; ++i) {
-            float tmp = (synth->buffersize_f - i) / synth->buffersize_f;
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
+            float tmp = (this->_synth->buffersize_f - i) / this->_synth->buffersize_f;
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
         }

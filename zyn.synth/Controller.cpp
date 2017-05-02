@@ -24,7 +24,8 @@
 #include <math.h>
 #include <stdio.h>
 
-Controller::Controller()
+Controller::Controller(SYNTH_T* synth_)
+    : _synth(synth_)
 {
     defaults();
     resetall();
@@ -248,7 +249,7 @@ int Controller::initportamento(float oldfreq,
 
     //printf("%f->%f : Time %f\n",oldfreq,newfreq,portamentotime);
 
-    portamento.dx = synth->buffersize_f / (portamentotime * synth->samplerate_f);
+    portamento.dx = this->_synth->buffersize_f / (portamentotime * this->_synth->samplerate_f);
     portamento.origfreqrap = oldfreq / newfreq;
 
     float tmprap = ((portamento.origfreqrap > 1.0f) ?

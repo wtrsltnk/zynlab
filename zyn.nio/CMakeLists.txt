@@ -76,8 +76,9 @@ if(OssEnable)
     list(APPEND zyn_nio_SRCS OssEngine.cpp)
 endif(OssEnable)
 
-add_library(zyn.nio
-    ${zyn_nio_SRCS}  ${zyn_nio_HDRS}
+add_library(zyn.nio STATIC
+    ${zyn_nio_SRCS}
+    ${zyn_nio_HDRS}
     )
 
 target_link_libraries(zyn.nio

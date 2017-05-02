@@ -30,8 +30,8 @@
 class Echo:public Effect
 {
     public:
-        Echo(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize);
-        ~Echo();
+        Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_);
+        virtual ~Echo();
 
         void out(const Stereo<float *> &input);
         void setpreset(unsigned char npreset);

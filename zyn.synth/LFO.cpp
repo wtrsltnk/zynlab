@@ -27,7 +27,8 @@
 #include <stdio.h>
 #include <math.h>
 
-LFO::LFO(LFOParams *lfopars, float basefreq)
+LFO::LFO(LFOParams *lfopars, float basefreq, SYNTH_T* synth_)
+    : _synth(synth_)
 {
     if(lfopars->Pstretch == 0)
         lfopars->Pstretch = 1;
@@ -36,7 +37,7 @@ LFO::LFO(LFOParams *lfopars, float basefreq)
 
     float lfofreq =
         (powf(2, lfopars->Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
-    incx = fabs(lfofreq) * synth->buffersize_f / synth->samplerate_f;
+    incx = fabs(lfofreq) * this->_synth->buffersize_f / this->_synth->samplerate_f;
 
     if(lfopars->Pcontinous == 0) {
         if(lfopars->Pstartphase == 0)
@@ -154,7 +155,7 @@ float LFO::lfoout()
         }
     }
     else
-        lfodelay -= synth->buffersize_f / synth->samplerate_f;
+        lfodelay -= this->_synth->buffersize_f / this->_synth->samplerate_f;
     return out;
 }
 

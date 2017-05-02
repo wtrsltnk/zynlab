@@ -7,11 +7,6 @@ if(GLFW3_FOUND)
     find_package(OpenGL REQUIRED)
     find_package(GLM REQUIRED)
 
-    include_directories(
-        imgui
-        ${GLM_INCLUDE_DIRS}
-        )
-
     set(app_threedee_SRCS
         main.cpp
         app.threedee.cpp
@@ -33,6 +28,12 @@ if(GLFW3_FOUND)
         ${app_threedee_SRCS}
         ${app_threedee_HDRS}
         ${app_threedee_imgui_SRCS}
+        )
+
+    target_include_directories(app.threedee
+        PRIVATE ${GLFW3_INCLUDE_DIR}
+        PRIVATE ${GLM_DIR}
+        PRIVATE imgui
         )
 
     target_link_libraries(app.threedee

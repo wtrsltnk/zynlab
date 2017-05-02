@@ -23,23 +23,18 @@
 
 #ifndef MIXER_H
 #define MIXER_H
-#include <pthread.h>
 
-#include "../zyn.common/globals.h"
 #include "Microtonal.h"
-
 #include "Bank.h"
-#include "Recorder.h"
-#include "Dump.h"
+#include "../zyn.common/globals.h"
 #include "../zyn.common/XMLwrapper.h"
-
 #include "../zyn.synth/Controller.h"
+
+#include <pthread.h>
 
 typedef enum {
     MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK
 } lockset;
-
-extern Dump dump;
 
 struct vuData {
     vuData(void);
@@ -55,7 +50,7 @@ class Mixer : public IMixer
 {
     public:
         /** Constructor TODO make private*/
-        Mixer();
+        Mixer(SYNTH_T* synth_);
         /** Destructor*/
         virtual ~Mixer();
 
@@ -132,12 +127,9 @@ class Mixer : public IMixer
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
 
         //effects
-        class EffectMgr * sysefx[NUM_SYS_EFX]; //system
-        class EffectMgr * insefx[NUM_INS_EFX]; //insertion
+        class EffectManager * sysefx[NUM_SYS_EFX]; //system
+        class EffectManager * insefx[NUM_INS_EFX]; //insertion
 //      void swapcopyeffects(int what,int type,int neff1,int neff2);
-
-        //HDD recorder
-        Recorder HDDRecorder;
 
         //part that's apply the insertion effect; -1 to disable
         short int Pinsparts[NUM_INS_EFX];

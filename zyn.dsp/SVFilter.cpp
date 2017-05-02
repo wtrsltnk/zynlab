@@ -30,8 +30,8 @@
 #include <iostream>
 
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
-                   unsigned char Fstages, unsigned int srate, int bufsize)
-    :Filter(srate, bufsize),
+                   unsigned char Fstages, SYNTH_T* synth_)
+    :Filter(synth_),
       type(Ftype),
       stages(Fstages),
       freq(Ffreq),
@@ -60,7 +60,7 @@ void SVFilter::cleanup()
 
 void SVFilter::computefiltercoefs(void)
 {
-    par.f = freq / samplerate_f * 4.0f;
+    par.f = freq / this->_synth->samplerate_f * 4.0f;
     if(par.f > 0.99999f)
         par.f = 0.99999f;
     par.q      = 1.0f - atanf(sqrtf(q)) * 2.0f / PI;
@@ -78,7 +78,7 @@ void SVFilter::setfreq(float frequency)
         rap = 1.0f / rap;
 
     oldabovenq = abovenq;
-    abovenq    = frequency > (samplerate_f / 2 - 500.0f);
+    abovenq    = frequency > (this->_synth->samplerate_f / 2 - 500.0f);
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
@@ -146,7 +146,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
             std::cerr << "Impossible SVFilter type encountered [" << type << "]" << std::endl;
     }
 
-    for(int i = 0; i < buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         x.low   = x.low + par.f * x.band;
         x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
         x.band  = par.f * x.high + x.band;
@@ -161,19 +161,19 @@ void SVFilter::filterout(float *smp)
         singlefilterout(smp, st[i], par);
 
     if(needsinterpolation) {
-        float ismp[buffersize];
-        memcpy(ismp, smp, bufferbytes);
+        float ismp[this->_synth->buffersize];
+        memcpy(ismp, smp, this->_synth->bufferbytes);
 
         for(int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, st[i], ipar);
 
-        for(int i = 0; i < buffersize; ++i) {
-            float x = i / buffersize_f;
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
+            float x = i / this->_synth->buffersize_f;
             smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
         needsinterpolation = false;
     }
 
-    for(int i = 0; i < buffersize; ++i)
+    for(int i = 0; i < this->_synth->buffersize; ++i)
         smp[i] *= outgain;
 }

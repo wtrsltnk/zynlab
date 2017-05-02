@@ -4,23 +4,19 @@ project(zyn.mixer)
 
 set(zyn_mixer_SRCS
     Bank.cpp
-    Dump.cpp
     Mixer.cpp
     Microtonal.cpp
     Instrument.cpp
-    Recorder.cpp
 )
 
 set(zyn_mixer_HDRS
     Bank.h
-    Dump.h
     Mixer.h
     Microtonal.h
     Instrument.h
-    Recorder.h
     )
 
-add_library(zyn.mixer
+add_library(zyn.mixer STATIC
     ${zyn_mixer_SRCS}
     ${zyn_mixer_HDRS}
     )

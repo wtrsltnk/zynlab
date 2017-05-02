@@ -20,7 +20,7 @@ set(zyn_dsp_HDRS
     Unison.h
 )
 
-add_library(zyn.dsp
+add_library(zyn.dsp STATIC
     ${zyn_dsp_SRCS}
     ${zyn_dsp_HDRS}
     )

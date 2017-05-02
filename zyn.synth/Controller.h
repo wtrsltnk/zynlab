@@ -30,9 +30,10 @@
 /**(Midi) Controllers implementation*/
 class Controller
 {
+    SYNTH_T* _synth;
     public:
-        Controller();
-        ~Controller();
+        Controller(SYNTH_T* synth_);
+        virtual ~Controller();
         void resetall();
 
         void add2XML(XMLwrapper *xml);

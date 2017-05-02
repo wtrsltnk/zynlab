@@ -20,7 +20,7 @@ bool Nio::start(IMixer* mixer)
 {
     in  = &MidiInputManager::createInstance(mixer); //Enable input wrapper
     out = &AudioOutputManager::createInstance(mixer); //Initialize the Output Systems
-    eng = &EngineManager::getInstance(); //Initialize The Engines
+    eng = &EngineManager::createInstance(mixer); //Initialize The Engines
 
     return eng->start();
 }
@@ -99,23 +99,3 @@ void Nio::preferedSampleRate(unsigned &rate)
 void Nio::preferedSampleRate(unsigned &)
 {}
 #endif
-
-void Nio::waveNew(class WavFile *wave)
-{
-    out->wave->newFile(wave);
-}
-
-void Nio::waveStart(void)
-{
-    out->wave->Start();
-}
-
-void Nio::waveStop(void)
-{
-    out->wave->Stop();
-}
-
-void Nio::waveEnd(void)
-{
-    out->wave->destroyFile();
-}

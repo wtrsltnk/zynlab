@@ -30,8 +30,8 @@
 class DynamicFilter:public Effect
 {
     public:
-        DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize);
-        ~DynamicFilter();
+        DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_);
+        virtual ~DynamicFilter();
         void out(const Stereo<float *> &smp);
 
         void setpreset(unsigned char npreset);

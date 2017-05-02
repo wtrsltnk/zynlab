@@ -45,8 +45,8 @@ class Alienwah:public Effect
         Alienwah(bool insertion_,
                  float *const efxoutl_,
                  float *const efxoutr_,
-                 unsigned int srate, int bufsize);
-        ~Alienwah();
+                 SYNTH_T* synth_);
+        virtual ~Alienwah();
         void out(const Stereo<float *> &smp);
 
         void setpreset(unsigned char npreset);

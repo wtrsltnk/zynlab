@@ -13,9 +13,13 @@ class AudioOutputManager;
 class EngineManager
 {
     friend class Nio;
+    static EngineManager* _instance;
+    EngineManager(class IMixer* mixer);
 public:
+    static EngineManager &createInstance(class IMixer* mixer);
     static EngineManager &getInstance();
-    ~EngineManager();
+    static void destroyInstance();
+    virtual ~EngineManager();
 
     /**Gets requested engine
          * @param name case unsensitive name of engine
@@ -38,8 +42,6 @@ public:
     //default I/O
     AudioOutput *defaultOut;
     MidiInput   *defaultIn;
-private:
-    EngineManager();
 };
 
 #endif // ENGINEMANAGER_H

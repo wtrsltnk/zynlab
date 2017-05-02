@@ -40,8 +40,6 @@
 #include "../zyn.mixer/Mixer.h"
 #include "../zyn.mixer/Instrument.h"
 #include "../zyn.common/Util.h"
-#include "../zyn.mixer/Dump.h"
-extern Dump dump;
 
 // Sequencer
 #include "../zyn.seq/Sequencer.h"
@@ -60,7 +58,7 @@ using namespace std;
 
 static Mixer* mixer;
 static Sequencer* seq;
-SYNTH_T* synth;
+//SYNTH_T* synth;
 static int swaplr = 0; //1 for left-right swapping
 
 static int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
@@ -101,7 +99,7 @@ void initprogram(void)
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
-    mixer = new Mixer();
+    mixer = new Mixer(synth);
     mixer->swaplr = swaplr;
 
     signal(SIGINT, sigterm_exit);
@@ -136,7 +134,6 @@ int main(int argc, char *argv[])
 {
     synth = new SYNTH_T;
     config.init();
-    dump.startnow();
     int noui = 0;
     cerr
             << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
@@ -262,9 +259,6 @@ int main(int argc, char *argv[])
             break;
         case 'S':
             swaplr = 1;
-            break;
-        case 'D':
-            dump.startnow();
             break;
         case 'I':
             if(optarguments)

@@ -16,7 +16,7 @@ set(zyn_seq_HDRS
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_library(zyn.seq
+add_library(zyn.seq STATIC
     ${zyn_seq_SRCS}
     ${zyn_seq_HDRS}
     )

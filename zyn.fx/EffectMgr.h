@@ -38,11 +38,11 @@ class FilterParams;
 class XMLwrapper;
 
 /**Effect manager, an interface betwen the program and effects*/
-class EffectMgr:public Presets
+class EffectManager:public Presets
 {
     public:
-        EffectMgr(const bool insertion_, pthread_mutex_t *mutex_);
-        ~EffectMgr();
+        EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SYNTH_T* synth_);
+        virtual ~EffectManager();
 
         void add2XML(XMLwrapper *xml);
         void defaults(void);
@@ -78,6 +78,7 @@ class EffectMgr:public Presets
         int     nefx;
         Effect *efx;
         pthread_mutex_t *mutex;
+        SYNTH_T* _synth;
         bool dryonly;
 };
 

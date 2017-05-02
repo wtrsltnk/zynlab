@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  EffectMgr.cpp - Effect manager, an interface betwen the program and effects
+  EffectManager.cpp - Effect manager, an interface betwen the program and effects
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -35,70 +35,71 @@
 
 using namespace std;
 
-EffectMgr::EffectMgr(const bool insertion_, pthread_mutex_t *mutex_)
+EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SYNTH_T* synth_)
     :insertion(insertion_),
-      efxoutl(new float[synth->buffersize]),
-      efxoutr(new float[synth->buffersize]),
+      efxoutl(new float[synth_->buffersize]),
+      efxoutr(new float[synth_->buffersize]),
       filterpars(NULL),
       nefx(0),
       efx(NULL),
       mutex(mutex_),
+      _synth(synth_),
       dryonly(false)
 {
     setpresettype("Peffect");
-    memset(efxoutl, 0, synth->bufferbytes);
-    memset(efxoutr, 0, synth->bufferbytes);
+    memset(efxoutl, 0, this->_synth->bufferbytes);
+    memset(efxoutr, 0, this->_synth->bufferbytes);
     defaults();
 }
 
 
-EffectMgr::~EffectMgr()
+EffectManager::~EffectManager()
 {
     delete efx;
     delete [] efxoutl;
     delete [] efxoutr;
 }
 
-void EffectMgr::defaults(void)
+void EffectManager::defaults(void)
 {
     changeeffect(0);
     setdryonly(false);
 }
 
 //Change the effect
-void EffectMgr::changeeffect(int _nefx)
+void EffectManager::changeeffect(int _nefx)
 {
     cleanup();
     if(nefx == _nefx)
         return;
     nefx = _nefx;
-    memset(efxoutl, 0, synth->bufferbytes);
-    memset(efxoutr, 0, synth->bufferbytes);
+    memset(efxoutl, 0, this->_synth->bufferbytes);
+    memset(efxoutr, 0, this->_synth->bufferbytes);
     delete efx;
     switch(nefx) {
         case 1:
-            efx = new Reverb(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new Reverb(insertion, efxoutl, efxoutr, this->_synth);
             break;
         case 2:
-            efx = new Echo(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new Echo(insertion, efxoutl, efxoutr, this->_synth);
             break;
         case 3:
-            efx = new Chorus(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new Chorus(insertion, efxoutl, efxoutr, this->_synth);
             break;
         case 4:
-            efx = new Phaser(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new Phaser(insertion, efxoutl, efxoutr, this->_synth);
             break;
         case 5:
-            efx = new Alienwah(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new Alienwah(insertion, efxoutl, efxoutr, this->_synth);
             break;
         case 6:
-            efx = new Distorsion(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new Distorsion(insertion, efxoutl, efxoutr, this->_synth);
             break;
         case 7:
-            efx = new EQ(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new EQ(insertion, efxoutl, efxoutr, this->_synth);
             break;
         case 8:
-            efx = new DynamicFilter(insertion, efxoutl, efxoutr, synth->samplerate, synth->buffersize);
+            efx = new DynamicFilter(insertion, efxoutl, efxoutr, this->_synth);
             break;
         //put more effect here
         default:
@@ -111,13 +112,13 @@ void EffectMgr::changeeffect(int _nefx)
 }
 
 //Obtain the effect number
-int EffectMgr::geteffect(void)
+int EffectManager::geteffect(void)
 {
     return nefx;
 }
 
 // Cleanup the current effect
-void EffectMgr::cleanup(void)
+void EffectManager::cleanup(void)
 {
     if(efx)
         efx->cleanup();
@@ -125,7 +126,7 @@ void EffectMgr::cleanup(void)
 
 
 // Get the preset of the current effect
-unsigned char EffectMgr::getpreset(void)
+unsigned char EffectManager::getpreset(void)
 {
     if(efx)
         return efx->Ppreset;
@@ -134,14 +135,14 @@ unsigned char EffectMgr::getpreset(void)
 }
 
 // Change the preset of the current effect
-void EffectMgr::changepreset_nolock(unsigned char npreset)
+void EffectManager::changepreset_nolock(unsigned char npreset)
 {
     if(efx)
         efx->setpreset(npreset);
 }
 
 //Change the preset of the current effect(with thread locking)
-void EffectMgr::changepreset(unsigned char npreset)
+void EffectManager::changepreset(unsigned char npreset)
 {
     pthread_mutex_lock(mutex);
     changepreset_nolock(npreset);
@@ -150,7 +151,7 @@ void EffectMgr::changepreset(unsigned char npreset)
 
 
 //Change a parameter of the current effect
-void EffectMgr::seteffectpar_nolock(int npar, unsigned char value)
+void EffectManager::seteffectpar_nolock(int npar, unsigned char value)
 {
     if(!efx)
         return;
@@ -158,7 +159,7 @@ void EffectMgr::seteffectpar_nolock(int npar, unsigned char value)
 }
 
 // Change a parameter of the current effect (with thread locking)
-void EffectMgr::seteffectpar(int npar, unsigned char value)
+void EffectManager::seteffectpar(int npar, unsigned char value)
 {
     pthread_mutex_lock(mutex);
     seteffectpar_nolock(npar, value);
@@ -166,7 +167,7 @@ void EffectMgr::seteffectpar(int npar, unsigned char value)
 }
 
 //Get a parameter of the current effect
-unsigned char EffectMgr::geteffectpar(int npar)
+unsigned char EffectManager::geteffectpar(int npar)
 {
     if(!efx)
         return 0;
@@ -174,11 +175,11 @@ unsigned char EffectMgr::geteffectpar(int npar)
 }
 
 // Apply the effect
-void EffectMgr::out(float *smpsl, float *smpsr)
+void EffectManager::out(float *smpsl, float *smpsr)
 {
     if(!efx) {
         if(!insertion)
-            for(int i = 0; i < synth->buffersize; ++i) {
+            for(int i = 0; i < this->_synth->buffersize; ++i) {
                 smpsl[i]   = 0.0f;
                 smpsr[i]   = 0.0f;
                 efxoutl[i] = 0.0f;
@@ -186,7 +187,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             }
         return;
     }
-    for(int i = 0; i < synth->buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         smpsl[i]  += denormalkillbuf[i];
         smpsr[i]  += denormalkillbuf[i];
         efxoutl[i] = 0.0f;
@@ -197,8 +198,8 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     float volume = efx->volume;
 
     if(nefx == 7) { //this is need only for the EQ effect
-        memcpy(smpsl, efxoutl, synth->bufferbytes);
-        memcpy(smpsr, efxoutr, synth->bufferbytes);
+        memcpy(smpsl, efxoutl, this->_synth->bufferbytes);
+        memcpy(smpsr, efxoutr, this->_synth->bufferbytes);
         return;
     }
 
@@ -217,20 +218,20 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             v2 *= v2;  //for Reverb and Echo, the wet function is not liniar
 
         if(dryonly)   //this is used for instrument effect only
-            for(int i = 0; i < synth->buffersize; ++i) {
+            for(int i = 0; i < this->_synth->buffersize; ++i) {
                 smpsl[i]   *= v1;
                 smpsr[i]   *= v1;
                 efxoutl[i] *= v2;
                 efxoutr[i] *= v2;
             }
         else // normal instrument/insertion effect
-            for(int i = 0; i < synth->buffersize; ++i) {
+            for(int i = 0; i < this->_synth->buffersize; ++i) {
                 smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
             }
     }
     else // System effect
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             efxoutl[i] *= 2.0f * volume;
             efxoutr[i] *= 2.0f * volume;
             smpsl[i]    = efxoutl[i];
@@ -240,25 +241,25 @@ void EffectMgr::out(float *smpsl, float *smpsr)
 
 
 // Get the effect volume for the system effect
-float EffectMgr::sysefxgetvolume(void)
+float EffectManager::sysefxgetvolume(void)
 {
     return (!efx) ? 1.0f : efx->outvolume;
 }
 
 
 // Get the EQ response
-float EffectMgr::getEQfreqresponse(float freq)
+float EffectManager::getEQfreqresponse(float freq)
 {
     return (nefx == 7) ? efx->getfreqresponse(freq) : 0.0f;
 }
 
 
-void EffectMgr::setdryonly(bool value)
+void EffectManager::setdryonly(bool value)
 {
     dryonly = value;
 }
 
-void EffectMgr::add2XML(XMLwrapper *xml)
+void EffectManager::add2XML(XMLwrapper *xml)
 {
     xml->addpar("type", geteffect());
 
@@ -283,7 +284,7 @@ void EffectMgr::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void EffectMgr::getfromXML(XMLwrapper *xml)
+void EffectManager::getfromXML(XMLwrapper *xml)
 {
     changeeffect(xml->getpar127("type", geteffect()));
 

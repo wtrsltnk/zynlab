@@ -366,22 +366,21 @@ void SUBnote::filter(bpfilter &filter, float *smps)
  */
 void SUBnote::initparameters(float freq)
 {
-    AmpEnvelope = new Envelope(pars->AmpEnvelope, freq);
+    AmpEnvelope = new Envelope(pars->AmpEnvelope, freq, synth);
     if(pars->PFreqEnvelopeEnabled != 0)
-        FreqEnvelope = new Envelope(pars->FreqEnvelope, freq);
+        FreqEnvelope = new Envelope(pars->FreqEnvelope, freq, synth);
     else
         FreqEnvelope = NULL;
     if(pars->PBandWidthEnvelopeEnabled != 0)
-        BandWidthEnvelope = new Envelope(pars->BandWidthEnvelope, freq);
+        BandWidthEnvelope = new Envelope(pars->BandWidthEnvelope, freq, synth);
     else
         BandWidthEnvelope = NULL;
     if(pars->PGlobalFilterEnabled != 0) {
         globalfiltercenterq = pars->GlobalFilter->getq();
-        GlobalFilterL = Filter::generate(pars->GlobalFilter);
+        GlobalFilterL = Filter::generate(pars->GlobalFilter, synth);
         if(stereo)
-            GlobalFilterR = Filter::generate(pars->GlobalFilter);
-        GlobalFilterEnvelope = new Envelope(pars->GlobalFilterEnvelope,
-                                            freq);
+            GlobalFilterR = Filter::generate(pars->GlobalFilter, synth);
+        GlobalFilterEnvelope = new Envelope(pars->GlobalFilterEnvelope, freq, synth);
         GlobalFilterFreqTracking = pars->GlobalFilter->getfreqtracking(basefreq);
     }
     computecurrentparameters();

@@ -26,10 +26,10 @@
 
 using namespace std;
 
-Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, srate, bufsize),
-      lfo(srate, bufsize),
-      maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * samplerate_f)),
+Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
+      lfo(synth_),
+      maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * synth_->samplerate_f)),
       delaySample(new float[maxdelay], new float[maxdelay])
 {
     dlk = 0;
@@ -52,7 +52,7 @@ Chorus::~Chorus()
 float Chorus::getdelay(float xlfo)
 {
     float result =
-        (Pflangemode) ? 0 : (delay + xlfo * depth) * samplerate_f;
+        (Pflangemode) ? 0 : (delay + xlfo * depth) * this->_synth->samplerate_f;
 
     //check if delay is too big (caused by bad setdelay() and setdepth()
     if((result + 0.5f) >= maxdelay) {
@@ -76,7 +76,7 @@ void Chorus::out(const Stereo<float *> &input)
     dl2 = getdelay(lfol);
     dr2 = getdelay(lfor);
 
-    for(int i = 0; i < buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         float inL = input.l[i];
         float inR = input.r[i];
         //LRcross
@@ -88,7 +88,7 @@ void Chorus::out(const Stereo<float *> &input)
 
         //compute the delay in samples using linear interpolation between the lfo delays
         float mdel =
-            (dl1 * (buffersize - i) + dl2 * i) / buffersize_f;
+            (dl1 * (this->_synth->buffersize - i) + dl2 * i) / this->_synth->buffersize_f;
         if(++dlk >= maxdelay)
             dlk = 0;
         float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
@@ -106,7 +106,7 @@ void Chorus::out(const Stereo<float *> &input)
         //Right channel
 
         //compute the delay in samples using linear interpolation between the lfo delays
-        mdel = (dr1 * (buffersize - i) + dr2 * i) / buffersize_f;
+        mdel = (dr1 * (this->_synth->buffersize - i) + dr2 * i) / this->_synth->buffersize_f;
         if(++drk >= maxdelay)
             drk = 0;
         tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
@@ -123,12 +123,12 @@ void Chorus::out(const Stereo<float *> &input)
     }
 
     if(Poutsub)
-        for(int i = 0; i < buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             efxoutl[i] *= -1.0f;
             efxoutr[i] *= -1.0f;
         }
 
-    for(int i = 0; i < buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         efxoutl[i] *= pangainL;
         efxoutr[i] *= pangainR;
     }

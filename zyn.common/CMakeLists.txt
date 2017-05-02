@@ -28,7 +28,7 @@ set(zyn_common_HDRS
     XmlWrapper.h
 )
 
-add_library(zyn.common
+add_library(zyn.common STATIC
     ${zyn_common_SRCS}
     ${zyn_common_HDRS}
     )
@@ -41,6 +41,11 @@ target_link_libraries(zyn.common
     ${MXML_LIBRARIES}
 	${ZLIB_LIBRARIES}
     z
+    )
+
+target_compile_features(zyn.common
+    PRIVATE cxx_auto_type
+    PRIVATE cxx_nullptr
     )
 
 install(FILES ${zyn_common_HDRS} DESTINATION include/zyn/common COMPONENT develop)

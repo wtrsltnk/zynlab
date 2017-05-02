@@ -45,7 +45,7 @@ void initprogram(void)
     cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
-    mixer = new Mixer();
+    mixer = new Mixer(synth);
     mixer->swaplr = config.cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth->samplerate);
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    AppThreeDee app(window);
+    AppThreeDee app(window, mixer);
 
     // Setup ImGui binding
     ImGui_ImplGlfwGL3_Init(window, true);

@@ -26,8 +26,8 @@
 
 using namespace std;
 
-SdlEngine::SdlEngine()
-    : _dev(0)
+SdlEngine::SdlEngine(SYNTH_T* s)
+    : AudioOutput(s), _dev(0)
 {
     name = "SDL2";
 }
@@ -56,7 +56,7 @@ bool SdlEngine::Start()
     want.freq = 48000;
     want.format = AUDIO_F32;
     want.channels = 2;
-    want.samples = synth->buffersize;
+    want.samples = this->_synth->buffersize;
     want.size = 0;
     want.userdata = (void*)this;
     want.callback = my_audio_callback; /* you wrote this function elsewhere -- see SDL_AudioSpec for details */

@@ -25,8 +25,8 @@
 
 #include <cmath>
 
-EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, srate, bufsize)
+EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_)
 {
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         filter[i].Ptype   = 0;
@@ -34,8 +34,8 @@ EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, in
         filter[i].Pgain   = 64;
         filter[i].Pq      = 64;
         filter[i].Pstages = 0;
-        filter[i].l = new AnalogFilter(6, 1000.0f, 1.0f, 0, srate, bufsize);
-        filter[i].r = new AnalogFilter(6, 1000.0f, 1.0f, 0, srate, bufsize);
+        filter[i].l = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
+        filter[i].r = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
     }
     //default values
     Pvolume = 50;
@@ -57,7 +57,7 @@ void EQ::cleanup(void)
 //Effect output
 void EQ::out(const Stereo<float *> &smp)
 {
-    for(int i = 0; i < buffersize; ++i) {
+    for(int i = 0; i < this->_synth->buffersize; ++i) {
         efxoutl[i] = smp.l[i] * volume;
         efxoutr[i] = smp.r[i] * volume;
     }

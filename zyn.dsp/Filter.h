@@ -23,15 +23,15 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-//#include "../globals.h"
+#include "../zyn.common/globals.h"
 
 class Filter
 {
     public:
         static float getrealfreq(float freqpitch);
-        static Filter *generate(class FilterParams * pars, unsigned int srate = 0, int bufsize = 0);
+        static Filter *generate(class FilterParams * pars, SYNTH_T* synth_);
 
-        Filter(unsigned int srate, int bufsize);
+        Filter(SYNTH_T* synth_);
         virtual ~Filter() {}
         virtual void filterout(float *smp)    = 0;
         virtual void setfreq(float frequency) = 0;
@@ -41,24 +41,8 @@ class Filter
 
     protected:
         float outgain;
+        SYNTH_T* _synth;
 
-        // current setup
-        unsigned int samplerate;
-        int buffersize;
-
-        // alias for above terms
-        float samplerate_f;
-        float halfsamplerate_f;
-        float buffersize_f;
-        int   bufferbytes;
-
-        inline void alias()
-        {
-            samplerate_f     = samplerate;
-            halfsamplerate_f = samplerate_f / 2.0f;
-            buffersize_f     = buffersize;
-            bufferbytes      = buffersize * sizeof(float);
-        }
 };
 
 #endif

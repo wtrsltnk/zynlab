@@ -28,12 +28,12 @@
 #include <cmath>
 #include <cstdio>
 
-FormantFilter::FormantFilter(FilterParams *pars, unsigned int srate, int bufsize)
-    : Filter(srate, bufsize)
+FormantFilter::FormantFilter(FilterParams *pars, SYNTH_T* synth_)
+    : Filter(synth_)
 {
     numformants = pars->Pnumformants;
     for(int i = 0; i < numformants; ++i)
-        formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages, srate, bufsize);
+        formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages, synth_);
     cleanup();
 
     for(int j = 0; j < FF_MAX_VOWELS; ++j)
@@ -205,26 +205,26 @@ void FormantFilter::setfreq_and_q(float frequency, float q_)
 
 void FormantFilter::filterout(float *smp)
 {
-    float inbuffer[buffersize];
+    float inbuffer[this->_synth->buffersize];
 
-    memcpy(inbuffer, smp, bufferbytes);
-    memset(smp, 0, bufferbytes);
+    memcpy(inbuffer, smp, this->_synth->bufferbytes);
+    memset(smp, 0, this->_synth->bufferbytes);
 
     for(int j = 0; j < numformants; ++j) {
-        float tmpbuf[buffersize];
-        for(int i = 0; i < buffersize; ++i)
+        float tmpbuf[this->_synth->buffersize];
+        for(int i = 0; i < this->_synth->buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);
 
         if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for(int i = 0; i < buffersize; ++i)
+            for(int i = 0; i < this->_synth->buffersize; ++i)
                 smp[i] += tmpbuf[i]
                           * INTERPOLATE_AMPLITUDE(oldformantamp[j],
                                                   currentformants[j].amp,
                                                   i,
-                                                  buffersize);
+                                                  this->_synth->buffersize);
         else
-            for(int i = 0; i < buffersize; ++i)
+            for(int i = 0; i < this->_synth->buffersize; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
         oldformantamp[j] = currentformants[j].amp;
     }

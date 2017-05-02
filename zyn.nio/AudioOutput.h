@@ -29,8 +29,10 @@
 
 class AudioOutput : public virtual Engine
 {
+protected:
+    SYNTH_T* _synth;
 public:
-    AudioOutput();
+    AudioOutput(SYNTH_T* s);
     virtual ~AudioOutput();
 
     /**Sets the Sample Rate of this Output

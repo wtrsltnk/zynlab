@@ -29,7 +29,7 @@
 
 using namespace std;
 
-AudioOutput::AudioOutput() : samplerate(synth->samplerate), bufferSize(synth->buffersize) { }
+AudioOutput::AudioOutput(SYNTH_T* s) : _synth(s), samplerate(s->samplerate), bufferSize(s->buffersize) { }
 
 AudioOutput::~AudioOutput() { }
 

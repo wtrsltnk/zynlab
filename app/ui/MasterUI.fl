@@ -324,9 +324,9 @@ return(WidgetPDial::handle(event));} {}
   }
 }
 
-class Panellistitem {open : {public Fl_Group}
+class Panellistitem {: {public Fl_Group}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window panellistitem {
       private xywh {932 250 150 422} type Double box NO_BOX color 51 hide
@@ -471,10 +471,10 @@ class MasterUI {open
  || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))) {
     config.save();
     *exitprogram=1;
-};}
+};} open
       xywh {979 190 390 524} type Double hide xclass zynaddsubfx
     } {
-      Fl_Menu_Bar mastermenu {
+      Fl_Menu_Bar mastermenu {open selected
         xywh {-5 0 690 25}
       } {
         Submenu {} {
@@ -644,33 +644,6 @@ updatepanel();}
             label {&Virtual Keyboard...}
             callback {virkeyboard->show();}
             xywh {10 10 100 20}
-          }
-        }
-        Submenu recordmenu {
-          label {&Record}
-          xywh {0 0 100 20}
-        } {
-          MenuItem {} {
-            label {&Choose WAV file...}
-            callback {char *filename;
-recordbutton->deactivate();
-pausebutton->deactivate();
-pauselabel->deactivate();
-stopbutton->deactivate();
-filename=fl_file_chooser("Record to audio file:","(*.wav)",NULL,0);
-if (filename==NULL) return;
-fl_filename_setext(filename,".wav");
-
-int result=master->HDDRecorder.preparefile(filename,0);
-if (result==1) {
-    result=0;
-   if (fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL))
-       master->HDDRecorder.preparefile(filename,1);
-};
-if (result==0) recordbutton->activate();
-
-if (result!=0) fl_alert("Error: Could not save the file.");}
-            xywh {0 0 100 20}
           }
         }
         Submenu {} {
@@ -930,47 +903,6 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {320 69 65 23} color 51 labelfont 1
       }
       Fl_Group {} {
-        xywh {150 40 117 45} box UP_FRAME
-      } {
-        Fl_Button recordbutton {
-          label {Rec.}
-          callback {o->deactivate();
-recordmenu->deactivate();
-recordmenu->label("&Record(*)");
-stopbutton->activate();
-pausebutton->activate();
-pauselabel->activate();
-master->HDDRecorder.start();
-master->vuresetpeaks();
-mastermenu->redraw();}
-          tooltip {Start Recording} xywh {159 46 21 21} box ROUND_UP_BOX color 88 labelfont 1 labelsize 10 align 2 deactivate
-        }
-        Fl_Button stopbutton {
-          label Stop
-          callback {o->deactivate();
-master->HDDRecorder.stop();
-recordbutton->deactivate();
-pausebutton->deactivate();
-pauselabel->deactivate();
-recordmenu->activate();
-recordmenu->label("&Record");
-mastermenu->redraw();}
-          tooltip {Stop Recording and close the audio file} xywh {237 46 21 21} box THIN_UP_BOX color 4 labelfont 1 labelsize 10 align 2 deactivate
-        }
-        Fl_Button pausebutton {
-          label {@||}
-          callback {o->deactivate();
-master->HDDRecorder.pause();
-recordbutton->activate();
-mastermenu->redraw();}
-          tooltip {Pause Recording} xywh {198 46 21 21} box THIN_UP_BOX color 4 selection_color 4 labelfont 1 labelcolor 3 align 16 deactivate
-        }
-        Fl_Box pauselabel {
-          label Pause
-          xywh {192 66 30 15} labelfont 1 labelsize 10 deactivate
-        }
-      }
-      Fl_Group {} {
         xywh {1 490 389 55}
       } {
         Fl_Box {} {
@@ -1090,7 +1022,7 @@ GNU General Public License for details.}
       }
     }
     Fl_Window panelwindow {
-      label {ZynAddSubFX Panel} open
+      label {ZynAddSubFX Panel}
       xywh {162 276 1167 469} type Single hide
     } {
       Fl_Pack {} {open
@@ -1100,7 +1032,7 @@ GNU General Public License for details.}
       Fl_Button {} {
         label Close
         callback {panelwindow->hide();
-updatepanel();} selected
+updatepanel();}
         xywh {1050 435 50 25} box THIN_UP_BOX labelsize 13
       }
       Fl_Button {} {

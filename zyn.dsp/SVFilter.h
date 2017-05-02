@@ -33,8 +33,8 @@ class SVFilter:public Filter
                  float Ffreq,
                  float Fq,
                  unsigned char Fstages,
-                 unsigned int srate, int bufsize);
-        ~SVFilter();
+                 SYNTH_T* synth_);
+        virtual ~SVFilter();
         void filterout(float *smp);
         void setfreq(float frequency);
         void setfreq_and_q(float frequency, float q_);

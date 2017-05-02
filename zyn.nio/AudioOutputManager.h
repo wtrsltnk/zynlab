@@ -36,7 +36,6 @@ public:
 
     std::string getSink() const;
 
-    class WavEngine * wave;     /**<The Wave Recorder*/
     friend class EngineManager;
 private:
     AudioOutputManager(IMixer* mixer);

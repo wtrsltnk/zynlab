@@ -32,12 +32,6 @@ public:
     //Get the prefered sample rate from jack (if running)
     static void preferedSampleRate(unsigned &rate);
 
-    //Wave writing
-    static void waveNew(class WavFile *wave);
-    static void waveStart(void);
-    static void waveStop(void);
-    static void waveEnd(void);
-
     static std::string defaultSource;
     static std::string defaultSink;
 };

@@ -33,8 +33,8 @@
 class NulEngine:public AudioOutput, MidiInput
 {
     public:
-        NulEngine();
-        ~NulEngine();
+        NulEngine(SYNTH_T* s);
+        virtual ~NulEngine();
 
         bool Start();
         void Stop();

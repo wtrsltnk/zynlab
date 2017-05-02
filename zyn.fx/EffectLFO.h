@@ -23,31 +23,31 @@
 #ifndef EFFECT_LFO_H
 #define EFFECT_LFO_H
 
+#include "../zyn.common/globals.h"
+
 /**LFO for some of the Effect objects
  * \todo see if this should inherit LFO*/
 class EffectLFO
 {
-    public:
-        EffectLFO(float srate_f, float bufsize_f);
-        ~EffectLFO();
-        void effectlfoout(float *outl, float *outr);
-        void updateparams(void);
-        unsigned char Pfreq;
-        unsigned char Prandomness;
-        unsigned char PLFOtype;
-        unsigned char Pstereo; // 64 is centered
-    private:
-        float getlfoshape(float x);
+    SYNTH_T* _synth;
+public:
+    EffectLFO(SYNTH_T* synth_);
+    ~EffectLFO();
+    void effectlfoout(float *outl, float *outr);
+    void updateparams(void);
+    unsigned char Pfreq;
+    unsigned char Prandomness;
+    unsigned char PLFOtype;
+    unsigned char Pstereo; // 64 is centered
+private:
+    float getlfoshape(float x);
 
-        float xl, xr;
-        float incx;
-        float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
-        float lfornd;
-        char  lfotype;
+    float xl, xr;
+    float incx;
+    float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
+    float lfornd;
+    char  lfotype;
 
-        // current setup
-        float samplerate_f;
-        float buffersize_f;
 };
 
 #endif

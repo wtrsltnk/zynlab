@@ -32,7 +32,7 @@
 #include <pthread.h>
 #include <list> // For the monomemnotes list.
 
-class EffectMgr;
+class EffectManager;
 class ADnoteParameters;
 class SUBnoteParameters;
 class PADnoteParameters;
@@ -43,12 +43,13 @@ class FFTwrapper;
 /** Part implementation*/
 class Instrument
 {
+        SYNTH_T* _synth;
     public:
         /**Constructor
          * @param microtonal_ Pointer to the microtonal object
          * @param fft_ Pointer to the FFTwrapper
          * @param mutex_ Pointer to the master pthread_mutex_t*/
-        Instrument(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
+        Instrument(SYNTH_T* synth_, Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
         /**Destructor*/
         ~Instrument();
 
@@ -147,7 +148,7 @@ class Instrument
 
         Controller ctl; //Part controllers
 
-        EffectMgr    *partefx[NUM_PART_EFX]; //insertion part effects (they are part of the instrument)
+        EffectManager *partefx[NUM_PART_EFX]; //insertion part effects (they are part of the instrument)
         unsigned char Pefxroute[NUM_PART_EFX]; //how the effect's output is routed(to next effect/to out)
         bool Pefxbypass[NUM_PART_EFX]; //if the effects are bypassed
 

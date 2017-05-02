@@ -34,8 +34,8 @@ class WavFile;
 class WavEngine:public AudioOutput
 {
     public:
-        WavEngine();
-        ~WavEngine();
+        WavEngine(SYNTH_T* s);
+        virtual ~WavEngine();
 
         bool openAudio();
         bool Start();

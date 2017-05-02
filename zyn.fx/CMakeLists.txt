@@ -30,7 +30,7 @@ set(zyn_fx_HDRS
     Reverb.h
     )
 
-add_library(zyn.fx
+add_library(zyn.fx STATIC
     ${zyn_fx_SRCS}
     ${zyn_fx_HDRS}
     )

@@ -29,8 +29,11 @@
 
 class FilterParams:public PresetsArray
 {
+protected:
+    SYNTH_T* _synth;
     public:
-        FilterParams(unsigned char Ptype_,
+        FilterParams(SYNTH_T* synth_,
+                     unsigned char Ptype_,
                      unsigned char Pfreq,
                      unsigned char Pq_);
         ~FilterParams();

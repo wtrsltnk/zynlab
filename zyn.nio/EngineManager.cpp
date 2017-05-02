@@ -27,30 +27,42 @@
 
 using namespace std;
 
-EngineManager &EngineManager::  getInstance()
+EngineManager* EngineManager::_instance = nullptr;
+
+EngineManager &EngineManager::createInstance(IMixer* mixer)
 {
-    static EngineManager instance;
-    return instance;
+    if (EngineManager::_instance == 0) EngineManager::_instance = new EngineManager(mixer);
+    return *EngineManager::_instance;
+}
+EngineManager &EngineManager::getInstance()
+{
+    return *EngineManager::_instance;
 }
 
-EngineManager::EngineManager()
+void EngineManager::destroyInstance()
 {
-    Engine *defaultEng = new NulEngine();
+    if (EngineManager::_instance != 0) delete EngineManager::_instance;
+    EngineManager::_instance = 0;
+}
+
+EngineManager::EngineManager(class IMixer* mixer)
+{
+    Engine *defaultEng = new NulEngine(mixer->_synth);
 
     //conditional compiling mess (but contained)
     engines.push_back(defaultEng);
     engines.push_back(new RtEngine());
 #if OSS
-    engines.push_back(new OssEngine());
+    engines.push_back(new OssEngine(mixer->_synth));
 #endif
 #if ALSA
-    engines.push_back(new AlsaEngine());
+    engines.push_back(new AlsaEngine(mixer->_synth));
 #endif
 #if JACK
-    engines.push_back(new JackEngine());
+    engines.push_back(new JackEngine(mixer->_synth));
 #endif
 #if PORTAUDIO
-    engines.push_back(new PaEngine());
+    engines.push_back(new PaEngine(mixer->_synth));
 #endif
 #if SDL2
     // TODO Not working yet!
@@ -108,9 +120,8 @@ bool EngineManager::start()
     else {
         expected = false;
         cerr << "ERROR: The default audio output failed to open!" << endl;
-        AudioOutputManager::getInstance(). currentOut =
-            dynamic_cast<AudioOutput *>(getEng("NULL"));
-        AudioOutputManager::getInstance(). currentOut->setAudioEn(true);
+        AudioOutputManager::getInstance().currentOut = dynamic_cast<AudioOutput *>(getEng("NULL"));
+        AudioOutputManager::getInstance().currentOut->setAudioEn(true);
     }
 
     cout << "Starting MIDI: " << defaultIn->name << endl;
@@ -120,8 +131,8 @@ bool EngineManager::start()
     else { //recover
         expected = false;
         cerr << "ERROR: The default MIDI input failed to open!" << endl;
-        MidiInputManager::getInstance(). current = dynamic_cast<MidiInput *>(getEng("NULL"));
-        MidiInputManager::getInstance(). current->setMidiEn(true);
+        MidiInputManager::getInstance().current = dynamic_cast<MidiInput *>(getEng("NULL"));
+        MidiInputManager::getInstance().current->setMidiEn(true);
     }
 
     //Show if expected drivers were booted
