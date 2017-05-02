@@ -20,18 +20,18 @@
 
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
 #include "ADnoteParams.h"
 #include "EnvelopeParams.h"
 #include "LFOParams.h"
 #include "FFTwrapper.h"
 #include "OscilGen.h"
 #include "Resonance.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.dsp/FilterParams.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.dsp/FilterParams.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 int ADnote_unison_sizes[] =
 {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};

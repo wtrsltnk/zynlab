@@ -26,7 +26,8 @@
 
 #ifndef PHASER_H
 #define PHASER_H
-#include "zyn.common/globals.h"
+
+#include "../zyn.common/globals.h"
 #include "Effect.h"
 #include "EffectLFO.h"
 

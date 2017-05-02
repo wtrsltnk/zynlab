@@ -27,7 +27,7 @@
 
 using namespace std;
 
-EngineManager &EngineManager::getInstance()
+EngineManager &EngineManager::  getInstance()
 {
     static EngineManager instance;
     return instance;

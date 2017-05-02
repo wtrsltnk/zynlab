@@ -24,8 +24,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
 
 /**(Midi) Controllers implementation*/
 class Controller

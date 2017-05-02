@@ -28,10 +28,11 @@
 #include "Distorsion.h"
 #include "EQ.h"
 #include "DynamicFilter.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.dsp/FilterParams.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.dsp/FilterParams.h"
 
 #include <iostream>
+
 using namespace std;
 
 EffectMgr::EffectMgr(const bool insertion_, pthread_mutex_t *mutex_)

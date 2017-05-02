@@ -21,7 +21,7 @@
 */
 
 #include "OscilGen.h"
-#include "zyn.common/WaveShapeSmps.h"
+#include "../zyn.common/WaveShapeSmps.h"
 
 #include <cassert>
 #include <stdlib.h>

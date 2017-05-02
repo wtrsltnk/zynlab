@@ -22,8 +22,8 @@
 #ifndef SYNTH_NOTE_H
 #define SYNTH_NOTE_H
 
-#include "zyn.common/globals.h"
-#include "zyn.dsp/FilterParams.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.dsp/FilterParams.h"
 
 class SynthNote
 {

@@ -25,7 +25,7 @@
 
 #include "AudioOutput.h"
 #include "MidiInput.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 #include <sys/time.h>
 #include <pthread.h>

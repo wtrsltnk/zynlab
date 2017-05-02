@@ -23,7 +23,7 @@
 #ifndef ENVELOPE_H
 #define ENVELOPE_H
 
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 #include "EnvelopeParams.h"
 
 /**Implementation of a general Envelope*/

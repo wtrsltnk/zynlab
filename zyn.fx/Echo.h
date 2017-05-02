@@ -24,7 +24,7 @@
 #define ECHO_H
 
 #include "Effect.h"
-#include "zyn.common/Stereo.h"
+#include "../zyn.common/Stereo.h"
 
 /**Echo Effect*/
 class Echo:public Effect

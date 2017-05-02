@@ -4,12 +4,12 @@
 #include <GL/glextl.h>
 #include <GLFW/glfw3.h>
 
-#include "zyn.synth/FFTwrapper.h"
-#include "zyn.mixer/Mixer.h"
-#include "zyn.common/Util.h"
+#include "../zyn.synth/FFTwrapper.h"
+#include "../zyn.mixer/Mixer.h"
+#include "../zyn.common/Util.h"
 
 //Nio System
-#include "zyn.nio/Nio.h"
+#include "../zyn.nio/Nio.h"
 
 #include "scenenode.h"
 

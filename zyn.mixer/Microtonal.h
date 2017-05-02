@@ -23,8 +23,8 @@
 #ifndef MICROTONAL_H
 #define MICROTONAL_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
 
 #define MAX_OCTAVE_SIZE 128
 #define MICROTONAL_MAX_NAME_LEN 120

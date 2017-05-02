@@ -25,7 +25,7 @@
 #include <cstdio>
 #include <cassert>
 #include "SUBnote.h"
-#include "zyn.common/Util.h"
+#include "../zyn.common/Util.h"
 
 SUBnote::SUBnote(SUBnoteParameters *parameters,
                  Controller *ctl_,

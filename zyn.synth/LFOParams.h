@@ -23,9 +23,9 @@
 #ifndef LFO_PARAMS_H
 #define LFO_PARAMS_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/Presets.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.common/Presets.h"
 
 class LFOParams:public Presets
 {

@@ -12,7 +12,8 @@ class SequencerUI {open
 } {
   Function {make_window()} {open
   } {
-    Fl_Window sequencerwindow {open
+    Fl_Window sequencerwindow {
+      label {ZynAddSubFX Sequencer} open selected
       xywh {396 516 965 283} type Double visible
     } {
       Fl_Box led01 {
@@ -144,28 +145,28 @@ class SequencerUI {open
         xywh {905 173 55 85} box FLAT_BOX color 44 align 2
       }
       Fl_Button {} {
-        label Play
+        label {@>}
         callback {seq->Start();}
-        xywh {5 50 55 20}
+        xywh {5 60 40 35} labelsize 19
       }
       Fl_Button {} {
-        label Pause
+        label {@||}
         callback {seq->Pause();}
-        xywh {115 50 55 20}
+        xywh {85 60 35 35} labelsize 20
       }
       Fl_Button {} {
-        label Stop
+        label {@square}
         callback {seq->Stop();}
-        xywh {60 50 55 20}
+        xywh {45 60 40 35} labelsize 19
       }
       Fl_Counter bpm {
         label BPM
         callback {seq->setBpm(o->value());}
-        xywh {47 25 80 20} align 1 minimum 20 maximum 200 step 1 value 80
+        xywh {5 25 115 25} align 1 minimum 20 maximum 200 step 1 value 80
       }
       Fl_Group {} {
         label Display open
-        xywh {175 20 265 130} box PLASTIC_DOWN_BOX color 178
+        xywh {125 20 315 130} box PLASTIC_DOWN_BOX color 178
       } {}
       Fl_Group keyboard {open
         xywh {445 5 515 145} box BORDER_BOX color 47 selection_color 43 deactivate
@@ -239,7 +240,7 @@ class SequencerUI {open
           label Save
           callback {disable_keyboard();
 this->seq->setStep(this->selectedStep, this->selectedNote, velocity->value());
-this->update_leds();} selected
+this->update_leds();}
           xywh {875 120 80 25}
         }
         Fl_Box step_lbl {

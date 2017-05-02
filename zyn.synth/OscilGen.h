@@ -23,9 +23,9 @@
 #ifndef OSCIL_GEN_H
 #define OSCIL_GEN_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/Presets.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.common/Presets.h"
 #include "FFTwrapper.h"
 #include "Resonance.h"
 

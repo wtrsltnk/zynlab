@@ -23,10 +23,10 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-#include "zyn.common/Util.h"
-#include "zyn.common/globals.h"
-#include "zyn.dsp/FilterParams.h"
-#include "zyn.common/Stereo.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.dsp/FilterParams.h"
+#include "../zyn.common/Stereo.h"
 
 class FilterParams;
 

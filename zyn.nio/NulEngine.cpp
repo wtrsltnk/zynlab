@@ -21,7 +21,7 @@
 */
 
 #include "NulEngine.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 #include <unistd.h>
 #include <iostream>

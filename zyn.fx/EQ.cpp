@@ -20,9 +20,10 @@
 
 */
 
-#include <cmath>
 #include "EQ.h"
-#include "zyn.dsp/AnalogFilter.h"
+#include "../zyn.dsp/AnalogFilter.h"
+
+#include <cmath>
 
 EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, srate, bufsize)

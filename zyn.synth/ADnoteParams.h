@@ -24,9 +24,9 @@
 #define AD_NOTE_PARAMETERS_H
 
 
-#include "zyn.common/globals.h"
-#include "zyn.common/Util.h"
-#include "zyn.common/PresetsArray.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.common/PresetsArray.h"
 
 class EnvelopeParams;
 class LFOParams;

@@ -24,10 +24,10 @@
 #define SUB_NOTE_PARAMETERS_H
 
 #include "EnvelopeParams.h"
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/Presets.h"
-#include "zyn.dsp/FilterParams.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.common/Presets.h"
+#include "../zyn.dsp/FilterParams.h"
 
 class SUBnoteParameters:public Presets
 {

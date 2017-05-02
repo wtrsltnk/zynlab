@@ -1,8 +1,8 @@
 #ifndef AUDIOOUTPUTMANAGER_H
 #define AUDIOOUTPUTMANAGER_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/Stereo.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/Stereo.h"
 
 #include <list>
 #include <string>
@@ -32,12 +32,6 @@ public:
          */
     AudioOutput *getOut(std::string name);
 
-    /**Gets the name of the first running driver
-         * Deprecated
-         * @return if no running output, "" is returned
-         */
-    std::string getDriver() const;
-
     bool setSink(std::string name);
 
     std::string getSink() const;
@@ -47,7 +41,7 @@ public:
 private:
     AudioOutputManager(IMixer* mixer);
     void addSmps(float *l, float *r);
-    unsigned int  storedSmps() const {return priBuffCurrent.l - priBuf.l; }
+    unsigned int  storedSmps() const { return priBuffCurrent.l - priBuf.l; }
     void removeStaleSmps();
 
     AudioOutput *currentOut; /**<The current output driver*/

@@ -25,15 +25,15 @@
 #define MIXER_H
 #include <pthread.h>
 
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 #include "Microtonal.h"
 
 #include "Bank.h"
 #include "Recorder.h"
 #include "Dump.h"
-#include "zyn.common/XMLwrapper.h"
+#include "../zyn.common/XMLwrapper.h"
 
-#include "zyn.synth/Controller.h"
+#include "../zyn.synth/Controller.h"
 
 typedef enum {
     MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK
@@ -98,8 +98,6 @@ class Mixer : public IMixer
         virtual void PolyphonicAftertouch(char chan, char note, char velocity);
         virtual void SetController(char chan, int type, int par);
         virtual void SetProgram(char chan, unsigned int pgm);
-        //void NRPN...
-
 
         void ShutUp();
         int shutup;
@@ -143,7 +141,6 @@ class Mixer : public IMixer
 
         //part that's apply the insertion effect; -1 to disable
         short int Pinsparts[NUM_INS_EFX];
-
 
         //peaks for VU-meter
         void vuresetpeaks();

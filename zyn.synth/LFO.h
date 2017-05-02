@@ -23,7 +23,7 @@
 #ifndef LFO_H
 #define LFO_H
 
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 #include "LFOParams.h"
 
 /**Class for creating Low Frequency Ocillators*/

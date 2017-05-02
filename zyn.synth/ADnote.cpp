@@ -19,19 +19,18 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
+#include "ADnote.h"
+#include "OscilGen.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.dsp/Filter.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <cassert>
 #include <stdint.h>
-
-#include "zyn.common/globals.h"
-#include "zyn.common/Util.h"
-#include "zyn.dsp/Filter.h"
-#include "OscilGen.h"
-#include "ADnote.h"
-
 
 ADnote::ADnote(ADnoteParameters *pars,
                Controller *ctl_,

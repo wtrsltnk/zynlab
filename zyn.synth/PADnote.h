@@ -26,7 +26,7 @@
 #include "Controller.h"
 #include "Envelope.h"
 #include "LFO.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 /**The "pad" synthesizer*/
 class PADnote:public SynthNote

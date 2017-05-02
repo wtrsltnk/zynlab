@@ -21,7 +21,7 @@
 */
 #include <math.h>
 #include "PADnoteParams.h"
-#include "zyn.common/WavFile.h"
+#include "../zyn.common/WavFile.h"
 
 PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,
                                      pthread_mutex_t *mutex_):Presets()

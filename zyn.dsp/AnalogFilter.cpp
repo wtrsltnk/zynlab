@@ -26,7 +26,7 @@
 #include <cmath>
 #include <cassert>
 
-#include "zyn.common/Util.h"
+#include "../zyn.common/Util.h"
 #include "AnalogFilter.h"
 
 AnalogFilter::AnalogFilter(unsigned char Ftype,

@@ -21,7 +21,7 @@
 */
 
 #include "EffectLFO.h"
-#include "zyn.common/Util.h"
+#include "../zyn.common/Util.h"
 
 #include <cmath>
 

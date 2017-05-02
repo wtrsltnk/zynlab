@@ -36,18 +36,18 @@
 
 #include <getopt.h>
 
-#include "zyn.synth/FFTwrapper.h"
-#include "zyn.mixer/Mixer.h"
-#include "zyn.mixer/Instrument.h"
-#include "zyn.common/Util.h"
-#include "zyn.mixer/Dump.h"
+#include "../zyn.synth/FFTwrapper.h"
+#include "../zyn.mixer/Mixer.h"
+#include "../zyn.mixer/Instrument.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.mixer/Dump.h"
 extern Dump dump;
 
 // Sequencer
-#include "zyn.seq/Sequencer.h"
+#include "../zyn.seq/Sequencer.h"
 
 //Nio System
-#include "zyn.nio/Nio.h"
+#include "../zyn.nio/Nio.h"
 
 #ifdef ENABLE_FLTKGUI
 #include "MasterUI.h"
@@ -266,9 +266,6 @@ int main(int argc, char *argv[])
         case 'D':
             dump.startnow();
             break;
-        case 'N':
-            Nio::setPostfix(optarguments);
-            break;
         case 'I':
             if(optarguments)
                 Nio::setDefaultSource(optarguments);
@@ -276,9 +273,6 @@ int main(int argc, char *argv[])
         case 'O':
             if(optarguments)
                 Nio::setDefaultSink(optarguments);
-            break;
-        case 'a':
-            Nio::autoConnect = true;
             break;
         case 'e':
             GETOP(execAfterInit);
@@ -308,8 +302,6 @@ int main(int argc, char *argv[])
              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
              <<
                 "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
-             << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
-             << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"

@@ -29,11 +29,11 @@
 #include "EnvelopeParams.h"
 #include "LFOParams.h"
 
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/Util.h"
-#include "zyn.common/Presets.h"
-#include "zyn.dsp/FilterParams.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.common/Presets.h"
+#include "../zyn.dsp/FilterParams.h"
 
 #include <string>
 #include <pthread.h>

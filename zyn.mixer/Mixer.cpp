@@ -22,12 +22,10 @@
 */
 
 #include "Mixer.h"
-
 #include "Instrument.h"
-
-#include "zyn.synth/LFOParams.h"
-#include "zyn.fx/EffectMgr.h"
-#include "zyn.synth/FFTwrapper.h"
+#include "../zyn.synth/LFOParams.h"
+#include "../zyn.fx/EffectMgr.h"
+#include "../zyn.synth/FFTwrapper.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -35,7 +33,6 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-
 #include <unistd.h>
 
 using namespace std;

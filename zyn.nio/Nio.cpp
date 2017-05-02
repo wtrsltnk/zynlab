@@ -5,21 +5,16 @@
 #include "MidiInputManager.h"
 #include "EngineManager.h"
 #include "WavEngine.h"
+
 #include <iostream>
 #include <algorithm>
-using std::string;
-using std::set;
-using std::cerr;
-using std::endl;
 
-MidiInputManager     *in  = NULL;
-AudioOutputManager    *out = NULL;
+MidiInputManager *in  = NULL;
+AudioOutputManager *out = NULL;
 EngineManager *eng = NULL;
-string     postfix;
 
-bool   Nio::autoConnect   = false;
-string Nio::defaultSource = IN_DEFAULT;
-string Nio::defaultSink   = OUT_DEFAULT;
+std::string Nio::defaultSource = IN_DEFAULT;
+std::string Nio::defaultSink = OUT_DEFAULT;
 
 bool Nio::start(IMixer* mixer)
 {
@@ -35,64 +30,56 @@ void Nio::stop()
     eng->stop();
 }
 
-void Nio::setDefaultSource(string name)
+void Nio::setDefaultSource(const std::string& name)
 {
-    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
     defaultSource = name;
+    std::transform(defaultSource.begin(), defaultSource.end(), defaultSource.begin(), ::toupper);
 }
 
-void Nio::setDefaultSink(string name)
+void Nio::setDefaultSink(const std::string& name)
 {
-    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
     defaultSink = name;
+    std::transform(defaultSink.begin(), defaultSink.end(), defaultSink.begin(), ::toupper);
 }
 
-bool Nio::setSource(string name)
+bool Nio::setSource(const std::string& name)
 {
     return in->setSource(name);
 }
 
-bool Nio::setSink(string name)
+bool Nio::setSink(const std::string& name)
 {
     return out->setSink(name);
 }
 
-void Nio::setPostfix(std::string post)
+std::set<std::string> Nio::getSources(void)
 {
-    postfix = post;
-}
+    std::set<std::string> sources;
 
-std::string Nio::getPostfix(void)
-{
-    return postfix;
-}
+    for (Engine* e : eng->engines)
+        if(dynamic_cast<MidiInput *>(e))
+            sources.insert(e->name);
 
-set<string> Nio::getSources(void)
-{
-    set<string> sources;
-    for(std::list<Engine *>::iterator itr = eng->engines.begin();
-        itr != eng->engines.end(); ++itr)
-        if(dynamic_cast<MidiInput *>(*itr))
-            sources.insert((*itr)->name);
     return sources;
 }
 
-set<string> Nio::getSinks(void)
+std::set<std::string> Nio::getSinks(void)
 {
-    set<string> sinks;
-    for(std::list<Engine *>::iterator itr = eng->engines.begin();
-        itr != eng->engines.end(); ++itr)
-        if(dynamic_cast<AudioOutput *>(*itr))
-            sinks.insert((*itr)->name);
+    std::set<std::string> sinks;
+
+    for(Engine* e : eng->engines)
+        if(dynamic_cast<AudioOutput *>(e))
+            sinks.insert(e->name);
+
     return sinks;
 }
 
-string Nio::getSource()
+std::string Nio::getSource()
 {
     return in->getSource();
 }
 
-string Nio::getSink()
+std::string Nio::getSink()
 {
     return out->getSink();
 }

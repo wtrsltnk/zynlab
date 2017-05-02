@@ -22,7 +22,8 @@
 */
 
 #include "Effect.h"
-#include "zyn.dsp/FilterParams.h"
+#include "../zyn.dsp/FilterParams.h"
+
 #include <cmath>
 
 Effect::Effect(bool insertion_, float *efxoutl_, float *efxoutr_,

@@ -36,8 +36,8 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "zyn.common/Config.h"
-#include "zyn.common/Util.h"
+#include "../zyn.common/Config.h"
+#include "../zyn.common/Util.h"
 #include "Instrument.h"
 
 #define INSTRUMENT_EXTENSION ".xiz"

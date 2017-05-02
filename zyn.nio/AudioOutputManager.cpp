@@ -4,7 +4,7 @@
 #include "EngineManager.h"
 #include "MidiInputManager.h"
 #include "WavEngine.h"
-#include "zyn.common/Util.h" //for set_realtime()
+#include "../zyn.common/Util.h" //for set_realtime()
 
 #include <algorithm>
 #include <iostream>
@@ -33,9 +33,9 @@ void AudioOutputManager::destroyInstance()
 }
 
 AudioOutputManager::AudioOutputManager(IMixer* mixer)
-    :wave(new WavEngine()),
-      priBuf(new float[4096],
-             new float[4096]), priBuffCurrent(priBuf),
+    : wave(new WavEngine()),
+      priBuf(new float[4096], new float[4096]),
+      priBuffCurrent(priBuf),
       mixer(mixer)
 {
     currentOut = NULL;
@@ -82,6 +82,10 @@ const Stereo<float *> AudioOutputManager::tick(unsigned int frameSize)
         this->mixer->AudioOut(outl, outr);
         this->mixer->Unlock();
         addSmps(outl, outr);
+
+        //allow wave file to syphon off stream
+        wave->push(Stereo<float *>(outl, outr), synth->buffersize);
+
         i++;
     }
     stales = frameSize;
@@ -91,11 +95,6 @@ const Stereo<float *> AudioOutputManager::tick(unsigned int frameSize)
 AudioOutput *AudioOutputManager::getOut(string name)
 {
     return dynamic_cast<AudioOutput *>(EngineManager::getInstance().getEng(name));
-}
-
-string AudioOutputManager::getDriver() const
-{
-    return currentOut->name;
 }
 
 bool AudioOutputManager::setSink(string name)
@@ -150,9 +149,6 @@ static size_t resample(float *dest,
 
 void AudioOutputManager::addSmps(float *l, float *r)
 {
-    //allow wave file to syphon off stream
-    wave->push(Stereo<float *>(l, r), synth->buffersize);
-
     const int s_out = currentOut->getSampleRate(),
               s_sys = synth->samplerate;
 

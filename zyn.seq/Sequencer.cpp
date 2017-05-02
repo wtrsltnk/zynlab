@@ -1,9 +1,10 @@
 #include "Sequencer.h"
 #include "SequencerStrip.h"
+#include "../zyn.mixer/Mixer.h"
+
 #include <ctime>
 #include <chrono>
 #include <iostream>
-#include "zyn.mixer/Mixer.h"
 
 Sequencer::Sequencer(class IMixer* mixer)
     : _mixer(mixer), _playThread([this](){ this->runThread(); }),

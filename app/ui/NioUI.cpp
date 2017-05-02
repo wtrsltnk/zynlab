@@ -1,6 +1,7 @@
 #include "NioUI.h"
-#include "zyn.nio/Nio.h"
-#include "MasterUI.h"
+#include "../../zyn.nio/Nio.h"
+#include <MasterUI.h>
+
 #include <string>
 
 using namespace std;

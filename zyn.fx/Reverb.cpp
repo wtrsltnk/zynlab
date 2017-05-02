@@ -21,9 +21,10 @@
 */
 
 #include "Reverb.h"
-#include "zyn.common/Util.h"
-#include "zyn.dsp/AnalogFilter.h"
-#include "zyn.dsp/Unison.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.dsp/AnalogFilter.h"
+#include "../zyn.dsp/Unison.h"
+
 #include <cmath>
 
 Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)

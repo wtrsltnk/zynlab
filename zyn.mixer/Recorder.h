@@ -24,7 +24,7 @@
 #define RECORDER_H
 
 #include <string>
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 /**Records sound to a file*/
 class Recorder

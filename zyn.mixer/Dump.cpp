@@ -21,7 +21,7 @@
 */
 #include <stdlib.h>
 #include <time.h>
-#include "zyn.common/Util.h"
+#include "../zyn.common/Util.h"
 #include "Dump.h"
 
 Dump dump;

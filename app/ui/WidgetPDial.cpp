@@ -9,7 +9,8 @@
 #include <FL/fl_draw.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Menu_Window.H>
-#include "zyn.common/Util.h"
+#include "../../zyn.common/Util.h"
+
 //Copyright (c) 2003-2005 Nasca Octavian Paul
 //License: GNU GPL version 2 or later
 

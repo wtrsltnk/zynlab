@@ -22,7 +22,7 @@
 #ifndef UNISON_H
 #define UNISON_H
 
-#include "zyn.common/Util.h"
+#include "../zyn.common/Util.h"
 
 //how much the unison frequencies varies (always >= 1.0)
 #define UNISON_FREQ_SPAN 2.0f

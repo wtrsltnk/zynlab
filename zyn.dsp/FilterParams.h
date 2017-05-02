@@ -23,9 +23,9 @@
 #ifndef FILTER_PARAMS_H
 #define FILTER_PARAMS_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/PresetsArray.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.common/PresetsArray.h"
 
 class FilterParams:public PresetsArray
 {

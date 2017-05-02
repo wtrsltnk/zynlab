@@ -21,7 +21,7 @@
 */
 
 #include "LFO.h"
-#include "zyn.common/Util.h"
+#include "../zyn.common/Util.h"
 
 #include <stdlib.h>
 #include <stdio.h>

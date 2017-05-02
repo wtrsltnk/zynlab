@@ -22,10 +22,10 @@
 #ifndef RESONANCE_H
 #define RESONANCE_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/Util.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/Presets.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.common/Presets.h"
 #include "FFTwrapper.h"
 
 #define N_RES_POINTS 256

@@ -22,22 +22,20 @@
 #ifndef EFFECTMGR_H
 #define EFFECTMGR_H
 
-#include <pthread.h>
-
 #include "Alienwah.h"
 #include "Phaser.h"
-#include "zyn.common/Presets.h"
+#include "Distorsion.h"
+#include "EQ.h"
+#include "DynamicFilter.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.dsp/FilterParams.h"
+#include "../zyn.common/Presets.h"
+
+#include <pthread.h>
 
 class Effect;
 class FilterParams;
 class XMLwrapper;
-
-#include "Distorsion.h"
-#include "EQ.h"
-#include "DynamicFilter.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/Presets.h"
-#include "zyn.dsp/FilterParams.h"
 
 /**Effect manager, an interface betwen the program and effects*/
 class EffectMgr:public Presets

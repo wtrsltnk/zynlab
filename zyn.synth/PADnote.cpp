@@ -18,10 +18,12 @@
   along with this program; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
-#include <math.h>
+
 #include "PADnote.h"
-#include "zyn.common/Config.h"
-#include "zyn.dsp/Filter.h"
+#include "../zyn.common/Config.h"
+#include "../zyn.dsp/Filter.h"
+
+#include <math.h>
 
 PADnote::PADnote(PADnoteParameters *parameters,
                  Controller *ctl_,

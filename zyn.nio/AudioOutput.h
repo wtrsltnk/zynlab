@@ -24,8 +24,8 @@
 #define AUDIOOUTPUT_H
 
 #include "Engine.h"
-#include "zyn.common/Stereo.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/Stereo.h"
+#include "../zyn.common/globals.h"
 
 class AudioOutput : public virtual Engine
 {

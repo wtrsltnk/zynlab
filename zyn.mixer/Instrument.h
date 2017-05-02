@@ -25,8 +25,8 @@
 
 #define MAX_INFO_TEXT_SIZE 1000
 
-#include "zyn.common/globals.h"
-#include "zyn.synth/Controller.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.synth/Controller.h"
 #include "Microtonal.h"
 
 #include <pthread.h>

@@ -1,7 +1,7 @@
 #include "MidiInputManager.h"
 #include "MidiInput.h"
 #include "EngineManager.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 #include <iostream>
 

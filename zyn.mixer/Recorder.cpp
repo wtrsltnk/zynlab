@@ -20,10 +20,11 @@
 
 */
 
-#include <sys/stat.h>
 #include "Recorder.h"
-#include "zyn.common/WavFile.h"
-#include "zyn.nio/Nio.h"
+#include "../zyn.common/WavFile.h"
+#include "../zyn.nio/Nio.h"
+
+#include <sys/stat.h>
 
 Recorder::Recorder()
     :status(0), notetrigger(0)

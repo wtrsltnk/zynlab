@@ -22,9 +22,10 @@
 
 #ifndef CHORUS_H
 #define CHORUS_H
+
 #include "Effect.h"
 #include "EffectLFO.h"
-#include "zyn.common/Stereo.h"
+#include "../zyn.common/Stereo.h"
 
 #define MAX_CHORUS_DELAY 250.0f //ms
 

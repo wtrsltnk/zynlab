@@ -23,7 +23,7 @@
 #ifndef FORMANT_FILTER_H
 #define FORMANT_FILTER_H
 
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 #include "Filter.h"
 
 

@@ -17,8 +17,8 @@
 */
 
 #include "WavEngine.h"
-#include "zyn.common/WavFile.h"
-#include "zyn.common/Util.h"
+#include "../zyn.common/WavFile.h"
+#include "../zyn.common/Util.h"
 
 #include <cstdio>
 #include <iostream>

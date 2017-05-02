@@ -329,8 +329,8 @@ class Panellistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {
-      private xywh {932 250 120 422} type Double box NO_BOX color 51
-      class Fl_Group visible
+      private xywh {932 250 150 422} type Double box NO_BOX color 51 hide
+      class Fl_Group
     } {
       Fl_Group panellistitemgroup {open
         private xywh {0 20 70 400} box UP_BOX
@@ -382,7 +382,7 @@ bankui->show();}
         Fl_Button {} {
           label Effects
           callback {//partfx->show();}
-          xywh {5 215 60 20} box THIN_UP_BOX
+          xywh {5 213 60 20} box THIN_UP_BOX
         }
       }
       Fl_Check_Button partenabled {
@@ -1090,8 +1090,8 @@ GNU General Public License for details.}
       }
     }
     Fl_Window panelwindow {
-      label {ZynAddSubFX Panel} open selected
-      xywh {330 104 1167 469} type Single visible
+      label {ZynAddSubFX Panel} open
+      xywh {162 276 1167 469} type Single hide
     } {
       Fl_Pack {} {open
         xywh {5 5 1155 425} type HORIZONTAL
@@ -1100,7 +1100,7 @@ GNU General Public License for details.}
       Fl_Button {} {
         label Close
         callback {panelwindow->hide();
-updatepanel();}
+updatepanel();} selected
         xywh {1050 435 50 25} box THIN_UP_BOX labelsize 13
       }
       Fl_Button {} {

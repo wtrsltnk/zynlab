@@ -21,7 +21,8 @@
 */
 
 #include "FilterParams.h"
-#include "zyn.common/Util.h"
+#include "../zyn.common/Util.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

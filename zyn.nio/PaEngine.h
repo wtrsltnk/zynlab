@@ -23,7 +23,7 @@
 #define PA_ENGINE_H
 
 #include "AudioOutput.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 #include <portaudio.h>
 

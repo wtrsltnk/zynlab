@@ -20,12 +20,13 @@
 
 */
 
-#include <cmath>
-#include <cstdio>
-#include "zyn.common/Util.h"
 #include "FormantFilter.h"
 #include "AnalogFilter.h"
 #include "FilterParams.h"
+#include "../zyn.common/Util.h"
+
+#include <cmath>
+#include <cstdio>
 
 FormantFilter::FormantFilter(FilterParams *pars, unsigned int srate, int bufsize)
     : Filter(srate, bufsize)

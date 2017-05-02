@@ -23,7 +23,7 @@
 #ifndef SV_FILTER_H
 #define SV_FILTER_H
 
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 #include "Filter.h"
 
 class SVFilter:public Filter

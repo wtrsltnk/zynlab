@@ -23,9 +23,9 @@
 #ifndef ENVELOPE_PARAMS_H
 #define ENVELOPE_PARAMS_H
 
-#include "zyn.common/globals.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.common/Presets.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.common/Presets.h"
 
 #define MAX_ENVELOPE_POINTS 40
 #define MIN_ENVELOPE_DB -400

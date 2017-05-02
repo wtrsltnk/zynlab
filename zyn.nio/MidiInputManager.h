@@ -3,7 +3,7 @@
 
 #include "ZynSema.h"
 #include "SafeQueue.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 #include <string>
 

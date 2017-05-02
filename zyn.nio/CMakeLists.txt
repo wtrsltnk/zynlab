@@ -86,6 +86,10 @@ target_link_libraries(zyn.nio
     winmm
     )
 
+target_include_directories(zyn.nio
+    PRIVATE "${CMAKE_SOURCE_DIR}"
+    )
+
 target_compile_definitions(zyn.nio
     PRIVATE -D__WINDOWS_MM__
     )

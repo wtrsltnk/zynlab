@@ -22,16 +22,17 @@
 
 #include "Instrument.h"
 #include "Microtonal.h"
-#include "zyn.common/Util.h"
-#include "zyn.common/XMLwrapper.h"
-#include "zyn.fx/EffectMgr.h"
-#include "zyn.synth/ADnoteParams.h"
-#include "zyn.synth/SUBnoteParams.h"
-#include "zyn.synth/PADnoteParams.h"
-#include "zyn.synth/ADnote.h"
-#include "zyn.synth/SUBnote.h"
-#include "zyn.synth/PADnote.h"
-#include "zyn.synth/FFTwrapper.h"
+#include "../zyn.common/Util.h"
+#include "../zyn.common/XMLwrapper.h"
+#include "../zyn.fx/EffectMgr.h"
+#include "../zyn.synth/ADnoteParams.h"
+#include "../zyn.synth/SUBnoteParams.h"
+#include "../zyn.synth/PADnoteParams.h"
+#include "../zyn.synth/ADnote.h"
+#include "../zyn.synth/SUBnote.h"
+#include "../zyn.synth/PADnote.h"
+#include "../zyn.synth/FFTwrapper.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

@@ -22,7 +22,7 @@
 
 #include "MidiInput.h"
 #include "MidiInputManager.h"
-#include "zyn.common/globals.h"
+#include "../zyn.common/globals.h"
 
 void MidiInput::midiProcess(unsigned char head, unsigned char num, unsigned char value)
 {

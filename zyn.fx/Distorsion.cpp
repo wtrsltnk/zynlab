@@ -21,8 +21,9 @@
 */
 
 #include "Distorsion.h"
-#include "zyn.dsp/AnalogFilter.h"
-#include "zyn.common/WaveShapeSmps.h"
+#include "../zyn.dsp/AnalogFilter.h"
+#include "../zyn.common/WaveShapeSmps.h"
+
 #include <cmath>
 
 Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)

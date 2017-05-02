@@ -27,8 +27,8 @@
 #include "SUBnoteParams.h"
 #include "Controller.h"
 #include "Envelope.h"
-#include "zyn.common/globals.h"
-#include "zyn.dsp/Filter.h"
+#include "../zyn.common/globals.h"
+#include "../zyn.dsp/Filter.h"
 
 class SUBnote:public SynthNote
 {

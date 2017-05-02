@@ -20,13 +20,14 @@
 
 */
 
+#include "SVFilter.h"
+#include "../zyn.common/Util.h"
+
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <cassert>
 #include <iostream>
-#include "zyn.common/Util.h"
-#include "SVFilter.h"
 
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
                    unsigned char Fstages, unsigned int srate, int bufsize)
