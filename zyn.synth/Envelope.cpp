@@ -23,7 +23,7 @@
 #include <cmath>
 #include "Envelope.h"
 
-Envelope::Envelope(EnvelopeParams *envpars, float basefreq, SYNTH_T* synth_)
+Envelope::Envelope(EnvelopeParams *envpars, float basefreq, SystemSettings* synth_)
     : _synth(synth_)
 {
     int i;

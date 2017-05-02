@@ -28,7 +28,7 @@
 
 using namespace std;
 
-NulEngine::NulEngine(SYNTH_T* s)
+NulEngine::NulEngine(SystemSettings* s)
     : AudioOutput(s), pThread(NULL)
 {
     name = "NULL";

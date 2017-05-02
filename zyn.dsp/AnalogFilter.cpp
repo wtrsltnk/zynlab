@@ -33,7 +33,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
                            float Ffreq,
                            float Fq,
                            unsigned char Fstages,
-                           SYNTH_T* synth_)
+                           SystemSettings* synth_)
     :Filter(synth_),
       type(Ftype),
       stages(Fstages),

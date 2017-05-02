@@ -26,7 +26,7 @@
 
 using namespace std;
 
-WavEngine::WavEngine(SYNTH_T* s)
+WavEngine::WavEngine(SystemSettings* s)
     :AudioOutput(s), file(NULL), buffer(s->samplerate * 4), pThread(NULL)
 {
     work.init(PTHREAD_PROCESS_PRIVATE, 0);

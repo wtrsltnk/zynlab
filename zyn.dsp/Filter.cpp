@@ -29,11 +29,11 @@
 #include "SVFilter.h"
 #include "FilterParams.h"
 
-Filter::Filter(SYNTH_T* synth_)
+Filter::Filter(SystemSettings* synth_)
     : outgain(1.0f), _synth(synth_)
 { }
 
-Filter *Filter::generate(FilterParams *pars, SYNTH_T* synth_)
+Filter *Filter::generate(FilterParams *pars, SystemSettings* synth_)
 {
     unsigned char Ftype   = pars->Ptype;
     unsigned char Fstages = pars->Pstages;

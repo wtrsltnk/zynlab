@@ -36,7 +36,7 @@
 class Phaser:public Effect
 {
     public:
-        Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_);
+        Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_);
         virtual ~Phaser();
         void out(const Stereo<float *> &input);
         void setpreset(unsigned char npreset);

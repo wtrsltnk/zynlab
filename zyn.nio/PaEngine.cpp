@@ -26,7 +26,7 @@
 
 using namespace std;
 
-PaEngine::PaEngine(SYNTH_T* s)
+PaEngine::PaEngine(SystemSettings* s)
     : AudioOutput(s), stream(NULL)
 {
     name = "PA";

@@ -35,7 +35,7 @@
 
 using namespace std;
 
-EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SYNTH_T* synth_)
+EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings* synth_)
     :insertion(insertion_),
       efxoutl(new float[synth_->buffersize]),
       efxoutr(new float[synth_->buffersize]),

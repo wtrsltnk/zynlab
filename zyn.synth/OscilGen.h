@@ -32,7 +32,7 @@
 class OscilGen : public Presets
 {
     public:
-        OscilGen(FFTwrapper *fft_, Resonance *res_, SYNTH_T* synth_);
+        OscilGen(FFTwrapper *fft_, Resonance *res_, SystemSettings* synth_);
         virtual ~OscilGen();
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
@@ -110,7 +110,7 @@ class OscilGen : public Presets
 
         bool ADvsPAD; //if it is used by ADsynth or by PADsynth
 
-        SYNTH_T* _synth;
+        SystemSettings* _synth;
     private:
         //This array stores some termporary data and it has OSCIL_SIZE elements
         float *tmpsmps;

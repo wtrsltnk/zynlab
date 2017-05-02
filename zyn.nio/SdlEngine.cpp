@@ -26,7 +26,7 @@
 
 using namespace std;
 
-SdlEngine::SdlEngine(SYNTH_T* s)
+SdlEngine::SdlEngine(SystemSettings* s)
     : AudioOutput(s), _dev(0)
 {
     name = "SDL2";

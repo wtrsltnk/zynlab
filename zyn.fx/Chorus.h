@@ -33,7 +33,7 @@
 class Chorus:public Effect
 {
     public:
-        Chorus(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_);
+        Chorus(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_);
         /**Destructor*/
         virtual ~Chorus();
         void out(const Stereo<float *> &input);

@@ -42,7 +42,7 @@ vuData::vuData(void)
       rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
 
-Mixer::Mixer(SYNTH_T* synth_)
+Mixer::Mixer(SystemSettings* synth_)
     : ctl(synth_)
 {
     this->_synth = synth_;

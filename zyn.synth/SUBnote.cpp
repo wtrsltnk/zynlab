@@ -29,7 +29,7 @@
 
 SUBnote::SUBnote(SUBnoteParameters *parameters,
                  Controller *ctl_,
-                 SYNTH_T* synth_,
+                 SystemSettings* synth_,
                  float freq,
                  float velocity,
                  int portamento_,

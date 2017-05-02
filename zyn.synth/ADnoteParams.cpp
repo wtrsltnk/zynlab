@@ -36,7 +36,7 @@
 int ADnote_unison_sizes[] =
 {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
-ADnoteParameters::ADnoteParameters(SYNTH_T* synth_, FFTwrapper *fft_)
+ADnoteParameters::ADnoteParameters(SystemSettings* synth_, FFTwrapper *fft_)
     : PresetsArray(), GlobalPar(synth_), _synth(synth_)
 {
     setpresettype("Padsynth");
@@ -48,7 +48,7 @@ ADnoteParameters::ADnoteParameters(SYNTH_T* synth_, FFTwrapper *fft_)
     defaults();
 }
 
-ADnoteGlobalParam::ADnoteGlobalParam(SYNTH_T* synth_)
+ADnoteGlobalParam::ADnoteGlobalParam(SystemSettings* synth_)
 {
     FreqEnvelope = new EnvelopeParams(0, 0);
     FreqEnvelope->ASRinit(64, 50, 64, 60);
@@ -193,7 +193,7 @@ void ADnoteParameters::EnableVoice(int nvoice)
     VoicePar[nvoice].enable(fft, GlobalPar.Reson, this->_synth);
 }
 
-void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson, SYNTH_T* synth_)
+void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson, SystemSettings* synth_)
 {
     OscilSmp = new OscilGen(fft, Reson, synth_);
     FMSmp    = new OscilGen(fft, NULL, synth_);

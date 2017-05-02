@@ -210,11 +210,11 @@ enum LegatoMsg {
 #endif
 
 //temporary include for synth->{samplerate/buffersize} members
-class SYNTH_T
+class SystemSettings
 {
 public:
-    SYNTH_T();
-    virtual ~SYNTH_T();
+    SystemSettings();
+    virtual ~SystemSettings();
 
     float *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
 
@@ -274,7 +274,7 @@ public:
     /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
     virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr) = 0;
 
-    SYNTH_T* _synth;
+    SystemSettings* _synth;
 };
 
 #endif

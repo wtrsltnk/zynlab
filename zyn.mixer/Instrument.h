@@ -43,13 +43,13 @@ class FFTwrapper;
 /** Part implementation*/
 class Instrument
 {
-        SYNTH_T* _synth;
+        SystemSettings* _synth;
     public:
         /**Constructor
          * @param microtonal_ Pointer to the microtonal object
          * @param fft_ Pointer to the FFTwrapper
          * @param mutex_ Pointer to the master pthread_mutex_t*/
-        Instrument(SYNTH_T* synth_, Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
+        Instrument(SystemSettings* synth_, Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
         /**Destructor*/
         ~Instrument();
 

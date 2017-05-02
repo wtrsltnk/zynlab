@@ -44,7 +44,7 @@ class Effect
          * @return Initialized Effect object*/
         Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
                FilterParams *filterpars_, unsigned char Ppreset_,
-               SYNTH_T* synth_);
+               SystemSettings* synth_);
         virtual ~Effect() {}
         /**
          * Choose a preset
@@ -103,7 +103,7 @@ class Effect
         float lrcross;
 
         // current setup
-        SYNTH_T* _synth;
+        SystemSettings* _synth;
 };
 
 #endif

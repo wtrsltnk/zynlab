@@ -30,7 +30,7 @@
 class PaEngine:public AudioOutput
 {
     public:
-        PaEngine(SYNTH_T* s);
+        PaEngine(SystemSettings* s);
         virtual ~PaEngine();
 
         bool Start();

@@ -26,7 +26,7 @@
 
 #include <cmath>
 
-Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       Pvolume(50),
       Pdrive(90),

@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <cmath>
 
-SUBnoteParameters::SUBnoteParameters(SYNTH_T* synth_) : Presets()
+SUBnoteParameters::SUBnoteParameters(SystemSettings* synth_) : Presets()
 {
     setpresettype("Psubsynth");
     AmpEnvelope = new EnvelopeParams(64, 1);

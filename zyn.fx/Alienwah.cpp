@@ -23,7 +23,7 @@
 #include <cmath>
 #include "Alienwah.h"
 
-Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       lfo(synth_),
       oldl(NULL),

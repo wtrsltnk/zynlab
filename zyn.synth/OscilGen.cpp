@@ -30,7 +30,7 @@
 
 
 //operations on FFTfreqs
-inline void clearAll(fft_t *freqs, SYNTH_T* synth_)
+inline void clearAll(fft_t *freqs, SystemSettings* synth_)
 {
     memset(freqs, 0, synth_->oscilsize / 2 * sizeof(fft_t));
 }
@@ -63,7 +63,7 @@ inline float arg(const fft_t *freqs, off_t x)
  * Take frequency spectrum and ensure values are normalized based upon
  * magnitude to 0<=x<=1
  */
-void normalize(fft_t *freqs, SYNTH_T* synth_)
+void normalize(fft_t *freqs, SystemSettings* synth_)
 {
     float normMax = 0.0f;
     for(int i = 0; i < synth_->oscilsize / 2; ++i) {
@@ -82,7 +82,7 @@ void normalize(fft_t *freqs, SYNTH_T* synth_)
 }
 
 //Full RMS normalize
-void rmsNormalize(fft_t *freqs, SYNTH_T* synth_)
+void rmsNormalize(fft_t *freqs, SystemSettings* synth_)
 {
     float sum = 0.0f;
     for(int i = 1; i < synth_->oscilsize / 2; ++i)
@@ -99,7 +99,7 @@ void rmsNormalize(fft_t *freqs, SYNTH_T* synth_)
 
 #define DIFF(par) (old ## par != P ## par)
 
-OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_, SYNTH_T* synth_)
+OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_, SystemSettings* synth_)
     : Presets(), _synth(synth_)
 {
     assert(fft_);

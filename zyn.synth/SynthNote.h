@@ -28,9 +28,9 @@
 class SynthNote
 {
 protected:
-    SYNTH_T* _synth;
+    SystemSettings* _synth;
     public:
-        SynthNote(SYNTH_T* synth_, float freq, float vel, int port, int note, bool quiet);
+        SynthNote(SystemSettings* synth_, float freq, float vel, int port, int note, bool quiet);
         virtual ~SynthNote() {}
 
         /**Compute Output Samples

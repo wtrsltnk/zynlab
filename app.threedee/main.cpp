@@ -23,7 +23,7 @@ void sigterm_exit(int /*sig*/)
  */
 void initprogram(void)
 {
-    auto synth = new SYNTH_T;
+    auto synth = new SystemSettings;
     config.init();
 
     /* Get the settings from the Config*/

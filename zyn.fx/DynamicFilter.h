@@ -30,7 +30,7 @@
 class DynamicFilter:public Effect
 {
     public:
-        DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_);
+        DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_);
         virtual ~DynamicFilter();
         void out(const Stereo<float *> &smp);
 

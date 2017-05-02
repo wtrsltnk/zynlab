@@ -27,7 +27,7 @@
 
 #include <cmath>
 
-Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       // defaults
       Pvolume(48),

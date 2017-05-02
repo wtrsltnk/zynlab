@@ -29,9 +29,9 @@
  * \todo see if this should inherit LFO*/
 class EffectLFO
 {
-    SYNTH_T* _synth;
+    SystemSettings* _synth;
 public:
-    EffectLFO(SYNTH_T* synth_);
+    EffectLFO(SystemSettings* synth_);
     ~EffectLFO();
     void effectlfoout(float *outl, float *outr);
     void updateparams(void);

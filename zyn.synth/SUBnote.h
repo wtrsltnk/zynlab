@@ -33,7 +33,7 @@
 class SUBnote:public SynthNote
 {
     public:
-        SUBnote(SUBnoteParameters *parameters, Controller *ctl_, SYNTH_T* synth_, float freq,
+        SUBnote(SUBnoteParameters *parameters, Controller *ctl_, SystemSettings* synth_, float freq,
                 float velocity, int portamento_, int midinote, bool besilent);
         virtual ~SUBnote();
 

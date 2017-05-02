@@ -30,7 +30,7 @@
 #include <iostream>
 
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
-                   unsigned char Fstages, SYNTH_T* synth_)
+                   unsigned char Fstages, SystemSettings* synth_)
     :Filter(synth_),
       type(Ftype),
       stages(Fstages),

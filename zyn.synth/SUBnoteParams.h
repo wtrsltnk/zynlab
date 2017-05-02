@@ -32,7 +32,7 @@
 class SUBnoteParameters:public Presets
 {
     public:
-        SUBnoteParameters(SYNTH_T* synth_);
+        SUBnoteParameters(SystemSettings* synth_);
         ~SUBnoteParameters();
 
         void add2XML(XMLwrapper *xml);

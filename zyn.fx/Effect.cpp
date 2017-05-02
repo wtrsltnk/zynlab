@@ -28,7 +28,7 @@
 
 Effect::Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
                FilterParams *filterpars_, unsigned char Ppreset_,
-               SYNTH_T* synth_)
+               SystemSettings* synth_)
     :Ppreset(Ppreset_),
       efxoutl(efxoutl_),
       efxoutr(efxoutr_),

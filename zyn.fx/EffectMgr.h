@@ -41,7 +41,7 @@ class XMLwrapper;
 class EffectManager:public Presets
 {
     public:
-        EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SYNTH_T* synth_);
+        EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings* synth_);
         virtual ~EffectManager();
 
         void add2XML(XMLwrapper *xml);
@@ -73,7 +73,7 @@ class EffectManager:public Presets
         float getEQfreqresponse(float freq);
 
         FilterParams *filterpars;
-        SYNTH_T* _synth;
+        SystemSettings* _synth;
 
     private:
         int     nefx;

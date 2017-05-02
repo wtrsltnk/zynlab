@@ -26,7 +26,7 @@
 
 using namespace std;
 
-Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, SystemSettings* synth_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       lfo(synth_),
       maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * synth_->samplerate_f)),

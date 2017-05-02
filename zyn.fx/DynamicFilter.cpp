@@ -25,7 +25,7 @@
 
 #include <cmath>
 
-DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
     :Effect(insertion_, efxoutl_, efxoutr_, new FilterParams(synth_, 0, 64, 64), 0, synth_),
       lfo(synth_),
       Pvolume(110),

@@ -28,7 +28,7 @@
 #include <cmath>
 #include <cstdio>
 
-FormantFilter::FormantFilter(FilterParams *pars, SYNTH_T* synth_)
+FormantFilter::FormantFilter(FilterParams *pars, SystemSettings* synth_)
     : Filter(synth_)
 {
     numformants = pars->Pnumformants;

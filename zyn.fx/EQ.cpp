@@ -25,7 +25,7 @@
 
 #include <cmath>
 
-EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_)
 {
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {

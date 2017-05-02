@@ -40,7 +40,7 @@ class AnalogFilter:public Filter
 {
     public:
         AnalogFilter(unsigned char Ftype, float Ffreq, float Fq,
-                     unsigned char Fstages, SYNTH_T* synth_);
+                     unsigned char Fstages, SystemSettings* synth_);
         ~AnalogFilter();
         void filterout(float *smp);
         void setfreq(float frequency);

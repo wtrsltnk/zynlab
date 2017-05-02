@@ -25,7 +25,7 @@
 
 #include <cmath>
 
-EffectLFO::EffectLFO(SYNTH_T* synth_)
+EffectLFO::EffectLFO(SystemSettings* synth_)
     :Pfreq(40),
       Prandomness(0),
       PLFOtype(0),

@@ -23,7 +23,7 @@
 #include "PADnoteParams.h"
 #include "../zyn.common/WavFile.h"
 
-PADnoteParameters::PADnoteParameters(SYNTH_T* synth_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
+PADnoteParameters::PADnoteParameters(SystemSettings* synth_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     : Presets(), _synth(synth_)
 {
     setpresettype("Ppadsynth");

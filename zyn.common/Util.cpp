@@ -151,7 +151,7 @@ void invSignal(float *sig, size_t len)
         sig[i] *= -1.0f;
 }
 
-float SYNTH_T::numRandom()
+float SystemSettings::numRandom()
 {
     return RND;
 }
@@ -173,7 +173,7 @@ float cinterpolate(const float *data, size_t len, float pos)
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
 
-SYNTH_T::SYNTH_T()
+SystemSettings::SystemSettings()
     :samplerate(44100), buffersize(256), oscilsize(1024)
 {
     alias();
@@ -182,7 +182,7 @@ SYNTH_T::SYNTH_T()
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 }
 
-SYNTH_T::~SYNTH_T()
+SystemSettings::~SystemSettings()
 {
     delete []this->denormalkillbuf;
 }

@@ -14,7 +14,6 @@
 #include "scenenode.h"
 
 static Mixer* mixer;
-extern SYNTH_T* synth;
 
 class AppThreeDee
 {

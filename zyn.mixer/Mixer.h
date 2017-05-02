@@ -50,7 +50,7 @@ class Mixer : public IMixer
 {
     public:
         /** Constructor TODO make private*/
-        Mixer(SYNTH_T* synth_);
+        Mixer(SystemSettings* synth_);
         /** Destructor*/
         virtual ~Mixer();
 

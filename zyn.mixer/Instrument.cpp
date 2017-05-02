@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 
-Instrument::Instrument(SYNTH_T* synth_, Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
+Instrument::Instrument(SystemSettings* synth_, Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     : _synth(synth_), ctl(synth_)
 {
     microtonal = microtonal_;

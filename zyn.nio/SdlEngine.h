@@ -30,7 +30,7 @@
 class SdlEngine:public AudioOutput
 {
     public:
-        SdlEngine(SYNTH_T* s);
+        SdlEngine(SystemSettings* s);
         virtual ~SdlEngine();
 
         bool Start();

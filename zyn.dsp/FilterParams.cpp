@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-FilterParams::FilterParams(SYNTH_T* synth_,
+FilterParams::FilterParams(SystemSettings* synth_,
                            unsigned char Ptype_,
                            unsigned char Pfreq_,
                            unsigned char Pq_)

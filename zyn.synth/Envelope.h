@@ -29,11 +29,11 @@
 /**Implementation of a general Envelope*/
 class Envelope
 {
-    SYNTH_T* _synth;
+    SystemSettings* _synth;
     public:
 
         /**Constructor*/
-        Envelope(class EnvelopeParams *envpars, float basefreq, SYNTH_T* synth_);
+        Envelope(class EnvelopeParams *envpars, float basefreq, SystemSettings* synth_);
         /**Destructor*/
         ~Envelope();
         void relasekey();

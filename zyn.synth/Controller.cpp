@@ -24,7 +24,7 @@
 #include <math.h>
 #include <stdio.h>
 
-Controller::Controller(SYNTH_T* synth_)
+Controller::Controller(SystemSettings* synth_)
     : _synth(synth_)
 {
     defaults();

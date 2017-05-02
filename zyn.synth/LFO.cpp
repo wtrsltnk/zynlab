@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <math.h>
 
-LFO::LFO(LFOParams *lfopars, float basefreq, SYNTH_T* synth_)
+LFO::LFO(LFOParams *lfopars, float basefreq, SystemSettings* synth_)
     : _synth(synth_)
 {
     if(lfopars->Pstretch == 0)

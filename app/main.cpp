@@ -105,7 +105,7 @@ int exitprogram()
 
 int main(int argc, char *argv[])
 {
-    auto synth = new SYNTH_T;
+    auto synth = new SystemSettings;
     config.init();
     int noui = 0;
     cerr

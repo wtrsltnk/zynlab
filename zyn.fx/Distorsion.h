@@ -29,7 +29,7 @@
 class Distorsion:public Effect
 {
     public:
-        Distorsion(bool insertion, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_);
+        Distorsion(bool insertion, float *efxoutl_, float *efxoutr_, SystemSettings* synth_);
         virtual ~Distorsion();
         void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);

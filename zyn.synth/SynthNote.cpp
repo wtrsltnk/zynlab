@@ -1,7 +1,7 @@
 #include "SynthNote.h"
 #include <cstring>
 
-SynthNote::SynthNote(SYNTH_T* synth_, float freq, float vel, int port, int note, bool quiet)
+SynthNote::SynthNote(SystemSettings* synth_, float freq, float vel, int port, int note, bool quiet)
     : _synth(synth_), legato(this, freq, vel, port, note, quiet)
 {}
 

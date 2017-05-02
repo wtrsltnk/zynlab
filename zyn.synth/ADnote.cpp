@@ -34,7 +34,7 @@
 
 ADnote::ADnote(ADnoteParameters *pars,
                Controller *ctl_,
-               SYNTH_T* synth_,
+               SystemSettings* synth_,
                float freq,
                float velocity,
                int portamento_,
@@ -1756,7 +1756,7 @@ static inline void nullify(T &t) {delete t; t = NULL; }
 template<class T>
 static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
 
-void ADnote::Voice::kill(SYNTH_T* synth_)
+void ADnote::Voice::kill(SystemSettings* synth_)
 {
     arrayNullify(OscilSmp);
     nullify(FreqEnvelope);
@@ -1794,7 +1794,7 @@ void ADnote::Global::kill()
     nullify(FilterLfo);
 }
 
-void ADnote::Global::initparameters(const ADnoteGlobalParam &param, SYNTH_T* synth_,
+void ADnote::Global::initparameters(const ADnoteGlobalParam &param, SystemSettings* synth_,
                                     float basefreq, float velocity,
                                     bool stereo)
 {

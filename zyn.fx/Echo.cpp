@@ -27,7 +27,7 @@
 
 #define MAX_DELAY 2
 
-Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SYNTH_T* synth_)
+Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       Pvolume(50),
       Pdelay(60),

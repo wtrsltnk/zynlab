@@ -30,9 +30,9 @@
 /**(Midi) Controllers implementation*/
 class Controller
 {
-    SYNTH_T* _synth;
+    SystemSettings* _synth;
     public:
-        Controller(SYNTH_T* synth_);
+        Controller(SystemSettings* synth_);
         virtual ~Controller();
         void resetall();
 
