@@ -188,8 +188,8 @@ void EffectManager::out(float *smpsl, float *smpsr)
         return;
     }
     for(int i = 0; i < this->_synth->buffersize; ++i) {
-        smpsl[i]  += denormalkillbuf[i];
-        smpsr[i]  += denormalkillbuf[i];
+        smpsl[i]  += this->_synth->denormalkillbuf[i];
+        smpsr[i]  += this->_synth->denormalkillbuf[i];
         efxoutl[i] = 0.0f;
         efxoutr[i] = 0.0f;
     }

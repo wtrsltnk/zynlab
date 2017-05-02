@@ -96,7 +96,7 @@ int exitprogram()
     delete ui;
 #endif // ENABLE_FLTKGUI
 
-    delete [] denormalkillbuf;
+    delete mixer->_synth;
     delete mixer;
     FFT_cleanup();
 
@@ -278,11 +278,6 @@ int main(int argc, char *argv[])
     }
 
     synth->alias();
-
-    //produce denormal buf
-    denormalkillbuf = new float [synth->buffersize];
-    for(int i = 0; i < synth->buffersize; ++i)
-        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     cerr.precision(1);
     cerr << std::fixed;

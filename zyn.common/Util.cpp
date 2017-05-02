@@ -172,3 +172,17 @@ float cinterpolate(const float *data, size_t len, float pos)
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
+
+SYNTH_T::SYNTH_T()
+    :samplerate(44100), buffersize(256), oscilsize(1024)
+{
+    alias();
+    denormalkillbuf = new float [this->buffersize];
+    for(int i = 0; i < this->buffersize; ++i)
+        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
+}
+
+SYNTH_T::~SYNTH_T()
+{
+    delete []this->denormalkillbuf;
+}

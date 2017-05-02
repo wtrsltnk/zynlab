@@ -210,12 +210,13 @@ enum LegatoMsg {
 #endif
 
 //temporary include for synth->{samplerate/buffersize} members
-struct SYNTH_T {
-    SYNTH_T(void)
-        :samplerate(44100), buffersize(256), oscilsize(1024)
-    {
-        alias();
-    }
+class SYNTH_T
+{
+public:
+    SYNTH_T();
+    virtual ~SYNTH_T();
+
+    float *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
 
     /**Sampling rate*/
     unsigned int samplerate;

@@ -1452,8 +1452,8 @@ inline void ADnote::ComputeVoiceNoise(int nvoice)
  */
 int ADnote::noteout(float *outl, float *outr)
 {
-    memcpy(outl, denormalkillbuf, this->_synth->bufferbytes);
-    memcpy(outr, denormalkillbuf, this->_synth->bufferbytes);
+    memcpy(outl, this->_synth->denormalkillbuf, this->_synth->bufferbytes);
+    memcpy(outr, this->_synth->denormalkillbuf, this->_synth->bufferbytes);
 
     if(NoteEnabled == OFF)
         return 0;
