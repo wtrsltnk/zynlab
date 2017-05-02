@@ -23,10 +23,9 @@ if(FltkGui)
         ui/SequencerUI.fl
 	)
 
-set_source_files_properties(ui/MasterUI.h PROPERTIES GENERATED 1)
-fltk_wrap_ui(app ${UI_fl_files})
+    set_source_files_properties(ui/MasterUI.h PROPERTIES GENERATED 1)
+    fltk_wrap_ui(app ${UI_fl_files})
 
-	#UGLY WORKAROUND
 	find_program (FLTK_CONFIG fltk-config)
 	if (FLTK_CONFIG)
 		execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
@@ -34,8 +33,6 @@ fltk_wrap_ui(app ${UI_fl_files})
 			string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
 		endif()
 	endif()
-
-	set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
@@ -45,23 +42,27 @@ fltk_wrap_ui(app ${UI_fl_files})
 		"${CMAKE_CURRENT_SOURCE_DIR}/ui"
 		"${CMAKE_CURRENT_BINARY_DIR}"
 		)
+
+    add_library(zyn.ui
+        ${app_FLTK_UI_SRCS}
+        ${UI_fl_files}
+        ui/NioUI.cpp
+        ui/WidgetPDial.cpp
+        )
+
+    target_compile_features(zyn.ui
+        PRIVATE cxx_auto_type
+        PRIVATE cxx_nullptr
+        PRIVATE cxx_lambdas
+        )
 endif()
 
 set(app_SRCS
     main.cpp
     )
 
-set(app_HDRS
-    )
-
 add_executable(app
     ${app_SRCS}
-    ${app_HDRS}
-    ${UI_objs}
-    ${app_FLTK_UI_SRCS}
-    ${UI_fl_files}
-    ui/NioUI.cpp
-    ui/WidgetPDial.cpp
 	)
 
 target_compile_features(app
@@ -71,7 +72,8 @@ target_compile_features(app
     )
 
 target_link_libraries(app
-    ${GUI_LIBRARIES}
+    ${FLTK_LIBRARIES}
+    ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     zyn.nio
     zyn.mixer
@@ -80,4 +82,5 @@ target_link_libraries(app
     zyn.dsp
     zyn.common
     zyn.seq
+    zyn.ui
     )
