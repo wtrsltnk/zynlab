@@ -36,12 +36,11 @@
 int ADnote_unison_sizes[] =
 {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
-ADnoteParameters::ADnoteParameters(FFTwrapper *fft_)
-    :PresetsArray()
+ADnoteParameters::ADnoteParameters(SYNTH_T* synth_, FFTwrapper *fft_)
+    : PresetsArray(), GlobalPar(synth_), _synth(synth_)
 {
     setpresettype("Padsynth");
     fft = fft_;
-
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         EnableVoice(nvoice);
@@ -49,7 +48,7 @@ ADnoteParameters::ADnoteParameters(FFTwrapper *fft_)
     defaults();
 }
 
-ADnoteGlobalParam::ADnoteGlobalParam()
+ADnoteGlobalParam::ADnoteGlobalParam(SYNTH_T* synth_)
 {
     FreqEnvelope = new EnvelopeParams(0, 0);
     FreqEnvelope->ASRinit(64, 50, 64, 60);
@@ -59,7 +58,7 @@ ADnoteGlobalParam::ADnoteGlobalParam()
     AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
     AmpLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 1);
 
-    GlobalFilter   = new FilterParams(synth, 2, 94, 40);
+    GlobalFilter   = new FilterParams(synth_, 2, 94, 40);
     FilterEnvelope = new EnvelopeParams(0, 1);
     FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
@@ -191,13 +190,13 @@ void ADnoteVoiceParam::defaults()
  */
 void ADnoteParameters::EnableVoice(int nvoice)
 {
-    VoicePar[nvoice].enable(fft, GlobalPar.Reson);
+    VoicePar[nvoice].enable(fft, GlobalPar.Reson, this->_synth);
 }
 
-void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson)
+void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson, SYNTH_T* synth_)
 {
-    OscilSmp = new OscilGen(fft, Reson);
-    FMSmp    = new OscilGen(fft, NULL);
+    OscilSmp = new OscilGen(fft, Reson, synth_);
+    FMSmp    = new OscilGen(fft, NULL, synth_);
 
     AmpEnvelope = new EnvelopeParams(64, 1);
     AmpEnvelope->ADSRinit_dB(0, 100, 127, 100);
@@ -207,7 +206,7 @@ void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson)
     FreqEnvelope->ASRinit(30, 40, 64, 60);
     FreqLfo = new LFOParams(50, 40, 0, 0, 0, 0, 0, 0);
 
-    VoiceFilter    = new FilterParams(synth, 2, 50, 60);
+    VoiceFilter    = new FilterParams(synth_, 2, 50, 60);
     FilterEnvelope = new EnvelopeParams(0, 0);
     FilterEnvelope->ADSRinit_filter(90, 70, 40, 70, 10, 40);
     FilterLfo = new LFOParams(50, 20, 64, 0, 0, 0, 0, 2);

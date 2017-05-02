@@ -40,9 +40,10 @@
 
 class PADnoteParameters:public Presets
 {
+    SYNTH_T *_synth;
     public:
-        PADnoteParameters(FFTwrapper *fft_, pthread_mutex_t *mutex_);
-        ~PADnoteParameters();
+        PADnoteParameters(SYNTH_T* synth_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
+        virtual ~PADnoteParameters();
 
         void defaults();
         void add2XML(XMLwrapper *xml);

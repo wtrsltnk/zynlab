@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <cmath>
 
-SUBnoteParameters::SUBnoteParameters():Presets()
+SUBnoteParameters::SUBnoteParameters(SYNTH_T* synth_) : Presets()
 {
     setpresettype("Psubsynth");
     AmpEnvelope = new EnvelopeParams(64, 1);
@@ -34,7 +34,7 @@ SUBnoteParameters::SUBnoteParameters():Presets()
     BandWidthEnvelope = new EnvelopeParams(64, 0);
     BandWidthEnvelope->ASRinit_bw(100, 70, 64, 60);
 
-    GlobalFilter = new FilterParams(synth, 2, 80, 40);
+    GlobalFilter = new FilterParams(synth_, 2, 80, 40);
     GlobalFilterEnvelope = new EnvelopeParams(0, 1);
     GlobalFilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
 

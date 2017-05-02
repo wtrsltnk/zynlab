@@ -23,8 +23,8 @@
 #include "PADnoteParams.h"
 #include "../zyn.common/WavFile.h"
 
-PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,
-                                     pthread_mutex_t *mutex_):Presets()
+PADnoteParameters::PADnoteParameters(SYNTH_T* synth_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
+    : Presets(), _synth(synth_)
 {
     setpresettype("Ppadsynth");
 
@@ -32,7 +32,7 @@ PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,
     mutex = mutex_;
 
     resonance = new Resonance();
-    oscilgen  = new OscilGen(fft_, resonance);
+    oscilgen  = new OscilGen(fft_, resonance, synth_);
     oscilgen->ADvsPAD = true;
 
     FreqEnvelope = new EnvelopeParams(0, 0);
@@ -43,7 +43,7 @@ PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,
     AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
     AmpLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 1);
 
-    GlobalFilter   = new FilterParams(synth, 2, 94, 40);
+    GlobalFilter   = new FilterParams(this->_synth, 2, 94, 40);
     FilterEnvelope = new EnvelopeParams(0, 1);
     FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
@@ -395,25 +395,25 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
     for(int i = 0; i < size; ++i)
         spectrum[i] = 0.0f;
 
-    float harmonics[synth->oscilsize / 2];
-    for(int i = 0; i < synth->oscilsize / 2; ++i)
+    float harmonics[this->_synth->oscilsize / 2];
+    for(int i = 0; i < this->_synth->oscilsize / 2; ++i)
         harmonics[i] = 0.0f;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
 
     //normalize
     float max = 0.0f;
-    for(int i = 0; i < synth->oscilsize / 2; ++i)
+    for(int i = 0; i < this->_synth->oscilsize / 2; ++i)
         if(harmonics[i] > max)
             max = harmonics[i];
     if(max < 0.000001f)
         max = 1;
-    for(int i = 0; i < synth->oscilsize / 2; ++i)
+    for(int i = 0; i < this->_synth->oscilsize / 2; ++i)
         harmonics[i] /= max;
 
-    for(int nh = 1; nh < synth->oscilsize / 2; ++nh) { //for each harmonic
+    for(int nh = 1; nh < this->_synth->oscilsize / 2; ++nh) { //for each harmonic
         float realfreq = getNhr(nh) * basefreq;
-        if(realfreq > synth->samplerate_f * 0.49999f)
+        if(realfreq > this->_synth->samplerate_f * 0.49999f)
             break;
         if(realfreq < 20.0f)
             break;
@@ -452,7 +452,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                 break;
         }
         bw = bw * powf(realfreq / basefreq, power);
-        int ibw = (int)((bw / (synth->samplerate_f * 0.5f) * size)) + 1;
+        int ibw = (int)((bw / (this->_synth->samplerate_f * 0.5f) * size)) + 1;
 
         float amp = harmonics[nh - 1];
         if(resonance->Penabled)
@@ -462,7 +462,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             float rap   = sqrt((float)profilesize / (float)ibw);
             int   cfreq =
                 (int) (realfreq
-                       / (synth->samplerate_f * 0.5f) * size) - ibw / 2;
+                       / (this->_synth->samplerate_f * 0.5f) * size) - ibw / 2;
             for(int i = 0; i < ibw; ++i) {
                 int src    = (int)(i * rap * rap);
                 int spfreq = i + cfreq;
@@ -475,7 +475,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
         }
         else {  //if the bandwidth is smaller than the profilesize
             float rap = sqrt((float)ibw / (float)profilesize);
-            float ibasefreq = realfreq / (synth->samplerate_f * 0.5f) * size;
+            float ibasefreq = realfreq / (this->_synth->samplerate_f * 0.5f) * size;
             for(int i = 0; i < profilesize; ++i) {
                 float idfreq = i / (float)profilesize - 0.5f;
                 idfreq *= ibw;
@@ -503,28 +503,28 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
     for(int i = 0; i < size; ++i)
         spectrum[i] = 0.0f;
 
-    float harmonics[synth->oscilsize / 2];
-    for(int i = 0; i < synth->oscilsize / 2; ++i)
+    float harmonics[this->_synth->oscilsize / 2];
+    for(int i = 0; i < this->_synth->oscilsize / 2; ++i)
         harmonics[i] = 0.0f;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
 
     //normalize
     float max = 0.0f;
-    for(int i = 0; i < synth->oscilsize / 2; ++i)
+    for(int i = 0; i < this->_synth->oscilsize / 2; ++i)
         if(harmonics[i] > max)
             max = harmonics[i];
     if(max < 0.000001f)
         max = 1;
-    for(int i = 0; i < synth->oscilsize / 2; ++i)
+    for(int i = 0; i < this->_synth->oscilsize / 2; ++i)
         harmonics[i] /= max;
 
-    for(int nh = 1; nh < synth->oscilsize / 2; ++nh) { //for each harmonic
+    for(int nh = 1; nh < this->_synth->oscilsize / 2; ++nh) { //for each harmonic
         float realfreq = getNhr(nh) * basefreq;
 
         ///sa fac aici interpolarea si sa am grija daca frecv descresc
 
-        if(realfreq > synth->samplerate_f * 0.49999f)
+        if(realfreq > this->_synth->samplerate_f * 0.49999f)
             break;
         if(realfreq < 20.0f)
             break;
@@ -534,7 +534,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
         float amp = harmonics[nh - 1];
         if(resonance->Penabled)
             amp *= resonance->getfreqresponse(realfreq);
-        int cfreq = (int) (realfreq / (synth->samplerate_f * 0.5f) * size);
+        int cfreq = (int) (realfreq / (this->_synth->samplerate_f * 0.5f) * size);
 
         spectrum[cfreq] = amp + 1e-9;
     }
@@ -678,7 +678,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
         snprintf(tmpstr, 20, "_%02d", k + 1);
         std::string filename = basefilename + std::string(tmpstr) + ".wav";
 
-        WavFile     wav(filename, synth->samplerate, 1);
+        WavFile     wav(filename, this->_synth->samplerate, 1);
         if(wav.good()) {
             int nsmps = sample[k].size;
             short int *smps = new short int[nsmps];

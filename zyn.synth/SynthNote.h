@@ -27,8 +27,10 @@
 
 class SynthNote
 {
+protected:
+    SYNTH_T* _synth;
     public:
-        SynthNote(float freq, float vel, int port, int note, bool quiet);
+        SynthNote(SYNTH_T* synth_, float freq, float vel, int port, int note, bool quiet);
         virtual ~SynthNote() {}
 
         /**Compute Output Samples
@@ -52,11 +54,12 @@ class SynthNote
         // Legato transitions
         class Legato
         {
+            SynthNote* _note;
             public:
-                Legato(float freq, float vel, int port,
+               Legato(SynthNote* note_, float freq, float vel, int port,
                        int note, bool quiet);
 
-                void apply(SynthNote &note, float *outl, float *outr);
+                void apply(float *outl, float *outr);
                 int update(float freq, float velocity, int portamento_,
                            int midinote_, bool externalcall);
 

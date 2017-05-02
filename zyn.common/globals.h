@@ -254,8 +254,6 @@ struct SYNTH_T {
     static float numRandom(void); //defined in Util.cpp for now
 };
 
-extern SYNTH_T *synth;
-
 class IMixer
 {
 public:

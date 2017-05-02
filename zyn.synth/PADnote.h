@@ -34,12 +34,13 @@ class PADnote:public SynthNote
     public:
         PADnote(PADnoteParameters *parameters,
                 Controller *ctl_,
+                SYNTH_T* synth_,
                 float freq,
                 float velocity,
                 int portamento_,
                 int midinote,
                 bool besilent);
-        ~PADnote();
+        virtual ~PADnote();
 
         void legatonote(float freq, float velocity, int portamento_,
                         int midinote, bool externcall);

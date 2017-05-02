@@ -54,9 +54,9 @@ Instrument::Instrument(SYNTH_T* synth_, Microtonal *microtonal_, FFTwrapper *fft
         kit[n].padpars = NULL;
     }
 
-    kit[0].adpars  = new ADnoteParameters(fft);
-    kit[0].subpars = new SUBnoteParameters();
-    kit[0].padpars = new PADnoteParameters(fft, mutex);
+    kit[0].adpars  = new ADnoteParameters(this->_synth, fft);
+    kit[0].subpars = new SUBnoteParameters(this->_synth);
+    kit[0].padpars = new PADnoteParameters(this->_synth, fft, mutex);
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
@@ -465,6 +465,7 @@ void Instrument::NoteOn(unsigned char note,
             if(kit[0].Padenabled != 0)
                 partnote[pos].kititem[0].adnote = new ADnote(kit[0].adpars,
                                                              &ctl,
+                                                             this->_synth,
                                                              notebasefreq,
                                                              vel,
                                                              portamento,
@@ -473,6 +474,7 @@ void Instrument::NoteOn(unsigned char note,
             if(kit[0].Psubenabled != 0)
                 partnote[pos].kititem[0].subnote = new SUBnote(kit[0].subpars,
                                                                &ctl,
+                        this->_synth,
                                                                notebasefreq,
                                                                vel,
                                                                portamento,
@@ -481,6 +483,7 @@ void Instrument::NoteOn(unsigned char note,
             if(kit[0].Ppadenabled != 0)
                 partnote[pos].kititem[0].padnote = new PADnote(kit[0].padpars,
                                                                &ctl,
+                        this->_synth,
                                                                notebasefreq,
                                                                vel,
                                                                portamento,
@@ -496,6 +499,7 @@ void Instrument::NoteOn(unsigned char note,
                 if(kit[0].Padenabled != 0)
                     partnote[posb].kititem[0].adnote = new ADnote(kit[0].adpars,
                                                                   &ctl,
+                            this->_synth,
                                                                   notebasefreq,
                                                                   vel,
                                                                   portamento,
@@ -505,6 +509,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[posb].kititem[0].subnote = new SUBnote(
                         kit[0].subpars,
                         &ctl,
+                            this->_synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -514,6 +519,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[posb].kititem[0].padnote = new PADnote(
                         kit[0].padpars,
                         &ctl,
+                            this->_synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -542,6 +548,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[pos].kititem[ci].adnote = new ADnote(
                         kit[item].adpars,
                         &ctl,
+                                this->_synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -552,6 +559,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[pos].kititem[ci].subnote = new SUBnote(
                         kit[item].subpars,
                         &ctl,
+                                this->_synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -562,6 +570,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[pos].kititem[ci].padnote = new PADnote(
                         kit[item].padpars,
                         &ctl,
+                                this->_synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -580,6 +589,7 @@ void Instrument::NoteOn(unsigned char note,
                         partnote[posb].kititem[ci].adnote = new ADnote(
                             kit[item].adpars,
                             &ctl,
+                                    this->_synth,
                             notebasefreq,
                             vel,
                             portamento,
@@ -590,6 +600,7 @@ void Instrument::NoteOn(unsigned char note,
                         partnote[posb].kititem[ci].subnote =
                             new SUBnote(kit[item].subpars,
                                         &ctl,
+                                        this->_synth,
                                         notebasefreq,
                                         vel,
                                         portamento,
@@ -600,6 +611,7 @@ void Instrument::NoteOn(unsigned char note,
                         partnote[posb].kititem[ci].padnote =
                             new PADnote(kit[item].padpars,
                                         &ctl,
+                                        this->_synth,
                                         notebasefreq,
                                         vel,
                                         portamento,
@@ -1075,11 +1087,11 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
     }
     else {
         if(kit[kititem].adpars == NULL)
-            kit[kititem].adpars = new ADnoteParameters(fft);
+            kit[kititem].adpars = new ADnoteParameters(this->_synth, fft);
         if(kit[kititem].subpars == NULL)
-            kit[kititem].subpars = new SUBnoteParameters();
+            kit[kititem].subpars = new SUBnoteParameters(this->_synth);
         if(kit[kititem].padpars == NULL)
-            kit[kititem].padpars = new PADnoteParameters(fft, mutex);
+            kit[kititem].padpars = new PADnoteParameters(this->_synth, fft, mutex);
     }
 
     if(resetallnotes)

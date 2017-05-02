@@ -73,12 +73,12 @@ class EffectManager:public Presets
         float getEQfreqresponse(float freq);
 
         FilterParams *filterpars;
+        SYNTH_T* _synth;
 
     private:
         int     nefx;
         Effect *efx;
         pthread_mutex_t *mutex;
-        SYNTH_T* _synth;
         bool dryonly;
 };
 

@@ -37,8 +37,6 @@
 #include <sched.h>
 #endif
 
-SYNTH_T* synth;
-
 prng_t prng_state = 0x1234;
 
 Config config;

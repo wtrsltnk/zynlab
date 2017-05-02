@@ -45,7 +45,7 @@ extern int ADnote_unison_sizes[];
 /*****************************************************************/
 
 struct ADnoteGlobalParam {
-    ADnoteGlobalParam();
+    ADnoteGlobalParam(SYNTH_T* synth_);
     ~ADnoteGlobalParam();
     void defaults();
     void add2XML(XMLwrapper *xml);
@@ -122,7 +122,7 @@ struct ADnoteVoiceParam {
     void getfromXML(XMLwrapper *xml, unsigned nvoice);
     void add2XML(XMLwrapper *xml, bool fmoscilused);
     void defaults();
-    void enable(FFTwrapper *fft, Resonance *Reson);
+    void enable(FFTwrapper *fft, Resonance *Reson, SYNTH_T* synth_);
     void kill();
     /** If the voice is enabled */
     unsigned char Enabled;
@@ -290,9 +290,10 @@ struct ADnoteVoiceParam {
 
 class ADnoteParameters:public PresetsArray
 {
+    SYNTH_T* _synth;
     public:
-        ADnoteParameters(FFTwrapper *fft_);
-        ~ADnoteParameters();
+        ADnoteParameters(SYNTH_T* synth_, FFTwrapper *fft_);
+        virtual ~ADnoteParameters();
 
         ADnoteGlobalParam GlobalPar;
         ADnoteVoiceParam  VoicePar[NUM_VOICES];

@@ -80,33 +80,6 @@ void set_module_parameters ( Fl_Widget *o )
 #endif
 
 /*
- * Program initialisation
- */
-void initprogram(void)
-{
-    synth->alias();
-
-    //produce denormal buf
-    denormalkillbuf = new float [synth->buffersize];
-    for(int i = 0; i < synth->buffersize; ++i)
-        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
-
-    cerr.precision(1);
-    cerr << std::fixed;
-    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
-    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
-
-
-    mixer = new Mixer(synth);
-    mixer->swaplr = swaplr;
-
-    signal(SIGINT, sigterm_exit);
-    signal(SIGTERM, sigterm_exit);
-}
-
-/*
  * Program exit
  */
 int exitprogram()
@@ -132,7 +105,7 @@ int exitprogram()
 
 int main(int argc, char *argv[])
 {
-    synth = new SYNTH_T;
+    auto synth = new SYNTH_T;
     config.init();
     int noui = 0;
     cerr
@@ -304,7 +277,24 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    initprogram();
+    synth->alias();
+
+    //produce denormal buf
+    denormalkillbuf = new float [synth->buffersize];
+    for(int i = 0; i < synth->buffersize; ++i)
+        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
+
+    cerr.precision(1);
+    cerr << std::fixed;
+    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
+    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
+    cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
+    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
+
+    signal(SIGINT, sigterm_exit);
+    signal(SIGTERM, sigterm_exit);
+    mixer = new Mixer(synth);
+    mixer->swaplr = swaplr;
 
     if(!loadfile.empty()) {
         int tmp = mixer->loadXML(loadfile.c_str());

@@ -48,11 +48,11 @@ class ADnote:public SynthNote
          * @param portamento_ 1 if the note has portamento
          * @param midinote_ The midi number of the note
          * @param besilent Start silent note if true*/
-        ADnote(ADnoteParameters *pars, Controller *ctl_, float freq,
-               float velocity, int portamento_, int midinote_,
+        ADnote(ADnoteParameters *pars, Controller *ctl_, SYNTH_T* synth_,
+               float freq, float velocity, int portamento_, int midinote_,
                bool besilent);
         /**Destructor*/
-        ~ADnote();
+        virtual ~ADnote();
 
         /**Alters the playing note for legato effect*/
         void legatonote(float freq, float velocity, int portamento_,
@@ -126,7 +126,7 @@ class ADnote:public SynthNote
 
         struct Global {
             void kill();
-            void initparameters(const ADnoteGlobalParam &param,
+            void initparameters(const ADnoteGlobalParam &param, SYNTH_T* synth_,
                                 float basefreq, float velocity,
                                 bool stereo);
             /******************************************
@@ -173,7 +173,7 @@ class ADnote:public SynthNote
         /***********************************************************/
         struct Voice {
             void releasekey();
-            void kill();
+            void kill(SYNTH_T* synth_);
             /* If the voice is enabled */
             ONOFFTYPE Enabled;
 

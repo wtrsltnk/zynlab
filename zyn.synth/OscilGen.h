@@ -29,11 +29,11 @@
 #include "FFTwrapper.h"
 #include "Resonance.h"
 
-class OscilGen:public Presets
+class OscilGen : public Presets
 {
     public:
-        OscilGen(FFTwrapper *fft_, Resonance *res_);
-        ~OscilGen();
+        OscilGen(FFTwrapper *fft_, Resonance *res_, SYNTH_T* synth_);
+        virtual ~OscilGen();
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
         void prepare();
@@ -110,6 +110,7 @@ class OscilGen:public Presets
 
         bool ADvsPAD; //if it is used by ADsynth or by PADsynth
 
+        SYNTH_T* _synth;
     private:
         //This array stores some termporary data and it has OSCIL_SIZE elements
         float *tmpsmps;

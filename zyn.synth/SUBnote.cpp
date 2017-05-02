@@ -29,12 +29,13 @@
 
 SUBnote::SUBnote(SUBnoteParameters *parameters,
                  Controller *ctl_,
+                 SYNTH_T* synth_,
                  float freq,
                  float velocity,
                  int portamento_,
                  int midinote,
                  bool besilent)
-    :SynthNote(freq, velocity, portamento_, midinote, besilent)
+    :SynthNote(synth_, freq, velocity, portamento_, midinote, besilent)
 {
     pars = parameters;
     ctl  = ctl_;
@@ -260,11 +261,11 @@ void SUBnote::computefiltercoefs(bpfilter &filter,
                                  float bw,
                                  float gain)
 {
-    if(freq > synth->samplerate_f / 2.0f - 200.0f)
-        freq = synth->samplerate_f / 2.0f - 200.0f;
+    if(freq > this->_synth->samplerate_f / 2.0f - 200.0f)
+        freq = this->_synth->samplerate_f / 2.0f - 200.0f;
 
 
-    float omega = 2.0f * PI * freq / synth->samplerate_f;
+    float omega = 2.0f * PI * freq / this->_synth->samplerate_f;
     float sn    = sinf(omega);
     float cs    = cosf(omega);
     float alpha = sn * sinh(LOG_2 / 2.0f * bw * omega / sn);
@@ -303,11 +304,11 @@ void SUBnote::initfilter(bpfilter &filter,
         if(start == 1)
             a *= RND;
         filter.yn1 = a * cosf(p);
-        filter.yn2 = a * cosf(p + freq * 2.0f * PI / synth->samplerate_f);
+        filter.yn2 = a * cosf(p + freq * 2.0f * PI / this->_synth->samplerate_f);
 
         //correct the error of computation the start amplitude
         //at very high frequencies
-        if(freq > synth->samplerate_f * 0.96f) {
+        if(freq > this->_synth->samplerate_f * 0.96f) {
             filter.yn1 = 0.0f;
             filter.yn2 = 0.0f;
         }
@@ -341,11 +342,11 @@ inline void SubFilterB(const float coeff[4], float &src, float work[4])
 //in quite a bit of wasted time
 void SUBnote::filter(bpfilter &filter, float *smps)
 {
-    assert(synth->buffersize % 8 == 0);
+    assert(this->_synth->buffersize % 8 == 0);
     float coeff[4] = {filter.b0, filter.b2,  -filter.a1, -filter.a2};
     float work[4]  = {filter.xn1, filter.xn2, filter.yn1, filter.yn2};
 
-    for(int i = 0; i < synth->buffersize; i += 8) {
+    for(int i = 0; i < this->_synth->buffersize; i += 8) {
         SubFilterA(coeff, smps[i + 0], work);
         SubFilterB(coeff, smps[i + 1], work);
         SubFilterA(coeff, smps[i + 2], work);
@@ -366,21 +367,21 @@ void SUBnote::filter(bpfilter &filter, float *smps)
  */
 void SUBnote::initparameters(float freq)
 {
-    AmpEnvelope = new Envelope(pars->AmpEnvelope, freq, synth);
+    AmpEnvelope = new Envelope(pars->AmpEnvelope, freq, this->_synth);
     if(pars->PFreqEnvelopeEnabled != 0)
-        FreqEnvelope = new Envelope(pars->FreqEnvelope, freq, synth);
+        FreqEnvelope = new Envelope(pars->FreqEnvelope, freq, this->_synth);
     else
         FreqEnvelope = NULL;
     if(pars->PBandWidthEnvelopeEnabled != 0)
-        BandWidthEnvelope = new Envelope(pars->BandWidthEnvelope, freq, synth);
+        BandWidthEnvelope = new Envelope(pars->BandWidthEnvelope, freq, this->_synth);
     else
         BandWidthEnvelope = NULL;
     if(pars->PGlobalFilterEnabled != 0) {
         globalfiltercenterq = pars->GlobalFilter->getq();
-        GlobalFilterL = Filter::generate(pars->GlobalFilter, synth);
+        GlobalFilterL = Filter::generate(pars->GlobalFilter, this->_synth);
         if(stereo)
-            GlobalFilterR = Filter::generate(pars->GlobalFilter, synth);
-        GlobalFilterEnvelope = new Envelope(pars->GlobalFilterEnvelope, freq, synth);
+            GlobalFilterR = Filter::generate(pars->GlobalFilter, this->_synth);
+        GlobalFilterEnvelope = new Envelope(pars->GlobalFilterEnvelope, freq, this->_synth);
         GlobalFilterFreqTracking = pars->GlobalFilter->getfreqtracking(basefreq);
     }
     computecurrentparameters();
@@ -394,7 +395,7 @@ float SUBnote::computerolloff(float freq)
     const float lower_limit = 10.0f;
     const float lower_width = 10.0f;
     const float upper_width = 200.0f;
-    float upper_limit = synth->samplerate / 2.0f;
+    float upper_limit = this->_synth->samplerate / 2.0f;
 
     if (freq > lower_limit + lower_width &&
             freq < upper_limit - upper_width)
@@ -497,23 +498,23 @@ void SUBnote::computecurrentparameters()
  */
 int SUBnote::noteout(float *outl, float *outr)
 {
-    memcpy(outl, denormalkillbuf, synth->bufferbytes);
-    memcpy(outr, denormalkillbuf, synth->bufferbytes);
+    memcpy(outl, denormalkillbuf, this->_synth->bufferbytes);
+    memcpy(outr, denormalkillbuf, this->_synth->bufferbytes);
 
     if(NoteEnabled == OFF)
         return 0;
 
-    float tmprnd[synth->buffersize];
-    float tmpsmp[synth->buffersize];
+    float tmprnd[this->_synth->buffersize];
+    float tmpsmp[this->_synth->buffersize];
     //left channel
-    for(int i = 0; i < synth->buffersize; ++i)
+    for(int i = 0; i < this->_synth->buffersize; ++i)
         tmprnd[i] = RND * 2.0f - 1.0f;
     for(int n = 0; n < numharmonics; ++n) {
         float rolloff = overtone_rolloff[n];
-        memcpy(tmpsmp, tmprnd, synth->bufferbytes);
+        memcpy(tmpsmp, tmprnd, this->_synth->bufferbytes);
         for(int nph = 0; nph < numstages; ++nph)
             filter(lfilter[nph + n * numstages], tmpsmp);
-        for(int i = 0; i < synth->buffersize; ++i)
+        for(int i = 0; i < this->_synth->buffersize; ++i)
             outl[i] += tmpsmp[i] * rolloff;
     }
 
@@ -522,26 +523,26 @@ int SUBnote::noteout(float *outl, float *outr)
 
     //right channel
     if(stereo != 0) {
-        for(int i = 0; i < synth->buffersize; ++i)
+        for(int i = 0; i < this->_synth->buffersize; ++i)
             tmprnd[i] = RND * 2.0f - 1.0f;
         for(int n = 0; n < numharmonics; ++n) {
             float rolloff = overtone_rolloff[n];
-            memcpy(tmpsmp, tmprnd, synth->bufferbytes);
+            memcpy(tmpsmp, tmprnd, this->_synth->bufferbytes);
             for(int nph = 0; nph < numstages; ++nph)
                 filter(rfilter[nph + n * numstages], tmpsmp);
-            for(int i = 0; i < synth->buffersize; ++i)
+            for(int i = 0; i < this->_synth->buffersize; ++i)
                 outr[i] += tmpsmp[i] * rolloff;
         }
         if(GlobalFilterR != NULL)
             GlobalFilterR->filterout(&outr[0]);
     }
     else
-        memcpy(outr, outl, synth->bufferbytes);
+        memcpy(outr, outl, this->_synth->bufferbytes);
 
     if(firsttick != 0) {
         int n = 10;
-        if(n > synth->buffersize)
-            n = synth->buffersize;
+        if(n > this->_synth->buffersize)
+            n = this->_synth->buffersize;
         for(int i = 0; i < n; ++i) {
             float ampfadein = 0.5f - 0.5f * cosf(
                 (float) i / (float) n * PI);
@@ -553,16 +554,16 @@ int SUBnote::noteout(float *outl, float *outr)
 
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude))
         // Amplitude interpolation
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             float tmpvol = INTERPOLATE_AMPLITUDE(oldamplitude,
                                                  newamplitude,
                                                  i,
-                                                 synth->buffersize);
+                                                 this->_synth->buffersize);
             outl[i] *= tmpvol * panning;
             outr[i] *= tmpvol * (1.0f - panning);
         }
     else
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < this->_synth->buffersize; ++i) {
             outl[i] *= newamplitude * panning;
             outr[i] *= newamplitude * (1.0f - panning);
         }
@@ -571,12 +572,12 @@ int SUBnote::noteout(float *outl, float *outr)
     computecurrentparameters();
 
     // Apply legato-specific sound signal modifications
-    legato.apply(*this, outl, outr);
+    legato.apply(outl, outr);
 
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
-        for(int i = 0; i < synth->buffersize; ++i) { //fade-out
-            float tmp = 1.0f - (float)i / synth->buffersize_f;
+        for(int i = 0; i < this->_synth->buffersize; ++i) { //fade-out
+            float tmp = 1.0f - (float)i / this->_synth->buffersize_f;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }

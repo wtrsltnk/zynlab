@@ -125,7 +125,7 @@ oiy=getresponse(ly,getfreqx(0.0));
 fl_begin_line();
 for (i=1;i<lx;i++){
    float frq=getfreqx(i/(float) lx);
-   if (frq>synth->samplerate/2) break;
+   if (frq>eff->_synth->samplerate/2) break;
    iy=getresponse(ly,frq);
    if ((oiy>=0) && (oiy<ly) &&
        (iy>=0) && (iy<ly) )
