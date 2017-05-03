@@ -52,7 +52,7 @@ Bank::Bank()
 {
     clearbank();
     bankfiletitle = dirname;
-    loadbank(config.cfg.currentBankDir);
+    loadbank(Config::Current().cfg.currentBankDir);
 }
 
 Bank::~Bank()
@@ -241,7 +241,7 @@ int Bank::loadbank(string bankdirname)
     closedir(dir);
 
     if(!dirname.empty())
-        config.cfg.currentBankDir = dirname;
+        Config::Current().cfg.currentBankDir = dirname;
 
     return 0;
 }
@@ -252,7 +252,7 @@ int Bank::loadbank(string bankdirname)
 int Bank::newbank(string newbankdirname)
 {
     string bankdir;
-    bankdir = config.cfg.bankRootDirList[0];
+    bankdir = Config::Current().cfg.bankRootDirList[0];
 
     if(((bankdir[bankdir.size() - 1]) != '/')
        && ((bankdir[bankdir.size() - 1]) != '\\'))
@@ -325,8 +325,8 @@ void Bank::rescanforbanks()
     banks.clear();
 
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-        if(!config.cfg.bankRootDirList[i].empty())
-            scanrootdir(config.cfg.bankRootDirList[i]);
+        if(!Config::Current().cfg.bankRootDirList[i].empty())
+            scanrootdir(Config::Current().cfg.bankRootDirList[i]);
 
     //sort the banks
     sort(banks.begin(), banks.end());
@@ -463,7 +463,7 @@ int Bank::addtobank(int pos, string filename, string name)
     ins[pos].filename = dirname + '/' + filename;
 
     //see if PADsynth is used
-    if(config.cfg.CheckPADsynth) {
+    if(Config::Current().cfg.CheckPADsynth) {
         XMLwrapper xml;
         xml.loadXMLfile(ins[pos].filename);
 
@@ -477,7 +477,7 @@ int Bank::addtobank(int pos, string filename, string name)
 
 bool Bank::isPADsynth_used(unsigned int ninstrument)
 {
-    if(config.cfg.CheckPADsynth == 0)
+    if(Config::Current().cfg.CheckPADsynth == 0)
         return 0;
     else
         return ins[ninstrument].info.PADsynth_used;

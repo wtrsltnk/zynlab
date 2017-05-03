@@ -32,6 +32,16 @@ using namespace std;
 
 Config::Config()
 {}
+
+Config* Config::_instance = nullptr;
+
+Config& Config::Current()
+{
+    if (Config::_instance == nullptr) Config::_instance = new Config();
+
+    return *Config::_instance;
+}
+
 void Config::init()
 {
     maxstringsize = MAX_STRING_SIZE; //for ui

@@ -1,12 +1,8 @@
 #ifndef NIO_H
 #define NIO_H
 
-#include "../zyn.common/globals.h"
-
 #include <string>
 #include <set>
-
-class WavFile;
 
 /**Interface to Nio Subsystem
  *
@@ -14,7 +10,7 @@ class WavFile;
 class Nio
 {
 public:
-    static bool start(IMixer* mixer);
+    static bool start(class IMixer* mixer);
     static void stop(void);
 
     static void setDefaultSource(const std::string& name);

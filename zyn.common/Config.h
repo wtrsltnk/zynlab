@@ -30,45 +30,46 @@
 /**Configuration file functions*/
 class Config
 {
-    public:
-        /** Constructor*/
-        Config();
-        /** Destructor*/
-        ~Config();
-        struct {
-            char *LinuxOSSWaveOutDev, *LinuxOSSSeqInDev;
-            int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
-            int   WindowsWaveOutId, WindowsMidiInId;
-            int   BankUIAutoClose;
-            int   DumpNotesToFile, DumpAppend;
-            int   GzipCompression;
-            int   Interpolation;
-            std::string DumpFile;
-            std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
-            std::string presetsDirList[MAX_BANK_ROOT_DIRS];
-            int CheckPADsynth;
-            int IgnoreProgramChange;
-            int UserInterfaceMode;
-            int VirKeybLayout;
-            std::string LinuxALSAaudioDev;
-            std::string nameTag;
-        } cfg;
-        int winwavemax, winmidimax; //number of wave/midi devices on Windows
-        int maxstringsize;
+    Config();
+    static Config* _instance;
+public:
+    static Config& Current();
+    virtual ~Config();
 
-        struct winmidionedevice {
-            char *name;
-        };
-        winmidionedevice *winmididevices;
+    struct {
+        char *LinuxOSSWaveOutDev, *LinuxOSSSeqInDev;
+        int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
+        int   WindowsWaveOutId, WindowsMidiInId;
+        int   BankUIAutoClose;
+        int   DumpNotesToFile, DumpAppend;
+        int   GzipCompression;
+        int   Interpolation;
+        std::string DumpFile;
+        std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
+        std::string presetsDirList[MAX_BANK_ROOT_DIRS];
+        int CheckPADsynth;
+        int IgnoreProgramChange;
+        int UserInterfaceMode;
+        int VirKeybLayout;
+        std::string LinuxALSAaudioDev;
+        std::string nameTag;
+    } cfg;
+    int winwavemax, winmidimax; //number of wave/midi devices on Windows
+    int maxstringsize;
 
-        void clearbankrootdirlist();
-        void clearpresetsdirlist();
-        void init();
-        void save();
+    struct winmidionedevice {
+        char *name;
+    };
+    winmidionedevice *winmididevices;
 
-    private:
-        void readConfig(const char *filename);
-        void saveConfig(const char *filename);
-        void getConfigFileName(char *name, int namesize);
+    void clearbankrootdirlist();
+    void clearpresetsdirlist();
+    void init();
+    void save();
+
+private:
+    void readConfig(const char *filename);
+    void saveConfig(const char *filename);
+    void getConfigFileName(char *name, int namesize);
 };
 #endif

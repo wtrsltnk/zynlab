@@ -97,11 +97,11 @@ void PresetsStore::rescanforpresets(const string &type)
     string ftype = "." + type.substr(1) + ".xpz";
 
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i) {
-        if(config.cfg.presetsDirList[i].empty())
+        if(Config::Current().cfg.presetsDirList[i].empty())
             continue;
 
         //open directory
-        string dirname = config.cfg.presetsDirList[i];
+        string dirname = Config::Current().cfg.presetsDirList[i];
         DIR   *dir     = opendir(dirname.c_str());
         if(dir == NULL)
             continue;
@@ -140,14 +140,14 @@ void PresetsStore::rescanforpresets(const string &type)
 
 void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
 {
-    if(config.cfg.presetsDirList[0].empty())
+    if(Config::Current().cfg.presetsDirList[0].empty())
         return;
 
     //make the filenames legal
     name = legalizeFilename(name);
 
     //make path legal
-    const string dirname = config.cfg.presetsDirList[0];
+    const string dirname = Config::Current().cfg.presetsDirList[0];
     char tmpc = dirname[dirname.size() - 1];
     const char *tmps;
     if((tmpc == '/') || (tmpc == '\\'))

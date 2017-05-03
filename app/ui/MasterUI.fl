@@ -469,7 +469,7 @@ class MasterUI {open
 0
 \#endif
  || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))) {
-    config.save();
+    Config::Current().save();
     *exitprogram=1;
 };} open
       xywh {979 190 390 524} type Double hide xclass zynaddsubfx
@@ -656,7 +656,7 @@ updatepanel();}
 	masterwindow->hide();
 	refresh_master_ui();
 	simplemasterwindow->show();
-	config.cfg.UserInterfaceMode=2;
+    Config::Current().cfg.UserInterfaceMode=2;
 };}
             xywh {10 10 100 20}
           }
@@ -1047,7 +1047,7 @@ updatepanel();}
 if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 \#endif
 {
-	config.save();
+    Config::Current().save();
 	*exitprogram=1;
 };}
       xywh {687 295 600 335} type Double hide
@@ -1135,7 +1135,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
 	simplemasterwindow->hide();
 	refresh_master_ui();
 	masterwindow->show();
-	config.cfg.UserInterfaceMode=1;
+    Config::Current().cfg.UserInterfaceMode=1;
 };}
             xywh {0 0 100 20}
           }
@@ -1548,7 +1548,7 @@ virkeys->take_focus();}
       }
       Fl_Button {} {
         label Advanced
-        callback {config.cfg.UserInterfaceMode=1;
+        callback {Config::Current().cfg.UserInterfaceMode=1;
 masterwindow->show();
 selectuiwindow->hide();}
         xywh {10 165 100 35} color 229 labelfont 1 labelsize 16
@@ -1561,7 +1561,7 @@ selectuiwindow->hide();}
         label Beginner
         callback {simplemasterwindow->show();
 selectuiwindow->hide();
-config.cfg.UserInterfaceMode=2;}
+Config::Current().cfg.UserInterfaceMode=2;}
         xywh {10 80 100 65} color 238 labelfont 1 labelsize 16
       }
       Fl_Box {} {
@@ -1635,7 +1635,7 @@ delete panelwindow;
 delete selectuiwindow;} {}
   }
   Function {showUI()} {} {
-    code {switch (config.cfg.UserInterfaceMode){
+    code {switch (Config::Current().cfg.UserInterfaceMode){
 	case 0:selectuiwindow->show();
 	break;
 	case 1:masterwindow->show();

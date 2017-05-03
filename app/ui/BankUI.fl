@@ -222,10 +222,10 @@ banklist->value(0);}
           }
           Fl_Check_Button {} {
             label {Show PADsynth status}
-            callback {config.cfg.CheckPADsynth=(int) o->value();
+            callback {Config::Current().cfg.CheckPADsynth=(int) o->value();
 refreshmainwindow();}
             xywh {445 558 265 46} down_box DOWN_BOX labelsize 11
-            code0 {o->value(config.cfg.CheckPADsynth);}
+            code0 {o->value(Config::Current().cfg.CheckPADsynth);}
           }
         }
         Fl_Group {} {
@@ -263,9 +263,9 @@ Fl::add_timeout(0.25, BankUI::search, (void*)this);}
       }
       Fl_Check_Button {} {
         label {auto close}
-        callback {config.cfg.BankUIAutoClose=(int) o->value();}
+        callback {Config::Current().cfg.BankUIAutoClose=(int) o->value();}
         tooltip {automatically close the bank window if the instrument is loaded} xywh {720 613 75 26} down_box DOWN_BOX labelsize 10
-        code0 {o->value(config.cfg.BankUIAutoClose);}
+        code0 {o->value(Config::Current().cfg.BankUIAutoClose);}
       }
     }
   }
@@ -286,7 +286,7 @@ delete(bankuiwindow);} {}
   }
   Function {show()} {} {
     code {bankuiwindow->show();
-simplesetmode(config.cfg.UserInterfaceMode==2);} {}
+simplesetmode(Config::Current().cfg.UserInterfaceMode==2);} {}
   }
   Function {hide()} {} {
     code {bankuiwindow->hide();} {}
@@ -313,7 +313,7 @@ if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
     snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->getname(slot).c_str());
      cbwig->do_callback();
      
-     if (config.cfg.BankUIAutoClose!=0)
+     if (Config::Current().cfg.BankUIAutoClose!=0)
          bankuiwindow->hide();
 
 };

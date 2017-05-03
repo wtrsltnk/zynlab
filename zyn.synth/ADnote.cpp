@@ -1483,7 +1483,7 @@ int ADnote::noteout(float *outl, float *outr)
                 //case PITCH_MOD:ComputeVoiceOscillatorPitchModulation(nvoice);break;
                 default:
                     ComputeVoiceOscillator_LinearInterpolation(nvoice);
-                    //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
+                    //if (Config::Current().cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
             }
         else
             ComputeVoiceNoise(nvoice);

@@ -106,7 +106,7 @@ int exitprogram()
 int main(int argc, char *argv[])
 {
     auto synth = new SystemSettings;
-    config.init();
+    Config::Current().init();
     int noui = 0;
     cerr
             << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
@@ -121,10 +121,10 @@ int main(int argc, char *argv[])
         cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
 
     /* Get the settings from the Config*/
-    synth->samplerate = config.cfg.SampleRate;
-    synth->buffersize = config.cfg.SoundBufferSize;
-    synth->oscilsize  = config.cfg.OscilSize;
-    swaplr = config.cfg.SwapStereo;
+    synth->samplerate = Config::Current().cfg.SampleRate;
+    synth->buffersize = Config::Current().cfg.SoundBufferSize;
+    synth->oscilsize  = Config::Current().cfg.OscilSize;
+    swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth->samplerate);
 

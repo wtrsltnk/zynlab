@@ -187,7 +187,7 @@ int XMLwrapper::saveXMLfile(const string &filename) const
     if(xmldata == NULL)
         return -2;
 
-    int compression = config.cfg.GzipCompression;
+    int compression = Config::Current().cfg.GzipCompression;
     int result      = dosavefile(filename.c_str(), compression, xmldata);
 
     free(xmldata);

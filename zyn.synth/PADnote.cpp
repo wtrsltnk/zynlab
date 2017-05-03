@@ -358,7 +358,7 @@ int PADnote::noteout(float *outl, float *outr)
     float freqlo  = freqrap - floor(freqrap);
 
 
-    if(config.cfg.Interpolation)
+    if(Config::Current().cfg.Interpolation)
         Compute_Cubic(outl, outr, freqhi, freqlo);
     else
         Compute_Linear(outl, outr, freqhi, freqlo);

@@ -218,13 +218,13 @@ if ((event==FL_PUSH)||(event==FL_DRAG)||(event==FL_RELEASE)){
 const int *keysoct1=keysoct1qwerty;
 const int *keysoct2=keysoct2qwerty;
 
-if (config.cfg.VirKeybLayout==2) {
+if (Config::Current().cfg.VirKeybLayout==2) {
 	keysoct1=keysoct1dw;
 	keysoct2=keysoct2dw;
-}else if (config.cfg.VirKeybLayout==3) {
+}else if (Config::Current().cfg.VirKeybLayout==3) {
 	keysoct1=keysoct1qwertz;
 	keysoct2=keysoct2qwertz;
-}else if (config.cfg.VirKeybLayout==4) {
+}else if (Config::Current().cfg.VirKeybLayout==4) {
 	keysoct1=keysoct1az;
 	keysoct2=keysoct2az;
 };

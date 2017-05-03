@@ -226,7 +226,7 @@ void Mixer::SetController(char chan, int type, int par)
 
 void Mixer::SetProgram(char chan, unsigned int pgm)
 {
-    if(config.cfg.IgnoreProgramChange)
+    if(Config::Current().cfg.IgnoreProgramChange)
         return;
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)

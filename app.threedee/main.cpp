@@ -24,12 +24,12 @@ void sigterm_exit(int /*sig*/)
 void initprogram(void)
 {
     auto synth = new SystemSettings;
-    config.init();
+    Config::Current().init();
 
     /* Get the settings from the Config*/
-    synth->samplerate = config.cfg.SampleRate;
-    synth->buffersize = config.cfg.SoundBufferSize;
-    synth->oscilsize  = config.cfg.OscilSize;
+    synth->samplerate = Config::Current().cfg.SampleRate;
+    synth->buffersize = Config::Current().cfg.SoundBufferSize;
+    synth->oscilsize  = Config::Current().cfg.OscilSize;
 
     synth->alias();
 
@@ -41,7 +41,7 @@ void initprogram(void)
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
     mixer = new Mixer(synth);
-    mixer->swaplr = config.cfg.SwapStereo;
+    mixer->swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth->samplerate);
 
