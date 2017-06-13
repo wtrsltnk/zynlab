@@ -57,11 +57,11 @@ bool AppThreeDee::SetUp()
     config.MergeMode = true;
 
     static const ImWchar icons_ranges_fontawesome[] = { 0xf000, 0xf3ff, 0 }; // will not be copied by AddFont* so keep
-    io.Fonts->AddFontFromFileTTF("../../zynlab/app.threedee/imgui/extra_fonts/fontawesome-webfont.ttf", 18.0f, &config, icons_ranges_fontawesome);
+    io.Fonts->AddFontFromFileTTF("../../zynlab/app.threedee/fontawesome-webfont.ttf", 18.0f, &config, icons_ranges_fontawesome);
 
     config.MergeGlyphCenterV = true;
     static const ImWchar icons_ranges_googleicon[] = { 0xe000, 0xeb4c, 0 }; // will not be copied by AddFont* so keep
-    io.Fonts->AddFontFromFileTTF("../../zynlab/app.threedee/imgui/extra_fonts/MaterialIcons-Regular.ttf", 18.0f, &config, icons_ranges_googleicon);
+    io.Fonts->AddFontFromFileTTF("../../zynlab/app.threedee/MaterialIcons-Regular.ttf", 18.0f, &config, icons_ranges_googleicon);
 
     return true;
 }
