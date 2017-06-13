@@ -99,7 +99,7 @@ int PaEngine::PAprocess(const void *inputBuffer,
 
 int PaEngine::process(float *out, unsigned long framesPerBuffer)
 {
-    const Stereo<float *> smp = getNext();
+    const Stereo<float *> smp = nextSample();
     for(unsigned i = 0; i < framesPerBuffer; ++i) {
         *out++ = smp.l[i];
         *out++ = smp.r[i];

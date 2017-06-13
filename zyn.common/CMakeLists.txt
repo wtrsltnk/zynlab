@@ -34,7 +34,7 @@ add_library(zyn.common STATIC
     )
 
 target_include_directories(zyn.common
-    PRIVATE ${MXML_INCLUDE_DIRS}
+    PUBLIC ${MXML_INCLUDE_DIRS}
     )
 
 target_link_libraries(zyn.common

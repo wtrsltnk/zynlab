@@ -19,11 +19,6 @@ else()
     message(STATUS "GUI module defaulting to off")
 endif()
 
-include_directories(
-    ${MXML_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}
-    )
-
 add_subdirectory("zyn.common")
 add_subdirectory("zyn.dsp")
 add_subdirectory("zyn.fx")

@@ -95,7 +95,7 @@ bool SdlEngine::getAudioEn() const
 
 int SdlEngine::process(Uint8 *stream, int len)
 {
-    const Stereo<float *> smp = getNext();
+    const Stereo<float *> smp = nextSample();
     Uint8 *l = (Uint8*)(smp.l);
     Uint8 *r = (Uint8*)(smp.r);
     for(unsigned i = 0; i < len; ++i) {

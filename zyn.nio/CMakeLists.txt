@@ -4,6 +4,13 @@ project(zyn.nio)
 
 find_package(PORTAUDIO REQUIRED)
 find_package(SDL2)
+if (UNIX)
+    find_package(ALSA)
+    find_package(JACK)
+    find_package(OSS)
+    find_package(DSSI)
+    find_package(LIBLO)
+endif (UNIX)
 
 set(AlsaEnable  ${ALSA_FOUND}      CACHE BOOL  "Enable support for Advanced Linux Sound Architecture")
 set(JackEnable  ${JACK_FOUND}      CACHE BOOL  "Enable support for JACK Audio Connection toolKit")

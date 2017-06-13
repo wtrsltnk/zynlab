@@ -48,7 +48,7 @@ void AudioOutput::setBufferSize(int _bufferSize)
     bufferSize = _bufferSize;
 }
 
-const Stereo<float *> AudioOutput::getNext()
+const Stereo<float *> AudioOutput::nextSample()
 {
-    return AudioOutputManager::getInstance().tick(bufferSize);
+    return AudioOutputManager::getInstance().nextSample(bufferSize);
 }

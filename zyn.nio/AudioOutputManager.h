@@ -19,7 +19,7 @@ public:
     virtual ~AudioOutputManager();
 
     /**Execute a tick*/
-    const Stereo<float *> tick(unsigned int frameSize);
+    const Stereo<float *> nextSample(unsigned int frameSize);
 
     /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)

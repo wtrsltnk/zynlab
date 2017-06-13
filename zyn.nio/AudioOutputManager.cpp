@@ -64,7 +64,7 @@ AudioOutputManager::~AudioOutputManager()
  * 6) Lets return those samples to the primary and secondary outputs
  * 7) Lets wait for another tick
  */
-const Stereo<float *> AudioOutputManager::tick(unsigned int frameSize)
+const Stereo<float *> AudioOutputManager::nextSample(unsigned int frameSize)
 {
     MidiInputManager &midi = MidiInputManager::getInstance();
     //SysEv->execute();

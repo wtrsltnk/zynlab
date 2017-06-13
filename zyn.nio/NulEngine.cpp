@@ -44,7 +44,7 @@ void *NulEngine::_AudioThread(void *arg)
 void *NulEngine::AudioThread()
 {
     while(pThread) {
-        getNext();
+        nextSample();
 
         struct timeval now;
         int remaining = 0;

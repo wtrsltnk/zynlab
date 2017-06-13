@@ -54,7 +54,7 @@ public:
 protected:
     /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-    const Stereo<float *> getNext();
+    const Stereo<float *> nextSample();
 
     int samplerate;
     int bufferSize;

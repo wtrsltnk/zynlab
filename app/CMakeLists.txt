@@ -37,11 +37,12 @@ if(FltkGui)
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
 
-	include_directories(
-		${FLTK_INCLUDE_DIR}
-		"${CMAKE_CURRENT_SOURCE_DIR}/ui"
-		"${CMAKE_CURRENT_BINARY_DIR}"
-		)
+    include_directories(
+        ${FLTK_INCLUDE_DIR}
+        "${CMAKE_CURRENT_SOURCE_DIR}/.."
+        "${CMAKE_CURRENT_SOURCE_DIR}/ui"
+        "${CMAKE_CURRENT_BINARY_DIR}"
+        )
 
     add_library(zyn.ui
         ${app_FLTK_UI_SRCS}
@@ -57,12 +58,8 @@ if(FltkGui)
         )
 endif()
 
-set(app_SRCS
-    main.cpp
-    )
-
 add_executable(app
-    ${app_SRCS}
+    main.cpp
 	)
 
 target_compile_features(app
