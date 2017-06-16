@@ -96,32 +96,43 @@ void AppThreeDee::Render()
         ImGui::EndMainMenuBar();
     }
 
+    static bool show_library = true;
+    static bool show_inspector = true;
+    static bool show_smartcontrols = true;
+    static bool show_editors = true;
+    static bool show_mixer = true;
     static bool open = true;
-    ImGui::Begin("TOOLBAR", &open, ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
+
+    int leftWidth = (this->_display_w - 210) / 2;
+    ImGui::Begin("TOOLBAR_LEFT", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
     {
         ImGui::SetWindowPos(ImVec2(0, 22));
-        ImGui::SetWindowSize(ImVec2(this->_display_w, 70));
+        ImGui::SetWindowSize(ImVec2(leftWidth, 40));
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-        if (ImGui::Button(FontAwesomeIcons::FA_INBOX, ImVec2(30, 30))) show_test_window ^= 1;
+        if (ImGui::Button(FontAwesomeIcons::FA_INBOX, ImVec2(30, 30))) show_library ^= 1;
         ImGui::SameLine();
-        if (ImGui::Button(FontAwesomeIcons::FA_INFO, ImVec2(30, 30))) show_test_window ^= 1;
-
-        ImGui::SameLine();
-        ImGui::Text("  ");
-        ImGui::SameLine();
-        if (ImGui::Button(FontAwesomeIcons::FA_QUESTION, ImVec2(30, 30))) show_test_window ^= 1;
+        if (ImGui::Button(FontAwesomeIcons::FA_INFO, ImVec2(30, 30))) show_inspector ^= 1;
 
         ImGui::SameLine();
         ImGui::Text("  ");
         ImGui::SameLine();
-        if (ImGui::Button(FontAwesomeIcons::FA_SLIDERS, ImVec2(30, 30))) show_test_window ^= 1;
+        if (ImGui::Button(FontAwesomeIcons::FA_SLIDERS, ImVec2(30, 30))) show_smartcontrols ^= 1;
         ImGui::SameLine();
-        if (ImGui::Button(FontAwesomeIcons::FA_SCISSORS, ImVec2(30, 30))) show_test_window ^= 1;
+        if (ImGui::Button(FontAwesomeIcons::FA_SLIDERS, ImVec2(30, 30))) show_mixer ^= 1;
+        ImGui::SameLine();
+        if (ImGui::Button(FontAwesomeIcons::FA_SCISSORS, ImVec2(30, 30))) show_editors ^= 1;
 
-        ImGui::SameLine();
-        ImGui::Text("  ");
+        ImGui::PopStyleVar();
+    }
+    ImGui::End();
+
+    ImGui::Begin("TOOLBAR", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
+    {
+        ImGui::SetWindowPos(ImVec2(leftWidth, 22));
+        ImGui::SetWindowSize(ImVec2(210, 40));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
+
         ImGui::SameLine();
         if (ImGui::Button(GoogleIcons::GI_FAST_REWIND, ImVec2(30, 30))) show_test_window ^= 1;
         ImGui::SameLine();
@@ -133,15 +144,37 @@ void AppThreeDee::Render()
         ImGui::SameLine();
         if (ImGui::Button(GoogleIcons::GI_FIBER_MANUAL_RECORD, ImVec2(30, 30))) show_test_window ^= 1;
 
+        ImGui::PopStyleVar();
+    }
+    ImGui::End();
+
+    static bool show_listeditor = false;
+    static bool show_notes = false;
+    static bool show_loops = false;
+    static bool show_browser = false;
+    ImGui::Begin("TOOLBAR_RIGHT", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
+    {
+        ImGui::SetWindowPos(ImVec2(this->_display_w - leftWidth, 22));
+        ImGui::SetWindowSize(ImVec2(leftWidth, 40));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
+
+        ImGui::SameLine();
+        if (ImGui::Button(GoogleIcons::GI_LIST, ImVec2(30, 30))) show_listeditor ^= 1;
+        ImGui::SameLine();
+        if (ImGui::Button(GoogleIcons::GI_NOTE, ImVec2(30, 30))) show_notes ^= 1;
+        ImGui::SameLine();
+        if (ImGui::Button(GoogleIcons::GI_ALL_INCLUSIVE, ImVec2(30, 30))) show_loops ^= 1;
+        ImGui::SameLine();
+        if (ImGui::Button(GoogleIcons::GI_LIBRARY_MUSIC, ImVec2(30, 30))) show_browser ^= 1;
 
         ImGui::PopStyleVar();
     }
     ImGui::End();
 
-    auto v = ImVec2((float)this->_display_w, (float)this->_display_h - 92.0f);
+    auto v = ImVec2((float)this->_display_w, (float)this->_display_h - 62.0f);
     ImGui::Begin("Splitter test2", &open, ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
     {
-        ImGui::SetWindowPos(ImVec2(0, 92));
+        ImGui::SetWindowPos(ImVec2(0, 62));
         ImGui::SetWindowSize(v);
         ImGui::SetNextWindowSizeConstraints(v, v);
 
