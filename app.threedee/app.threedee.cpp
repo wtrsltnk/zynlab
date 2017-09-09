@@ -1,7 +1,23 @@
 #include "app.threedee.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include "imgui_impl_glfw_gl3.h"
 #include "font-icons.h"
+
+struct {
+    bool show_library = false;
+    bool show_inspector = true;
+    bool show_smartcontrols = false;
+    bool show_editors = false;
+    bool show_mixer = false;
+    bool show_listeditor = false;
+    bool show_notes = false;
+    bool show_loops = false;
+    bool show_browser = false;
+    float w = 200.0f;
+    float h = 300.0f;
+
+} windowConfig;
 
 AppThreeDee::AppThreeDee(GLFWwindow* window, Mixer* mixer)
     : _window(window), _mixer(mixer), _display_w(800), _display_h(600)
@@ -31,14 +47,60 @@ void AppThreeDee::ResizeCallback(GLFWwindow* window, int width, int height)
 void AppThreeDee::onKeyAction(int key, int scancode, int action, int mods)
 { }
 
-static float w = 200.0f;
-static float h = 300.0f;
+bool Knob(const char* label, float* value_p, float minv, float maxv)
+{
+    ImGuiStyle& style = ImGui::GetStyle();
+    float line_height = ImGui::GetTextLineHeight();
+
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    float sz = 36.0f;
+    float radio =  sz*0.5f;
+    ImVec2 center = ImVec2(p.x + radio, p.y + radio);
+    float val1 = (value_p[0] - minv)/(maxv - minv);
+    char textval[32];
+    ImFormatString(textval, IM_ARRAYSIZE(textval), "%04.1f", value_p[0]);
+
+    ImVec2 textpos = p;
+    float gamma = M_PI/4.0f;//0 value in knob
+    float alpha = (M_PI-gamma)*val1*2.0f+gamma;
+
+    float x2 = -sinf(alpha)*radio + center.x;
+    float y2 = cosf(alpha)*radio + center.y;
+
+    ImGui::InvisibleButton(label,ImVec2(sz, sz + line_height + style.ItemInnerSpacing.y));
+
+    bool is_active = ImGui::IsItemActive();
+    bool is_hovered = ImGui::IsItemHovered();
+    bool touched = false;
+
+    if (is_active)
+    {
+        touched = true;
+        ImVec2 mp = ImGui::GetIO().MousePos;
+        alpha = atan2f(mp.x - center.x, center.y - mp.y) + M_PI;
+        alpha = ImMax(gamma,ImMin(2.0f*M_PI-gamma,alpha));
+        float value = 0.5f*(alpha-gamma)/(M_PI-gamma);
+        value_p[0] = value*(maxv - minv) + minv;
+    }
+
+    ImU32 col32 = ImGui::GetColorU32(is_active ? ImGuiCol_FrameBgActive : is_hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+    ImU32 col32line = ImGui::GetColorU32(ImGuiCol_SliderGrabActive);
+    ImU32 col32text = ImGui::GetColorU32(ImGuiCol_Text);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddCircleFilled(center, radio, col32, 16);
+    draw_list->AddLine(center, ImVec2(x2, y2), col32line, 1);
+    draw_list->AddText(textpos, col32text, textval);
+    draw_list->AddText(ImVec2(p.x, p.y + sz + style.ItemInnerSpacing.y), col32text, label);
+
+    return touched;
+}
+
 void AppThreeDee::onResize(int width, int height)
 {
     float aspectw = float(width) / float(this->_display_w);
     float aspecth = float(height) / float(this->_display_h);
-    w *= aspectw;
-    h *= aspecth;
+    windowConfig.w *= aspectw;
+    windowConfig.h *= aspecth;
 
     this->_display_w = width;
     this->_display_h = height;
@@ -97,12 +159,10 @@ void AppThreeDee::Render()
             ImGui::EndMainMenuBar();
         }
 
-        static bool show_library = false;
-        static bool show_inspector = false;
-        static bool show_smartcontrols = false;
-        static bool show_editors = false;
-        static bool show_mixer = false;
         static bool open = true;
+        const int inspectorWidth = 200;
+        const int libraryWidth = 200;
+        const ImVec4 checkedButtonColor = ImVec4(0.47f, 0.20f, 0.20f, 0.60f);
 
         int leftWidth = (this->_display_w - 210) / 2;
         ImGui::Begin("TOOLBAR_LEFT", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
@@ -111,24 +171,43 @@ void AppThreeDee::Render()
             ImGui::SetWindowSize(ImVec2(leftWidth, 40));
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
 
-            if (ImGui::Button(FontAwesomeIcons::FA_INBOX, ImVec2(30, 30))) show_library ^= 1;
+            bool tmp = windowConfig.show_library;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(FontAwesomeIcons::FA_INBOX, ImVec2(30, 30))) windowConfig.show_library ^= 1;
+            if (tmp) ImGui::PopStyleColor(1);
+
             ImGui::SameLine();
-            if (ImGui::Button(FontAwesomeIcons::FA_INFO, ImVec2(30, 30))) show_inspector ^= 1;
+            tmp = windowConfig.show_inspector;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(FontAwesomeIcons::FA_INFO, ImVec2(30, 30))) windowConfig.show_inspector ^= 1;
+            if (tmp) ImGui::PopStyleColor(1);
 
             ImGui::SameLine();
             ImGui::Text("  ");
+
             ImGui::SameLine();
-            if (ImGui::Button(FontAwesomeIcons::FA_TACHOMETER, ImVec2(30, 30))) show_smartcontrols ^= 1;
+            tmp = windowConfig.show_smartcontrols;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(FontAwesomeIcons::FA_TACHOMETER, ImVec2(30, 30))) { windowConfig.show_smartcontrols ^= 1; windowConfig.show_mixer = false; windowConfig.show_editors = false; }
+            if (tmp) ImGui::PopStyleColor(1);
+
             ImGui::SameLine();
-            if (ImGui::Button(FontAwesomeIcons::FA_SLIDERS, ImVec2(30, 30))) show_mixer ^= 1;
+            tmp = windowConfig.show_mixer;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(FontAwesomeIcons::FA_SLIDERS, ImVec2(30, 30))) { windowConfig.show_mixer ^= 1; windowConfig.show_editors = false; windowConfig.show_smartcontrols = false; }
+            if (tmp) ImGui::PopStyleColor(1);
+
             ImGui::SameLine();
-            if (ImGui::Button(FontAwesomeIcons::FA_SCISSORS, ImVec2(30, 30))) show_editors ^= 1;
+            tmp = windowConfig.show_editors;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(FontAwesomeIcons::FA_SCISSORS, ImVec2(30, 30))) { windowConfig.show_editors ^= 1; windowConfig.show_smartcontrols = false; windowConfig.show_mixer = false; }
+            if (tmp) ImGui::PopStyleColor(1);
 
             ImGui::PopStyleVar();
         }
         ImGui::End();
 
-        ImGui::Begin("TOOLBAR", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
+        ImGui::Begin("TOOLBAR_CENTER", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
         {
             ImGui::SetWindowPos(ImVec2(leftWidth, 22));
             ImGui::SetWindowSize(ImVec2(210, 40));
@@ -149,10 +228,6 @@ void AppThreeDee::Render()
         }
         ImGui::End();
 
-        static bool show_listeditor = false;
-        static bool show_notes = false;
-        static bool show_loops = false;
-        static bool show_browser = false;
         ImGui::Begin("TOOLBAR_RIGHT", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
         {
             ImGui::SetWindowPos(ImVec2(this->_display_w - 150, 22));
@@ -160,52 +235,117 @@ void AppThreeDee::Render()
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
 
             ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_LIST, ImVec2(30, 30))) show_listeditor ^= 1;
+            bool tmp = windowConfig.show_listeditor;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(GoogleIcons::GI_LIST, ImVec2(30, 30)))
+            {
+                windowConfig.show_listeditor ^= 1;
+                windowConfig.show_notes = false;
+                windowConfig.show_loops = false;
+                windowConfig.show_browser = false;
+            }
+            if (tmp) ImGui::PopStyleColor(1);
+
             ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_NOTE, ImVec2(30, 30))) show_notes ^= 1;
+            tmp = windowConfig.show_notes;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(GoogleIcons::GI_NOTE, ImVec2(30, 30)))
+            {
+                windowConfig.show_notes ^= 1;
+                windowConfig.show_listeditor = false;
+                windowConfig.show_loops = false;
+                windowConfig.show_browser = false;
+            }
+            if (tmp) ImGui::PopStyleColor(1);
+
             ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_ALL_INCLUSIVE, ImVec2(30, 30))) show_loops ^= 1;
+            tmp = windowConfig.show_loops;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(GoogleIcons::GI_ALL_INCLUSIVE, ImVec2(30, 30)))
+            {
+                windowConfig.show_loops ^= 1;
+                windowConfig.show_listeditor = false;
+                windowConfig.show_notes = false;
+                windowConfig.show_browser = false;
+            }
+            if (tmp) ImGui::PopStyleColor(1);
+
             ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_LIBRARY_MUSIC, ImVec2(30, 30))) show_browser ^= 1;
+            tmp = windowConfig.show_browser;
+            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
+            if (ImGui::Button(GoogleIcons::GI_LIBRARY_MUSIC, ImVec2(30, 30)))
+            {
+                windowConfig.show_browser ^= 1;
+                windowConfig.show_listeditor = false;
+                windowConfig.show_notes = false;
+                windowConfig.show_loops = false;
+            }
+            if (tmp) ImGui::PopStyleColor(1);
 
             ImGui::PopStyleVar();
         }
         ImGui::End();
 
-        if (show_library)
+        if (windowConfig.show_library)
         {
-            ImGui::Begin("library", &show_library, ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+            ImGui::Begin("library", &(windowConfig.show_library), ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
             {
                 ImGui::SetWindowPos(ImVec2(0, 62));
-                ImGui::SetWindowSize(ImVec2(150, this->_display_h));
+                ImGui::SetWindowSize(ImVec2(libraryWidth, this->_display_h));
 
                 ImGui::Text("Library");
             }
             ImGui::End();
         }
 
-        if (show_inspector)
+        if (windowConfig.show_inspector)
         {
-            ImGui::Begin("inspector", &show_inspector, ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+            ImGui::Begin("inspector", &(windowConfig.show_inspector), ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
             {
-                ImGui::SetWindowPos(ImVec2(show_library ? 150 : 0, 62));
-                ImGui::SetWindowSize(ImVec2(150, this->_display_h));
+                static bool region_mute = true;
+                static bool region_loop = false;
+                ImGui::SetWindowPos(ImVec2(windowConfig.show_library ? libraryWidth : 0, 62));
+                ImGui::SetWindowSize(ImVec2(inspectorWidth, this->_display_h - 62));
+                if (ImGui::CollapsingHeader("Region"))
+                {
+                    ImGui::Checkbox("Mute", &region_mute);
+                    ImGui::Checkbox("Loop", &region_loop);
+                }
+                if (ImGui::CollapsingHeader("Groups"))
+                {
+                }
+                if (ImGui::CollapsingHeader("Track"))
+                {
+                }
 
-                ImGui::Text("Inspector");
+                ImGui::BeginChild("selected_track");
+                {
+                    ImGui::SetWindowPos(ImVec2((windowConfig.show_library ? libraryWidth : 0) + 15, this->_display_h - 70));
+                    static float trackPan = 0.0f;
+                    static bool trackMute = false;
+                    static bool trackSolo = false;
+                    if (ImGui::Button("Instrument")) windowConfig.show_library = true;
+//                    Knob("Pan", &trackPan, -1.0f, 1.0f);
+                    if (ImGui::Button("M", ImVec2(24, 24))) trackMute ^= 1;
+                    ImGui::SameLine();
+                    if (ImGui::Button("S", ImVec2(24, 24))) trackSolo ^= 1;
+                }
+                ImGui::EndChild();
             }
             ImGui::End();
         }
 
-        auto v = ImVec2((float)this->_display_w - (show_library ? 150 : 0) - (show_inspector ? 150 : 0), (float)this->_display_h - 62.0f);
+        auto v = ImVec2((float)this->_display_w - (windowConfig.show_library ? libraryWidth : 0) - (windowConfig.show_inspector ? inspectorWidth : 0),
+                        (float)this->_display_h - 62.0f);
         ImGui::Begin("Splitter test2", &open, ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
         {
-            ImGui::SetWindowPos(ImVec2((show_library ? 150 : 0) + (show_inspector ? 150 : 0), 62));
+            ImGui::SetWindowPos(ImVec2((windowConfig.show_library ? libraryWidth : 0) + (windowConfig.show_inspector ? inspectorWidth : 0), 62));
             ImGui::SetWindowSize(v);
             ImGui::SetNextWindowSizeConstraints(v, v);
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,0));
 
-            ImGui::BeginChild("child1", ImVec2((show_library ? 150 : 0) + (show_inspector ? 150 : 0), h), true);
+            ImGui::BeginChild("child1", ImVec2(0, (windowConfig.show_smartcontrols | windowConfig.show_editors | windowConfig.show_mixer ? windowConfig.h : 0)), true);
             {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15,15));
                 static float f = 0.0f;
@@ -218,15 +358,29 @@ void AppThreeDee::Render()
             }
             ImGui::EndChild();
 
-            ImGui::InvisibleButton("hsplitter", ImVec2(-1,8.0f));
-            if (ImGui::IsItemActive())
-                h += ImGui::GetIO().MouseDelta.y;
-
-            ImGui::BeginChild("child3", ImVec2(0,0), true);
+            if (windowConfig.show_smartcontrols | windowConfig.show_editors | windowConfig.show_mixer)
             {
+                ImGui::InvisibleButton("hsplitter", ImVec2(-1,8.0f));
+                if (ImGui::IsItemActive())
+                    windowConfig.h += ImGui::GetIO().MouseDelta.y;
 
+                ImGui::BeginChild("child2", ImVec2(0,0), true);
+                {
+                    if (windowConfig.show_smartcontrols)
+                    {
+                        ImGui::Text("Smart controls");
+                    }
+                    if (windowConfig.show_editors)
+                    {
+                        ImGui::Text("Editors");
+                    }
+                    if (windowConfig.show_mixer)
+                    {
+                        ImGui::Text("Mixer");
+                    }
+                }
+                ImGui::EndChild();
             }
-            ImGui::EndChild();
 
             ImGui::PopStyleVar();
         }
