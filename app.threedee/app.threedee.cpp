@@ -160,12 +160,13 @@ void AppThreeDee::Render()
 {
     nk_glfw3_new_frame();
 
+    struct nk_color active = nk_rgb(28,48,62);
+    struct nk_style_button *style = &ctx->style.button;
+
     if (nk_begin(ctx, "Toolbar", nk_rect(0, 0, this->_display_w, 50), 0))
     {
         nk_layout_row_static(ctx, 30, 30, 3);
 
-        struct nk_color active = nk_rgb(28,48,62);
-        struct nk_style_button *style = &ctx->style.button;
         nk_style_push_color(ctx, &style->border_color, windowConfig.show_library ? active : style->border_color);
         if (nk_button_image(ctx, windowAssets.library_button))
         {
@@ -222,120 +223,133 @@ void AppThreeDee::Render()
     }
     nk_end(ctx);
 
-    if (nk_begin(ctx, "Demo", nk_rect(left, 52, this->_display_w - left - 2, this->_display_h - 54), NK_WINDOW_NO_SCROLLBAR))
-    {
-        const struct nk_input *in = &ctx->input;
-        static float a = this->_display_h - 250, b = 200;
-        struct nk_rect bounds;
+    const struct nk_input *in = &ctx->input;
 
-        nk_layout_row_dynamic(ctx, this->_display_h - 100 - windowConfig.splitter1, 1);
-        if (nk_group_begin(ctx, "Tracks", 0))
+    auto tracksRect = nk_rect(left, 52,
+                              this->_display_w - left - 2,
+                              this->_display_h - 12 - windowConfig.splitter1 - 54);
+
+    auto splitterRect = nk_rect(left, 52 + this->_display_h - 64 - windowConfig.splitter1,
+                                this->_display_w - left - 2,
+                                8);
+
+    auto mixerRect = nk_rect(left, 52 + this->_display_h - 54 - windowConfig.splitter1,
+                             this->_display_w - left - 2,
+                             windowConfig.splitter1);
+
+    if (nk_begin(ctx, "Tracks", tracksRect, 0))
+    {
+        nk_layout_row_template_begin(ctx, windowConfig.channel_height);
+        nk_layout_row_template_push_static(ctx, 350);
+        nk_layout_row_template_push_dynamic(ctx);
+        nk_layout_row_template_end(ctx);
+        for (int i = 0; i < 16; i++)
         {
-            nk_layout_row_template_begin(ctx, windowConfig.channel_height);
-            nk_layout_row_template_push_static(ctx, 350);
-            nk_layout_row_template_push_dynamic(ctx);
-            nk_layout_row_template_end(ctx);
-            for (int i = 0; i < 16; i++)
+            if (nk_group_begin(ctx, "track0", NK_WINDOW_NO_SCROLLBAR))
             {
-                if (nk_group_begin(ctx, "track0", NK_WINDOW_NO_SCROLLBAR))
+                nk_layout_row_template_begin(ctx, windowConfig.channel_height - 10);
+                nk_layout_row_template_push_static(ctx, 20);
+                nk_layout_row_template_push_static(ctx, 60);
+                nk_layout_row_template_push_dynamic(ctx);
+                nk_layout_row_template_end(ctx);
+                std::stringstream index; index << (i + 1);
+                nk_label(ctx, index.str().c_str(), NK_TEXT_LEFT);
+                nk_button_image(ctx, windowAssets.mixer_button);
+                if (nk_group_begin(ctx, "track0_title", NK_WINDOW_NO_SCROLLBAR))
                 {
-                    nk_layout_row_template_begin(ctx, windowConfig.channel_height - 10);
-                    nk_layout_row_template_push_static(ctx, 20);
-                    nk_layout_row_template_push_static(ctx, 60);
-                    nk_layout_row_template_push_dynamic(ctx);
-                    nk_layout_row_template_end(ctx);
-                    std::stringstream index; index << (i + 1);
-                    nk_label(ctx, index.str().c_str(), NK_TEXT_LEFT);
-                    nk_button_image(ctx, windowAssets.mixer_button);
-                    if (nk_group_begin(ctx, "track0_title", NK_WINDOW_NO_SCROLLBAR))
+                    nk_layout_row_dynamic(ctx, 25, 1);
+                    nk_label(ctx, "Naam van de track", NK_TEXT_LEFT);
+                    if (nk_group_begin(ctx, "track0_buttons", NK_WINDOW_NO_SCROLLBAR))
                     {
-                        nk_layout_row_dynamic(ctx, 25, 1);
-                        nk_label(ctx, "Naam van de track", NK_TEXT_LEFT);
-                        if (nk_group_begin(ctx, "track0_buttons", NK_WINDOW_NO_SCROLLBAR))
-                        {
-                            nk_layout_row_static(ctx, 20, 20, 2);
-                            nk_button_label(ctx, "M");
-                            nk_button_label(ctx, "S");
-                            nk_group_end(ctx);
-                        }
+                        nk_layout_row_static(ctx, 20, 20, 2);
+                        nk_button_label(ctx, "M");
+                        nk_button_label(ctx, "S");
                         nk_group_end(ctx);
                     }
                     nk_group_end(ctx);
                 }
-                nk_button_label(ctx, "#FFAA");
+                nk_group_end(ctx);
             }
-            nk_group_end(ctx);
+            nk_button_label(ctx, "#FFAA");
         }
+    }
+    nk_end(ctx);
 
-        nk_layout_row_dynamic(ctx, 8, 1);
-        bounds = nk_widget_bounds(ctx);
+    struct nk_style_window *windowstyle = &ctx->style.window;
+
+    nk_style_push_color(ctx, &windowstyle->border_color, windowstyle->contextual_border_color);
+    nk_style_push_float(ctx, &windowstyle->border, 8.0f);
+    if (nk_begin(ctx, "Splitter", splitterRect, NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BORDER))
+    {
+        nk_layout_row_dynamic(ctx, 12, 1);
         nk_spacing(ctx, 1);
-        if ((nk_input_is_mouse_hovering_rect(in, bounds) ||
-             nk_input_is_mouse_prev_hovering_rect(in, bounds)) &&
+        if ((nk_input_is_mouse_hovering_rect(in, splitterRect) ||
+             nk_input_is_mouse_prev_hovering_rect(in, splitterRect)) &&
                 nk_input_is_mouse_down(in, NK_BUTTON_LEFT))
         {
             windowConfig.splitter1 -= in->mouse.delta.y;
         }
+    }
+    nk_end(ctx);
+    nk_style_pop_float(ctx);
+    nk_style_pop_color(ctx);
 
-        nk_layout_row_dynamic(ctx, windowConfig.splitter1, 1);
-        if (nk_group_begin(ctx, "Mixer", 0))
+    if (nk_begin(ctx, "Mixer", mixerRect, 0))
+    {
+        nk_layout_row_template_begin(ctx, 800);
+        nk_layout_row_template_push_static(ctx, 90);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_push_static(ctx, 80);
+        nk_layout_row_template_end(ctx);
+        if (nk_group_begin(ctx, "midipartlabels", 0))
         {
-            nk_layout_row_template_begin(ctx, 800);
-            nk_layout_row_template_push_static(ctx, 90);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 80);
-            nk_layout_row_template_end(ctx);
-            if (nk_group_begin(ctx, "midipartlabels", 0))
-            {
-                nk_layout_row_dynamic(ctx, 20, 1);
-                nk_label(ctx, "", NK_TEXT_RIGHT);
-                nk_label(ctx, "Setting", NK_TEXT_RIGHT);
-                nk_label(ctx, "Gain Reduction", NK_TEXT_RIGHT);
-                nk_label(ctx, "EQ", NK_TEXT_RIGHT);
-                nk_label(ctx, "MIDI FX", NK_TEXT_RIGHT);
-                nk_label(ctx, "Input", NK_TEXT_RIGHT);
-                nk_label(ctx, "Audio FX", NK_TEXT_RIGHT);
-                nk_label(ctx, "Sends", NK_TEXT_RIGHT);
-                nk_label(ctx, "Output", NK_TEXT_RIGHT);
-                nk_label(ctx, "Group", NK_TEXT_RIGHT);
-                nk_label(ctx, "Automation", NK_TEXT_RIGHT);
-                nk_label(ctx, "Pan", NK_TEXT_RIGHT);
-                nk_label(ctx, "dB", NK_TEXT_RIGHT);
-                nk_group_end(ctx);
-            }
-            if (nk_group_begin(ctx, "midipart0", 0))
-            {
-                nk_layout_row_dynamic(ctx, 20, 1);
-                nk_label(ctx, "Instrument 1", NK_TEXT_CENTERED);
-                nk_group_end(ctx);
-            }
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFAA");
+            nk_layout_row_dynamic(ctx, 20, 1);
+            nk_label(ctx, "", NK_TEXT_RIGHT);
+            nk_label(ctx, "Setting", NK_TEXT_RIGHT);
+            nk_label(ctx, "Gain Reduction", NK_TEXT_RIGHT);
+            nk_label(ctx, "EQ", NK_TEXT_RIGHT);
+            nk_label(ctx, "MIDI FX", NK_TEXT_RIGHT);
+            nk_label(ctx, "Input", NK_TEXT_RIGHT);
+            nk_label(ctx, "Audio FX", NK_TEXT_RIGHT);
+            nk_label(ctx, "Sends", NK_TEXT_RIGHT);
+            nk_label(ctx, "Output", NK_TEXT_RIGHT);
+            nk_label(ctx, "Group", NK_TEXT_RIGHT);
+            nk_label(ctx, "Automation", NK_TEXT_RIGHT);
+            nk_label(ctx, "Pan", NK_TEXT_RIGHT);
+            nk_label(ctx, "dB", NK_TEXT_RIGHT);
             nk_group_end(ctx);
         }
+        if (nk_group_begin(ctx, "midipart0", 0))
+        {
+            nk_layout_row_dynamic(ctx, 20, 1);
+            nk_label(ctx, "Instrument 1", NK_TEXT_CENTERED);
+            nk_group_end(ctx);
+        }
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
+        nk_button_label(ctx, "#FFAA");
     }
     nk_end(ctx);
 
