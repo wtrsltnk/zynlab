@@ -25,7 +25,7 @@
 #define LEN(a) (sizeof(a)/sizeof(a)[0])
 
 struct {
-    bool show_library = true;
+    bool show_library = false;
     bool show_inspector = true;
     bool show_smartcontrols = false;
     bool show_mixer = false;
@@ -153,6 +153,10 @@ bool AppThreeDee::SetUp()
     windowAssets.inspector_button = icon_load("../../zynlab/app.threedee/icons/info-with-circle.png");
     windowAssets.mixer_button = icon_load("../../zynlab/app.threedee/icons/sound-mix.png");
 
+    nk_window_show(ctx, "Library", windowConfig.show_library ? NK_SHOWN : NK_HIDDEN);
+    nk_window_show(ctx, "Inspector", windowConfig.show_inspector ? NK_SHOWN : NK_HIDDEN);
+    nk_window_show(ctx, "Mixer", windowConfig.show_mixer ? NK_SHOWN : NK_HIDDEN);
+
     return true;
 }
 
@@ -195,7 +199,7 @@ void AppThreeDee::Render()
 
     int left = 2;
 
-    if (nk_begin(ctx, "Library", nk_rect(left, 52, 400, this->_display_h - 54), 0))
+    if (nk_begin(ctx, "Library", nk_rect(left, 52, 400, this->_display_h - 54), windowConfig.show_library ? 0: NK_WINDOW_HIDDEN))
     {
         nk_layout_row_dynamic(ctx, 20, 1);
         nk_label(ctx, "Library", NK_TEXT_CENTERED);
@@ -203,7 +207,7 @@ void AppThreeDee::Render()
     }
     nk_end(ctx);
 
-    if (nk_begin(ctx, "Inspector", nk_rect(left, 52, 200, this->_display_h - 54), 0))
+    if (nk_begin(ctx, "Inspector", nk_rect(left, 52, 200, this->_display_h - 54), windowConfig.show_inspector ? 0: NK_WINDOW_HIDDEN))
     {
         nk_layout_row_dynamic(ctx, 20, 1);
         nk_label(ctx, "Inspector", NK_TEXT_CENTERED);
@@ -225,17 +229,20 @@ void AppThreeDee::Render()
 
     const struct nk_input *in = &ctx->input;
 
+    auto splitter = windowConfig.splitter1;
+    if (!windowConfig.show_mixer) splitter = 0;
+
     auto tracksRect = nk_rect(left, 52,
                               this->_display_w - left - 2,
-                              this->_display_h - 12 - windowConfig.splitter1 - 54);
+                              this->_display_h - splitter - 54);
 
-    auto splitterRect = nk_rect(left, 52 + this->_display_h - 64 - windowConfig.splitter1,
+    auto splitterRect = nk_rect(left, (this->_display_h - splitter),
                                 this->_display_w - left - 2,
                                 8);
 
-    auto mixerRect = nk_rect(left, 52 + this->_display_h - 54 - windowConfig.splitter1,
+    auto mixerRect = nk_rect(left, (this->_display_h - splitter) + 10,
                              this->_display_w - left - 2,
-                             windowConfig.splitter1);
+                             splitter - 12);
 
     if (nk_begin(ctx, "Tracks", tracksRect, 0))
     {
@@ -275,11 +282,7 @@ void AppThreeDee::Render()
     }
     nk_end(ctx);
 
-    struct nk_style_window *windowstyle = &ctx->style.window;
-
-    nk_style_push_color(ctx, &windowstyle->border_color, windowstyle->contextual_border_color);
-    nk_style_push_float(ctx, &windowstyle->border, 8.0f);
-    if (nk_begin(ctx, "Splitter", splitterRect, NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BORDER))
+    if (nk_begin(ctx, "Splitter", splitterRect, NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BORDER | windowConfig.show_mixer ? 0: NK_WINDOW_HIDDEN))
     {
         nk_layout_row_dynamic(ctx, 12, 1);
         nk_spacing(ctx, 1);
@@ -291,10 +294,8 @@ void AppThreeDee::Render()
         }
     }
     nk_end(ctx);
-    nk_style_pop_float(ctx);
-    nk_style_pop_color(ctx);
 
-    if (nk_begin(ctx, "Mixer", mixerRect, 0))
+    if (nk_begin(ctx, "Mixer", mixerRect, windowConfig.show_mixer ? 0: NK_WINDOW_HIDDEN))
     {
         nk_layout_row_template_begin(ctx, 800);
         nk_layout_row_template_push_static(ctx, 90);
