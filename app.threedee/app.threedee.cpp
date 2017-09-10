@@ -173,13 +173,60 @@ void AppThreeDee::Render()
         nk_layout_row_dynamic(ctx, windowConfig.splitter1, 1);
         if (nk_group_begin(ctx, "middle", 0))
         {
-            nk_layout_row_static(ctx, 800, 170, NUM_MIDI_PARTS);
+            nk_layout_row_template_begin(ctx, 800);
+            nk_layout_row_template_push_static(ctx, 90);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 80);
+            nk_layout_row_template_end(ctx);
+            if (nk_group_begin(ctx, "midipartlabels", 0))
+            {
+                nk_layout_row_dynamic(ctx, 20, 1);
+                nk_label(ctx, "", NK_TEXT_RIGHT);
+                nk_label(ctx, "Setting", NK_TEXT_RIGHT);
+                nk_label(ctx, "Gain Reduction", NK_TEXT_RIGHT);
+                nk_label(ctx, "EQ", NK_TEXT_RIGHT);
+                nk_label(ctx, "MIDI FX", NK_TEXT_RIGHT);
+                nk_label(ctx, "Input", NK_TEXT_RIGHT);
+                nk_label(ctx, "Audio FX", NK_TEXT_RIGHT);
+                nk_label(ctx, "Sends", NK_TEXT_RIGHT);
+                nk_label(ctx, "Output", NK_TEXT_RIGHT);
+                nk_label(ctx, "Group", NK_TEXT_RIGHT);
+                nk_label(ctx, "Automation", NK_TEXT_RIGHT);
+                nk_label(ctx, "Pan", NK_TEXT_RIGHT);
+                nk_label(ctx, "dB", NK_TEXT_RIGHT);
+                nk_group_end(ctx);
+            }
+            if (nk_group_begin(ctx, "midipart0", 0))
+            {
+                nk_layout_row_dynamic(ctx, 20, 1);
+                nk_label(ctx, "Instrument 1", NK_TEXT_CENTERED);
+                nk_group_end(ctx);
+            }
             nk_button_label(ctx, "#FFAA");
-            nk_button_label(ctx, "#FFBB");
-            nk_button_label(ctx, "#FFCC");
-            nk_button_label(ctx, "#FFDD");
-            nk_button_label(ctx, "#FFEE");
-            nk_button_label(ctx, "#FFFF");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFAA");
             nk_group_end(ctx);
         }
     }
