@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     Nio::setSink("PA");
 
-    mixer->NoteOn(0, 60, 200);
+//    mixer->NoteOn(0, 60, 200);
 
     if (glfwInit() == GLFW_FALSE)
         return -1;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     {
         while (glfwWindowShouldClose(window) == 0)
         {
-            glfwPollEvents();
+            glfwWaitEvents();
 
             glClear(GL_COLOR_BUFFER_BIT);
 

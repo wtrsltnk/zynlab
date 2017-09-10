@@ -10,6 +10,7 @@ if(GLFW3_FOUND)
     set(app_threedee_SRCS
         main.cpp
         app.threedee.cpp
+        stb_image.cpp
         scenenode.cpp
         )
 
