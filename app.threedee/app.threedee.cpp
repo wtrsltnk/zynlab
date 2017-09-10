@@ -1,8 +1,27 @@
 #include "app.threedee.h"
-#include <imgui.h>
-#include <imgui_internal.h>
-#include "imgui_impl_glfw_gl3.h"
+
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_IMPLEMENTATION
+#define NK_GLFW_GL3_IMPLEMENTATION
+
+#include "nuklear/nuklear.h"
+#include "nuklear/demo/glfw_opengl3/nuklear_glfw_gl3.h"
+#include "nuklear/demo/style.c"
 #include "font-icons.h"
+
+#define MAX_VERTEX_BUFFER 512 * 1024
+#define MAX_ELEMENT_BUFFER 128 * 1024
+
+#define UNUSED(a) (void)a
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) < (b) ? (b) : (a))
+#define LEN(a) (sizeof(a)/sizeof(a)[0])
 
 struct {
     bool show_library = false;
@@ -14,8 +33,10 @@ struct {
     bool show_notes = false;
     bool show_loops = false;
     bool show_browser = false;
+    float channel_height = 50.0f;
     float w = 200.0f;
     float h = 300.0f;
+    float splitter1 = 255.0f;
 
 } windowConfig;
 
@@ -47,54 +68,6 @@ void AppThreeDee::ResizeCallback(GLFWwindow* window, int width, int height)
 void AppThreeDee::onKeyAction(int key, int scancode, int action, int mods)
 { }
 
-bool Knob(const char* label, float* value_p, float minv, float maxv)
-{
-    ImGuiStyle& style = ImGui::GetStyle();
-    float line_height = ImGui::GetTextLineHeight();
-
-    ImVec2 p = ImGui::GetCursorScreenPos();
-    float sz = 36.0f;
-    float radio =  sz*0.5f;
-    ImVec2 center = ImVec2(p.x + radio, p.y + radio);
-    float val1 = (value_p[0] - minv)/(maxv - minv);
-    char textval[32];
-    ImFormatString(textval, IM_ARRAYSIZE(textval), "%04.1f", value_p[0]);
-
-    ImVec2 textpos = p;
-    float gamma = M_PI/4.0f;//0 value in knob
-    float alpha = (M_PI-gamma)*val1*2.0f+gamma;
-
-    float x2 = -sinf(alpha)*radio + center.x;
-    float y2 = cosf(alpha)*radio + center.y;
-
-    ImGui::InvisibleButton(label,ImVec2(sz, sz + line_height + style.ItemInnerSpacing.y));
-
-    bool is_active = ImGui::IsItemActive();
-    bool is_hovered = ImGui::IsItemHovered();
-    bool touched = false;
-
-    if (is_active)
-    {
-        touched = true;
-        ImVec2 mp = ImGui::GetIO().MousePos;
-        alpha = atan2f(mp.x - center.x, center.y - mp.y) + M_PI;
-        alpha = ImMax(gamma,ImMin(2.0f*M_PI-gamma,alpha));
-        float value = 0.5f*(alpha-gamma)/(M_PI-gamma);
-        value_p[0] = value*(maxv - minv) + minv;
-    }
-
-    ImU32 col32 = ImGui::GetColorU32(is_active ? ImGuiCol_FrameBgActive : is_hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-    ImU32 col32line = ImGui::GetColorU32(ImGuiCol_SliderGrabActive);
-    ImU32 col32text = ImGui::GetColorU32(ImGuiCol_Text);
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->AddCircleFilled(center, radio, col32, 16);
-    draw_list->AddLine(center, ImVec2(x2, y2), col32line, 1);
-    draw_list->AddText(textpos, col32text, textval);
-    draw_list->AddText(ImVec2(p.x, p.y + sz + style.ItemInnerSpacing.y), col32text, label);
-
-    return touched;
-}
-
 void AppThreeDee::onResize(int width, int height)
 {
     float aspectw = float(width) / float(this->_display_w);
@@ -107,293 +80,122 @@ void AppThreeDee::onResize(int width, int height)
 
     glViewport(0, 0, width, height);
 }
-#define ICON_FA_MUSIC u8"\uf001"
+
+struct nk_context *ctx;
+struct nk_color background;
+
 bool AppThreeDee::SetUp()
 {
-    SceneNode::Setup();
+    ctx = nk_glfw3_init(_window, NK_GLFW3_INSTALL_CALLBACKS);
+    /* Load Fonts: if none of these are loaded a default font will be used  */
+    /* Load Cursor: if you uncomment cursor loading please hide the cursor */
+    {struct nk_font_atlas *atlas;
+    nk_glfw3_font_stash_begin(&atlas);
+    /*struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);*/
+    /*struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 14, 0);*/
+    /*struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);*/
+    /*struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);*/
+    /*struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);*/
+    /*struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);*/
+    nk_glfw3_font_stash_end();
+    /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
+    /*nk_style_set_font(ctx, &droid->handle);*/}
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontFromFileTTF("../../zynlab/app.threedee/imgui/extra_fonts/Roboto-Medium.ttf", 16.0f);
+    /* style.c */
+//    set_style(ctx, THEME_WHITE);
+//    set_style(ctx, THEME_RED);
+    set_style(ctx, THEME_BLUE);
+//    set_style(ctx, THEME_DARK);
 
-    ImFontConfig config;
-    config.MergeMode = true;
-
-    static const ImWchar icons_ranges_fontawesome[] = { 0xf000, 0xf3ff, 0 }; // will not be copied by AddFont* so keep
-    io.Fonts->AddFontFromFileTTF("../../zynlab/app.threedee/fontawesome-webfont.ttf", 18.0f, &config, icons_ranges_fontawesome);
-
-    config.MergeGlyphCenterV = true;
-    static const ImWchar icons_ranges_googleicon[] = { 0xe000, 0xeb4c, 0 }; // will not be copied by AddFont* so keep
-    io.Fonts->AddFontFromFileTTF("../../zynlab/app.threedee/MaterialIcons-Regular.ttf", 18.0f, &config, icons_ranges_googleicon);
+    background = nk_rgb(28,48,62);
 
     return true;
 }
 
-bool show_test_window = true;
-bool show_another_window = false;
-ImVec4 clear_color = ImColor(114, 144, 154);
-
 void AppThreeDee::Render()
 {
-    ImGui_ImplGlfwGL3_NewFrame();
+    nk_glfw3_new_frame();
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 1.0f);
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+    if (nk_begin(ctx, "Toolbar", nk_rect(0, 0, this->_display_w, 50), 0))
     {
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-    //            ShowExampleMenuFile();
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Edit"))
-            {
-                if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-                ImGui::Separator();
-                if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-                if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-                if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
-
-        static bool open = true;
-        const int inspectorWidth = 200;
-        const int libraryWidth = 200;
-        const ImVec4 checkedButtonColor = ImVec4(0.47f, 0.20f, 0.20f, 0.60f);
-
-        int leftWidth = (this->_display_w - 210) / 2;
-        ImGui::Begin("TOOLBAR_LEFT", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
-        {
-            ImGui::SetWindowPos(ImVec2(0, 22));
-            ImGui::SetWindowSize(ImVec2(leftWidth, 40));
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
-
-            bool tmp = windowConfig.show_library;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(FontAwesomeIcons::FA_INBOX, ImVec2(30, 30))) windowConfig.show_library ^= 1;
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::SameLine();
-            tmp = windowConfig.show_inspector;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(FontAwesomeIcons::FA_INFO, ImVec2(30, 30))) windowConfig.show_inspector ^= 1;
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::SameLine();
-            ImGui::Text("  ");
-
-            ImGui::SameLine();
-            tmp = windowConfig.show_smartcontrols;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(FontAwesomeIcons::FA_TACHOMETER, ImVec2(30, 30))) { windowConfig.show_smartcontrols ^= 1; windowConfig.show_mixer = false; windowConfig.show_editors = false; }
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::SameLine();
-            tmp = windowConfig.show_mixer;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(FontAwesomeIcons::FA_SLIDERS, ImVec2(30, 30))) { windowConfig.show_mixer ^= 1; windowConfig.show_editors = false; windowConfig.show_smartcontrols = false; }
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::SameLine();
-            tmp = windowConfig.show_editors;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(FontAwesomeIcons::FA_SCISSORS, ImVec2(30, 30))) { windowConfig.show_editors ^= 1; windowConfig.show_smartcontrols = false; windowConfig.show_mixer = false; }
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::PopStyleVar();
-        }
-        ImGui::End();
-
-        ImGui::Begin("TOOLBAR_CENTER", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
-        {
-            ImGui::SetWindowPos(ImVec2(leftWidth, 22));
-            ImGui::SetWindowSize(ImVec2(210, 40));
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
-
-            ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_FAST_REWIND, ImVec2(30, 30))) show_test_window ^= 1;
-            ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_FAST_FORWARD, ImVec2(30, 30))) show_test_window ^= 1;
-            ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_SKIP_NEXT, ImVec2(30, 30))) show_test_window ^= 1;
-            ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_PLAY_ARROW, ImVec2(30, 30))) show_test_window ^= 1;
-            ImGui::SameLine();
-            if (ImGui::Button(GoogleIcons::GI_FIBER_MANUAL_RECORD, ImVec2(30, 30))) show_test_window ^= 1;
-
-            ImGui::PopStyleVar();
-        }
-        ImGui::End();
-
-        ImGui::Begin("TOOLBAR_RIGHT", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
-        {
-            ImGui::SetWindowPos(ImVec2(this->_display_w - 150, 22));
-            ImGui::SetWindowSize(ImVec2(150, 40));
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5,15));
-
-            ImGui::SameLine();
-            bool tmp = windowConfig.show_listeditor;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(GoogleIcons::GI_LIST, ImVec2(30, 30)))
-            {
-                windowConfig.show_listeditor ^= 1;
-                windowConfig.show_notes = false;
-                windowConfig.show_loops = false;
-                windowConfig.show_browser = false;
-            }
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::SameLine();
-            tmp = windowConfig.show_notes;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(GoogleIcons::GI_NOTE, ImVec2(30, 30)))
-            {
-                windowConfig.show_notes ^= 1;
-                windowConfig.show_listeditor = false;
-                windowConfig.show_loops = false;
-                windowConfig.show_browser = false;
-            }
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::SameLine();
-            tmp = windowConfig.show_loops;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(GoogleIcons::GI_ALL_INCLUSIVE, ImVec2(30, 30)))
-            {
-                windowConfig.show_loops ^= 1;
-                windowConfig.show_listeditor = false;
-                windowConfig.show_notes = false;
-                windowConfig.show_browser = false;
-            }
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::SameLine();
-            tmp = windowConfig.show_browser;
-            if (tmp) ImGui::PushStyleColor(ImGuiCol_Button, checkedButtonColor);
-            if (ImGui::Button(GoogleIcons::GI_LIBRARY_MUSIC, ImVec2(30, 30)))
-            {
-                windowConfig.show_browser ^= 1;
-                windowConfig.show_listeditor = false;
-                windowConfig.show_notes = false;
-                windowConfig.show_loops = false;
-            }
-            if (tmp) ImGui::PopStyleColor(1);
-
-            ImGui::PopStyleVar();
-        }
-        ImGui::End();
-
-        if (windowConfig.show_library)
-        {
-            ImGui::Begin("library", &(windowConfig.show_library), ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
-            {
-                ImGui::SetWindowPos(ImVec2(0, 62));
-                ImGui::SetWindowSize(ImVec2(libraryWidth, this->_display_h));
-
-                ImGui::Text("Library");
-            }
-            ImGui::End();
-        }
-
-        if (windowConfig.show_inspector)
-        {
-            ImGui::Begin("inspector", &(windowConfig.show_inspector), ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
-            {
-                static bool region_mute = true;
-                static bool region_loop = false;
-                ImGui::SetWindowPos(ImVec2(windowConfig.show_library ? libraryWidth : 0, 62));
-                ImGui::SetWindowSize(ImVec2(inspectorWidth, this->_display_h - 62));
-                if (ImGui::CollapsingHeader("Region"))
-                {
-                    ImGui::Checkbox("Mute", &region_mute);
-                    ImGui::Checkbox("Loop", &region_loop);
-                }
-                if (ImGui::CollapsingHeader("Groups"))
-                {
-                }
-                if (ImGui::CollapsingHeader("Track"))
-                {
-                }
-
-                ImGui::BeginChild("selected_track");
-                {
-                    ImGui::SetWindowPos(ImVec2((windowConfig.show_library ? libraryWidth : 0) + 15, this->_display_h - 70));
-                    static float trackPan = 0.0f;
-                    static bool trackMute = false;
-                    static bool trackSolo = false;
-                    if (ImGui::Button("Instrument")) windowConfig.show_library = true;
-//                    Knob("Pan", &trackPan, -1.0f, 1.0f);
-                    if (ImGui::Button("M", ImVec2(24, 24))) trackMute ^= 1;
-                    ImGui::SameLine();
-                    if (ImGui::Button("S", ImVec2(24, 24))) trackSolo ^= 1;
-                }
-                ImGui::EndChild();
-            }
-            ImGui::End();
-        }
-
-        auto v = ImVec2((float)this->_display_w - (windowConfig.show_library ? libraryWidth : 0) - (windowConfig.show_inspector ? inspectorWidth : 0),
-                        (float)this->_display_h - 62.0f);
-        ImGui::Begin("Splitter test2", &open, ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove |  ImGuiWindowFlags_NoTitleBar);
-        {
-            ImGui::SetWindowPos(ImVec2((windowConfig.show_library ? libraryWidth : 0) + (windowConfig.show_inspector ? inspectorWidth : 0), 62));
-            ImGui::SetWindowSize(v);
-            ImGui::SetNextWindowSizeConstraints(v, v);
-
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,0));
-
-            ImGui::BeginChild("child1", ImVec2(0, (windowConfig.show_smartcontrols | windowConfig.show_editors | windowConfig.show_mixer ? windowConfig.h : 0)), true);
-            {
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15,15));
-                static float f = 0.0f;
-                f = this->_mixer->Pvolume / 128.0f;
-                ImGui::SliderFloat("Volume", (float*)&(f), 0.0f, 1.0f);
-                this->_mixer->setPvolume((unsigned char)(f * 128));
-                ImGui::ColorEdit3("clear color", (float*)&clear_color);
-                if (ImGui::Button("Another Window")) show_another_window ^= 1;
-                ImGui::PopStyleVar();
-            }
-            ImGui::EndChild();
-
-            if (windowConfig.show_smartcontrols | windowConfig.show_editors | windowConfig.show_mixer)
-            {
-                ImGui::InvisibleButton("hsplitter", ImVec2(-1,8.0f));
-                if (ImGui::IsItemActive())
-                    windowConfig.h += ImGui::GetIO().MouseDelta.y;
-
-                ImGui::BeginChild("child2", ImVec2(0,0), true);
-                {
-                    if (windowConfig.show_smartcontrols)
-                    {
-                        ImGui::Text("Smart controls");
-                    }
-                    if (windowConfig.show_editors)
-                    {
-                        ImGui::Text("Editors");
-                    }
-                    if (windowConfig.show_mixer)
-                    {
-                        ImGui::Text("Mixer");
-                    }
-                }
-                ImGui::EndChild();
-            }
-
-            ImGui::PopStyleVar();
-        }
-        ImGui::End();
+        nk_layout_row_static(ctx, 30, 30, 2);
+        if (nk_button_symbol(ctx, NK_SYMBOL_RECT_SOLID)) windowConfig.show_library = !windowConfig.show_library;
     }
-    ImGui::PopStyleColor();
-    ImGui::PopStyleVar();
+    nk_end(ctx);
 
-    // Rendering
+    int left = 0;
+
+    if (windowConfig.show_library)
+    {
+//        if (nk_begin(ctx, "Library", nk_rect(left, 50, 200, this->_display_h - 50), 0))
+//        {
+//        }
+//        nk_end(ctx);
+
+        left += 200.0f;
+    }
+
+    if (nk_begin(ctx, "Demo", nk_rect(left, 50, this->_display_w - left, this->_display_h - 50), NK_WINDOW_NO_SCROLLBAR))
+    {
+        const struct nk_input *in = &ctx->input;
+        static float a = this->_display_h - 250, b = 200;
+        struct nk_rect bounds;
+
+        /* top space */
+        nk_layout_row_dynamic(ctx, this->_display_h - 100 - windowConfig.splitter1, 1);
+        if (nk_group_begin(ctx, "top", 0))
+        {
+            nk_layout_row_template_begin(ctx, windowConfig.channel_height);
+            nk_layout_row_template_push_static(ctx, 350);
+            nk_layout_row_template_push_dynamic(ctx);
+            nk_layout_row_template_end(ctx);
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFBB");
+            nk_button_label(ctx, "#FFCC");
+            nk_button_label(ctx, "#FFDD");
+            nk_button_label(ctx, "#FFEE");
+            nk_button_label(ctx, "#FFFF");
+            nk_group_end(ctx);
+        }
+
+        /* scaler */
+        nk_layout_row_dynamic(ctx, 8, 1);
+        bounds = nk_widget_bounds(ctx);
+        nk_spacing(ctx, 1);
+        if ((nk_input_is_mouse_hovering_rect(in, bounds) ||
+            nk_input_is_mouse_prev_hovering_rect(in, bounds)) &&
+            nk_input_is_mouse_down(in, NK_BUTTON_LEFT))
+        {
+            windowConfig.splitter1 -= in->mouse.delta.y;
+        }
+
+        /* middle space */
+        nk_layout_row_dynamic(ctx, windowConfig.splitter1, 1);
+        if (nk_group_begin(ctx, "middle", 0))
+        {
+            nk_layout_row_static(ctx, 800, 170, NUM_MIDI_PARTS);
+            nk_button_label(ctx, "#FFAA");
+            nk_button_label(ctx, "#FFBB");
+            nk_button_label(ctx, "#FFCC");
+            nk_button_label(ctx, "#FFDD");
+            nk_button_label(ctx, "#FFEE");
+            nk_button_label(ctx, "#FFFF");
+            nk_group_end(ctx);
+        }
+    }
+    nk_end(ctx);
+
+    float bg[4];
+    nk_color_fv(bg, background);
     glViewport(0, 0, this->_display_w, this->_display_h);
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClearColor(bg[0], bg[1], bg[2], bg[3]);
     glClear(GL_COLOR_BUFFER_BIT);
-    ImGui::Render();
+    /* IMPORTANT: `nk_glfw_render` modifies some global OpenGL state
+     * with blending, scissor, face culling, depth test and viewport and
+     * defaults everything back into a default state.
+     * Make sure to either a.) save and restore or b.) reset your own state after
+     * rendering the UI. */
+    nk_glfw3_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
 }
 
 void AppThreeDee::CleanUp()

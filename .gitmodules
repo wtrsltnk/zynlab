@@ -7,3 +7,6 @@
 [submodule "app.threedee/gl.utilities"]
 	path = app.threedee/gl.utilities
 	url = https://github.com/wtrsltnk/gl.utilities.git
+[submodule "app.threedee/nuklear"]
+	path = app.threedee/nuklear
+	url = https://github.com/vurtun/nuklear.git
