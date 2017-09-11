@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
 
     Nio::setSink("PA");
 
+    Config::Current().init();
+
 //    mixer->NoteOn(0, 60, 200);
 
     if (glfwInit() == GLFW_FALSE)

@@ -16,6 +16,8 @@
 #include "nuklear/example/stb_image.h"
 #include "font-icons.h"
 
+#include <algorithm>
+
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
@@ -157,6 +159,20 @@ bool AppThreeDee::SetUp()
     nk_window_show(ctx, "Inspector", windowConfig.show_inspector ? NK_SHOWN : NK_HIDDEN);
     nk_window_show(ctx, "Mixer", windowConfig.show_mixer ? NK_SHOWN : NK_HIDDEN);
 
+    _mixer->bank.rescanforbanks();
+
+    return true;
+}
+
+bool filterOut(const char* filter, int filter_length, const std::vector<std::string>& names)
+{
+    if (filter_length <= 0) return false;
+
+    for (auto name : names)
+    {
+        if (name.find(std::string(filter, filter_length)) != std::string::npos) return false;
+    }
+
     return true;
 }
 
@@ -203,6 +219,56 @@ void AppThreeDee::Render()
     {
         nk_layout_row_dynamic(ctx, 20, 1);
         nk_label(ctx, "Library", NK_TEXT_CENTERED);
+
+        static char library_search[64] = { 0 };
+        static int library_search_length = 0;
+        nk_edit_string(ctx, NK_EDIT_FIELD, library_search, &library_search_length, 64, nk_filter_default);
+
+        static int selected_bank = -1;
+        static int selected_instrument = -1;
+        nk_layout_row_dynamic(ctx, this->_display_h - 120, 2);
+        if (nk_group_begin(ctx, "library_banks", 0))
+        {
+            nk_layout_row_dynamic(ctx, 20, 1);
+            for (int i = 0; i < _mixer->bank.banks.size(); i++)
+            {
+                if (!filterOut(library_search, library_search_length, _mixer->bank.banks[i].instrumentNames))
+                {
+                    nk_style_push_color(ctx, &style->border_color, selected_bank == i ? active : style->border_color);
+                    if (nk_button_label(ctx, _mixer->bank.banks[i].name.c_str()))
+                    {
+                        _mixer->bank.loadbank(_mixer->bank.banks[i].name);
+                        selected_bank = i;
+                        selected_instrument = -1;
+                    }
+                    nk_style_pop_color(ctx);
+                }
+            }
+
+            nk_group_end(ctx);
+        }
+        if (nk_group_begin(ctx, "library_instruments", 0))
+        {
+            if (selected_bank >= 0)
+            {
+                nk_layout_row_dynamic(ctx, 20, 1);
+                for (int i = 0; i < _mixer->bank.banks[selected_bank].instrumentNames.size(); i++)
+                {
+                    if (library_search_length <= 0 || _mixer->bank.banks[selected_bank].instrumentNames[i].find(std::string(library_search, library_search_length)) != std::string::npos)
+                    {
+                        nk_style_push_color(ctx, &style->border_color, selected_instrument == i ? active : style->border_color);
+                        if (nk_button_label(ctx, _mixer->bank.banks[selected_bank].instrumentNames[i].c_str() + 5))
+                        {
+                            selected_instrument = i;
+                        }
+                        nk_style_pop_color(ctx);
+                    }
+                }
+            }
+
+            nk_group_end(ctx);
+        }
+
         left += 402;
     }
     nk_end(ctx);
