@@ -2,26 +2,35 @@ cmake_minimum_required(VERSION 2.8)
 
 project(app)
 
+add_executable(app
+    main.cpp
+    )
+
+add_library(zyn.fltkui
+    ui/NioUI.cpp
+    ui/WidgetPDial.cpp
+    )
+
 if(FltkGui)
-	set(UI_fl_files
-		ui/ADnoteUI.fl
-		ui/BankUI.fl
-		ui/ConfigUI.fl
-		ui/EffUI.fl
-		ui/EnvelopeUI.fl
-		ui/FilterUI.fl
-		ui/LFOUI.fl
-		ui/MasterUI.fl
-		ui/MicrotonalUI.fl
-		ui/OscilGenUI.fl
-		ui/PADnoteUI.fl
-		ui/PartUI.fl
-		ui/PresetsUI.fl
+    set(UI_fl_files
+        ui/ADnoteUI.fl
+        ui/BankUI.fl
+        ui/ConfigUI.fl
+        ui/EffUI.fl
+        ui/EnvelopeUI.fl
+        ui/FilterUI.fl
+        ui/LFOUI.fl
+        ui/MasterUI.fl
+        ui/MicrotonalUI.fl
+        ui/OscilGenUI.fl
+        ui/PADnoteUI.fl
+        ui/PartUI.fl
+        ui/PresetsUI.fl
         ui/ResonanceUI.fl
         ui/SUBnoteUI.fl
         ui/VirKeyboard.fl
         ui/SequencerUI.fl
-	)
+    )
 
     set_source_files_properties(ui/MasterUI.h PROPERTIES GENERATED 1)
     fltk_wrap_ui(app ${UI_fl_files})
@@ -34,33 +43,35 @@ if(FltkGui)
 		endif()
 	endif()
 
-	add_definitions(-DFLTK_GUI)
-	message(STATUS "Will build FLTK gui")
-
-    include_directories(
-        ${FLTK_INCLUDE_DIR}
-        "${CMAKE_CURRENT_SOURCE_DIR}/.."
-        "${CMAKE_CURRENT_SOURCE_DIR}/ui"
-        "${CMAKE_CURRENT_BINARY_DIR}"
+    target_compile_definitions(zyn.fltkui
+        PRIVATE -DFLTK_GUI
         )
 
-    add_library(zyn.ui
-        ${app_FLTK_UI_SRCS}
-        ${UI_fl_files}
-        ui/NioUI.cpp
-        ui/WidgetPDial.cpp
+    target_sources(zyn.fltkui
+        PRIVATE ${app_FLTK_UI_SRCS}
+        PRIVATE ${UI_fl_files}
         )
 
-    target_compile_features(zyn.ui
+    target_include_directories(zyn.fltkui
+        PRIVATE ${FLTK_INCLUDE_DIR}
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ui"
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+
+    target_compile_features(zyn.fltkui
         PRIVATE cxx_auto_type
         PRIVATE cxx_nullptr
         PRIVATE cxx_lambdas
         )
-endif()
 
-add_executable(app
-    main.cpp
-	)
+    target_include_directories(app
+        PRIVATE ${FLTK_INCLUDE_DIR}
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ui"
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+endif()
 
 target_compile_features(app
     PRIVATE cxx_auto_type
@@ -79,5 +90,6 @@ target_link_libraries(app
     zyn.dsp
     zyn.common
     zyn.seq
-    zyn.ui
+    zyn.fltkui
     )
+

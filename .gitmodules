@@ -10,3 +10,9 @@
 [submodule "app.threedee/nuklear"]
 	path = app.threedee/nuklear
 	url = https://github.com/vurtun/nuklear.git
+[submodule "app.imgui/imgui"]
+	path = app.imgui/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "app.imgui/gl.utilities"]
+	path = app.imgui/gl.utilities
+	url = https://github.com/wtrsltnk/gl.utilities.git
