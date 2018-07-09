@@ -23,18 +23,18 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-#include "../zyn.common/Util.h"
-#include "../zyn.common/globals.h"
-#include "../zyn.dsp/FilterParams.h"
-#include "../zyn.common/Stereo.h"
+#include <zyn.common/Stereo.h>
+#include <zyn.common/Util.h>
+#include <zyn.common/globals.h>
+#include <zyn.dsp/FilterParams.h>
 
 class FilterParams;
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
 class Effect
 {
-    public:
-        /**
+public:
+    /**
          * Effect Constructor
          * @param insertion_ 1 when it is an insertion Effect
          * @param efxoutl_ Effect output buffer Left channel
@@ -42,24 +42,24 @@ class Effect
          * @param filterpars_ pointer to FilterParams array
          * @param Ppreset_ chosen preset
          * @return Initialized Effect object*/
-        Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
-               FilterParams *filterpars_, unsigned char Ppreset_,
-               SystemSettings* synth_);
-        virtual ~Effect() {}
-        /**
+    Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
+           FilterParams *filterpars_, unsigned char Ppreset_,
+           SystemSettings *synth_);
+    virtual ~Effect() {}
+    /**
          * Choose a preset
          * @param npreset number of chosen preset*/
-        virtual void setpreset(unsigned char npreset) = 0;
-        /**Change parameter npar to value
+    virtual void setpreset(unsigned char npreset) = 0;
+    /**Change parameter npar to value
          * @param npar chosen parameter
          * @param value chosen new value*/
-        virtual void changepar(int npar, unsigned char value) = 0;
-        /**Get the value of parameter npar
+    virtual void changepar(int npar, unsigned char value) = 0;
+    /**Get the value of parameter npar
          * @param npar chosen parameter
          * @return the value of the parameter in an unsigned char or 0 if it
          * does not exist*/
-        virtual unsigned char getpar(int npar) const = 0;
-        /**Output result of effect based on the given buffers
+    virtual unsigned char getpar(int npar) const = 0;
+    /**Output result of effect based on the given buffers
          *
          * This method should result in the effect generating its results
          * and placing them into the efxoutl and efxoutr buffers.
@@ -68,42 +68,42 @@ class Effect
          * @param smpsl Input buffer for the Left channel
          * @param smpsr Input buffer for the Right channel
          */
-        void out(float *const smpsl, float *const smpsr);
-        virtual void out(const Stereo<float *> &smp) = 0;
-        /**Reset the state of the effect*/
-        virtual void cleanup(void) {}
-        virtual float getfreqresponse(float freq) { return freq; }
+    void out(float *const smpsl, float *const smpsr);
+    virtual void out(const Stereo<float *> &smp) = 0;
+    /**Reset the state of the effect*/
+    virtual void cleanup(void) {}
+    virtual float getfreqresponse(float freq) { return freq; }
 
-        unsigned char Ppreset;   /**<Currently used preset*/
-        float *const  efxoutl; /**<Effect out Left Channel*/
-        float *const  efxoutr; /**<Effect out Right Channel*/
-        float outvolume; /**<This is the volume of effect and is public because
+    unsigned char Ppreset; /**<Currently used preset*/
+    float *const efxoutl;  /**<Effect out Left Channel*/
+    float *const efxoutr;  /**<Effect out Right Channel*/
+    float outvolume;       /**<This is the volume of effect and is public because
                           * it is needed in system effects.
                           * The out volume of such effects are always 1.0f, so
                           * this setting tells me how is the volume to the
                           * Master Output only.*/
 
-        float volume;
+    float volume;
 
-        FilterParams *filterpars; /**<Parameters for filters used by Effect*/
+    FilterParams *filterpars; /**<Parameters for filters used by Effect*/
 
-        //Perform L/R crossover
-        static void crossover(float &a, float &b, float crossover);
+    //Perform L/R crossover
+    static void crossover(float &a, float &b, float crossover);
 
-    protected:
-        void setpanning(char Ppanning_);
-        void setlrcross(char Plrcross_);
+protected:
+    void setpanning(char Ppanning_);
+    void setlrcross(char Plrcross_);
 
-        const bool insertion;
-        //panning parameters
-        char  Ppanning;
-        float pangainL;
-        float pangainR;
-        char  Plrcross; // L/R mix
-        float lrcross;
+    const bool insertion;
+    //panning parameters
+    char Ppanning;
+    float pangainL;
+    float pangainR;
+    char Plrcross; // L/R mix
+    float lrcross;
 
-        // current setup
-        SystemSettings* _synth;
+    // current setup
+    SystemSettings *_synth;
 };
 
 #endif

@@ -17,19 +17,22 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
-#include <iostream>
 #include "WavFile.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
 using namespace std;
 
 WavFile::WavFile(string filename, int samplerate, int channels)
-    :sampleswritten(0), samplerate(samplerate), channels(channels),
+    : sampleswritten(0), samplerate(samplerate), channels(channels),
       file(fopen(filename.c_str(), "w"))
 
 {
-    if(file) {
+    if (file)
+    {
         cout << "INFO: Making space for wave file header" << endl;
         //making space for the header written at destruction
         char tmp[44];
@@ -40,7 +43,8 @@ WavFile::WavFile(string filename, int samplerate, int channels)
 
 WavFile::~WavFile()
 {
-    if(file) {
+    if (file)
+    {
         cout << "INFO: Writing wave file header" << endl;
 
         unsigned int chunksize;
@@ -53,15 +57,15 @@ WavFile::~WavFile()
         fwrite("WAVEfmt ", 8, 1, file);
         chunksize = 16;
         fwrite(&chunksize, 4, 1, file);
-        unsigned short int formattag = 1;     //uncompresed wave
+        unsigned short int formattag = 1; //uncompresed wave
         fwrite(&formattag, 2, 1, file);
-        unsigned short int nchannels = channels;     //stereo
+        unsigned short int nchannels = channels; //stereo
         fwrite(&nchannels, 2, 1, file);
-        unsigned int samplerate_ = samplerate;         //samplerate
+        unsigned int samplerate_ = samplerate; //samplerate
         fwrite(&samplerate_, 4, 1, file);
-        unsigned int bytespersec = samplerate * 2 * channels;         //bytes/sec
+        unsigned int bytespersec = samplerate * 2 * channels; //bytes/sec
         fwrite(&bytespersec, 4, 1, file);
-        unsigned short int blockalign = 2 * channels;    //2 channels * 16 bits/8
+        unsigned short int blockalign = 2 * channels; //2 channels * 16 bits/8
         fwrite(&blockalign, 2, 1, file);
         unsigned short int bitspersample = 16;
         fwrite(&bitspersample, 2, 1, file);
@@ -82,7 +86,8 @@ bool WavFile::good() const
 
 void WavFile::writeStereoSamples(int nsmps, short int *smps)
 {
-    if(file) {
+    if (file)
+    {
         fwrite(smps, nsmps, 4, file);
         sampleswritten += nsmps;
     }
@@ -90,7 +95,8 @@ void WavFile::writeStereoSamples(int nsmps, short int *smps)
 
 void WavFile::writeMonoSamples(int nsmps, short int *smps)
 {
-    if(file) {
+    if (file)
+    {
         fwrite(smps, nsmps, 2, file);
         sampleswritten += nsmps;
     }

@@ -2,23 +2,18 @@ cmake_minimum_required(VERSION 2.8)
 
 project(zyn.seq)
 
-set(zyn_seq_SRCS
-    Sequencer.cpp
-    SequencerStrip.cpp
-    SequencerStep.cpp
-    )
-
-set(zyn_seq_HDRS
-    Sequencer.h
-    SequencerStrip.h
-    SequencerStep.h
-    )
-
-include_directories(${CMAKE_SOURCE_DIR})
-
 add_library(zyn.seq STATIC
-    ${zyn_seq_SRCS}
-    ${zyn_seq_HDRS}
+    Sequencer.cpp
+    Sequencer.h
+    SequencerStep.cpp
+    SequencerStep.h
+    SequencerStrip.cpp
+    SequencerStrip.h
+    )
+
+target_include_directories(zyn.seq
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}
     )
 
 target_link_libraries(zyn.seq
@@ -29,5 +24,29 @@ target_compile_features(zyn.seq
     PRIVATE cxx_thread_local
     )
 
-install(FILES ${zyn_seq_HDRS} DESTINATION include/zyn/seq COMPONENT develop)
-install(TARGETS zyn.seq DESTINATION lib COMPONENT develop)
+install(
+    TARGETS
+        zyn.seq
+    EXPORT
+        zyn.seq
+    DESTINATION
+        "lib"
+    )
+
+install(
+    FILES
+        ${zyn.seq_SOURCE_DIR}/Sequencer.h
+        ${zyn.seq_SOURCE_DIR}/SequencerStep.h
+        ${zyn.seq_SOURCE_DIR}/SequencerStrip.h
+    DESTINATION
+        "include/zyn/seq"
+    )
+
+install(
+    EXPORT
+        zyn.seq
+    FILE
+        zyn.seq-config.cmake
+    DESTINATION
+        "cmake"
+    )

@@ -1,51 +1,55 @@
 #include "SynthNote.h"
 #include <cstring>
 
-SynthNote::SynthNote(SystemSettings* synth_, float freq, float vel, int port, int note, bool quiet)
+SynthNote::SynthNote(SystemSettings *synth_, float freq, float vel, int port, int note, bool quiet)
     : _synth(synth_), legato(this, freq, vel, port, note, quiet)
 {}
 
-SynthNote::Legato::Legato(SynthNote* note_, float freq, float vel, int port,
+SynthNote::Legato::Legato(SynthNote *note_, float freq, float vel, int port,
                           int note, bool quiet) : _note(note_)
 {
     // Initialise some legato-specific vars
     msg = LM_Norm;
-    fade.length = (int)(this->_note->_synth->samplerate_f * 0.005f);      // 0.005f seems ok.
-    if(fade.length < 1)
-        fade.length = 1;                    // (if something's fishy)
-    fade.step  = (1.0f / fade.length);
-    decounter  = -10;
+    fade.length = (int)(this->_note->_synth->samplerate_f * 0.005f); // 0.005f seems ok.
+    if (fade.length < 1)
+        fade.length = 1; // (if something's fishy)
+    fade.step = (1.0f / fade.length);
+    decounter = -10;
     param.freq = freq;
-    param.vel  = vel;
+    param.vel = vel;
     param.portamento = port;
-    param.midinote   = note;
+    param.midinote = note;
     lastfreq = 0.0f;
-    silent   = quiet;
+    silent = quiet;
 }
 
 int SynthNote::Legato::update(float freq, float velocity, int portamento_,
                               int midinote_, bool externcall)
 {
-    if(externcall)
+    if (externcall)
         msg = LM_Norm;
-    if(msg != LM_CatchUp) {
-        lastfreq   = param.freq;
+    if (msg != LM_CatchUp)
+    {
+        lastfreq = param.freq;
         param.freq = freq;
-        param.vel  = velocity;
+        param.vel = velocity;
         param.portamento = portamento_;
-        param.midinote   = midinote_;
-        if(msg == LM_Norm) {
-            if(silent) {
+        param.midinote = midinote_;
+        if (msg == LM_Norm)
+        {
+            if (silent)
+            {
                 fade.m = 0.0f;
-                msg    = LM_FadeIn;
+                msg = LM_FadeIn;
             }
-            else {
+            else
+            {
                 fade.m = 1.0f;
-                msg    = LM_FadeOut;
+                msg = LM_FadeOut;
                 return 1;
             }
         }
-        if(msg == LM_ToNorm)
+        if (msg == LM_ToNorm)
             msg = LM_Norm;
     }
     return 0;
@@ -53,57 +57,66 @@ int SynthNote::Legato::update(float freq, float velocity, int portamento_,
 
 void SynthNote::Legato::apply(float *outl, float *outr)
 {
-    if(silent) // Silencer
-        if(msg != LM_FadeIn) {
+    if (silent) // Silencer
+        if (msg != LM_FadeIn)
+        {
             memset(outl, 0, this->_note->_synth->bufferbytes);
             memset(outr, 0, this->_note->_synth->bufferbytes);
         }
-    switch(msg) {
+    switch (msg)
+    {
         case LM_CatchUp: // Continue the catch-up...
-            if(decounter == -10)
+            if (decounter == -10)
                 decounter = fade.length;
             //Yea, could be done without the loop...
-            for(int i = 0; i < this->_note->_synth->buffersize; ++i) {
+            for (int i = 0; i < this->_note->_synth->buffersize; ++i)
+            {
                 decounter--;
-                if(decounter < 1) {
+                if (decounter < 1)
+                {
                     // Catching-up done, we can finally set
                     // the note to the actual parameters.
                     decounter = -10;
                     msg = LM_ToNorm;
                     this->_note->legatonote(param.freq, param.vel, param.portamento,
-                                    param.midinote, false);
+                                            param.midinote, false);
                     break;
                 }
             }
             break;
         case LM_FadeIn: // Fade-in
-            if(decounter == -10)
+            if (decounter == -10)
                 decounter = fade.length;
             silent = false;
-            for(int i = 0; i < this->_note->_synth->buffersize; ++i) {
+            for (int i = 0; i < this->_note->_synth->buffersize; ++i)
+            {
                 decounter--;
-                if(decounter < 1) {
+                if (decounter < 1)
+                {
                     decounter = -10;
                     msg = LM_Norm;
                     break;
                 }
-                fade.m  += fade.step;
+                fade.m += fade.step;
                 outl[i] *= fade.m;
                 outr[i] *= fade.m;
             }
             break;
         case LM_FadeOut: // Fade-out, then set the catch-up
-            if(decounter == -10)
+            if (decounter == -10)
                 decounter = fade.length;
-            for(int i = 0; i < this->_note->_synth->buffersize; ++i) {
+            for (int i = 0; i < this->_note->_synth->buffersize; ++i)
+            {
                 decounter--;
-                if(decounter < 1) {
-                    for(int j = i; j < this->_note->_synth->buffersize; ++j) {
+                if (decounter < 1)
+                {
+                    for (int j = i; j < this->_note->_synth->buffersize; ++j)
+                    {
                         outl[j] = 0.0f;
                         outr[j] = 0.0f;
                     }
                     decounter = -10;
-                    silent    = true;
+                    silent = true;
                     // Fading-out done, now set the catch-up :
                     decounter = fade.length;
                     msg = LM_CatchUp;
@@ -112,10 +125,10 @@ void SynthNote::Legato::apply(float *outl, float *outr)
                     //previous freq during the fadeout.
                     float catchupfreq = param.freq * (param.freq / lastfreq);
                     this->_note->legatonote(catchupfreq, param.vel, param.portamento,
-                                    param.midinote, false);
+                                            param.midinote, false);
                     break;
                 }
-                fade.m  -= fade.step;
+                fade.m -= fade.step;
                 outl[i] *= fade.m;
                 outr[i] *= fade.m;
             }
@@ -125,7 +138,8 @@ void SynthNote::Legato::apply(float *outl, float *outr)
     }
 }
 
-void SynthNote::setVelocity(float velocity_) {
+void SynthNote::setVelocity(float velocity_)
+{
     legato.setSilent(true); //Let legato.update(...) returns 0.
     legatonote(legato.getFreq(), velocity_,
                legato.getPortamento(), legato.getMidinote(), true);

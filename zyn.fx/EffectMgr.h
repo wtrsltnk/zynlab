@@ -23,13 +23,13 @@
 #define EFFECTMGR_H
 
 #include "Alienwah.h"
-#include "Phaser.h"
 #include "Distorsion.h"
-#include "EQ.h"
 #include "DynamicFilter.h"
-#include "../zyn.common/XMLwrapper.h"
-#include "../zyn.dsp/FilterParams.h"
-#include "../zyn.common/Presets.h"
+#include "EQ.h"
+#include "Phaser.h"
+#include <zyn.common/Presets.h>
+#include <zyn.common/XMLwrapper.h>
+#include <zyn.dsp/FilterParams.h>
 
 #include <pthread.h>
 
@@ -38,48 +38,48 @@ class FilterParams;
 class XMLwrapper;
 
 /**Effect manager, an interface betwen the program and effects*/
-class EffectManager:public Presets
+class EffectManager : public Presets
 {
-    public:
-        EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings* synth_);
-        virtual ~EffectManager();
+public:
+    EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_);
+    virtual ~EffectManager();
 
-        void add2XML(XMLwrapper *xml);
-        void defaults(void);
-        void getfromXML(XMLwrapper *xml);
+    void add2XML(XMLwrapper *xml);
+    void defaults(void);
+    void getfromXML(XMLwrapper *xml);
 
-        void out(float *smpsl, float *smpsr);
+    void out(float *smpsl, float *smpsr);
 
-        void setdryonly(bool value);
+    void setdryonly(bool value);
 
-        /**get the output(to speakers) volume of the systemeffect*/
-        float sysefxgetvolume(void);
+    /**get the output(to speakers) volume of the systemeffect*/
+    float sysefxgetvolume(void);
 
-        void cleanup(void);
+    void cleanup(void);
 
-        void changeeffect(int nefx_);
-        int geteffect(void);
-        void changepreset(unsigned char npreset);
-        void changepreset_nolock(unsigned char npreset);
-        unsigned char getpreset(void);
-        void seteffectpar(int npar, unsigned char value);
-        void seteffectpar_nolock(int npar, unsigned char value);
-        unsigned char geteffectpar(int npar);
+    void changeeffect(int nefx_);
+    int geteffect(void);
+    void changepreset(unsigned char npreset);
+    void changepreset_nolock(unsigned char npreset);
+    unsigned char getpreset(void);
+    void seteffectpar(int npar, unsigned char value);
+    void seteffectpar_nolock(int npar, unsigned char value);
+    unsigned char geteffectpar(int npar);
 
-        const bool insertion;
-        float     *efxoutl, *efxoutr;
+    const bool insertion;
+    float *efxoutl, *efxoutr;
 
-        // used by UI
-        float getEQfreqresponse(float freq);
+    // used by UI
+    float getEQfreqresponse(float freq);
 
-        FilterParams *filterpars;
-        SystemSettings* _synth;
+    FilterParams *filterpars;
+    SystemSettings *_synth;
 
-    private:
-        int     nefx;
-        Effect *efx;
-        pthread_mutex_t *mutex;
-        bool dryonly;
+private:
+    int nefx;
+    Effect *efx;
+    pthread_mutex_t *mutex;
+    bool dryonly;
 };
 
 #endif

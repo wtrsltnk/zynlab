@@ -24,14 +24,14 @@
 #include "AudioOutputManager.h"
 #include "SafeQueue.h"
 
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 using namespace std;
 
-AudioOutput::AudioOutput(SystemSettings* s) : _synth(s), samplerate(s->samplerate), bufferSize(s->buffersize) { }
+AudioOutput::AudioOutput(SystemSettings *s) : _synth(s), samplerate(s->samplerate), bufferSize(s->buffersize) {}
 
-AudioOutput::~AudioOutput() { }
+AudioOutput::~AudioOutput() {}
 
 void AudioOutput::setSamplerate(int _samplerate)
 {

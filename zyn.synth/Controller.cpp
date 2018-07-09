@@ -24,7 +24,7 @@
 #include <math.h>
 #include <stdio.h>
 
-Controller::Controller(SystemSettings* synth_)
+Controller::Controller(SystemSettings *synth_)
     : _synth(synth_)
 {
     defaults();
@@ -37,31 +37,31 @@ Controller::~Controller()
 void Controller::defaults()
 {
     setpitchwheelbendrange(200); //2 halftones
-    expression.receive    = 1;
-    panning.depth         = 64;
-    filtercutoff.depth    = 64;
-    filterq.depth         = 64;
-    bandwidth.depth       = 64;
+    expression.receive = 1;
+    panning.depth = 64;
+    filtercutoff.depth = 64;
+    filterq.depth = 64;
+    bandwidth.depth = 64;
     bandwidth.exponential = 0;
-    modwheel.depth        = 80;
-    modwheel.exponential  = 0;
-    fmamp.receive         = 1;
-    volume.receive        = 1;
-    sustain.receive       = 1;
+    modwheel.depth = 80;
+    modwheel.exponential = 0;
+    fmamp.receive = 1;
+    volume.receive = 1;
+    sustain.receive = 1;
     NRPN.receive = 1;
 
     portamento.portamento = 0;
     portamento.used = 0;
     portamento.proportional = 0;
-    portamento.propRate     = 80;
-    portamento.propDepth    = 90;
-    portamento.receive      = 1;
+    portamento.propRate = 80;
+    portamento.propDepth = 90;
+    portamento.receive = 1;
     portamento.time = 64;
     portamento.updowntimestretch = 64;
-    portamento.pitchthresh     = 3;
+    portamento.pitchthresh = 3;
     portamento.pitchthreshtype = 1;
-    portamento.noteusing     = -1;
-    resonancecenter.depth    = 64;
+    portamento.noteusing = -1;
+    resonancecenter.depth = 64;
     resonancebandwidth.depth = 64;
 
     initportamento(440.0f, 440.0f, false); // Now has a third argument
@@ -107,7 +107,7 @@ void Controller::setpitchwheelbendrange(unsigned short int value)
 void Controller::setexpression(int value)
 {
     expression.data = value;
-    if(expression.receive != 0)
+    if (expression.receive != 0)
         expression.relvolume = value / 127.0f;
     else
         expression.relvolume = 1.0f;
@@ -116,14 +116,14 @@ void Controller::setexpression(int value)
 void Controller::setpanning(int value)
 {
     panning.data = value;
-    panning.pan  = (value / 128.0f - 0.5f) * (panning.depth / 64.0f);
+    panning.pan = (value / 128.0f - 0.5f) * (panning.depth / 64.0f);
 }
 
 void Controller::setfiltercutoff(int value)
 {
-    filtercutoff.data    = value;
+    filtercutoff.data = value;
     filtercutoff.relfreq =
-        (value - 64.0f) * filtercutoff.depth / 4096.0f * 3.321928f;         //3.3219f..=ln2(10)
+        (value - 64.0f) * filtercutoff.depth / 4096.0f * 3.321928f; //3.3219f..=ln2(10)
 }
 
 void Controller::setfilterq(int value)
@@ -135,12 +135,13 @@ void Controller::setfilterq(int value)
 void Controller::setbandwidth(int value)
 {
     bandwidth.data = value;
-    if(bandwidth.exponential == 0) {
+    if (bandwidth.exponential == 0)
+    {
         float tmp = powf(25.0f, powf(bandwidth.depth / 127.0f, 1.5f)) - 1.0f;
-        if((value < 64) && (bandwidth.depth >= 64))
+        if ((value < 64) && (bandwidth.depth >= 64))
             tmp = 1.0f;
         bandwidth.relbw = (value / 64.0f - 1.0f) * tmp + 1.0f;
-        if(bandwidth.relbw < 0.01f)
+        if (bandwidth.relbw < 0.01f)
             bandwidth.relbw = 0.01f;
     }
     else
@@ -152,13 +153,14 @@ void Controller::setbandwidth(int value)
 void Controller::setmodwheel(int value)
 {
     modwheel.data = value;
-    if(modwheel.exponential == 0) {
+    if (modwheel.exponential == 0)
+    {
         float tmp =
             powf(25.0f, powf(modwheel.depth / 127.0f, 1.5f) * 2.0f) / 25.0f;
-        if((value < 64) && (modwheel.depth >= 64))
+        if ((value < 64) && (modwheel.depth >= 64))
             tmp = 1.0f;
         modwheel.relmod = (value / 64.0f - 1.0f) * tmp + 1.0f;
-        if(modwheel.relmod < 0.0f)
+        if (modwheel.relmod < 0.0f)
             modwheel.relmod = 0.0f;
     }
     else
@@ -168,9 +170,9 @@ void Controller::setmodwheel(int value)
 
 void Controller::setfmamp(int value)
 {
-    fmamp.data   = value;
+    fmamp.data = value;
     fmamp.relamp = value / 127.0f;
-    if(fmamp.receive != 0)
+    if (fmamp.receive != 0)
         fmamp.relamp = value / 127.0f;
     else
         fmamp.relamp = 1.0f;
@@ -179,7 +181,7 @@ void Controller::setfmamp(int value)
 void Controller::setvolume(int value)
 {
     volume.data = value;
-    if(volume.receive != 0)
+    if (volume.receive != 0)
         volume.volume = powf(0.1f, (127 - value) / 127.0f * 2.0f);
     else
         volume.volume = 1.0f;
@@ -188,7 +190,7 @@ void Controller::setvolume(int value)
 void Controller::setsustain(int value)
 {
     sustain.data = value;
-    if(sustain.receive != 0)
+    if (sustain.receive != 0)
         sustain.sustain = ((value < 64) ? 0 : 1);
     else
         sustain.sustain = 0;
@@ -197,7 +199,7 @@ void Controller::setsustain(int value)
 void Controller::setportamento(int value)
 {
     portamento.data = value;
-    if(portamento.receive != 0)
+    if (portamento.receive != 0)
         portamento.portamento = ((value < 64) ? 0 : 1);
 }
 
@@ -207,41 +209,43 @@ int Controller::initportamento(float oldfreq,
 {
     portamento.x = 0.0f;
 
-    if(legatoflag) {  // Legato in progress
-        if(portamento.portamento == 0)
+    if (legatoflag)
+    { // Legato in progress
+        if (portamento.portamento == 0)
             return 0;
     }
-    else     // No legato, do the original if...return
-    if((portamento.used != 0) || (portamento.portamento == 0))
+    else // No legato, do the original if...return
+        if ((portamento.used != 0) || (portamento.portamento == 0))
         return 0;
     ;
 
     float portamentotime = powf(100.0f, portamento.time / 127.0f) / 50.0f; //portamento time in seconds
 
-    if(portamento.proportional) {
+    if (portamento.proportional)
+    {
         //If there is a min(float,float) and a max(float,float) then they
         //could be used here
         //Linear functors could also make this nicer
-        if(oldfreq > newfreq) //2 is the center of propRate
+        if (oldfreq > newfreq) //2 is the center of propRate
             portamentotime *=
-                powf(oldfreq / newfreq
-                     / (portamento.propRate / 127.0f * 3 + .05),
+                powf(oldfreq / newfreq / (portamento.propRate / 127.0f * 3 + .05),
                      (portamento.propDepth / 127.0f * 1.6f + .2));
-        else                  //1 is the center of propDepth
+        else //1 is the center of propDepth
             portamentotime *=
-                powf(newfreq / oldfreq
-                     / (portamento.propRate / 127.0f * 3 + .05),
+                powf(newfreq / oldfreq / (portamento.propRate / 127.0f * 3 + .05),
                      (portamento.propDepth / 127.0f * 1.6f + .2));
     }
 
-    if((portamento.updowntimestretch >= 64) && (newfreq < oldfreq)) {
-        if(portamento.updowntimestretch == 127)
+    if ((portamento.updowntimestretch >= 64) && (newfreq < oldfreq))
+    {
+        if (portamento.updowntimestretch == 127)
             return 0;
         portamentotime *= powf(0.1f,
                                (portamento.updowntimestretch - 64) / 63.0f);
     }
-    if((portamento.updowntimestretch < 64) && (newfreq > oldfreq)) {
-        if(portamento.updowntimestretch == 0)
+    if ((portamento.updowntimestretch < 64) && (newfreq > oldfreq))
+    {
+        if (portamento.updowntimestretch == 0)
             return 0;
         portamentotime *= powf(0.1f,
                                (64.0f - portamento.updowntimestretch) / 64.0f);
@@ -252,57 +256,53 @@ int Controller::initportamento(float oldfreq,
     portamento.dx = this->_synth->buffersize_f / (portamentotime * this->_synth->samplerate_f);
     portamento.origfreqrap = oldfreq / newfreq;
 
-    float tmprap = ((portamento.origfreqrap > 1.0f) ?
-                    (portamento.origfreqrap) :
-                    (1.0f / portamento.origfreqrap));
+    float tmprap = ((portamento.origfreqrap > 1.0f) ? (portamento.origfreqrap) : (1.0f / portamento.origfreqrap));
 
     float thresholdrap = powf(2.0f, portamento.pitchthresh / 12.0f);
-    if((portamento.pitchthreshtype == 0) && (tmprap - 0.00001f > thresholdrap))
+    if ((portamento.pitchthreshtype == 0) && (tmprap - 0.00001f > thresholdrap))
         return 0;
-    if((portamento.pitchthreshtype == 1) && (tmprap + 0.00001f < thresholdrap))
+    if ((portamento.pitchthreshtype == 1) && (tmprap + 0.00001f < thresholdrap))
         return 0;
 
-    portamento.used    = 1;
+    portamento.used = 1;
     portamento.freqrap = portamento.origfreqrap;
     return 1;
 }
 
 void Controller::updateportamento()
 {
-    if(portamento.used == 0)
+    if (portamento.used == 0)
         return;
 
     portamento.x += portamento.dx;
-    if(portamento.x > 1.0f) {
-        portamento.x    = 1.0f;
+    if (portamento.x > 1.0f)
+    {
+        portamento.x = 1.0f;
         portamento.used = 0;
     }
     portamento.freqrap =
         (1.0f - portamento.x) * portamento.origfreqrap + portamento.x;
 }
 
-
 void Controller::setresonancecenter(int value)
 {
-    resonancecenter.data      = value;
+    resonancecenter.data = value;
     resonancecenter.relcenter =
         powf(3.0f, (value - 64.0f) / 64.0f * (resonancecenter.depth / 64.0f));
 }
 void Controller::setresonancebw(int value)
 {
-    resonancebandwidth.data  = value;
+    resonancebandwidth.data = value;
     resonancebandwidth.relbw =
         powf(1.5f, (value - 64.0f) / 64.0f * (resonancebandwidth.depth / 127.0f));
 }
 
-
 //Returns 0 if there is NRPN or 1 if there is not
 int Controller::getnrpn(int *parhi, int *parlo, int *valhi, int *vallo)
 {
-    if(NRPN.receive == 0)
+    if (NRPN.receive == 0)
         return 1;
-    if((NRPN.parhi < 0) || (NRPN.parlo < 0) || (NRPN.valhi < 0)
-       || (NRPN.vallo < 0))
+    if ((NRPN.parhi < 0) || (NRPN.parlo < 0) || (NRPN.valhi < 0) || (NRPN.vallo < 0))
         return 1;
 
     *parhi = NRPN.parhi;
@@ -312,10 +312,10 @@ int Controller::getnrpn(int *parhi, int *parlo, int *valhi, int *vallo)
     return 0;
 }
 
-
 void Controller::setparameternumber(unsigned int type, int value)
 {
-    switch(type) {
+    switch (type)
+    {
         case C_nrpnhi:
             NRPN.parhi = value;
             NRPN.valhi = -1;
@@ -327,17 +327,15 @@ void Controller::setparameternumber(unsigned int type, int value)
             NRPN.vallo = -1; //clear the values
             break;
         case C_dataentryhi:
-            if((NRPN.parhi >= 0) && (NRPN.parlo >= 0))
+            if ((NRPN.parhi >= 0) && (NRPN.parlo >= 0))
                 NRPN.valhi = value;
             break;
         case C_dataentrylo:
-            if((NRPN.parhi >= 0) && (NRPN.parlo >= 0))
+            if ((NRPN.parhi >= 0) && (NRPN.parlo >= 0))
                 NRPN.vallo = value;
             break;
     }
 }
-
-
 
 void Controller::add2XML(XMLwrapper *xml)
 {
@@ -377,12 +375,12 @@ void Controller::getfromXML(XMLwrapper *xml)
 
     expression.receive = xml->getparbool("expression_receive",
                                          expression.receive);
-    panning.depth      = xml->getpar127("panning_depth", panning.depth);
+    panning.depth = xml->getpar127("panning_depth", panning.depth);
     filtercutoff.depth = xml->getpar127("filter_cutoff_depth",
                                         filtercutoff.depth);
-    filterq.depth        = xml->getpar127("filter_q_depth", filterq.depth);
-    bandwidth.depth      = xml->getpar127("bandwidth_depth", bandwidth.depth);
-    modwheel.depth       = xml->getpar127("mod_wheel_depth", modwheel.depth);
+    filterq.depth = xml->getpar127("filter_q_depth", filterq.depth);
+    bandwidth.depth = xml->getpar127("bandwidth_depth", bandwidth.depth);
+    modwheel.depth = xml->getpar127("mod_wheel_depth", modwheel.depth);
     modwheel.exponential = xml->getparbool("mod_wheel_exponential",
                                            modwheel.exponential);
     fmamp.receive = xml->getparbool("fm_amp_receive",
@@ -411,7 +409,6 @@ void Controller::getfromXML(XMLwrapper *xml)
                                          portamento.propRate);
     portamento.propDepth = xml->getpar127("portamento_propdepth",
                                           portamento.propDepth);
-
 
     resonancecenter.depth = xml->getpar127("resonance_center_depth",
                                            resonancecenter.depth);

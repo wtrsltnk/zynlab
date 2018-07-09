@@ -23,48 +23,50 @@
 #ifndef SV_FILTER_H
 #define SV_FILTER_H
 
-#include "../zyn.common/globals.h"
 #include "Filter.h"
+#include <zyn.common/globals.h>
 
-class SVFilter:public Filter
+class SVFilter : public Filter
 {
-    public:
-        SVFilter(unsigned char Ftype,
-                 float Ffreq,
-                 float Fq,
-                 unsigned char Fstages,
-                 SystemSettings* synth_);
-        virtual ~SVFilter();
-        void filterout(float *smp);
-        void setfreq(float frequency);
-        void setfreq_and_q(float frequency, float q_);
-        void setq(float q_);
+public:
+    SVFilter(unsigned char Ftype,
+             float Ffreq,
+             float Fq,
+             unsigned char Fstages,
+             SystemSettings *synth_);
+    virtual ~SVFilter();
+    void filterout(float *smp);
+    void setfreq(float frequency);
+    void setfreq_and_q(float frequency, float q_);
+    void setq(float q_);
 
-        void settype(int type_);
-        void setgain(float dBgain);
-        void setstages(int stages_);
-        void cleanup();
+    void settype(int type_);
+    void setgain(float dBgain);
+    void setstages(int stages_);
+    void cleanup();
 
-    private:
-        struct fstage {
-            float low, high, band, notch;
-        } st[MAX_FILTER_STAGES + 1];
+private:
+    struct fstage
+    {
+        float low, high, band, notch;
+    } st[MAX_FILTER_STAGES + 1];
 
-        struct parameters {
-            float f, q, q_sqrt;
-        } par, ipar;
+    struct parameters
+    {
+        float f, q, q_sqrt;
+    } par, ipar;
 
-        void singlefilterout(float *smp, fstage &x, parameters &par);
-        void computefiltercoefs(void);
-        int   type;    // The type of the filter (LPF1,HPF1,LPF2,HPF2...)
-        int   stages;  // how many times the filter is applied (0->1,1->2,etc.)
-        float freq; // Frequency given in Hz
-        float q;    // Q factor (resonance or Q factor)
-        float gain; // the gain of the filter (if are shelf/peak) filters
+    void singlefilterout(float *smp, fstage &x, parameters &par);
+    void computefiltercoefs(void);
+    int type;   // The type of the filter (LPF1,HPF1,LPF2,HPF2...)
+    int stages; // how many times the filter is applied (0->1,1->2,etc.)
+    float freq; // Frequency given in Hz
+    float q;    // Q factor (resonance or Q factor)
+    float gain; // the gain of the filter (if are shelf/peak) filters
 
-        bool abovenq,   //if the frequency is above the nyquist
-             oldabovenq;
-        bool needsinterpolation, firsttime;
+    bool abovenq, //if the frequency is above the nyquist
+        oldabovenq;
+    bool needsinterpolation, firsttime;
 };
 
 #endif

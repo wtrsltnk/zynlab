@@ -1,19 +1,20 @@
 #ifndef AUDIOOUTPUTMANAGER_H
 #define AUDIOOUTPUTMANAGER_H
 
-#include "../zyn.common/globals.h"
-#include "../zyn.common/Stereo.h"
+#include <zyn.common/Stereo.h>
+#include <zyn.common/globals.h>
 
 #include <list>
-#include <string>
 #include <semaphore.h>
+#include <string>
 
 class AudioOutput;
 class AudioOutputManager
 {
-    static AudioOutputManager* _instance;
+    static AudioOutputManager *_instance;
+
 public:
-    static AudioOutputManager &createInstance(IMixer* mixer);
+    static AudioOutputManager &createInstance(IMixer *mixer);
     static AudioOutputManager &getInstance();
     static void destroyInstance();
     virtual ~AudioOutputManager();
@@ -37,10 +38,11 @@ public:
     std::string getSink() const;
 
     friend class EngineManager;
+
 private:
-    AudioOutputManager(IMixer* mixer);
+    AudioOutputManager(IMixer *mixer);
     void addSmps(float *l, float *r);
-    unsigned int  storedSmps() const { return priBuffCurrent.l - priBuf.l; }
+    unsigned int storedSmps() const { return priBuffCurrent.l - priBuf.l; }
     void removeStaleSmps();
 
     AudioOutput *currentOut; /**<The current output driver*/
@@ -48,12 +50,12 @@ private:
     sem_t requested;
 
     /**Buffer*/
-    Stereo<float *> priBuf;          //buffer for primary drivers
+    Stereo<float *> priBuf;         //buffer for primary drivers
     Stereo<float *> priBuffCurrent; //current array accessor
 
     float *outl;
     float *outr;
-    IMixer* mixer;
+    IMixer *mixer;
 
     int stales;
 };

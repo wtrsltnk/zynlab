@@ -17,17 +17,17 @@
 */
 
 #include "WavEngine.h"
-#include "../zyn.common/WavFile.h"
-#include "../zyn.common/Util.h"
+#include <zyn.common/Util.h>
+#include <zyn.common/WavFile.h>
 
 #include <cstdio>
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 
 using namespace std;
 
-WavEngine::WavEngine(SystemSettings* s)
-    :AudioOutput(s), file(NULL), buffer(s->samplerate * 4), pThread(NULL)
+WavEngine::WavEngine(SystemSettings *s)
+    : AudioOutput(s), file(NULL), buffer(s->samplerate * 4), pThread(NULL)
 {
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
@@ -45,7 +45,7 @@ bool WavEngine::openAudio()
 
 bool WavEngine::Start()
 {
-    if(pThread)
+    if (pThread)
         return true;
     pThread = new pthread_t;
 
@@ -59,7 +59,7 @@ bool WavEngine::Start()
 
 void WavEngine::Stop()
 {
-    if(!pThread)
+    if (!pThread)
         return;
 
     pthread_t *tmp = pThread;
@@ -72,12 +72,12 @@ void WavEngine::Stop()
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
 {
-    if(!pThread)
+    if (!pThread)
         return;
 
-
     //copy the input [overflow when needed]
-    for(size_t i = 0; i < len; ++i) {
+    for (size_t i = 0; i < len; ++i)
+    {
         buffer.push(*smps.l++);
         buffer.push(*smps.r++);
     }
@@ -91,15 +91,15 @@ void WavEngine::newFile(WavFile *_file)
     file = _file;
 
     //check state
-    if(!file->good())
+    if (!file->good())
         cerr
-        << "ERROR: WavEngine handed bad file output WavEngine::newFile()"
-        << endl;
+            << "ERROR: WavEngine handed bad file output WavEngine::newFile()"
+            << endl;
 }
 
 void WavEngine::destroyFile()
 {
-    if(file)
+    if (file)
         delete file;
     file = NULL;
 }
@@ -113,8 +113,10 @@ void *WavEngine::AudioThread()
 {
     short *recordbuf_16bit = new short[2 * this->_synth->buffersize];
 
-    while(!work.wait() && pThread) {
-        for(int i = 0; i < this->_synth->buffersize; ++i) {
+    while (!work.wait() && pThread)
+    {
+        for (int i = 0; i < this->_synth->buffersize; ++i)
+        {
             float left = 0.0f, right = 0.0f;
             buffer.pop(left);
             buffer.pop(right);

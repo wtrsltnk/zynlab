@@ -23,35 +23,36 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "Filter.h"
 #include "AnalogFilter.h"
+#include "Filter.h"
+#include "FilterParams.h"
 #include "FormantFilter.h"
 #include "SVFilter.h"
-#include "FilterParams.h"
 
-Filter::Filter(SystemSettings* synth_)
+Filter::Filter(SystemSettings *synth_)
     : outgain(1.0f), _synth(synth_)
-{ }
+{}
 
-Filter *Filter::generate(FilterParams *pars, SystemSettings* synth_)
+Filter *Filter::generate(FilterParams *pars, SystemSettings *synth_)
 {
-    unsigned char Ftype   = pars->Ptype;
+    unsigned char Ftype = pars->Ptype;
     unsigned char Fstages = pars->Pstages;
 
     Filter *filter;
-    switch(pars->Pcategory) {
+    switch (pars->Pcategory)
+    {
         case 1:
             filter = new FormantFilter(pars, synth_);
             break;
         case 2:
             filter = new SVFilter(Ftype, 1000.0f, pars->getq(), Fstages, synth_);
             filter->outgain = dB2rap(pars->getgain());
-            if(filter->outgain > 1.0f)
+            if (filter->outgain > 1.0f)
                 filter->outgain = sqrt(filter->outgain);
             break;
         default:
             filter = new AnalogFilter(Ftype, 1000.0f, pars->getq(), Fstages, synth_);
-            if((Ftype >= 6) && (Ftype <= 8))
+            if ((Ftype >= 6) && (Ftype <= 8))
                 filter->setgain(pars->getgain());
             else
                 filter->outgain = dB2rap(pars->getgain());

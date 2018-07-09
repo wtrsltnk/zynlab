@@ -22,13 +22,13 @@
 
 */
 
-#include <cmath>
 #include "Echo.h"
+#include <cmath>
 
 #define MAX_DELAY 2
 
-Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
+Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
+    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       Pvolume(50),
       Pdelay(60),
       Plrdelay(100),
@@ -77,14 +77,15 @@ void Echo::initdelays(void)
     //number of seconds to delay right chan
     float dr = avgDelay + lrdelay;
 
-    ndelta.l = max(1, (int) (dl * this->_synth->samplerate));
-    ndelta.r = max(1, (int) (dr * this->_synth->samplerate));
+    ndelta.l = max(1, (int)(dl * this->_synth->samplerate));
+    ndelta.r = max(1, (int)(dr * this->_synth->samplerate));
 }
 
 //Effect output
 void Echo::out(const Stereo<float *> &input)
 {
-    for(int i = 0; i < this->_synth->buffersize; ++i) {
+    for (int i = 0; i < this->_synth->buffersize; ++i)
+    {
         float ldl = delay.l[pos.l];
         float rdl = delay.r[pos.r];
         ldl = ldl * (1.0f - lrcross) + rdl * lrcross;
@@ -98,9 +99,9 @@ void Echo::out(const Stereo<float *> &input)
 
         //LowPass Filter
         old.l = delay.l[(pos.l + delta.l) % (MAX_DELAY * this->_synth->samplerate)] =
-                    ldl * hidamp + old.l * (1.0f - hidamp);
+            ldl * hidamp + old.l * (1.0f - hidamp);
         old.r = delay.r[(pos.r + delta.r) % (MAX_DELAY * this->_synth->samplerate)] =
-                    rdl * hidamp + old.r * (1.0f - hidamp);
+            rdl * hidamp + old.r * (1.0f - hidamp);
 
         //increment
         ++pos.l; // += delta.l;
@@ -116,25 +117,25 @@ void Echo::out(const Stereo<float *> &input)
     }
 }
 
-
 //Parameter control
 void Echo::setvolume(unsigned char _Pvolume)
 {
     Pvolume = _Pvolume;
 
-    if(insertion == 0) {
+    if (insertion == 0)
+    {
         outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
-        volume    = 1.0f;
+        volume = 1.0f;
     }
     else
         volume = outvolume = Pvolume / 127.0f;
-    if(Pvolume == 0)
+    if (Pvolume == 0)
         cleanup();
 }
 
 void Echo::setdelay(unsigned char _Pdelay)
 {
-    Pdelay   = _Pdelay;
+    Pdelay = _Pdelay;
     avgDelay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
     initdelays();
 }
@@ -143,9 +144,9 @@ void Echo::setlrdelay(unsigned char _Plrdelay)
 {
     float tmp;
     Plrdelay = _Plrdelay;
-    tmp      =
+    tmp =
         (powf(2.0f, fabsf(Plrdelay - 64.0f) / 64.0f * 9.0f) - 1.0f) / 1000.0f;
-    if(Plrdelay < 64.0f)
+    if (Plrdelay < 64.0f)
         tmp = -tmp;
     lrdelay = tmp;
     initdelays();
@@ -154,44 +155,44 @@ void Echo::setlrdelay(unsigned char _Plrdelay)
 void Echo::setfb(unsigned char _Pfb)
 {
     Pfb = _Pfb;
-    fb  = Pfb / 128.0f;
+    fb = Pfb / 128.0f;
 }
 
 void Echo::sethidamp(unsigned char _Phidamp)
 {
     Phidamp = _Phidamp;
-    hidamp  = 1.0f - Phidamp / 127.0f;
+    hidamp = 1.0f - Phidamp / 127.0f;
 }
 
 void Echo::setpreset(unsigned char npreset)
 {
-    const int     PRESET_SIZE = 7;
-    const int     NUM_PRESETS = 9;
+    const int PRESET_SIZE = 7;
+    const int NUM_PRESETS = 9;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
-        {67, 64, 35,  64,  30,  59, 0 }, //Echo 1
-        {67, 64, 21,  64,  30,  59, 0 }, //Echo 2
-        {67, 75, 60,  64,  30,  59, 10}, //Echo 3
-        {67, 60, 44,  64,  30,  0,  0 }, //Simple Echo
-        {67, 60, 102, 50,  30,  82, 48}, //Canyon
-        {67, 64, 44,  17,  0,   82, 24}, //Panning Echo 1
-        {81, 60, 46,  118, 100, 68, 18}, //Panning Echo 2
-        {81, 60, 26,  100, 127, 67, 36}, //Panning Echo 3
-        {62, 64, 28,  64,  100, 90, 55}  //Feedback Echo
+        {67, 64, 35, 64, 30, 59, 0},    //Echo 1
+        {67, 64, 21, 64, 30, 59, 0},    //Echo 2
+        {67, 75, 60, 64, 30, 59, 10},   //Echo 3
+        {67, 60, 44, 64, 30, 0, 0},     //Simple Echo
+        {67, 60, 102, 50, 30, 82, 48},  //Canyon
+        {67, 64, 44, 17, 0, 82, 24},    //Panning Echo 1
+        {81, 60, 46, 118, 100, 68, 18}, //Panning Echo 2
+        {81, 60, 26, 100, 127, 67, 36}, //Panning Echo 3
+        {62, 64, 28, 64, 100, 90, 55}   //Feedback Echo
     };
 
-    if(npreset >= NUM_PRESETS)
+    if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
+    for (int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
-    if(insertion)
-        setvolume(presets[npreset][0] / 2);  //lower the volume if this is insertion effect
+    if (insertion)
+        setvolume(presets[npreset][0] / 2); //lower the volume if this is insertion effect
     Ppreset = npreset;
 }
 
-
 void Echo::changepar(int npar, unsigned char value)
 {
-    switch(npar) {
+    switch (npar)
+    {
         case 0:
             setvolume(value);
             break;
@@ -218,14 +219,23 @@ void Echo::changepar(int npar, unsigned char value)
 
 unsigned char Echo::getpar(int npar) const
 {
-    switch(npar) {
-        case 0:  return Pvolume;
-        case 1:  return Ppanning;
-        case 2:  return Pdelay;
-        case 3:  return Plrdelay;
-        case 4:  return Plrcross;
-        case 5:  return Pfb;
-        case 6:  return Phidamp;
-        default: return 0; // in case of bogus parameter number
+    switch (npar)
+    {
+        case 0:
+            return Pvolume;
+        case 1:
+            return Ppanning;
+        case 2:
+            return Pdelay;
+        case 3:
+            return Plrdelay;
+        case 4:
+            return Plrcross;
+        case 5:
+            return Pfb;
+        case 6:
+            return Phidamp;
+        default:
+            return 0; // in case of bogus parameter number
     }
 }

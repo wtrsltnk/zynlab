@@ -4,18 +4,18 @@
 #include "EngineManager.h"
 #include "MidiInputManager.h"
 #include "WavEngine.h"
-#include "../zyn.common/Util.h" //for set_realtime()
+#include <zyn.common/Util.h> //for set_realtime()
 
 #include <algorithm>
-#include <iostream>
 #include <cassert>
+#include <iostream>
 #include <memory.h>
 
 using namespace std;
 
 AudioOutputManager *AudioOutputManager::_instance = 0;
 
-AudioOutputManager &AudioOutputManager::createInstance(IMixer* mixer)
+AudioOutputManager &AudioOutputManager::createInstance(IMixer *mixer)
 {
     if (AudioOutputManager::_instance == 0) AudioOutputManager::_instance = new AudioOutputManager(mixer);
     return *AudioOutputManager::_instance;
@@ -32,13 +32,13 @@ void AudioOutputManager::destroyInstance()
     AudioOutputManager::_instance = 0;
 }
 
-AudioOutputManager::AudioOutputManager(IMixer* mixer)
+AudioOutputManager::AudioOutputManager(IMixer *mixer)
     : priBuf(new float[4096], new float[4096]),
       priBuffCurrent(priBuf),
       mixer(mixer)
 {
     currentOut = NULL;
-    stales     = 0;
+    stales = 0;
 
     //init samples
     outr = new float[this->mixer->_synth->buffersize];
@@ -49,10 +49,10 @@ AudioOutputManager::AudioOutputManager(IMixer* mixer)
 
 AudioOutputManager::~AudioOutputManager()
 {
-    delete [] priBuf.l;
-    delete [] priBuf.r;
-    delete [] outr;
-    delete [] outl;
+    delete[] priBuf.l;
+    delete[] priBuf.r;
+    delete[] outr;
+    delete[] outl;
 }
 
 /* Sequence of a tick
@@ -69,11 +69,13 @@ const Stereo<float *> AudioOutputManager::nextSample(unsigned int frameSize)
     MidiInputManager &midi = MidiInputManager::getInstance();
     //SysEv->execute();
     removeStaleSmps();
-    int i=0;
-    while(frameSize > storedSmps()) {
-        if(!midi.empty()) {
+    int i = 0;
+    while (frameSize > storedSmps())
+    {
+        if (!midi.empty())
+        {
             this->mixer->Lock();
-            midi.flush(i*this->mixer->_synth->buffersize, (i+1)*this->mixer->_synth->buffersize);
+            midi.flush(i * this->mixer->_synth->buffersize, (i + 1) * this->mixer->_synth->buffersize);
             this->mixer->Unlock();
         }
         this->mixer->Lock();
@@ -82,7 +84,7 @@ const Stereo<float *> AudioOutputManager::nextSample(unsigned int frameSize)
         addSmps(outl, outr);
 
         //allow wave file to syphon off stream
-//        wave->push(Stereo<float *>(outl, outr), synth->buffersize);
+        //        wave->push(Stereo<float *>(outl, outr), synth->buffersize);
 
         i++;
     }
@@ -99,10 +101,10 @@ bool AudioOutputManager::setSink(string name)
 {
     AudioOutput *sink = getOut(name);
 
-    if(!sink)
+    if (!sink)
         return false;
 
-    if(currentOut)
+    if (currentOut)
         currentOut->setAudioEn(false);
 
     currentOut = sink;
@@ -111,7 +113,7 @@ bool AudioOutputManager::setSink(string name)
     bool success = currentOut->getAudioEn();
 
     //Keep system in a valid state (aka with a running driver)
-    if(!success)
+    if (!success)
         (currentOut = getOut("NULL"))->setAudioEn(true);
 
     return success;
@@ -119,9 +121,10 @@ bool AudioOutputManager::setSink(string name)
 
 string AudioOutputManager::getSink() const
 {
-    if(currentOut)
+    if (currentOut)
         return currentOut->name;
-    else {
+    else
+    {
         cerr << "BUG: No current output in OutMgr " << __LINE__ << endl;
         return "ERROR";
     }
@@ -138,8 +141,8 @@ static size_t resample(float *dest,
                        size_t elms)
 {
     size_t out_elms = elms * s_out / s_in;
-    float  r_pos    = 0.0f;
-    for(int i = 0; i < (int)out_elms; ++i, r_pos += s_in / s_out)
+    float r_pos = 0.0f;
+    for (int i = 0; i < (int)out_elms; ++i, r_pos += s_in / s_out)
         dest[i] = interpolate(src, elms, r_pos);
 
     return out_elms;
@@ -150,7 +153,8 @@ void AudioOutputManager::addSmps(float *l, float *r)
     const int s_out = currentOut->getSampleRate(),
               s_sys = this->mixer->_synth->samplerate;
 
-    if(s_out != s_sys) { //we need to resample
+    if (s_out != s_sys)
+    { //we need to resample
         const size_t steps = resample(priBuffCurrent.l,
                                       l,
                                       s_sys,
@@ -161,7 +165,8 @@ void AudioOutputManager::addSmps(float *l, float *r)
         priBuffCurrent.l += steps;
         priBuffCurrent.r += steps;
     }
-    else { //just copy the samples
+    else
+    { //just copy the samples
         memcpy(priBuffCurrent.l, l, this->mixer->_synth->bufferbytes);
         memcpy(priBuffCurrent.r, r, this->mixer->_synth->bufferbytes);
         priBuffCurrent.l += this->mixer->_synth->buffersize;
@@ -171,7 +176,7 @@ void AudioOutputManager::addSmps(float *l, float *r)
 
 void AudioOutputManager::removeStaleSmps()
 {
-    if(!stales)
+    if (!stales)
         return;
 
     const int leftover = storedSmps() - stales;
@@ -179,7 +184,8 @@ void AudioOutputManager::removeStaleSmps()
     assert(leftover > -1);
 
     //leftover samples [seen at very low latencies]
-    if(leftover) {
+    if (leftover)
+    {
         memmove(priBuf.l, priBuffCurrent.l - leftover, leftover * sizeof(float));
         memmove(priBuf.r, priBuffCurrent.r - leftover, leftover * sizeof(float));
         priBuffCurrent.l = priBuf.l + leftover;

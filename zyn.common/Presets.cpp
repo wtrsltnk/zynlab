@@ -23,7 +23,6 @@
 #include "Presets.h"
 #include <string.h>
 
-
 Presets::Presets()
 {
     type[0] = 0;
@@ -42,21 +41,21 @@ void Presets::copy(const char *name)
     XMLwrapper *xml = new XMLwrapper();
 
     //used only for the clipboard
-    if(name == NULL)
+    if (name == NULL)
         xml->minimal = false;
 
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
     //strcat(type, "n");
-    if(name == NULL)
-        if(strstr(type, "Plfo") != NULL)
+    if (name == NULL)
+        if (strstr(type, "Plfo") != NULL)
             strcpy(type, "Plfo");
 
     xml->beginbranch(type);
     add2XML(xml);
     xml->endbranch();
 
-    if(name == NULL)
+    if (name == NULL)
         presetsstore.copyclipboard(xml, type);
     else
         presetsstore.copypreset(xml, type, name);
@@ -70,28 +69,31 @@ void Presets::paste(int npreset)
     strcpy(type, this->type);
     //strcat(type, "n");
 
-    if(npreset == 0)
-        if(strstr(type, "Plfo") != NULL)
+    if (npreset == 0)
+        if (strstr(type, "Plfo") != NULL)
             strcpy(type, "Plfo");
 
     XMLwrapper *xml = new XMLwrapper();
-    if(npreset == 0) {
-        if(!checkclipboardtype()) {
+    if (npreset == 0)
+    {
+        if (!checkclipboardtype())
+        {
             delete (xml);
             return;
         }
-        if(!presetsstore.pasteclipboard(xml)) {
+        if (!presetsstore.pasteclipboard(xml))
+        {
             delete (xml);
             return;
         }
     }
-    else
-    if(!presetsstore.pastepreset(xml, npreset)) {
+    else if (!presetsstore.pastepreset(xml, npreset))
+    {
         delete (xml);
         return;
     }
 
-    if(xml->enterbranch(type) == 0)
+    if (xml->enterbranch(type) == 0)
         return;
 
     defaults();
@@ -111,7 +113,6 @@ void Presets::rescanforpresets()
 {
     presetsstore.rescanforpresets(type);
 }
-
 
 void Presets::deletepreset(int npreset)
 {

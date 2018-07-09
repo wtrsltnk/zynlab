@@ -22,8 +22,10 @@
 
 #ifndef CONFIG_H
 #define CONFIG_H
+
 #include "globals.h"
 #include <string>
+
 #define MAX_STRING_SIZE 4000
 #define MAX_BANK_ROOT_DIRS 100
 
@@ -31,19 +33,21 @@
 class Config
 {
     Config();
-    static Config* _instance;
+    static Config *_instance;
+
 public:
-    static Config& Current();
+    static Config &Current();
     virtual ~Config();
 
-    struct {
+    struct
+    {
         char *LinuxOSSWaveOutDev, *LinuxOSSSeqInDev;
-        int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
-        int   WindowsWaveOutId, WindowsMidiInId;
-        int   BankUIAutoClose;
-        int   DumpNotesToFile, DumpAppend;
-        int   GzipCompression;
-        int   Interpolation;
+        int SampleRate, SoundBufferSize, OscilSize, SwapStereo;
+        int WindowsWaveOutId, WindowsMidiInId;
+        int BankUIAutoClose;
+        int DumpNotesToFile, DumpAppend;
+        int GzipCompression;
+        int Interpolation;
         std::string DumpFile;
         std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
         std::string presetsDirList[MAX_BANK_ROOT_DIRS];
@@ -57,7 +61,8 @@ public:
     int winwavemax, winmidimax; //number of wave/midi devices on Windows
     int maxstringsize;
 
-    struct winmidionedevice {
+    struct winmidionedevice
+    {
         char *name;
     };
     winmidionedevice *winmididevices;
@@ -72,4 +77,5 @@ private:
     void saveConfig(const char *filename);
     void getConfigFileName(char *name, int namesize);
 };
+
 #endif

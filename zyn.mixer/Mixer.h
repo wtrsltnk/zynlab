@@ -24,150 +24,150 @@
 #ifndef MIXER_H
 #define MIXER_H
 
-#include "Microtonal.h"
 #include "Bank.h"
-#include "../zyn.common/globals.h"
-#include "../zyn.common/XMLwrapper.h"
-#include "../zyn.synth/Controller.h"
+#include "Microtonal.h"
+#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/globals.h>
+#include <zyn.synth/Controller.h>
+#include <zyn.synth/ifftwrapper.h>
 
 #include <pthread.h>
 
 typedef enum {
-    MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK
+    MUTEX_TRYLOCK,
+    MUTEX_LOCK,
+    MUTEX_UNLOCK
 } lockset;
 
-struct vuData {
+struct vuData
+{
     vuData(void);
     float outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
-          rmspeakl, rmspeakr;
+        rmspeakl, rmspeakr;
     int clipped;
 };
-
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
 class Mixer : public IMixer
 {
-    public:
-        /** Constructor TODO make private*/
-        Mixer(SystemSettings* synth_);
-        /** Destructor*/
-        virtual ~Mixer();
+public:
+    /** Constructor TODO make private*/
+    Mixer(SystemSettings *synth_);
+    /** Destructor*/
+    virtual ~Mixer();
 
-        /**Saves all settings to a XML file
+    /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
-        int saveXML(const char *filename);
+    int saveXML(const char *filename);
 
-        /**This adds the parameters to the XML data*/
-        void add2XML(XMLwrapper *xml);
+    /**This adds the parameters to the XML data*/
+    void add2XML(XMLwrapper *xml);
 
-        void defaults();
+    void defaults();
 
-
-        /**loads all settings from a XML file
+    /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/
-        int loadXML(const char *filename);
-        void applyparameters(bool lockmutex = true);
+    int loadXML(const char *filename);
+    void applyparameters(bool lockmutex = true);
 
-        void getfromXML(XMLwrapper *xml);
+    void getfromXML(XMLwrapper *xml);
 
-        /**get all data to a newly allocated array (used for VST)
+    /**get all data to a newly allocated array (used for VST)
          * @return the datasize*/
-        int getalldata(char **data);
-        /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
-        void putalldata(char *data, int size);
+    int getalldata(char **data);
+    /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
+    void putalldata(char *data, int size);
 
-        //Mutex control
-        /**Control the Master's mutex state.
+    //Mutex control
+    /**Control the Master's mutex state.
          * @param lockset either trylock, lock, or unlock.
          * @return true when successful false otherwise.*/
-        bool mutexLock(lockset request);
+    bool mutexLock(lockset request);
 
-        // Mutex
-        virtual void Lock();
-        virtual void Unlock();
+    // Mutex
+    virtual void Lock();
+    virtual void Unlock();
 
-        //Midi IN
-        virtual void NoteOn(char chan, char note, char velocity);
-        virtual void NoteOff(char chan, char note);
-        virtual void PolyphonicAftertouch(char chan, char note, char velocity);
-        virtual void SetController(char chan, int type, int par);
-        virtual void SetProgram(char chan, unsigned int pgm);
+    //Midi IN
+    virtual void NoteOn(char chan, char note, char velocity);
+    virtual void NoteOff(char chan, char note);
+    virtual void PolyphonicAftertouch(char chan, char note, char velocity);
+    virtual void SetController(char chan, int type, int par);
+    virtual void SetProgram(char chan, unsigned int pgm);
 
-        void ShutUp();
-        int shutup;
+    void ShutUp();
+    int shutup;
 
-        void vuUpdate(const float *outl, const float *outr);
+    void vuUpdate(const float *outl, const float *outr);
 
-        /**Audio Output*/
-        virtual void AudioOut(float *outl, float *outr);
-        /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
-        virtual void GetAudioOutSamples(size_t nsamples,
-                                unsigned samplerate,
-                                float *outl,
-                                float *outr);
+    /**Audio Output*/
+    virtual void AudioOut(float *outl, float *outr);
+    /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
+    virtual void GetAudioOutSamples(size_t nsamples,
+                                    unsigned samplerate,
+                                    float *outl,
+                                    float *outr);
 
+    void partonoff(int npart, int what);
 
-        void partonoff(int npart, int what);
+    /**parts \todo see if this can be made to be dynamic*/
+    class Instrument *part[NUM_MIDI_PARTS];
 
-        /**parts \todo see if this can be made to be dynamic*/
-        class Instrument * part[NUM_MIDI_PARTS];
+    //parameters
 
-        //parameters
+    unsigned char Pvolume;
+    unsigned char Pkeyshift;
+    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
+    unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
 
-        unsigned char Pvolume;
-        unsigned char Pkeyshift;
-        unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
-        unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+    //parameters control
+    void setPvolume(char Pvolume_);
+    void setPkeyshift(char Pkeyshift_);
+    void setPsysefxvol(int Ppart, int Pefx, char Pvol);
+    void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
 
-        //parameters control
-        void setPvolume(char Pvolume_);
-        void setPkeyshift(char Pkeyshift_);
-        void setPsysefxvol(int Ppart, int Pefx, char Pvol);
-        void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
+    //effects
+    class EffectManager *sysefx[NUM_SYS_EFX]; //system
+    class EffectManager *insefx[NUM_INS_EFX]; //insertion
+                                              //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
-        //effects
-        class EffectManager * sysefx[NUM_SYS_EFX]; //system
-        class EffectManager * insefx[NUM_INS_EFX]; //insertion
-//      void swapcopyeffects(int what,int type,int neff1,int neff2);
+    //part that's apply the insertion effect; -1 to disable
+    short int Pinsparts[NUM_INS_EFX];
 
-        //part that's apply the insertion effect; -1 to disable
-        short int Pinsparts[NUM_INS_EFX];
+    //peaks for VU-meter
+    void vuresetpeaks();
+    //get VU-meter data
+    vuData getVuData();
 
-        //peaks for VU-meter
-        void vuresetpeaks();
-        //get VU-meter data
-        vuData getVuData();
+    //peaks for part VU-meters
+    /**\todo synchronize this with a mutex*/
+    float vuoutpeakpart[NUM_MIDI_PARTS];
+    unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
-        //peaks for part VU-meters
-        /**\todo synchronize this with a mutex*/
-        float vuoutpeakpart[NUM_MIDI_PARTS];
-        unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
+    Controller ctl;
+    bool swaplr; //if L and R are swapped
 
-        Controller ctl;
-        bool       swaplr; //if L and R are swapped
+    //other objects
+    Microtonal microtonal;
+    Bank bank;
 
-        //other objects
-        Microtonal microtonal;
-        Bank       bank;
+    IFFTwrapper *fft;
+    pthread_mutex_t mutex;
+    pthread_mutex_t vumutex;
 
-        class FFTwrapper * fft;
-        pthread_mutex_t mutex;
-        pthread_mutex_t vumutex;
+private:
+    vuData vu;
+    float volume;
+    float sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
+    float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+    int keyshift;
 
-
-    private:
-        vuData vu;
-        float  volume;
-        float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
-        float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
-        int    keyshift;
-
-        //information relevent to generating plugin audio samples
-        float *bufl;
-        float *bufr;
-        off_t  off;
-        size_t smps;
+    //information relevent to generating plugin audio samples
+    float *bufl;
+    float *bufr;
+    off_t off;
+    size_t smps;
 };
 
 #endif // MIXER_H

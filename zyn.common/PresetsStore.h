@@ -23,47 +23,49 @@
 #ifndef PRESETSTORE_H
 #define PRESETSTORE_H
 
+#include "Config.h"
+#include "XMLwrapper.h"
 #include <string>
 #include <vector>
-#include "XMLwrapper.h"
-#include "Config.h"
 
 #define MAX_PRESETTYPE_SIZE 30
 
 class PresetsStore
 {
-    public:
-        PresetsStore();
-        ~PresetsStore();
+public:
+    PresetsStore();
+    ~PresetsStore();
 
-        //Clipboard stuff
-        void copyclipboard(XMLwrapper *xml, char *type);
-        bool pasteclipboard(XMLwrapper *xml);
-        bool checkclipboardtype(const char *type);
+    //Clipboard stuff
+    void copyclipboard(XMLwrapper *xml, char *type);
+    bool pasteclipboard(XMLwrapper *xml);
+    bool checkclipboardtype(const char *type);
 
-        //presets stuff
-        void copypreset(XMLwrapper *xml, char *type, std::string name);
-        bool pastepreset(XMLwrapper *xml, unsigned int npreset);
-        void deletepreset(unsigned int npreset);
+    //presets stuff
+    void copypreset(XMLwrapper *xml, char *type, std::string name);
+    bool pastepreset(XMLwrapper *xml, unsigned int npreset);
+    void deletepreset(unsigned int npreset);
 
-        struct presetstruct {
-            presetstruct(std::string _file, std::string _name)
-                :file(_file), name(_name) {}
-            bool operator<(const presetstruct &b) const;
-            std::string file;
-            std::string name;
-        };
-        std::vector<presetstruct> presets;
+    struct presetstruct
+    {
+        presetstruct(std::string _file, std::string _name)
+            : file(_file), name(_name) {}
+        bool operator<(const presetstruct &b) const;
+        std::string file;
+        std::string name;
+    };
+    std::vector<presetstruct> presets;
 
-        void rescanforpresets(const std::string &type);
+    void rescanforpresets(const std::string &type);
 
-    private:
-        struct {
-            char *data;
-            char  type[MAX_PRESETTYPE_SIZE];
-        } clipboard;
+private:
+    struct
+    {
+        char *data;
+        char type[MAX_PRESETTYPE_SIZE];
+    } clipboard;
 
-        void clearpresets();
+    void clearpresets();
 };
 
 extern PresetsStore presetsstore;

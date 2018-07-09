@@ -28,7 +28,7 @@
 #include "Engine.h"
 
 /**This class is inherited by all the Midi input classes*/
-class MidiInput:public virtual Engine
+class MidiInput : public virtual Engine
 {
 public:
     /**Enables or disables driver based upon value*/

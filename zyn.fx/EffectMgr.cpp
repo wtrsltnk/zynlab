@@ -21,22 +21,22 @@
 */
 
 #include "EffectMgr.h"
-#include "Effect.h"
-#include "Reverb.h"
-#include "Echo.h"
 #include "Chorus.h"
 #include "Distorsion.h"
-#include "EQ.h"
 #include "DynamicFilter.h"
-#include "../zyn.common/XMLwrapper.h"
-#include "../zyn.dsp/FilterParams.h"
+#include "EQ.h"
+#include "Echo.h"
+#include "Effect.h"
+#include "Reverb.h"
+#include <zyn.common/XMLwrapper.h>
+#include <zyn.dsp/FilterParams.h>
 
 #include <iostream>
 
 using namespace std;
 
-EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings* synth_)
-    :insertion(insertion_),
+EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_)
+    : insertion(insertion_),
       efxoutl(new float[synth_->buffersize]),
       efxoutr(new float[synth_->buffersize]),
       filterpars(NULL),
@@ -52,12 +52,11 @@ EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, Sys
     defaults();
 }
 
-
 EffectManager::~EffectManager()
 {
     delete efx;
-    delete [] efxoutl;
-    delete [] efxoutr;
+    delete[] efxoutl;
+    delete[] efxoutr;
 }
 
 void EffectManager::defaults(void)
@@ -70,13 +69,14 @@ void EffectManager::defaults(void)
 void EffectManager::changeeffect(int _nefx)
 {
     cleanup();
-    if(nefx == _nefx)
+    if (nefx == _nefx)
         return;
     nefx = _nefx;
     memset(efxoutl, 0, this->_synth->bufferbytes);
     memset(efxoutr, 0, this->_synth->bufferbytes);
     delete efx;
-    switch(nefx) {
+    switch (nefx)
+    {
         case 1:
             efx = new Reverb(insertion, efxoutl, efxoutr, this->_synth);
             break;
@@ -107,7 +107,7 @@ void EffectManager::changeeffect(int _nefx)
             break; //no effect (thru)
     }
 
-    if(efx)
+    if (efx)
         filterpars = efx->filterpars;
 }
 
@@ -120,15 +120,14 @@ int EffectManager::geteffect(void)
 // Cleanup the current effect
 void EffectManager::cleanup(void)
 {
-    if(efx)
+    if (efx)
         efx->cleanup();
 }
-
 
 // Get the preset of the current effect
 unsigned char EffectManager::getpreset(void)
 {
-    if(efx)
+    if (efx)
         return efx->Ppreset;
     else
         return 0;
@@ -137,7 +136,7 @@ unsigned char EffectManager::getpreset(void)
 // Change the preset of the current effect
 void EffectManager::changepreset_nolock(unsigned char npreset)
 {
-    if(efx)
+    if (efx)
         efx->setpreset(npreset);
 }
 
@@ -149,11 +148,10 @@ void EffectManager::changepreset(unsigned char npreset)
     pthread_mutex_unlock(mutex);
 }
 
-
 //Change a parameter of the current effect
 void EffectManager::seteffectpar_nolock(int npar, unsigned char value)
 {
-    if(!efx)
+    if (!efx)
         return;
     efx->changepar(npar, value);
 }
@@ -169,7 +167,7 @@ void EffectManager::seteffectpar(int npar, unsigned char value)
 //Get a parameter of the current effect
 unsigned char EffectManager::geteffectpar(int npar)
 {
-    if(!efx)
+    if (!efx)
         return 0;
     return efx->getpar(npar);
 }
@@ -177,19 +175,22 @@ unsigned char EffectManager::geteffectpar(int npar)
 // Apply the effect
 void EffectManager::out(float *smpsl, float *smpsr)
 {
-    if(!efx) {
-        if(!insertion)
-            for(int i = 0; i < this->_synth->buffersize; ++i) {
-                smpsl[i]   = 0.0f;
-                smpsr[i]   = 0.0f;
+    if (!efx)
+    {
+        if (!insertion)
+            for (int i = 0; i < this->_synth->buffersize; ++i)
+            {
+                smpsl[i] = 0.0f;
+                smpsr[i] = 0.0f;
                 efxoutl[i] = 0.0f;
                 efxoutr[i] = 0.0f;
             }
         return;
     }
-    for(int i = 0; i < this->_synth->buffersize; ++i) {
-        smpsl[i]  += this->_synth->denormalkillbuf[i];
-        smpsr[i]  += this->_synth->denormalkillbuf[i];
+    for (int i = 0; i < this->_synth->buffersize; ++i)
+    {
+        smpsl[i] += this->_synth->denormalkillbuf[i];
+        smpsr[i] += this->_synth->denormalkillbuf[i];
         efxoutl[i] = 0.0f;
         efxoutr[i] = 0.0f;
     }
@@ -197,48 +198,54 @@ void EffectManager::out(float *smpsl, float *smpsr)
 
     float volume = efx->volume;
 
-    if(nefx == 7) { //this is need only for the EQ effect
+    if (nefx == 7)
+    { //this is need only for the EQ effect
         memcpy(smpsl, efxoutl, this->_synth->bufferbytes);
         memcpy(smpsr, efxoutr, this->_synth->bufferbytes);
         return;
     }
 
     //Insertion effect
-    if(insertion != 0) {
+    if (insertion != 0)
+    {
         float v1, v2;
-        if(volume < 0.5f) {
+        if (volume < 0.5f)
+        {
             v1 = 1.0f;
             v2 = volume * 2.0f;
         }
-        else {
+        else
+        {
             v1 = (1.0f - volume) * 2.0f;
             v2 = 1.0f;
         }
-        if((nefx == 1) || (nefx == 2))
-            v2 *= v2;  //for Reverb and Echo, the wet function is not liniar
+        if ((nefx == 1) || (nefx == 2))
+            v2 *= v2; //for Reverb and Echo, the wet function is not liniar
 
-        if(dryonly)   //this is used for instrument effect only
-            for(int i = 0; i < this->_synth->buffersize; ++i) {
-                smpsl[i]   *= v1;
-                smpsr[i]   *= v1;
+        if (dryonly) //this is used for instrument effect only
+            for (int i = 0; i < this->_synth->buffersize; ++i)
+            {
+                smpsl[i] *= v1;
+                smpsr[i] *= v1;
                 efxoutl[i] *= v2;
                 efxoutr[i] *= v2;
             }
         else // normal instrument/insertion effect
-            for(int i = 0; i < this->_synth->buffersize; ++i) {
+            for (int i = 0; i < this->_synth->buffersize; ++i)
+            {
                 smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
             }
     }
     else // System effect
-        for(int i = 0; i < this->_synth->buffersize; ++i) {
+        for (int i = 0; i < this->_synth->buffersize; ++i)
+        {
             efxoutl[i] *= 2.0f * volume;
             efxoutr[i] *= 2.0f * volume;
-            smpsl[i]    = efxoutl[i];
-            smpsr[i]    = efxoutr[i];
+            smpsl[i] = efxoutl[i];
+            smpsr[i] = efxoutr[i];
         }
 }
-
 
 // Get the effect volume for the system effect
 float EffectManager::sysefxgetvolume(void)
@@ -246,13 +253,11 @@ float EffectManager::sysefxgetvolume(void)
     return (!efx) ? 1.0f : efx->outvolume;
 }
 
-
 // Get the EQ response
 float EffectManager::getEQfreqresponse(float freq)
 {
     return (nefx == 7) ? efx->getfreqresponse(freq) : 0.0f;
 }
-
 
 void EffectManager::setdryonly(bool value)
 {
@@ -263,20 +268,22 @@ void EffectManager::add2XML(XMLwrapper *xml)
 {
     xml->addpar("type", geteffect());
 
-    if(!efx || !geteffect())
+    if (!efx || !geteffect())
         return;
     xml->addpar("preset", efx->Ppreset);
 
     xml->beginbranch("EFFECT_PARAMETERS");
-    for(int n = 0; n < 128; ++n) {
+    for (int n = 0; n < 128; ++n)
+    {
         int par = geteffectpar(n);
-        if(par == 0)
+        if (par == 0)
             continue;
         xml->beginbranch("par_no", n);
         xml->addpar("par", par);
         xml->endbranch();
     }
-    if(filterpars) {
+    if (filterpars)
+    {
         xml->beginbranch("FILTER");
         filterpars->add2XML(xml);
         xml->endbranch();
@@ -288,22 +295,25 @@ void EffectManager::getfromXML(XMLwrapper *xml)
 {
     changeeffect(xml->getpar127("type", geteffect()));
 
-    if(!efx || !geteffect())
+    if (!efx || !geteffect())
         return;
 
     efx->Ppreset = xml->getpar127("preset", efx->Ppreset);
 
-    if(xml->enterbranch("EFFECT_PARAMETERS")) {
-        for(int n = 0; n < 128; ++n) {
+    if (xml->enterbranch("EFFECT_PARAMETERS"))
+    {
+        for (int n = 0; n < 128; ++n)
+        {
             seteffectpar_nolock(n, 0); //erase effect parameter
-            if(xml->enterbranch("par_no", n) == 0)
+            if (xml->enterbranch("par_no", n) == 0)
                 continue;
             int par = geteffectpar(n);
             seteffectpar_nolock(n, xml->getpar127("par", par));
             xml->exitbranch();
         }
-        if(filterpars)
-            if(xml->enterbranch("FILTER")) {
+        if (filterpars)
+            if (xml->enterbranch("FILTER"))
+            {
                 filterpars->getfromXML(xml);
                 xml->exitbranch();
             }

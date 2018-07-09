@@ -22,23 +22,24 @@
 
 #ifndef WAVFILE_H
 #define WAVFILE_H
+
 #include <string>
 
 class WavFile
 {
-    public:
-        WavFile(std::string filename, int samplerate, int channels);
-        ~WavFile();
+public:
+    WavFile(std::string filename, int samplerate, int channels);
+    ~WavFile();
 
-        bool good() const;
+    bool good() const;
 
-        void writeMonoSamples(int nsmps, short int *smps);
-        void writeStereoSamples(int nsmps, short int *smps);
+    void writeMonoSamples(int nsmps, short int *smps);
+    void writeStereoSamples(int nsmps, short int *smps);
 
-    private:
-        int   sampleswritten;
-        int   samplerate;
-        int   channels;
-        FILE *file;
+private:
+    int sampleswritten;
+    int samplerate;
+    int channels;
+    FILE *file;
 };
 #endif

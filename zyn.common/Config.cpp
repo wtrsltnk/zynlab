@@ -19,11 +19,11 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
-#include <stdio.h>
+#include <direct.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <direct.h>
 
 #include "Config.h"
 #include "XMLwrapper.h"
@@ -33,9 +33,9 @@ using namespace std;
 Config::Config()
 {}
 
-Config* Config::_instance = nullptr;
+Config *Config::_instance = nullptr;
 
-Config& Config::Current()
+Config &Config::Current()
 {
     if (Config::_instance == nullptr) Config::_instance = new Config();
 
@@ -46,9 +46,9 @@ void Config::init()
 {
     maxstringsize = MAX_STRING_SIZE; //for ui
     //defaults
-    cfg.SampleRate      = 44100;
+    cfg.SampleRate = 44100;
     cfg.SoundBufferSize = 256;
-    cfg.OscilSize  = 1024;
+    cfg.OscilSize = 1024;
     cfg.SwapStereo = 0;
 
     cfg.LinuxOSSWaveOutDev = new char[MAX_STRING_SIZE];
@@ -59,11 +59,11 @@ void Config::init()
     cfg.DumpFile = "zynaddsubfx_dump.txt";
 
     cfg.WindowsWaveOutId = 0;
-    cfg.WindowsMidiInId  = 0;
+    cfg.WindowsMidiInId = 0;
 
     cfg.BankUIAutoClose = 0;
     cfg.DumpNotesToFile = 0;
-    cfg.DumpAppend      = 1;
+    cfg.DumpAppend = 1;
 
     cfg.GzipCompression = 3;
 
@@ -72,26 +72,27 @@ void Config::init()
     cfg.IgnoreProgramChange = 0;
 
     cfg.UserInterfaceMode = 0;
-    cfg.VirKeybLayout     = 1;
+    cfg.VirKeybLayout = 1;
     winwavemax = 1;
     winmidimax = 1;
     //try to find out how many input midi devices are there
     winmididevices = new winmidionedevice[winmidimax];
-    for(int i = 0; i < winmidimax; ++i) {
+    for (int i = 0; i < winmidimax; ++i)
+    {
         winmididevices[i].name = new char[MAX_STRING_SIZE];
-        for(int j = 0; j < MAX_STRING_SIZE; ++j)
+        for (int j = 0; j < MAX_STRING_SIZE; ++j)
             winmididevices[i].name[j] = '\0';
     }
 
-
-//get the midi input devices name
+    //get the midi input devices name
     cfg.currentBankDir = "./testbnk";
 
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename, MAX_STRING_SIZE);
     readConfig(filename);
 
-    if(cfg.bankRootDirList[0].empty()) {
+    if (cfg.bankRootDirList[0].empty())
+    {
         //banks
         cfg.bankRootDirList[0] = "~/banks";
         cfg.bankRootDirList[1] = "./";
@@ -105,7 +106,8 @@ void Config::init()
         cfg.bankRootDirList[5] = "banks";
     }
 
-    if(cfg.presetsDirList[0].empty()) {
+    if (cfg.presetsDirList[0].empty())
+    {
         //presets
         cfg.presetsDirList[0] = "./";
 #ifdef __APPLE__
@@ -123,14 +125,13 @@ void Config::init()
 
 Config::~Config()
 {
-    delete [] cfg.LinuxOSSWaveOutDev;
-    delete [] cfg.LinuxOSSSeqInDev;
+    delete[] cfg.LinuxOSSWaveOutDev;
+    delete[] cfg.LinuxOSSSeqInDev;
 
-    for(int i = 0; i < winmidimax; ++i)
-        delete [] winmididevices[i].name;
-    delete [] winmididevices;
+    for (int i = 0; i < winmidimax; ++i)
+        delete[] winmididevices[i].name;
+    delete[] winmididevices;
 }
-
 
 void Config::save()
 {
@@ -141,22 +142,23 @@ void Config::save()
 
 void Config::clearbankrootdirlist()
 {
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         cfg.bankRootDirList[i].clear();
 }
 
 void Config::clearpresetsdirlist()
 {
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         cfg.presetsDirList[i].clear();
 }
 
 void Config::readConfig(const char *filename)
 {
     XMLwrapper xmlcfg;
-    if(xmlcfg.loadXMLfile(filename) < 0)
+    if (xmlcfg.loadXMLfile(filename) < 0)
         return;
-    if(xmlcfg.enterbranch("CONFIGURATION")) {
+    if (xmlcfg.enterbranch("CONFIGURATION"))
+    {
         cfg.SampleRate = xmlcfg.getpar("sample_rate",
                                        cfg.SampleRate,
                                        4000,
@@ -194,10 +196,10 @@ void Config::readConfig(const char *filename)
                                             9);
 
         cfg.currentBankDir = xmlcfg.getparstr("bank_current", "");
-        cfg.Interpolation  = xmlcfg.getpar("interpolation",
-                                           cfg.Interpolation,
-                                           0,
-                                           1);
+        cfg.Interpolation = xmlcfg.getpar("interpolation",
+                                          cfg.Interpolation,
+                                          0,
+                                          1);
 
         cfg.CheckPADsynth = xmlcfg.getpar("check_pad_synth",
                                           cfg.CheckPADsynth,
@@ -205,10 +207,9 @@ void Config::readConfig(const char *filename)
                                           1);
 
         cfg.IgnoreProgramChange = xmlcfg.getpar("ignore_program_change",
-                                          cfg.IgnoreProgramChange,
-                                          0,
-                                          1);
-
+                                                cfg.IgnoreProgramChange,
+                                                0,
+                                                1);
 
         cfg.UserInterfaceMode = xmlcfg.getpar("user_interface_mode",
                                               cfg.UserInterfaceMode,
@@ -220,15 +221,17 @@ void Config::readConfig(const char *filename)
                                           10);
 
         //get bankroot dirs
-        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-            if(xmlcfg.enterbranch("BANKROOT", i)) {
+        for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+            if (xmlcfg.enterbranch("BANKROOT", i))
+            {
                 cfg.bankRootDirList[i] = xmlcfg.getparstr("bank_root", "");
                 xmlcfg.exitbranch();
             }
 
         //get preset root dirs
-        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-            if(xmlcfg.enterbranch("PRESETSROOT", i)) {
+        for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+            if (xmlcfg.enterbranch("PRESETSROOT", i))
+            {
                 cfg.presetsDirList[i] = xmlcfg.getparstr("presets_root", "");
                 xmlcfg.exitbranch();
             }
@@ -254,7 +257,7 @@ void Config::readConfig(const char *filename)
         xmlcfg.exitbranch();
     }
 
-    cfg.OscilSize = (int) powf(2, ceil(logf(cfg.OscilSize - 1.0f) / logf(2.0f)));
+    cfg.OscilSize = (int)powf(2, ceil(logf(cfg.OscilSize - 1.0f) / logf(2.0f)));
 }
 
 void Config::saveConfig(const char *filename)
@@ -283,16 +286,17 @@ void Config::saveConfig(const char *filename)
     xmlcfg->addpar("user_interface_mode", cfg.UserInterfaceMode);
     xmlcfg->addpar("virtual_keyboard_layout", cfg.VirKeybLayout);
 
-
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-        if(!cfg.bankRootDirList[i].empty()) {
+    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+        if (!cfg.bankRootDirList[i].empty())
+        {
             xmlcfg->beginbranch("BANKROOT", i);
             xmlcfg->addparstr("bank_root", cfg.bankRootDirList[i]);
             xmlcfg->endbranch();
         }
 
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-        if(!cfg.presetsDirList[i].empty()) {
+    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+        if (!cfg.presetsDirList[i].empty())
+        {
             xmlcfg->beginbranch("PRESETSROOT", i);
             xmlcfg->addparstr("presets_root", cfg.presetsDirList[i]);
             xmlcfg->endbranch();

@@ -2,4 +2,4 @@
 
 SequencerStrip::SequencerStrip()
     : _targetMixerChannel(0)
-{ }
+{}

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(app.imgui)
 
@@ -30,9 +30,11 @@ if(GLFW3_FOUND)
         )
 
     target_include_directories(app.imgui
-        PRIVATE ${GLFW3_INCLUDE_DIR}
-        PRIVATE ${GLM_DIR}
-        PRIVATE imgui
+        PRIVATE
+            ${CMAKE_SOURCE_DIR}
+            ${GLFW3_INCLUDE_DIR}
+            ${GLM_DIR}
+            imgui
         )
 
     target_link_libraries(app.imgui

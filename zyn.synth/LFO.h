@@ -23,37 +23,38 @@
 #ifndef LFO_H
 #define LFO_H
 
-#include "../zyn.common/globals.h"
 #include "LFOParams.h"
+#include <zyn.common/globals.h>
 
 /**Class for creating Low Frequency Ocillators*/
 class LFO
 {
-    SystemSettings* _synth;
-    public:
-        /**Constructor
+    SystemSettings *_synth;
+
+public:
+    /**Constructor
          *
          * @param lfopars pointer to a LFOParams object
          * @param basefreq base frequency of LFO
          */
-        LFO(LFOParams *lfopars, float basefreq, SystemSettings* synth_);
-        /**Deconstructor*/
-        virtual ~LFO();
-        float lfoout();
-        float amplfoout();
-    private:
-        float x;
-        float incx, incrnd, nextincrnd;
-        float amp1, amp2; // used for randomness
-        float lfointensity;
-        float lfornd, lfofreqrnd;
-        float lfodelay;
-        /**\todo see if an enum would be better here*/
-        char lfotype;
-        int  freqrndenabled;
+    LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_);
+    /**Deconstructor*/
+    virtual ~LFO();
+    float lfoout();
+    float amplfoout();
 
+private:
+    float x;
+    float incx, incrnd, nextincrnd;
+    float amp1, amp2; // used for randomness
+    float lfointensity;
+    float lfornd, lfofreqrnd;
+    float lfodelay;
+    /**\todo see if an enum would be better here*/
+    char lfotype;
+    int freqrndenabled;
 
-        void computenextincrnd();
+    void computenextincrnd();
 };
 
 #endif

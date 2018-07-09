@@ -1,8 +1,8 @@
 #ifndef SEQUENCER_H
 #define SEQUENCER_H
 
-#include <thread>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 enum class PlayingStates
@@ -15,7 +15,7 @@ enum class PlayingStates
 
 class Sequencer
 {
-    class IMixer* _mixer;
+    class IMixer *_mixer;
     std::thread _playThread;
 
     PlayingStates _playingState;
@@ -29,13 +29,14 @@ class Sequencer
     int _bpm;
     std::mutex _changeBpm;
 
-    std::vector<class SequencerStrip*> _channels;
+    std::vector<class SequencerStrip *> _channels;
     std::mutex _changeChannels;
 
     void runThread();
     void doStep();
+
 public:
-    Sequencer(class IMixer* mixer);
+    Sequencer(class IMixer *mixer);
     virtual ~Sequencer();
 
     PlayingStates currentState();

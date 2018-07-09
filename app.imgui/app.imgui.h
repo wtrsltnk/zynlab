@@ -6,7 +6,7 @@
 
 #include "../zyn.synth/FFTwrapper.h"
 #include "../zyn.mixer/Mixer.h"
-#include "../zyn.common/Util.h"
+#include <zyn.common/Util.h>
 
 //Nio System
 #include "../zyn.nio/Nio.h"

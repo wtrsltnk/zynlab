@@ -20,16 +20,16 @@
 
 */
 
-#include <cmath>
-#include <cassert>
-#include <cstring>
 #include "FFTwrapper.h"
+#include <cassert>
+#include <cmath>
+#include <cstring>
 
 FFTwrapper::FFTwrapper(int fftsize_)
 {
-    fftsize  = fftsize_;
-    time     = new fftw_real[fftsize];
-    fft      = new fftw_complex[fftsize + 1];
+    fftsize = fftsize_;
+    time = new fftw_real[fftsize];
+    fft = new fftw_complex[fftsize + 1];
     planfftw = fftw_plan_dft_r2c_1d(fftsize,
                                     time,
                                     fft,
@@ -45,14 +45,14 @@ FFTwrapper::~FFTwrapper()
     fftw_destroy_plan(planfftw);
     fftw_destroy_plan(planfftw_inv);
 
-    delete [] time;
-    delete [] fft;
+    delete[] time;
+    delete[] fft;
 }
 
 void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
 {
     //Load data
-    for(int i = 0; i < fftsize; ++i)
+    for (int i = 0; i < fftsize; ++i)
         time[i] = static_cast<double>(smps[i]);
 
     //DFT
@@ -75,7 +75,7 @@ void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
     fftw_execute(planfftw_inv);
 
     //Grab data
-    for(int i = 0; i < fftsize; ++i)
+    for (int i = 0; i < fftsize; ++i)
         smps[i] = static_cast<float>(time[i]);
 }
 

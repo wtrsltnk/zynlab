@@ -22,20 +22,20 @@
 */
 
 #include "Effect.h"
-#include "../zyn.dsp/FilterParams.h"
+#include <zyn.dsp/FilterParams.h>
 
 #include <cmath>
 
 Effect::Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
                FilterParams *filterpars_, unsigned char Ppreset_,
-               SystemSettings* synth_)
-    :Ppreset(Ppreset_),
+               SystemSettings *synth_)
+    : Ppreset(Ppreset_),
       efxoutl(efxoutl_),
       efxoutr(efxoutr_),
       filterpars(filterpars_),
       insertion(insertion_),
       _synth(synth_)
-{ }
+{}
 
 void Effect::out(float *const smpsl, float *const smpsr)
 {
@@ -61,5 +61,5 @@ void Effect::setpanning(char Ppanning_)
 void Effect::setlrcross(char Plrcross_)
 {
     Plrcross = Plrcross_;
-    lrcross  = (float)Plrcross / 127.0f;
+    lrcross = (float)Plrcross / 127.0f;
 }

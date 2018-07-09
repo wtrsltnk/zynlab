@@ -1,28 +1,21 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(zyn.mixer)
 
-set(zyn_mixer_SRCS
-    Bank.cpp
-    Mixer.cpp
-    Microtonal.cpp
-    Instrument.cpp
-)
-
-set(zyn_mixer_HDRS
-    Bank.h
-    Mixer.h
-    Microtonal.h
-    Instrument.h
-    )
-
 add_library(zyn.mixer STATIC
-    ${zyn_mixer_SRCS}
-    ${zyn_mixer_HDRS}
+    Bank.cpp
+    Bank.h
+    Instrument.cpp
+    Instrument.h
+    Microtonal.cpp
+    Microtonal.h
+    Mixer.cpp
+    Mixer.h
     )
 
 target_include_directories(zyn.mixer
-    PRIVATE ${MXML_INCLUDE_DIRS}
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}
     )
 
 target_link_libraries(zyn.mixer
@@ -33,11 +26,37 @@ target_link_libraries(zyn.mixer
     )
 
 target_compile_features(zyn.mixer
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
-    PRIVATE cxx_range_for
-    PRIVATE cxx_thread_local
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
+        cxx_range_for
+        cxx_thread_local
     )
 
-install(FILES ${zyn_mixer_HDRS} DESTINATION include/zyn/mixer COMPONENT develop)
-install(TARGETS zyn.mixer DESTINATION lib COMPONENT develop)
+install(
+    TARGETS
+        zyn.mixer
+    EXPORT
+        zyn.mixer
+    DESTINATION
+        "lib"
+    )
+
+install(
+    FILES
+        ${zyn.mixer_SOURCE_DIR}/Bank.h
+        ${zyn.mixer_SOURCE_DIR}/Instrument.h
+        ${zyn.mixer_SOURCE_DIR}/Microtonal.h
+        ${zyn.mixer_SOURCE_DIR}/Mixer.h
+    DESTINATION
+        "include/zyn/mixer"
+    )
+
+install(
+    EXPORT
+        zyn.mixer
+    FILE
+        zyn.mixer-config.cmake
+    DESTINATION
+        "cmake"
+    )

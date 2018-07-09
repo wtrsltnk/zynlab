@@ -24,15 +24,16 @@
 #define AUDIOOUTPUT_H
 
 #include "Engine.h"
-#include "../zyn.common/Stereo.h"
-#include "../zyn.common/globals.h"
+#include <zyn.common/Stereo.h>
+#include <zyn.common/globals.h>
 
 class AudioOutput : public virtual Engine
 {
 protected:
-    SystemSettings* _synth;
+    SystemSettings *_synth;
+
 public:
-    AudioOutput(SystemSettings* s);
+    AudioOutput(SystemSettings *s);
     virtual ~AudioOutput();
 
     /**Sets the Sample Rate of this Output
@@ -49,7 +50,7 @@ public:
     int bufferingSize();
 
     virtual void setAudioEn(bool nval) = 0;
-    virtual bool getAudioEn() const    = 0;
+    virtual bool getAudioEn() const = 0;
 
 protected:
     /**Get the next sample for output.

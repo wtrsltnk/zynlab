@@ -23,44 +23,44 @@
 #ifndef FORMANT_FILTER_H
 #define FORMANT_FILTER_H
 
-#include "../zyn.common/globals.h"
 #include "Filter.h"
+#include <zyn.common/globals.h>
 
-
-class FormantFilter:public Filter
+class FormantFilter : public Filter
 {
-    public:
-        FormantFilter(class FilterParams *pars, SystemSettings* synth_);
-        virtual ~FormantFilter();
-        void filterout(float *smp);
-        void setfreq(float frequency);
-        void setfreq_and_q(float frequency, float q_);
-        void setq(float q_);
-        void setgain(float dBgain);
+public:
+    FormantFilter(class FilterParams *pars, SystemSettings *synth_);
+    virtual ~FormantFilter();
+    void filterout(float *smp);
+    void setfreq(float frequency);
+    void setfreq_and_q(float frequency, float q_);
+    void setq(float q_);
+    void setgain(float dBgain);
 
-        void cleanup(void);
+    void cleanup(void);
 
-    private:
-        void setpos(float input);
+private:
+    void setpos(float input);
 
+    class AnalogFilter *formant[FF_MAX_FORMANTS];
 
-        class AnalogFilter * formant[FF_MAX_FORMANTS];
+    struct
+    {
+        float freq, amp, q; //frequency,amplitude,Q
+    } formantpar[FF_MAX_VOWELS][FF_MAX_FORMANTS],
+        currentformants[FF_MAX_FORMANTS];
 
-        struct {
-            float freq, amp, q; //frequency,amplitude,Q
-        } formantpar[FF_MAX_VOWELS][FF_MAX_FORMANTS],
-          currentformants[FF_MAX_FORMANTS];
+    struct
+    {
+        unsigned char nvowel;
+    } sequence[FF_MAX_SEQUENCE];
 
-        struct {
-            unsigned char nvowel;
-        } sequence [FF_MAX_SEQUENCE];
+    float oldformantamp[FF_MAX_FORMANTS];
 
-        float oldformantamp[FF_MAX_FORMANTS];
-
-        int   sequencesize, numformants, firsttime;
-        float oldinput, slowinput;
-        float Qfactor, formantslowness, oldQfactor;
-        float vowelclearness, sequencestretch;
+    int sequencesize, numformants, firsttime;
+    float oldinput, slowinput;
+    float Qfactor, formantslowness, oldQfactor;
+    float vowelclearness, sequencestretch;
 };
 
 #endif

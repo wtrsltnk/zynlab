@@ -21,25 +21,26 @@
 #ifndef STEREO_H
 #define STEREO_H
 
-template<class T>
-struct Stereo {
-    public:
-        Stereo(const T &left, const T &right) : l(left), r(right) { }
+template <class T>
+struct Stereo
+{
+public:
+    Stereo(const T &left, const T &right) : l(left), r(right) {}
 
-        /**Initializes Stereo with left and right set to val
+    /**Initializes Stereo with left and right set to val
          * @param val the value for both channels*/
-        Stereo(const T &val) : l(val), r(val) { }
-        ~Stereo() {}
+    Stereo(const T &val) : l(val), r(val) {}
+    ~Stereo() {}
 
-        Stereo<T> &operator=(const Stereo<T> &smp)
-        {
-            l = smp.l;
-            r = smp.r;
-            return *this;
-        }
+    Stereo<T> &operator=(const Stereo<T> &smp)
+    {
+        l = smp.l;
+        r = smp.r;
+        return *this;
+    }
 
-        //data
-        T l, r;
+    //data
+    T l, r;
 };
 #include "Stereo.cpp"
 #endif

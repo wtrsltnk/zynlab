@@ -21,12 +21,12 @@
 */
 
 #include "Distorsion.h"
-#include "../zyn.dsp/AnalogFilter.h"
-#include "../zyn.common/WaveShapeSmps.h"
+#include <zyn.common/WaveShapeSmps.h>
+#include <zyn.dsp/AnalogFilter.h>
 
 #include <cmath>
 
-Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
+Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       Pvolume(50),
       Pdrive(90),
@@ -63,54 +63,55 @@ void Distorsion::cleanup(void)
     hpfr->cleanup();
 }
 
-
 //Apply the filters
 void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
 {
     lpfl->filterout(efxoutl);
     hpfl->filterout(efxoutl);
-    if(Pstereo != 0) { //stereo
+    if (Pstereo != 0)
+    { //stereo
         lpfr->filterout(efxoutr);
         hpfr->filterout(efxoutr);
     }
 }
 
-
 //Effect output
 void Distorsion::out(const Stereo<float *> &smp)
 {
     float inputvol = powf(5.0f, (Pdrive - 32.0f) / 127.0f);
-    if(Pnegate)
+    if (Pnegate)
         inputvol *= -1.0f;
 
-    if(Pstereo) //Stereo
-        for(int i = 0; i < this->_synth->buffersize; ++i) {
+    if (Pstereo) //Stereo
+        for (int i = 0; i < this->_synth->buffersize; ++i)
+        {
             efxoutl[i] = smp.l[i] * inputvol * pangainL;
             efxoutr[i] = smp.r[i] * inputvol * pangainR;
         }
     else //Mono
-        for(int i = 0; i < this->_synth->buffersize; ++i)
+        for (int i = 0; i < this->_synth->buffersize; ++i)
             efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
 
-    if(Pprefiltering)
+    if (Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
     waveShapeSmps(this->_synth->buffersize, efxoutl, Ptype + 1, Pdrive);
-    if(Pstereo)
+    if (Pstereo)
         waveShapeSmps(this->_synth->buffersize, efxoutr, Ptype + 1, Pdrive);
 
-    if(!Pprefiltering)
+    if (!Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    if(!Pstereo)
+    if (!Pstereo)
         memcpy(efxoutr, efxoutl, this->_synth->bufferbytes);
 
     float level = dB2rap(60.0f * Plevel / 127.0f - 40.0f);
-    for(int i = 0; i < this->_synth->buffersize; ++i) {
+    for (int i = 0; i < this->_synth->buffersize; ++i)
+    {
         float lout = efxoutl[i];
         float rout = efxoutr[i];
-        float l    = lout * (1.0f - lrcross) + rout * lrcross;
-        float r    = rout * (1.0f - lrcross) + lout * lrcross;
+        float l = lout * (1.0f - lrcross) + rout * lrcross;
+        float r = rout * (1.0f - lrcross) + lout * lrcross;
         lout = l;
         rout = r;
 
@@ -119,19 +120,19 @@ void Distorsion::out(const Stereo<float *> &smp)
     }
 }
 
-
 //Parameter control
 void Distorsion::setvolume(unsigned char _Pvolume)
 {
     Pvolume = _Pvolume;
 
-    if(insertion == 0) {
+    if (insertion == 0)
+    {
         outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
-        volume    = 1.0f;
+        volume = 1.0f;
     }
     else
         volume = outvolume = Pvolume / 127.0f;
-    if(Pvolume == 0)
+    if (Pvolume == 0)
         cleanup();
 }
 
@@ -151,40 +152,38 @@ void Distorsion::sethpf(unsigned char _Phpf)
     hpfr->setfreq(fr);
 }
 
-
 void Distorsion::setpreset(unsigned char npreset)
 {
-    const int     PRESET_SIZE = 11;
-    const int     NUM_PRESETS = 6;
+    const int PRESET_SIZE = 11;
+    const int NUM_PRESETS = 6;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Overdrive 1
-        {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0},
+        {127, 64, 35, 56, 70, 0, 0, 96, 0, 0, 0},
         //Overdrive 2
-        {127, 64, 35, 29, 75, 1, 0, 127, 0,   0, 0},
+        {127, 64, 35, 29, 75, 1, 0, 127, 0, 0, 0},
         //A. Exciter 1
-        {64,  64, 35, 75, 80, 5, 0, 127, 105, 1, 0},
+        {64, 64, 35, 75, 80, 5, 0, 127, 105, 1, 0},
         //A. Exciter 2
-        {64,  64, 35, 85, 62, 1, 0, 127, 118, 1, 0},
+        {64, 64, 35, 85, 62, 1, 0, 127, 118, 1, 0},
         //Guitar Amp
-        {127, 64, 35, 63, 75, 2, 0, 55,  0,   0, 0},
+        {127, 64, 35, 63, 75, 2, 0, 55, 0, 0, 0},
         //Quantisize
-        {127, 64, 35, 88, 75, 4, 0, 127, 0,   1, 0}
-    };
+        {127, 64, 35, 88, 75, 4, 0, 127, 0, 1, 0}};
 
-    if(npreset >= NUM_PRESETS)
+    if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
+    for (int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
-    if(!insertion) //lower the volume if this is system effect
-        changepar(0, (int) (presets[npreset][0] / 1.5f));
+    if (!insertion) //lower the volume if this is system effect
+        changepar(0, (int)(presets[npreset][0] / 1.5f));
     Ppreset = npreset;
     cleanup();
 }
 
-
 void Distorsion::changepar(int npar, unsigned char value)
 {
-    switch(npar) {
+    switch (npar)
+    {
         case 0:
             setvolume(value);
             break;
@@ -201,13 +200,13 @@ void Distorsion::changepar(int npar, unsigned char value)
             Plevel = value;
             break;
         case 5:
-            if(value > 13)
-                Ptype = 13;  //this must be increased if more distorsion types are added
+            if (value > 13)
+                Ptype = 13; //this must be increased if more distorsion types are added
             else
                 Ptype = value;
             break;
         case 6:
-            if(value > 1)
+            if (value > 1)
                 Pnegate = 1;
             else
                 Pnegate = value;
@@ -229,18 +228,31 @@ void Distorsion::changepar(int npar, unsigned char value)
 
 unsigned char Distorsion::getpar(int npar) const
 {
-    switch(npar) {
-        case 0:  return Pvolume;
-        case 1:  return Ppanning;
-        case 2:  return Plrcross;
-        case 3:  return Pdrive;
-        case 4:  return Plevel;
-        case 5:  return Ptype;
-        case 6:  return Pnegate;
-        case 7:  return Plpf;
-        case 8:  return Phpf;
-        case 9:  return Pstereo;
-        case 10: return Pprefiltering;
-        default: return 0; //in case of bogus parameter number
+    switch (npar)
+    {
+        case 0:
+            return Pvolume;
+        case 1:
+            return Ppanning;
+        case 2:
+            return Plrcross;
+        case 3:
+            return Pdrive;
+        case 4:
+            return Plevel;
+        case 5:
+            return Ptype;
+        case 6:
+            return Pnegate;
+        case 7:
+            return Plpf;
+        case 8:
+            return Phpf;
+        case 9:
+            return Pstereo;
+        case 10:
+            return Pprefiltering;
+        default:
+            return 0; //in case of bogus parameter number
     }
 }

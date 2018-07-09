@@ -23,15 +23,16 @@
 #ifndef EFFECT_LFO_H
 #define EFFECT_LFO_H
 
-#include "../zyn.common/globals.h"
+#include <zyn.common/globals.h>
 
 /**LFO for some of the Effect objects
  * \todo see if this should inherit LFO*/
 class EffectLFO
 {
-    SystemSettings* _synth;
+    SystemSettings *_synth;
+
 public:
-    EffectLFO(SystemSettings* synth_);
+    EffectLFO(SystemSettings *synth_);
     ~EffectLFO();
     void effectlfoout(float *outl, float *outr);
     void updateparams(void);
@@ -46,8 +47,7 @@ private:
     float incx;
     float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
     float lfornd;
-    char  lfotype;
-
+    char lfotype;
 };
 
 #endif

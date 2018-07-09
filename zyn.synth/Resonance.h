@@ -22,49 +22,48 @@
 #ifndef RESONANCE_H
 #define RESONANCE_H
 
-#include "../zyn.common/globals.h"
-#include "../zyn.common/Util.h"
-#include "../zyn.common/XMLwrapper.h"
-#include "../zyn.common/Presets.h"
-#include "FFTwrapper.h"
+#include "IFFTwrapper.h"
+#include <zyn.common/Presets.h>
+#include <zyn.common/Util.h>
+#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/globals.h>
 
 #define N_RES_POINTS 256
 
-class Resonance:public Presets
+class Resonance : public Presets
 {
-    public:
-        Resonance();
-        ~Resonance();
-        void setpoint(int n, unsigned char p);
-        void applyres(int n, fft_t *fftdata, float freq);
-        void smooth();
-        void interpolatepeaks(int type);
-        void randomize(int type);
+public:
+    Resonance();
+    ~Resonance();
+    void setpoint(int n, unsigned char p);
+    void applyres(int n, fft_t *fftdata, float freq);
+    void smooth();
+    void interpolatepeaks(int type);
+    void randomize(int type);
 
-        void add2XML(XMLwrapper *xml);
-        void defaults();
-        void getfromXML(XMLwrapper *xml);
+    void add2XML(XMLwrapper *xml);
+    void defaults();
+    void getfromXML(XMLwrapper *xml);
 
+    float getfreqpos(float freq);
+    float getfreqx(float x);
+    float getfreqresponse(float freq);
+    float getcenterfreq();
+    float getoctavesfreq();
+    void sendcontroller(MidiControllers ctl, float par);
 
-        float getfreqpos(float freq);
-        float getfreqx(float x);
-        float getfreqresponse(float freq);
-        float getcenterfreq();
-        float getoctavesfreq();
-        void sendcontroller(MidiControllers ctl, float par);
+    //parameters
+    unsigned char Penabled;                  //if the ressonance is enabled
+    unsigned char Prespoints[N_RES_POINTS];  //how many points define the resonance function
+    unsigned char PmaxdB;                    //how many dB the signal may be amplified
+    unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
+    unsigned char Pprotectthefundamental;    //the fundamental (1-st harmonic) is not damped, even it resonance function is low
 
-        //parameters
-        unsigned char Penabled;     //if the ressonance is enabled
-        unsigned char Prespoints[N_RES_POINTS]; //how many points define the resonance function
-        unsigned char PmaxdB;       //how many dB the signal may be amplified
-        unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
-        unsigned char Pprotectthefundamental;   //the fundamental (1-st harmonic) is not damped, even it resonance function is low
+    //controllers
+    float ctlcenter; //center frequency(relative)
+    float ctlbw;     //bandwidth(relative)
 
-        //controllers
-        float ctlcenter; //center frequency(relative)
-        float ctlbw; //bandwidth(relative)
-
-    private:
+private:
 };
 
 #endif

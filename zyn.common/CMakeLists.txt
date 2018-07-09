@@ -1,40 +1,32 @@
-
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(zyn.common)
 
-set(zyn_common_SRCS
-    Config.cpp
-    Presets.cpp
-    PresetsArray.cpp
-    PresetsStore.cpp
-    Stereo.cpp
-    Util.cpp
-    WaveShapeSmps.cpp
-    WavFile.cpp
-    XmlWrapper.cpp
-)
-
-set(zyn_common_HDRS
-    Config.h
-    globals.h
-    Presets.h
-    PresetsArray.h
-    PresetsStore.h
-    Stereo.h
-    Util.h
-    WaveShapeSmps.h
-    WavFile.h
-    XmlWrapper.h
-)
-
 add_library(zyn.common STATIC
-    ${zyn_common_SRCS}
-    ${zyn_common_HDRS}
-    )
+    Config.cpp
+    Config.h
+    Presets.cpp
+    Presets.h
+    PresetsArray.cpp
+    PresetsArray.h
+    PresetsStore.cpp
+    PresetsStore.h
+    Stereo.cpp
+    Stereo.h
+    Util.cpp
+    Util.h
+    WavFile.cpp
+    WavFile.h
+    WaveShapeSmps.cpp
+    WaveShapeSmps.h
+    XmlWrapper.cpp
+    XmlWrapper.h
+    globals.h
+)
 
 target_include_directories(zyn.common
-    PUBLIC ${MXML_INCLUDE_DIRS}
+    PUBLIC
+        ${MXML_INCLUDE_DIRS}
     )
 
 target_link_libraries(zyn.common
@@ -48,5 +40,36 @@ target_compile_features(zyn.common
     PRIVATE cxx_nullptr
     )
 
-install(FILES ${zyn_common_HDRS} DESTINATION include/zyn/common COMPONENT develop)
-install(TARGETS zyn.common DESTINATION lib COMPONENT develop)
+install(
+    TARGETS
+        zyn.common
+    EXPORT
+        zyn.common
+    DESTINATION
+        "lib"
+    )
+
+install(
+    FILES
+        ${zyn.common_SOURCE_DIR}/Config.h
+        ${zyn.common_SOURCE_DIR}/Presets.h
+        ${zyn.common_SOURCE_DIR}/PresetsArray.h
+        ${zyn.common_SOURCE_DIR}/PresetsStore.h
+        ${zyn.common_SOURCE_DIR}/Stereo.h
+        ${zyn.common_SOURCE_DIR}/Util.h
+        ${zyn.common_SOURCE_DIR}/WavFile.h
+        ${zyn.common_SOURCE_DIR}/WaveShapeSmps.h
+        ${zyn.common_SOURCE_DIR}/XmlWrapper.h
+        ${zyn.common_SOURCE_DIR}/globals.h
+    DESTINATION
+        "include/zyn/common"
+    )
+
+install(
+    EXPORT
+        zyn.common
+    FILE
+        zyn.common-config.cmake
+    DESTINATION
+        "cmake"
+    )

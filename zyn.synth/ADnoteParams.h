@@ -23,20 +23,25 @@
 #ifndef AD_NOTE_PARAMETERS_H
 #define AD_NOTE_PARAMETERS_H
 
-
-#include "../zyn.common/globals.h"
-#include "../zyn.common/Util.h"
-#include "../zyn.common/PresetsArray.h"
+#include <zyn.common/PresetsArray.h>
+#include <zyn.common/Util.h>
+#include <zyn.common/globals.h>
 
 class EnvelopeParams;
 class LFOParams;
 class FilterParams;
 class Resonance;
 class OscilGen;
-class FFTwrapper;
+class IFFTwrapper;
 
-enum FMTYPE {
-    NONE, MORPH, RING_MOD, PHASE_MOD, FREQ_MOD, PITCH_MOD
+enum FMTYPE
+{
+    NONE,
+    MORPH,
+    RING_MOD,
+    PHASE_MOD,
+    FREQ_MOD,
+    PITCH_MOD
 };
 extern int ADnote_unison_sizes[];
 
@@ -44,8 +49,9 @@ extern int ADnote_unison_sizes[];
 /*                    GLOBAL PARAMETERS                          */
 /*****************************************************************/
 
-struct ADnoteGlobalParam {
-    ADnoteGlobalParam(SystemSettings* synth_);
+struct ADnoteGlobalParam
+{
+    ADnoteGlobalParam(SystemSettings *synth_);
     ~ADnoteGlobalParam();
     void defaults();
     void add2XML(XMLwrapper *xml);
@@ -56,17 +62,16 @@ struct ADnoteGlobalParam {
 
     unsigned char PStereo;
 
-
     /******************************************
     *     FREQUENCY GLOBAL PARAMETERS        *
     ******************************************/
-    unsigned short int PDetune; //fine detune
+    unsigned short int PDetune;       //fine detune
     unsigned short int PCoarseDetune; //coarse detune+octave
-    unsigned char      PDetuneType; //detune type
+    unsigned char PDetuneType;        //detune type
 
-    unsigned char PBandwidth;      //how much the relative fine detunes of the voices are changed
+    unsigned char PBandwidth; //how much the relative fine detunes of the voices are changed
 
-    EnvelopeParams *FreqEnvelope;    //Frequency Envelope
+    EnvelopeParams *FreqEnvelope; //Frequency Envelope
 
     LFOParams *FreqLfo; //Frequency LFO
 
@@ -89,7 +94,7 @@ struct ADnoteGlobalParam {
     LFOParams *AmpLfo;
 
     unsigned char PPunchStrength, PPunchTime, PPunchStretch,
-                  PPunchVelocitySensing;
+        PPunchVelocitySensing;
 
     /******************************************
     *        FILTER GLOBAL PARAMETERS        *
@@ -113,16 +118,15 @@ struct ADnoteGlobalParam {
     unsigned char Hrandgrouping;
 };
 
-
-
 /***********************************************************/
 /*                    VOICE PARAMETERS                     */
 /***********************************************************/
-struct ADnoteVoiceParam {
+struct ADnoteVoiceParam
+{
     void getfromXML(XMLwrapper *xml, unsigned nvoice);
     void add2XML(XMLwrapper *xml, bool fmoscilused);
     void defaults();
-    void enable(FFTwrapper *fft, Resonance *Reson, SystemSettings* synth_);
+    void enable(IFFTwrapper *fft, Resonance *Reson, SystemSettings *synth_);
     void kill();
     /** If the voice is enabled */
     unsigned char Enabled;
@@ -192,13 +196,12 @@ struct ADnoteVoiceParam {
     unsigned char PDetuneType;
 
     /* Frequency Envelope */
-    unsigned char   PFreqEnvelopeEnabled;
+    unsigned char PFreqEnvelopeEnabled;
     EnvelopeParams *FreqEnvelope;
 
     /* Frequency LFO */
     unsigned char PFreqLfoEnabled;
-    LFOParams    *FreqLfo;
-
+    LFOParams *FreqLfo;
 
     /***************************
     *   AMPLITUDE PARAMETERS   *
@@ -221,14 +224,12 @@ struct ADnoteVoiceParam {
     unsigned char PAmpVelocityScaleFunction;
 
     /* Amplitude Envelope */
-    unsigned char   PAmpEnvelopeEnabled;
+    unsigned char PAmpEnvelopeEnabled;
     EnvelopeParams *AmpEnvelope;
 
     /* Amplitude LFO */
     unsigned char PAmpLfoEnabled;
-    LFOParams    *AmpLfo;
-
-
+    LFOParams *AmpLfo;
 
     /*************************
     *   FILTER PARAMETERS    *
@@ -239,12 +240,12 @@ struct ADnoteVoiceParam {
     FilterParams *VoiceFilter;
 
     /* Filter Envelope */
-    unsigned char   PFilterEnvelopeEnabled;
+    unsigned char PFilterEnvelopeEnabled;
     EnvelopeParams *FilterEnvelope;
 
     /* LFO Envelope */
     unsigned char PFilterLfoEnabled;
-    LFOParams    *FilterLfo;
+    LFOParams *FilterLfo;
 
     /****************************
     *   MODULLATOR PARAMETERS   *
@@ -280,41 +281,43 @@ struct ADnoteVoiceParam {
     unsigned char PFMDetuneType;
 
     /* Frequency Envelope of the Modullator */
-    unsigned char   PFMFreqEnvelopeEnabled;
+    unsigned char PFMFreqEnvelopeEnabled;
     EnvelopeParams *FMFreqEnvelope;
 
     /* Frequency Envelope of the Modullator */
-    unsigned char   PFMAmpEnvelopeEnabled;
+    unsigned char PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
 };
 
-class ADnoteParameters:public PresetsArray
+class ADnoteParameters : public PresetsArray
 {
-    SystemSettings* _synth;
-    public:
-        ADnoteParameters(SystemSettings* synth_, FFTwrapper *fft_);
-        virtual ~ADnoteParameters();
+    SystemSettings *_synth;
 
-        ADnoteGlobalParam GlobalPar;
-        ADnoteVoiceParam  VoicePar[NUM_VOICES];
+public:
+    ADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_);
+    virtual ~ADnoteParameters();
 
-        void defaults();
-        void add2XML(XMLwrapper *xml);
-        void getfromXML(XMLwrapper *xml);
+    ADnoteGlobalParam GlobalPar;
+    ADnoteVoiceParam VoicePar[NUM_VOICES];
 
-        float getBandwidthDetuneMultiplier();
-        float getUnisonFrequencySpreadCents(int nvoice);
-        int get_unison_size_index(int nvoice);
-        void set_unison_size_index(int nvoice, int index);
-    private:
-        void defaults(int n); //n is the nvoice
+    void defaults();
+    void add2XML(XMLwrapper *xml);
+    void getfromXML(XMLwrapper *xml);
 
-        void EnableVoice(int nvoice);
-        void KillVoice(int nvoice);
-        FFTwrapper *fft;
+    float getBandwidthDetuneMultiplier();
+    float getUnisonFrequencySpreadCents(int nvoice);
+    int get_unison_size_index(int nvoice);
+    void set_unison_size_index(int nvoice, int index);
 
-        void add2XMLsection(XMLwrapper *xml, int n);
-        void getfromXMLsection(XMLwrapper *xml, int n);
+private:
+    void defaults(int n); //n is the nvoice
+
+    void EnableVoice(int nvoice);
+    void KillVoice(int nvoice);
+    IFFTwrapper *fft;
+
+    void add2XMLsection(XMLwrapper *xml, int n);
+    void getfromXMLsection(XMLwrapper *xml, int n);
 };
 
 #endif

@@ -23,21 +23,22 @@
 #include "FormantFilter.h"
 #include "AnalogFilter.h"
 #include "FilterParams.h"
-#include "../zyn.common/Util.h"
+#include <zyn.common/Util.h>
 
 #include <cmath>
 #include <cstdio>
 
-FormantFilter::FormantFilter(FilterParams *pars, SystemSettings* synth_)
+FormantFilter::FormantFilter(FilterParams *pars, SystemSettings *synth_)
     : Filter(synth_)
 {
     numformants = pars->Pnumformants;
-    for(int i = 0; i < numformants; ++i)
+    for (int i = 0; i < numformants; ++i)
         formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages, synth_);
     cleanup();
 
-    for(int j = 0; j < FF_MAX_VOWELS; ++j)
-        for(int i = 0; i < numformants; ++i) {
+    for (int j = 0; j < FF_MAX_VOWELS; ++j)
+        for (int i = 0; i < numformants; ++i)
+        {
             formantpar[j][i].freq = pars->getformantfreq(
                 pars->Pvowels[j].formants[i].freq);
             formantpar[j][i].amp = pars->getformantamp(
@@ -46,45 +47,46 @@ FormantFilter::FormantFilter(FilterParams *pars, SystemSettings* synth_)
                 pars->Pvowels[j].formants[i].q);
         }
 
-    for(int i = 0; i < FF_MAX_FORMANTS; ++i)
+    for (int i = 0; i < FF_MAX_FORMANTS; ++i)
         oldformantamp[i] = 1.0f;
-    for(int i = 0; i < numformants; ++i) {
+    for (int i = 0; i < numformants; ++i)
+    {
         currentformants[i].freq = 1000.0f;
-        currentformants[i].amp  = 1.0f;
-        currentformants[i].q    = 2.0f;
+        currentformants[i].amp = 1.0f;
+        currentformants[i].q = 2.0f;
     }
 
     formantslowness = powf(1.0f - (pars->Pformantslowness / 128.0f), 3.0f);
 
     sequencesize = pars->Psequencesize;
-    if(sequencesize == 0)
+    if (sequencesize == 0)
         sequencesize = 1;
-    for(int k = 0; k < sequencesize; ++k)
+    for (int k = 0; k < sequencesize; ++k)
         sequence[k].nvowel = pars->Psequence[k].nvowel;
 
     vowelclearness = powf(10.0f, (pars->Pvowelclearness - 32.0f) / 48.0f);
 
     sequencestretch = powf(0.1f, (pars->Psequencestretch - 32.0f) / 48.0f);
-    if(pars->Psequencereversed)
+    if (pars->Psequencereversed)
         sequencestretch *= -1.0f;
 
     outgain = dB2rap(pars->getgain());
 
-    oldinput   = -1.0f;
-    Qfactor    = 1.0f;
+    oldinput = -1.0f;
+    Qfactor = 1.0f;
     oldQfactor = Qfactor;
-    firsttime  = 1;
+    firsttime = 1;
 }
 
 FormantFilter::~FormantFilter()
 {
-    for(int i = 0; i < numformants; ++i)
+    for (int i = 0; i < numformants; ++i)
         delete (formant[i]);
 }
 
 void FormantFilter::cleanup()
 {
-    for(int i = 0; i < numformants; ++i)
+    for (int i = 0; i < numformants; ++i)
         formant[i]->cleanup();
 }
 
@@ -92,14 +94,13 @@ void FormantFilter::setpos(float input)
 {
     int p1, p2;
 
-    if(firsttime != 0)
+    if (firsttime != 0)
         slowinput = input;
     else
-        slowinput = slowinput
-                    * (1.0f - formantslowness) + input * formantslowness;
+        slowinput = slowinput * (1.0f - formantslowness) + input * formantslowness;
 
-    if((fabsf(oldinput - input) < 0.001f) && (fabsf(slowinput - input) < 0.001f)
-       && (fabsf(Qfactor - oldQfactor) < 0.001f)) {
+    if ((fabsf(oldinput - input) < 0.001f) && (fabsf(slowinput - input) < 0.001f) && (fabsf(Qfactor - oldQfactor) < 0.001f))
+    {
         //	oldinput=input; daca setez asta, o sa faca probleme la schimbari foarte lente
         firsttime = 0;
         return;
@@ -108,36 +109,33 @@ void FormantFilter::setpos(float input)
         oldinput = input;
 
     float pos = fmodf(input * sequencestretch, 1.0f);
-    if(pos < 0.0f)
+    if (pos < 0.0f)
         pos += 1.0f;
 
     F2I(pos * sequencesize, p2);
     p1 = p2 - 1;
-    if(p1 < 0)
+    if (p1 < 0)
         p1 += sequencesize;
 
     pos = fmodf(pos * sequencesize, 1.0f);
-    if(pos < 0.0f)
+    if (pos < 0.0f)
         pos = 0.0f;
-    else
-    if(pos > 1.0f)
+    else if (pos > 1.0f)
         pos = 1.0f;
     pos =
-        (atanf((pos * 2.0f
-                - 1.0f)
-               * vowelclearness) / atanf(vowelclearness) + 1.0f) * 0.5f;
+        (atanf((pos * 2.0f - 1.0f) * vowelclearness) / atanf(vowelclearness) + 1.0f) * 0.5f;
 
     p1 = sequence[p1].nvowel;
     p2 = sequence[p2].nvowel;
 
-    if(firsttime != 0) {
-        for(int i = 0; i < numformants; ++i) {
+    if (firsttime != 0)
+    {
+        for (int i = 0; i < numformants; ++i)
+        {
             currentformants[i].freq =
-                formantpar[p1][i].freq
-                * (1.0f - pos) + formantpar[p2][i].freq * pos;
+                formantpar[p1][i].freq * (1.0f - pos) + formantpar[p2][i].freq * pos;
             currentformants[i].amp =
-                formantpar[p1][i].amp
-                * (1.0f - pos) + formantpar[p2][i].amp * pos;
+                formantpar[p1][i].amp * (1.0f - pos) + formantpar[p2][i].amp * pos;
             currentformants[i].q =
                 formantpar[p1][i].q * (1.0f - pos) + formantpar[p2][i].q * pos;
             formant[i]->setfreq_and_q(currentformants[i].freq,
@@ -147,24 +145,15 @@ void FormantFilter::setpos(float input)
         firsttime = 0;
     }
     else
-        for(int i = 0; i < numformants; ++i) {
+        for (int i = 0; i < numformants; ++i)
+        {
             currentformants[i].freq =
-                currentformants[i].freq * (1.0f - formantslowness)
-                + (formantpar[p1][i].freq
-                   * (1.0f - pos) + formantpar[p2][i].freq * pos)
-                * formantslowness;
+                currentformants[i].freq * (1.0f - formantslowness) + (formantpar[p1][i].freq * (1.0f - pos) + formantpar[p2][i].freq * pos) * formantslowness;
 
             currentformants[i].amp =
-                currentformants[i].amp * (1.0f - formantslowness)
-                + (formantpar[p1][i].amp * (1.0f - pos)
-                   + formantpar[p2][i].amp * pos) * formantslowness;
+                currentformants[i].amp * (1.0f - formantslowness) + (formantpar[p1][i].amp * (1.0f - pos) + formantpar[p2][i].amp * pos) * formantslowness;
 
-            currentformants[i].q = currentformants[i].q
-                                   * (1.0f - formantslowness)
-                                   + (formantpar[p1][i].q * (1.0f - pos)
-                                      + formantpar[p2][i].q
-                                      * pos) * formantslowness;
-
+            currentformants[i].q = currentformants[i].q * (1.0f - formantslowness) + (formantpar[p1][i].q * (1.0f - pos) + formantpar[p2][i].q * pos) * formantslowness;
 
             formant[i]->setfreq_and_q(currentformants[i].freq,
                                       currentformants[i].q * Qfactor);
@@ -181,7 +170,7 @@ void FormantFilter::setfreq(float frequency)
 void FormantFilter::setq(float q_)
 {
     Qfactor = q_;
-    for(int i = 0; i < numformants; ++i)
+    for (int i = 0; i < numformants; ++i)
         formant[i]->setq(Qfactor * currentformants[i].q);
 }
 
@@ -202,7 +191,6 @@ void FormantFilter::setfreq_and_q(float frequency, float q_)
     setpos(freq);
 }
 
-
 void FormantFilter::filterout(float *smp)
 {
     float inbuffer[this->_synth->buffersize];
@@ -210,21 +198,21 @@ void FormantFilter::filterout(float *smp)
     memcpy(inbuffer, smp, this->_synth->bufferbytes);
     memset(smp, 0, this->_synth->bufferbytes);
 
-    for(int j = 0; j < numformants; ++j) {
+    for (int j = 0; j < numformants; ++j)
+    {
         float tmpbuf[this->_synth->buffersize];
-        for(int i = 0; i < this->_synth->buffersize; ++i)
+        for (int i = 0; i < this->_synth->buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);
 
-        if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for(int i = 0; i < this->_synth->buffersize; ++i)
-                smp[i] += tmpbuf[i]
-                          * INTERPOLATE_AMPLITUDE(oldformantamp[j],
-                                                  currentformants[j].amp,
-                                                  i,
-                                                  this->_synth->buffersize);
+        if (ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
+            for (int i = 0; i < this->_synth->buffersize; ++i)
+                smp[i] += tmpbuf[i] * INTERPOLATE_AMPLITUDE(oldformantamp[j],
+                                                            currentformants[j].amp,
+                                                            i,
+                                                            this->_synth->buffersize);
         else
-            for(int i = 0; i < this->_synth->buffersize; ++i)
+            for (int i = 0; i < this->_synth->buffersize; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
         oldformantamp[j] = currentformants[j].amp;
     }

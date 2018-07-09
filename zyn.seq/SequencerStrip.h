@@ -1,8 +1,8 @@
 #ifndef SEQUENCERSTRIP_H
 #define SEQUENCERSTRIP_H
 
-#include <map>
 #include "SequencerStep.h"
+#include <map>
 
 class SequencerStrip
 {

@@ -21,56 +21,56 @@
 */
 
 #include "MidiInput.h"
+#include <zyn.common/globals.h>
 #include "MidiInputManager.h"
-#include "../zyn.common/globals.h"
 
 void MidiInput::midiProcess(unsigned char head, unsigned char num, unsigned char value)
 {
-    MidiEvent     ev;
+    MidiEvent ev;
     unsigned char chan = head & 0x0f;
-    switch(head & 0xf0)
+    switch (head & 0xf0)
     {
-    case 0x80: //Note Off
-        ev.type    = MidiEventTypes::M_NOTE;
-        ev.channel = chan;
-        ev.num     = num;
-        ev.value   = 0;
-        MidiInputManager::getInstance().putEvent(ev);
-        break;
-    case 0x90: //Note On
-        ev.type    = MidiEventTypes::M_NOTE;
-        ev.channel = chan;
-        ev.num     = num;
-        ev.value   = value;
-        MidiInputManager::getInstance().putEvent(ev);
-        break;
-    case 0xA0: /* pressure, aftertouch */
-        ev.type    = MidiEventTypes::M_PRESSURE;
-        ev.channel = chan;
-        ev.num     = num;
-        ev.value   = value;
-        MidiInputManager::getInstance().putEvent(ev);
-        break;
-    case 0xb0: //Controller
-        ev.type    = MidiEventTypes::M_CONTROLLER;
-        ev.channel = chan;
-        ev.num     = num;
-        ev.value   = value;
-        MidiInputManager::getInstance().putEvent(ev);
-        break;
-    case 0xc0: //Program Change
-        ev.type    = MidiEventTypes::M_PGMCHANGE;
-        ev.channel = chan;
-        ev.num     = num;
-        ev.value   = 0;
-        MidiInputManager::getInstance().putEvent(ev);
-        break;
-    case 0xe0: //Pitch Wheel
-        ev.type    = MidiEventTypes::M_CONTROLLER;
-        ev.channel = chan;
-        ev.num     = C_pitchwheel;
-        ev.value   = (num + value * (int) 128) - 8192;
-        MidiInputManager::getInstance().putEvent(ev);
-        break;
+        case 0x80: //Note Off
+            ev.type = MidiEventTypes::M_NOTE;
+            ev.channel = chan;
+            ev.num = num;
+            ev.value = 0;
+            MidiInputManager::getInstance().putEvent(ev);
+            break;
+        case 0x90: //Note On
+            ev.type = MidiEventTypes::M_NOTE;
+            ev.channel = chan;
+            ev.num = num;
+            ev.value = value;
+            MidiInputManager::getInstance().putEvent(ev);
+            break;
+        case 0xA0: /* pressure, aftertouch */
+            ev.type = MidiEventTypes::M_PRESSURE;
+            ev.channel = chan;
+            ev.num = num;
+            ev.value = value;
+            MidiInputManager::getInstance().putEvent(ev);
+            break;
+        case 0xb0: //Controller
+            ev.type = MidiEventTypes::M_CONTROLLER;
+            ev.channel = chan;
+            ev.num = num;
+            ev.value = value;
+            MidiInputManager::getInstance().putEvent(ev);
+            break;
+        case 0xc0: //Program Change
+            ev.type = MidiEventTypes::M_PGMCHANGE;
+            ev.channel = chan;
+            ev.num = num;
+            ev.value = 0;
+            MidiInputManager::getInstance().putEvent(ev);
+            break;
+        case 0xe0: //Pitch Wheel
+            ev.type = MidiEventTypes::M_CONTROLLER;
+            ev.channel = chan;
+            ev.num = C_pitchwheel;
+            ev.value = (num + value * (int)128) - 8192;
+            MidiInputManager::getInstance().putEvent(ev);
+            break;
     }
 }

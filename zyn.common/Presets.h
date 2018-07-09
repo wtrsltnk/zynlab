@@ -31,26 +31,28 @@
 class Presets
 {
     friend class PresetsArray;
-    public:
-        Presets();
-        virtual ~Presets();
 
-        virtual void copy(const char *name); /**<if name==NULL, the clipboard is used*/
-        virtual void paste(int npreset); //npreset==0 for clipboard
-        virtual bool checkclipboardtype();
-        void deletepreset(int npreset);
+public:
+    Presets();
+    virtual ~Presets();
 
-        char type[MAX_PRESETTYPE_SIZE];
-        //void setelement(int n);
+    virtual void copy(const char *name); /**<if name==NULL, the clipboard is used*/
+    virtual void paste(int npreset);     //npreset==0 for clipboard
+    virtual bool checkclipboardtype();
+    void deletepreset(int npreset);
 
-        void rescanforpresets();
+    char type[MAX_PRESETTYPE_SIZE];
+    //void setelement(int n);
 
-    protected:
-        void setpresettype(const char *type);
-    private:
-        virtual void add2XML(XMLwrapper *xml)    = 0;
-        virtual void getfromXML(XMLwrapper *xml) = 0;
-        virtual void defaults() = 0;
+    void rescanforpresets();
+
+protected:
+    void setpresettype(const char *type);
+
+private:
+    virtual void add2XML(XMLwrapper *xml) = 0;
+    virtual void getfromXML(XMLwrapper *xml) = 0;
+    virtual void defaults() = 0;
 };
 
 #endif

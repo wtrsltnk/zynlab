@@ -23,12 +23,12 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <stdint.h>
 #include "Config.h"
 #include "globals.h"
+#include <iostream>
+#include <sstream>
+#include <stdint.h>
+#include <string>
 
 //Velocity Sensing function
 extern float VelF(float velocity, unsigned char scaling);
@@ -53,7 +53,7 @@ std::string legalizeFilename(std::string filename);
 
 void invSignal(float *sig, size_t len);
 
-template<class T>
+template <class T>
 std::string stringFrom(T x)
 {
     std::stringstream ss;
@@ -61,7 +61,7 @@ std::string stringFrom(T x)
     return ss.str();
 }
 
-template<class T>
+template <class T>
 T stringTo(const char *x)
 {
     std::string str = x != NULL ? x : "0"; //should work for the basic float/int
@@ -71,7 +71,7 @@ T stringTo(const char *x)
     return ans;
 }
 
-template<class T>
+template <class T>
 T limit(T val, T min, T max)
 {
     return val < min ? min : (val > max ? max : val);
@@ -102,7 +102,7 @@ inline void sprng(prng_t p)
  * The random generator (0.0f..1.0f)
  */
 #ifndef INT32_MAX
-#define INT32_MAX      (2147483647)
+#define INT32_MAX (2147483647)
 #endif
 #define RND (prng() / (INT32_MAX * 1.0f))
 

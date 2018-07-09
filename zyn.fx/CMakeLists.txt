@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(zyn.fx)
 
-set(zyn_fx_SRCS
+add_library(zyn.fx STATIC
     Alienwah.cpp
     Chorus.cpp
     Distorsion.cpp
@@ -14,9 +14,6 @@ set(zyn_fx_SRCS
     EQ.cpp
     Phaser.cpp
     Reverb.cpp
-)
-
-set(zyn_fx_HDRS
     Alienwah.h
     Chorus.h
     Distorsion.h
@@ -30,9 +27,9 @@ set(zyn_fx_HDRS
     Reverb.h
     )
 
-add_library(zyn.fx STATIC
-    ${zyn_fx_SRCS}
-    ${zyn_fx_HDRS}
+target_include_directories(zyn.fx
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}
     )
 
 target_link_libraries(zyn.fx
@@ -40,5 +37,37 @@ target_link_libraries(zyn.fx
     zyn.common
     )
 
-install(FILES ${zyn_fx_HDRS} DESTINATION include/zyn/common COMPONENT develop)
-install(TARGETS zyn.fx DESTINATION lib COMPONENT develop)
+install(
+    TARGETS
+        zyn.fx
+    EXPORT
+        zyn.fx
+    DESTINATION
+        "lib"
+    )
+
+install(
+    FILES
+        ${zyn.fx_SOURCE_DIR}/Alienwah.h
+        ${zyn.fx_SOURCE_DIR}/Chorus.h
+        ${zyn.fx_SOURCE_DIR}/Distorsion.h
+        ${zyn.fx_SOURCE_DIR}/DynamicFilter.h
+        ${zyn.fx_SOURCE_DIR}/Echo.h
+        ${zyn.fx_SOURCE_DIR}/Effect.h
+        ${zyn.fx_SOURCE_DIR}/EffectLFO.h
+        ${zyn.fx_SOURCE_DIR}/EffectMgr.h
+        ${zyn.fx_SOURCE_DIR}/EQ.h
+        ${zyn.fx_SOURCE_DIR}/Phaser.h
+        ${zyn.fx_SOURCE_DIR}/Reverb.h
+    DESTINATION
+        "include/zyn/fx"
+    )
+
+install(
+    EXPORT
+        zyn.fx
+    FILE
+        zyn.fx-config.cmake
+    DESTINATION
+        "cmake"
+    )

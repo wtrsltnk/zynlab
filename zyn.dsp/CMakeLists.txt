@@ -1,33 +1,57 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(zyn.dsp)
 
-set(zyn_dsp_SRCS
-    AnalogFilter.cpp
-    Filter.cpp
-    FilterParams.cpp
-    FormantFilter.cpp
-    SVFilter.cpp
-    Unison.cpp
-)
-
-set(zyn_dsp_HDRS
-    AnalogFilter.h
-    Filter.h
-    FilterParams.h
-    FormantFilter.h
-    SVFilter.h
-    Unison.h
-)
-
 add_library(zyn.dsp STATIC
-    ${zyn_dsp_SRCS}
-    ${zyn_dsp_HDRS}
+    AnalogFilter.cpp
+    AnalogFilter.h
+    Filter.cpp
+    Filter.h
+    FilterParams.cpp
+    FilterParams.h
+    FormantFilter.cpp
+    FormantFilter.h
+    SVFilter.cpp
+    SVFilter.h
+    Unison.cpp
+    Unison.h
+    )
+
+target_include_directories(zyn.dsp
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}
     )
 
 target_link_libraries(zyn.dsp
     zyn.common
     )
 
-install(FILES ${zyn_dsp_HDRS} DESTINATION include/zyn/dsp COMPONENT develop)
-install(TARGETS zyn.dsp DESTINATION lib COMPONENT develop)
+install(
+    TARGETS
+        zyn.dsp
+    EXPORT
+        zyn.dsp
+    DESTINATION
+        "lib"
+    )
+
+install(
+    FILES
+        ${zyn.dsp_SOURCE_DIR}/AnalogFilter.h
+        ${zyn.dsp_SOURCE_DIR}/Filter.h
+        ${zyn.dsp_SOURCE_DIR}/FilterParams.h
+        ${zyn.dsp_SOURCE_DIR}/FormantFilter.h
+        ${zyn.dsp_SOURCE_DIR}/SVFilter.h
+        ${zyn.dsp_SOURCE_DIR}/Unison.h
+    DESTINATION
+        "include/zyn/dsp"
+    )
+
+install(
+    EXPORT
+        zyn.dsp
+    FILE
+        zyn.dsp-config.cmake
+    DESTINATION
+        "cmake"
+    )

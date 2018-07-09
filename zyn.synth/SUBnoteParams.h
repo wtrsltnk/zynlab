@@ -24,89 +24,88 @@
 #define SUB_NOTE_PARAMETERS_H
 
 #include "EnvelopeParams.h"
-#include "../zyn.common/globals.h"
-#include "../zyn.common/XMLwrapper.h"
-#include "../zyn.common/Presets.h"
-#include "../zyn.dsp/FilterParams.h"
+#include <zyn.common/Presets.h>
+#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/globals.h>
+#include <zyn.dsp/FilterParams.h>
 
-class SUBnoteParameters:public Presets
+class SUBnoteParameters : public Presets
 {
-    public:
-        SUBnoteParameters(SystemSettings* synth_);
-        ~SUBnoteParameters();
+public:
+    SUBnoteParameters(SystemSettings *synth_);
+    ~SUBnoteParameters();
 
-        void add2XML(XMLwrapper *xml);
-        void defaults();
-        void getfromXML(XMLwrapper *xml);
-        void updateFrequencyMultipliers(void);
+    void add2XML(XMLwrapper *xml);
+    void defaults();
+    void getfromXML(XMLwrapper *xml);
+    void updateFrequencyMultipliers(void);
 
-        //Parameters
-        //AMPLITUDE PARAMETRERS
-        unsigned char   Pstereo; //0 for mono,1 for stereo
-        unsigned char   PVolume;
-        unsigned char   PPanning;
-        unsigned char   PAmpVelocityScaleFunction;
-        EnvelopeParams *AmpEnvelope;
+    //Parameters
+    //AMPLITUDE PARAMETRERS
+    unsigned char Pstereo; //0 for mono,1 for stereo
+    unsigned char PVolume;
+    unsigned char PPanning;
+    unsigned char PAmpVelocityScaleFunction;
+    EnvelopeParams *AmpEnvelope;
 
-        //Frequency Parameters
-        unsigned short int PDetune;
-        unsigned short int PCoarseDetune;
-        unsigned char      PDetuneType;
-        unsigned char      PFreqEnvelopeEnabled;
-        EnvelopeParams    *FreqEnvelope;
-        unsigned char      PBandWidthEnvelopeEnabled;
-        EnvelopeParams    *BandWidthEnvelope;
+    //Frequency Parameters
+    unsigned short int PDetune;
+    unsigned short int PCoarseDetune;
+    unsigned char PDetuneType;
+    unsigned char PFreqEnvelopeEnabled;
+    EnvelopeParams *FreqEnvelope;
+    unsigned char PBandWidthEnvelopeEnabled;
+    EnvelopeParams *BandWidthEnvelope;
 
-        //Filter Parameters (Global)
-        unsigned char   PGlobalFilterEnabled;
-        FilterParams   *GlobalFilter;
-        unsigned char   PGlobalFilterVelocityScale;
-        unsigned char   PGlobalFilterVelocityScaleFunction;
-        EnvelopeParams *GlobalFilterEnvelope;
+    //Filter Parameters (Global)
+    unsigned char PGlobalFilterEnabled;
+    FilterParams *GlobalFilter;
+    unsigned char PGlobalFilterVelocityScale;
+    unsigned char PGlobalFilterVelocityScaleFunction;
+    EnvelopeParams *GlobalFilterEnvelope;
 
+    //Other Parameters
 
-        //Other Parameters
+    //If the base frequency is fixed to 440 Hz
+    unsigned char Pfixedfreq;
 
-        //If the base frequency is fixed to 440 Hz
-        unsigned char Pfixedfreq;
-
-        /* Equal temperate (this is used only if the Pfixedfreq is enabled)
+    /* Equal temperate (this is used only if the Pfixedfreq is enabled)
            If this parameter is 0, the frequency is fixed (to 440 Hz);
            if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
-        unsigned char PfixedfreqET;
+    unsigned char PfixedfreqET;
 
-        // Overtone spread parameters
-        struct {
-            unsigned char type;
-            unsigned char par1;
-            unsigned char par2;
-            unsigned char par3;
-        } POvertoneSpread;
-        float POvertoneFreqMult[MAX_SUB_HARMONICS];
+    // Overtone spread parameters
+    struct
+    {
+        unsigned char type;
+        unsigned char par1;
+        unsigned char par2;
+        unsigned char par3;
+    } POvertoneSpread;
+    float POvertoneFreqMult[MAX_SUB_HARMONICS];
 
-        //how many times the filters are applied
-        unsigned char Pnumstages;
+    //how many times the filters are applied
+    unsigned char Pnumstages;
 
-        //bandwidth
-        unsigned char Pbandwidth;
+    //bandwidth
+    unsigned char Pbandwidth;
 
-        //How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)
-        unsigned char Phmagtype;
+    //How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)
+    unsigned char Phmagtype;
 
-        //Magnitudes
-        unsigned char Phmag[MAX_SUB_HARMONICS];
+    //Magnitudes
+    unsigned char Phmag[MAX_SUB_HARMONICS];
 
-        //Relative BandWidth ("64"=1.0f)
-        unsigned char Phrelbw[MAX_SUB_HARMONICS];
+    //Relative BandWidth ("64"=1.0f)
+    unsigned char Phrelbw[MAX_SUB_HARMONICS];
 
-        //how much the bandwidth is increased according to lower/higher frequency; 64-default
-        unsigned char Pbwscale;
+    //how much the bandwidth is increased according to lower/higher frequency; 64-default
+    unsigned char Pbwscale;
 
-        //how the harmonics start("0"=0,"1"=random,"2"=1)
-        unsigned char Pstart;
+    //how the harmonics start("0"=0,"1"=random,"2"=1)
+    unsigned char Pstart;
 
-
-    private:
+private:
 };
 
 #endif

@@ -24,40 +24,40 @@
 #define WAVENGINE_H
 
 #include "AudioOutput.h"
-#include "ZynSema.h"
 #include "SafeQueue.h"
+#include "ZynSema.h"
 
-#include <string>
 #include <pthread.h>
+#include <string>
 
 class WavFile;
-class WavEngine:public AudioOutput
+class WavEngine : public AudioOutput
 {
-    public:
-        WavEngine(SystemSettings* s);
-        virtual ~WavEngine();
+public:
+    WavEngine(SystemSettings *s);
+    virtual ~WavEngine();
 
-        bool openAudio();
-        bool Start();
-        void Stop();
+    bool openAudio();
+    bool Start();
+    void Stop();
 
-        void setAudioEn(bool /*nval*/) {}
-        bool getAudioEn() const {return true; }
+    void setAudioEn(bool /*nval*/) {}
+    bool getAudioEn() const { return true; }
 
-        void push(Stereo<float *> smps, size_t len);
+    void push(Stereo<float *> smps, size_t len);
 
-        void newFile(WavFile *_file);
-        void destroyFile();
+    void newFile(WavFile *_file);
+    void destroyFile();
 
-    protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
+protected:
+    void *AudioThread();
+    static void *_AudioThread(void *arg);
 
-    private:
-        WavFile *file;
-        ZynSema  work;
-        SafeQueue<float> buffer;
+private:
+    WavFile *file;
+    ZynSema work;
+    SafeQueue<float> buffer;
 
-        pthread_t *pThread;
+    pthread_t *pThread;
 };
 #endif

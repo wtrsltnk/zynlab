@@ -23,35 +23,35 @@
 #ifndef NUL_ENGINE_H
 #define NUL_ENGINE_H
 
+#include <zyn.common/globals.h>
 #include "AudioOutput.h"
 #include "MidiInput.h"
-#include "../zyn.common/globals.h"
 
-#include <sys/time.h>
 #include <pthread.h>
+#include <sys/time.h>
 
-class NulEngine:public AudioOutput, MidiInput
+class NulEngine : public AudioOutput, MidiInput
 {
-    public:
-        NulEngine(SystemSettings* s);
-        virtual ~NulEngine();
+public:
+    NulEngine(SystemSettings *s);
+    virtual ~NulEngine();
 
-        bool Start();
-        void Stop();
+    bool Start();
+    void Stop();
 
-        void setAudioEn(bool nval);
-        bool getAudioEn() const;
+    void setAudioEn(bool nval);
+    bool getAudioEn() const;
 
-        void setMidiEn(bool) {}
-        bool getMidiEn() const {return true; }
+    void setMidiEn(bool) {}
+    bool getMidiEn() const { return true; }
 
-    protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
+protected:
+    void *AudioThread();
+    static void *_AudioThread(void *arg);
 
-    private:
-        struct timeval playing_until;
-        pthread_t     *pThread;
+private:
+    struct timeval playing_until;
+    pthread_t *pThread;
 };
 
 #endif

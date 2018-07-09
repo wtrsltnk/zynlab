@@ -26,12 +26,11 @@
 
 using namespace std;
 
-SdlEngine::SdlEngine(SystemSettings* s)
+SdlEngine::SdlEngine(SystemSettings *s)
     : AudioOutput(s), _dev(0)
 {
     name = "SDL2";
 }
-
 
 SdlEngine::~SdlEngine()
 {
@@ -40,13 +39,13 @@ SdlEngine::~SdlEngine()
 
 void SdlEngine::my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
-    SdlEngine* thiz = static_cast<SdlEngine*>(userdata);
+    SdlEngine *thiz = static_cast<SdlEngine *>(userdata);
     thiz->process(stream, len);
 }
 
 bool SdlEngine::Start()
 {
-    if(getAudioEn()) return true;
+    if (getAudioEn()) return true;
 
     SDL_Init(SDL_INIT_AUDIO);
 
@@ -58,12 +57,12 @@ bool SdlEngine::Start()
     want.channels = 2;
     want.samples = this->_synth->buffersize;
     want.size = 0;
-    want.userdata = (void*)this;
+    want.userdata = (void *)this;
     want.callback = my_audio_callback; /* you wrote this function elsewhere -- see SDL_AudioSpec for details */
 
     this->_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
 
-//    this->setBufferSize(have.size);
+    //    this->setBufferSize(have.size);
 
     SDL_PauseAudioDevice(this->_dev, 0);
 
@@ -72,7 +71,7 @@ bool SdlEngine::Start()
 
 void SdlEngine::Stop()
 {
-    if(!getAudioEn()) return;
+    if (!getAudioEn()) return;
 
     SDL_PauseAudioDevice(this->_dev, 1);
     SDL_CloseAudio();
@@ -82,7 +81,7 @@ void SdlEngine::Stop()
 
 void SdlEngine::setAudioEn(bool nval)
 {
-    if(nval)
+    if (nval)
         Start();
     else
         Stop();
@@ -96,9 +95,10 @@ bool SdlEngine::getAudioEn() const
 int SdlEngine::process(Uint8 *stream, int len)
 {
     const Stereo<float *> smp = nextSample();
-    Uint8 *l = (Uint8*)(smp.l);
-    Uint8 *r = (Uint8*)(smp.r);
-    for(unsigned i = 0; i < len; ++i) {
+    Uint8 *l = (Uint8 *)(smp.l);
+    Uint8 *r = (Uint8 *)(smp.r);
+    for (unsigned i = 0; i < len; ++i)
+    {
         *stream++ = smp.l[i];
         *stream++ = smp.r[i];
     }

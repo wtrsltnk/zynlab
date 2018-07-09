@@ -24,18 +24,18 @@
 #define ECHO_H
 
 #include "Effect.h"
-#include "../zyn.common/Stereo.h"
+#include <zyn.common/Stereo.h>
 
 /**Echo Effect*/
-class Echo:public Effect
+class Echo : public Effect
 {
-    public:
-        Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_);
-        virtual ~Echo();
+public:
+    Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
+    virtual ~Echo();
 
-        void out(const Stereo<float *> &input);
-        void setpreset(unsigned char npreset);
-        /**
+    void out(const Stereo<float *> &input);
+    void setpreset(unsigned char npreset);
+    /**
          * Sets the value of the chosen variable
          *
          * The possible parameters are:
@@ -49,9 +49,9 @@ class Echo:public Effect
          * @param npar number of chosen parameter
          * @param value the new value
          */
-        void changepar(int npar, unsigned char value);
+    void changepar(int npar, unsigned char value);
 
-        /**
+    /**
          * Gets the specified parameter
          *
          * The possible parameters are
@@ -65,40 +65,41 @@ class Echo:public Effect
          * @param npar number of chosen parameter
          * @return value of parameter
          */
-        unsigned char getpar(int npar) const;
-        int getnumparams(void);
-        void cleanup(void);
-    private:
-        //Parameters
-        unsigned char Pvolume;  /**<#1 Volume or Dry/Wetness*/
-        unsigned char Pdelay;   /**<#3 Delay of the Echo*/
-        unsigned char Plrdelay; /**<#4 L/R delay difference*/
-        unsigned char Pfb;      /**<#6Feedback*/
-        unsigned char Phidamp;  /**<#7Dampening of the Echo*/
+    unsigned char getpar(int npar) const;
+    int getnumparams(void);
+    void cleanup(void);
 
-        void setvolume(unsigned char _Pvolume);
-        void setdelay(unsigned char _Pdelay);
-        void setlrdelay(unsigned char _Plrdelay);
-        void setfb(unsigned char _Pfb);
-        void sethidamp(unsigned char _Phidamp);
+private:
+    //Parameters
+    unsigned char Pvolume;  /**<#1 Volume or Dry/Wetness*/
+    unsigned char Pdelay;   /**<#3 Delay of the Echo*/
+    unsigned char Plrdelay; /**<#4 L/R delay difference*/
+    unsigned char Pfb;      /**<#6Feedback*/
+    unsigned char Phidamp;  /**<#7Dampening of the Echo*/
 
-        //Real Parameters
-        float fb, hidamp;
-        //Left/Right delay lengths
-        Stereo<int> delayTime;
-        float       lrdelay;
-        float       avgDelay;
+    void setvolume(unsigned char _Pvolume);
+    void setdelay(unsigned char _Pdelay);
+    void setlrdelay(unsigned char _Plrdelay);
+    void setfb(unsigned char _Pfb);
+    void sethidamp(unsigned char _Phidamp);
 
-        void initdelays(void);
-        //2 channel ring buffer
-        Stereo<float *> delay;
-        Stereo<float>   old;
+    //Real Parameters
+    float fb, hidamp;
+    //Left/Right delay lengths
+    Stereo<int> delayTime;
+    float lrdelay;
+    float avgDelay;
 
-        //position of reading/writing from delaysample
-        Stereo<int> pos;
-        //step size for delay buffer
-        Stereo<int> delta;
-        Stereo<int> ndelta;
+    void initdelays(void);
+    //2 channel ring buffer
+    Stereo<float *> delay;
+    Stereo<float> old;
+
+    //position of reading/writing from delaysample
+    Stereo<int> pos;
+    //step size for delay buffer
+    Stereo<int> delta;
+    Stereo<int> ndelta;
 };
 
 #endif

@@ -23,26 +23,25 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include "../zyn.common/globals.h"
+#include <zyn.common/globals.h>
 
 class Filter
 {
-    public:
-        static float getrealfreq(float freqpitch);
-        static Filter *generate(class FilterParams * pars, SystemSettings* synth_);
+public:
+    static float getrealfreq(float freqpitch);
+    static Filter *generate(class FilterParams *pars, SystemSettings *synth_);
 
-        Filter(SystemSettings* synth_);
-        virtual ~Filter() {}
-        virtual void filterout(float *smp)    = 0;
-        virtual void setfreq(float frequency) = 0;
-        virtual void setfreq_and_q(float frequency, float q_) = 0;
-        virtual void setq(float q_) = 0;
-        virtual void setgain(float dBgain) = 0;
+    Filter(SystemSettings *synth_);
+    virtual ~Filter() {}
+    virtual void filterout(float *smp) = 0;
+    virtual void setfreq(float frequency) = 0;
+    virtual void setfreq_and_q(float frequency, float q_) = 0;
+    virtual void setq(float q_) = 0;
+    virtual void setgain(float dBgain) = 0;
 
-    protected:
-        float outgain;
-        SystemSettings* _synth;
-
+protected:
+    float outgain;
+    SystemSettings *_synth;
 };
 
 #endif

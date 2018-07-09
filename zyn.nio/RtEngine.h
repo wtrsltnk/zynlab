@@ -42,8 +42,9 @@ public:
     virtual bool getMidiEn() const;
 
     static void callback(double timeStamp, std::vector<unsigned char> *message, void *userData);
+
 private:
-    RtMidiIn* midiin;
+    RtMidiIn *midiin;
 };
 
 #endif // RTENGINE_H

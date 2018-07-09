@@ -22,30 +22,31 @@
 
 #ifndef FFT_WRAPPER_H
 #define FFT_WRAPPER_H
+
 #include <fftw3.h>
-#include <complex>
-typedef double                  fftw_real;
-typedef std::complex<fftw_real> fft_t;
+
+#include "ifftwrapper.h"
 
 /**A wrapper for the FFTW library (Fast Fourier Transforms)*/
-class FFTwrapper
+class FFTwrapper : public IFFTwrapper
 {
-    public:
-        /**Constructor
+public:
+    /**Constructor
          * @param fftsize The size of samples to be fed to fftw*/
-        FFTwrapper(int fftsize_);
-        /**Destructor*/
-        ~FFTwrapper();
-        /**Convert Samples to Frequencies using Fourier Transform
+    FFTwrapper(int fftsize_);
+    /**Destructor*/
+    ~FFTwrapper();
+    /**Convert Samples to Frequencies using Fourier Transform
          * @param smps Pointer to Samples to be converted; has length fftsize_
          * @param freqs Structure FFTFREQS which stores the frequencies*/
-        void smps2freqs(const float *smps, fft_t *freqs);
-        void freqs2smps(const fft_t *freqs, float *smps);
-    private:
-        int fftsize;
-        fftw_real    *time;
-        fftw_complex *fft;
-        fftw_plan     planfftw, planfftw_inv;
+    void smps2freqs(const float *smps, fft_t *freqs);
+    void freqs2smps(const fft_t *freqs, float *smps);
+
+private:
+    int fftsize;
+    fftw_real *time;
+    fftw_complex *fft;
+    fftw_plan planfftw, planfftw_inv;
 };
 
 void FFT_cleanup();

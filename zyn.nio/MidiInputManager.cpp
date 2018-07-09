@@ -1,7 +1,7 @@
 #include "MidiInputManager.h"
-#include "MidiInput.h"
+#include <zyn.common/globals.h>
 #include "EngineManager.h"
-#include "../zyn.common/globals.h"
+#include "MidiInput.h"
 
 #include <iostream>
 
@@ -9,47 +9,46 @@ using namespace std;
 
 ostream &operator<<(ostream &out, const MidiEvent &ev)
 {
-    switch(ev.type) {
-    case MidiEventTypes::M_NOTE:
-        out << "MidiNote: note(" << ev.num << ")\n"
-            << "          channel(" << ev.channel << ")\n"
-            << "          velocity(" << ev.value << ")";
-        break;
+    switch (ev.type)
+    {
+        case MidiEventTypes::M_NOTE:
+            out << "MidiNote: note(" << ev.num << ")\n"
+                << "          channel(" << ev.channel << ")\n"
+                << "          velocity(" << ev.value << ")";
+            break;
 
-    case MidiEventTypes::M_CONTROLLER:
-        out << "MidiCtl: controller(" << ev.num << ")\n"
-            << "         channel(" << ev.channel << ")\n"
-            << "         value(" << ev.value << ")";
-        break;
+        case MidiEventTypes::M_CONTROLLER:
+            out << "MidiCtl: controller(" << ev.num << ")\n"
+                << "         channel(" << ev.channel << ")\n"
+                << "         value(" << ev.value << ")";
+            break;
 
-    case MidiEventTypes::M_PGMCHANGE:
-        out << "PgmChange: program(" << ev.num << ")\n"
-            << "           channel(" << ev.channel << ")";
-        break;
+        case MidiEventTypes::M_PGMCHANGE:
+            out << "PgmChange: program(" << ev.num << ")\n"
+                << "           channel(" << ev.channel << ")";
+            break;
     }
 
     return out;
 }
 
 MidiEvent::MidiEvent()
-    :channel(0), type(MidiEventTypes::M_NOTE), num(0), value(0), time(0)
+    : channel(0), type(MidiEventTypes::M_NOTE), num(0), value(0), time(0)
 {}
 
 MidiInputManager *MidiInputManager::_instance = 0;
 
-MidiInputManager &MidiInputManager::createInstance(IMixer* mixer)
+MidiInputManager &MidiInputManager::createInstance(IMixer *mixer)
 {
     if (MidiInputManager::_instance == 0) MidiInputManager::_instance = new MidiInputManager(mixer);
 
     return *MidiInputManager::_instance;
 }
 
-
 MidiInputManager &MidiInputManager::getInstance()
 {
     return *MidiInputManager::_instance;
 }
-
 
 void MidiInputManager::destroyInstance()
 {
@@ -57,8 +56,8 @@ void MidiInputManager::destroyInstance()
     MidiInputManager::_instance = 0;
 }
 
-MidiInputManager::MidiInputManager(IMixer* mixer)
-    :queue(100), mixer(mixer)
+MidiInputManager::MidiInputManager(IMixer *mixer)
+    : queue(100), mixer(mixer)
 {
     current = NULL;
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
@@ -71,7 +70,7 @@ MidiInputManager::~MidiInputManager()
 
 void MidiInputManager::putEvent(MidiEvent ev)
 {
-    if(queue.push(ev)) //check for error
+    if (queue.push(ev)) //check for error
         cerr << "ERROR: Midi Ringbuffer is FULL" << endl;
     else
         work.post();
@@ -80,9 +79,11 @@ void MidiInputManager::putEvent(MidiEvent ev)
 void MidiInputManager::flush(unsigned frameStart, unsigned frameStop)
 {
     MidiEvent ev;
-    while(!work.trywait()) {
+    while (!work.trywait())
+    {
         queue.peak(ev);
-        if(ev.time < (int)frameStart || ev.time > (int)frameStop) {
+        if (ev.time < (int)frameStart || ev.time > (int)frameStop)
+        {
             //Back out of transaction
             work.post();
             //printf("%d vs [%d..%d]\n",ev.time, frameStart, frameStop);
@@ -91,27 +92,28 @@ void MidiInputManager::flush(unsigned frameStart, unsigned frameStop)
         queue.pop(ev);
         //cout << ev << endl;
 
-        switch(ev.type) {
-        case MidiEventTypes::M_NOTE:
-            //                dump.dumpnote(ev.channel, ev.num, ev.value);
+        switch (ev.type)
+        {
+            case MidiEventTypes::M_NOTE:
+                //                dump.dumpnote(ev.channel, ev.num, ev.value);
 
-            if(ev.value)
-                this->mixer->NoteOn(ev.channel, ev.num, ev.value);
-            else
-                this->mixer->NoteOff(ev.channel, ev.num);
-            break;
+                if (ev.value)
+                    this->mixer->NoteOn(ev.channel, ev.num, ev.value);
+                else
+                    this->mixer->NoteOff(ev.channel, ev.num);
+                break;
 
-        case MidiEventTypes::M_CONTROLLER:
-            //                dump.dumpcontroller(ev.channel, ev.num, ev.value);
-            this->mixer->SetController(ev.channel, ev.num, ev.value);
-            break;
+            case MidiEventTypes::M_CONTROLLER:
+                //                dump.dumpcontroller(ev.channel, ev.num, ev.value);
+                this->mixer->SetController(ev.channel, ev.num, ev.value);
+                break;
 
-        case MidiEventTypes::M_PGMCHANGE:
-            this->mixer->SetProgram(ev.channel, ev.num);
-            break;
-        case MidiEventTypes::M_PRESSURE:
-            this->mixer->PolyphonicAftertouch(ev.channel, ev.num, ev.value);
-            break;
+            case MidiEventTypes::M_PGMCHANGE:
+                this->mixer->SetProgram(ev.channel, ev.num);
+                break;
+            case MidiEventTypes::M_PRESSURE:
+                this->mixer->PolyphonicAftertouch(ev.channel, ev.num, ev.value);
+                break;
         }
     }
 }
@@ -126,10 +128,10 @@ bool MidiInputManager::setSource(string name)
 {
     MidiInput *src = getIn(name);
 
-    if(!src)
+    if (!src)
         return false;
 
-    if(current)
+    if (current)
         current->setMidiEn(false);
     current = src;
     current->setMidiEn(true);
@@ -137,7 +139,7 @@ bool MidiInputManager::setSource(string name)
     bool success = current->getMidiEn();
 
     //Keep system in a valid state (aka with a running driver)
-    if(!success)
+    if (!success)
         (current = getIn("NULL"))->setMidiEn(true);
 
     return success;
@@ -145,7 +147,7 @@ bool MidiInputManager::setSource(string name)
 
 string MidiInputManager::getSource() const
 {
-    if(current)
+    if (current)
         return current->name;
     else
         return "ERROR";

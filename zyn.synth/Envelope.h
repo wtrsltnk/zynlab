@@ -23,43 +23,43 @@
 #ifndef ENVELOPE_H
 #define ENVELOPE_H
 
-#include "../zyn.common/globals.h"
 #include "EnvelopeParams.h"
+#include <zyn.common/globals.h>
 
 /**Implementation of a general Envelope*/
 class Envelope
 {
-    SystemSettings* _synth;
-    public:
+    SystemSettings *_synth;
 
-        /**Constructor*/
-        Envelope(class EnvelopeParams *envpars, float basefreq, SystemSettings* synth_);
-        /**Destructor*/
-        ~Envelope();
-        void relasekey();
-        float envout();
-        float envout_dB();
-        /**Determines the status of the Envelope
+public:
+    /**Constructor*/
+    Envelope(class EnvelopeParams *envpars, float basefreq, SystemSettings *synth_);
+    /**Destructor*/
+    ~Envelope();
+    void relasekey();
+    float envout();
+    float envout_dB();
+    /**Determines the status of the Envelope
          * @return returns 1 if the envelope is finished*/
-        bool finished() const;
-    private:
-        float env_rap2dB(float rap);
-        float env_dB2rap(float db);
-        int   envpoints;
-        int   envsustain;    //"-1" means disabled
-        float envdt[MAX_ENVELOPE_POINTS]; //millisecons
-        float envval[MAX_ENVELOPE_POINTS]; // [0.0f .. 1.0f]
-        float envstretch;
-        int   linearenvelope;
+    bool finished() const;
 
-        int   currentpoint;    //current envelope point (starts from 1)
-        int   forcedrelase;
-        bool  keyreleased;    //if the key was released
-        bool  envfinish;
-        float t; // the time from the last point
-        float inct; // the time increment
-        float envoutval; //used to do the forced release
+private:
+    float env_rap2dB(float rap);
+    float env_dB2rap(float db);
+    int envpoints;
+    int envsustain;                    //"-1" means disabled
+    float envdt[MAX_ENVELOPE_POINTS];  //millisecons
+    float envval[MAX_ENVELOPE_POINTS]; // [0.0f .. 1.0f]
+    float envstretch;
+    int linearenvelope;
+
+    int currentpoint; //current envelope point (starts from 1)
+    int forcedrelase;
+    bool keyreleased; //if the key was released
+    bool envfinish;
+    float t;         // the time from the last point
+    float inct;      // the time increment
+    float envoutval; //used to do the forced release
 };
-
 
 #endif

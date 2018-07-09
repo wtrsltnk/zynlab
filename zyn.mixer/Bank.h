@@ -32,82 +32,85 @@
 /**The instrument Bank*/
 class Bank
 {
-    public:
-        /**Constructor*/
-        Bank();
-        ~Bank();
-        std::string getname(unsigned int ninstrument);
-        std::string getnamenumbered(unsigned int ninstrument);
-        void setname(unsigned int ninstrument,
-                     const std::string &newname,
-                     int newslot);                                                       //if newslot==-1 then this is ignored, else it will be put on that slot
-        bool isPADsynth_used(unsigned int ninstrument);
+public:
+    /**Constructor*/
+    Bank();
+    ~Bank();
+    std::string getname(unsigned int ninstrument);
+    std::string getnamenumbered(unsigned int ninstrument);
+    void setname(unsigned int ninstrument,
+                 const std::string &newname,
+                 int newslot); //if newslot==-1 then this is ignored, else it will be put on that slot
+    bool isPADsynth_used(unsigned int ninstrument);
 
-        /**returns true when slot is empty*/
-        bool emptyslot(unsigned int ninstrument);
+    /**returns true when slot is empty*/
+    bool emptyslot(unsigned int ninstrument);
 
-        /**Empties out the selected slot*/
-        void clearslot(unsigned int ninstrument);
-        /**Saves the given Part to slot*/
-        void savetoslot(unsigned int ninstrument, class Instrument * part);
-        /**Loads the given slot into a Part*/
-        void loadfromslot(unsigned int ninstrument, class Instrument * part);
+    /**Empties out the selected slot*/
+    void clearslot(unsigned int ninstrument);
+    /**Saves the given Part to slot*/
+    void savetoslot(unsigned int ninstrument, class Instrument *part);
+    /**Loads the given slot into a Part*/
+    void loadfromslot(unsigned int ninstrument, class Instrument *part);
 
-        /**Swaps Slots*/
-        void swapslot(unsigned int n1, unsigned int n2);
+    /**Swaps Slots*/
+    void swapslot(unsigned int n1, unsigned int n2);
 
-        int loadbank(std::string bankdirname);
-        int newbank(std::string newbankdirname);
+    int loadbank(std::string bankdirname);
+    int newbank(std::string newbankdirname);
 
-        std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
-        int locked();
+    std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
+    int locked();
 
-        void rescanforbanks();
+    void rescanforbanks();
 
-        struct bankstruct {
-            bool operator<(const bankstruct &b) const;
-            std::string dir;
-            std::string name;
-            std::vector<std::string> instrumentNames;
-        };
+    struct bankstruct
+    {
+        bool operator<(const bankstruct &b) const;
+        std::string dir;
+        std::string name;
+        std::vector<std::string> instrumentNames;
+    };
 
-        std::vector<bankstruct> banks;
+    std::vector<bankstruct> banks;
 
-        struct banksearchstruct {
-            std::string shortBankName;
-            std::string fullBankName;
-            int instrumentSlot;
-            std::string instrumentName;
-        };
+    struct banksearchstruct
+    {
+        std::string shortBankName;
+        std::string fullBankName;
+        int instrumentSlot;
+        std::string instrumentName;
+    };
 
-        std::vector<banksearchstruct> search(const char* searchFor);
+    std::vector<banksearchstruct> search(const char *searchFor);
 
-    private:
+private:
+    //it adds a filename to the bank
+    //if pos is -1 it try to find a position
+    //returns -1 if the bank is full, or 0 if the instrument was added
+    int addtobank(int pos, std::string filename, std::string name);
 
-        //it adds a filename to the bank
-        //if pos is -1 it try to find a position
-        //returns -1 if the bank is full, or 0 if the instrument was added
-        int addtobank(int pos, std::string filename, std::string name);
+    void deletefrombank(int pos);
 
-        void deletefrombank(int pos);
+    void clearbank();
 
-        void clearbank();
+    std::string defaultinsname;
 
-        std::string defaultinsname;
+    struct ins_t
+    {
+        ins_t();
+        bool used;
+        std::string name;
+        std::string filename;
+        struct
+        {
+            bool PADsynth_used;
+        } info;
+    } ins[BANK_SIZE];
 
-        struct ins_t {
-            ins_t();
-            bool used;
-            std::string name;
-            std::string filename;
-            struct {
-                bool PADsynth_used;
-            } info;
-        } ins[BANK_SIZE];
+    std::string dirname;
 
-        std::string dirname;
-
-        void scanrootdir(std::string rootdir); //scans a root dir for banks
+    void scanrootdir(std::string rootdir); //scans a root dir for banks
 };
 
 #endif

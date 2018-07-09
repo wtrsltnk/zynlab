@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(zyn.nio)
 
@@ -20,94 +20,162 @@ set(SdlEnable   ${SDL2_FOUND}      CACHE BOOL  "Enable support for SDL Audio Sys
 set(DssiEnable  ${DSSI_FOUND}      CACHE BOOL  "Enable DSSI Plugin compilation")
 set(LibloEnable ${LIBLO_FOUND}     CACHE BOOL  "Enable Liblo")
 
-set(zyn_nio_SRCS
-    Nio.cpp
+add_library(zyn.nio STATIC
     AudioOutput.cpp
-    AudioOutputManager.cpp
-    MidiInput.cpp
-    MidiInputManager.cpp
-    Engine.cpp
-    EngineManager.cpp
-    WavEngine.cpp
-    NulEngine.cpp
-    RtEngine.cpp
-    RtMidi.cpp
-    )
-
-set(zyn_nio_HDRS
-    Nio.h
     AudioOutput.h
+    AudioOutputManager.cpp
     AudioOutputManager.h
-    MidiInput.h
-    MidiInputManager.h
+    Engine.cpp
     Engine.h
+    EngineManager.cpp
     EngineManager.h
-    WavEngine.h
+    MidiInput.cpp
+    MidiInput.h
+    MidiInputManager.cpp
+    MidiInputManager.h
+    Nio.cpp
+    Nio.h
+    NulEngine.cpp
     NulEngine.h
+    RtEngine.cpp
     RtEngine.h
-    RtMidi.h
     RtError.h
+    RtMidi.cpp
+    RtMidi.h
+    WavEngine.cpp
+    WavEngine.h
     )
 
-set(zyn_nio_LIB )
-
-add_definitions(-DOUT_DEFAULT="${DefaultOutput}")
-add_definitions(-DIN_DEFAULT="${DefaultInput}")
+target_compile_definitions(zyn.nio
+    PRIVATE -DOUT_DEFAULT="${DefaultOutput}"
+    )
+target_compile_definitions(zyn.nio
+    PRIVATE -DIN_DEFAULT="${DefaultInput}"
+    )
 
 if(JackEnable)
-    include_directories(${JACK_INCLUDE_DIR})
-    list(APPEND zyn_nio_SRCS JackEngine.cpp)
-    list(APPEND zyn_nio_LIB ${JACK_LIBRARIES})
+    target_sources(zyn.nio
+        PRIVATE
+            JackEngine.cpp
+            JackEngine.h
+        )
+    target_include_directories(zyn.nio
+        PRIVATE ${JACK_INCLUDE_DIR}
+        )
+    target_link_libraries(zyn.nio
+        ${JACK_LIBRARIES}
+        )
 endif(JackEnable)
 
 if(PaEnable)
-    include_directories(${PORTAUDIO_INCLUDE_DIR})
-    list(APPEND zyn_nio_SRCS PaEngine.cpp)
-    list(APPEND zyn_nio_LIB ${PORTAUDIO_LIBRARIES})
-    add_definitions(-DPORTAUDIO=1)
-endif(PaEnable)
+    target_sources(zyn.nio
+        PRIVATE
+            PaEngine.cpp
+            PaEngine.h
+        )
+    target_include_directories(zyn.nio
+        PRIVATE
+            ${PORTAUDIO_INCLUDE_DIR}
+        )
+    target_link_libraries(zyn.nio
+        ${PORTAUDIO_LIBRARIES}
+        )
+    target_compile_definitions(zyn.nio
+        PRIVATE -DPORTAUDIO=1
+        )
+endif()
 
 if(SdlEnable)
-    include_directories(${SDL2_INCLUDE_DIR})
-    list(APPEND zyn_nio_SRCS SdlEngine.cpp)
-    list(APPEND zyn_nio_LIB ${SDL2_LIBRARY})
-    add_definitions(-DSDL2=1)
-endif(SdlEnable)
+    target_sources(zyn.nio
+        PRIVATE
+            SdlEngine.cpp
+            SdlEngine.h
+        )
+    target_include_directories(zyn.nio
+        PRIVATE
+            ${SDL2_INCLUDE_DIR}
+        )
+    target_link_libraries(zyn.nio
+        ${SDL2_LIBRARY}
+        )
+    target_compile_definitions(zyn.nio
+        PRIVATE -DSDL2=1
+        )
+endif()
 
 if(AlsaEnable)
-    list(APPEND zyn_nio_SRCS AlsaEngine.cpp)
-    list(APPEND zyn_nio_LIB ${ASOUND_LIBRARY})
-endif(AlsaEnable)
+    target_sources(zyn.nio
+        PRIVATE
+            AlsaEngine.cpp
+            AlsaEngine.h
+        )
+    target_link_libraries(zyn.nio
+        ${ASOUND_LIBRARY}
+        )
+endif()
 
 if(OssEnable)
-    list(APPEND zyn_nio_SRCS OssEngine.cpp)
-endif(OssEnable)
-
-add_library(zyn.nio STATIC
-    ${zyn_nio_SRCS}
-    ${zyn_nio_HDRS}
-    )
+    target_sources(zyn.nio
+        PRIVATE
+            OssEngine.cpp
+            OssEngine.h
+        )
+endif()
 
 target_link_libraries(zyn.nio
     ${zyn.common}
-    ${zyn_nio_LIB}
     winmm
     )
 
 target_include_directories(zyn.nio
-    PRIVATE "${CMAKE_SOURCE_DIR}"
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}
     )
 
 target_compile_definitions(zyn.nio
-    PRIVATE -D__WINDOWS_MM__
+    PRIVATE
+        -D__WINDOWS_MM__
     )
 
 target_compile_features(zyn.nio
     PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
     PRIVATE cxx_lambdas
+    PRIVATE cxx_nullptr
     PRIVATE cxx_strong_enums
     )
 
-install(FILES ${zyn_nio_HDRS} DESTINATION include/zyn/nio COMPONENT develop)
-install(TARGETS zyn.nio DESTINATION lib COMPONENT develop)
+install(
+    TARGETS
+        zyn.nio
+    EXPORT
+        zyn.nio
+    DESTINATION
+        "lib"
+    )
+
+install(
+    FILES
+        ${zyn.nio_SOURCE_DIR}/AudioOutput.h
+        ${zyn.nio_SOURCE_DIR}/AudioOutputManager.h
+        ${zyn.nio_SOURCE_DIR}/Engine.h
+        ${zyn.nio_SOURCE_DIR}/EngineManager.h
+        ${zyn.nio_SOURCE_DIR}/MidiInput.h
+        ${zyn.nio_SOURCE_DIR}/MidiInputManager.h
+        ${zyn.nio_SOURCE_DIR}/Nio.h
+        ${zyn.nio_SOURCE_DIR}/NulEngine.h
+        ${zyn.nio_SOURCE_DIR}/RtEngine.h
+        ${zyn.nio_SOURCE_DIR}/RtError.h
+        ${zyn.nio_SOURCE_DIR}/RtMidi.h
+        ${zyn.nio_SOURCE_DIR}/WavEngine.h
+    DESTINATION
+        "include/zyn/nio"
+    )
+
+install(
+    EXPORT
+        zyn.nio
+    FILE
+        zyn.nio-config.cmake
+    DESTINATION
+        "cmake"
+    )

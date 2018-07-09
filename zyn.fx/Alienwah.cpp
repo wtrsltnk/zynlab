@@ -20,11 +20,11 @@
 
 */
 
-#include <cmath>
 #include "Alienwah.h"
+#include <cmath>
 
-Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
+Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
+    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
       lfo(synth_),
       oldl(NULL),
       oldr(NULL)
@@ -37,12 +37,11 @@ Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSett
 
 Alienwah::~Alienwah()
 {
-    if(oldl != NULL)
-        delete [] oldl;
-    if(oldr != NULL)
-        delete [] oldr;
+    if (oldl != NULL)
+        delete[] oldl;
+    if (oldr != NULL)
+        delete[] oldr;
 }
-
 
 //Apply the effect
 void Alienwah::out(const Stereo<float *> &smp)
@@ -59,8 +58,9 @@ void Alienwah::out(const Stereo<float *> &smp)
     clfol = complex<float>(cosf(lfol + phase) * fb, sinf(lfol + phase) * fb); //rework
     clfor = complex<float>(cosf(lfor + phase) * fb, sinf(lfor + phase) * fb); //rework
 
-    for(int i = 0; i < this->_synth->buffersize; ++i) {
-        float x  = ((float) i) / this->_synth->buffersize_f;
+    for (int i = 0; i < this->_synth->buffersize; ++i)
+    {
+        float x = ((float)i) / this->_synth->buffersize_f;
         float x1 = 1.0f - x;
         //left
         complex<float> tmp = clfol * x + oldclfol * x1;
@@ -80,8 +80,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         oldr[oldk] = out;
         float r = out.real() * 10.0f * (fb + 0.1f);
 
-
-        if(++oldk >= Pdelay)
+        if (++oldk >= Pdelay)
             oldk = 0;
         //LRcross
         efxoutl[i] = l * (1.0f - lrcross) + r * lrcross;
@@ -95,37 +94,37 @@ void Alienwah::out(const Stereo<float *> &smp)
 //Cleanup the effect
 void Alienwah::cleanup(void)
 {
-    for(int i = 0; i < Pdelay; ++i) {
+    for (int i = 0; i < Pdelay; ++i)
+    {
         oldl[i] = complex<float>(0.0f, 0.0f);
         oldr[i] = complex<float>(0.0f, 0.0f);
     }
     oldk = 0;
 }
 
-
 //Parameter control
 void Alienwah::setdepth(unsigned char _Pdepth)
 {
     Pdepth = _Pdepth;
-    depth  = Pdepth / 127.0f;
+    depth = Pdepth / 127.0f;
 }
 
 void Alienwah::setfb(unsigned char _Pfb)
 {
     Pfb = _Pfb;
-    fb  = fabs((Pfb - 64.0f) / 64.1f);
-    fb  = sqrtf(fb);
-    if(fb < 0.4f)
+    fb = fabs((Pfb - 64.0f) / 64.1f);
+    fb = sqrtf(fb);
+    if (fb < 0.4f)
         fb = 0.4f;
-    if(Pfb < 64)
+    if (Pfb < 64)
         fb = -fb;
 }
 
 void Alienwah::setvolume(unsigned char _Pvolume)
 {
-    Pvolume   = _Pvolume;
+    Pvolume = _Pvolume;
     outvolume = Pvolume / 127.0f;
-    if(insertion == 0)
+    if (insertion == 0)
         volume = 1.0f;
     else
         volume = outvolume;
@@ -134,49 +133,48 @@ void Alienwah::setvolume(unsigned char _Pvolume)
 void Alienwah::setphase(unsigned char _Pphase)
 {
     Pphase = _Pphase;
-    phase  = (Pphase - 64.0f) / 64.0f * PI;
+    phase = (Pphase - 64.0f) / 64.0f * PI;
 }
 
 void Alienwah::setdelay(unsigned char _Pdelay)
 {
-    if(oldl != NULL)
-        delete [] oldl;
-    if(oldr != NULL)
-        delete [] oldr;
+    if (oldl != NULL)
+        delete[] oldl;
+    if (oldr != NULL)
+        delete[] oldr;
     Pdelay = (_Pdelay >= MAX_ALIENWAH_DELAY) ? MAX_ALIENWAH_DELAY : _Pdelay;
-    oldl   = new complex<float>[Pdelay];
-    oldr   = new complex<float>[Pdelay];
+    oldl = new complex<float>[Pdelay];
+    oldr = new complex<float>[Pdelay];
     cleanup();
 }
 
 void Alienwah::setpreset(unsigned char npreset)
 {
-    const int     PRESET_SIZE = 11;
-    const int     NUM_PRESETS = 4;
+    const int PRESET_SIZE = 11;
+    const int NUM_PRESETS = 4;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //AlienWah1
-        {127, 64, 70, 0,   0, 62,  60,  105, 25, 0, 64},
+        {127, 64, 70, 0, 0, 62, 60, 105, 25, 0, 64},
         //AlienWah2
-        {127, 64, 73, 106, 0, 101, 60,  105, 17, 0, 64},
+        {127, 64, 73, 106, 0, 101, 60, 105, 17, 0, 64},
         //AlienWah3
-        {127, 64, 63, 0,   1, 100, 112, 105, 31, 0, 42},
+        {127, 64, 63, 0, 1, 100, 112, 105, 31, 0, 42},
         //AlienWah4
-        {93,  64, 25, 0,   1, 66,  101, 11,  47, 0, 86}
-    };
+        {93, 64, 25, 0, 1, 66, 101, 11, 47, 0, 86}};
 
-    if(npreset >= NUM_PRESETS)
+    if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
+    for (int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
-    if(insertion == 0)
-        changepar(0, presets[npreset][0] / 2);  //lower the volume if this is system effect
+    if (insertion == 0)
+        changepar(0, presets[npreset][0] / 2); //lower the volume if this is system effect
     Ppreset = npreset;
 }
 
-
 void Alienwah::changepar(int npar, unsigned char value)
 {
-    switch(npar) {
+    switch (npar)
+    {
         case 0:
             setvolume(value);
             break;
@@ -219,18 +217,31 @@ void Alienwah::changepar(int npar, unsigned char value)
 
 unsigned char Alienwah::getpar(int npar) const
 {
-    switch(npar) {
-        case 0:  return Pvolume;
-        case 1:  return Ppanning;
-        case 2:  return lfo.Pfreq;
-        case 3:  return lfo.Prandomness;
-        case 4:  return lfo.PLFOtype;
-        case 5:  return lfo.Pstereo;
-        case 6:  return Pdepth;
-        case 7:  return Pfb;
-        case 8:  return Pdelay;
-        case 9:  return Plrcross;
-        case 10: return Pphase;
-        default: return 0;
+    switch (npar)
+    {
+        case 0:
+            return Pvolume;
+        case 1:
+            return Ppanning;
+        case 2:
+            return lfo.Pfreq;
+        case 3:
+            return lfo.Prandomness;
+        case 4:
+            return lfo.PLFOtype;
+        case 5:
+            return lfo.Pstereo;
+        case 6:
+            return Pdepth;
+        case 7:
+            return Pfb;
+        case 8:
+            return Pdelay;
+        case 9:
+            return Plrcross;
+        case 10:
+            return Pphase;
+        default:
+            return 0;
     }
 }

@@ -21,18 +21,18 @@
 */
 
 #include "Util.h"
-#include <vector>
 #include <cassert>
+#include <iostream>
 #include <math.h>
 #include <stdio.h>
-#include <iostream>
+#include <vector>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
 #endif
@@ -41,7 +41,6 @@ prng_t prng_state = 0x1234;
 
 float *denormalkillbuf;
 
-
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)
  */
@@ -49,7 +48,7 @@ float VelF(float velocity, unsigned char scaling)
 {
     float x;
     x = powf(VELOCITY_MAX_SCALE, (64.0f - scaling) / 64.0f);
-    if((scaling == 127) || (velocity > 0.99f))
+    if ((scaling == 127) || (velocity > 0.99f))
         return 1.0f;
     else
         return powf(velocity, x);
@@ -65,53 +64,53 @@ float getdetune(unsigned char type,
     float det = 0.0f, octdet = 0.0f, cdet = 0.0f, findet = 0.0f;
     //Get Octave
     int octave = coarsedetune / 1024;
-    if(octave >= 8)
+    if (octave >= 8)
         octave -= 16;
     octdet = octave * 1200.0f;
 
     //Coarse and fine detune
     int cdetune = coarsedetune % 1024;
-    if(cdetune > 512)
+    if (cdetune > 512)
         cdetune -= 1024;
 
     int fdetune = finedetune - 8192;
 
-    switch(type) {
-//	case 1: is used for the default (see below)
+    switch (type)
+    {
+            //	case 1: is used for the default (see below)
         case 2:
-            cdet   = fabs(cdetune * 10.0f);
+            cdet = fabs(cdetune * 10.0f);
             findet = fabs(fdetune / 8192.0f) * 10.0f;
             break;
         case 3:
-            cdet   = fabs(cdetune * 100);
+            cdet = fabs(cdetune * 100);
             findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
             break;
         case 4:
-            cdet   = fabs(cdetune * 701.95500087f); //perfect fifth
+            cdet = fabs(cdetune * 701.95500087f); //perfect fifth
             findet =
                 (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
             break;
         //case ...: need to update N_DETUNE_TYPES, if you'll add more
         default:
-            cdet   = fabs(cdetune * 50.0f);
+            cdet = fabs(cdetune * 50.0f);
             findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
             break;
     }
-    if(finedetune < 8192)
+    if (finedetune < 8192)
         findet = -findet;
-    if(cdetune < 0)
+    if (cdetune < 0)
         cdet = -cdet;
 
     det = octdet + cdet + findet;
     return det;
 }
 
-
 bool fileexists(const char *filename)
 {
     struct stat tmp;
     int result = stat(filename, &tmp);
-    if(result >= 0)
+    if (result >= 0)
         return true;
 
     return false;
@@ -136,9 +135,10 @@ void os_sleep(long length)
 
 std::string legalizeFilename(std::string filename)
 {
-    for(int i = 0; i < (int) filename.size(); ++i) {
+    for (int i = 0; i < (int)filename.size(); ++i)
+    {
         char c = filename[i];
-        if(!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
+        if (!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
             filename[i] = '_';
     }
     return filename;
@@ -146,7 +146,7 @@ std::string legalizeFilename(std::string filename)
 
 void invSignal(float *sig, size_t len)
 {
-    for(size_t i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
         sig[i] *= -1.0f;
 }
 
@@ -158,30 +158,30 @@ float SystemSettings::numRandom()
 float interpolate(const float *data, size_t len, float pos)
 {
     assert(len > (size_t)pos + 1);
-    const int l_pos      = (int)pos,
-              r_pos      = l_pos + 1;
+    const int l_pos = (int)pos,
+              r_pos = l_pos + 1;
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
 
 float cinterpolate(const float *data, size_t len, float pos)
 {
-    const int l_pos      = ((int)pos) % len,
-              r_pos      = (l_pos + 1) % len;
+    const int l_pos = ((int)pos) % len,
+              r_pos = (l_pos + 1) % len;
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
 
 SystemSettings::SystemSettings()
-    :samplerate(44100), buffersize(256), oscilsize(1024)
+    : samplerate(44100), buffersize(256), oscilsize(1024)
 {
     alias();
-    denormalkillbuf = new float [this->buffersize];
-    for(int i = 0; i < this->buffersize; ++i)
+    denormalkillbuf = new float[this->buffersize];
+    for (int i = 0; i < this->buffersize; ++i)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 }
 
 SystemSettings::~SystemSettings()
 {
-    delete []this->denormalkillbuf;
+    delete[] this->denormalkillbuf;
 }

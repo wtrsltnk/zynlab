@@ -39,7 +39,7 @@
 #include "../zyn.synth/FFTwrapper.h"
 #include "../zyn.mixer/Mixer.h"
 #include "../zyn.mixer/Instrument.h"
-#include "../zyn.common/Util.h"
+#include <zyn.common/Util.h>
 
 // Sequencer
 #include "../zyn.seq/Sequencer.h"

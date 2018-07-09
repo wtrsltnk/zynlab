@@ -22,69 +22,74 @@
 #ifndef SYNTH_NOTE_H
 #define SYNTH_NOTE_H
 
-#include "../zyn.common/globals.h"
-#include "../zyn.dsp/FilterParams.h"
+#include <zyn.common/globals.h>
+#include <zyn.dsp/FilterParams.h>
 
 class SynthNote
 {
 protected:
-    SystemSettings* _synth;
-    public:
-        SynthNote(SystemSettings* synth_, float freq, float vel, int port, int note, bool quiet);
-        virtual ~SynthNote() {}
+    SystemSettings *_synth;
 
-        /**Compute Output Samples
+public:
+    SynthNote(SystemSettings *synth_, float freq, float vel, int port, int note, bool quiet);
+    virtual ~SynthNote() {}
+
+    /**Compute Output Samples
          * @return 0 if note is finished*/
-        virtual int noteout(float *outl, float *outr) = 0;
+    virtual int noteout(float *outl, float *outr) = 0;
 
-        //TODO fix this spelling error [noisey commit]
-        /**Release the key for the note and start release portion of envelopes.*/
-        virtual void relasekey() = 0;
+    //TODO fix this spelling error [noisey commit]
+    /**Release the key for the note and start release portion of envelopes.*/
+    virtual void relasekey() = 0;
 
-        /**Return if note is finished.
+    /**Return if note is finished.
          * @return finished=1 unfinished=0*/
-        virtual int finished() const = 0;
+    virtual int finished() const = 0;
 
-        virtual void legatonote(float freq, float velocity,
-                                int portamento_, int midinote_,
-                                bool externcall) = 0;
-        /* For polyphonic aftertouch needed */
-        void setVelocity(float velocity_);
-    protected:
-        // Legato transitions
-        class Legato
-        {
-            SynthNote* _note;
-            public:
-               Legato(SynthNote* note_, float freq, float vel, int port,
-                       int note, bool quiet);
+    virtual void legatonote(float freq, float velocity,
+                            int portamento_, int midinote_,
+                            bool externcall) = 0;
+    /* For polyphonic aftertouch needed */
+    void setVelocity(float velocity_);
 
-                void apply(float *outl, float *outr);
-                int update(float freq, float velocity, int portamento_,
-                           int midinote_, bool externalcall);
+protected:
+    // Legato transitions
+    class Legato
+    {
+        SynthNote *_note;
 
-            private:
-                bool      silent;
-                float     lastfreq;
-                LegatoMsg msg;
-                int       decounter;
-                struct { // Fade In/Out vars
-                    int   length;
-                    float m, step;
-                } fade;
-                struct { // Note parameters
-                    float freq, vel;
-                    int   portamento, midinote;
-                } param;
+    public:
+        Legato(SynthNote *note_, float freq, float vel, int port,
+               int note, bool quiet);
 
-            public: /* Some get routines for legatonote calls (aftertouch feature)*/
-                float getFreq() {return param.freq; }
-                float getVelocity() {return param.vel; }
-                int getPortamento() {return param.portamento; }
-                int getMidinote() {return param.midinote; }
-                void setSilent(bool silent_) {silent = silent_; }
-                void setDecounter(int decounter_) {decounter = decounter_; }
-        } legato;
+        void apply(float *outl, float *outr);
+        int update(float freq, float velocity, int portamento_,
+                   int midinote_, bool externalcall);
+
+    private:
+        bool silent;
+        float lastfreq;
+        LegatoMsg msg;
+        int decounter;
+        struct
+        { // Fade In/Out vars
+            int length;
+            float m, step;
+        } fade;
+        struct
+        { // Note parameters
+            float freq, vel;
+            int portamento, midinote;
+        } param;
+
+    public: /* Some get routines for legatonote calls (aftertouch feature)*/
+        float getFreq() { return param.freq; }
+        float getVelocity() { return param.vel; }
+        int getPortamento() { return param.portamento; }
+        int getMidinote() { return param.midinote; }
+        void setSilent(bool silent_) { silent = silent_; }
+        void setDecounter(int decounter_) { decounter = decounter_; }
+    } legato;
 };
 
 #endif

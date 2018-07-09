@@ -21,11 +21,9 @@
 
 */
 
-
 #ifndef GLOBALS_H
 #define GLOBALS_H
 #include <stdint.h>
-
 
 /**
  * The number of harmonics of additive synth
@@ -33,18 +31,15 @@
  */
 #define MAX_AD_HARMONICS 128
 
-
 /**
  * The number of harmonics of substractive
  */
 #define MAX_SUB_HARMONICS 64
 
-
 /*
  * The maximum number of samples that are used for 1 PADsynth instrument(or item)
  */
 #define PAD_MAX_SAMPLES 64
-
 
 /*
  * Number of parts
@@ -71,7 +66,6 @@
  */
 #define NUM_SYS_EFX 4
 
-
 /*
  * Number of insertion effects
  */
@@ -86,7 +80,6 @@
  * Maximum number of the instrument on a part
  */
 #define NUM_KIT_ITEMS 16
-
 
 /*
  * How is applied the velocity sensing
@@ -114,7 +107,7 @@
 #endif // M_PI
 
 #ifndef M_PI_2
-#define M_PI_2 (M_PI*2.0)
+#define M_PI_2 (M_PI * 2.0)
 #endif // M_PI_2
 /*
  * Maximum filter stages
@@ -142,70 +135,93 @@
 /*
  * How the amplitude threshold is computed
  */
-#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabs((b) - (a)) \
-                                          / (fabs((b) + (a) \
-                                                  + 0.0000000001f))) > \
+#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabs((b) - (a)) / (fabs((b) + (a) + 0.0000000001f))) > \
                                          AMPLITUDE_INTERPOLATION_THRESHOLD)
 
 /*
  * Interpolate Amplitude
  */
-#define INTERPOLATE_AMPLITUDE(a, b, x, size) ((a) \
-                                              + ((b) \
-                                                 - (a)) * (float)(x) \
-                                              / (float) (size))
-
+#define INTERPOLATE_AMPLITUDE(a, b, x, size) ((a) + ((b) - (a)) * (float)(x) / (float)(size))
 
 /*
  * dB
  */
-#define dB2rap(dB) ((expf((dB) * LOG_10 / 20.0f)))
+#define dB2rap(dB) ((expf((dB)*LOG_10 / 20.0f)))
 #define rap2dB(rap) ((20 * logf(rap) / LOG_10))
 
-#define ZERO(data, size) {char *data_ = (char *) data; for(int i = 0; \
-                                                           i < size; \
-                                                           i++) \
-                              data_[i] = 0; }
-#define ZERO_float(data, size) {float *data_ = (float *) data; \
-                                for(int i = 0; \
-                                    i < size; \
-                                    i++) \
-                                    data_[i] = 0.0f; }
+#define ZERO(data, size)            \
+    {                               \
+        char *data_ = (char *)data; \
+        for (int i = 0;             \
+             i < size;              \
+             i++)                   \
+            data_[i] = 0;           \
+    }
+#define ZERO_float(data, size)        \
+    {                                 \
+        float *data_ = (float *)data; \
+        for (int i = 0;               \
+             i < size;                \
+             i++)                     \
+            data_[i] = 0.0f;          \
+    }
 
-enum ONOFFTYPE {
-    OFF = 0, ON = 1
+enum ONOFFTYPE
+{
+    OFF = 0,
+    ON = 1
 };
 
-enum MidiControllers {
-    C_bankselectmsb = 0, C_pitchwheel = 1000, C_NULL = 1001,
-    C_expression    = 11, C_panning = 10, C_bankselectlsb = 32,
-    C_filtercutoff  = 74, C_filterq = 71, C_bandwidth = 75, C_modwheel = 1,
-    C_fmamp  = 76,
-    C_volume = 7, C_sustain = 64, C_allnotesoff = 123, C_allsoundsoff = 120,
+enum MidiControllers
+{
+    C_bankselectmsb = 0,
+    C_pitchwheel = 1000,
+    C_NULL = 1001,
+    C_expression = 11,
+    C_panning = 10,
+    C_bankselectlsb = 32,
+    C_filtercutoff = 74,
+    C_filterq = 71,
+    C_bandwidth = 75,
+    C_modwheel = 1,
+    C_fmamp = 76,
+    C_volume = 7,
+    C_sustain = 64,
+    C_allnotesoff = 123,
+    C_allsoundsoff = 120,
     C_resetallcontrollers = 121,
-    C_portamento = 65, C_resonance_center = 77, C_resonance_bandwidth = 78,
+    C_portamento = 65,
+    C_resonance_center = 77,
+    C_resonance_bandwidth = 78,
 
-    C_dataentryhi = 0x06, C_dataentrylo = 0x26, C_nrpnhi = 99, C_nrpnlo = 98
+    C_dataentryhi = 0x06,
+    C_dataentrylo = 0x26,
+    C_nrpnhi = 99,
+    C_nrpnlo = 98
 };
 
-enum LegatoMsg {
-    LM_Norm, LM_FadeIn, LM_FadeOut, LM_CatchUp, LM_ToNorm
+enum LegatoMsg
+{
+    LM_Norm,
+    LM_FadeIn,
+    LM_FadeOut,
+    LM_CatchUp,
+    LM_ToNorm
 };
 
 //is like i=(int)(floor(f))
 #ifdef ASM_F2I_YES
-#define F2I(f, \
-            i) __asm__ __volatile__ ("fistpl %0" : "=m" (i) : "t" (f \
-                                                                   - \
-                                                                   0.49999999f) \
-                                     : "st");
+#define F2I(f,                                         \
+            i) __asm__ __volatile__("fistpl %0"        \
+                                    : "=m"(i)          \
+                                    : "t"(f -          \
+                                          0.49999999f) \
+                                    : "st");
 #else
 #define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
 #endif
 
-
-
-#ifndef  O_BINARY
+#ifndef O_BINARY
 #define O_BINARY 0
 #endif
 
@@ -242,15 +258,15 @@ public:
     float samplerate_f;
     float halfsamplerate_f;
     float buffersize_f;
-    int   bufferbytes;
+    int bufferbytes;
     float oscilsize_f;
 
     inline void alias(void)
     {
         halfsamplerate_f = (samplerate_f = samplerate) / 2.0f;
-        buffersize_f     = buffersize;
-        bufferbytes      = buffersize * sizeof(float);
-        oscilsize_f      = oscilsize;
+        buffersize_f = buffersize;
+        bufferbytes = buffersize * sizeof(float);
+        oscilsize_f = oscilsize;
     }
     static float numRandom(void); //defined in Util.cpp for now
 };
@@ -274,7 +290,7 @@ public:
     /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
     virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr) = 0;
 
-    SystemSettings* _synth;
+    SystemSettings *_synth;
 };
 
 #endif

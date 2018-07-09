@@ -23,159 +23,161 @@
 #ifndef PAD_NOTE_PARAMETERS_H
 #define PAD_NOTE_PARAMETERS_H
 
-#include "FFTwrapper.h"
+#include "EnvelopeParams.h"
+#include "IFFTwrapper.h"
+#include "LFOParams.h"
 #include "OscilGen.h"
 #include "Resonance.h"
-#include "EnvelopeParams.h"
-#include "LFOParams.h"
 
-#include "../zyn.common/globals.h"
-#include "../zyn.common/XMLwrapper.h"
-#include "../zyn.common/Util.h"
-#include "../zyn.common/Presets.h"
-#include "../zyn.dsp/FilterParams.h"
+#include <zyn.common/Presets.h>
+#include <zyn.common/Util.h>
+#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/globals.h>
+#include <zyn.dsp/FilterParams.h>
 
-#include <string>
 #include <pthread.h>
+#include <string>
 
-class PADnoteParameters:public Presets
+class PADnoteParameters : public Presets
 {
     SystemSettings *_synth;
-    public:
-        PADnoteParameters(SystemSettings* synth_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
-        virtual ~PADnoteParameters();
 
-        void defaults();
-        void add2XML(XMLwrapper *xml);
-        void getfromXML(XMLwrapper *xml);
+public:
+    PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
+    virtual ~PADnoteParameters();
 
-        //returns a value between 0.0f-1.0f that represents the estimation perceived bandwidth
-        float getprofile(float *smp, int size);
+    void defaults();
+    void add2XML(XMLwrapper *xml);
+    void getfromXML(XMLwrapper *xml);
 
-        //parameters
+    //returns a value between 0.0f-1.0f that represents the estimation perceived bandwidth
+    float getprofile(float *smp, int size);
 
-        //the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
-        //the harmonic profile is used only on mode 0
-        unsigned char Pmode;
+    //parameters
 
-        //Harmonic profile (the frequency distribution of a single harmonic)
-        struct {
-            struct { //base function
-                unsigned char type;
-                unsigned char par1;
-            } base;
-            unsigned char freqmult; //frequency multiplier of the distribution
-            struct { //the modulator of the distribution
-                unsigned char par1;
-                unsigned char freq;
-            } modulator;
+    //the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
+    //the harmonic profile is used only on mode 0
+    unsigned char Pmode;
 
-            unsigned char width; //the width of the resulting function after the modulation
-            struct { //the amplitude multiplier of the harmonic profile
-                unsigned char mode;
-                unsigned char type;
-                unsigned char par1;
-                unsigned char par2;
-            } amp;
-            bool autoscale; //if the scale of the harmonic profile is computed automaticaly
-            unsigned char onehalf; //what part of the base function is used to make the distribution
-        } Php;
-
-
-        unsigned int  Pbandwidth; //the values are from 0 to 1000
-        unsigned char Pbwscale; //how the bandwidth is increased according to the harmonic's frequency
-
-        struct { //where are positioned the harmonics (on integer multimplier or different places)
+    //Harmonic profile (the frequency distribution of a single harmonic)
+    struct
+    {
+        struct
+        { //base function
             unsigned char type;
-            unsigned char par1, par2, par3; //0..255
-        } Phrpos;
+            unsigned char par1;
+        } base;
+        unsigned char freqmult; //frequency multiplier of the distribution
+        struct
+        { //the modulator of the distribution
+            unsigned char par1;
+            unsigned char freq;
+        } modulator;
 
-        struct { //quality of the samples (how many samples, the length of them,etc.)
-            unsigned char samplesize;
-            unsigned char basenote, oct, smpoct;
-        } Pquality;
+        unsigned char width; //the width of the resulting function after the modulation
+        struct
+        { //the amplitude multiplier of the harmonic profile
+            unsigned char mode;
+            unsigned char type;
+            unsigned char par1;
+            unsigned char par2;
+        } amp;
+        bool autoscale;        //if the scale of the harmonic profile is computed automaticaly
+        unsigned char onehalf; //what part of the base function is used to make the distribution
+    } Php;
 
-        //frequency parameters
-        //If the base frequency is fixed to 440 Hz
-        unsigned char Pfixedfreq;
+    unsigned int Pbandwidth; //the values are from 0 to 1000
+    unsigned char Pbwscale;  //how the bandwidth is increased according to the harmonic's frequency
 
-        /* Equal temperate (this is used only if the Pfixedfreq is enabled)
+    struct
+    { //where are positioned the harmonics (on integer multimplier or different places)
+        unsigned char type;
+        unsigned char par1, par2, par3; //0..255
+    } Phrpos;
+
+    struct
+    { //quality of the samples (how many samples, the length of them,etc.)
+        unsigned char samplesize;
+        unsigned char basenote, oct, smpoct;
+    } Pquality;
+
+    //frequency parameters
+    //If the base frequency is fixed to 440 Hz
+    unsigned char Pfixedfreq;
+
+    /* Equal temperate (this is used only if the Pfixedfreq is enabled)
            If this parameter is 0, the frequency is fixed (to 440 Hz);
            if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
-        unsigned char PfixedfreqET;
-        unsigned short int PDetune; //fine detune
-        unsigned short int PCoarseDetune; //coarse detune+octave
-        unsigned char      PDetuneType; //detune type
+    unsigned char PfixedfreqET;
+    unsigned short int PDetune;       //fine detune
+    unsigned short int PCoarseDetune; //coarse detune+octave
+    unsigned char PDetuneType;        //detune type
 
-        EnvelopeParams *FreqEnvelope; //Frequency Envelope
-        LFOParams      *FreqLfo; //Frequency LFO
+    EnvelopeParams *FreqEnvelope; //Frequency Envelope
+    LFOParams *FreqLfo;           //Frequency LFO
 
-        //Amplitude parameters
-        unsigned char PStereo;
-        /* Panning -  0 - random
+    //Amplitude parameters
+    unsigned char PStereo;
+    /* Panning -  0 - random
                   1 - left
                  64 - center
                 127 - right */
-        unsigned char PPanning;
+    unsigned char PPanning;
 
-        unsigned char PVolume;
+    unsigned char PVolume;
 
-        unsigned char PAmpVelocityScaleFunction;
+    unsigned char PAmpVelocityScaleFunction;
 
-        EnvelopeParams *AmpEnvelope;
+    EnvelopeParams *AmpEnvelope;
 
-        LFOParams *AmpLfo;
+    LFOParams *AmpLfo;
 
-        unsigned char PPunchStrength, PPunchTime, PPunchStretch,
-                      PPunchVelocitySensing;
+    unsigned char PPunchStrength, PPunchTime, PPunchStretch,
+        PPunchVelocitySensing;
 
-        //Filter Parameters
-        FilterParams *GlobalFilter;
+    //Filter Parameters
+    FilterParams *GlobalFilter;
 
-        // filter velocity sensing
-        unsigned char PFilterVelocityScale;
+    // filter velocity sensing
+    unsigned char PFilterVelocityScale;
 
-        // filter velocity sensing
-        unsigned char PFilterVelocityScaleFunction;
+    // filter velocity sensing
+    unsigned char PFilterVelocityScaleFunction;
 
-        EnvelopeParams *FilterEnvelope;
-        LFOParams      *FilterLfo;
+    EnvelopeParams *FilterEnvelope;
+    LFOParams *FilterLfo;
 
+    float setPbandwidth(int Pbandwidth); //returns the BandWidth in cents
+    float getNhr(int n);                 //gets the n-th overtone position relatively to N harmonic
 
+    void applyparameters(bool lockmutex);
+    void export2wav(std::string basefilename);
 
+    OscilGen *oscilgen;
+    Resonance *resonance;
 
-        float setPbandwidth(int Pbandwidth); //returns the BandWidth in cents
-        float getNhr(int n); //gets the n-th overtone position relatively to N harmonic
+    struct
+    {
+        int size;
+        float basefreq;
+        float *smp;
+    } sample[PAD_MAX_SAMPLES], newsample;
 
-        void applyparameters(bool lockmutex);
-        void export2wav(std::string basefilename);
+private:
+    void generatespectrum_bandwidthMode(float *spectrum,
+                                        int size,
+                                        float basefreq,
+                                        float *profile,
+                                        int profilesize,
+                                        float bwadjust);
+    void generatespectrum_otherModes(float *spectrum,
+                                     int size,
+                                     float basefreq);
+    void deletesamples();
+    void deletesample(int n);
 
-        OscilGen  *oscilgen;
-        Resonance *resonance;
-
-        struct {
-            int    size;
-            float  basefreq;
-            float *smp;
-        } sample[PAD_MAX_SAMPLES], newsample;
-
-    private:
-        void generatespectrum_bandwidthMode(float *spectrum,
-                                            int size,
-                                            float basefreq,
-                                            float *profile,
-                                            int profilesize,
-                                            float bwadjust);
-        void generatespectrum_otherModes(float *spectrum,
-                                         int size,
-                                         float basefreq);
-        void deletesamples();
-        void deletesample(int n);
-
-        FFTwrapper *fft;
-        pthread_mutex_t *mutex;
+    IFFTwrapper *fft;
+    pthread_mutex_t *mutex;
 };
-
-
 
 #endif

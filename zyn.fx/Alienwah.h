@@ -23,59 +23,58 @@
 #ifndef ALIENWAH_H
 #define ALIENWAH_H
 
-#include <complex>
 #include "Effect.h"
 #include "EffectLFO.h"
+#include <complex>
 
 using namespace std;
 
 #define MAX_ALIENWAH_DELAY 100
 
 /**"AlienWah" Effect*/
-class Alienwah:public Effect
+class Alienwah : public Effect
 {
-    public:
-        /**
+public:
+    /**
          * Constructor
          * @param insertion_ true for insertion Effect
          * @param efxoutl_ Pointer to Alienwah's left channel output buffer
          * @param efxoutr_ Pointer to Alienwah's left channel output buffer
          * @return Initialized Alienwah
          */
-        Alienwah(bool insertion_,
-                 float *const efxoutl_,
-                 float *const efxoutr_,
-                 SystemSettings* synth_);
-        virtual ~Alienwah();
-        void out(const Stereo<float *> &smp);
+    Alienwah(bool insertion_,
+             float *const efxoutl_,
+             float *const efxoutr_,
+             SystemSettings *synth_);
+    virtual ~Alienwah();
+    void out(const Stereo<float *> &smp);
 
-        void setpreset(unsigned char npreset);
-        void changepar(int npar, unsigned char value);
-        unsigned char getpar(int npar) const;
-        void cleanup(void);
+    void setpreset(unsigned char npreset);
+    void changepar(int npar, unsigned char value);
+    unsigned char getpar(int npar) const;
+    void cleanup(void);
 
-    private:
-        //Alienwah Parameters
-        EffectLFO     lfo;      //lfo-ul Alienwah
-        unsigned char Pvolume;
-        unsigned char Pdepth;   //the depth of the Alienwah
-        unsigned char Pfb;      //feedback
-        unsigned char Pdelay;
-        unsigned char Pphase;
+private:
+    //Alienwah Parameters
+    EffectLFO lfo; //lfo-ul Alienwah
+    unsigned char Pvolume;
+    unsigned char Pdepth; //the depth of the Alienwah
+    unsigned char Pfb;    //feedback
+    unsigned char Pdelay;
+    unsigned char Pphase;
 
+    //Control Parameters
+    void setvolume(unsigned char _Pvolume);
+    void setdepth(unsigned char _Pdepth);
+    void setfb(unsigned char _Pfb);
+    void setdelay(unsigned char _Pdelay);
+    void setphase(unsigned char _Pphase);
 
-        //Control Parameters
-        void setvolume(unsigned char _Pvolume);
-        void setdepth(unsigned char _Pdepth);
-        void setfb(unsigned char _Pfb);
-        void setdelay(unsigned char _Pdelay);
-        void setphase(unsigned char _Pphase);
-
-        //Internal Values
-        float fb, depth, phase;
-        complex<float> *oldl, *oldr;
-        complex<float>  oldclfol, oldclfor;
-        int oldk;
+    //Internal Values
+    float fb, depth, phase;
+    complex<float> *oldl, *oldr;
+    complex<float> oldclfol, oldclfor;
+    int oldk;
 };
 
 #endif

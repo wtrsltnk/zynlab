@@ -21,101 +21,101 @@
 #ifndef PAD_NOTE_H
 #define PAD_NOTE_H
 
-#include "SynthNote.h"
-#include "PADnoteParams.h"
 #include "Controller.h"
 #include "Envelope.h"
 #include "LFO.h"
-#include "../zyn.common/globals.h"
+#include "PADnoteParams.h"
+#include "SynthNote.h"
+#include <zyn.common/globals.h>
 
 /**The "pad" synthesizer*/
-class PADnote:public SynthNote
+class PADnote : public SynthNote
 {
-    public:
-        PADnote(PADnoteParameters *parameters,
-                Controller *ctl_,
-                SystemSettings* synth_,
-                float freq,
-                float velocity,
-                int portamento_,
-                int midinote,
-                bool besilent);
-        virtual ~PADnote();
+public:
+    PADnote(PADnoteParameters *parameters,
+            Controller *ctl_,
+            SystemSettings *synth_,
+            float freq,
+            float velocity,
+            int portamento_,
+            int midinote,
+            bool besilent);
+    virtual ~PADnote();
 
-        void legatonote(float freq, float velocity, int portamento_,
-                        int midinote, bool externcall);
+    void legatonote(float freq, float velocity, int portamento_,
+                    int midinote, bool externcall);
 
-        int noteout(float *outl, float *outr);
-        int finished() const;
-        void relasekey();
-    private:
-        void setup(float freq, float velocity, int portamento_,
-                   int midinote, bool legato = false);
-        void fadein(float *smps);
-        void computecurrentparameters();
-        bool finished_;
-        PADnoteParameters *pars;
+    int noteout(float *outl, float *outr);
+    int finished() const;
+    void relasekey();
 
-        int   poshi_l, poshi_r;
-        float poslo;
+private:
+    void setup(float freq, float velocity, int portamento_,
+               int midinote, bool legato = false);
+    void fadein(float *smps);
+    void computecurrentparameters();
+    bool finished_;
+    PADnoteParameters *pars;
 
-        float basefreq;
-        bool  firsttime, released;
+    int poshi_l, poshi_r;
+    float poslo;
 
-        int nsample, portamento;
+    float basefreq;
+    bool firsttime, released;
 
-        int Compute_Linear(float *outl,
-                           float *outr,
-                           int freqhi,
-                           float freqlo);
-        int Compute_Cubic(float *outl,
-                          float *outr,
-                          int freqhi,
-                          float freqlo);
+    int nsample, portamento;
 
+    int Compute_Linear(float *outl,
+                       float *outr,
+                       int freqhi,
+                       float freqlo);
+    int Compute_Cubic(float *outl,
+                      float *outr,
+                      int freqhi,
+                      float freqlo);
 
-        struct {
-            /******************************************
+    struct
+    {
+        /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
-            float Detune;  //cents
+        float Detune; //cents
 
-            Envelope *FreqEnvelope;
-            LFO      *FreqLfo;
+        Envelope *FreqEnvelope;
+        LFO *FreqLfo;
 
-            /********************************************
+        /********************************************
              *     AMPLITUDE GLOBAL PARAMETERS          *
              ********************************************/
-            float Volume;  // [ 0 .. 1 ]
+        float Volume; // [ 0 .. 1 ]
 
-            float Panning;  // [ 0 .. 1 ]
+        float Panning; // [ 0 .. 1 ]
 
-            Envelope *AmpEnvelope;
-            LFO      *AmpLfo;
+        Envelope *AmpEnvelope;
+        LFO *AmpLfo;
 
-            struct {
-                int   Enabled;
-                float initialvalue, dt, t;
-            } Punch;
+        struct
+        {
+            int Enabled;
+            float initialvalue, dt, t;
+        } Punch;
 
-            /******************************************
+        /******************************************
             *        FILTER GLOBAL PARAMETERS        *
             ******************************************/
-            class Filter * GlobalFilterL, *GlobalFilterR;
+        class Filter *GlobalFilterL, *GlobalFilterR;
 
-            float FilterCenterPitch;  //octaves
-            float FilterQ;
-            float FilterFreqTracking;
+        float FilterCenterPitch; //octaves
+        float FilterQ;
+        float FilterFreqTracking;
 
-            Envelope *FilterEnvelope;
+        Envelope *FilterEnvelope;
 
-            LFO *FilterLfo;
-        } NoteGlobalPar;
+        LFO *FilterLfo;
+    } NoteGlobalPar;
 
-
-        float globaloldamplitude, globalnewamplitude, velocity, realfreq;
-        Controller *ctl;
+    float globaloldamplitude, globalnewamplitude, velocity, realfreq;
+    Controller *ctl;
 };
-
 
 #endif

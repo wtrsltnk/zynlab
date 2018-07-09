@@ -28,16 +28,16 @@
 /**Marker for input/output driver*/
 class Engine
 {
-    public:
-        Engine();
-        virtual ~Engine();
+public:
+    Engine();
+    virtual ~Engine();
 
-        /**Start the Driver with all capabilities
+    /**Start the Driver with all capabilities
          * @return true on success*/
-        virtual bool Start() = 0;
-        /**Completely stop the Driver*/
-        virtual void Stop() = 0;
+    virtual bool Start() = 0;
+    /**Completely stop the Driver*/
+    virtual void Stop() = 0;
 
-        std::string name;
+    std::string name;
 };
 #endif

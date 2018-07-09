@@ -26,30 +26,31 @@
 #include "Effect.h"
 
 /**EQ Effect*/
-class EQ:public Effect
+class EQ : public Effect
 {
-    public:
-        EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings* synth_);
-        virtual ~EQ() {}
-        void out(const Stereo<float *> &smp);
-        void setpreset(unsigned char npreset);
-        void changepar(int npar, unsigned char value);
-        unsigned char getpar(int npar) const;
-        void cleanup(void);
-        float getfreqresponse(float freq);
+public:
+    EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
+    virtual ~EQ() {}
+    void out(const Stereo<float *> &smp);
+    void setpreset(unsigned char npreset);
+    void changepar(int npar, unsigned char value);
+    unsigned char getpar(int npar) const;
+    void cleanup(void);
+    float getfreqresponse(float freq);
 
-    private:
-        //Parameters
-        unsigned char Pvolume;
+private:
+    //Parameters
+    unsigned char Pvolume;
 
-        void setvolume(unsigned char _Pvolume);
+    void setvolume(unsigned char _Pvolume);
 
-        struct {
-            //parameters
-            unsigned char Ptype, Pfreq, Pgain, Pq, Pstages;
-            //internal values
-            class AnalogFilter * l, *r;
-        } filter[MAX_EQ_BANDS];
+    struct
+    {
+        //parameters
+        unsigned char Ptype, Pfreq, Pgain, Pq, Pstages;
+        //internal values
+        class AnalogFilter *l, *r;
+    } filter[MAX_EQ_BANDS];
 };
 
 #endif
