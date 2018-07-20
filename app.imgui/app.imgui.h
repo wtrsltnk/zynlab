@@ -11,8 +11,6 @@
 //Nio System
 #include "../zyn.nio/Nio.h"
 
-static Mixer *mixer;
-
 class AppThreeDee
 {
 private:
@@ -33,8 +31,11 @@ public:
     AppThreeDee(GLFWwindow *window, Mixer *mixer);
     virtual ~AppThreeDee();
 
+    void NoteOn();
+    void NoteOff();
+
     bool SetUp();
-    void Render();
+    void Render(double dt);
     void CleanUp();
 };
 

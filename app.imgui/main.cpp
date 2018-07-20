@@ -9,6 +9,8 @@
 
 using namespace std;
 
+static Mixer *mixer;
+
 static int Pexitprogram = 0;
 
 //cleanup on signaled exit
@@ -78,8 +80,6 @@ int main(int argc, char *argv[])
 
     Config::Current().init();
 
-    //    mixer->NoteOn(0, 60, 200);
-
     if (glfwInit() == GLFW_FALSE)
         return -1;
 
@@ -105,15 +105,20 @@ int main(int argc, char *argv[])
 
     AppThreeDee::ResizeCallback(window, 800, 600);
 
+    double lastTime = glfwGetTime();
+
     if (app.SetUp())
     {
         while (glfwWindowShouldClose(window) == 0)
         {
-            glfwWaitEvents();
+            glfwPollEvents();
+//            glfwWaitEvents();
 
             glClear(GL_COLOR_BUFFER_BIT);
 
-            app.Render();
+            double currTime = glfwGetTime();
+            app.Render(currTime - lastTime);
+            lastTime = currTime;
 
             glfwSwapBuffers(window);
         }

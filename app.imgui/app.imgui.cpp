@@ -135,11 +135,11 @@ static bool MyKnob(const char *label, float *p_value, float v_min, float v_max)
 
 static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max)
 {
-    float val = (p_value[0]) / 255.0f;
+    float val = (p_value[0]) / 128.0f;
 
-    if (MyKnob(label, &val, v_min / 255.0f, v_max / 255.0f))
+    if (MyKnob(label, &val, v_min / 128.0f, v_max / 128.0f))
     {
-        p_value[0] = val * 255;
+        p_value[0] = val * 128;
 
         return true;
     }
@@ -147,24 +147,111 @@ static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char
     return false;
 }
 
-bool show_demo_window = true;
+bool show_demo_window = false;
 bool show_another_window = true;
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+static bool selected[16] = {
+    true, false, false, false,
+    true, false, false, false,
+    true, false, false, false,
+    true, false, false, false,
+};
+static bool noteOn = false;
+static float BPM = 140.0f;
+static float speed = 1.0f / (BPM / 60.0f);
+static double timePast = -0.01f;
+static int step = 0;
+static bool running = false;
 
-void AppThreeDee::Render()
+void AppThreeDee::NoteOn()
 {
+    _mixer->Lock();
+    _mixer->NoteOn(0, 60, 200);
+    _mixer->Unlock();
+    noteOn = true;
+}
+
+void AppThreeDee::NoteOff()
+{
+    _mixer->Lock();
+    _mixer->NoteOff(0, 60);
+    _mixer->Unlock();
+    noteOn = false;
+}
+
+void AppThreeDee::Render(double dt)
+{
+    if (running)
+    {
+        timePast += dt;
+        if (timePast > (speed / 4.0) && !noteOn)
+        {
+            timePast -= (speed / 4.0);
+            step = (step+1) % 16;
+
+            if (selected[step % 16])
+            {
+                NoteOn();
+            }
+        }
+        else if (timePast > ((speed / 4.0)*0.8) && noteOn)
+        {
+            NoteOff();
+        }
+    }
+    else
+    {
+        timePast = speed;
+    }
+
     ImGui_ImplGlfwGL3_NewFrame();
 
     // 1. Show a simple window.
     // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
     {
-        MyKnobUchar("Master", &(_mixer->Pvolume), 0, 255);
+        ImGui::Columns(2, NULL, false);
+        unsigned char vol = _mixer->Pvolume;
+        if (MyKnobUchar("Master", &vol, 0, 128))
+        {
+            _mixer->setPvolume(vol);
+        }
+        ImGui::NextColumn();
+
+        if (ImGui::Selectable("Play", &running, 0, ImVec2(50.0f, 50.0f)))
+        {
+            step = 0;
+            NoteOff();
+        }
+
+        ImGui::Columns(1, NULL, false);
+        if (ImGui::SliderFloat("BPM", &BPM, 50.f, 200.f))
+        {
+            speed = 1.0f / (BPM / 60.0f);
+        }
     }
 
     // 2. Show another simple window. In most cases you will use an explicit Begin/End pair to name the window.
     if (show_another_window)
     {
         ImGui::Begin("Another Window", &show_another_window);
+
+        ImGui::Columns(16, NULL, false);
+        char label[32];
+        for (int i = 0; i < 16; i++)
+        {
+            ImGui::TextColored(i == step ? ImVec4(0, 1, 0, 1) : ImVec4(0, 0, 0, 1), "*");
+            ImGui::NextColumn();
+        }
+        for (int i = 0; i < 16; i++)
+        {
+            sprintf(label, "%d", i);
+            if (ImGui::Selectable(label, &selected[i], 0, ImVec2(30.0f, 50.0f)))
+            {
+            }
+            ImGui::NextColumn();
+        }
+        ImGui::Columns(1);
+
         ImGui::End();
     }
 
