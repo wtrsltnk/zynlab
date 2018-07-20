@@ -15,7 +15,8 @@
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
 #define LEN(a) (sizeof(a) / sizeof(a)[0])
 
-struct {
+struct
+{
     bool show_library = false;
     bool show_inspector = true;
     bool show_smartcontrols = false;
@@ -32,13 +33,10 @@ struct {
 
 } windowConfig;
 
-AppThreeDee::AppThreeDee(GLFWwindow* window, Mixer* mixer)
-    : _window(window)
-    , _mixer(mixer)
-    , _display_w(800)
-    , _display_h(600)
+AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
+    : _window(window), _mixer(mixer), _display_w(800), _display_h(600)
 {
-    glfwSetWindowUserPointer(this->_window, static_cast<void*>(this));
+    glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
 
 AppThreeDee::~AppThreeDee()
@@ -46,17 +44,17 @@ AppThreeDee::~AppThreeDee()
     glfwSetWindowUserPointer(this->_window, nullptr);
 }
 
-void AppThreeDee::KeyActionCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void AppThreeDee::KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    auto app = static_cast<AppThreeDee*>(glfwGetWindowUserPointer(window));
+    auto app = static_cast<AppThreeDee *>(glfwGetWindowUserPointer(window));
 
     if (app != nullptr)
         app->onKeyAction(key, scancode, action, mods);
 }
 
-void AppThreeDee::ResizeCallback(GLFWwindow* window, int width, int height)
+void AppThreeDee::ResizeCallback(GLFWwindow *window, int width, int height)
 {
-    auto app = static_cast<AppThreeDee*>(glfwGetWindowUserPointer(window));
+    auto app = static_cast<AppThreeDee *>(glfwGetWindowUserPointer(window));
 
     if (app != nullptr)
         app->onResize(width, height);
@@ -86,16 +84,16 @@ bool AppThreeDee::SetUp()
 // Implementing a simple custom widget using the public API.
 // You may also use the <imgui_internal.h> API to get raw access to more data/helpers, however the internal API isn't guaranteed to be forward compatible.
 // FIXME: Need at least proper label centering + clipping (internal functions RenderTextClipped provides both but api is flaky/temporary)
-static bool MyKnob(const char* label, float* p_value, float v_min, float v_max)
+static bool MyKnob(const char *label, float *p_value, float v_min, float v_max)
 {
-    ImGuiIO& io = ImGui::GetIO();
-    ImGuiStyle& style = ImGui::GetStyle();
+    ImGuiIO &io = ImGui::GetIO();
+    ImGuiStyle &style = ImGui::GetStyle();
 
     float radius_outer = 20.0f;
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImVec2 center = ImVec2(pos.x + radius_outer, pos.y + radius_outer);
     float line_height = ImGui::GetTextLineHeight();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
     float ANGLE_MIN = 3.141592f * 0.75f;
     float ANGLE_MAX = 3.141592f * 2.25f;
@@ -104,7 +102,8 @@ static bool MyKnob(const char* label, float* p_value, float v_min, float v_max)
     bool value_changed = false;
     bool is_active = ImGui::IsItemActive();
     bool is_hovered = ImGui::IsItemActive();
-    if (is_active && io.MouseDelta.x != 0.0f) {
+    if (is_active && io.MouseDelta.x != 0.0f)
+    {
         float step = (v_max - v_min) / 200.0f;
         *p_value += io.MouseDelta.x * step;
         if (*p_value < v_min)
@@ -123,7 +122,8 @@ static bool MyKnob(const char* label, float* p_value, float v_min, float v_max)
     draw_list->AddCircleFilled(center, radius_inner, ImGui::GetColorU32(is_active ? ImGuiCol_FrameBgActive : is_hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), 16);
     draw_list->AddText(ImVec2(pos.x, pos.y + radius_outer * 2 + style.ItemInnerSpacing.y), ImGui::GetColorU32(ImGuiCol_Text), label);
 
-    if (is_active || is_hovered) {
+    if (is_active || is_hovered)
+    {
         ImGui::SetNextWindowPos(ImVec2(pos.x - style.WindowPadding.x, pos.y - line_height - style.ItemInnerSpacing.y - style.WindowPadding.y));
         ImGui::BeginTooltip();
         ImGui::Text("%.3f", *p_value);
@@ -133,11 +133,12 @@ static bool MyKnob(const char* label, float* p_value, float v_min, float v_max)
     return value_changed;
 }
 
-static bool MyKnobUchar(const char* label, unsigned char* p_value, unsigned char v_min, unsigned char v_max)
+static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max)
 {
     float val = (p_value[0]) / 255.0f;
 
-    if (MyKnob(label, &val, v_min / 255.0f, v_max / 255.0f)) {
+    if (MyKnob(label, &val, v_min / 255.0f, v_max / 255.0f))
+    {
         p_value[0] = val * 255;
 
         return true;
@@ -147,32 +148,12 @@ static bool MyKnobUchar(const char* label, unsigned char* p_value, unsigned char
 }
 
 bool show_demo_window = true;
-bool show_another_window = false;
+bool show_another_window = true;
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 void AppThreeDee::Render()
 {
     ImGui_ImplGlfwGL3_NewFrame();
-
-    if (ImGui::BeginMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Instrument"))
-        {
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Misc"))
-        {
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("NIO"))
-        {
-            ImGui::EndMenu();
-        }
-    }
 
     // 1. Show a simple window.
     // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
@@ -181,14 +162,15 @@ void AppThreeDee::Render()
     }
 
     // 2. Show another simple window. In most cases you will use an explicit Begin/End pair to name the window.
-    if (show_another_window) {
+    if (show_another_window)
+    {
         ImGui::Begin("Another Window", &show_another_window);
-        ImGui::Text("Hello from another window!");
         ImGui::End();
     }
 
     // 3. Show the ImGui demo window. Most of the sample code is in ImGui::ShowDemoWindow().
-    if (show_demo_window) {
+    if (show_demo_window)
+    {
         ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); // Normally user code doesn't need/want to call this because positions are saved in .ini file anyway. Here we just want to make the demo initial state a bit more friendly!
         ImGui::ShowDemoWindow(&show_demo_window);
     }

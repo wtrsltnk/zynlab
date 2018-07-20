@@ -62,12 +62,12 @@ public:
     int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
 
     /**
-         * Initialize a portamento
-         *
-         * @param oldfreq Starting frequency of the portamento (Hz)
-         * @param newfreq Ending frequency of the portamento (Hz)
-         * @param legatoflag true when legato is in progress, false otherwise
-         * @returns 1 if properly initialized, 0 otherwise*/
+     * Initialize a portamento
+     *
+     * @param oldfreq Starting frequency of the portamento (Hz)
+     * @param newfreq Ending frequency of the portamento (Hz)
+     * @param legatoflag true when legato is in progress, false otherwise
+     * @returns 1 if properly initialized, 0 otherwise*/
     int initportamento(float oldfreq, float newfreq, bool legatoflag);
     /**Update portamento's freqrap to next value based upon dx*/
     void updateportamento();
@@ -171,27 +171,27 @@ public:
         unsigned char pitchthreshtype;
 
         /**this value represent how the portamento time is reduced
-             * 0      - for down portamento
-             * 1-63   - the up portamento's time is smaller than the down portamento
-             * 64     - the portamento time is always the same
-             * 64-126 - the down portamento's time is smaller than the up portamento
-             * 127    - for upper portamento
-             * 'up portamento'   means when the frequency is rising
-             * (eg: the portamento is from 200Hz to 300 Hz)
-             * 'down portamento' means when the frequency is lowering
-             * (eg: the portamento is from 300Hz to 200 Hz)
-             */
+         * 0      - for down portamento
+         * 1-63   - the up portamento's time is smaller than the down portamento
+         * 64     - the portamento time is always the same
+         * 64-126 - the down portamento's time is smaller than the up portamento
+         * 127    - for upper portamento
+         * 'up portamento'   means when the frequency is rising
+         * (eg: the portamento is from 200Hz to 300 Hz)
+         * 'down portamento' means when the frequency is lowering
+         * (eg: the portamento is from 300Hz to 200 Hz)
+         */
         unsigned char updowntimestretch;
         /**this value is used to compute the actual portamento
-             *
-             * This is a multiplyer to change the frequency of the newer
-             * frequency to fit the profile of the portamento.
-             * This will be linear with respect to x.*/
+         *
+         * This is a multiplyer to change the frequency of the newer
+         * frequency to fit the profile of the portamento.
+         * This will be linear with respect to x.*/
         float freqrap;
         /**this is used by the Part for knowing which note uses the portamento*/
         int noteusing;
         /**if a the portamento is used by a note
-             * \todo see if this can be a bool*/
+         * \todo see if this can be a bool*/
         int used;
 
         //Internal data

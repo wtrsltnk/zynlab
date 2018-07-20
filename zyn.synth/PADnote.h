@@ -77,16 +77,16 @@ private:
     struct
     {
         /******************************************
-            *     FREQUENCY GLOBAL PARAMETERS        *
-            ******************************************/
+        *     FREQUENCY GLOBAL PARAMETERS        *
+        ******************************************/
         float Detune; //cents
 
         Envelope *FreqEnvelope;
         LFO *FreqLfo;
 
         /********************************************
-             *     AMPLITUDE GLOBAL PARAMETERS          *
-             ********************************************/
+         *     AMPLITUDE GLOBAL PARAMETERS          *
+         ********************************************/
         float Volume; // [ 0 .. 1 ]
 
         float Panning; // [ 0 .. 1 ]
@@ -101,8 +101,8 @@ private:
         } Punch;
 
         /******************************************
-            *        FILTER GLOBAL PARAMETERS        *
-            ******************************************/
+        *        FILTER GLOBAL PARAMETERS        *
+        ******************************************/
         class Filter *GlobalFilterL, *GlobalFilterR;
 
         float FilterCenterPitch; //octaves

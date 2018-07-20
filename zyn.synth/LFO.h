@@ -33,10 +33,10 @@ class LFO
 
 public:
     /**Constructor
-         *
-         * @param lfopars pointer to a LFOParams object
-         * @param basefreq base frequency of LFO
-         */
+     *
+     * @param lfopars pointer to a LFOParams object
+     * @param basefreq base frequency of LFO
+     */
     LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_);
     /**Deconstructor*/
     virtual ~LFO();

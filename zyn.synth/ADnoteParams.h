@@ -207,10 +207,11 @@ struct ADnoteVoiceParam
     *   AMPLITUDE PARAMETERS   *
     ***************************/
 
-    /* Panning       0 - random
+    /* Panning
+             0 - random
              1 - left
-                64 - center
-               127 - right
+            64 - center
+           127 - right
        The Panning is ignored if the instrument is mono */
     unsigned char PPanning;
 

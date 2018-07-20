@@ -11,7 +11,6 @@ add_library(zyn.common STATIC
     PresetsArray.h
     PresetsStore.cpp
     PresetsStore.h
-    Stereo.cpp
     Stereo.h
     Util.cpp
     Util.h

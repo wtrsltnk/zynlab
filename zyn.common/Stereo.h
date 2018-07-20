@@ -18,6 +18,7 @@
   along with this program; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
+
 #ifndef STEREO_H
 #define STEREO_H
 
@@ -28,7 +29,7 @@ public:
     Stereo(const T &left, const T &right) : l(left), r(right) {}
 
     /**Initializes Stereo with left and right set to val
-         * @param val the value for both channels*/
+     * @param val the value for both channels*/
     Stereo(const T &val) : l(val), r(val) {}
     ~Stereo() {}
 
@@ -42,5 +43,5 @@ public:
     //data
     T l, r;
 };
-#include "Stereo.cpp"
+
 #endif

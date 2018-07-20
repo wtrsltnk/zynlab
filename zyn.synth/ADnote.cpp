@@ -79,11 +79,8 @@ ADnote::ADnote(ADnoteParameters *pars,
     {
         NoteGlobalPar.Punch.Enabled = 1;
         NoteGlobalPar.Punch.t = 1.0f; //start from 1.0f and to 0.0f
-        NoteGlobalPar.Punch.initialvalue =
-            ((powf(10, 1.5f * pars->GlobalPar.PPunchStrength / 127.0f) - 1.0f) * VelF(velocity,
-                                                                                      pars->GlobalPar.PPunchVelocitySensing));
-        float time =
-            powf(10, 3.0f * pars->GlobalPar.PPunchTime / 127.0f) / 10000.0f; //0.1f .. 100 ms
+        NoteGlobalPar.Punch.initialvalue = ((powf(10, 1.5f * pars->GlobalPar.PPunchStrength / 127.0f) - 1.0f) * VelF(velocity, pars->GlobalPar.PPunchVelocitySensing));
+        float time = powf(10, 3.0f * pars->GlobalPar.PPunchTime / 127.0f) / 10000.0f; //0.1f .. 100 ms
         float stretch = powf(440.0f / freq,
                              pars->GlobalPar.PPunchStretch / 64.0f);
         NoteGlobalPar.Punch.dt = 1.0f / (time * this->_synth->samplerate_f * stretch);

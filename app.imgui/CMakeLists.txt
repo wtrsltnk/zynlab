@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(app.imgui)
 
 find_package(GLFW3)
+
 if(GLFW3_FOUND)
     find_package(OpenGL REQUIRED)
     find_package(GLM REQUIRED)

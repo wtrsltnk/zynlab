@@ -3,7 +3,6 @@
 #include <GL/glextl.h>
 #include <GLFW/glfw3.h>
 
-#include <imgui.h>
 #include "imgui_impl_glfw_gl3.h"
 
 #include "app.imgui.h"
@@ -29,7 +28,7 @@ void initprogram(void)
     /* Get the settings from the Config*/
     synth->samplerate = Config::Current().cfg.SampleRate;
     synth->buffersize = Config::Current().cfg.SoundBufferSize;
-    synth->oscilsize  = Config::Current().cfg.OscilSize;
+    synth->oscilsize = Config::Current().cfg.OscilSize;
 
     synth->alias();
 
@@ -79,12 +78,12 @@ int main(int argc, char *argv[])
 
     Config::Current().init();
 
-//    mixer->NoteOn(0, 60, 200);
+    //    mixer->NoteOn(0, 60, 200);
 
     if (glfwInit() == GLFW_FALSE)
         return -1;
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "zynlab", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "zynlab", NULL, NULL);
     if (window == 0)
     {
         glfwTerminate();
@@ -97,12 +96,12 @@ int main(int argc, char *argv[])
     ImGui_ImplGlfwGL3_Init(window, true);
 
     glfwSetKeyCallback(window, AppThreeDee::KeyActionCallback);
-//    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
+    //    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
 
     glfwSetWindowSizeCallback(window, AppThreeDee::ResizeCallback);
     glfwMakeContextCurrent(window);
 
-    glExtLoadAll((PFNGLGETPROC*)glfwGetProcAddress);
+    glExtLoadAll((PFNGLGETPROC *)glfwGetProcAddress);
 
     AppThreeDee::ResizeCallback(window, 800, 600);
 
@@ -117,7 +116,6 @@ int main(int argc, char *argv[])
             app.Render();
 
             glfwSwapBuffers(window);
-
         }
         app.CleanUp();
     }

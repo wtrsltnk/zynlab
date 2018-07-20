@@ -23,9 +23,8 @@
 #ifndef PRESETS_H
 #define PRESETS_H
 
-#include "XMLwrapper.h"
-
 #include "PresetsStore.h"
+#include "XMLwrapper.h"
 
 /**Presets and Clipboard management*/
 class Presets

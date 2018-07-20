@@ -67,7 +67,8 @@ public:
     unsigned char PA_dt, PD_dt, PR_dt,
         PA_val, PD_val, PS_val, PR_val;
 
-    int Envmode; // 1 for ADSR parameters (linear amplitude)
+    int Envmode;
+    // 1 for ADSR parameters (linear amplitude)
     // 2 for ADSR_dB parameters (dB amplitude)
     // 3 for ASR parameters (frequency LFO)
     // 4 for ADSR_filter parameters (filter parameters)
