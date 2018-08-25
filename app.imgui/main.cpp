@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     if (glfwInit() == GLFW_FALSE)
         return -1;
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "zynlab", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1400, 600, "zynlab", NULL, NULL);
     if (window == 0)
     {
         glfwTerminate();

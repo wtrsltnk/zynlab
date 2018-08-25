@@ -50,8 +50,8 @@ PADnoteParameters::PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, 
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
 
     for (int i = 0; i < PAD_MAX_SAMPLES; ++i)
-        sample[i].smp = NULL;
-    newsample.smp = NULL;
+        sample[i].smp = nullptr;
+    newsample.smp = nullptr;
 
     defaults();
 }
@@ -138,10 +138,10 @@ void PADnoteParameters::deletesample(int n)
 {
     if ((n < 0) || (n >= PAD_MAX_SAMPLES))
         return;
-    if (sample[n].smp != NULL)
+    if (sample[n].smp != nullptr)
     {
         delete[] sample[n].smp;
-        sample[n].smp = NULL;
+        sample[n].smp = nullptr;
     }
     sample[n].size = 0;
     sample[n].basefreq = 440.0f;
@@ -504,22 +504,22 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
         spectrum[i] = 0.0f;
 
     float harmonics[this->_synth->oscilsize / 2];
-    for (int i = 0; i < this->_synth->oscilsize / 2; ++i)
+    for (unsigned int i = 0; i < this->_synth->oscilsize / 2; ++i)
         harmonics[i] = 0.0f;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
 
     //normalize
     float max = 0.0f;
-    for (int i = 0; i < this->_synth->oscilsize / 2; ++i)
+    for (unsigned int i = 0; i < this->_synth->oscilsize / 2; ++i)
         if (harmonics[i] > max)
             max = harmonics[i];
     if (max < 0.000001f)
         max = 1;
-    for (int i = 0; i < this->_synth->oscilsize / 2; ++i)
+    for (unsigned int i = 0; i < this->_synth->oscilsize / 2; ++i)
         harmonics[i] /= max;
 
-    for (int nh = 1; nh < this->_synth->oscilsize / 2; ++nh)
+    for (unsigned int nh = 1; nh < this->_synth->oscilsize / 2; ++nh)
     { //for each harmonic
         float realfreq = getNhr(nh) * basefreq;
 
@@ -651,7 +651,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
             sample[nsample].size = samplesize;
             sample[nsample].basefreq = basefreq * basefreqadjust;
         }
-        newsample.smp = NULL;
+        newsample.smp = nullptr;
     }
     delete[] fftfreqs;
     delete[] spectrum;
@@ -676,7 +676,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
     basefilename += "_PADsynth_";
     for (int k = 0; k < PAD_MAX_SAMPLES; ++k)
     {
-        if (sample[k].smp == NULL)
+        if (sample[k].smp == nullptr)
             continue;
         char tmpstr[20];
         snprintf(tmpstr, 20, "_%02d", k + 1);

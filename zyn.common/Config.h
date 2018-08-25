@@ -42,7 +42,7 @@ public:
     struct
     {
         char *LinuxOSSWaveOutDev, *LinuxOSSSeqInDev;
-        int SampleRate, SoundBufferSize, OscilSize, SwapStereo;
+        unsigned int SampleRate, SoundBufferSize, OscilSize, SwapStereo;
         int WindowsWaveOutId, WindowsMidiInId;
         int BankUIAutoClose;
         int DumpNotesToFile, DumpAppend;

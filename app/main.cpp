@@ -22,7 +22,7 @@
 
 #include <FL/Fl.H>
 
-#include "UI/common.H"
+#include "ui/common.H"
 
 #include <iostream>
 #include <cmath>
@@ -59,7 +59,7 @@ using namespace std;
 static Mixer* mixer;
 static Sequencer* seq;
 //SYNTH_T* synth;
-static int swaplr = 0; //1 for left-right swapping
+static unsigned int swaplr = 0; //1 for left-right swapping
 
 static int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
 
@@ -96,8 +96,9 @@ int exitprogram()
     delete ui;
 #endif // ENABLE_FLTKGUI
 
-    delete mixer->_synth;
+    auto synth = mixer->_synth;
     delete mixer;
+    delete synth;
     FFT_cleanup();
 
     return 0;
@@ -130,27 +131,27 @@ int main(int argc, char *argv[])
 
     synth->alias(); //build aliases
 
-    sprng(time(NULL));
+    sprng(static_cast<unsigned int>(time(nullptr)));
 
     /* Parse command-line options */
     struct option opts[] = {
-        { "load", 2, NULL, 'l' },
-        { "load-instrument", 2, NULL, 'L' },
-        { "sample-rate", 2, NULL, 'r' },
-        { "buffer-size", 2, NULL, 'b' },
-        { "oscil-size", 2, NULL, 'o' },
-        { "dump", 2, NULL, 'D' },
-        { "swap", 2, NULL, 'S' },
-        { "no-gui", 2, NULL, 'U' },
-        { "dummy", 2, NULL, 'Y' },
-        { "help", 2, NULL, 'h' },
-        { "version", 2, NULL, 'v' },
-        { "named", 1, NULL, 'N' },
-        { "auto-connect", 0, NULL, 'a' },
-        { "output", 1, NULL, 'O' },
-        { "input", 1, NULL, 'I' },
-        { "exec-after-init", 1, NULL, 'e' },
-        { 0, 0, 0, 0 }
+        { "load", 2, nullptr, 'l' },
+        { "load-instrument", 2, nullptr, 'L' },
+        { "sample-rate", 2, nullptr, 'r' },
+        { "buffer-size", 2, nullptr, 'b' },
+        { "oscil-size", 2, nullptr, 'o' },
+        { "dump", 2, nullptr, 'D' },
+        { "swap", 2, nullptr, 'S' },
+        { "no-gui", 2, nullptr, 'U' },
+        { "dummy", 2, nullptr, 'Y' },
+        { "help", 2, nullptr, 'h' },
+        { "version", 2, nullptr, 'v' },
+        { "named", 1, nullptr, 'N' },
+        { "auto-connect", 0, nullptr, 'a' },
+        { "output", 1, nullptr, 'O' },
+        { "input", 1, nullptr, 'I' },
+        { "exec-after-init", 1, nullptr, 'e' },
+        { nullptr, 0, nullptr, 0 }
     };
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
@@ -158,7 +159,7 @@ int main(int argc, char *argv[])
     string loadfile, loadinstrument, execAfterInit;
 
     while(1) {
-        int tmp = 0;
+        unsigned int tmp = 0;
 
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
 #define GETOP(x) if(optarguments) \
     x = optarguments
 #define GETOPNUM(x) if(optarguments) \
-    x = atoi(optarguments)
+    x = static_cast<unsigned int>(atoi(optarguments))
 
 
         if(opt == -1)
@@ -218,12 +219,12 @@ int main(int argc, char *argv[])
             break;
         case 'o':
             if(optarguments)
-                synth->oscilsize = tmp = atoi(optarguments);
+                synth->oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
             if(synth->oscilsize < MAX_AD_HARMONICS * 2)
                 synth->oscilsize = MAX_AD_HARMONICS * 2;
             synth->oscilsize =
-                    (int) powf(2,
-                               ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f)));
+                    static_cast<unsigned int>(powf(2,
+                               ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f))));
             if(tmp != synth->oscilsize)
                 cerr
                         <<
@@ -346,7 +347,7 @@ int main(int argc, char *argv[])
 
     while(Pexitprogram == 0) {
 #ifdef ENABLE_FLTKGUI
-        Fl::wait(0.02f);
+        Fl::wait(0.02);
 #else // ENABLE_FLTKGUI
         usleep(100000);
 #endif // ENABLE_FLTKGUI

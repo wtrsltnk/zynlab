@@ -11,10 +11,12 @@ if(GLFW3_FOUND)
     set(app_imgui_SRCS
         main.cpp
         app.imgui.cpp
+        ImSequencer.cpp
         )
 
     set(app_imgui_HDRS
         app.imgui.h
+        ImSequencer.h
         )
 
     set(app_imgui_imgui_SRCS

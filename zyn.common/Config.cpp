@@ -31,6 +31,8 @@
 
 using namespace std;
 
+IMixer::~IMixer() {}
+
 Config::Config()
 {}
 
@@ -160,19 +162,19 @@ void Config::readConfig(const char *filename)
         return;
     if (xmlcfg.enterbranch("CONFIGURATION"))
     {
-        cfg.SampleRate = xmlcfg.getpar("sample_rate",
+        cfg.SampleRate = xmlcfg.getparunsigned("sample_rate",
                                        cfg.SampleRate,
                                        4000,
                                        1024000);
-        cfg.SoundBufferSize = xmlcfg.getpar("sound_buffer_size",
+        cfg.SoundBufferSize = xmlcfg.getparunsigned("sound_buffer_size",
                                             cfg.SoundBufferSize,
                                             16,
                                             8192);
-        cfg.OscilSize = xmlcfg.getpar("oscil_size",
+        cfg.OscilSize = xmlcfg.getparunsigned("oscil_size",
                                       cfg.OscilSize,
                                       MAX_AD_HARMONICS * 2,
                                       131072);
-        cfg.SwapStereo = xmlcfg.getpar("swap_stereo",
+        cfg.SwapStereo = xmlcfg.getparunsigned("swap_stereo",
                                        cfg.SwapStereo,
                                        0,
                                        1);
@@ -258,7 +260,7 @@ void Config::readConfig(const char *filename)
         xmlcfg.exitbranch();
     }
 
-    cfg.OscilSize = (int)powf(2, ceil(logf(cfg.OscilSize - 1.0f) / logf(2.0f)));
+    cfg.OscilSize = static_cast<unsigned int>(powf(2, ceilf(logf(cfg.OscilSize - 1.0f) / logf(2.0f))));
 }
 
 void Config::saveConfig(const char *filename)
@@ -267,10 +269,10 @@ void Config::saveConfig(const char *filename)
 
     xmlcfg->beginbranch("CONFIGURATION");
 
-    xmlcfg->addpar("sample_rate", cfg.SampleRate);
-    xmlcfg->addpar("sound_buffer_size", cfg.SoundBufferSize);
-    xmlcfg->addpar("oscil_size", cfg.OscilSize);
-    xmlcfg->addpar("swap_stereo", cfg.SwapStereo);
+    xmlcfg->addparunsigned("sample_rate", cfg.SampleRate);
+    xmlcfg->addparunsigned("sound_buffer_size", cfg.SoundBufferSize);
+    xmlcfg->addparunsigned("oscil_size", cfg.OscilSize);
+    xmlcfg->addparunsigned("swap_stereo", cfg.SwapStereo);
     xmlcfg->addpar("bank_window_auto_close", cfg.BankUIAutoClose);
 
     xmlcfg->addpar("dump_notes_to_file", cfg.DumpNotesToFile);
@@ -326,10 +328,10 @@ void Config::saveConfig(const char *filename)
 void Config::getConfigFileName(char *name, int namesize)
 {
     name[0] = 0;
-#ifndef _WIN32
-    snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
-#else
+#ifdef _WIN32
     char temp[FILENAME_MAX];
-    snprintf(name, namesize, "%s%s", getcwd(temp, FILENAME_MAX), "\\.zynaddsubfxXML.cfg");
+    snprintf(name, static_cast<size_t>(namesize), "%s%s", getcwd(temp, FILENAME_MAX), "\\.zynaddsubfxXML.cfg");
+#else
+    snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
 #endif
 }

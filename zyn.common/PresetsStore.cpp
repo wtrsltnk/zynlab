@@ -36,13 +36,13 @@ PresetsStore presetsstore;
 
 PresetsStore::PresetsStore()
 {
-    clipboard.data = NULL;
+    clipboard.data = nullptr;
     clipboard.type[0] = 0;
 }
 
 PresetsStore::~PresetsStore()
 {
-    if (clipboard.data != NULL)
+    if (clipboard.data != nullptr)
         free(clipboard.data);
     clearpresets();
 }
@@ -52,14 +52,14 @@ PresetsStore::~PresetsStore()
 void PresetsStore::copyclipboard(XMLwrapper *xml, char *type)
 {
     strcpy(clipboard.type, type);
-    if (clipboard.data != NULL)
+    if (clipboard.data != nullptr)
         free(clipboard.data);
     clipboard.data = xml->getXMLdata();
 }
 
 bool PresetsStore::pasteclipboard(XMLwrapper *xml)
 {
-    if (clipboard.data != NULL)
+    if (clipboard.data != nullptr)
         xml->putXMLdata(clipboard.data);
     else
         return false;
@@ -70,8 +70,8 @@ bool PresetsStore::checkclipboardtype(const char *type)
 {
     //makes LFO's compatible
     if ((strstr(type,
-                "Plfo") != NULL) &&
-        (strstr(clipboard.type, "Plfo") != NULL))
+                "Plfo") != nullptr) &&
+        (strstr(clipboard.type, "Plfo") != nullptr))
         return true;
     return strcmp(type, clipboard.type) == 0;
 }
@@ -104,7 +104,7 @@ void PresetsStore::rescanforpresets(const string &type)
         //open directory
         string dirname = Config::Current().cfg.presetsDirList[i];
         DIR *dir = opendir(dirname.c_str());
-        if (dir == NULL)
+        if (dir == nullptr)
             continue;
         struct dirent *fn;
 

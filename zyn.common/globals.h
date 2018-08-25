@@ -151,7 +151,15 @@
 
 #define ZERO(data, size)            \
     {                               \
-        char *data_ = (char *)data; \
+        char *data_ = static_cast<char *>(data); \
+        for (int i = 0;             \
+             i < size;              \
+             i++)                   \
+            data_[i] = 0;           \
+    }
+#define ZEROUNSIGNED(data, size)    \
+    {                               \
+        unsigned char *data_ = static_cast<unsigned char *>(data); \
         for (int i = 0;             \
              i < size;              \
              i++)                   \
@@ -159,7 +167,7 @@
     }
 #define ZERO_float(data, size)        \
     {                                 \
-        float *data_ = (float *)data; \
+        float *data_ = static_cast<float *>(data); \
         for (int i = 0;               \
              i < size;                \
              i++)                     \
@@ -245,20 +253,20 @@ public:
      * If you increase this you'll ecounter big latencies, but if you
      * decrease this the CPU requirements gets high.
      */
-    int buffersize;
+    unsigned int buffersize;
 
     /**
      * The size of ADnote Oscillator
      * Decrease this => poor quality
      * Increase this => CPU requirements gets high (only at start of the note)
      */
-    int oscilsize;
+    unsigned int oscilsize;
 
     //Alias for above terms
     float samplerate_f;
     float halfsamplerate_f;
     float buffersize_f;
-    int bufferbytes;
+    unsigned int bufferbytes;
     float oscilsize_f;
 
     inline void alias(void)
@@ -274,6 +282,7 @@ public:
 class IMixer
 {
 public:
+    virtual ~IMixer();
     // Mutex
     virtual void Lock() = 0;
     virtual void Unlock() = 0;

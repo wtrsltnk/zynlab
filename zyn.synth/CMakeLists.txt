@@ -50,6 +50,12 @@ target_link_libraries(zyn.synth
     ${FFTW_LIBRARIES}
     )
 
+target_compile_features(zyn.synth
+    PRIVATE cxx_auto_type
+    PRIVATE cxx_nullptr
+    PRIVATE cxx_lambdas
+    )
+
 install(
     TARGETS
         zyn.synth

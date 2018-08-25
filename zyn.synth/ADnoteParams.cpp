@@ -194,7 +194,7 @@ void ADnoteParameters::EnableVoice(int nvoice)
 void ADnoteVoiceParam::enable(IFFTwrapper *fft, Resonance *Reson, SystemSettings *synth_)
 {
     OscilSmp = new OscilGen(fft, Reson, synth_);
-    FMSmp = new OscilGen(fft, NULL, synth_);
+    FMSmp = new OscilGen(fft, nullptr, synth_);
 
     AmpEnvelope = new EnvelopeParams(64, 1);
     AmpEnvelope->ADSRinit_dB(0, 100, 127, 100);

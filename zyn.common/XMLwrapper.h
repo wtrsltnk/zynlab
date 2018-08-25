@@ -66,6 +66,13 @@ public:
     void addpar(const std::string &name, int val);
 
     /**
+     * Add simple parameter.
+     * @param name The name of the mXML node.
+     * @param val  The string value of the mXml node
+     */
+    void addparunsigned(const std::string &name, unsigned int val);
+
+    /**
      * Adds a realtype parameter.
      * @param name The name of the mXML node.
      * @param val  The float value of the node.
@@ -159,6 +166,19 @@ public:
      */
     int getpar(const std::string &name, int defaultpar, int min,
                int max) const;
+
+    /**
+     * Returns the integer value stored in node name.
+     * It returns the integer value between the limits min and max.
+     * If min==max==0, then the value will not be limited.
+     * If there is no location named name, then defaultpar will be returned.
+     * @param name The parameter name.
+     * @param defaultpar The default value if the real value is not found.
+     * @param min The minimum return value.
+     * @param max The maximum return value.
+     */
+    unsigned int getparunsigned(const std::string &name, unsigned int defaultpar, unsigned int min,
+               unsigned int max) const;
 
     /**
      * Returns the integer value stored in the node with range [0,127].

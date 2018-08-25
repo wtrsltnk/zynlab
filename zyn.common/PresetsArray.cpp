@@ -42,15 +42,15 @@ void PresetsArray::copy(const char *name)
     XMLwrapper *xml = new XMLwrapper();
 
     //used only for the clipboard
-    if (name == NULL)
+    if (name == nullptr)
         xml->minimal = false;
 
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
     if (nelement != -1)
         strcat(type, "n");
-    if (name == NULL)
-        if (strstr(type, "Plfo") != NULL)
+    if (name == nullptr)
+        if (strstr(type, "Plfo") != nullptr)
             strcpy(type, "Plfo");
     ;
 
@@ -61,7 +61,7 @@ void PresetsArray::copy(const char *name)
         add2XMLsection(xml, nelement);
     xml->endbranch();
 
-    if (name == NULL)
+    if (name == nullptr)
         presetsstore.copyclipboard(xml, type);
     else
         presetsstore.copypreset(xml, type, name);
@@ -77,7 +77,7 @@ void PresetsArray::paste(int npreset)
     if (nelement != -1)
         strcat(type, "n");
     if (npreset == 0)
-        if (strstr(type, "Plfo") != NULL)
+        if (strstr(type, "Plfo") != nullptr)
             strcpy(type, "Plfo");
     ;
 

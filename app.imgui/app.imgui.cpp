@@ -4,7 +4,7 @@
 #include "imgui_impl_glfw_gl3.h"
 
 #include "font-icons.h"
-
+#include <zyn.mixer/Instrument.h>
 #include <algorithm>
 
 #define MAX_VERTEX_BUFFER 512 * 1024
@@ -34,8 +34,9 @@ struct
 } windowConfig;
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
-    : _window(window), _mixer(mixer), _display_w(800), _display_h(600)
+    : _window(window), _mixer(mixer)
 {
+    glfwGetWindowSize(window, &_display_w, &_display_h);
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
 
@@ -147,7 +148,29 @@ static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char
     return false;
 }
 
-bool show_demo_window = false;
+#define CHANNEL_COUNT 16
+const char *channels[] = {
+    "Bass Drum",
+    "Snare Drum",
+    "Low Tom",
+    "Mid Tom",
+    "Hi Tom",
+    "Rim Shot",
+    "hand ClaP",
+    "Cow Bell",
+    "CYmbal",
+    "Open Hihat",
+    "Closed Hihat",
+    "Low Conga",
+    "Mid Conga",
+    "Hi Conga",
+    "CLaves",
+    "MAracas",
+};
+
+static bool selectedChannel[CHANNEL_COUNT] { true, false };
+
+bool show_channels_window = true;
 bool show_another_window = true;
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 static bool selected[16] = {
@@ -230,13 +253,76 @@ void AppThreeDee::Render(double dt)
         }
     }
 
+    char label[32];
+    if (show_channels_window)
+    {
+        ImGui::Begin("Channels Window", &show_channels_window);
+
+        ImGui::Columns(CHANNEL_COUNT, NULL, false);
+        for (int i = 0; i < CHANNEL_COUNT; i++)
+        {
+            sprintf(label, "child%d", i);
+            ImGui::BeginChild(label);
+
+            sprintf(label, "LEVEL %d", i);
+            unsigned char vol = _mixer->part[i]->Pvolume;
+            if (MyKnobUchar(label, &vol, 0, 128))
+            {
+                _mixer->part[i]->Pvolume = vol;
+            }
+
+            if (i < 5 || i == 8 || i == 11 || i == 12 || i == 13)
+            {
+                if (i == 0 || i == 1 || i == 8)
+                {
+                    sprintf(label, "TONE %d", i);
+                }
+                else
+                {
+                    sprintf(label, "TUNING %d", i);
+                }
+                unsigned char vol = _mixer->part[i]->Pvolume;
+                if (MyKnobUchar(label, &vol, 0, 128))
+                {
+                    _mixer->part[i]->Pvolume = vol;
+                }
+            }
+            if (i < 2 || i == 8 || i == 9)
+            {
+                if (i == 1)
+                {
+                    sprintf(label, "SNAPPY %d", i);
+                }
+                else
+                {
+                    sprintf(label, "DECAY %d", i);
+                }
+                unsigned char vol = _mixer->part[i]->Pvolume;
+                if (MyKnobUchar(label, &vol, 0, 128))
+                {
+                    _mixer->part[i]->Pvolume = vol;
+                }
+            }
+
+            if (ImGui::Selectable(channels[i], &selectedChannel[i], 0))
+            {
+                for (int j = 0; j < CHANNEL_COUNT; ++j) if (j != i) selectedChannel[j] = false;
+            }
+            ImGui::EndChild();
+
+            ImGui::NextColumn();
+        }
+        ImGui::Columns(1);
+
+        ImGui::End();
+    }
+
     // 2. Show another simple window. In most cases you will use an explicit Begin/End pair to name the window.
     if (show_another_window)
     {
         ImGui::Begin("Another Window", &show_another_window);
 
         ImGui::Columns(16, NULL, false);
-        char label[32];
         for (int i = 0; i < 16; i++)
         {
             ImGui::TextColored(i == step ? ImVec4(0, 1, 0, 1) : ImVec4(0, 0, 0, 1), "*");
@@ -253,13 +339,6 @@ void AppThreeDee::Render(double dt)
         ImGui::Columns(1);
 
         ImGui::End();
-    }
-
-    // 3. Show the ImGui demo window. Most of the sample code is in ImGui::ShowDemoWindow().
-    if (show_demo_window)
-    {
-        ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); // Normally user code doesn't need/want to call this because positions are saved in .ini file anyway. Here we just want to make the demo initial state a bit more friendly!
-        ImGui::ShowDemoWindow(&show_demo_window);
     }
 
     // Rendering

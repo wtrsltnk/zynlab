@@ -24,7 +24,7 @@
 #define PAD_NOTE_PARAMETERS_H
 
 #include "EnvelopeParams.h"
-#include "IFFTwrapper.h"
+#include "ifftwrapper.h"
 #include "LFOParams.h"
 #include "OscilGen.h"
 #include "Resonance.h"

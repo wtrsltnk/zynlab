@@ -110,11 +110,11 @@ public:
     unsigned char Pvolume;  /**<part volume*/
     unsigned char Pminkey;  /**<the minimum key that the part receives noteon messages*/
     unsigned char Pmaxkey;  //the maximum key that the part receives noteon messages
-    void setPvolume(char Pvolume);
+    void setPvolume(unsigned char Pvolume);
     unsigned char Pkeyshift; //Part keyshift
     unsigned char Prcvchn;   //from what midi channel it receive commnads
     unsigned char Ppanning;  //part panning
-    void setPpanning(char Ppanning);
+    void setPpanning(unsigned char Ppanning);
     unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
     unsigned char Pveloffs;  //velocity offset
     unsigned char Pnoteon;   //if the part receives NoteOn messages
@@ -162,9 +162,9 @@ public:
     int lastnote;
 
 private:
-    void RunNote(unsigned k);
-    void KillNotePos(int pos);
-    void RelaseNotePos(int pos);
+    void RunNote(unsigned int k);
+    void KillNotePos(unsigned int pos);
+    void RelaseNotePos(unsigned int pos);
     void MonoMemRenote(); // MonoMem stuff.
 
     int killallnotes; //is set to 1 if I want to kill all notes
@@ -184,7 +184,7 @@ private:
         int time;
     };
 
-    int lastpos, lastposb;    // To keep track of previously used pos and posb.
+    unsigned int lastpos, lastposb;    // To keep track of previously used pos and posb.
     bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 
     // MonoMem stuff

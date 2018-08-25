@@ -75,7 +75,7 @@ WavFile::~WavFile()
         fwrite(&chunksize, 4, 1, file);
 
         fclose(file);
-        file = NULL;
+        file = nullptr;
     }
 }
 
