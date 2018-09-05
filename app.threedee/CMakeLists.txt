@@ -9,13 +9,15 @@ if(GLFW3_FOUND)
     find_package(GLM REQUIRED)
 
     add_executable(app.threedee
+        glad.c
         main.cpp
         app.threedee.cpp
         app.threedee.h
-        stb_image.cpp
         imgui/imgui.cpp
         imgui/imgui_draw.cpp
-        imgui_impl_glfw_gl3.cpp
+        imgui/imgui_widgets.cpp
+        imgui/examples/imgui_impl_opengl3.cpp
+        imgui/examples/imgui_impl_glfw.cpp
         )
 
     target_include_directories(app.threedee
@@ -37,6 +39,10 @@ if(GLFW3_FOUND)
         zyn.fx
         zyn.dsp
         zyn.common
+        )
+
+    target_compile_definitions(app.threedee
+        PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD
         )
 
     target_compile_features(app.threedee

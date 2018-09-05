@@ -1,11 +1,9 @@
 
-#define GLEXTL_IMPLEMENTATION
-#include <GL/glextl.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <imgui.h>
-
-#include "imgui_impl_glfw_gl3.h"
+#include "examples/imgui_impl_opengl3.h"
 
 #include "app.threedee.h"
 
@@ -68,7 +66,7 @@ int exitprogram()
     return 0;
 }
 
-int main(int argc, char *argv[])
+int main(int /*argc*/, char */*argv*/[])
 {
     initprogram();
 
@@ -94,16 +92,13 @@ int main(int argc, char *argv[])
 
     AppThreeDee app(window, mixer);
 
-    // Setup ImGui binding
-    ImGui_ImplGlfwGL3_Init(window, true);
-
     glfwSetKeyCallback(window, AppThreeDee::KeyActionCallback);
     //    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
 
     glfwSetWindowSizeCallback(window, AppThreeDee::ResizeCallback);
     glfwMakeContextCurrent(window);
 
-    glExtLoadAll((PFNGLGETPROC *)glfwGetProcAddress);
+    gladLoadGL();
 
     AppThreeDee::ResizeCallback(window, 800, 600);
 
@@ -121,6 +116,8 @@ int main(int argc, char *argv[])
         }
         app.CleanUp();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
 
     glfwTerminate();
 
