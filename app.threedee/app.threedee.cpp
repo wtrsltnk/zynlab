@@ -464,6 +464,57 @@ static std::map<int, char> mappedNotes{
 
 void AppThreeDee::onKeyAction(int key, int scancode, int action, int /*mods*/)
 {
+    if (key >= GLFW_KEY_F1 && key <= GLFW_KEY_F12)
+    {
+        activeInstrument = keyboardChannel = key - GLFW_KEY_F1;
+
+        return;
+    }
+
+    if (key == GLFW_KEY_LEFT && action == 1)
+    {
+        activeInstrument--;
+        if (activeInstrument < 0)
+        {
+            activeInstrument = NUM_MIDI_CHANNELS + activeInstrument;
+        }
+        return;
+    }
+
+    if (key == GLFW_KEY_UP && action == 1)
+    {
+        activeInstrument -= 4;
+        if (activeInstrument < 0)
+        {
+            activeInstrument = NUM_MIDI_CHANNELS + activeInstrument;
+        }
+        return;
+    }
+
+    if (key == GLFW_KEY_RIGHT && action == 1)
+    {
+        activeInstrument = (activeInstrument + 1) % NUM_MIDI_CHANNELS;
+        return;
+    }
+
+    if (key == GLFW_KEY_DOWN && action == 1)
+    {
+        activeInstrument = (activeInstrument + 4) % NUM_MIDI_CHANNELS;
+        return;
+    }
+
+    if (key == GLFW_KEY_SPACE && action == 1)
+    {
+        _mixer->part[activeInstrument]->Penabled = !_mixer->part[activeInstrument]->Penabled;
+        return;
+    }
+
+    if (key == GLFW_KEY_ENTER && action == 1)
+    {
+        EditInstrument(activeInstrument);
+        return;
+    }
+//    std::cout << key << "-" << scancode << "\n";
     auto found = mappedNotes.find(key);
 
     if (found != mappedNotes.end())
