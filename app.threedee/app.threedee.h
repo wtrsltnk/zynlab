@@ -37,6 +37,10 @@ public:
     void Render();
     void CleanUp();
 
+public:
+    // App specific
+    void EditInstrument(int i);
+    void SelectInstrument(int i);
 };
 
 #endif // _APP_THREE_DEE_H_

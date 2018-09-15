@@ -27,11 +27,11 @@
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/ADnote.h>
 #include <zyn.synth/ADnoteParams.h>
-#include <zyn.synth/ifftwrapper.h>
 #include <zyn.synth/PADnote.h>
 #include <zyn.synth/PADnoteParams.h>
 #include <zyn.synth/SUBnote.h>
 #include <zyn.synth/SUBnoteParams.h>
+#include <zyn.synth/ifftwrapper.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -164,20 +164,25 @@ void Instrument::cleanup(bool final_)
 {
     for (unsigned int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
+
     for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
         partoutl[i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
         partoutr[i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
     }
+
     ctl.resetall();
     for (int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
         partefx[nefx]->cleanup();
+
     for (int n = 0; n < NUM_PART_EFX + 1; ++n)
+    {
         for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
         {
             partfxinputl[n][i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
             partfxinputr[n][i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
         }
+    }
 }
 
 Instrument::~Instrument()
@@ -276,9 +281,9 @@ void Instrument::NoteOn(unsigned char note,
             {
                 // At least one other key is held or sustained, and the
                 // previous note was played while in valid legato mode.
-                doinglegato = true; // So we'll do a legato note.
-                pos = static_cast<int>(lastpos);      // A legato note uses same pos as previous..
-                posb = static_cast<int>(lastposb);    // .. same goes for posb.
+                doinglegato = true;                // So we'll do a legato note.
+                pos = static_cast<int>(lastpos);   // A legato note uses same pos as previous..
+                posb = static_cast<int>(lastposb); // .. same goes for posb.
             }
             else
             {

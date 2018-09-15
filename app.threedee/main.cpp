@@ -92,9 +92,6 @@ int main(int /*argc*/, char */*argv*/[])
 
     AppThreeDee app(window, mixer);
 
-    glfwSetKeyCallback(window, AppThreeDee::KeyActionCallback);
-    //    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
-
     glfwSetWindowSizeCallback(window, AppThreeDee::ResizeCallback);
     glfwMakeContextCurrent(window);
 
@@ -104,9 +101,12 @@ int main(int /*argc*/, char */*argv*/[])
 
     if (app.SetUp())
     {
+        glfwSetKeyCallback(window, AppThreeDee::KeyActionCallback);
+        //    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
+
         while (glfwWindowShouldClose(window) == 0)
         {
-            glfwWaitEvents();
+            glfwPollEvents();
 
             glClear(GL_COLOR_BUFFER_BIT);
 
@@ -116,8 +116,6 @@ int main(int /*argc*/, char */*argv*/[])
         }
         app.CleanUp();
     }
-
-    ImGui_ImplOpenGL3_Shutdown();
 
     glfwTerminate();
 

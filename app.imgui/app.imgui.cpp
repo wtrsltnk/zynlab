@@ -82,6 +82,7 @@ bool AppThreeDee::SetUp()
 {
     return true;
 }
+
 // Implementing a simple custom widget using the public API.
 // You may also use the <imgui_internal.h> API to get raw access to more data/helpers, however the internal API isn't guaranteed to be forward compatible.
 // FIXME: Need at least proper label centering + clipping (internal functions RenderTextClipped provides both but api is flaky/temporary)

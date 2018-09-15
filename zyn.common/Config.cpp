@@ -96,17 +96,21 @@ void Config::init()
 
     if (cfg.bankRootDirList[0].empty())
     {
+        int b = 0;
         //banks
-        cfg.bankRootDirList[0] = "~/banks";
-        cfg.bankRootDirList[1] = "./";
-        cfg.bankRootDirList[2] = "/usr/share/zynaddsubfx/banks";
-        cfg.bankRootDirList[3] = "/usr/local/share/zynaddsubfx/banks";
+        cfg.bankRootDirList[b++] = "~/banks";
+        cfg.bankRootDirList[b++] = "./";
+        cfg.bankRootDirList[b++] = "/usr/share/zynaddsubfx/banks";
+        cfg.bankRootDirList[b++] = "/usr/local/share/zynaddsubfx/banks";
 #ifdef __APPLE__
-        cfg.bankRootDirList[4] = "../Resources/banks";
+        cfg.bankRootDirList[b++] = "../Resources/banks";
 #else
-        cfg.bankRootDirList[4] = "../banks";
+        cfg.bankRootDirList[b++] = "../banks";
 #endif
-        cfg.bankRootDirList[5] = "banks";
+        cfg.bankRootDirList[b++] = "banks";
+#ifdef _WIN32
+        cfg.bankRootDirList[b++] = "C:\\Code\\synthdev\\zynaddsubfx-instruments\\banks";
+#endif // _WIN32
     }
 
     if (cfg.presetsDirList[0].empty())
