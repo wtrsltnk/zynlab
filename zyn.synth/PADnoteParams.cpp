@@ -23,13 +23,13 @@
 #include "PADnoteParams.h"
 #include <math.h>
 #include <zyn.common/WavFile.h>
+#include "FFTwrapper.h"
 
 PADnoteParameters::PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, pthread_mutex_t *mutex_)
     : Presets(), _synth(synth_)
 {
     setpresettype("Ppadsynth");
 
-    fft = fft_;
     mutex = mutex_;
 
     resonance = new Resonance();
@@ -590,6 +590,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         samplemax = 1;
 
     //prepare a BIG FFT stuff
+    auto localFft = FFTwrapper(samplesize);
     fft_t *fftfreqs = new fft_t[samplesize / 2];
 
     float adj[samplemax]; //this is used to compute frequency relation to the base frequency
@@ -617,7 +618,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         newsample.smp[0] = 0.0f;
         for (int i = 1; i < spectrumsize; ++i) //randomize the phases
             fftfreqs[i] = std::polar(spectrum[i], (float)RND * 6.29f);
-        fft->freqs2smps(fftfreqs, newsample.smp); //that's all; here is the only ifft for the whole sample; no windows are used ;-)
+        localFft.freqs2smps(fftfreqs, newsample.smp); //that's all; here is the only ifft for the whole sample; no windows are used ;-)
 
         //normalize(rms)
         float rms = 0.0f;

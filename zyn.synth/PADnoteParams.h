@@ -176,7 +176,6 @@ private:
     void deletesamples();
     void deletesample(int n);
 
-    IFFTwrapper *fft;
     pthread_mutex_t *mutex;
 };
 
