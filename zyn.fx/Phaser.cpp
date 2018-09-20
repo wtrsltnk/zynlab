@@ -40,7 +40,7 @@ using namespace std;
 #define ZERO_ 0.00001f // Same idea as above.
 
 Phaser::Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_), lfo(synth_), old(NULL), xn1(NULL),
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_), lfo(synth_), old(NULL), xn1(NULL),
       yn1(NULL), diff(0.0f), oldgain(0.0f), fb(0.0f)
 {
     analog_setup();

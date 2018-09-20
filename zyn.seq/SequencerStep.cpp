@@ -6,10 +6,4 @@ SequencerStep::SequencerStep(char note, char velocity)
 
 SequencerStep::SequencerStep(const SequencerStep &clone) { (*this) = clone; }
 
-SequencerStep &SequencerStep::operator=(const SequencerStep &clone)
-{
-    this->_note = clone._note;
-    this->_velocity = clone._velocity;
-
-    return *this;
-}
+SequencerStep &SequencerStep::operator=(const SequencerStep &clone) = default;

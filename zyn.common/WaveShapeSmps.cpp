@@ -54,7 +54,7 @@ void waveShapeSmps(int n,
             for (i = 0; i < n; ++i)
             {
                 smps[i] *= ws;
-                if (fabs(smps[i]) < 1.0f)
+                if (std::fabs(smps[i]) < 1.0f)
                 {
                     smps[i] = (smps[i] - powf(smps[i], 3.0f)) * 3.0f;
                     if (ws < 1.0f)
@@ -76,7 +76,7 @@ void waveShapeSmps(int n,
         case 5:
             ws = ws * ws + 0.000001f; //Quantisize
             for (i = 0; i < n; ++i)
-                smps[i] = floor(smps[i] / ws + 0.5f) * ws;
+                smps[i] = std::floor(smps[i] / ws + 0.5f) * ws;
             break;
         case 6:
             ws = ws * ws * ws * 32 + 0.0001f; //Zigzag
@@ -92,7 +92,7 @@ void waveShapeSmps(int n,
             for (i = 0; i < n; ++i)
             {
                 float tmp = smps[i];
-                if (fabs(tmp) > ws)
+                if (std::fabs(tmp) > ws)
                 {
                     if (tmp >= 0.0f)
                         smps[i] = 1.0f;
@@ -128,7 +128,7 @@ void waveShapeSmps(int n,
             for (i = 0; i < n; ++i)
             {
                 float tmp = smps[i];
-                if (fabs(tmp) > ws)
+                if (std::fabs(tmp) > ws)
                 {
                     if (tmp >= 0.0f)
                         smps[i] = tmp - ws;
@@ -142,7 +142,7 @@ void waveShapeSmps(int n,
         case 11:
             ws = powf(5, ws * ws * 1.0f) - 1.0f; //Clip
             for (i = 0; i < n; ++i)
-                smps[i] = smps[i] * (ws + 0.5f) * 0.9999f - floor(
+                smps[i] = smps[i] * (ws + 0.5f) * 0.9999f - std::floor(
                                                                 0.5f + smps[i] * (ws + 0.5f) * 0.9999f);
             break;
         case 12:

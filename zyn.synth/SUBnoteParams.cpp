@@ -22,9 +22,8 @@
 
 #include "SUBnoteParams.h"
 #include <cmath>
-#include <stdio.h>
 
-SUBnoteParameters::SUBnoteParameters(SystemSettings *synth_) : Presets()
+SUBnoteParameters::SUBnoteParameters(SystemSettings *synth_)
 {
     setpresettype("Psubsynth");
     AmpEnvelope = new EnvelopeParams(64, 1);
@@ -175,7 +174,7 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void SUBnoteParameters::updateFrequencyMultipliers(void)
+void SUBnoteParameters::updateFrequencyMultipliers()
 {
     float par1 = POvertoneSpread.par1 / 255.0f;
     float par1pow = powf(10.0f,
@@ -218,7 +217,7 @@ void SUBnoteParameters::updateFrequencyMultipliers(void)
 
             case 5:
                 result = n1 + 2.0f * sinf(n * par2 * par2 * PI * 0.999f) *
-                                  sqrt(par1pow);
+                                  std::sqrt(par1pow);
                 break;
             case 6:
                 tmp = powf(2.0f * par2, 2.0f) + 0.1f;
@@ -232,7 +231,7 @@ void SUBnoteParameters::updateFrequencyMultipliers(void)
             default:
                 result = n1;
         }
-        float iresult = floor(result + 0.5f);
+        float iresult = std::floor(result + 0.5f);
         POvertoneFreqMult[n] = iresult + par3 * (result - iresult);
     }
 }

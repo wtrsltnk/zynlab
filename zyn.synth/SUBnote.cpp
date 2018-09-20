@@ -97,9 +97,9 @@ void SUBnote::setup(float freq,
 
     if (!legato)
     {
-        GlobalFilterL = NULL;
-        GlobalFilterR = NULL;
-        GlobalFilterEnvelope = NULL;
+        GlobalFilterL = nullptr;
+        GlobalFilterR = nullptr;
+        GlobalFilterEnvelope = nullptr;
     }
 
     int harmonics = 0;
@@ -157,7 +157,7 @@ void SUBnote::setup(float freq,
             bw = 25.0f;
 
         //try to keep same amplitude on all freqs and bw. (empirically)
-        float gain = sqrt(1500.0f / (bw * freq));
+        float gain = std::sqrt(1500.0f / (bw * freq));
 
         float hmagnew = 1.0f - pars->Phmag[pos[n]] / 127.0f;
         float hgain;
@@ -248,10 +248,10 @@ void SUBnote::KillNote()
     if (NoteEnabled != OFF)
     {
         delete[] lfilter;
-        lfilter = NULL;
+        lfilter = nullptr;
         if (stereo != 0)
             delete[] rfilter;
-        rfilter = NULL;
+        rfilter = nullptr;
         delete AmpEnvelope;
         delete FreqEnvelope;
         delete BandWidthEnvelope;
@@ -276,7 +276,7 @@ void SUBnote::computefiltercoefs(bpfilter &filter,
     float omega = 2.0f * PI * freq / this->_synth->samplerate_f;
     float sn = sinf(omega);
     float cs = cosf(omega);
-    float alpha = sn * sinh(LOG_2 / 2.0f * bw * omega / sn);
+    float alpha = sn * std::sinh(LOG_2 / 2.0f * bw * omega / sn);
 
     if (alpha > 1)
         alpha = 1;
@@ -382,11 +382,11 @@ void SUBnote::initparameters(float freq)
     if (pars->PFreqEnvelopeEnabled != 0)
         FreqEnvelope = new Envelope(pars->FreqEnvelope, freq, this->_synth);
     else
-        FreqEnvelope = NULL;
+        FreqEnvelope = nullptr;
     if (pars->PBandWidthEnvelopeEnabled != 0)
         BandWidthEnvelope = new Envelope(pars->BandWidthEnvelope, freq, this->_synth);
     else
-        BandWidthEnvelope = NULL;
+        BandWidthEnvelope = nullptr;
     if (pars->PGlobalFilterEnabled != 0)
     {
         globalfiltercenterq = pars->GlobalFilter->getq();
@@ -424,13 +424,13 @@ float SUBnote::computerolloff(float freq)
  */
 void SUBnote::computecurrentparameters()
 {
-    if ((FreqEnvelope != NULL) || (BandWidthEnvelope != NULL) || (oldpitchwheel != ctl->pitchwheel.data) || (oldbandwidth != ctl->bandwidth.data) || (portamento != 0))
+    if ((FreqEnvelope != nullptr) || (BandWidthEnvelope != nullptr) || (oldpitchwheel != ctl->pitchwheel.data) || (oldbandwidth != ctl->bandwidth.data) || (portamento != 0))
     {
         float envfreq = 1.0f;
         float envbw = 1.0f;
         float gain = 1.0f;
 
-        if (FreqEnvelope != NULL)
+        if (FreqEnvelope != nullptr)
         {
             envfreq = FreqEnvelope->envout() / 1200;
             envfreq = powf(2.0f, envfreq);
@@ -444,14 +444,14 @@ void SUBnote::computecurrentparameters()
             ;
         }
 
-        if (BandWidthEnvelope != NULL)
+        if (BandWidthEnvelope != nullptr)
         {
             envbw = BandWidthEnvelope->envout();
             envbw = powf(2, envbw);
         }
         envbw *= ctl->bandwidth.relbw; //bandwidth controller
 
-        float tmpgain = 1.0f / sqrt(envbw * envfreq);
+        float tmpgain = 1.0f / std::sqrt(envbw * envfreq);
 
         for (int n = 0; n < numharmonics; ++n)
         {
@@ -490,7 +490,7 @@ void SUBnote::computecurrentparameters()
     newamplitude = volume * AmpEnvelope->envout_dB() * 2.0f;
 
     //Filter
-    if (GlobalFilterL != NULL)
+    if (GlobalFilterL != nullptr)
     {
         float globalfilterpitch = GlobalFilterCenterPitch + GlobalFilterEnvelope->envout();
         float filterfreq = globalfilterpitch + ctl->filtercutoff.relfreq + GlobalFilterFreqTracking;
@@ -498,7 +498,7 @@ void SUBnote::computecurrentparameters()
 
         GlobalFilterL->setfreq_and_q(filterfreq,
                                      globalfiltercenterq * ctl->filterq.relq);
-        if (GlobalFilterR != NULL)
+        if (GlobalFilterR != nullptr)
             GlobalFilterR->setfreq_and_q(
                 filterfreq,
                 globalfiltercenterq * ctl->filterq.relq);
@@ -531,7 +531,7 @@ int SUBnote::noteout(float *outl, float *outr)
             outl[i] += tmpsmp[i] * rolloff;
     }
 
-    if (GlobalFilterL != NULL)
+    if (GlobalFilterL != nullptr)
         GlobalFilterL->filterout(&outl[0]);
 
     //right channel
@@ -548,7 +548,7 @@ int SUBnote::noteout(float *outl, float *outr)
             for (int i = 0; i < this->_synth->buffersize; ++i)
                 outr[i] += tmpsmp[i] * rolloff;
         }
-        if (GlobalFilterR != NULL)
+        if (GlobalFilterR != nullptr)
             GlobalFilterR->filterout(&outr[0]);
     }
     else
@@ -628,6 +628,6 @@ int SUBnote::finished() const
 {
     if (NoteEnabled == OFF)
         return 1;
-    else
-        return 0;
+
+    return 0;
 }

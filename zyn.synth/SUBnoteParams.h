@@ -42,37 +42,37 @@ public:
 
     //Parameters
     //AMPLITUDE PARAMETRERS
-    unsigned char Pstereo; //0 for mono,1 for stereo
-    unsigned char PVolume;
-    unsigned char PPanning;
-    unsigned char PAmpVelocityScaleFunction;
+    unsigned char Pstereo{}; //0 for mono,1 for stereo
+    unsigned char PVolume{};
+    unsigned char PPanning{};
+    unsigned char PAmpVelocityScaleFunction{};
     EnvelopeParams *AmpEnvelope;
 
     //Frequency Parameters
-    unsigned short int PDetune;
-    unsigned short int PCoarseDetune;
-    unsigned char PDetuneType;
-    unsigned char PFreqEnvelopeEnabled;
+    unsigned short int PDetune{};
+    unsigned short int PCoarseDetune{};
+    unsigned char PDetuneType{};
+    unsigned char PFreqEnvelopeEnabled{};
     EnvelopeParams *FreqEnvelope;
-    unsigned char PBandWidthEnvelopeEnabled;
+    unsigned char PBandWidthEnvelopeEnabled{};
     EnvelopeParams *BandWidthEnvelope;
 
     //Filter Parameters (Global)
-    unsigned char PGlobalFilterEnabled;
+    unsigned char PGlobalFilterEnabled{};
     FilterParams *GlobalFilter;
-    unsigned char PGlobalFilterVelocityScale;
-    unsigned char PGlobalFilterVelocityScaleFunction;
+    unsigned char PGlobalFilterVelocityScale{};
+    unsigned char PGlobalFilterVelocityScaleFunction{};
     EnvelopeParams *GlobalFilterEnvelope;
 
     //Other Parameters
 
     //If the base frequency is fixed to 440 Hz
-    unsigned char Pfixedfreq;
+    unsigned char Pfixedfreq{};
 
     /* Equal temperate (this is used only if the Pfixedfreq is enabled)
            If this parameter is 0, the frequency is fixed (to 440 Hz);
            if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
-    unsigned char PfixedfreqET;
+    unsigned char PfixedfreqET{};
 
     // Overtone spread parameters
     struct
@@ -81,29 +81,29 @@ public:
         unsigned char par1;
         unsigned char par2;
         unsigned char par3;
-    } POvertoneSpread;
-    float POvertoneFreqMult[MAX_SUB_HARMONICS];
+    } POvertoneSpread{};
+    float POvertoneFreqMult[MAX_SUB_HARMONICS]{};
 
     //how many times the filters are applied
-    unsigned char Pnumstages;
+    unsigned char Pnumstages{};
 
     //bandwidth
-    unsigned char Pbandwidth;
+    unsigned char Pbandwidth{};
 
     //How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)
-    unsigned char Phmagtype;
+    unsigned char Phmagtype{};
 
     //Magnitudes
-    unsigned char Phmag[MAX_SUB_HARMONICS];
+    unsigned char Phmag[MAX_SUB_HARMONICS]{};
 
     //Relative BandWidth ("64"=1.0f)
-    unsigned char Phrelbw[MAX_SUB_HARMONICS];
+    unsigned char Phrelbw[MAX_SUB_HARMONICS]{};
 
     //how much the bandwidth is increased according to lower/higher frequency; 64-default
-    unsigned char Pbwscale;
+    unsigned char Pbwscale{};
 
     //how the harmonics start("0"=0,"1"=random,"2"=1)
-    unsigned char Pstart;
+    unsigned char Pstart{};
 
 private:
 };

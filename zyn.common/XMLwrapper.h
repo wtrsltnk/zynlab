@@ -285,7 +285,7 @@ private:
         int Major;    /**<major version number.*/
         int Minor;    /**<minor version number.*/
         int Revision; /**<version revision number.*/
-    } version;
+    } version{};
 };
 
 #endif

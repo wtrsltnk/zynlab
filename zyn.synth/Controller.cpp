@@ -21,8 +21,7 @@
 */
 
 #include "Controller.h"
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
 
 Controller::Controller(SystemSettings *synth_)
     : _synth(synth_)
@@ -31,8 +30,7 @@ Controller::Controller(SystemSettings *synth_)
     resetall();
 }
 
-Controller::~Controller()
-{}
+Controller::~Controller() = default;
 
 void Controller::defaults()
 {

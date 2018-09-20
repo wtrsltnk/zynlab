@@ -47,8 +47,8 @@ FormantFilter::FormantFilter(FilterParams *pars, SystemSettings *synth_)
                 pars->Pvowels[j].formants[i].q);
         }
 
-    for (int i = 0; i < FF_MAX_FORMANTS; ++i)
-        oldformantamp[i] = 1.0f;
+    for (float & i : oldformantamp)
+        i = 1.0f;
     for (int i = 0; i < numformants; ++i)
     {
         currentformants[i].freq = 1000.0f;
@@ -105,8 +105,8 @@ void FormantFilter::setpos(float input)
         firsttime = 0;
         return;
     }
-    else
-        oldinput = input;
+
+    oldinput = input;
 
     float pos = fmodf(input * sequencestretch, 1.0f);
     if (pos < 0.0f)

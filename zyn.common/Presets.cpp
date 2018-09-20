@@ -21,15 +21,14 @@
 */
 
 #include "Presets.h"
-#include <string.h>
+#include <string>
 
 Presets::Presets()
 {
     type[0] = 0;
 }
 
-Presets::~Presets()
-{}
+Presets::~Presets() = default;
 
 void Presets::setpresettype(const char *type)
 {
@@ -38,7 +37,7 @@ void Presets::setpresettype(const char *type)
 
 void Presets::copy(const char *name)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
 
     //used only for the clipboard
     if (name == nullptr)
@@ -73,7 +72,7 @@ void Presets::paste(int npreset)
         if (strstr(type, "Plfo") != nullptr)
             strcpy(type, "Plfo");
 
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
     if (npreset == 0)
     {
         if (!checkclipboardtype())

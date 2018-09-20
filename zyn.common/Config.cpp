@@ -20,21 +20,16 @@
 
 */
 
-#include <direct.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "Config.h"
 #include "XMLwrapper.h"
+#include <cmath>
+#include <direct.h>
 
 using namespace std;
 
-IMixer::~IMixer() {}
+IMixer::~IMixer() = default;
 
-Config::Config()
-{}
+Config::Config() = default;
 
 Config *Config::_instance = nullptr;
 
@@ -109,7 +104,7 @@ void Config::init()
 #endif
         cfg.bankRootDirList[b++] = "banks";
 #ifdef _WIN32
-        cfg.bankRootDirList[b++] = "C:\\Code\\synthdev\\zynaddsubfx-instruments\\banks";
+        cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\zynaddsubfx-instruments\banks)";
 #endif // _WIN32
     }
 
@@ -149,14 +144,14 @@ void Config::save()
 
 void Config::clearbankrootdirlist()
 {
-    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-        cfg.bankRootDirList[i].clear();
+    for (auto & i : cfg.bankRootDirList)
+        i.clear();
 }
 
 void Config::clearpresetsdirlist()
 {
-    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-        cfg.presetsDirList[i].clear();
+    for (auto & i : cfg.presetsDirList)
+        i.clear();
 }
 
 void Config::readConfig(const char *filename)
@@ -167,21 +162,21 @@ void Config::readConfig(const char *filename)
     if (xmlcfg.enterbranch("CONFIGURATION"))
     {
         cfg.SampleRate = xmlcfg.getparunsigned("sample_rate",
-                                       cfg.SampleRate,
-                                       4000,
-                                       1024000);
+                                               cfg.SampleRate,
+                                               4000,
+                                               1024000);
         cfg.SoundBufferSize = xmlcfg.getparunsigned("sound_buffer_size",
-                                            cfg.SoundBufferSize,
-                                            16,
-                                            8192);
+                                                    cfg.SoundBufferSize,
+                                                    16,
+                                                    8192);
         cfg.OscilSize = xmlcfg.getparunsigned("oscil_size",
-                                      cfg.OscilSize,
-                                      MAX_AD_HARMONICS * 2,
-                                      131072);
+                                              cfg.OscilSize,
+                                              MAX_AD_HARMONICS * 2,
+                                              131072);
         cfg.SwapStereo = xmlcfg.getparunsigned("swap_stereo",
-                                       cfg.SwapStereo,
-                                       0,
-                                       1);
+                                               cfg.SwapStereo,
+                                               0,
+                                               1);
         cfg.BankUIAutoClose = xmlcfg.getpar("bank_window_auto_close",
                                             cfg.BankUIAutoClose,
                                             0,
@@ -269,7 +264,7 @@ void Config::readConfig(const char *filename)
 
 void Config::saveConfig(const char *filename)
 {
-    XMLwrapper *xmlcfg = new XMLwrapper();
+    auto *xmlcfg = new XMLwrapper();
 
     xmlcfg->beginbranch("CONFIGURATION");
 

@@ -56,7 +56,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
 }
 
 AnalogFilter::~AnalogFilter()
-{}
+= default;
 
 void AnalogFilter::cleanup()
 {
@@ -71,7 +71,7 @@ void AnalogFilter::cleanup()
     needsinterpolation = false;
 }
 
-void AnalogFilter::computefiltercoefs(void)
+void AnalogFilter::computefiltercoefs()
 {
     float tmp;
     bool zerocoefs = false; //this is used if the freq is too high

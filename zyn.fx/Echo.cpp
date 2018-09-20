@@ -28,7 +28,7 @@
 #define MAX_DELAY 2
 
 Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
       Pvolume(50),
       Pdelay(60),
       Plrdelay(100),
@@ -55,7 +55,7 @@ Echo::~Echo()
 }
 
 //Cleanup the effect
-void Echo::cleanup(void)
+void Echo::cleanup()
 {
     memset(delay.l, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
     memset(delay.r, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
@@ -68,7 +68,7 @@ inline int max(int a, int b)
 }
 
 //Initialize the delays
-void Echo::initdelays(void)
+void Echo::initdelays()
 {
     cleanup();
     //number of seconds to delay left chan

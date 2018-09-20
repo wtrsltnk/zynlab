@@ -27,7 +27,7 @@
 using namespace std;
 
 WavEngine::WavEngine(SystemSettings *s)
-    : AudioOutput(s), file(NULL), buffer(s->samplerate * 4), pThread(NULL)
+    : AudioOutput(s), file(nullptr), buffer(s->samplerate * 4), pThread(nullptr)
 {
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
@@ -63,10 +63,10 @@ void WavEngine::Stop()
         return;
 
     pthread_t *tmp = pThread;
-    pThread = NULL;
+    pThread = nullptr;
 
     work.post();
-    pthread_join(*tmp, NULL);
+    pthread_join(*tmp, nullptr);
     delete pThread;
 }
 
@@ -99,9 +99,8 @@ void WavEngine::newFile(WavFile *_file)
 
 void WavEngine::destroyFile()
 {
-    if (file)
-        delete file;
-    file = NULL;
+    delete file;
+    file = nullptr;
 }
 
 void *WavEngine::_AudioThread(void *arg)
@@ -111,7 +110,7 @@ void *WavEngine::_AudioThread(void *arg)
 
 void *WavEngine::AudioThread()
 {
-    short *recordbuf_16bit = new short[2 * this->_synth->buffersize];
+    auto *recordbuf_16bit = new short[2 * this->_synth->buffersize];
 
     while (!work.wait() && pThread)
     {
@@ -132,5 +131,5 @@ void *WavEngine::AudioThread()
 
     delete[] recordbuf_16bit;
 
-    return NULL;
+    return nullptr;
 }

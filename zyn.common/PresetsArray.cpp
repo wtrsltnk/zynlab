@@ -21,7 +21,7 @@
 */
 
 #include "PresetsArray.h"
-#include <string.h>
+#include <string>
 
 PresetsArray::PresetsArray()
 {
@@ -29,8 +29,7 @@ PresetsArray::PresetsArray()
     nelement = -1;
 }
 
-PresetsArray::~PresetsArray()
-{}
+PresetsArray::~PresetsArray() = default;
 
 void PresetsArray::setpresettype(const char *type)
 {
@@ -39,7 +38,7 @@ void PresetsArray::setpresettype(const char *type)
 
 void PresetsArray::copy(const char *name)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
 
     //used only for the clipboard
     if (name == nullptr)
@@ -81,7 +80,7 @@ void PresetsArray::paste(int npreset)
             strcpy(type, "Plfo");
     ;
 
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
     if (npreset == 0)
     {
         if (!checkclipboardtype())

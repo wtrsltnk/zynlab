@@ -27,7 +27,7 @@
 using namespace std;
 
 Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
       lfo(synth_),
       maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * synth_->samplerate_f)),
       delaySample(new float[maxdelay], new float[maxdelay])
@@ -138,7 +138,7 @@ void Chorus::out(const Stereo<float *> &input)
 }
 
 //Cleanup the effect
-void Chorus::cleanup(void)
+void Chorus::cleanup()
 {
     memset(delaySample.l, 0, maxdelay * sizeof(float));
     memset(delaySample.r, 0, maxdelay * sizeof(float));

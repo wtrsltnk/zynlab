@@ -29,7 +29,7 @@
 using namespace std;
 
 NulEngine::NulEngine(SystemSettings *s)
-    : AudioOutput(s), pThread(NULL)
+    : AudioOutput(s), pThread(nullptr)
 {
     name = "NULL";
     playing_until.tv_sec = 0;
@@ -49,7 +49,7 @@ void *NulEngine::AudioThread()
 
         struct timeval now;
         int remaining = 0;
-        gettimeofday(&now, NULL);
+        gettimeofday(&now, nullptr);
         if ((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0))
         {
             playing_until.tv_usec = now.tv_usec;
@@ -70,11 +70,10 @@ void *NulEngine::AudioThread()
         playing_until.tv_sec += playing_until.tv_usec / 1000000;
         playing_until.tv_usec %= 1000000;
     }
-    return NULL;
+    return nullptr;
 }
 
-NulEngine::~NulEngine()
-{}
+NulEngine::~NulEngine() = default;
 
 bool NulEngine::Start()
 {
@@ -93,7 +92,7 @@ void NulEngine::setAudioEn(bool nval)
     {
         if (!getAudioEn())
         {
-            pthread_t *thread = new pthread_t;
+            auto *thread = new pthread_t;
             pthread_attr_t attr;
             pthread_attr_init(&attr);
             pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -104,8 +103,8 @@ void NulEngine::setAudioEn(bool nval)
     else if (getAudioEn())
     {
         pthread_t *thread = pThread;
-        pThread = NULL;
-        pthread_join(*thread, NULL);
+        pThread = nullptr;
+        pthread_join(*thread, nullptr);
         delete thread;
     }
 }

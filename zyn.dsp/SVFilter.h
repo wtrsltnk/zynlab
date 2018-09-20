@@ -49,12 +49,12 @@ private:
     struct fstage
     {
         float low, high, band, notch;
-    } st[MAX_FILTER_STAGES + 1];
+    } st[MAX_FILTER_STAGES + 1]{};
 
     struct parameters
     {
         float f, q, q_sqrt;
-    } par, ipar;
+    } par{}, ipar{};
 
     void singlefilterout(float *smp, fstage &x, parameters &par);
     void computefiltercoefs(void);
@@ -64,8 +64,8 @@ private:
     float q;    // Q factor (resonance or Q factor)
     float gain; // the gain of the filter (if are shelf/peak) filters
 
-    bool abovenq, //if the frequency is above the nyquist
-        oldabovenq;
+    bool abovenq{}, //if the frequency is above the nyquist
+        oldabovenq{};
     bool needsinterpolation, firsttime;
 };
 

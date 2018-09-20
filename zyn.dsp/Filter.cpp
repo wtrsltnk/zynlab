@@ -20,14 +20,12 @@
 
 */
 
-#include <math.h>
-#include <stdio.h>
-
-#include "AnalogFilter.h"
 #include "Filter.h"
+#include "AnalogFilter.h"
 #include "FilterParams.h"
 #include "FormantFilter.h"
 #include "SVFilter.h"
+#include <cmath>
 
 Filter::Filter(SystemSettings *synth_)
     : outgain(1.0f), _synth(synth_)
@@ -48,7 +46,7 @@ Filter *Filter::generate(FilterParams *pars, SystemSettings *synth_)
             filter = new SVFilter(Ftype, 1000.0f, pars->getq(), Fstages, synth_);
             filter->outgain = dB2rap(pars->getgain());
             if (filter->outgain > 1.0f)
-                filter->outgain = sqrt(filter->outgain);
+                filter->outgain = std::sqrt(filter->outgain);
             break;
         default:
             filter = new AnalogFilter(Ftype, 1000.0f, pars->getq(), Fstages, synth_);

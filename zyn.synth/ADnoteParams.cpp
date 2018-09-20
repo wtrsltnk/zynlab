@@ -22,22 +22,19 @@
 
 #include "ADnoteParams.h"
 #include "EnvelopeParams.h"
-#include "IFFTwrapper.h"
 #include "LFOParams.h"
 #include "OscilGen.h"
 #include "Resonance.h"
+#include "ifftwrapper.h"
+#include <cmath>
 #include <zyn.common/XMLwrapper.h>
 #include <zyn.dsp/FilterParams.h>
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 int ADnote_unison_sizes[] =
     {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
 ADnoteParameters::ADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_)
-    : PresetsArray(), GlobalPar(synth_), _synth(synth_)
+    : GlobalPar(synth_), _synth(synth_)
 {
     setpresettype("Padsynth");
     fft = fft_;
@@ -221,7 +218,7 @@ void ADnoteVoiceParam::enable(IFFTwrapper *fft, Resonance *Reson, SystemSettings
 float ADnoteParameters::getBandwidthDetuneMultiplier()
 {
     float bw = (GlobalPar.PBandwidth - 64.0f) / 64.0f;
-    bw = powf(2.0f, bw * powf(fabs(bw), 0.2f) * 5.0f);
+    bw = powf(2.0f, bw * powf(std::fabs(bw), 0.2f) * 5.0f);
 
     return bw;
 }
@@ -289,7 +286,7 @@ int ADnoteParameters::get_unison_size_index(int nvoice)
         return 0;
     int unison = VoicePar[nvoice].Unison_size;
 
-    while (1)
+    while (true)
     {
         if (ADnote_unison_sizes[index] >= unison)
             return index;
@@ -326,11 +323,11 @@ void ADnoteParameters::add2XMLsection(XMLwrapper *xml, int n)
 
     int oscilused = 0, fmoscilused = 0; //if the oscil or fmoscil are used by another voice
 
-    for (int i = 0; i < NUM_VOICES; ++i)
+    for (auto & i : VoicePar)
     {
-        if (VoicePar[i].Pextoscil == nvoice)
+        if (i.Pextoscil == nvoice)
             oscilused = 1;
-        if (VoicePar[i].PextFMoscil == nvoice)
+        if (i.PextFMoscil == nvoice)
             fmoscilused = 1;
     }
 

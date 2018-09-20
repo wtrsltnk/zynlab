@@ -22,17 +22,14 @@
 
 #include "Util.h"
 #include <cassert>
-#include <iostream>
-#include <math.h>
-#include <stdio.h>
-#include <vector>
-
-#include <errno.h>
+#include <cmath>
 #include <fcntl.h>
-#include <string.h>
+#include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
+
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
 #endif
@@ -50,8 +47,8 @@ float VelF(float velocity, unsigned char scaling)
     x = powf(VELOCITY_MAX_SCALE, (64.0f - scaling) / 64.0f);
     if ((scaling == 127) || (velocity > 0.99f))
         return 1.0f;
-    else
-        return powf(velocity, x);
+
+    return powf(velocity, x);
 }
 
 /*
@@ -79,22 +76,22 @@ float getdetune(unsigned char type,
     {
             //	case 1: is used for the default (see below)
         case 2:
-            cdet = fabs(cdetune * 10.0f);
-            findet = fabs(fdetune / 8192.0f) * 10.0f;
+            cdet = std::fabs(cdetune * 10.0f);
+            findet = std::fabs(fdetune / 8192.0f) * 10.0f;
             break;
         case 3:
-            cdet = fabs(cdetune * 100);
-            findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
+            cdet = std::fabs(cdetune * 100);
+            findet = powf(10, std::fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
             break;
         case 4:
-            cdet = fabs(cdetune * 701.95500087f); //perfect fifth
+            cdet = std::fabs(cdetune * 701.95500087f); //perfect fifth
             findet =
-                (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
+                (powf(2, std::fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
             break;
         //case ...: need to update N_DETUNE_TYPES, if you'll add more
         default:
-            cdet = fabs(cdetune * 50.0f);
-            findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
+            cdet = std::fabs(cdetune * 50.0f);
+            findet = std::fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
             break;
     }
     if (finedetune < 8192)
@@ -108,12 +105,10 @@ float getdetune(unsigned char type,
 
 bool fileexists(const char *filename)
 {
-    struct stat tmp;
+    struct stat tmp
+    {};
     int result = stat(filename, &tmp);
-    if (result >= 0)
-        return true;
-
-    return false;
+    return (result >= 0);
 }
 
 void set_realtime()
@@ -135,11 +130,11 @@ void os_sleep(long length)
 
 std::string legalizeFilename(std::string filename)
 {
-    for (int i = 0; i < (int)filename.size(); ++i)
+    for (char & i : filename)
     {
-        char c = filename[i];
+        char c = i;
         if (!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
-            filename[i] = '_';
+            i = '_';
     }
     return filename;
 }

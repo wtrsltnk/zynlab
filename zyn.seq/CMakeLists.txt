@@ -21,6 +21,8 @@ target_link_libraries(zyn.seq
     )
 
 target_compile_features(zyn.seq
+    PRIVATE cxx_auto_type
+    PRIVATE cxx_nullptr
     PRIVATE cxx_thread_local
     )
 

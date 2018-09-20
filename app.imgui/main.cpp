@@ -22,7 +22,7 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(void)
+void initprogram()
 {
     auto synth = new SystemSettings;
     Config::Current().init();
@@ -68,7 +68,7 @@ int exitprogram()
     return 0;
 }
 
-int main(int argc, char *argv[])
+int main(int /*argc*/, char * /*argv*/ [])
 {
     initprogram();
 
@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
     if (glfwInit() == GLFW_FALSE)
         return -1;
 
-    GLFWwindow *window = glfwCreateWindow(1400, 600, "zynlab", NULL, NULL);
-    if (window == 0)
+    GLFWwindow *window = glfwCreateWindow(1400, 600, "zynlab", nullptr, nullptr);
+    if (window == nullptr)
     {
         glfwTerminate();
         return -1;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         while (glfwWindowShouldClose(window) == 0)
         {
             glfwPollEvents();
-//            glfwWaitEvents();
+            //            glfwWaitEvents();
 
             glClear(GL_COLOR_BUFFER_BIT);
 

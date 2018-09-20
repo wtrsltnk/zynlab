@@ -21,8 +21,7 @@
 */
 
 #include "LFOParams.h"
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
 
 int LFOParams::time;
 
@@ -33,7 +32,7 @@ LFOParams::LFOParams(char Pfreq_,
                      char Prandomness_,
                      char Pdelay_,
                      char Pcontinous_,
-                     char fel_) : Presets()
+                     char fel_)
 {
     switch (fel_)
     {
@@ -60,8 +59,7 @@ LFOParams::LFOParams(char Pfreq_,
     defaults();
 }
 
-LFOParams::~LFOParams()
-{}
+LFOParams::~LFOParams() = default;
 
 void LFOParams::defaults()
 {

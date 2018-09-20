@@ -23,16 +23,10 @@
 */
 
 #include "XMLwrapper.h"
-#include <cstdarg>
-#include <cstring>
-#include <iostream>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <zlib.h>
-
 #include "Util.h"
 #include "globals.h"
+#include <cstdarg>
+#include <zlib.h>
 
 using namespace std;
 
@@ -102,8 +96,7 @@ XMLwrapper::XMLwrapper()
 
     minimal = true;
 
-    node = tree = mxmlNewElement(MXML_NO_PARENT,
-                                 "?xml version=\"1.0f\" encoding=\"UTF-8\"?");
+    node = tree = mxmlNewElement(MXML_NO_PARENT, R"(?xml version="1.0f" encoding="UTF-8"?)");
 
     mxml_node_t *doctype = mxmlNewElement(tree, "!DOCTYPE");
     mxmlElementSetAttr(doctype, "ZynAddSubFX-data", nullptr);
@@ -171,10 +164,7 @@ bool XMLwrapper::hasPadSynth() const
     if (strval == nullptr) //no information available
         return false;
 
-    if ((strval[0] == 'Y') || (strval[0] == 'y'))
-        return true;
-    else
-        return false;
+    return ((strval[0] == 'Y') || (strval[0] == 'y'));
 }
 
 /* SAVE XML members */
@@ -304,7 +294,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
         mxmlDelete(tree);
     tree = nullptr;
 
-    const char *xmldata = doloadfile(filename.c_str());
+    const char *xmldata = doloadfile(filename);
     if (xmldata == nullptr)
         return -1; //the file could not be loaded or uncompressed
 
@@ -387,10 +377,7 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
                                   nullptr,
                                   nullptr,
                                   MXML_DESCEND);
-    if (root == nullptr)
-        return false;
-
-    return true;
+    return (root == nullptr);
 }
 
 int XMLwrapper::enterbranch(const string &name)
@@ -431,7 +418,7 @@ void XMLwrapper::exitbranch()
 
 int XMLwrapper::getbranchid(int min, int max) const
 {
-    int id = stringTo<int>(mxmlElementGetAttr(node, "id"));
+    auto id = stringTo<int>(mxmlElementGetAttr(node, "id"));
     if ((min == 0) && (max == 0))
         return id;
 
@@ -460,7 +447,7 @@ int XMLwrapper::getpar(const string &name, int defaultpar, int min,
     if (strval == nullptr)
         return defaultpar;
 
-    int val = stringTo<int>(strval);
+    auto val = stringTo<int>(strval);
     if (val < min)
         val = min;
     else if (val > max)
@@ -470,7 +457,7 @@ int XMLwrapper::getpar(const string &name, int defaultpar, int min,
 }
 
 unsigned int XMLwrapper::getparunsigned(const string &name, unsigned int defaultpar, unsigned int min,
-                       unsigned int max) const
+                                        unsigned int max) const
 {
     const mxml_node_t *tmp = mxmlFindElement(node,
                                              node,
@@ -486,7 +473,7 @@ unsigned int XMLwrapper::getparunsigned(const string &name, unsigned int default
     if (strval == nullptr)
         return defaultpar;
 
-    unsigned int val = stringTo<unsigned int>(strval);
+    auto val = stringTo<unsigned int>(strval);
     if (val < min)
         val = min;
     else if (val > max)
@@ -518,29 +505,31 @@ int XMLwrapper::getparbool(const string &name, int defaultpar) const
 
     if ((strval[0] == 'Y') || (strval[0] == 'y'))
         return 1;
-    else
+    
         return 0;
 }
 
 void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
 {
     ZERO(par, maxstrlen);
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "string",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    auto tmp = mxmlFindElement(node,
+                               node,
+                               "string",
+                               "name",
+                               name.c_str(),
+                               MXML_DESCEND_FIRST);
 
-    if (tmp == nullptr)
+    if (tmp == nullptr || tmp->child == nullptr)
+    {
         return;
-    if (tmp->child == nullptr)
-        return;
+    }
+
     if (tmp->child->type == MXML_OPAQUE)
     {
         snprintf(par, static_cast<size_t>(maxstrlen), "%s", tmp->child->value.element.name);
         return;
     }
+
     if ((tmp->child->type == MXML_TEXT) && (tmp->child->value.text.string != nullptr))
     {
         snprintf(par, static_cast<size_t>(maxstrlen), "%s", tmp->child->value.text.string);

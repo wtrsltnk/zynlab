@@ -15,8 +15,7 @@ Sequencer::Sequencer(class IMixer *mixer)
     this->_playThread.detach();
 }
 
-Sequencer::~Sequencer()
-{}
+Sequencer::~Sequencer() = default;
 
 void Sequencer::runThread()
 {

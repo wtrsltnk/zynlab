@@ -57,28 +57,28 @@ private:
     SUBnoteParameters *pars;
 
     //parameters
-    int stereo;
-    int numstages;         //number of stages of filters
-    int numharmonics;      //number of harmonics (after the too higher hamonics are removed)
-    int firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
-    int start;             //how the harmonics start
-    float basefreq;
-    float panning;
-    Envelope *AmpEnvelope;
-    Envelope *FreqEnvelope;
-    Envelope *BandWidthEnvelope;
+    int stereo{};
+    int numstages{};         //number of stages of filters
+    int numharmonics{};      //number of harmonics (after the too higher hamonics are removed)
+    int firstnumharmonics{}; //To keep track of the first note's numharmonics value, useful in legato mode.
+    int start{};             //how the harmonics start
+    float basefreq{};
+    float panning{};
+    Envelope *AmpEnvelope{};
+    Envelope *FreqEnvelope{};
+    Envelope *BandWidthEnvelope{};
 
-    Filter *GlobalFilterL, *GlobalFilterR;
+    Filter *GlobalFilterL{}, *GlobalFilterR{};
 
-    Envelope *GlobalFilterEnvelope;
+    Envelope *GlobalFilterEnvelope{};
 
     //internal values
     ONOFFTYPE NoteEnabled;
-    int firsttick, portamento;
-    float volume, oldamplitude, newamplitude;
+    int firsttick{}, portamento{};
+    float volume{}, oldamplitude{}, newamplitude{};
 
-    float GlobalFilterCenterPitch; //octaves
-    float GlobalFilterFreqTracking;
+    float GlobalFilterCenterPitch{}; //octaves
+    float GlobalFilterFreqTracking{};
 
     struct bpfilter
     {
@@ -99,14 +99,14 @@ private:
                             float gain);
     inline void filter(bpfilter &filter, float *smps);
 
-    bpfilter *lfilter, *rfilter;
+    bpfilter *lfilter{}, *rfilter{};
 
-    float overtone_rolloff[MAX_SUB_HARMONICS];
-    float overtone_freq[MAX_SUB_HARMONICS];
+    float overtone_rolloff[MAX_SUB_HARMONICS]{};
+    float overtone_freq[MAX_SUB_HARMONICS]{};
 
     Controller *ctl;
-    int oldpitchwheel, oldbandwidth;
-    float globalfiltercenterq;
+    int oldpitchwheel{}, oldbandwidth{};
+    float globalfiltercenterq{};
 };
 
 #endif

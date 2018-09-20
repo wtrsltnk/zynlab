@@ -263,11 +263,11 @@ public:
     unsigned int oscilsize;
 
     //Alias for above terms
-    float samplerate_f;
-    float halfsamplerate_f;
-    float buffersize_f;
-    unsigned int bufferbytes;
-    float oscilsize_f;
+    float samplerate_f{};
+    float halfsamplerate_f{};
+    float buffersize_f{};
+    unsigned int bufferbytes{};
+    float oscilsize_f{};
 
     inline void alias(void)
     {

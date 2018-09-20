@@ -33,8 +33,8 @@ DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, 
       Pampsns(90),
       Pampsnsinv(0),
       Pampsmooth(60),
-      filterl(NULL),
-      filterr(NULL)
+      filterl(nullptr),
+      filterr(nullptr)
 {
     setpreset(Ppreset);
     cleanup();
@@ -96,7 +96,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
 }
 
 // Cleanup the effect
-void DynamicFilter::cleanup(void)
+void DynamicFilter::cleanup()
 {
     reinitfilter();
     ms1 = ms2 = ms3 = ms4 = 0.0f;
@@ -128,7 +128,7 @@ void DynamicFilter::setampsns(unsigned char _Pampsns)
     ampsmooth = expf(-Pampsmooth / 127.0f * 10.0f) * 0.99f;
 }
 
-void DynamicFilter::reinitfilter(void)
+void DynamicFilter::reinitfilter()
 {
     delete filterl;
     delete filterr;

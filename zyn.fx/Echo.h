@@ -84,7 +84,7 @@ private:
     void sethidamp(unsigned char _Phidamp);
 
     //Real Parameters
-    float fb, hidamp;
+    float fb{}, hidamp{};
     //Left/Right delay lengths
     Stereo<int> delayTime;
     float lrdelay;

@@ -40,7 +40,7 @@ public:
     virtual bool checkclipboardtype();
     void deletepreset(int npreset);
 
-    char type[MAX_PRESETTYPE_SIZE];
+    char type[MAX_PRESETTYPE_SIZE]{};
     //void setelement(int n);
 
     void rescanforpresets();

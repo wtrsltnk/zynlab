@@ -63,7 +63,7 @@ public:
          * The hmag and hphase starts counting from 0, so the first harmonic(1) has the index 0,
          * 2-nd harmonic has index 1, ..the 128 harminic has index 127
          */
-    unsigned char Phmag[MAX_AD_HARMONICS], Phphase[MAX_AD_HARMONICS]; //the MIDI parameters for mag. and phases
+    unsigned char Phmag[MAX_AD_HARMONICS]{}, Phphase[MAX_AD_HARMONICS]{}; //the MIDI parameters for mag. and phases
 
     /**The Type of magnitude:
          *   0 - Linear
@@ -71,36 +71,36 @@ public:
          *   2 - dB scale (-60)
          *   3 - dB scale (-80)
          *   4 - dB scale (-100)*/
-    unsigned char Phmagtype;
+    unsigned char Phmagtype{};
 
-    unsigned char Pcurrentbasefunc; //The base function used - 0=sin, 1=...
-    unsigned char Pbasefuncpar;     //the parameter of the base function
+    unsigned char Pcurrentbasefunc{}; //The base function used - 0=sin, 1=...
+    unsigned char Pbasefuncpar{};     //the parameter of the base function
 
-    unsigned char Pbasefuncmodulation; //what modulation is applied to the basefunc
-    unsigned char Pbasefuncmodulationpar1, Pbasefuncmodulationpar2,
-        Pbasefuncmodulationpar3; //the parameter of the base function modulation
+    unsigned char Pbasefuncmodulation{}; //what modulation is applied to the basefunc
+    unsigned char Pbasefuncmodulationpar1{}, Pbasefuncmodulationpar2{},
+        Pbasefuncmodulationpar3{}; //the parameter of the base function modulation
 
     /*the Randomness:
           64=no randomness
           63..0 - block type randomness - 0 is maximum
           65..127 - each harmonic randomness - 127 is maximum*/
-    unsigned char Prand;
-    unsigned char Pwaveshaping, Pwaveshapingfunction;
-    unsigned char Pfiltertype, Pfilterpar1, Pfilterpar2;
-    unsigned char Pfilterbeforews;
-    unsigned char Psatype, Psapar; //spectrum adjust
+    unsigned char Prand{};
+    unsigned char Pwaveshaping{}, Pwaveshapingfunction{};
+    unsigned char Pfiltertype{}, Pfilterpar1{}, Pfilterpar2{};
+    unsigned char Pfilterbeforews{};
+    unsigned char Psatype{}, Psapar{}; //spectrum adjust
 
-    unsigned char Pamprandpower, Pamprandtype; //amplitude randomness
-    int Pharmonicshift;                        //how the harmonics are shifted
-    int Pharmonicshiftfirst;                   //if the harmonic shift is done before waveshaping and filter
+    unsigned char Pamprandpower{}, Pamprandtype{}; //amplitude randomness
+    int Pharmonicshift{};                        //how the harmonics are shifted
+    int Pharmonicshiftfirst{};                   //if the harmonic shift is done before waveshaping and filter
 
-    unsigned char Padaptiveharmonics;         //the adaptive harmonics status (off=0,on=1,etc..)
-    unsigned char Padaptiveharmonicsbasefreq; //the base frequency of the adaptive harmonic (30..3000Hz)
-    unsigned char Padaptiveharmonicspower;    //the strength of the effect (0=off,100=full)
-    unsigned char Padaptiveharmonicspar;      //the parameters in 2,3,4.. modes of adaptive harmonics
+    unsigned char Padaptiveharmonics{};         //the adaptive harmonics status (off=0,on=1,etc..)
+    unsigned char Padaptiveharmonicsbasefreq{}; //the base frequency of the adaptive harmonic (30..3000Hz)
+    unsigned char Padaptiveharmonicspower{};    //the strength of the effect (0=off,100=full)
+    unsigned char Padaptiveharmonicspar{};      //the parameters in 2,3,4.. modes of adaptive harmonics
 
-    unsigned char Pmodulation;                                       //what modulation is applied to the oscil
-    unsigned char Pmodulationpar1, Pmodulationpar2, Pmodulationpar3; //the parameter of the parameters
+    unsigned char Pmodulation{};                                       //what modulation is applied to the oscil
+    unsigned char Pmodulationpar1{}, Pmodulationpar2{}, Pmodulationpar3{}; //the parameter of the parameters
 
     //makes a new random seed for Amplitude Randomness
     //this should be called every note on event
@@ -115,7 +115,7 @@ private:
     float *tmpsmps;
     fft_t *outoscilFFTfreqs;
 
-    float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
+    float hmag[MAX_AD_HARMONICS]{}, hphase[MAX_AD_HARMONICS]{}; //the magnituides and the phases of the sine/nonsine harmonics
                                                             //    private:
     IFFTwrapper *fft;
     //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
@@ -148,17 +148,17 @@ private:
     void adaptiveharmonicpostprocess(fft_t *f, int size);
 
     //Internal Data
-    unsigned char oldbasefunc, oldbasepar, oldhmagtype,
-        oldwaveshapingfunction, oldwaveshaping;
-    int oldfilterpars, oldsapars, oldbasefuncmodulation,
-        oldbasefuncmodulationpar1, oldbasefuncmodulationpar2,
-        oldbasefuncmodulationpar3, oldharmonicshift;
-    int oldmodulation, oldmodulationpar1, oldmodulationpar2,
-        oldmodulationpar3;
+    unsigned char oldbasefunc{}, oldbasepar{}, oldhmagtype{},
+        oldwaveshapingfunction{}, oldwaveshaping{};
+    int oldfilterpars{}, oldsapars{}, oldbasefuncmodulation{},
+        oldbasefuncmodulationpar1{}, oldbasefuncmodulationpar2{},
+        oldbasefuncmodulationpar3{}, oldharmonicshift{};
+    int oldmodulation{}, oldmodulationpar1{}, oldmodulationpar2{},
+        oldmodulationpar3{};
 
     fft_t *basefuncFFTfreqs; //Base Function Frequencies
     fft_t *oscilFFTfreqs;    //Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
-    int oscilprepared;       //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
+    int oscilprepared{};       //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
     Resonance *res;
 

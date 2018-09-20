@@ -22,6 +22,11 @@ target_include_directories(zyn.dsp
         ${CMAKE_SOURCE_DIR}
     )
 
+target_compile_features(zyn.dsp
+    PRIVATE cxx_auto_type
+    PRIVATE cxx_nullptr
+    )
+
 target_link_libraries(zyn.dsp
     zyn.common
     )

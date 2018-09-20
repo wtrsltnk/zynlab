@@ -21,11 +21,8 @@
 */
 
 #include "FilterParams.h"
+#include <cmath>
 #include <zyn.common/Util.h>
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 FilterParams::FilterParams(SystemSettings *synth_,
                            unsigned char Ptype_,
@@ -42,8 +39,7 @@ FilterParams::FilterParams(SystemSettings *synth_,
     defaults();
 }
 
-FilterParams::~FilterParams()
-{}
+FilterParams::~FilterParams() = default;
 
 void FilterParams::defaults()
 {
@@ -92,7 +88,7 @@ void FilterParams::getfromFilterParams(FilterParams *pars)
 {
     defaults();
 
-    if (pars == NULL)
+    if (pars == nullptr)
         return;
 
     Ptype = pars->Ptype;
@@ -171,7 +167,7 @@ float FilterParams::getfreqx(float x)
     if (x > 1.0f)
         x = 1.0f;
     float octf = powf(2.0f, getoctavesfreq());
-    return getcenterfreq() / sqrt(octf) * powf(octf, x);
+    return getcenterfreq() / std::sqrt(octf) * powf(octf, x);
 }
 
 /*
@@ -216,9 +212,9 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
             cs = cosf(omega);
             alpha = sn / (2 * filter_q);
             float tmp = 1 + alpha;
-            c[0] = alpha / tmp * sqrt(filter_q + 1);
+            c[0] = alpha / tmp * std::sqrt(filter_q + 1);
             c[1] = 0;
-            c[2] = -alpha / tmp * sqrt(filter_q + 1);
+            c[2] = -alpha / tmp * std::sqrt(filter_q + 1);
             d[1] = -2 * cs / tmp * (-1);
             d[2] = (1 - alpha) / tmp * (-1);
         }

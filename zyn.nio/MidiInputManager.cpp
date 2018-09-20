@@ -4,6 +4,7 @@
 #include "MidiInput.h"
 
 #include <iostream>
+#include <utility>
 
 using namespace std;
 
@@ -36,11 +37,11 @@ MidiEvent::MidiEvent()
     : channel(0), type(MidiEventTypes::M_NOTE), num(0), value(0), time(0)
 {}
 
-MidiInputManager *MidiInputManager::_instance = 0;
+MidiInputManager *MidiInputManager::_instance = nullptr;
 
 MidiInputManager &MidiInputManager::createInstance(IMixer *mixer)
 {
-    if (MidiInputManager::_instance == 0) MidiInputManager::_instance = new MidiInputManager(mixer);
+    if (MidiInputManager::_instance == nullptr) MidiInputManager::_instance = new MidiInputManager(mixer);
 
     return *MidiInputManager::_instance;
 }
@@ -52,14 +53,14 @@ MidiInputManager &MidiInputManager::getInstance()
 
 void MidiInputManager::destroyInstance()
 {
-    if (MidiInputManager::_instance != 0) delete MidiInputManager::_instance;
-    MidiInputManager::_instance = 0;
+    delete MidiInputManager::_instance;
+    MidiInputManager::_instance = nullptr;
 }
 
 MidiInputManager::MidiInputManager(IMixer *mixer)
     : queue(100), mixer(mixer)
 {
-    current = NULL;
+    current = nullptr;
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
 
@@ -118,7 +119,7 @@ void MidiInputManager::flush(unsigned frameStart, unsigned frameStop)
     }
 }
 
-bool MidiInputManager::empty(void) const
+bool MidiInputManager::empty() const
 {
     int semvalue = work.getvalue();
     return semvalue <= 0;
@@ -126,7 +127,7 @@ bool MidiInputManager::empty(void) const
 
 bool MidiInputManager::setSource(string name)
 {
-    MidiInput *src = getIn(name);
+    MidiInput *src = getIn(std::move(name));
 
     if (!src)
         return false;
@@ -149,12 +150,12 @@ string MidiInputManager::getSource() const
 {
     if (current)
         return current->name;
-    else
-        return "ERROR";
+
+    return "ERROR";
 }
 
 MidiInput *MidiInputManager::getIn(string name)
 {
     EngineManager &eng = EngineManager::getInstance();
-    return dynamic_cast<MidiInput *>(eng.getEng(name));
+    return dynamic_cast<MidiInput *>(eng.getEng(std::move(name)));
 }

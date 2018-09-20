@@ -26,7 +26,7 @@
 #include <iostream>
 
 RtEngine::RtEngine()
-    : midiin(0)
+    : midiin(nullptr)
 {
     this->name = "RT";
 }
@@ -47,9 +47,9 @@ bool RtEngine::Start()
 
 void RtEngine::Stop()
 {
-    if (this->midiin != 0)
-        delete this->midiin;
-    this->midiin = 0;
+
+    delete this->midiin;
+    this->midiin = nullptr;
 }
 
 void RtEngine::setMidiEn(bool nval)
@@ -62,12 +62,12 @@ void RtEngine::setMidiEn(bool nval)
 
 bool RtEngine::getMidiEn() const
 {
-    return (this->midiin != 0);
+    return (this->midiin != nullptr);
 }
 
-void RtEngine::callback(double timeStamp, std::vector<unsigned char> *message, void *userData)
+void RtEngine::callback(double /*timeStamp*/, std::vector<unsigned char> *message, void *userData)
 {
-    RtEngine *engine = (RtEngine *)userData;
+    auto *engine = (RtEngine *)userData;
 
     MidiEvent ev;
     unsigned char chan = message->at(0) & 0x0f;

@@ -26,17 +26,17 @@
 #include <cmath>
 
 EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_)
 {
-    for (int i = 0; i < MAX_EQ_BANDS; ++i)
+    for (auto & i : filter)
     {
-        filter[i].Ptype = 0;
-        filter[i].Pfreq = 64;
-        filter[i].Pgain = 64;
-        filter[i].Pq = 64;
-        filter[i].Pstages = 0;
-        filter[i].l = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
-        filter[i].r = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
+        i.Ptype = 0;
+        i.Pfreq = 64;
+        i.Pgain = 64;
+        i.Pq = 64;
+        i.Pstages = 0;
+        i.l = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
+        i.r = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
     }
     //default values
     Pvolume = 50;
@@ -46,12 +46,12 @@ EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_
 }
 
 // Cleanup the effect
-void EQ::cleanup(void)
+void EQ::cleanup()
 {
-    for (int i = 0; i < MAX_EQ_BANDS; ++i)
+    for (auto & i : filter)
     {
-        filter[i].l->cleanup();
-        filter[i].r->cleanup();
+        i.l->cleanup();
+        i.r->cleanup();
     }
 }
 
@@ -64,12 +64,12 @@ void EQ::out(const Stereo<float *> &smp)
         efxoutr[i] = smp.r[i] * volume;
     }
 
-    for (int i = 0; i < MAX_EQ_BANDS; ++i)
+    for (auto & i : filter)
     {
-        if (filter[i].Ptype == 0)
+        if (i.Ptype == 0)
             continue;
-        filter[i].l->filterout(efxoutl);
-        filter[i].r->filterout(efxoutr);
+        i.l->filterout(efxoutl);
+        i.r->filterout(efxoutr);
     }
 }
 
@@ -195,11 +195,11 @@ unsigned char EQ::getpar(int npar) const
 float EQ::getfreqresponse(float freq)
 {
     float resp = 1.0f;
-    for (int i = 0; i < MAX_EQ_BANDS; ++i)
+    for (auto & i : filter)
     {
-        if (filter[i].Ptype == 0)
+        if (i.Ptype == 0)
             continue;
-        resp *= filter[i].l->H(freq);
+        resp *= i.l->H(freq);
     }
     return rap2dB(resp * outvolume);
 }

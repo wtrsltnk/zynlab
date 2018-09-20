@@ -20,7 +20,7 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(void)
+void initprogram()
 {
     auto synth = new SystemSettings;
     Config::Current().init();

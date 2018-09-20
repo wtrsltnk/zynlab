@@ -27,7 +27,7 @@
 #include <cmath>
 
 Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
       Pvolume(50),
       Pdrive(90),
       Plevel(64),
@@ -55,7 +55,7 @@ Distorsion::~Distorsion()
 }
 
 //Cleanup the effect
-void Distorsion::cleanup(void)
+void Distorsion::cleanup()
 {
     lpfl->cleanup();
     hpfl->cleanup();

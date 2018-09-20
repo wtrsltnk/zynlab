@@ -57,7 +57,7 @@ public:
 
     //the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
     //the harmonic profile is used only on mode 0
-    unsigned char Pmode;
+    unsigned char Pmode{};
 
     //Harmonic profile (the frequency distribution of a single harmonic)
     struct
@@ -84,65 +84,65 @@ public:
         } amp;
         bool autoscale;        //if the scale of the harmonic profile is computed automaticaly
         unsigned char onehalf; //what part of the base function is used to make the distribution
-    } Php;
+    } Php{};
 
-    unsigned int Pbandwidth; //the values are from 0 to 1000
-    unsigned char Pbwscale;  //how the bandwidth is increased according to the harmonic's frequency
+    unsigned int Pbandwidth{}; //the values are from 0 to 1000
+    unsigned char Pbwscale{};  //how the bandwidth is increased according to the harmonic's frequency
 
     struct
     { //where are positioned the harmonics (on integer multimplier or different places)
         unsigned char type;
         unsigned char par1, par2, par3; //0..255
-    } Phrpos;
+    } Phrpos{};
 
     struct
     { //quality of the samples (how many samples, the length of them,etc.)
         unsigned char samplesize;
         unsigned char basenote, oct, smpoct;
-    } Pquality;
+    } Pquality{};
 
     //frequency parameters
     //If the base frequency is fixed to 440 Hz
-    unsigned char Pfixedfreq;
+    unsigned char Pfixedfreq{};
 
     /* Equal temperate (this is used only if the Pfixedfreq is enabled)
            If this parameter is 0, the frequency is fixed (to 440 Hz);
            if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
-    unsigned char PfixedfreqET;
-    unsigned short int PDetune;       //fine detune
-    unsigned short int PCoarseDetune; //coarse detune+octave
-    unsigned char PDetuneType;        //detune type
+    unsigned char PfixedfreqET{};
+    unsigned short int PDetune{};       //fine detune
+    unsigned short int PCoarseDetune{}; //coarse detune+octave
+    unsigned char PDetuneType{};        //detune type
 
     EnvelopeParams *FreqEnvelope; //Frequency Envelope
     LFOParams *FreqLfo;           //Frequency LFO
 
     //Amplitude parameters
-    unsigned char PStereo;
+    unsigned char PStereo{};
     /* Panning -  0 - random
                   1 - left
                  64 - center
                 127 - right */
-    unsigned char PPanning;
+    unsigned char PPanning{};
 
-    unsigned char PVolume;
+    unsigned char PVolume{};
 
-    unsigned char PAmpVelocityScaleFunction;
+    unsigned char PAmpVelocityScaleFunction{};
 
     EnvelopeParams *AmpEnvelope;
 
     LFOParams *AmpLfo;
 
-    unsigned char PPunchStrength, PPunchTime, PPunchStretch,
-        PPunchVelocitySensing;
+    unsigned char PPunchStrength{}, PPunchTime{}, PPunchStretch{},
+        PPunchVelocitySensing{};
 
     //Filter Parameters
     FilterParams *GlobalFilter;
 
     // filter velocity sensing
-    unsigned char PFilterVelocityScale;
+    unsigned char PFilterVelocityScale{};
 
     // filter velocity sensing
-    unsigned char PFilterVelocityScaleFunction;
+    unsigned char PFilterVelocityScaleFunction{};
 
     EnvelopeParams *FilterEnvelope;
     LFOParams *FilterLfo;
@@ -161,13 +161,13 @@ public:
         int size;
         float basefreq;
         float *smp;
-    } sample[PAD_MAX_SAMPLES], newsample;
+    } sample[PAD_MAX_SAMPLES]{}, newsample{};
 
 private:
     void generatespectrum_bandwidthMode(float *spectrum,
                                         int size,
                                         float basefreq,
-                                        float *profile,
+                                        const float *profile,
                                         int profilesize,
                                         float bwadjust);
     void generatespectrum_otherModes(float *spectrum,

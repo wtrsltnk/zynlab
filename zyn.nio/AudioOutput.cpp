@@ -31,7 +31,7 @@ using namespace std;
 
 AudioOutput::AudioOutput(SystemSettings *s) : _synth(s), samplerate(s->samplerate), bufferSize(s->buffersize) {}
 
-AudioOutput::~AudioOutput() {}
+AudioOutput::~AudioOutput() = default;
 
 void AudioOutput::setSamplerate(int _samplerate)
 {

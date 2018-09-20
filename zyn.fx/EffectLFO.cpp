@@ -42,10 +42,10 @@ EffectLFO::EffectLFO(SystemSettings *synth_)
     updateparams();
 }
 
-EffectLFO::~EffectLFO() {}
+EffectLFO::~EffectLFO() = default;
 
 //Update the changed parameters
-void EffectLFO::updateparams(void)
+void EffectLFO::updateparams()
 {
     float lfofreq = (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f;
     incx = fabsf(lfofreq) * this->_synth->buffersize_f / this->_synth->samplerate_f;

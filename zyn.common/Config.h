@@ -58,14 +58,14 @@ public:
         std::string LinuxALSAaudioDev;
         std::string nameTag;
     } cfg;
-    int winwavemax, winmidimax; //number of wave/midi devices on Windows
-    int maxstringsize;
+    int winwavemax{}, winmidimax{}; //number of wave/midi devices on Windows
+    int maxstringsize{};
 
     struct winmidionedevice
     {
         char *name;
     };
-    winmidionedevice *winmididevices;
+    winmidionedevice *winmididevices{};
 
     void clearbankrootdirlist();
     void clearpresetsdirlist();

@@ -21,12 +21,12 @@
 */
 
 #include "PADnoteParams.h"
-#include <math.h>
-#include <zyn.common/WavFile.h>
 #include "FFTwrapper.h"
+#include <cmath>
+#include <zyn.common/WavFile.h>
 
 PADnoteParameters::PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, pthread_mutex_t *mutex_)
-    : Presets(), _synth(synth_)
+    : _synth(synth_)
 {
     setpresettype("Ppadsynth");
 
@@ -49,8 +49,8 @@ PADnoteParameters::PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, 
     FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
 
-    for (int i = 0; i < PAD_MAX_SAMPLES; ++i)
-        sample[i].smp = nullptr;
+    for (auto &i : sample)
+        i.smp = nullptr;
     newsample.smp = nullptr;
 
     defaults();
@@ -162,14 +162,14 @@ float PADnoteParameters::getprofile(float *smp, int size)
         smp[i] = 0.0f;
     const int supersample = 16;
     float basepar = powf(2.0f, (1.0f - Php.base.par1 / 127.0f) * 12.0f);
-    float freqmult = floor(powf(2.0f,
-                                Php.freqmult / 127.0f * 5.0f) +
-                           0.000001f);
+    float freqmult = std::floor(powf(2.0f,
+                                     Php.freqmult / 127.0f * 5.0f) +
+                                0.000001f);
 
-    float modfreq = floor(powf(2.0f,
-                               Php.modulator.freq / 127.0f * 5.0f) +
-                          0.000001f);
-    float modpar1 = powf(Php.modulator.par1 / 127.0f, 4.0f) * 5.0f / sqrt(modfreq);
+    float modfreq = std::floor(powf(2.0f,
+                                    Php.modulator.freq / 127.0f * 5.0f) +
+                               0.000001f);
+    float modpar1 = powf(Php.modulator.par1 / 127.0f, 4.0f) * 5.0f / std::sqrt(modfreq);
     float amppar1 =
         powf(2.0f, powf(Php.amp.par1 / 127.0f, 2.0f) * 10.0f) - 0.999f;
     float amppar2 = (1.0f - Php.amp.par2 / 127.0f) * 0.998f + 0.001f;
@@ -213,7 +213,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
 
         //do the modulation of the profile
         x += sinf(x_before_freq_mult * 3.1415926f * modfreq) * modpar1;
-        x = fmod(x + 1000.0f, 1.0f) * 2.0f - 1.0f;
+        x = std::fmod(x + 1000.0f, 1.0f) * 2.0f - 1.0f;
 
         //this is the base function of the profile
         float f;
@@ -227,7 +227,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
                     f = 1.0f;
                 break;
             case 2:
-                f = expf(-(fabs(x)) * sqrt(basepar));
+                f = expf(-(std::fabs(x)) * std::sqrt(basepar));
                 break;
             default:
                 f = expf(-(x * x) * basepar);
@@ -246,7 +246,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
                 amp = expf(-(origx * origx) * 10.0f * amppar1);
                 break;
             case 2:
-                amp = 0.5f * (1.0f + cosf(3.1415926f * origx * sqrt(amppar1 * 4.0f + 1.0f)));
+                amp = 0.5f * (1.0f + cosf(3.1415926f * origx * std::sqrt(amppar1 * 4.0f + 1.0f)));
                 break;
             case 3:
                 amp = 1.0f / (powf(origx * (amppar1 * 2.0f + 0.8f), 14.0f) + 1.0f);
@@ -354,7 +354,7 @@ float PADnoteParameters::getNhr(int n)
             result = n0 * (1.0f - par1) + powf(n0 * 0.1f, par2 * 3.0f + 1.0f) * par1 * 10.0f + 1.0f;
             break;
         case 5:
-            result = n0 + sinf(n0 * par2 * par2 * PI * 0.999f) * sqrt(par1) * 2.0f + 1.0f;
+            result = n0 + sinf(n0 * par2 * par2 * PI * 0.999f) * std::sqrt(par1) * 2.0f + 1.0f;
             break;
         case 6:
             tmp = powf(par2 * 2.0f, 2.0f) + 0.1f;
@@ -370,7 +370,7 @@ float PADnoteParameters::getNhr(int n)
 
     float par3 = Phrpos.par3 / 255.0f;
 
-    float iresult = floor(result + 0.5f);
+    float iresult = std::floor(result + 0.5f);
     float dresult = result - iresult;
 
     result = iresult + (1.0f - par3) * dresult;
@@ -384,7 +384,7 @@ float PADnoteParameters::getNhr(int n)
 void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int size,
                                                        float basefreq,
-                                                       float *profile,
+                                                       const float *profile,
                                                        int profilesize,
                                                        float bwadjust)
 {
@@ -458,12 +458,12 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
 
         if (ibw > profilesize)
         { //if the bandwidth is larger than the profilesize
-            float rap = sqrt((float)profilesize / (float)ibw);
+            float rap = std::sqrt((float)profilesize / (float)ibw);
             int cfreq =
                 (int)(realfreq / (this->_synth->samplerate_f * 0.5f) * size) - ibw / 2;
             for (int i = 0; i < ibw; ++i)
             {
-                int src = (int)(i * rap * rap);
+                auto src = (int)(i * rap * rap);
                 int spfreq = i + cfreq;
                 if (spfreq < 0)
                     continue;
@@ -474,13 +474,13 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
         }
         else
         { //if the bandwidth is smaller than the profilesize
-            float rap = sqrt((float)ibw / (float)profilesize);
+            float rap = std::sqrt((float)ibw / (float)profilesize);
             float ibasefreq = realfreq / (this->_synth->samplerate_f * 0.5f) * size;
             for (int i = 0; i < profilesize; ++i)
             {
                 float idfreq = i / (float)profilesize - 0.5f;
                 idfreq *= ibw;
-                int spfreq = (int)(idfreq + ibasefreq);
+                auto spfreq = (int)(idfreq + ibasefreq);
                 float fspfreq = fmodf((float)idfreq + ibasefreq, 1.0f);
                 if (spfreq <= 0)
                     continue;
@@ -534,7 +534,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
         float amp = harmonics[nh - 1];
         if (resonance->Penabled)
             amp *= resonance->getfreqresponse(realfreq);
-        int cfreq = (int)(realfreq / (this->_synth->samplerate_f * 0.5f) * size);
+        auto cfreq = (int)(realfreq / (this->_synth->samplerate_f * 0.5f) * size);
 
         spectrum[cfreq] = amp + 1e-9;
     }
@@ -566,7 +566,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
 {
     const int samplesize = (((int)1) << (Pquality.samplesize + 14));
     int spectrumsize = samplesize / 2;
-    float *spectrum = new float[spectrumsize];
+    auto *spectrum = new float[spectrumsize];
     int profilesize = 512;
     float profile[profilesize];
 
@@ -591,7 +591,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
 
     //prepare a BIG FFT stuff
     auto localFft = FFTwrapper(samplesize);
-    fft_t *fftfreqs = new fft_t[samplesize / 2];
+    auto *fftfreqs = new fft_t[samplesize / 2];
 
     float adj[samplemax]; //this is used to compute frequency relation to the base frequency
     for (int nsample = 0; nsample < samplemax; ++nsample)
@@ -624,10 +624,10 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         float rms = 0.0f;
         for (int i = 0; i < samplesize; ++i)
             rms += newsample.smp[i] * newsample.smp[i];
-        rms = sqrt(rms);
+        rms = std::sqrt(rms);
         if (rms < 0.000001f)
             rms = 1.0f;
-        rms *= sqrt(262144.0f / samplesize);
+        rms *= std::sqrt(262144.0f / samplesize);
         for (int i = 0; i < samplesize; ++i)
             newsample.smp[i] *= 1.0f / rms * 50.0f;
 
@@ -687,7 +687,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
         if (wav.good())
         {
             int nsmps = sample[k].size;
-            short int *smps = new short int[nsmps];
+            auto *smps = new short int[nsmps];
             for (int i = 0; i < nsmps; ++i)
                 smps[i] = (short int)(sample[k].smp[i] * 32767.0f);
             wav.writeMonoSamples(nsmps, smps);

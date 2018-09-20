@@ -24,10 +24,10 @@
 #include <cmath>
 
 Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, synth_),
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
       lfo(synth_),
-      oldl(NULL),
-      oldr(NULL)
+      oldl(nullptr),
+      oldr(nullptr)
 {
     setpreset(Ppreset);
     cleanup();
@@ -37,10 +37,8 @@ Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSett
 
 Alienwah::~Alienwah()
 {
-    if (oldl != NULL)
-        delete[] oldl;
-    if (oldr != NULL)
-        delete[] oldr;
+    delete[] oldl;
+    delete[] oldr;
 }
 
 //Apply the effect
@@ -92,7 +90,7 @@ void Alienwah::out(const Stereo<float *> &smp)
 }
 
 //Cleanup the effect
-void Alienwah::cleanup(void)
+void Alienwah::cleanup()
 {
     for (int i = 0; i < Pdelay; ++i)
     {
@@ -138,10 +136,8 @@ void Alienwah::setphase(unsigned char _Pphase)
 
 void Alienwah::setdelay(unsigned char _Pdelay)
 {
-    if (oldl != NULL)
-        delete[] oldl;
-    if (oldr != NULL)
-        delete[] oldr;
+    delete[] oldl;
+    delete[] oldr;
     Pdelay = (_Pdelay >= MAX_ALIENWAH_DELAY) ? MAX_ALIENWAH_DELAY : _Pdelay;
     oldl = new complex<float>[Pdelay];
     oldr = new complex<float>[Pdelay];

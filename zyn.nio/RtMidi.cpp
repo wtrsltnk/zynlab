@@ -95,7 +95,7 @@ void RtMidiIn :: openMidiApi( RtMidi::Api api, const std::string clientName, uns
 {
   if ( rtapi_ )
     delete rtapi_;
-  rtapi_ = 0;
+  rtapi_ = nullptr;
 
 #if defined(__UNIX_JACK__)
   if ( api == UNIX_JACK )
@@ -125,7 +125,7 @@ void RtMidiIn :: openMidiApi( RtMidi::Api api, const std::string clientName, uns
 
 RtMidiIn :: RtMidiIn( RtMidi::Api api, const std::string clientName, unsigned int queueSizeLimit )
 {
-  rtapi_ = 0;
+  rtapi_ = nullptr;
 
   if ( api != UNSPECIFIED ) {
     // Attempt to open the specified API.
@@ -169,7 +169,7 @@ void RtMidiOut :: openMidiApi( RtMidi::Api api, const std::string clientName )
 {
   if ( rtapi_ )
     delete rtapi_;
-  rtapi_ = 0;
+  rtapi_ = nullptr;
 
 #if defined(__UNIX_JACK__)
   if ( api == UNIX_JACK )
@@ -199,7 +199,7 @@ void RtMidiOut :: openMidiApi( RtMidi::Api api, const std::string clientName )
 
 RtMidiOut :: RtMidiOut( RtMidi::Api api, const std::string clientName )
 {
-  rtapi_ = 0;
+  rtapi_ = nullptr;
 
   if ( api != UNSPECIFIED ) {
     // Attempt to open the specified API.
@@ -239,7 +239,7 @@ RtMidiOut :: ~RtMidiOut() throw()
 //*********************************************************************//
 
 MidiInApi :: MidiInApi( unsigned int queueSizeLimit )
-  : apiData_( 0 ), connected_( false )
+  : apiData_( nullptr ), connected_( false )
 {
   // Allocate the MIDI queue.
   inputData_.queue.ringSize = queueSizeLimit;
@@ -280,8 +280,8 @@ void MidiInApi :: cancelCallback()
     return;
   }
 
-  inputData_.userCallback = 0;
-  inputData_.userData = 0;
+  inputData_.userCallback = nullptr;
+  inputData_.userData = nullptr;
   inputData_.usingCallback = false;
 }
 
@@ -322,7 +322,7 @@ double MidiInApi :: getMessage( std::vector<unsigned char> *message )
 //*********************************************************************//
 
 MidiOutApi :: MidiOutApi( void )
-  : apiData_( 0 ), connected_( false )
+  : apiData_( nullptr ), connected_( false )
 {
 }
 
@@ -1895,8 +1895,8 @@ static void CALLBACK midiInputCallback( HMIDIIN hmin,
   if ( inputStatus != MIM_DATA && inputStatus != MIM_LONGDATA && inputStatus != MIM_LONGERROR ) return;
 
   //MidiInApi::RtMidiInData *data = static_cast<MidiInApi::RtMidiInData *> (instancePtr);
-  MidiInApi::RtMidiInData *data = (MidiInApi::RtMidiInData *)instancePtr;
-  WinMidiData *apiData = static_cast<WinMidiData *> (data->apiData);
+  auto *data = (MidiInApi::RtMidiInData *)instancePtr;
+  auto *apiData = static_cast<WinMidiData *> (data->apiData);
 
   // Calculate time stamp.
   if ( data->firstMessage == true ) {
@@ -1909,7 +1909,7 @@ static void CALLBACK midiInputCallback( HMIDIIN hmin,
   if ( inputStatus == MIM_DATA ) { // Channel or system message
 
     // Make sure the first byte is a status byte.
-    unsigned char status = (unsigned char) (midiMessage & 0x000000FF);
+    auto status = (unsigned char) (midiMessage & 0x000000FF);
     if ( !(status & 0x80) ) return;
 
     // Determine the number of bytes in the MIDI message.
@@ -1933,11 +1933,11 @@ static void CALLBACK midiInputCallback( HMIDIIN hmin,
     }
 
     // Copy bytes to our MIDI message.
-    unsigned char *ptr = (unsigned char *) &midiMessage;
+    auto *ptr = (unsigned char *) &midiMessage;
     for ( int i=0; i<nBytes; ++i ) apiData->message.bytes.push_back( *ptr++ );
   }
   else { // Sysex message ( MIM_LONGDATA or MIM_LONGERROR )
-    MIDIHDR *sysex = ( MIDIHDR *) midiMessage; 
+    auto *sysex = ( MIDIHDR *) midiMessage; 
     if ( !( data->ignoreFlags & 0x01 ) && inputStatus != MIM_LONGERROR ) {  
       // Sysex message and we're not ignoring it
       for ( int i=0; i<(int)sysex->dwBytesRecorded; ++i )
@@ -1964,7 +1964,7 @@ static void CALLBACK midiInputCallback( HMIDIIN hmin,
   }
 
   if ( data->usingCallback ) {
-    RtMidiIn::RtMidiCallback callback = (RtMidiIn::RtMidiCallback) data->userCallback;
+    auto callback = (RtMidiIn::RtMidiCallback) data->userCallback;
     callback( apiData->message.timeStamp, &apiData->message.bytes, data->userData );
   }
   else {
@@ -1994,7 +1994,7 @@ MidiInWinMM :: ~MidiInWinMM()
   closePort();
 
   // Cleanup.
-  WinMidiData *data = static_cast<WinMidiData *> (apiData_);
+  auto *data = static_cast<WinMidiData *> (apiData_);
   delete data;
 }
 
@@ -2009,7 +2009,7 @@ void MidiInWinMM :: initialize( const std::string& /*clientName*/ )
   }
 
   // Save our api-specific connection information.
-  WinMidiData *data = (WinMidiData *) new WinMidiData;
+  auto *data = (WinMidiData *) new WinMidiData;
   apiData_ = (void *) data;
   inputData_.apiData = (void *) data;
   data->message.bytes.clear();  // needs to be empty for first input message
@@ -2036,7 +2036,7 @@ void MidiInWinMM :: openPort( unsigned int portNumber, const std::string /*portN
     RtMidi::error( RtError::INVALID_PARAMETER, errorString_ );
   }
 
-  WinMidiData *data = static_cast<WinMidiData *> (apiData_);
+  auto *data = static_cast<WinMidiData *> (apiData_);
   MMRESULT result = midiInOpen( &data->inHandle,
                                 portNumber,
                                 (DWORD_PTR)&midiInputCallback,
@@ -2091,7 +2091,7 @@ void MidiInWinMM :: openVirtualPort( std::string portName )
 void MidiInWinMM :: closePort( void )
 {
   if ( connected_ ) {
-    WinMidiData *data = static_cast<WinMidiData *> (apiData_);
+    auto *data = static_cast<WinMidiData *> (apiData_);
     midiInReset( data->inHandle );
     midiInStop( data->inHandle );
 
@@ -2167,7 +2167,7 @@ MidiOutWinMM :: ~MidiOutWinMM()
   closePort();
 
   // Cleanup.
-  WinMidiData *data = static_cast<WinMidiData *> (apiData_);
+  auto *data = static_cast<WinMidiData *> (apiData_);
   delete data;
 }
 
@@ -2182,7 +2182,7 @@ void MidiOutWinMM :: initialize( const std::string& /*clientName*/ )
   }
 
   // Save our api-specific connection information.
-  WinMidiData *data = (WinMidiData *) new WinMidiData;
+  auto *data = (WinMidiData *) new WinMidiData;
   apiData_ = (void *) data;
 }
 
@@ -2239,7 +2239,7 @@ void MidiOutWinMM :: openPort( unsigned int portNumber, const std::string /*port
     RtMidi::error( RtError::INVALID_PARAMETER, errorString_ );
   }
 
-  WinMidiData *data = static_cast<WinMidiData *> (apiData_);
+  auto *data = static_cast<WinMidiData *> (apiData_);
   MMRESULT result = midiOutOpen( &data->outHandle,
                                  portNumber,
                                  (DWORD)NULL,
@@ -2256,7 +2256,7 @@ void MidiOutWinMM :: openPort( unsigned int portNumber, const std::string /*port
 void MidiOutWinMM :: closePort( void )
 {
   if ( connected_ ) {
-    WinMidiData *data = static_cast<WinMidiData *> (apiData_);
+    auto *data = static_cast<WinMidiData *> (apiData_);
     midiOutReset( data->outHandle );
     midiOutClose( data->outHandle );
     connected_ = false;
@@ -2272,7 +2272,7 @@ void MidiOutWinMM :: openVirtualPort( std::string portName )
 
 void MidiOutWinMM :: sendMessage( std::vector<unsigned char> *message )
 {
-  unsigned int nBytes = static_cast<unsigned int>(message->size());
+  auto nBytes = static_cast<unsigned int>(message->size());
   if ( nBytes == 0 ) {
     errorString_ = "MidiOutWinMM::sendMessage: message argument is empty!";
     RtMidi::error( RtError::WARNING, errorString_ );
@@ -2280,12 +2280,12 @@ void MidiOutWinMM :: sendMessage( std::vector<unsigned char> *message )
   }
 
   MMRESULT result;
-  WinMidiData *data = static_cast<WinMidiData *> (apiData_);
+  auto *data = static_cast<WinMidiData *> (apiData_);
   if ( message->at(0) == 0xF0 ) { // Sysex message
 
     // Allocate buffer for sysex data.
-    char *buffer = (char *) malloc( nBytes );
-    if ( buffer == NULL ) {
+    auto *buffer = (char *) malloc( nBytes );
+    if ( buffer == nullptr ) {
       errorString_ = "MidiOutWinMM::sendMessage: error allocating sysex message memory!";
       RtMidi::error( RtError::MEMORY_ERROR, errorString_ );
     }
@@ -2329,7 +2329,7 @@ void MidiOutWinMM :: sendMessage( std::vector<unsigned char> *message )
 
     // Pack MIDI bytes into double word.
     DWORD packet;
-    unsigned char *ptr = (unsigned char *) &packet;
+    auto *ptr = (unsigned char *) &packet;
     for ( unsigned int i=0; i<nBytes; ++i ) {
       *ptr = message->at(i);
       ++ptr;

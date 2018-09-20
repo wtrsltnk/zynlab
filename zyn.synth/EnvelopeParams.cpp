@@ -20,14 +20,10 @@
 
 */
 
-#include <stdio.h>
-
 #include "EnvelopeParams.h"
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
 
-EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
-                               unsigned char Pforcedrelease_) : Presets()
+EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_, unsigned char Pforcedrelease_) : Presets()
 {
     int i;
 
@@ -56,8 +52,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     store2defaults();
 }
 
-EnvelopeParams::~EnvelopeParams()
-{}
+EnvelopeParams::~EnvelopeParams() = default;
 
 float EnvelopeParams::getdt(char i)
 {

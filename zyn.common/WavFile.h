@@ -28,7 +28,7 @@
 class WavFile
 {
 public:
-    WavFile(std::string filename, int samplerate, int channels);
+    WavFile(const std::string& filename, int samplerate, int channels);
     ~WavFile();
 
     bool good() const;

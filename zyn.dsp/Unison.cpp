@@ -28,13 +28,13 @@
 Unison::Unison(int update_period_samples_, float max_delay_sec_, float srate_f)
     : unison_size(0),
       base_freq(1.0f),
-      uv(NULL),
+      uv(nullptr),
       update_period_samples(update_period_samples_),
       update_period_sample_k(0),
       max_delay((int)(srate_f * max_delay_sec_) + 1),
       delay_k(0),
       first_time(false),
-      delay_buffer(NULL),
+      delay_buffer(nullptr),
       unison_amplitude_samples(0.0f),
       unison_bandwidth_cents(10.0f),
       samplerate_f(srate_f)
@@ -57,8 +57,8 @@ void Unison::setSize(int new_size)
     if (new_size < 1)
         new_size = 1;
     unison_size = new_size;
-    if (uv)
-        delete[] uv;
+
+    delete[] uv;
     uv = new UnisonVoice[unison_size];
     first_time = true;
     updateParameters();
@@ -85,7 +85,7 @@ void Unison::setBandwidth(float bandwidth)
     updateParameters();
 }
 
-void Unison::updateParameters(void)
+void Unison::updateParameters()
 {
     if (!uv)
         return;

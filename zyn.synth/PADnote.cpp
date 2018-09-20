@@ -20,10 +20,9 @@
 */
 
 #include "PADnote.h"
+#include <cmath>
 #include <zyn.common/Config.h>
 #include <zyn.dsp/Filter.h>
-
-#include <math.h>
 
 PADnote::PADnote(PADnoteParameters *parameters,
                  Controller *ctl_,
@@ -78,13 +77,13 @@ void PADnote::setup(float freq,
 
     //find out the closest note
     float logfreq = logf(basefreq * powf(2.0f, NoteGlobalPar.Detune / 1200.0f));
-    float mindist = fabs(logfreq - logf(pars->sample[0].basefreq + 0.0001f));
+    float mindist = std::fabs(logfreq - logf(pars->sample[0].basefreq + 0.0001f));
     nsample = 0;
     for (int i = 1; i < PAD_MAX_SAMPLES; ++i)
     {
-        if (pars->sample[i].smp == NULL)
+        if (pars->sample[i].smp == nullptr)
             break;
-        float dist = fabs(logfreq - logf(pars->sample[i].basefreq + 0.0001f));
+        float dist = std::fabs(logfreq - logf(pars->sample[i].basefreq + 0.0001f));
 
         if (dist < mindist)
         {
@@ -160,7 +159,7 @@ void PADnote::setup(float freq,
     NoteGlobalPar.FilterFreqTracking = pars->GlobalFilter->getfreqtracking(
         basefreq);
 
-    if (pars->sample[nsample].smp == NULL)
+    if (pars->sample[nsample].smp == nullptr)
     {
         finished_ = true;
         return;
@@ -250,7 +249,7 @@ int PADnote::Compute_Linear(float *outl,
                             float freqlo)
 {
     float *smps = pars->sample[nsample].smp;
-    if (smps == NULL)
+    if (smps == nullptr)
     {
         finished_ = true;
         return 1;
@@ -283,7 +282,7 @@ int PADnote::Compute_Cubic(float *outl,
                            float freqlo)
 {
     float *smps = pars->sample[nsample].smp;
-    if (smps == NULL)
+    if (smps == nullptr)
     {
         finished_ = true;
         return 1;
@@ -332,7 +331,7 @@ int PADnote::noteout(float *outl, float *outr)
 {
     computecurrentparameters();
     float *smps = pars->sample[nsample].smp;
-    if (smps == NULL)
+    if (smps == nullptr)
     {
         for (int i = 0; i < this->_synth->buffersize; ++i)
         {
@@ -344,8 +343,8 @@ int PADnote::noteout(float *outl, float *outr)
     float smpfreq = pars->sample[nsample].basefreq;
 
     float freqrap = realfreq / smpfreq;
-    int freqhi = (int)(floor(freqrap));
-    float freqlo = freqrap - floor(freqrap);
+    auto freqhi = (int)(std::floor(freqrap));
+    float freqlo = freqrap - std::floor(freqrap);
 
     if (Config::Current().cfg.Interpolation)
         Compute_Cubic(outl, outr, freqhi, freqlo);
@@ -408,7 +407,7 @@ int PADnote::noteout(float *outl, float *outr)
             outl[i] *= tmp;
             outr[i] *= tmp;
         }
-        finished_ = 1;
+        finished_ = true;
     }
 
     return 1;

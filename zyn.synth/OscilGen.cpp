@@ -24,9 +24,7 @@
 #include <zyn.common/WaveShapeSmps.h>
 
 #include <cassert>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
 
 //operations on FFTfreqs
 inline void clearAll(fft_t *freqs, SystemSettings *synth_)
@@ -73,7 +71,7 @@ void normalize(fft_t *freqs, SystemSettings *synth_)
             normMax = norm;
     }
 
-    const float max = sqrt(normMax);
+    const float max = std::sqrt(normMax);
     if (max < 1e-8) //data is all ~zero, do not amplify noise
         return;
 
@@ -91,7 +89,7 @@ void rmsNormalize(fft_t *freqs, SystemSettings *synth_)
     if (sum < 0.000001f)
         return; //data is all ~zero, do not amplify noise
 
-    const float gain = 1.0f / sqrt(sum);
+    const float gain = 1.0f / std::sqrt(sum);
 
     for (int i = 1; i < synth_->oscilsize / 2; ++i)
         freqs[i] *= gain;
@@ -203,7 +201,7 @@ void OscilGen::convert2sine()
 {
     float mag[MAX_AD_HARMONICS], phase[MAX_AD_HARMONICS];
     float oscil[this->_synth->oscilsize];
-    fft_t *freqs = new fft_t[this->_synth->oscilsize / 2];
+    auto *freqs = new fft_t[this->_synth->oscilsize / 2];
 
     get(oscil, -1.0f);
     fft->smps2freqs(oscil, freqs);
@@ -258,14 +256,14 @@ void OscilGen::getbasefunction(float *smps)
             basefuncmodulationpar1 =
                 (powf(2, basefuncmodulationpar1 * 5.0f) - 1.0f) / 10.0f;
             basefuncmodulationpar3 =
-                floor((powf(2, basefuncmodulationpar3 * 5.0f) - 1.0f));
+                std::floor((powf(2, basefuncmodulationpar3 * 5.0f) - 1.0f));
             if (basefuncmodulationpar3 < 0.9999f)
                 basefuncmodulationpar3 = -1.0f;
             break;
         case 2:
             basefuncmodulationpar1 =
                 (powf(2, basefuncmodulationpar1 * 5.0f) - 1.0f) / 10.0f;
-            basefuncmodulationpar3 = 1.0f + floor((powf(2, basefuncmodulationpar3 * 5.0f) - 1.0f));
+            basefuncmodulationpar3 = 1.0f + std::floor((powf(2, basefuncmodulationpar3 * 5.0f) - 1.0f));
             break;
         case 3:
             basefuncmodulationpar1 =
@@ -301,7 +299,7 @@ void OscilGen::getbasefunction(float *smps)
                 break;
         }
 
-        t = t - floor(t);
+        t = t - std::floor(t);
 
         if (func)
             smps[i] = func(t, par);
@@ -355,8 +353,8 @@ inline void normalize(float *smps, size_t N)
     //Find max
     float max = 0.0f;
     for (size_t i = 0; i < N; ++i)
-        if (max < fabs(smps[i]))
-            max = fabs(smps[i]);
+        if (max < std::fabs(smps[i]))
+            max = std::fabs(smps[i]);
     if (max < 0.00001f)
         max = 1.0f;
 
@@ -415,13 +413,13 @@ void OscilGen::modulation()
     {
         case 1:
             modulationpar1 = (powf(2, modulationpar1 * 7.0f) - 1.0f) / 100.0f;
-            modulationpar3 = floor((powf(2, modulationpar3 * 5.0f) - 1.0f));
+            modulationpar3 = std::floor((powf(2, modulationpar3 * 5.0f) - 1.0f));
             if (modulationpar3 < 0.9999f)
                 modulationpar3 = -1.0f;
             break;
         case 2:
             modulationpar1 = (powf(2, modulationpar1 * 7.0f) - 1.0f) / 100.0f;
-            modulationpar3 = 1.0f + floor((powf(2, modulationpar3 * 5.0f) - 1.0f));
+            modulationpar3 = 1.0f + std::floor((powf(2, modulationpar3 * 5.0f) - 1.0f));
             break;
         case 3:
             modulationpar1 = (powf(2, modulationpar1 * 9.0f) - 1.0f) / 100.0f;
@@ -438,7 +436,7 @@ void OscilGen::modulation()
     }
     fft->freqs2smps(oscilFFTfreqs, tmpsmps);
     int extra_points = 2;
-    float *in = new float[this->_synth->oscilsize + extra_points];
+    auto *in = new float[this->_synth->oscilsize + extra_points];
 
     //Normalize
     normalize(tmpsmps, this->_synth->oscilsize);
@@ -470,10 +468,10 @@ void OscilGen::modulation()
                 break;
         }
 
-        t = (t - floor(t)) * this->_synth->oscilsize;
+        t = (t - std::floor(t)) * this->_synth->oscilsize;
 
-        int poshi = (int)t;
-        float poslo = t - floor(t);
+        auto poshi = (int)t;
+        float poslo = t - std::floor(t);
 
         tmpsmps[i] = in[poshi] * (1.0f - poslo) + in[poshi + 1] * poslo;
     }
@@ -583,7 +581,7 @@ void OscilGen::prepare()
 
     for (int i = 0; i < MAX_AD_HARMONICS; ++i)
     {
-        const float hmagnew = 1.0f - fabs(Phmag[i] / 64.0f - 1.0f);
+        const float hmagnew = 1.0f - std::fabs(Phmag[i] / 64.0f - 1.0f);
         switch (Phmagtype)
         {
             case 1:
@@ -670,7 +668,7 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
     if (freq < 1.0f)
         freq = 440.0f;
 
-    fft_t *inf = new fft_t[this->_synth->oscilsize / 2];
+    auto *inf = new fft_t[this->_synth->oscilsize / 2];
     for (int i = 0; i < this->_synth->oscilsize / 2; ++i)
         inf[i] = f[i];
     clearAll(f, this->_synth);
@@ -694,32 +692,30 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
     for (int i = 0; i < this->_synth->oscilsize / 2 - 2; ++i)
     {
         float h = i * rap;
-        int high = (int)(i * rap);
-        float low = fmod(h, 1.0f);
+        auto high = (int)(i * rap);
+        float low = std::fmod(h, 1.0f);
 
         if (high >= (this->_synth->oscilsize / 2 - 2))
             break;
+
+        if (down)
+        {
+            f[high] =
+                std::complex<float>(f[high].real() + inf[i].real() * (1.0f - low),
+                                    f[high].imag() + inf[i].imag() * (1.0f - low));
+
+            f[high + 1] = std::complex<float>(f[high + 1].real() + inf[i].real() * low,
+                                              f[high + 1].imag() + inf[i].imag() * low);
+        }
         else
         {
-            if (down)
-            {
-                f[high] =
-                    std::complex<float>(f[high].real() + inf[i].real() * (1.0f - low),
-                                        f[high].imag() + inf[i].imag() * (1.0f - low));
-
-                f[high + 1] = std::complex<float>(f[high + 1].real() + inf[i].real() * low,
-                                                  f[high + 1].imag() + inf[i].imag() * low);
-            }
-            else
-            {
-                hc = inf[high].real() * (1.0f - low) + inf[high + 1].real() * low;
-                hs = inf[high].imag() * (1.0f - low) + inf[high + 1].imag() * low;
-            }
-            if (fabs(hc) < 0.000001f)
-                hc = 0.0f;
-            if (fabs(hs) < 0.000001f)
-                hs = 0.0f;
+            hc = inf[high].real() * (1.0f - low) + inf[high + 1].real() * low;
+            hs = inf[high].imag() * (1.0f - low) + inf[high + 1].imag() * low;
         }
+        if (std::fabs(hc) < 0.000001f)
+            hc = 0.0f;
+        if (std::fabs(hs) < 0.000001f)
+            hs = 0.0f;
 
         if (!down)
         {
@@ -741,7 +737,7 @@ void OscilGen::adaptiveharmonicpostprocess(fft_t *f, int size)
 {
     if (Padaptiveharmonics <= 1)
         return;
-    fft_t *inf = new fft_t[size];
+    auto *inf = new fft_t[size];
     float par = Padaptiveharmonicspar * 0.01f;
     par = 1.0f - powf((1.0f - par), 1.5f);
 
@@ -780,7 +776,7 @@ void OscilGen::newrandseed(unsigned int randseed)
     this->randseed = randseed;
 }
 
-bool OscilGen::needPrepare(void)
+bool OscilGen::needPrepare()
 {
     bool outdated = false;
 
@@ -814,7 +810,7 @@ bool OscilGen::needPrepare(void)
     if (oldharmonicshift != Pharmonicshift + Pharmonicshiftfirst * 256)
         outdated = true;
 
-    return outdated == true || oscilprepared == false;
+    return outdated || !oscilprepared;
 }
 
 /*
@@ -825,13 +821,13 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
     if (needPrepare())
         prepare();
 
-    int outpos =
+    auto outpos =
         (int)((RND * 2.0f - 1.0f) * this->_synth->oscilsize_f * (Prand - 64.0f) / 64.0f);
     outpos = (outpos + 2 * this->_synth->oscilsize) % this->_synth->oscilsize;
 
     clearAll(outoscilFFTfreqs, this->_synth);
 
-    int nyquist = (int)(0.5f * this->_synth->samplerate_f / fabs(freqHz)) + 2;
+    int nyquist = (int)(0.5f * this->_synth->samplerate_f / std::fabs(freqHz)) + 2;
     if (ADvsPAD)
         nyquist = (int)(this->_synth->oscilsize / 2);
     if (nyquist > this->_synth->oscilsize / 2)
@@ -887,7 +883,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
                 power = powf(15.0f, power) * 2.0f;
                 float rndfreq = 2 * PI * RND;
                 for (int i = 1; i < nyquist - 1; ++i)
-                    outoscilFFTfreqs[i] *= powf(fabs(sinf(i * rndfreq)), power) * normalize;
+                    outoscilFFTfreqs[i] *= powf(std::fabs(sinf(i * rndfreq)), power) * normalize;
                 break;
         }
         sprng(realrnd + 1);
@@ -910,8 +906,8 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
 
     if (Prand < 64)
         return outpos;
-    else
-        return 0;
+
+    return 0;
 }
 
 /*
@@ -1030,7 +1026,7 @@ void OscilGen::add2XML(XMLwrapper *xml)
         {
             float xc = basefuncFFTfreqs[i].real();
             float xs = basefuncFFTfreqs[i].imag();
-            if ((fabs(xs) > 0.00001f) && (fabs(xs) > 0.00001f))
+            if ((std::fabs(xs) > 0.00001f) && (std::fabs(xs) > 0.00001f))
             {
                 xml->beginbranch("BF_HARMONIC", i);
                 xml->addparreal("cos", xc);
@@ -1144,7 +1140,7 @@ void OscilGen::getfromXML(XMLwrapper *xml)
 
 FUNC(pulse)
 {
-    return (fmod(x, 1.0f) < a) ? -1.0f : 1.0f;
+    return (std::fmod(x, 1.0f) < a) ? -1.0f : 1.0f;
 }
 
 FUNC(saw)
@@ -1156,8 +1152,8 @@ FUNC(saw)
     x = fmod(x, 1);
     if (x < a)
         return x / a * 2.0f - 1.0f;
-    else
-        return (1.0f - x) / (1.0f - a) * 2.0f - 1.0f;
+
+    return (1.0f - x) / (1.0f - a) * 2.0f - 1.0f;
 }
 
 FUNC(triangle)
@@ -1239,7 +1235,7 @@ FUNC(stretchsine)
     if (a > 0.0f)
         a *= 2;
     a = powf(3.0f, a);
-    float b = powf(fabs(x), a);
+    float b = powf(std::fabs(x), a);
     if (x < 0)
         b = -b;
     return -sinf(b * PI);
@@ -1247,7 +1243,7 @@ FUNC(stretchsine)
 
 FUNC(chirp)
 {
-    x = fmod(x, 1.0f) * 2.0f * PI;
+    x = std::fmod(x, 1.0f) * 2.0f * PI;
     a = (a - 0.5f) * 4;
     if (a < 0.0f)
         a *= 2.0f;
@@ -1260,7 +1256,7 @@ FUNC(absstretchsine)
     x = fmod(x + 0.5f, 1) * 2.0f - 1.0f;
     a = (a - 0.5f) * 9;
     a = powf(3.0f, a);
-    float b = powf(fabs(x), a);
+    float b = powf(std::fabs(x), a);
     if (x < 0)
         b = -b;
     return -powf(sinf(b * PI), 2);
@@ -1286,22 +1282,16 @@ FUNC(spike)
     {
         if (x < (0.5 - (b / 2.0)))
             return 0.0;
-        else
-        {
-            x = (x + (b / 2) - 0.5) * (2.0 / b); // shift to zero, and expand to range from 0 to 1
-            return x * (2.0 / b);                // this is the slope: 1 / (b / 2)
-        }
+
+        x = (x + (b / 2) - 0.5) * (2.0 / b); // shift to zero, and expand to range from 0 to 1
+        return x * (2.0 / b);                // this is the slope: 1 / (b / 2)
     }
-    else
-    {
-        if (x > (0.5 + (b / 2.0)))
-            return 0.0;
-        else
-        {
-            x = (x - 0.5) * (2.0 / b);
-            return (1 - x) * (2.0 / b);
-        }
-    }
+
+    if (x > (0.5 + (b / 2.0)))
+        return 0.0;
+
+    x = (x - 0.5) * (2.0 / b);
+    return (1 - x) * (2.0 / b);
 }
 
 FUNC(circle)
@@ -1331,15 +1321,15 @@ FUNC(circle)
     return y;
 }
 
-typedef float (*base_func)(float, float);
+using base_func = float (*)(float, float);
 
 base_func getBaseFunction(unsigned char func)
 {
     if (!func)
-        return NULL;
+        return nullptr;
 
     if (func == 127) //should be the custom wave
-        return NULL;
+        return nullptr;
 
     func--;
     assert(func < 15);
@@ -1433,9 +1423,9 @@ FILTER(hp2)
 
 FILTER(bp2)
 {
-    return (fabs(powf(2,
-                      (1.0f - par) * 7) -
-                 i) > i / 2 + 1
+    return (std::fabs(powf(2,
+                           (1.0f - par) * 7) -
+                      i) > i / 2 + 1
                 ? 0.0f
                 : 1.0f) *
                par2 +
@@ -1444,9 +1434,9 @@ FILTER(bp2)
 
 FILTER(bs2)
 {
-    return (fabs(powf(2,
-                      (1.0f - par) * 7) -
-                 i) < i / 2 + 1
+    return (std::fabs(powf(2,
+                           (1.0f - par) * 7) -
+                      i) < i / 2 + 1
                 ? 0.0f
                 : 1.0f) *
                par2 +
@@ -1503,11 +1493,11 @@ FILTER(s)
 }
 #undef FILTER
 
-typedef float (*filter_func)(unsigned int, float, float);
+using filter_func = float (*)(unsigned int, float, float);
 filter_func getFilter(unsigned char func)
 {
     if (!func)
-        return NULL;
+        return nullptr;
 
     func--;
     assert(func < 13);

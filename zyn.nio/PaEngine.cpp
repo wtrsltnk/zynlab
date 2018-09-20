@@ -27,7 +27,7 @@
 using namespace std;
 
 PaEngine::PaEngine(SystemSettings *s)
-    : AudioOutput(s), stream(NULL)
+    : AudioOutput(s), stream(nullptr)
 {
     name = "PA";
 }
@@ -55,10 +55,10 @@ bool PaEngine::Start()
     outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
     outputParameters.suggestedLatency =
         Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
-    outputParameters.hostApiSpecificStreamInfo = NULL;
+    outputParameters.hostApiSpecificStreamInfo = nullptr;
 
     Pa_OpenStream(&stream,
-                  NULL,
+                  nullptr,
                   &outputParameters,
                   this->_synth->samplerate,
                   this->_synth->buffersize,
@@ -114,6 +114,6 @@ void PaEngine::Stop()
         return;
     Pa_StopStream(stream);
     Pa_CloseStream(stream);
-    stream = NULL;
+    stream = nullptr;
     Pa_Terminate();
 }

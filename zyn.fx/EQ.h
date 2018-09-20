@@ -50,7 +50,7 @@ private:
         unsigned char Ptype, Pfreq, Pgain, Pq, Pstages;
         //internal values
         class AnalogFilter *l, *r;
-    } filter[MAX_EQ_BANDS];
+    } filter[MAX_EQ_BANDS]{};
 };
 
 #endif

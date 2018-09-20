@@ -39,9 +39,9 @@ EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, Sys
     : insertion(insertion_),
       efxoutl(new float[synth_->buffersize]),
       efxoutr(new float[synth_->buffersize]),
-      filterpars(NULL),
+      filterpars(nullptr),
       nefx(0),
-      efx(NULL),
+      efx(nullptr),
       mutex(mutex_),
       _synth(synth_),
       dryonly(false)
@@ -59,7 +59,7 @@ EffectManager::~EffectManager()
     delete[] efxoutr;
 }
 
-void EffectManager::defaults(void)
+void EffectManager::defaults()
 {
     changeeffect(0);
     setdryonly(false);
@@ -103,7 +103,7 @@ void EffectManager::changeeffect(int _nefx)
             break;
         //put more effect here
         default:
-            efx = NULL;
+            efx = nullptr;
             break; //no effect (thru)
     }
 
@@ -112,25 +112,25 @@ void EffectManager::changeeffect(int _nefx)
 }
 
 //Obtain the effect number
-int EffectManager::geteffect(void)
+int EffectManager::geteffect()
 {
     return nefx;
 }
 
 // Cleanup the current effect
-void EffectManager::cleanup(void)
+void EffectManager::cleanup()
 {
     if (efx)
         efx->cleanup();
 }
 
 // Get the preset of the current effect
-unsigned char EffectManager::getpreset(void)
+unsigned char EffectManager::getpreset()
 {
     if (efx)
         return efx->Ppreset;
-    else
-        return 0;
+
+    return 0;
 }
 
 // Change the preset of the current effect
@@ -248,7 +248,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
 }
 
 // Get the effect volume for the system effect
-float EffectManager::sysefxgetvolume(void)
+float EffectManager::sysefxgetvolume()
 {
     return (!efx) ? 1.0f : efx->outvolume;
 }

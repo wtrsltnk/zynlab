@@ -63,7 +63,7 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq, SystemSettings *synt
                 break;
             case 3:
                 envval[i] =
-                    (powf(2, 6.0f * fabs(envpars->Penvval[i] - 64.0f) / 64.0f) - 1.0f) * 100.0f;
+                    (powf(2, 6.0f * std::fabs(envpars->Penvval[i] - 64.0f) / 64.0f) - 1.0f) * 100.0f;
                 if (envpars->Penvval[i] < 64)
                     envval[i] = -envval[i];
                 break;
@@ -88,8 +88,7 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq, SystemSettings *synt
     envoutval = 0.0f;
 }
 
-Envelope::~Envelope()
-{}
+Envelope::~Envelope() = default;
 
 /*
  * Relase the key (note envelope)

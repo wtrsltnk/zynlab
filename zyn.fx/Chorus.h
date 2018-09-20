@@ -80,12 +80,12 @@ public:
 
 private:
     //Chorus Parameters
-    unsigned char Pvolume;
-    unsigned char Pdepth;      //the depth of the Chorus(ms)
-    unsigned char Pdelay;      //the delay (ms)
-    unsigned char Pfb;         //feedback
-    unsigned char Pflangemode; //how the LFO is scaled, to result chorus or flange
-    unsigned char Poutsub;     //if I wish to substract the output instead of the adding it
+    unsigned char Pvolume{};
+    unsigned char Pdepth{};      //the depth of the Chorus(ms)
+    unsigned char Pdelay{};      //the delay (ms)
+    unsigned char Pfb{};         //feedback
+    unsigned char Pflangemode{}; //how the LFO is scaled, to result chorus or flange
+    unsigned char Poutsub{};     //if I wish to substract the output instead of the adding it
     EffectLFO lfo;             //lfo-ul chorus
 
     //Parameter Controls
@@ -95,11 +95,11 @@ private:
     void setfb(unsigned char _Pfb);
 
     //Internal Values
-    float depth, delay, fb;
-    float dl1, dl2, dr1, dr2, lfol, lfor;
+    float depth{}, delay{}, fb{};
+    float dl1{}, dl2, dr1{}, dr2, lfol{}, lfor{};
     int maxdelay;
     Stereo<float *> delaySample;
-    int dlk, drk, dlhi;
+    int dlk, drk, dlhi{};
     float getdelay(float xlfo);
 };
 

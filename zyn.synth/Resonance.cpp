@@ -20,17 +20,15 @@
 */
 
 #include "Resonance.h"
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
 
-Resonance::Resonance() : Presets()
+Resonance::Resonance()
 {
     setpresettype("Presonance");
     defaults();
 }
 
-Resonance::~Resonance()
-{}
+Resonance::~Resonance() = default;
 
 void Resonance::defaults()
 {
@@ -41,8 +39,8 @@ void Resonance::defaults()
     Pprotectthefundamental = 0;
     ctlcenter = 1.0f;
     ctlbw = 1.0f;
-    for (int i = 0; i < N_RES_POINTS; ++i)
-        Prespoints[i] = 64;
+    for (unsigned char &Prespoint : Prespoints)
+        Prespoint = 64;
 }
 
 /*
@@ -66,9 +64,9 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
           l1 = logf(getfreqx(0.0f) * ctlcenter),
           l2 = logf(2.0f) * getoctavesfreq() * ctlbw;
 
-    for (int i = 0; i < N_RES_POINTS; ++i)
-        if (sum < Prespoints[i])
-            sum = Prespoints[i];
+    for (unsigned char Prespoint : Prespoints)
+        if (sum < Prespoint)
+            sum = Prespoint;
     if (sum < 1.0f)
         sum = 1.0f;
 
@@ -79,9 +77,9 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
             x = 0.0f;
 
         x *= N_RES_POINTS;
-        float dx = x - floor(x);
-        x = floor(x);
-        int kx1 = (int)x;
+        float dx = x - std::floor(x);
+        x = std::floor(x);
+        auto kx1 = (int)x;
         if (kx1 >= N_RES_POINTS)
             kx1 = N_RES_POINTS - 1;
         int kx2 = kx1 + 1;
@@ -108,9 +106,9 @@ float Resonance::getfreqresponse(float freq)
     float l1 = logf(getfreqx(0.0f) * ctlcenter),
           l2 = logf(2.0f) * getoctavesfreq() * ctlbw, sum = 0.0f;
 
-    for (int i = 0; i < N_RES_POINTS; ++i)
-        if (sum < Prespoints[i])
-            sum = Prespoints[i];
+    for (unsigned char Prespoint : Prespoints)
+        if (sum < Prespoint)
+            sum = Prespoint;
     if (sum < 1.0f)
         sum = 1.0f;
 
@@ -118,9 +116,9 @@ float Resonance::getfreqresponse(float freq)
     if (x < 0.0f)
         x = 0.0f;
     x *= N_RES_POINTS;
-    float dx = x - floor(x);
-    x = floor(x);
-    int kx1 = (int)x;
+    float dx = x - std::floor(x);
+    x = std::floor(x);
+    auto kx1 = (int)x;
     if (kx1 >= N_RES_POINTS)
         kx1 = N_RES_POINTS - 1;
     int kx2 = kx1 + 1;
@@ -138,10 +136,10 @@ float Resonance::getfreqresponse(float freq)
 void Resonance::smooth()
 {
     float old = Prespoints[0];
-    for (int i = 0; i < N_RES_POINTS; ++i)
+    for (unsigned char &Prespoint : Prespoints)
     {
-        old = old * 0.4f + Prespoints[i] * 0.6f;
-        Prespoints[i] = (int)old;
+        old = old * 0.4f + Prespoint * 0.6f;
+        Prespoint = (int)old;
     }
     old = Prespoints[N_RES_POINTS - 1];
     for (int i = N_RES_POINTS - 1; i > 0; i--)
@@ -158,10 +156,10 @@ void Resonance::smooth()
  */
 void Resonance::randomize(int type)
 {
-    int r = (int)(RND * 127.0f);
-    for (int i = 0; i < N_RES_POINTS; ++i)
+    auto r = (int)(RND * 127.0f);
+    for (unsigned char &Prespoint : Prespoints)
     {
-        Prespoints[i] = r;
+        Prespoint = r;
         if ((RND < 0.1f) && (type == 0))
             r = (int)(RND * 127.0f);
         if ((RND < 0.3f) && (type == 1))
@@ -202,7 +200,7 @@ float Resonance::getfreqx(float x)
     if (x > 1.0f)
         x = 1.0f;
     float octf = powf(2.0f, getoctavesfreq());
-    return getcenterfreq() / sqrt(octf) * powf(octf, x);
+    return getcenterfreq() / std::sqrt(octf) * powf(octf, x);
 }
 
 /*

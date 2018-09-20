@@ -21,11 +21,8 @@
 */
 
 #include "LFO.h"
+#include <cmath>
 #include <zyn.common/Util.h>
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 LFO::LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_)
     : _synth(synth_)
@@ -37,19 +34,19 @@ LFO::LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_)
 
     float lfofreq =
         (powf(2, lfopars->Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
-    incx = fabs(lfofreq) * this->_synth->buffersize_f / this->_synth->samplerate_f;
+    incx = std::fabs(lfofreq) * this->_synth->buffersize_f / this->_synth->samplerate_f;
 
     if (lfopars->Pcontinous == 0)
     {
         if (lfopars->Pstartphase == 0)
             x = RND;
         else
-            x = fmod((lfopars->Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
+            x = std::fmod((lfopars->Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
     }
     else
     {
-        float tmp = fmod(lfopars->time * incx, 1.0f);
-        x = fmod((lfopars->Pstartphase - 64.0f) / 127.0f + 1.0f + tmp, 1.0f);
+        float tmp = std::fmod(LFOParams::time * incx, 1.0f);
+        x = std::fmod((lfopars->Pstartphase - 64.0f) / 127.0f + 1.0f + tmp, 1.0f);
     }
 
     //Limit the Frequency(or else...)
@@ -90,7 +87,7 @@ LFO::LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_)
 }
 
 LFO::~LFO()
-{}
+= default;
 
 /*
  * LFO out
@@ -149,7 +146,7 @@ float LFO::lfoout()
         }
         if (x >= 1)
         {
-            x = fmod(x, 1.0f);
+            x = std::fmod(x, 1.0f);
             amp1 = amp2;
             amp2 = (1 - lfornd) + lfornd * RND;
 

@@ -21,8 +21,7 @@
 */
 
 #include "Microtonal.h"
-#include <math.h>
-#include <string.h>
+#include <cmath>
 
 #define MAX_LINE_SIZE 80
 
@@ -89,8 +88,8 @@ unsigned char Microtonal::getoctavesize() const
 {
     if (Penabled != 0)
         return octavesize;
-    else
-        return 12;
+
+    return 12;
 }
 
 /*
@@ -185,23 +184,21 @@ float Microtonal::getnotefreq(int note, int keyshift) const
             freq /= octave[scaleshift - 1].tuning;
         return freq * rap_keyshift;
     }
-    else
-    { //if the mapping is disabled
-        int nt = note - PAnote + scaleshift;
-        int ntkey = (nt + (int)octavesize * 100) % octavesize;
-        int ntoct = (nt - ntkey) / octavesize;
 
-        float oct = octave[octavesize - 1].tuning;
-        float freq =
-            octave[(ntkey + octavesize - 1) % octavesize].tuning * powf(oct, ntoct) * PAfreq;
-        if (ntkey == 0)
-            freq /= oct;
-        if (scaleshift != 0)
-            freq /= octave[scaleshift - 1].tuning;
-        //	fprintf(stderr,"note=%d freq=%.3f cents=%d\n",note,freq,(int)floor(logf(freq/PAfreq)/logf(2.0f)*1200.0f+0.5f));
-        freq *= globalfinedetunerap;
-        return freq * rap_keyshift;
-    }
+    int nt = note - PAnote + scaleshift;
+    int ntkey = (nt + (int)octavesize * 100) % octavesize;
+    int ntoct = (nt - ntkey) / octavesize;
+
+    float oct = octave[octavesize - 1].tuning;
+    float freq =
+        octave[(ntkey + octavesize - 1) % octavesize].tuning * powf(oct, ntoct) * PAfreq;
+    if (ntkey == 0)
+        freq /= oct;
+    if (scaleshift != 0)
+        freq /= octave[scaleshift - 1].tuning;
+    //	fprintf(stderr,"note=%d freq=%.3f cents=%d\n",note,freq,(int)floor(logf(freq/PAfreq)/logf(2.0f)*1200.0f+0.5f));
+    freq *= globalfinedetunerap;
+    return freq * rap_keyshift;
 }
 
 bool Microtonal::operator==(const Microtonal &micro) const
@@ -246,9 +243,9 @@ bool Microtonal::operator!=(const Microtonal &micro) const
         MCREQ(octave[i].x1);
         MCREQ(octave[i].x2);
     }
-    if (strcmp((const char *)this->Pname, (const char *)micro.Pname))
+    if (strcmp((const char *)this->Pname, (const char *)micro.Pname) != 0)
         return true;
-    if (strcmp((const char *)this->Pcomment, (const char *)micro.Pcomment))
+    if (strcmp((const char *)this->Pcomment, (const char *)micro.Pcomment) != 0)
         return true;
     MCREQ(Pglobalfinedetune);
     return false;
@@ -265,9 +262,9 @@ int Microtonal::linetotunings(unsigned int nline, const char *line)
 {
     int x1 = -1, x2 = -1, type = -1;
     float x = -1.0f, tmp, tuning = 1.0f;
-    if (strstr(line, "/") == NULL)
+    if (strstr(line, "/") == nullptr)
     {
-        if (strstr(line, ".") == NULL)
+        if (strstr(line, ".") == nullptr)
         { // M case (M=M/1)
             sscanf(line, "%d", &x1);
             x2 = 1;
@@ -303,8 +300,8 @@ int Microtonal::linetotunings(unsigned int nline, const char *line)
     switch (type)
     {
         case 1:
-            x1 = (int)floor(x);
-            tmp = fmod(x, 1.0f);
+            x1 = (int)std::floor(x);
+            tmp = std::fmod(x, 1.0f);
             x2 = (int)(floor(tmp * 1e6));
             tuning = powf(2.0f, x / 1200.0f);
             break;
@@ -425,7 +422,7 @@ int Microtonal::loadline(FILE *file, char *line)
 {
     do
     {
-        if (fgets(line, 500, file) == 0)
+        if (fgets(line, 500, file) == nullptr)
             return 1;
     } while (line[0] == '!');
     return 0;
@@ -441,9 +438,9 @@ int Microtonal::loadscl(const char *filename)
     //loads the short description
     if (loadline(file, &tmp[0]) != 0)
         return 2;
-    for (int i = 0; i < 500; ++i)
-        if (tmp[i] < 32)
-            tmp[i] = 0;
+    for (char & i : tmp)
+        if (i < 32)
+            i = 0;
     snprintf((char *)Pname, MICROTONAL_MAX_NAME_LEN, "%s", tmp);
     snprintf((char *)Pcomment, MICROTONAL_MAX_NAME_LEN, "%s", tmp);
     //loads the number of the notes
@@ -665,7 +662,7 @@ void Microtonal::getfromXML(XMLwrapper *xml)
                     octave[i].type = 1;
                     //populate fields for display
                     float x = logf(octave[i].tuning) / LOG_2 * 1200.0f;
-                    octave[i].x1 = (int)floor(x);
+                    octave[i].x1 = (int)std::floor(x);
                     octave[i].x2 = (int)(floor(fmodf(x, 1.0f) * 1e6));
                 }
 
@@ -693,7 +690,7 @@ void Microtonal::getfromXML(XMLwrapper *xml)
 
 int Microtonal::saveXML(const char *filename) const
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
 
     xml->beginbranch("MICROTONAL");
     add2XML(xml);
@@ -706,7 +703,7 @@ int Microtonal::saveXML(const char *filename) const
 
 int Microtonal::loadXML(const char *filename)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
     if (xml->loadXMLfile(filename) < 0)
     {
         delete (xml);

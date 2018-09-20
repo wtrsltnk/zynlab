@@ -48,17 +48,17 @@ SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
 }
 
 SVFilter::~SVFilter()
-{}
+= default;
 
 void SVFilter::cleanup()
 {
-    for (int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
-        st[i].low = st[i].high = st[i].band = st[i].notch = 0.0f;
+    for (auto & i : st)
+        i.low = i.high = i.band = i.notch = 0.0f;
     oldabovenq = false;
     abovenq = false;
 }
 
-void SVFilter::computefiltercoefs(void)
+void SVFilter::computefiltercoefs()
 {
     par.f = freq / this->_synth->samplerate_f * 4.0f;
     if (par.f > 0.99999f)
@@ -128,7 +128,7 @@ void SVFilter::setstages(int stages_)
 
 void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
 {
-    float *out = NULL;
+    float *out = nullptr;
     switch (type)
     {
         case 0:

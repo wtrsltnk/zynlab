@@ -77,13 +77,13 @@ public:
     unsigned char Ppreset; /**<Currently used preset*/
     float *const efxoutl;  /**<Effect out Left Channel*/
     float *const efxoutr;  /**<Effect out Right Channel*/
-    float outvolume;       /**<This is the volume of effect and is public because
+    float outvolume{};       /**<This is the volume of effect and is public because
                           * it is needed in system effects.
                           * The out volume of such effects are always 1.0f, so
                           * this setting tells me how is the volume to the
                           * Master Output only.*/
 
-    float volume;
+    float volume{};
 
     FilterParams *filterpars; /**<Parameters for filters used by Effect*/
 
@@ -96,11 +96,11 @@ protected:
 
     const bool insertion;
     //panning parameters
-    char Ppanning;
-    float pangainL;
-    float pangainR;
-    char Plrcross; // L/R mix
-    float lrcross;
+    char Ppanning{};
+    float pangainL{};
+    float pangainR{};
+    char Plrcross{}; // L/R mix
+    float lrcross{};
 
     // current setup
     SystemSettings *_synth;

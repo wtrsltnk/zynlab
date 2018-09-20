@@ -75,12 +75,12 @@ protected:
         { // Fade In/Out vars
             int length;
             float m, step;
-        } fade;
+        } fade{};
         struct
         { // Note parameters
             float freq, vel;
             int portamento, midinote;
-        } param;
+        } param{};
 
     public: /* Some get routines for legatonote calls (aftertouch feature)*/
         float getFreq() { return param.freq; }
