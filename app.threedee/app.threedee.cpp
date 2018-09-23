@@ -1,6 +1,7 @@
 
 #include "app.threedee.h"
 #include <zyn.mixer/Instrument.h>
+#include <zyn.synth/ADnoteParams.h>
 
 #include <imgui.h>
 
@@ -70,21 +71,31 @@ bool AppThreeDee::SetUp()
 // Implementing a simple custom widget using the public API.
 // You may also use the <imgui_internal.h> API to get raw access to more data/helpers, however the internal API isn't guaranteed to be forward compatible.
 // FIXME: Need at least proper label centering + clipping (internal functions RenderTextClipped provides both but api is flaky/temporary)
-static bool MyKnob(const char *label, float *p_value, float v_min, float v_max)
+static bool MyKnob(const char *label, float *p_value, float v_min, float v_max, ImVec2 const &size)
 {
     ImGuiIO &io = ImGui::GetIO();
     ImGuiStyle &style = ImGui::GetStyle();
 
-    float radius_outer = 20.0f;
+    float radius_outer = std::min(size.x, size.y) / 2.0f;
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImVec2 center = ImVec2(pos.x + radius_outer, pos.y + radius_outer);
+
     float line_height = ImGui::GetTextLineHeight();
     ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
     float ANGLE_MIN = 3.141592f * 0.75f;
     float ANGLE_MAX = 3.141592f * 2.25f;
 
-    ImGui::InvisibleButton(label, ImVec2(radius_outer * 2, radius_outer * 2 + line_height + style.ItemInnerSpacing.y));
+    if (size.x != 0.0f && size.y != 0.0f)
+    {
+        center.x = pos.x + (size.x / 2.0f);
+        center.y = pos.y + (size.y / 2.0f);
+        ImGui::InvisibleButton(label, ImVec2(size.x, size.y + line_height + style.ItemInnerSpacing.y));
+    }
+    else
+    {
+        ImGui::InvisibleButton(label, ImVec2(radius_outer * 2, radius_outer * 2 + line_height + style.ItemInnerSpacing.y));
+    }
     bool value_changed = false;
     bool is_active = ImGui::IsItemActive();
     bool is_hovered = ImGui::IsItemActive();
@@ -99,12 +110,18 @@ static bool MyKnob(const char *label, float *p_value, float v_min, float v_max)
         value_changed = true;
     }
 
-    float t = (*p_value - v_min) / (v_max - v_min);
-    float angle = ANGLE_MIN + (ANGLE_MAX - ANGLE_MIN) * t;
-    float angle_cos = cosf(angle), angle_sin = sinf(angle);
     float radius_inner = radius_outer * 0.40f;
+
+    float angle = ANGLE_MIN + (ANGLE_MAX - ANGLE_MIN) * (*p_value - v_min) / (v_max - v_min);
+    float angle_cos = cosf(angle);
+    float angle_sin = sinf(angle);
+
     draw_list->AddCircleFilled(center, radius_outer, ImGui::GetColorU32(ImGuiCol_FrameBg), 16);
-    draw_list->AddLine(ImVec2(center.x + angle_cos * radius_inner, center.y + angle_sin * radius_inner), ImVec2(center.x + angle_cos * (radius_outer - 2), center.y + angle_sin * (radius_outer - 2)), ImGui::GetColorU32(ImGuiCol_SliderGrabActive), 2.0f);
+    draw_list->AddLine(
+        ImVec2(center.x + angle_cos * radius_inner, center.y + angle_sin * radius_inner),
+        ImVec2(center.x + angle_cos * (radius_outer - 2), center.y + angle_sin * (radius_outer - 2)),
+        ImGui::GetColorU32(ImGuiCol_SliderGrabActive),
+        2.0f);
     draw_list->AddCircleFilled(center, radius_inner, ImGui::GetColorU32(is_active ? ImGuiCol_FrameBgActive : is_hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), 16);
     draw_list->AddText(ImVec2(pos.x, pos.y + radius_outer * 2 + style.ItemInnerSpacing.y), ImGui::GetColorU32(ImGuiCol_Text), label);
 
@@ -112,18 +129,18 @@ static bool MyKnob(const char *label, float *p_value, float v_min, float v_max)
     {
         ImGui::SetNextWindowPos(ImVec2(pos.x - style.WindowPadding.x, pos.y - line_height - style.ItemInnerSpacing.y - style.WindowPadding.y));
         ImGui::BeginTooltip();
-        ImGui::Text("%s %.3f", label, *p_value);
+        ImGui::Text("%s %.3f", label, static_cast<double>(*p_value));
         ImGui::EndTooltip();
     }
 
     return value_changed;
 }
 
-static bool MyKnobUchar(const char *label, char *p_value, unsigned char v_min, unsigned char v_max)
+static bool MyKnobUchar(const char *label, char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
 {
     float val = (p_value[0]) / 128.0f;
 
-    if (MyKnob(label, &val, v_min / 128.0f, v_max / 128.0f))
+    if (MyKnob(label, &val, v_min / 128.0f, v_max / 128.0f, size))
     {
         p_value[0] = static_cast<char>(val * 128);
 
@@ -133,11 +150,11 @@ static bool MyKnobUchar(const char *label, char *p_value, unsigned char v_min, u
     return false;
 }
 
-static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max)
+static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
 {
     float val = (p_value[0]) / 128.0f;
 
-    if (MyKnob(label, &val, v_min / 128.0f, v_max / 128.0f))
+    if (MyKnob(label, &val, v_min / 128.0f, v_max / 128.0f, size))
     {
         p_value[0] = static_cast<unsigned char>(val * 128);
 
@@ -166,13 +183,11 @@ void AppThreeDee::EditInstrument(int i)
 
     activeInstrument = i;
     showInstrumentEditor = true;
-    std::cout << "EditInstrument: " << i << std::endl;
 }
 
 void AppThreeDee::SelectInstrument(int i)
 {
     activeInstrument = i;
-    std::cout << "SelectInstrument: " << i << std::endl;
 }
 
 void AppThreeDee::Render()
@@ -182,6 +197,7 @@ void AppThreeDee::Render()
     ImGui::NewFrame();
 
     int openSelectInstrument = -1;
+    int openSelectSinkSource = -1;
 
     ImGui::Begin("Zynadsubfx", nullptr, ImGuiWindowFlags_NoTitleBar);
     {
@@ -212,10 +228,25 @@ void AppThreeDee::Render()
             ImGui::SetColumnWidth(0, 70);
             ImGui::SetColumnWidth(1, 8 * 100);
 
-            ImGui::Button("MASTER", ImVec2(50, 20));
-            ImGui::Button(" ", ImVec2(50, 20));
+            ImGui::Text("MASTER");
+            ImGui::NextColumn();
+            ImGui::Text("CHANNELS");
+            ImGui::NextColumn();
+            ImGui::Separator();
+
+            ImGui::Text("Input");
+            if (ImGui::Button(Nio::getSource().c_str(), ImVec2(55, 20)))
+            {
+                openSelectSinkSource = 1;
+            }
+            ImGui::Text("Output");
+            if (ImGui::Button(Nio::getSink().c_str(), ImVec2(55, 20)))
+            {
+                openSelectSinkSource = 1;
+            }
+
             char v = char(_mixer->Pvolume);
-            if (MyKnobUchar("Master", &(v), 0, 128))
+            if (MyKnobUchar("Volume", &(v), 0, 128, ImVec2(55, 55)))
             {
                 _mixer->setPvolume(v);
             }
@@ -231,9 +262,9 @@ void AppThreeDee::Render()
 
                     if (i == activeInstrument)
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.4f, 0.4f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(1.0f, 0.6f, 0.6f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(1.0f, 0.6f, 0.6f));
+                        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.4f, 0.4f)));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
                     }
                     else
                     {
@@ -242,7 +273,7 @@ void AppThreeDee::Render()
                         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered));
                     }
 
-                    ImVec2 size = ImVec2(85, 20);
+                    ImVec2 size = ImVec2(87, 18);
                     char label[32];
                     sprintf(label, "CH%d", i + 1);
                     bool channelEnabled = _mixer->part[i]->Penabled != '\0';
@@ -250,12 +281,13 @@ void AppThreeDee::Render()
                     {
                         _mixer->part[i]->Penabled = channelEnabled ? 1 : 0;
                     }
+
                     if (ImGui::Button("Edit", size))
                     {
                         EditInstrument(i);
                     }
 
-                    if (ImGui::Button((char *)_mixer->part[i]->Pname, size))
+                    if (ImGui::Button(reinterpret_cast<char *>(_mixer->part[i]->Pname), size))
                     {
                         SelectInstrument(i);
                         openSelectInstrument = i;
@@ -265,18 +297,18 @@ void AppThreeDee::Render()
                     {
                         ImGui::BeginTooltip();
                         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                        ImGui::TextUnformatted((char *)_mixer->part[i]->Pname);
+                        ImGui::TextUnformatted(reinterpret_cast<char *>(_mixer->part[i]->Pname));
                         ImGui::PopTextWrapPos();
                         ImGui::EndTooltip();
                     }
                     auto volume = _mixer->part[i]->Pvolume;
-                    if (MyKnobUchar("volume", &(volume), 0, 128))
+                    if (MyKnobUchar("volume", &(volume), 0, 128, ImVec2(40, 40)))
                     {
                         _mixer->part[i]->setPvolume(volume);
                     }
                     ImGui::SameLine();
                     auto panning = _mixer->part[i]->Ppanning;
-                    if (MyKnobUchar(" pann", &(panning), 0, 128))
+                    if (MyKnobUchar(" pann", &(panning), 0, 128, ImVec2(40, 40)))
                     {
                         _mixer->part[i]->setPpanning(panning);
                     }
@@ -298,97 +330,63 @@ void AppThreeDee::Render()
 
     if (showInstrumentEditor)
     {
-        ImGui::Begin("Instrument editor", &showInstrumentEditor);
-
-        ImGui::Columns(2);
-
-        const char *listbox_items[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
-        ImGui::Combo("Part", &activeInstrument, listbox_items, 15);
-
-        bool penabled = _mixer->part[activeInstrument]->Penabled != 0;
-        if (ImGui::Checkbox("Enabled", &penabled))
+        if (ImGui::Begin("Instrument editor", &showInstrumentEditor))
         {
-            _mixer->part[activeInstrument]->Penabled = penabled ? 1 : 0;
+            ImGui::Columns(2);
+
+            const char *listbox_items[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
+            ImGui::Combo("Part", &activeInstrument, listbox_items, 15);
+
+            bool penabled = _mixer->part[activeInstrument]->Penabled != 0;
+            if (ImGui::Checkbox("Enabled", &penabled))
+            {
+                _mixer->part[activeInstrument]->Penabled = penabled ? 1 : 0;
+            }
+
+            bool add = _mixer->part[activeInstrument]->kit[0].Padenabled;
+            if (ImGui::Checkbox("Add", &add))
+            {
+                _mixer->part[activeInstrument]->kit[0].Padenabled = add;
+            }
+
+            bool sub = _mixer->part[activeInstrument]->kit[0].Psubenabled;
+            if (ImGui::Checkbox("Sub", &sub))
+            {
+                _mixer->part[activeInstrument]->kit[0].Psubenabled = sub;
+            }
+
+            bool pad = _mixer->part[activeInstrument]->kit[0].Ppadenabled;
+            if (ImGui::Checkbox("Pad", &pad))
+            {
+                _mixer->part[activeInstrument]->kit[0].Ppadenabled = pad;
+            }
+
+            if (ImGui::Button("Edit"))
+            {
+                EditInstrument(activeInstrument);
+            }
+
+            if (ImGui::Button(reinterpret_cast<char *>(_mixer->part[activeInstrument]->Pname)))
+            {
+                SelectInstrument(activeInstrument);
+                openSelectInstrument = activeInstrument;
+            }
+            ImGui::NextColumn();
+            ImGui::Columns(1);
+
+            static bool noteOn = false;
+            if (ImGui::Button("Note On") && !noteOn)
+            {
+                _mixer->NoteOn(0, 65, 120);
+                noteOn = true;
+            }
+            if (ImGui::Button("Note Off") && noteOn)
+            {
+                _mixer->NoteOff(0, 65);
+                noteOn = false;
+            }
+            ImGui::End();
         }
-
-        MyKnobUchar("Volume", &(_mixer->part[activeInstrument]->Pvolume), 0, 128);
-        ImGui::SameLine();
-        MyKnobUchar("Pan", &(_mixer->part[activeInstrument]->Ppanning), 0, 128);
-        ImGui::SameLine();
-        MyKnobUchar("Vel.Sns", &(_mixer->part[activeInstrument]->Pvelsns), 0, 128);
-        ImGui::SameLine();
-        MyKnobUchar("Vel.Ofs", &(_mixer->part[activeInstrument]->Pveloffs), 0, 128);
-
-        if (ImGui::Button("Edit"))
-        {
-            EditInstrument(activeInstrument);
-        }
-
-        if (ImGui::Button((char *)_mixer->part[activeInstrument]->Pname))
-        {
-            SelectInstrument(activeInstrument);
-            openSelectInstrument = activeInstrument;
-        }
-        ImGui::NextColumn();
-        ImGui::Text("To Sys.Efx.");
-        MyKnobUchar("1", &(_mixer->part[activeInstrument]->Pefxroute[0]), 0, 128);
-        MyKnobUchar("2", &(_mixer->part[activeInstrument]->Pefxroute[1]), 0, 128);
-        MyKnobUchar("3", &(_mixer->part[activeInstrument]->Pefxroute[2]), 0, 128);
-        MyKnobUchar("4", &(_mixer->part[activeInstrument]->Pefxroute[3]), 0, 128);
-
-        ImGui::Columns(1);
-
-        ImGui::Button("Reset");
-        MyKnobUchar("Find Detune", &(_mixer->microtonal.Pglobalfinedetune), 0, 128);
-
-        static bool noteOn = false;
-        if (ImGui::Button("Panic!") && !noteOn)
-        {
-            _mixer->NoteOn(0, 65, 120);
-            noteOn = true;
-        }
-        if (ImGui::Button("vK") && noteOn)
-        {
-            _mixer->NoteOff(0, 65);
-            noteOn = false;
-        }
-        ImGui::SameLine();
-        ImGui::Button("Scales");
-        ImGui::Button("Panel Window");
-
-        int t = int(_mixer->Pkeyshift);
-        if (ImGui::SliderInt("Master KeyShift", &t, 0, 64))
-        {
-            _mixer->Pkeyshift = static_cast<unsigned char>(t);
-        }
-
-        ImGui::Separator();
-
-        enum EffectsTab
-        {
-            SystemEffects,
-            InsertionEffects
-        };
-
-        static EffectsTab effectsTab = EffectsTab::SystemEffects;
-        if (ImGui::Button("System Effects"))
-        {
-            effectsTab = EffectsTab::SystemEffects;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Insertion Effects"))
-        {
-            effectsTab = EffectsTab::InsertionEffects;
-        }
-        if (effectsTab == EffectsTab::SystemEffects)
-        {
-            ImGui::Text("SystemEffects");
-        }
-        if (effectsTab == EffectsTab::InsertionEffects)
-        {
-            ImGui::Text("InsertionEffects");
-        }
-        ImGui::End();
     }
 
     if (openSelectInstrument >= 0)
@@ -442,6 +440,20 @@ void AppThreeDee::Render()
         ImGui::EndPopup();
     }
 
+    if (openSelectSinkSource >= 0)
+    {
+        ImGui::OpenPopup("NioPopup");
+    }
+
+    if (ImGui::BeginPopupModal("NioPopup"))
+    {
+        if (ImGui::Button("Close"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
     ImGui::Render();
     int display_w, display_h;
     glfwMakeContextCurrent(_window);
@@ -462,7 +474,7 @@ static std::map<int, char> mappedNotes{
     {int('M'), static_cast<char>(71)},
 };
 
-void AppThreeDee::onKeyAction(int key, int scancode, int action, int /*mods*/)
+void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*/)
 {
     if (key >= GLFW_KEY_F1 && key <= GLFW_KEY_F12)
     {
@@ -514,18 +526,18 @@ void AppThreeDee::onKeyAction(int key, int scancode, int action, int /*mods*/)
         EditInstrument(activeInstrument);
         return;
     }
-//    std::cout << key << "-" << scancode << "\n";
+    //    std::cout << key << "-" << scancode << "\n";
     auto found = mappedNotes.find(key);
 
     if (found != mappedNotes.end())
     {
         if (action == 1)
         {
-            _mixer->NoteOn(keyboardChannel, found->second, 128);
+            _mixer->NoteOn(static_cast<char>(keyboardChannel), found->second, static_cast<char>(128));
         }
         else if (action == 0)
         {
-            _mixer->NoteOff(keyboardChannel, found->second);
+            _mixer->NoteOff(static_cast<char>(keyboardChannel), found->second);
         }
     }
 }
