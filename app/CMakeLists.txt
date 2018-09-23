@@ -84,6 +84,7 @@ target_link_libraries(app
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     zyn.nio
+    zyn.net
     zyn.mixer
     zyn.synth
     zyn.fx

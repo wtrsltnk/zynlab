@@ -33,6 +33,8 @@ add_library(zyn.nio STATIC
     MidiInput.h
     MidiInputManager.cpp
     MidiInputManager.h
+    NetMidiEngine.cpp
+    NetMidiEngine.h
     Nio.cpp
     Nio.h
     NulEngine.cpp
@@ -124,6 +126,7 @@ endif()
 
 target_link_libraries(zyn.nio
     ${zyn.common}
+    ${zyn.net}
     winmm
     )
 

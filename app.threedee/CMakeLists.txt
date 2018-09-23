@@ -34,6 +34,7 @@ if(GLFW3_FOUND)
         ${OPENGL_LIBRARIES}
         ${GLFW3_LIBRARY}
         zyn.nio
+        zyn.net
         zyn.mixer
         zyn.synth
         zyn.fx

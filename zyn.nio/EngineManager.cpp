@@ -6,6 +6,7 @@
 #include "Nio.h"
 #include "NulEngine.h"
 #include "RtEngine.h"
+#include "NetMidiEngine.h"
 #if OSS
 #include "OssEngine.h"
 #endif
@@ -52,6 +53,7 @@ EngineManager::EngineManager(class IMixer *mixer)
     //conditional compiling mess (but contained)
     engines.push_back(defaultEng);
     engines.push_back(new RtEngine());
+    engines.push_back(new NetMidiEngine());
 #if OSS
     engines.push_back(new OssEngine(mixer->_synth));
 #endif

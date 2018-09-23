@@ -147,6 +147,7 @@ void Mixer::NoteOn(char chan, char note, char velocity)
         for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
             if (chan == part[npart]->Prcvchn)
             {
+                std::cout << "chan: " << chan << ", note: " << note << ", velocity: " << velocity << std::endl;
                 fakepeakpart[npart] = velocity * 2;
                 if (part[npart]->Penabled)
                     part[npart]->NoteOn(note, velocity, keyshift);

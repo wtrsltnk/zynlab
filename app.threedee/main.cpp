@@ -75,6 +75,7 @@ int main(int /*argc*/, char */*argv*/[])
         return -1;
 
     Nio::setSink("PA");
+    Nio::setSource("NET");
 
     Config::Current().init();
 
