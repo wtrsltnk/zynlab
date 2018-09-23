@@ -29,7 +29,7 @@ class TipWin:public Fl_Menu_Window
         const char *getStr() const;
         string tip;
         string text;
-        bool   textmode;
+        bool   textmode{};
 };
 
 TipWin::TipWin():Fl_Menu_Window(1, 1)
@@ -210,7 +210,7 @@ void WidgetPDial::draw()
 
     /* value circle */
     double a = -(a2 - a1) * val - a1;
-    fl_line_style(0, 2, 0);
+    fl_line_style(0, 2, nullptr);
     pdialcolor(0, 200, 0);
     fl_arc(cx + 1, cy + 1, rad - 2, rad - 2, a - 90, a1 - 180);
     fl_line_style(0);

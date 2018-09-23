@@ -98,7 +98,7 @@ void rmsNormalize(fft_t *freqs, SystemSettings *synth_)
 #define DIFF(par) (old##par != P##par)
 
 OscilGen::OscilGen(IFFTwrapper *fft_, Resonance *res_, SystemSettings *synth_)
-    : Presets(), _synth(synth_)
+    : _synth(synth_)
 {
     assert(fft_);
 

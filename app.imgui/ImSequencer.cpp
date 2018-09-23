@@ -28,8 +28,8 @@ namespace ImSequencer
 	{
 		bool ret = false;
 		ImGuiIO& io = ImGui::GetIO();
-		int cx = (int)(io.MousePos.x);
-		int cy = (int)(io.MousePos.y);
+        auto cx = (int)(io.MousePos.x);
+        auto cy = (int)(io.MousePos.y);
 		int framePixelWidth = 10;
 		int legendWidth = 200;
 
@@ -114,7 +114,7 @@ namespace ImSequencer
 			for (int i = 0; i < sequenceCount; i++)
 			{
 				int type;
-				sequence->Get(i, NULL, NULL, &type, NULL);
+				sequence->Get(i, nullptr, nullptr, &type, nullptr);
 				ImVec2 tpos(canvas_pos.x + 3, canvas_pos.y + (i + 1) * ItemHeight + 2);
 				draw_list->AddText(tpos, 0xFFFFFFFF, sequence->GetItemLabel(i));
 
@@ -185,7 +185,7 @@ namespace ImSequencer
 			{
 				int *start, *end;
 				unsigned int color;
-				sequence->Get(i, &start, &end, NULL, &color);
+				sequence->Get(i, &start, &end, nullptr, &color);
 
 				ImVec2 pos = ImVec2(canvas_pos.x + legendWidth - firstFrameUsed * framePixelWidth, canvas_pos.y + ItemHeight * (i + 1) + 1);
 				ImVec2 slotP1(pos.x + *start * framePixelWidth, pos.y + 2);
@@ -237,7 +237,7 @@ namespace ImSequencer
 				if (std::abs(diffFrame) > 0)
 				{
 					int *start, *end;
-					sequence->Get(movingEntry, &start, &end, NULL, NULL);
+					sequence->Get(movingEntry, &start, &end, nullptr, nullptr);
 
 					int & l = *start;
 					int & r = *end;
@@ -306,7 +306,7 @@ namespace ImSequencer
 			{
 				int scrollBarStartHeight = controlHeight - scrollBarHeight;
 				// ratio = number of frames visible in control / number to total frames
-				int visibleFrameCount = (int)floorf((canvas_size.x - legendWidth) / framePixelWidth);
+				auto visibleFrameCount = (int)floorf((canvas_size.x - legendWidth) / framePixelWidth);
 				float barWidthRatio = visibleFrameCount / (float)frameCount;
 				float barWidthInPixels = barWidthRatio * (canvas_size.x - legendWidth);
 

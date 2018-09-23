@@ -28,7 +28,7 @@ FilterParams::FilterParams(SystemSettings *synth_,
                            unsigned char Ptype_,
                            unsigned char Pfreq_,
                            unsigned char Pq_)
-    : PresetsArray(), _synth(synth_)
+    : _synth(synth_)
 {
     setpresettype("Pfilter");
     Dtype = Ptype_;
@@ -72,11 +72,11 @@ void FilterParams::defaults()
 void FilterParams::defaults(int n)
 {
     int j = n;
-    for (int i = 0; i < FF_MAX_FORMANTS; ++i)
+    for (auto & formant : Pvowels[j].formants)
     {
-        Pvowels[j].formants[i].freq = (int)(RND * 127.0f); //some random freqs
-        Pvowels[j].formants[i].q = 64;
-        Pvowels[j].formants[i].amp = 127;
+        formant.freq = (int)(RND * 127.0f); //some random freqs
+        formant.q = 64;
+        formant.amp = 127;
     }
 }
 

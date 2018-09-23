@@ -23,7 +23,7 @@
 #include "EnvelopeParams.h"
 #include <cmath>
 
-EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_, unsigned char Pforcedrelease_) : Presets()
+EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_, unsigned char Pforcedrelease_)
 {
     int i;
 

@@ -789,13 +789,13 @@ void Instrument::SetController(unsigned int type, int par)
             setPvolume(Pvolume);   //update the volume
             setPpanning(Ppanning); //update the panning
 
-            for (int item = 0; item < NUM_KIT_ITEMS; ++item)
+            for (auto & item : kit)
             {
-                if (kit[item].adpars == nullptr)
+                if (item.adpars == nullptr)
                     continue;
-                kit[item].adpars->GlobalPar.Reson->sendcontroller(C_resonance_center, 1.0f);
+                item.adpars->GlobalPar.Reson->sendcontroller(C_resonance_center, 1.0f);
 
-                kit[item].adpars->GlobalPar.Reson->sendcontroller(C_resonance_bandwidth, 1.0f);
+                item.adpars->GlobalPar.Reson->sendcontroller(C_resonance_bandwidth, 1.0f);
             }
             //more update to add here if I add controllers
             break;
