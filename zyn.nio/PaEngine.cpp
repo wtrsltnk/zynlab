@@ -29,7 +29,7 @@ using namespace std;
 PaEngine::PaEngine(SystemSettings *s)
     : AudioOutput(s), stream(nullptr)
 {
-    name = "PA";
+    _name = "PA";
 }
 
 PaEngine::~PaEngine()
@@ -39,8 +39,11 @@ PaEngine::~PaEngine()
 
 bool PaEngine::Start()
 {
-    if (getAudioEn())
+    if (IsAudioEnabled())
+    {
         return true;
+    }
+
     Pa_Initialize();
 
     PaStreamParameters outputParameters;
@@ -53,8 +56,7 @@ bool PaEngine::Start()
     }
     outputParameters.channelCount = 2;         /* stereo output */
     outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
-    outputParameters.suggestedLatency =
-        Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
+    outputParameters.suggestedLatency = Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = nullptr;
 
     Pa_OpenStream(&stream,
@@ -64,45 +66,36 @@ bool PaEngine::Start()
                   this->_synth->buffersize,
                   0,
                   PAprocess,
-                  (void *)this);
+                  reinterpret_cast<void *>(this));
     Pa_StartStream(stream);
     return true;
 }
 
-void PaEngine::setAudioEn(bool nval)
-{
-    if (nval)
-        Start();
-    else
-        Stop();
-}
-
-bool PaEngine::getAudioEn() const
+bool PaEngine::IsAudioEnabled() const
 {
     return stream;
 }
 
-int PaEngine::PAprocess(const void *inputBuffer,
+int PaEngine::PAprocess(const void * /*inputBuffer*/,
                         void *outputBuffer,
                         unsigned long framesPerBuffer,
-                        const PaStreamCallbackTimeInfo *outTime,
-                        PaStreamCallbackFlags flags,
+                        const PaStreamCallbackTimeInfo * /*outTime*/,
+                        PaStreamCallbackFlags /*flags*/,
                         void *userData)
 {
-    (void)inputBuffer;
-    (void)outTime;
-    (void)flags;
-    return static_cast<PaEngine *>(userData)->process((float *)outputBuffer,
-                                                      framesPerBuffer);
+    auto engine = static_cast<PaEngine *>(userData);
+
+    return engine->process(reinterpret_cast<float *>(outputBuffer), framesPerBuffer);
 }
 
 int PaEngine::process(float *out, unsigned long framesPerBuffer)
 {
-    const Stereo<float *> smp = nextSample();
+    auto smp = NextSample();
+
     for (unsigned i = 0; i < framesPerBuffer; ++i)
     {
-        *out++ = smp.l[i];
-        *out++ = smp.r[i];
+        *out++ = smp._left[i];
+        *out++ = smp._right[i];
     }
 
     return 0;
@@ -110,8 +103,10 @@ int PaEngine::process(float *out, unsigned long framesPerBuffer)
 
 void PaEngine::Stop()
 {
-    if (!getAudioEn())
+    if (!IsAudioEnabled())
+    {
         return;
+    }
     Pa_StopStream(stream);
     Pa_CloseStream(stream);
     stream = nullptr;

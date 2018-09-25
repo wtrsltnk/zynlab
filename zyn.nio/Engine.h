@@ -35,9 +35,10 @@ public:
     /**Start the Driver with all capabilities
          * @return true on success*/
     virtual bool Start() = 0;
+
     /**Completely stop the Driver*/
     virtual void Stop() = 0;
 
-    std::string name;
+    std::string _name;
 };
 #endif

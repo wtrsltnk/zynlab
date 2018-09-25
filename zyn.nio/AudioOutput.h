@@ -38,27 +38,28 @@ public:
 
     /**Sets the Sample Rate of this Output
          * (used for getNext()).*/
-    void setSamplerate(int _samplerate);
+    void SetSamplerate(unsigned int _samplerate);
 
-    /**Sets the Samples required per Out of this driver
+    /**Gets the Samples required per Out of this driver
          * not a realtime opperation */
-    int getSampleRate();
-    void setBufferSize(int _bufferSize);
+    unsigned int SampleRate();
 
     /**Sets the Frame Size for output*/
-    void bufferingSize(int nBuffering);
-    int bufferingSize();
+    void SetBufferSize(unsigned int _bufferSize);
 
-    virtual void setAudioEn(bool nval) = 0;
-    virtual bool getAudioEn() const = 0;
+    /**Gets the Frame Size for output*/
+    unsigned int BufferingSize();
+
+    virtual void SetAudioEnabled(bool nval);
+    virtual bool IsAudioEnabled() const = 0;
 
 protected:
     /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-    const Stereo<float *> nextSample();
+    const Stereo<float *> NextSample();
 
-    int samplerate;
-    int bufferSize;
+    unsigned int samplerate;
+    unsigned int bufferSize;
 };
 
 #endif // AUDIOOUTPUT_H

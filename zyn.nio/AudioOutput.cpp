@@ -29,26 +29,45 @@
 
 using namespace std;
 
-AudioOutput::AudioOutput(SystemSettings *s) : _synth(s), samplerate(s->samplerate), bufferSize(s->buffersize) {}
+AudioOutput::AudioOutput(SystemSettings *s)
+    : _synth(s), samplerate(s->samplerate), bufferSize(s->buffersize)
+{}
 
 AudioOutput::~AudioOutput() = default;
 
-void AudioOutput::setSamplerate(int _samplerate)
+void AudioOutput::SetSamplerate(unsigned int _samplerate)
 {
     samplerate = _samplerate;
 }
 
-int AudioOutput::getSampleRate()
+unsigned int AudioOutput::SampleRate()
 {
     return samplerate;
 }
 
-void AudioOutput::setBufferSize(int _bufferSize)
+void AudioOutput::SetBufferSize(unsigned int _bufferSize)
 {
     bufferSize = _bufferSize;
 }
 
-const Stereo<float *> AudioOutput::nextSample()
+unsigned int AudioOutput::BufferingSize()
 {
-    return AudioOutputManager::getInstance().nextSample(bufferSize);
+    return bufferSize;
+}
+
+const Stereo<float *> AudioOutput::NextSample()
+{
+    return AudioOutputManager::getInstance().NextSample(bufferSize);
+}
+
+void AudioOutput::SetAudioEnabled(bool nval)
+{
+    if (nval)
+    {
+        Start();
+    }
+    else
+    {
+        Stop();
+    }
 }

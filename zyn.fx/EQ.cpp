@@ -60,8 +60,8 @@ void EQ::out(const Stereo<float *> &smp)
 {
     for (int i = 0; i < this->_synth->buffersize; ++i)
     {
-        efxoutl[i] = smp.l[i] * volume;
-        efxoutr[i] = smp.r[i] * volume;
+        efxoutl[i] = smp._left[i] * volume;
+        efxoutr[i] = smp._right[i] * volume;
     }
 
     for (auto & i : filter)

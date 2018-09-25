@@ -90,7 +90,7 @@ int exitprogram()
 
     seq->Quit();
 
-    Nio::stop();
+    Nio::Stop();
 
 #ifdef ENABLE_FLTKGUI
     delete ui;
@@ -236,11 +236,11 @@ int main(int argc, char *argv[])
             break;
         case 'I':
             if(optarguments)
-                Nio::setDefaultSource(optarguments);
+                Nio::SetDefaultSource(optarguments);
             break;
         case 'O':
             if(optarguments)
-                Nio::setDefaultSink(optarguments);
+                Nio::SetDefaultSink(optarguments);
             break;
         case 'e':
             GETOP(execAfterInit);
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
     }
 
     //Run the Nio system
-    bool ioGood = Nio::start(mixer);
+    bool ioGood = Nio::Start(mixer);
 
     // Run a system command after starting zynaddsubfx
     if(!execAfterInit.empty()) {

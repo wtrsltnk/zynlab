@@ -33,8 +33,8 @@ public:
 
     bool good() const;
 
-    void writeMonoSamples(int nsmps, short int *smps);
-    void writeStereoSamples(int nsmps, short int *smps);
+    void writeMonoSamples(unsigned int nsmps, short int *smps);
+    void writeStereoSamples(unsigned int nsmps, short int *smps);
 
 private:
     int sampleswritten;

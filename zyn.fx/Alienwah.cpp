@@ -64,7 +64,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         complex<float> tmp = clfol * x + oldclfol * x1;
 
         complex<float> out = tmp * oldl[oldk];
-        out += (1 - fabs(fb)) * smp.l[i] * pangainL;
+        out += (1 - fabs(fb)) * smp._left[i] * pangainL;
 
         oldl[oldk] = out;
         float l = out.real() * 10.0f * (fb + 0.1f);
@@ -73,7 +73,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         tmp = clfor * x + oldclfor * x1;
 
         out = tmp * oldr[oldk];
-        out += (1 - fabs(fb)) * smp.r[i] * pangainR;
+        out += (1 - fabs(fb)) * smp._right[i] * pangainR;
 
         oldr[oldk] = out;
         float r = out.real() * 10.0f * (fb + 0.1f);

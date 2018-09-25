@@ -50,15 +50,15 @@ Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *sy
 
 Echo::~Echo()
 {
-    delete[] delay.l;
-    delete[] delay.r;
+    delete[] delay._left;
+    delete[] delay._right;
 }
 
 //Cleanup the effect
 void Echo::cleanup()
 {
-    memset(delay.l, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
-    memset(delay.r, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
+    memset(delay._left, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
+    memset(delay._right, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
     old = Stereo<float>(0.0f);
 }
 
@@ -77,8 +77,8 @@ void Echo::initdelays()
     //number of seconds to delay right chan
     float dr = avgDelay + lrdelay;
 
-    ndelta.l = max(1, (int)(dl * this->_synth->samplerate));
-    ndelta.r = max(1, (int)(dr * this->_synth->samplerate));
+    ndelta._left = max(1, (int)(dl * this->_synth->samplerate));
+    ndelta._right = max(1, (int)(dr * this->_synth->samplerate));
 }
 
 //Effect output
@@ -86,34 +86,34 @@ void Echo::out(const Stereo<float *> &input)
 {
     for (int i = 0; i < this->_synth->buffersize; ++i)
     {
-        float ldl = delay.l[pos.l];
-        float rdl = delay.r[pos.r];
+        float ldl = delay._left[pos._left];
+        float rdl = delay._right[pos._right];
         ldl = ldl * (1.0f - lrcross) + rdl * lrcross;
         rdl = rdl * (1.0f - lrcross) + ldl * lrcross;
 
         efxoutl[i] = ldl * 2.0f;
         efxoutr[i] = rdl * 2.0f;
 
-        ldl = input.l[i] * pangainL - ldl * fb;
-        rdl = input.r[i] * pangainR - rdl * fb;
+        ldl = input._left[i] * pangainL - ldl * fb;
+        rdl = input._right[i] * pangainR - rdl * fb;
 
         //LowPass Filter
-        old.l = delay.l[(pos.l + delta.l) % (MAX_DELAY * this->_synth->samplerate)] =
-            ldl * hidamp + old.l * (1.0f - hidamp);
-        old.r = delay.r[(pos.r + delta.r) % (MAX_DELAY * this->_synth->samplerate)] =
-            rdl * hidamp + old.r * (1.0f - hidamp);
+        old._left = delay._left[(pos._left + delta._left) % (MAX_DELAY * this->_synth->samplerate)] =
+            ldl * hidamp + old._left * (1.0f - hidamp);
+        old._right = delay._right[(pos._right + delta._right) % (MAX_DELAY * this->_synth->samplerate)] =
+            rdl * hidamp + old._right * (1.0f - hidamp);
 
         //increment
-        ++pos.l; // += delta.l;
-        ++pos.r; // += delta.r;
+        ++pos._left; // += delta.l;
+        ++pos._right; // += delta.r;
 
         //ensure that pos is still in bounds
-        pos.l %= MAX_DELAY * this->_synth->samplerate;
-        pos.r %= MAX_DELAY * this->_synth->samplerate;
+        pos._left %= MAX_DELAY * this->_synth->samplerate;
+        pos._right %= MAX_DELAY * this->_synth->samplerate;
 
         //adjust delay if needed
-        delta.l = (15 * delta.l + ndelta.l) / 16;
-        delta.r = (15 * delta.r + ndelta.r) / 16;
+        delta._left = (15 * delta._left + ndelta._left) / 16;
+        delta._right = (15 * delta._right + ndelta._right) / 16;
     }
 }
 

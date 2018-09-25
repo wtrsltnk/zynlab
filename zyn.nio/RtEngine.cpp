@@ -19,6 +19,7 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+
 #include "RtEngine.h"
 #include "EngineManager.h"
 #include "MidiInputManager.h"
@@ -28,7 +29,7 @@
 RtEngine::RtEngine()
     : midiin(nullptr)
 {
-    this->name = "RT";
+    this->_name = "RT";
 }
 
 RtEngine::~RtEngine()
@@ -47,73 +48,74 @@ bool RtEngine::Start()
 
 void RtEngine::Stop()
 {
-
     delete this->midiin;
     this->midiin = nullptr;
 }
 
-void RtEngine::setMidiEn(bool nval)
-{
-    if (nval)
-        this->Start();
-    else
-        this->Stop();
-}
-
-bool RtEngine::getMidiEn() const
+bool RtEngine::IsMidiEnabled() const
 {
     return (this->midiin != nullptr);
 }
 
-void RtEngine::callback(double /*timeStamp*/, std::vector<unsigned char> *message, void *userData)
+void RtEngine::callback(double /*timeStamp*/, std::vector<unsigned char> *message, void * /*userData*/)
 {
-    auto *engine = (RtEngine *)userData;
-
     MidiEvent ev;
     unsigned char chan = message->at(0) & 0x0f;
     switch (message->at(0) & 0xf0)
     {
         case 0x80: //Note Off
+        {
             ev.type = MidiEventTypes::M_NOTE;
             ev.channel = chan;
             ev.num = message->at(1);
             ev.value = 0;
-            MidiInputManager::getInstance().putEvent(ev);
             break;
+        }
         case 0x90: //Note On
+        {
             ev.type = MidiEventTypes::M_NOTE;
             ev.channel = chan;
             ev.num = message->at(1);
             ev.value = message->at(2);
-            MidiInputManager::getInstance().putEvent(ev);
             break;
+        }
         case 0xA0: /* pressure, aftertouch */
+        {
             ev.type = MidiEventTypes::M_PRESSURE;
             ev.channel = chan;
             ev.num = message->at(1);
             ev.value = message->at(2);
-            MidiInputManager::getInstance().putEvent(ev);
             break;
+        }
         case 0xb0: //Controller
+        {
             ev.type = MidiEventTypes::M_CONTROLLER;
             ev.channel = chan;
             ev.num = message->at(1);
             ev.value = message->at(2);
-            MidiInputManager::getInstance().putEvent(ev);
             break;
+        }
         case 0xc0: //Program Change
+        {
             ev.type = MidiEventTypes::M_PGMCHANGE;
             ev.channel = chan;
             ev.num = message->at(1);
             ev.value = 0;
-            MidiInputManager::getInstance().putEvent(ev);
             break;
+        }
         case 0xe0: //Pitch Wheel
+        {
             ev.type = MidiEventTypes::M_CONTROLLER;
             ev.channel = chan;
             ev.num = C_pitchwheel;
-            ev.value = (message->at(1) + message->at(2) * (int)128) - 8192;
-            MidiInputManager::getInstance().putEvent(ev);
+            ev.value = (message->at(1) + message->at(2) * 128) - 8192;
             break;
+        }
+        default:
+        {
+            return;
+        }
     }
+
+    MidiInputManager::Instance().PutEvent(ev);
 }

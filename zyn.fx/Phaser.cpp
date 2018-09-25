@@ -78,18 +78,18 @@ void Phaser::analog_setup()
 
 Phaser::~Phaser()
 {
-    if (old.l)
-        delete[] old.l;
-    if (xn1.l)
-        delete[] xn1.l;
-    if (yn1.l)
-        delete[] yn1.l;
-    if (old.r)
-        delete[] old.r;
-    if (xn1.r)
-        delete[] xn1.r;
-    if (yn1.r)
-        delete[] yn1.r;
+    if (old._left)
+        delete[] old._left;
+    if (xn1._left)
+        delete[] xn1._left;
+    if (yn1._left)
+        delete[] yn1._left;
+    if (old._right)
+        delete[] old._right;
+    if (xn1._right)
+        delete[] xn1._right;
+    if (yn1._right)
+        delete[] yn1._right;
 }
 
 /*
@@ -107,52 +107,52 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
 {
     Stereo<float> gain(0.0f), lfoVal(0.0f), mod(0.0f), g(0.0f), b(0.0f), hpf(0.0f);
 
-    lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
-    mod.l = lfoVal.l * width + (depth - 0.5f);
-    mod.r = lfoVal.r * width + (depth - 0.5f);
+    lfo.effectlfoout(&lfoVal._left, &lfoVal._right);
+    mod._left = lfoVal._left * width + (depth - 0.5f);
+    mod._right = lfoVal._right * width + (depth - 0.5f);
 
-    mod.l = limit(mod.l, ZERO_, ONE_);
-    mod.r = limit(mod.r, ZERO_, ONE_);
+    mod._left = limit(mod._left, ZERO_, ONE_);
+    mod._right = limit(mod._right, ZERO_, ONE_);
 
     if (Phyper)
     {
         //Triangle wave squared is approximately sin on bottom, tri on top
         //Result is exponential sweep more akin to filter in synth with
         //exponential generator circuitry.
-        mod.l *= mod.l;
-        mod.r *= mod.r;
+        mod._left *= mod._left;
+        mod._right *= mod._right;
     }
 
     //g.l,g.r is Vp - Vgs. Typical FET drain-source resistance follows constant/[1-sqrt(Vp - Vgs)]
-    mod.l = sqrtf(1.0f - mod.l);
-    mod.r = sqrtf(1.0f - mod.r);
+    mod._left = sqrtf(1.0f - mod._left);
+    mod._right = sqrtf(1.0f - mod._right);
 
-    diff.r = (mod.r - oldgain.r) * invperiod;
-    diff.l = (mod.l - oldgain.l) * invperiod;
+    diff._right = (mod._right - oldgain._right) * invperiod;
+    diff._left = (mod._left - oldgain._left) * invperiod;
 
     g = oldgain;
     oldgain = mod;
 
     for (int i = 0; i < this->_synth->buffersize; ++i)
     {
-        g.l += diff.l; // Linear interpolation between LFO samples
-        g.r += diff.r;
+        g._left += diff._left; // Linear interpolation between LFO samples
+        g._right += diff._right;
 
-        Stereo<float> xn(input.l[i] * pangainL, input.r[i] * pangainR);
+        Stereo<float> xn(input._left[i] * pangainL, input._right[i] * pangainR);
 
         if (barber)
         {
-            g.l = fmodf((g.l + 0.25f), ONE_);
-            g.r = fmodf((g.r + 0.25f), ONE_);
+            g._left = fmodf((g._left + 0.25f), ONE_);
+            g._right = fmodf((g._right + 0.25f), ONE_);
         }
 
-        xn.l = applyPhase(xn.l, g.l, fb.l, hpf.l, yn1.l, xn1.l);
-        xn.r = applyPhase(xn.r, g.r, fb.r, hpf.r, yn1.r, xn1.r);
+        xn._left = applyPhase(xn._left, g._left, fb._left, hpf._left, yn1._left, xn1._left);
+        xn._right = applyPhase(xn._right, g._right, fb._right, hpf._right, yn1._right, xn1._right);
 
-        fb.l = xn.l * feedback;
-        fb.r = xn.r * feedback;
-        efxoutl[i] = xn.l;
-        efxoutr[i] = xn.r;
+        fb._left = xn._left * feedback;
+        fb._right = xn._right * feedback;
+        efxoutl[i] = xn._left;
+        efxoutr[i] = xn._right;
     }
 
     if (Poutsub)
@@ -195,39 +195,39 @@ void Phaser::normalPhase(const Stereo<float *> &input)
 {
     Stereo<float> gain(0.0f), lfoVal(0.0f);
 
-    lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
-    gain.l =
-        (expf(lfoVal.l * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
-    gain.r =
-        (expf(lfoVal.r * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
+    lfo.effectlfoout(&lfoVal._left, &lfoVal._right);
+    gain._left =
+        (expf(lfoVal._left * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
+    gain._right =
+        (expf(lfoVal._right * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
 
-    gain.l = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain.l * depth;
-    gain.r = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain.r * depth;
+    gain._left = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain._left * depth;
+    gain._right = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain._right * depth;
 
-    gain.l = limit(gain.l, ZERO_, ONE_);
-    gain.r = limit(gain.r, ZERO_, ONE_);
+    gain._left = limit(gain._left, ZERO_, ONE_);
+    gain._right = limit(gain._right, ZERO_, ONE_);
 
     for (int i = 0; i < this->_synth->buffersize; ++i)
     {
         float x = (float)i / this->_synth->buffersize_f;
         float x1 = 1.0f - x;
         //TODO think about making panning an external feature
-        Stereo<float> xn(input.l[i] * pangainL + fb.l,
-                         input.r[i] * pangainR + fb.r);
+        Stereo<float> xn(input._left[i] * pangainL + fb._left,
+                         input._right[i] * pangainR + fb._right);
 
-        Stereo<float> g(gain.l * x + oldgain.l * x1,
-                        gain.r * x + oldgain.r * x1);
+        Stereo<float> g(gain._left * x + oldgain._left * x1,
+                        gain._right * x + oldgain._right * x1);
 
-        xn.l = applyPhase(xn.l, g.l, old.l);
-        xn.r = applyPhase(xn.r, g.r, old.r);
+        xn._left = applyPhase(xn._left, g._left, old._left);
+        xn._right = applyPhase(xn._right, g._right, old._right);
 
         //Left/Right crossing
-        crossover(xn.l, xn.r, lrcross);
+        crossover(xn._left, xn._right, lrcross);
 
-        fb.l = xn.l * feedback;
-        fb.r = xn.r * feedback;
-        efxoutl[i] = xn.l;
-        efxoutr[i] = xn.r;
+        fb._left = xn._left * feedback;
+        fb._right = xn._right * feedback;
+        efxoutl[i] = xn._left;
+        efxoutr[i] = xn._right;
     }
 
     oldgain = gain;
@@ -258,15 +258,15 @@ void Phaser::cleanup()
     fb = oldgain = Stereo<float>(0.0f);
     for (int i = 0; i < Pstages * 2; ++i)
     {
-        old.l[i] = 0.0f;
-        old.r[i] = 0.0f;
+        old._left[i] = 0.0f;
+        old._right[i] = 0.0f;
     }
     for (int i = 0; i < Pstages; ++i)
     {
-        xn1.l[i] = 0.0f;
-        yn1.l[i] = 0.0f;
-        xn1.r[i] = 0.0f;
-        yn1.r[i] = 0.0f;
+        xn1._left[i] = 0.0f;
+        yn1._left[i] = 0.0f;
+        xn1._right[i] = 0.0f;
+        yn1._right[i] = 0.0f;
     }
 }
 
@@ -309,18 +309,18 @@ void Phaser::setoffset(unsigned char Poffset)
 
 void Phaser::setstages(unsigned char Pstages)
 {
-    if (old.l)
-        delete[] old.l;
-    if (xn1.l)
-        delete[] xn1.l;
-    if (yn1.l)
-        delete[] yn1.l;
-    if (old.r)
-        delete[] old.r;
-    if (xn1.r)
-        delete[] xn1.r;
-    if (yn1.r)
-        delete[] yn1.r;
+    if (old._left)
+        delete[] old._left;
+    if (xn1._left)
+        delete[] xn1._left;
+    if (yn1._left)
+        delete[] yn1._left;
+    if (old._right)
+        delete[] old._right;
+    if (xn1._right)
+        delete[] xn1._right;
+    if (yn1._right)
+        delete[] yn1._right;
 
     this->Pstages = min(MAX_PHASER_STAGES, (int)Pstages);
 

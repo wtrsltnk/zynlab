@@ -27,24 +27,23 @@
 
 #include <SDL2/SDL.h>
 
-class SdlEngine:public AudioOutput
+class SdlEngine : public AudioOutput
 {
-    public:
-        SdlEngine(SystemSettings* s);
-        virtual ~SdlEngine();
+public:
+    SdlEngine(SystemSettings *s);
+    virtual ~SdlEngine();
 
-        bool Start();
-        void Stop();
+    bool Start();
+    void Stop();
 
-        void setAudioEn(bool nval);
-        bool getAudioEn() const;
+    bool IsAudioEnabled() const;
 
-    protected:
-        static void my_audio_callback(void *userdata, Uint8 *stream, int len);
-        int process(Uint8 *stream, int len);
+protected:
+    static void my_audio_callback(void *userdata, Uint8 *stream, int len);
+    void process(float *stream, int len);
 
-    private:
-        SDL_AudioDeviceID _dev;
+private:
+    SDL_AudioDeviceID _dev;
 };
 
 #endif

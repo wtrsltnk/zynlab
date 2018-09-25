@@ -373,30 +373,30 @@ void Mixer::AudioOut(float *outl, float *outr)
 
         float pan = part[npart]->panning;
         if (pan < 0.5f)
-            newvol.l *= pan * 2.0f;
+            newvol._left *= pan * 2.0f;
         else
-            newvol.r *= (1.0f - pan) * 2.0f;
+            newvol._right *= (1.0f - pan) * 2.0f;
 
         //the volume or the panning has changed and needs interpolation
-        if (ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l) || ABOVE_AMPLITUDE_THRESHOLD(oldvol.r, newvol.r))
+        if (ABOVE_AMPLITUDE_THRESHOLD(oldvol._left, newvol._left) || ABOVE_AMPLITUDE_THRESHOLD(oldvol._right, newvol._right))
         {
             for (int i = 0; i < this->_synth->buffersize; ++i)
             {
-                Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
+                Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol._left, newvol._left,
                                                         i, this->_synth->buffersize),
-                                  INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
+                                  INTERPOLATE_AMPLITUDE(oldvol._right, newvol._right,
                                                         i, this->_synth->buffersize));
-                part[npart]->partoutl[i] *= vol.l;
-                part[npart]->partoutr[i] *= vol.r;
+                part[npart]->partoutl[i] *= vol._left;
+                part[npart]->partoutr[i] *= vol._right;
             }
-            part[npart]->oldvolumel = newvol.l;
-            part[npart]->oldvolumer = newvol.r;
+            part[npart]->oldvolumel = newvol._left;
+            part[npart]->oldvolumer = newvol._right;
         }
         else
             for (int i = 0; i < this->_synth->buffersize; ++i)
             { //the volume did not changed
-                part[npart]->partoutl[i] *= newvol.l;
-                part[npart]->partoutr[i] *= newvol.r;
+                part[npart]->partoutl[i] *= newvol._left;
+                part[npart]->partoutr[i] *= newvol._right;
             }
     }
 

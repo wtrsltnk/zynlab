@@ -17,28 +17,28 @@ class EngineManager
     EngineManager(class IMixer *mixer);
 
 public:
-    static EngineManager &createInstance(class IMixer *mixer);
-    static EngineManager &getInstance();
-    static void destroyInstance();
+    static EngineManager &CreateInstance(class IMixer *mixer);
+    static EngineManager &Instance();
+    static void DestroyInstance();
     virtual ~EngineManager();
 
     /**Gets requested engine
          * @param name case unsensitive name of engine
          * @return pointer to Engine or NULL
          */
-    Engine *getEng(std::string name);
+    Engine *GetEngine(std::string const &name);
 
     /**Start up defaults*/
-    bool start();
+    bool Start();
 
     /**Stop all engines*/
-    void stop();
+    void Stop();
 
     std::list<Engine *> engines;
 
     //return false on failure
-    bool setInDefault(std::string name);
-    bool setOutDefault(std::string name);
+    bool SetDefaultAudioOutput(std::string const &name);
+    bool SetDefaultMidiInput(std::string const &name);
 
     //default I/O
     AudioOutput *defaultOut;

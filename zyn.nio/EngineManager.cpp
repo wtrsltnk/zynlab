@@ -3,47 +3,53 @@
 #include "AudioOutputManager.h"
 #include "MidiInput.h"
 #include "MidiInputManager.h"
+#include "NetMidiEngine.h"
 #include "Nio.h"
 #include "NulEngine.h"
 #include "RtEngine.h"
-#include "NetMidiEngine.h"
-#if OSS
+#ifdef OSS
 #include "OssEngine.h"
 #endif
-#if ALSA
+#ifdef ALSA
 #include "AlsaEngine.h"
 #endif
-#if JACK
+#ifdef JACK
 #include "JackEngine.h"
 #endif
-#if PORTAUDIO
+#ifdef PORTAUDIO
 #include "PaEngine.h"
 #endif
-#if SDL2
+#ifdef SDL2
 #include "SdlEngine.h"
 #endif
 
 #include <algorithm>
 #include <iostream>
 
-using namespace std;
-
 EngineManager *EngineManager::_instance = nullptr;
 
-EngineManager &EngineManager::createInstance(IMixer *mixer)
+EngineManager &EngineManager::CreateInstance(IMixer *mixer)
 {
-    if (EngineManager::_instance == 0) EngineManager::_instance = new EngineManager(mixer);
+    if (EngineManager::_instance == nullptr)
+    {
+        EngineManager::_instance = new EngineManager(mixer);
+    }
+
     return *EngineManager::_instance;
 }
-EngineManager &EngineManager::getInstance()
+EngineManager &EngineManager::Instance()
 {
     return *EngineManager::_instance;
 }
 
-void EngineManager::destroyInstance()
+void EngineManager::DestroyInstance()
 {
-    if (EngineManager::_instance != 0) delete EngineManager::_instance;
-    EngineManager::_instance = 0;
+    if (EngineManager::_instance != nullptr)
+    {
+        delete EngineManager::_instance;
+    }
+
+    EngineManager::_instance = nullptr;
 }
 
 EngineManager::EngineManager(class IMixer *mixer)
@@ -54,21 +60,21 @@ EngineManager::EngineManager(class IMixer *mixer)
     engines.push_back(defaultEng);
     engines.push_back(new RtEngine());
     engines.push_back(new NetMidiEngine());
-#if OSS
+#ifdef OSS
     engines.push_back(new OssEngine(mixer->_synth));
 #endif
-#if ALSA
+#ifdef ALSA
     engines.push_back(new AlsaEngine(mixer->_synth));
 #endif
-#if JACK
+#ifdef JACK
     engines.push_back(new JackEngine(mixer->_synth));
 #endif
-#if PORTAUDIO
+#ifdef PORTAUDIO
     engines.push_back(new PaEngine(mixer->_synth));
 #endif
-#if SDL2
+#ifdef SDL2
     // TODO Not working yet!
-    //engines.push_back(new SdlEngine());
+//    engines.push_back(new SdlEngine(mixer->_synth));
 #endif
 
     defaultOut = dynamic_cast<AudioOutput *>(defaultEng);
@@ -77,108 +83,125 @@ EngineManager::EngineManager(class IMixer *mixer)
 
     //Accept command line/compile time options
     if (!Nio::defaultSink.empty())
-        setOutDefault(Nio::defaultSink);
-
+    {
+        SetDefaultMidiInput(Nio::defaultSink);
+    }
     if (!Nio::defaultSource.empty())
-        setInDefault(Nio::defaultSource);
+    {
+        SetDefaultAudioOutput(Nio::defaultSource);
+    }
 }
 
 EngineManager::~EngineManager()
 {
-    for (list<Engine *>::iterator itr = engines.begin();
-         itr != engines.end(); ++itr)
-        delete *itr;
+    while (!engines.empty())
+    {
+        auto engine = engines.back();
+        engines.pop_back();
+        delete engine;
+    }
 }
 
-Engine *EngineManager::getEng(string name)
+Engine *EngineManager::GetEngine(std::string const &name)
 {
-    transform(name.begin(), name.end(), name.begin(), ::toupper);
-    for (list<Engine *>::iterator itr = engines.begin();
-         itr != engines.end(); ++itr)
-        if ((*itr)->name == name)
-            return *itr;
-    return NULL;
+    std::string upperName = name;
+    transform(upperName.begin(), upperName.end(), upperName.begin(), ::toupper);
+
+    for (auto engine : engines)
+    {
+        if (engine->_name == upperName)
+        {
+            return engine;
+        }
+    }
+
+    return nullptr;
 }
 
-bool EngineManager::start()
+bool EngineManager::Start()
 {
     bool expected = true;
-    if (!(defaultOut && defaultIn))
+    if (defaultOut == nullptr || defaultIn == nullptr)
     {
-        cerr << "ERROR: It looks like someone broke the Nio Output\n"
-             << "       Attempting to recover by defaulting to the\n"
-             << "       Null Engine." << endl;
-        defaultOut = dynamic_cast<AudioOutput *>(getEng("NULL"));
-        defaultIn = dynamic_cast<MidiInput *>(getEng("NULL"));
+        std::cerr << "ERROR: It looks like someone broke the Nio Output\n"
+                  << "       Attempting to recover by defaulting to the\n"
+                  << "       Null Engine." << std::endl;
+        defaultOut = dynamic_cast<AudioOutput *>(GetEngine("NULL"));
+        defaultIn = dynamic_cast<MidiInput *>(GetEngine("NULL"));
     }
 
     AudioOutputManager::getInstance().currentOut = defaultOut;
-    MidiInputManager::getInstance().current = defaultIn;
+    MidiInputManager::Instance()._current = defaultIn;
 
     //open up the default output(s)
-    cout << "Starting Audio: " << defaultOut->name << endl;
-    defaultOut->setAudioEn(true);
-    if (defaultOut->getAudioEn())
-        cout << "Audio Started" << endl;
+    std::cout << "Starting Audio: " << defaultOut->_name << std::endl;
+    defaultOut->SetAudioEnabled(true);
+    if (defaultOut->IsAudioEnabled())
+    {
+        std::cout << "Audio Started" << std::endl;
+    }
     else
     {
         expected = false;
-        cerr << "ERROR: The default audio output failed to open!" << endl;
-        AudioOutputManager::getInstance().currentOut = dynamic_cast<AudioOutput *>(getEng("NULL"));
-        AudioOutputManager::getInstance().currentOut->setAudioEn(true);
+        std::cerr << "ERROR: The default audio output failed to open!" << std::endl;
+        AudioOutputManager::getInstance().currentOut = dynamic_cast<AudioOutput *>(GetEngine("NULL"));
+        AudioOutputManager::getInstance().currentOut->SetAudioEnabled(true);
     }
 
-    cout << "Starting MIDI: " << defaultIn->name << endl;
-    defaultIn->setMidiEn(true);
-    if (defaultIn->getMidiEn())
-        cout << "MIDI Started" << endl;
+    std::cout << "Starting MIDI: " << defaultIn->_name << std::endl;
+    defaultIn->SetMidiEnabled(true);
+    if (defaultIn->IsMidiEnabled())
+    {
+        std::cout << "MIDI Started" << std::endl;
+    }
     else
-    { //recover
+    {
         expected = false;
-        cerr << "ERROR: The default MIDI input failed to open!" << endl;
-        MidiInputManager::getInstance().current = dynamic_cast<MidiInput *>(getEng("NULL"));
-        MidiInputManager::getInstance().current->setMidiEn(true);
+        std::cerr << "ERROR: The default MIDI input failed to open!" << std::endl;
+        MidiInputManager::Instance()._current = dynamic_cast<MidiInput *>(GetEngine("NULL"));
+        MidiInputManager::Instance()._current->SetMidiEnabled(true);
     }
 
-    //Show if expected drivers were booted
     return expected;
 }
 
-void EngineManager::stop()
+void EngineManager::Stop()
 {
-    for (list<Engine *>::iterator itr = engines.begin();
+    for (std::list<Engine *>::iterator itr = engines.begin();
          itr != engines.end(); ++itr)
         (*itr)->Stop();
 }
 
-bool EngineManager::setInDefault(string name)
+bool EngineManager::SetDefaultAudioOutput(std::string const &name)
 {
-    MidiInput *chosen;
-    if ((chosen = dynamic_cast<MidiInput *>(getEng(name))))
-    { //got the input
+    auto chosen = dynamic_cast<MidiInput *>(GetEngine(name));
+
+    if (chosen != nullptr)
+    {
         defaultIn = chosen;
         return true;
     }
 
     //Warn user
-    cerr << "Error: " << name << " is not a recognized MIDI input source"
-         << endl;
-    cerr << "       Defaulting to the NULL input source" << endl;
+    std::cerr << "Error: " << name << " is not a recognized MIDI input source" << std::endl;
+    std::cerr << "       Defaulting to the NULL input source" << std::endl;
 
     return false;
 }
 
-bool EngineManager::setOutDefault(string name)
+bool EngineManager::SetDefaultMidiInput(std::string const &name)
 {
-    AudioOutput *chosen;
-    if ((chosen = dynamic_cast<AudioOutput *>(getEng(name))))
-    { //got the output
+    auto chosen = dynamic_cast<AudioOutput *>(GetEngine(name));
+
+    if (chosen != nullptr)
+    {
         defaultOut = chosen;
         return true;
     }
 
     //Warn user
-    cerr << "Error: " << name << " is not a recognized audio backend" << endl;
-    cerr << "       Defaulting to the NULL audio backend" << endl;
+    std::cerr << "Error: " << name << " is not a recognized audio backend" << std::endl;
+    std::cerr << "       Defaulting to the NULL audio backend" << std::endl;
+
     return false;
 }

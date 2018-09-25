@@ -88,11 +88,11 @@ private:
     //it adds a filename to the bank
     //if pos is -1 it try to find a position
     //returns -1 if the bank is full, or 0 if the instrument was added
-    int addtobank(int pos, std::string filename, std::string name);
+    int AddToBank(unsigned int pos, std::string filename, std::string name);
 
-    void deletefrombank(int pos);
+    void DeleteFromBank(unsigned int pos);
 
-    void clearbank();
+    void ClearBank();
 
     std::string defaultinsname;
 

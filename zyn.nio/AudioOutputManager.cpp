@@ -11,13 +11,15 @@
 #include <iostream>
 #include <memory.h>
 
-using namespace std;
-
-AudioOutputManager *AudioOutputManager::_instance = 0;
+AudioOutputManager *AudioOutputManager::_instance = nullptr;
 
 AudioOutputManager &AudioOutputManager::createInstance(IMixer *mixer)
 {
-    if (AudioOutputManager::_instance == 0) AudioOutputManager::_instance = new AudioOutputManager(mixer);
+    if (AudioOutputManager::_instance == nullptr)
+    {
+        AudioOutputManager::_instance = new AudioOutputManager(mixer);
+    }
+
     return *AudioOutputManager::_instance;
 }
 
@@ -28,8 +30,12 @@ AudioOutputManager &AudioOutputManager::getInstance()
 
 void AudioOutputManager::destroyInstance()
 {
-    if (AudioOutputManager::_instance != 0) delete AudioOutputManager::_instance;
-    AudioOutputManager::_instance = 0;
+    if (AudioOutputManager::_instance != nullptr)
+    {
+        delete AudioOutputManager::_instance;
+    }
+
+    AudioOutputManager::_instance = nullptr;
 }
 
 AudioOutputManager::AudioOutputManager(IMixer *mixer)
@@ -37,7 +43,7 @@ AudioOutputManager::AudioOutputManager(IMixer *mixer)
       priBuffCurrent(priBuf),
       mixer(mixer)
 {
-    currentOut = NULL;
+    currentOut = nullptr;
     stales = 0;
 
     //init samples
@@ -49,8 +55,8 @@ AudioOutputManager::AudioOutputManager(IMixer *mixer)
 
 AudioOutputManager::~AudioOutputManager()
 {
-    delete[] priBuf.l;
-    delete[] priBuf.r;
+    delete[] priBuf._left;
+    delete[] priBuf._right;
     delete[] outr;
     delete[] outl;
 }
@@ -64,18 +70,18 @@ AudioOutputManager::~AudioOutputManager()
  * 6) Lets return those samples to the primary and secondary outputs
  * 7) Lets wait for another tick
  */
-const Stereo<float *> AudioOutputManager::nextSample(unsigned int frameSize)
+const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
 {
-    MidiInputManager &midi = MidiInputManager::getInstance();
-    //SysEv->execute();
+    MidiInputManager &midi = MidiInputManager::Instance();
+
     removeStaleSmps();
-    int i = 0;
+    unsigned int i = 0;
     while (frameSize > storedSmps())
     {
-        if (!midi.empty())
+        if (!midi.Empty())
         {
             this->mixer->Lock();
-            midi.flush(i * this->mixer->_synth->buffersize, (i + 1) * this->mixer->_synth->buffersize);
+            midi.Flush(i * this->mixer->_synth->buffersize, (i + 1) * this->mixer->_synth->buffersize);
             this->mixer->Unlock();
         }
         this->mixer->Lock();
@@ -92,42 +98,49 @@ const Stereo<float *> AudioOutputManager::nextSample(unsigned int frameSize)
     return priBuf;
 }
 
-AudioOutput *AudioOutputManager::getOut(string name)
+AudioOutput *AudioOutputManager::GetAudioOutput(std::string const &name)
 {
-    return dynamic_cast<AudioOutput *>(EngineManager::getInstance().getEng(name));
+    return dynamic_cast<AudioOutput *>(EngineManager::Instance().GetEngine(name));
 }
 
-bool AudioOutputManager::setSink(string name)
+bool AudioOutputManager::SetSink(std::string const &name)
 {
-    AudioOutput *sink = getOut(name);
+    AudioOutput *sink = GetAudioOutput(name);
 
-    if (!sink)
+    if (sink == nullptr)
+    {
         return false;
+    }
 
-    if (currentOut)
-        currentOut->setAudioEn(false);
+    if (currentOut != nullptr)
+    {
+        currentOut->SetAudioEnabled(false);
+    }
 
     currentOut = sink;
-    currentOut->setAudioEn(true);
-
-    bool success = currentOut->getAudioEn();
+    currentOut->SetAudioEnabled(true);
 
     //Keep system in a valid state (aka with a running driver)
-    if (!success)
-        (currentOut = getOut("NULL"))->setAudioEn(true);
+    if (!currentOut->IsAudioEnabled())
+    {
+        currentOut = GetAudioOutput("NULL");
+        currentOut->SetAudioEnabled(true);
 
-    return success;
+        return false;
+    }
+
+    return true;
 }
 
-string AudioOutputManager::getSink() const
+std::string AudioOutputManager::GetSink() const
 {
     if (currentOut)
-        return currentOut->name;
-    else
     {
-        cerr << "BUG: No current output in OutMgr " << __LINE__ << endl;
-        return "ERROR";
+        return currentOut->_name;
     }
+
+    std::cerr << "BUG: No current output in AudioOutputManager " << __LINE__ << std::endl;
+
     return "ERROR";
 }
 
@@ -140,59 +153,66 @@ static size_t resample(float *dest,
                        float s_out,
                        size_t elms)
 {
-    size_t out_elms = elms * s_out / s_in;
+    size_t out_elms = static_cast<size_t>(elms * s_out / s_in);
     float r_pos = 0.0f;
-    for (int i = 0; i < (int)out_elms; ++i, r_pos += s_in / s_out)
+
+    for (size_t i = 0; i < out_elms; ++i, r_pos += s_in / s_out)
+    {
         dest[i] = interpolate(src, elms, r_pos);
+    }
 
     return out_elms;
 }
 
 void AudioOutputManager::addSmps(float *l, float *r)
 {
-    const int s_out = currentOut->getSampleRate(),
-              s_sys = this->mixer->_synth->samplerate;
+    const unsigned int s_out = currentOut->SampleRate();
+    const unsigned int s_sys = this->mixer->_synth->samplerate;
 
     if (s_out != s_sys)
     { //we need to resample
-        const size_t steps = resample(priBuffCurrent.l,
+        const size_t steps = resample(priBuffCurrent._left,
                                       l,
                                       s_sys,
                                       s_out,
                                       this->mixer->_synth->buffersize);
-        resample(priBuffCurrent.r, r, s_sys, s_out, this->mixer->_synth->buffersize);
+        resample(priBuffCurrent._right, r, s_sys, s_out, this->mixer->_synth->buffersize);
 
-        priBuffCurrent.l += steps;
-        priBuffCurrent.r += steps;
+        priBuffCurrent._left += steps;
+        priBuffCurrent._right += steps;
     }
     else
     { //just copy the samples
-        memcpy(priBuffCurrent.l, l, this->mixer->_synth->bufferbytes);
-        memcpy(priBuffCurrent.r, r, this->mixer->_synth->bufferbytes);
-        priBuffCurrent.l += this->mixer->_synth->buffersize;
-        priBuffCurrent.r += this->mixer->_synth->buffersize;
+        memcpy(priBuffCurrent._left, l, this->mixer->_synth->bufferbytes);
+        memcpy(priBuffCurrent._right, r, this->mixer->_synth->bufferbytes);
+        priBuffCurrent._left += this->mixer->_synth->buffersize;
+        priBuffCurrent._right += this->mixer->_synth->buffersize;
     }
 }
 
 void AudioOutputManager::removeStaleSmps()
 {
     if (!stales)
+    {
         return;
+    }
 
-    const int leftover = storedSmps() - stales;
+    assert(storedSmps() >= stales);
 
-    assert(leftover > -1);
+    const unsigned int leftover = storedSmps() - stales;
 
     //leftover samples [seen at very low latencies]
     if (leftover)
     {
-        memmove(priBuf.l, priBuffCurrent.l - leftover, leftover * sizeof(float));
-        memmove(priBuf.r, priBuffCurrent.r - leftover, leftover * sizeof(float));
-        priBuffCurrent.l = priBuf.l + leftover;
-        priBuffCurrent.r = priBuf.r + leftover;
+        memmove(priBuf._left, priBuffCurrent._left - leftover, leftover * sizeof(float));
+        memmove(priBuf._right, priBuffCurrent._right - leftover, leftover * sizeof(float));
+        priBuffCurrent._left = priBuf._left + leftover;
+        priBuffCurrent._right = priBuf._right + leftover;
     }
     else
+    {
         priBuffCurrent = priBuf;
+    }
 
     stales = 0;
 }

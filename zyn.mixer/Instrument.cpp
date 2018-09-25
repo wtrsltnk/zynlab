@@ -76,7 +76,7 @@ Instrument::Instrument(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrap
         i.status = KEY_OFF;
         i.note = -1;
         i.itemsplaying = 0;
-        for (auto & j : i.kititem)
+        for (auto &j : i.kititem)
         {
             j.adnote = nullptr;
             j.subnote = nullptr;
@@ -691,7 +691,7 @@ void Instrument::PolyphonicAftertouch(unsigned char note,
 
         monomem[note].velocity = velocity; // Store this note's velocity.
 
-    for (auto & i : partnote)
+    for (auto &i : partnote)
         if ((i.note == note) && (i.status == KEY_PLAYING))
         {
             /* update velocity */
@@ -789,7 +789,7 @@ void Instrument::SetController(unsigned int type, int par)
             setPvolume(Pvolume);   //update the volume
             setPpanning(Ppanning); //update the panning
 
-            for (auto & item : kit)
+            for (auto &item : kit)
             {
                 if (item.adpars == nullptr)
                     continue;
@@ -804,12 +804,12 @@ void Instrument::SetController(unsigned int type, int par)
             break;
         case C_resonance_center:
             ctl.setresonancecenter(par);
-            for (auto & item : kit)
+            for (auto &item : kit)
             {
                 if (item.adpars == nullptr)
                     continue;
                 item.adpars->GlobalPar.Reson->sendcontroller(C_resonance_center,
-                                                                  ctl.resonancecenter.relcenter);
+                                                             ctl.resonancecenter.relcenter);
             }
             break;
         case C_resonance_bandwidth:
@@ -863,7 +863,7 @@ void Instrument::MonoMemRenote()
  */
 void Instrument::RelaseNotePos(unsigned int pos)
 {
-    for (auto & j : partnote[pos].kititem)
+    for (auto &j : partnote[pos].kititem)
     {
         if (j.adnote != nullptr)
             if (j.adnote)
@@ -890,7 +890,7 @@ void Instrument::KillNotePos(unsigned int pos)
     partnote[pos].time = 0;
     partnote[pos].itemsplaying = 0;
 
-    for (auto & j : partnote[pos].kititem)
+    for (auto &j : partnote[pos].kititem)
     {
         if (j.adnote != nullptr)
         {
@@ -929,7 +929,7 @@ void Instrument::setkeylimit(unsigned char Pkeylimit)
     if (Ppolymode != 0)
     {
         int notecount = 0;
-        for (auto & i : partnote)
+        for (auto &i : partnote)
             if ((i.status == KEY_PLAYING) || (i.status == KEY_RELASED_AND_SUSTAINED))
                 notecount++;
 
@@ -977,7 +977,9 @@ void Instrument::RunNote(unsigned int k)
 
             //Process if it exists
             if (!(*note))
+            {
                 continue;
+            }
             noteplay++;
 
             float tmpoutr[this->_synth->buffersize];
@@ -999,7 +1001,9 @@ void Instrument::RunNote(unsigned int k)
 
     //Kill note if there is no synth on that note
     if (noteplay == 0)
+    {
         KillNotePos(k);
+    }
 }
 
 /*
@@ -1061,7 +1065,7 @@ void Instrument::ComputePartSmps()
         for (unsigned int k = 0; k < POLIPHONY; ++k)
             KillNotePos(k);
         killallnotes = 0;
-        for (auto & nefx : partefx)
+        for (auto &nefx : partefx)
             nefx->cleanup();
     }
     ctl.updateportamento();
@@ -1093,7 +1097,9 @@ void Instrument::setPpanning(unsigned char Ppanning_)
 void Instrument::setkititemstatus(int kititem, int Penabled_)
 {
     if ((kititem == 0) || (kititem >= NUM_KIT_ITEMS))
+    {
         return; //nonexistent kit item and the first kit item is always enabled
+    }
     kit[kititem].Penabled = static_cast<unsigned char>(Penabled_);
 
     bool resetallnotes = false;
@@ -1131,9 +1137,9 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
 void Instrument::add2XMLinstrument(XMLwrapper *xml)
 {
     xml->beginbranch("INFO");
-    xml->addparstr("name", (char *)Pname);
-    xml->addparstr("author", (char *)info.Pauthor);
-    xml->addparstr("comments", (char *)info.Pcomments);
+    xml->addparstr("name", reinterpret_cast<char *>(Pname));
+    xml->addparstr("author", reinterpret_cast<char *>(info.Pauthor));
+    xml->addparstr("comments", reinterpret_cast<char *>(info.Pcomments));
     xml->addpar("type", info.Ptype);
     xml->endbranch();
 
@@ -1147,7 +1153,7 @@ void Instrument::add2XMLinstrument(XMLwrapper *xml)
         xml->addparbool("enabled", kit[i].Penabled);
         if (kit[i].Penabled != 0)
         {
-            xml->addparstr("name", (char *)kit[i].Pname);
+            xml->addparstr("name", reinterpret_cast<char *>(kit[i].Pname));
 
             xml->addparbool("muted", kit[i].Pmuted);
             xml->addpar("min_key", kit[i].Pminkey);
@@ -1245,7 +1251,7 @@ int Instrument::saveXML(const char *filename)
     return result;
 }
 
-int Instrument::loadXMLinstrument(const char *filename) /*{*/
+int Instrument::loadXMLinstrument(const char *filename)
 {
     auto *xml = new XMLwrapper();
     if (xml->loadXMLfile(filename) < 0)
@@ -1261,31 +1267,31 @@ int Instrument::loadXMLinstrument(const char *filename) /*{*/
 
     delete (xml);
     return 0;
-} /*}*/
+}
 
-void Instrument::applyparameters(bool lockmutex) /*{*/
+void Instrument::applyparameters(bool lockmutex)
 {
-    for (auto & n : kit)
+    for (auto &n : kit)
         if ((n.padpars != nullptr) && (n.Ppadenabled != 0))
             n.padpars->applyparameters(lockmutex);
-} /*}*/
+}
 
 void Instrument::getfromXMLinstrument(XMLwrapper *xml)
 {
     if (xml->enterbranch("INFO"))
     {
-        xml->getparstr("name", (char *)Pname, PART_MAX_NAME_LEN);
-        xml->getparstr("author", (char *)info.Pauthor, MAX_INFO_TEXT_SIZE);
-        xml->getparstr("comments", (char *)info.Pcomments, MAX_INFO_TEXT_SIZE);
-        info.Ptype = xml->getpar("type", info.Ptype, 0, 16);
+        xml->getparstr("name", reinterpret_cast<char *>(Pname), PART_MAX_NAME_LEN);
+        xml->getparstr("author", reinterpret_cast<char *>(info.Pauthor), MAX_INFO_TEXT_SIZE);
+        xml->getparstr("comments", reinterpret_cast<char *>(info.Pcomments), MAX_INFO_TEXT_SIZE);
+        info.Ptype = static_cast<unsigned char>(xml->getpar("type", info.Ptype, 0, 16));
 
         xml->exitbranch();
     }
 
     if (xml->enterbranch("INSTRUMENT_KIT"))
     {
-        Pkitmode = xml->getpar127("kit_mode", Pkitmode);
-        Pdrummode = xml->getparbool("drum_mode", Pdrummode);
+        Pkitmode = static_cast<unsigned char>(xml->getpar127("kit_mode", Pkitmode));
+        Pdrummode = static_cast<unsigned char>(xml->getparbool("drum_mode", Pdrummode));
 
         setkititemstatus(0, 0);
         for (int i = 0; i < NUM_KIT_ITEMS; ++i)
@@ -1299,34 +1305,31 @@ void Instrument::getfromXMLinstrument(XMLwrapper *xml)
                 continue;
             }
 
-            xml->getparstr("name", (char *)kit[i].Pname, PART_MAX_NAME_LEN);
+            xml->getparstr("name", reinterpret_cast<char *>(kit[i].Pname), PART_MAX_NAME_LEN);
 
-            kit[i].Pmuted = xml->getparbool("muted", kit[i].Pmuted);
-            kit[i].Pminkey = xml->getpar127("min_key", kit[i].Pminkey);
-            kit[i].Pmaxkey = xml->getpar127("max_key", kit[i].Pmaxkey);
+            kit[i].Pmuted = static_cast<unsigned char>(xml->getparbool("muted", kit[i].Pmuted));
+            kit[i].Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", kit[i].Pminkey));
+            kit[i].Pmaxkey = static_cast<unsigned char>(xml->getpar127("max_key", kit[i].Pmaxkey));
 
-            kit[i].Psendtoparteffect = xml->getpar127(
+            kit[i].Psendtoparteffect = static_cast<unsigned char>(xml->getpar127(
                 "send_to_instrument_effect",
-                kit[i].Psendtoparteffect);
+                kit[i].Psendtoparteffect));
 
-            kit[i].Padenabled = xml->getparbool("add_enabled",
-                                                kit[i].Padenabled);
+            kit[i].Padenabled = static_cast<unsigned char>(xml->getparbool("add_enabled", kit[i].Padenabled));
             if (xml->enterbranch("ADD_SYNTH_PARAMETERS"))
             {
                 kit[i].adpars->getfromXML(xml);
                 xml->exitbranch();
             }
 
-            kit[i].Psubenabled = xml->getparbool("sub_enabled",
-                                                 kit[i].Psubenabled);
+            kit[i].Psubenabled = static_cast<unsigned char>(xml->getparbool("sub_enabled", kit[i].Psubenabled));
             if (xml->enterbranch("SUB_SYNTH_PARAMETERS"))
             {
                 kit[i].subpars->getfromXML(xml);
                 xml->exitbranch();
             }
 
-            kit[i].Ppadenabled = xml->getparbool("pad_enabled",
-                                                 kit[i].Ppadenabled);
+            kit[i].Ppadenabled = static_cast<unsigned char>(xml->getparbool("pad_enabled", kit[i].Ppadenabled));
             if (xml->enterbranch("PAD_SYNTH_PARAMETERS"))
             {
                 kit[i].padpars->getfromXML(xml);
@@ -1351,10 +1354,7 @@ void Instrument::getfromXMLinstrument(XMLwrapper *xml)
                 xml->exitbranch();
             }
 
-            Pefxroute[nefx] = xml->getpar("route",
-                                          Pefxroute[nefx],
-                                          0,
-                                          NUM_PART_EFX);
+            Pefxroute[nefx] = static_cast<unsigned char>(xml->getpar("route", Pefxroute[nefx], 0, NUM_PART_EFX));
             partefx[nefx]->setdryonly(Pefxroute[nefx] == 2);
             Pefxbypass[nefx] = xml->getparbool("bypass", Pefxbypass[nefx]);
             xml->exitbranch();
@@ -1365,25 +1365,27 @@ void Instrument::getfromXMLinstrument(XMLwrapper *xml)
 
 void Instrument::getfromXML(XMLwrapper *xml)
 {
-    Penabled = xml->getparbool("enabled", Penabled);
+    Penabled = static_cast<unsigned char>(xml->getparbool("enabled", Penabled));
 
-    setPvolume(xml->getpar127("volume", Pvolume));
-    setPpanning(xml->getpar127("panning", Ppanning));
+    setPvolume(static_cast<unsigned char>(xml->getpar127("volume", Pvolume)));
+    setPpanning(static_cast<unsigned char>(xml->getpar127("panning", Ppanning)));
 
-    Pminkey = xml->getpar127("min_key", Pminkey);
-    Pmaxkey = xml->getpar127("max_key", Pmaxkey);
-    Pkeyshift = xml->getpar127("key_shift", Pkeyshift);
-    Prcvchn = xml->getpar127("rcv_chn", Prcvchn);
+    Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", Pminkey));
+    Pmaxkey = static_cast<unsigned char>(xml->getpar127("max_key", Pmaxkey));
+    Pkeyshift = static_cast<unsigned char>(xml->getpar127("key_shift", Pkeyshift));
+    Prcvchn = static_cast<unsigned char>(xml->getpar127("rcv_chn", Prcvchn));
 
-    Pvelsns = xml->getpar127("velocity_sensing", Pvelsns);
-    Pveloffs = xml->getpar127("velocity_offset", Pveloffs);
+    Pvelsns = static_cast<unsigned char>(xml->getpar127("velocity_sensing", Pvelsns));
+    Pveloffs = static_cast<unsigned char>(xml->getpar127("velocity_offset", Pveloffs));
 
-    Pnoteon = xml->getparbool("note_on", Pnoteon);
-    Ppolymode = xml->getparbool("poly_mode", Ppolymode);
-    Plegatomode = xml->getparbool("legato_mode", Plegatomode); //older versions
+    Pnoteon = static_cast<unsigned char>(xml->getparbool("note_on", Pnoteon));
+    Ppolymode = static_cast<unsigned char>(xml->getparbool("poly_mode", Ppolymode));
+    Plegatomode = static_cast<unsigned char>(xml->getparbool("legato_mode", Plegatomode)); //older versions
     if (!Plegatomode)
-        Plegatomode = xml->getpar127("legato_mode", Plegatomode);
-    Pkeylimit = xml->getpar127("key_limit", Pkeylimit);
+    {
+        Plegatomode = static_cast<unsigned char>(xml->getpar127("legato_mode", Plegatomode));
+    }
+    Pkeylimit = static_cast<unsigned char>(xml->getpar127("key_limit", Pkeylimit));
 
     if (xml->enterbranch("INSTRUMENT"))
     {

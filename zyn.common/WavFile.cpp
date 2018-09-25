@@ -84,7 +84,7 @@ bool WavFile::good() const
     return file;
 }
 
-void WavFile::writeStereoSamples(int nsmps, short int *smps)
+void WavFile::writeStereoSamples(unsigned int nsmps, short int *smps)
 {
     if (file)
     {
@@ -93,7 +93,7 @@ void WavFile::writeStereoSamples(int nsmps, short int *smps)
     }
 }
 
-void WavFile::writeMonoSamples(int nsmps, short int *smps)
+void WavFile::writeMonoSamples(unsigned int nsmps, short int *smps)
 {
     if (file)
     {

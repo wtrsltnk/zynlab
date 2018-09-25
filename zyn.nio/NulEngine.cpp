@@ -26,12 +26,10 @@
 #include <iostream>
 #include <unistd.h>
 
-using namespace std;
-
 NulEngine::NulEngine(SystemSettings *s)
     : AudioOutput(s), pThread(nullptr)
 {
-    name = "NULL";
+    _name = "NULL";
     playing_until.tv_sec = 0;
     playing_until.tv_usec = 0;
 }
@@ -45,9 +43,10 @@ void *NulEngine::AudioThread()
 {
     while (pThread)
     {
-        nextSample();
+        NextSample();
 
-        struct timeval now{};
+        struct timeval now
+        {};
         int remaining = 0;
         gettimeofday(&now, nullptr);
         if ((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0))
@@ -60,13 +59,19 @@ void *NulEngine::AudioThread()
             remaining = (playing_until.tv_usec - now.tv_usec) + (playing_until.tv_sec - now.tv_sec) * 1000000;
             if (remaining > 10000) //Don't sleep() less than 10ms.
                 //This will add latency...
+            {
                 usleep(remaining - 10000);
+            }
             if (remaining < 0)
-                cerr << "WARNING - too late" << endl;
+            {
+                std::cerr << "WARNING - too late" << std::endl;
+            }
         }
         playing_until.tv_usec += this->_synth->buffersize * 1000000 / this->_synth->samplerate;
         if (remaining < 0)
+        {
             playing_until.tv_usec -= remaining;
+        }
         playing_until.tv_sec += playing_until.tv_usec / 1000000;
         playing_until.tv_usec %= 1000000;
     }
@@ -77,20 +82,20 @@ NulEngine::~NulEngine() = default;
 
 bool NulEngine::Start()
 {
-    setAudioEn(true);
-    return getAudioEn();
+    SetAudioEnabled(true);
+    return IsAudioEnabled();
 }
 
 void NulEngine::Stop()
 {
-    setAudioEn(false);
+    SetAudioEnabled(false);
 }
 
-void NulEngine::setAudioEn(bool nval)
+void NulEngine::SetAudioEnabled(bool nval)
 {
     if (nval)
     {
-        if (!getAudioEn())
+        if (!IsAudioEnabled())
         {
             auto *thread = new pthread_t;
             pthread_attr_t attr;
@@ -100,7 +105,7 @@ void NulEngine::setAudioEn(bool nval)
             pthread_create(pThread, &attr, _AudioThread, this);
         }
     }
-    else if (getAudioEn())
+    else if (IsAudioEnabled())
     {
         pthread_t *thread = pThread;
         pThread = nullptr;
@@ -109,7 +114,7 @@ void NulEngine::setAudioEn(bool nval)
     }
 }
 
-bool NulEngine::getAudioEn() const
+bool NulEngine::IsAudioEnabled() const
 {
     return pThread;
 }

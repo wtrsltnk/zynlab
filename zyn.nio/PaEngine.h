@@ -27,30 +27,29 @@
 
 #include <portaudio.h>
 
-class PaEngine:public AudioOutput
+class PaEngine : public AudioOutput
 {
-    public:
-        PaEngine(SystemSettings* s);
-        virtual ~PaEngine();
+public:
+    PaEngine(SystemSettings *s);
+    virtual ~PaEngine();
 
-        bool Start();
-        void Stop();
+    bool Start();
+    void Stop();
 
-        void setAudioEn(bool nval);
-        bool getAudioEn() const;
+    bool IsAudioEnabled() const;
 
-    protected:
-        static int PAprocess(const void *inputBuffer,
-                             void *outputBuffer,
-                             unsigned long framesPerBuffer,
-                             const PaStreamCallbackTimeInfo *outTime,
-                             PaStreamCallbackFlags flags,
-                             void *userData);
-        int process(float *out, unsigned long framesPerBuffer);
-    private:
-        PaStream *stream;
+protected:
+    static int PAprocess(const void *inputBuffer,
+                         void *outputBuffer,
+                         unsigned long framesPerBuffer,
+                         const PaStreamCallbackTimeInfo *outTime,
+                         PaStreamCallbackFlags flags,
+                         void *userData);
+    int process(float *out, unsigned long framesPerBuffer);
+
+private:
+    PaStream *stream;
 };
-
 
 void PAfinish();
 

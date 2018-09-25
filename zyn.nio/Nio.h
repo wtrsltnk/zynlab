@@ -10,23 +10,23 @@
 class Nio
 {
 public:
-    static bool start(class IMixer *mixer);
-    static void stop(void);
+    static bool Start(class IMixer *mixer);
+    static void Stop();
 
-    static void setDefaultSource(const std::string &name);
-    static void setDefaultSink(const std::string &name);
+    static void SetDefaultSource(const std::string &name);
+    static void SetDefaultSink(const std::string &name);
 
-    static bool setSource(const std::string &name);
-    static bool setSink(const std::string &name);
+    static bool SelectSource(const std::string &name);
+    static bool SelectSink(const std::string &name);
 
-    static std::set<std::string> getSources(void);
-    static std::set<std::string> getSinks(void);
+    static std::set<std::string> GetSources();
+    static std::set<std::string> GetSinks();
 
-    static std::string getSource(void);
-    static std::string getSink(void);
+    static std::string GetSelectedSource();
+    static std::string GetSelectedSink();
 
     //Get the prefered sample rate from jack (if running)
-    static void preferedSampleRate(unsigned &rate);
+    static void preferedSampleRate(unsigned int &rate);
 
     static std::string defaultSource;
     static std::string defaultSink;

@@ -22,6 +22,7 @@
 
 #include "SdlEngine.h"
 
+#include <cmath>
 #include <iostream>
 
 using namespace std;
@@ -29,7 +30,7 @@ using namespace std;
 SdlEngine::SdlEngine(SystemSettings *s)
     : AudioOutput(s), _dev(0)
 {
-    name = "SDL2";
+    _name = "SDL2";
 }
 
 SdlEngine::~SdlEngine()
@@ -39,30 +40,39 @@ SdlEngine::~SdlEngine()
 
 void SdlEngine::my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
-    SdlEngine *thiz = static_cast<SdlEngine *>(userdata);
-    thiz->process(stream, len);
+    static_cast<SdlEngine *>(userdata)->process((float *)stream, len / 4);
 }
+
+const double freq = 440;
+const int FREQUENCY = 44100;
 
 bool SdlEngine::Start()
 {
-    if (getAudioEn()) return true;
+    if (IsAudioEnabled())
+    {
+        return true;
+    }
 
     SDL_Init(SDL_INIT_AUDIO);
 
-    SDL_AudioSpec want, have;
+    SDL_AudioSpec desiredSpec;
 
-    SDL_memset(&want, 0, sizeof(want)); /* or SDL_zero(want) */
-    want.freq = 48000;
-    want.format = AUDIO_F32;
-    want.channels = 2;
-    want.samples = this->_synth->buffersize;
-    want.size = 0;
-    want.userdata = (void *)this;
-    want.callback = my_audio_callback; /* you wrote this function elsewhere -- see SDL_AudioSpec for details */
+    desiredSpec.freq = 44100;
+    desiredSpec.format = AUDIO_F32;
+    desiredSpec.channels = 2;
+    desiredSpec.samples = 256;
+    desiredSpec.callback = my_audio_callback;
+    desiredSpec.userdata = this;
 
-    this->_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    SDL_AudioSpec obtainedSpec;
 
-    //    this->setBufferSize(have.size);
+//    // you might want to look for errors here
+//    SDL_OpenAudio(&desiredSpec, &obtainedSpec);
+
+//    // start play audio
+//    SDL_PauseAudio(0);
+
+    this->_dev = SDL_OpenAudioDevice(nullptr, 0, &desiredSpec, &obtainedSpec, 0);
 
     SDL_PauseAudioDevice(this->_dev, 0);
 
@@ -71,37 +81,31 @@ bool SdlEngine::Start()
 
 void SdlEngine::Stop()
 {
-    if (!getAudioEn()) return;
+    if (!IsAudioEnabled())
+    {
+        return;
+    }
 
+//    SDL_PauseAudio(1);
     SDL_PauseAudioDevice(this->_dev, 1);
     SDL_CloseAudio();
-    std::cout << SDL_GetAudioStatus() << std::endl;
     this->_dev = 0;
 }
 
-void SdlEngine::setAudioEn(bool nval)
-{
-    if (nval)
-        Start();
-    else
-        Stop();
-}
-
-bool SdlEngine::getAudioEn() const
+bool SdlEngine::IsAudioEnabled() const
 {
     return this->_dev;
 }
 
-int SdlEngine::process(Uint8 *stream, int len)
+static double v = 0;
+void SdlEngine::process(float *stream, int len)
 {
-    const Stereo<float *> smp = nextSample();
-    Uint8 *l = (Uint8 *)(smp.l);
-    Uint8 *r = (Uint8 *)(smp.r);
-    for (unsigned i = 0; i < len; ++i)
-    {
-        *stream++ = smp.l[i];
-        *stream++ = smp.r[i];
-    }
+    const Stereo<float *> smp = NextSample();
 
-    return 0;
+    int i = 0;
+    while (i < len)
+    {
+        stream[i++] = *(smp._left);
+        stream[i++] = *(smp._right);
+    }
 }

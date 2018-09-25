@@ -19,6 +19,7 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+
 #ifndef RTENGINE_H
 #define RTENGINE_H
 
@@ -38,8 +39,7 @@ public:
     virtual bool Start();
     virtual void Stop();
 
-    virtual void setMidiEn(bool nval);
-    virtual bool getMidiEn() const;
+    virtual bool IsMidiEnabled() const;
 
     static void callback(double timeStamp, std::vector<unsigned char> *message, void *userData);
 

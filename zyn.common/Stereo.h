@@ -26,22 +26,22 @@ template <class T>
 struct Stereo
 {
 public:
-    Stereo(const T &left, const T &right) : l(left), r(right) {}
+    Stereo(const T &left, const T &right) : _left(left), _right(right) {}
 
     /**Initializes Stereo with left and right set to val
      * @param val the value for both channels*/
-    Stereo(const T &val) : l(val), r(val) {}
+    Stereo(const T &val) : _left(val), _right(val) {}
     ~Stereo() {}
 
     Stereo<T> &operator=(const Stereo<T> &smp)
     {
-        l = smp.l;
-        r = smp.r;
+        _left = smp._left;
+        _right = smp._right;
         return *this;
     }
 
     //data
-    T l, r;
+    T _left, _right;
 };
 
 #endif

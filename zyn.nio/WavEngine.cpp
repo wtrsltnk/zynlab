@@ -45,8 +45,11 @@ bool WavEngine::openAudio()
 
 bool WavEngine::Start()
 {
-    if (pThread)
+    if (pThread != nullptr)
+    {
         return true;
+    }
+
     pThread = new pthread_t;
 
     pthread_attr_t attr;
@@ -59,8 +62,10 @@ bool WavEngine::Start()
 
 void WavEngine::Stop()
 {
-    if (!pThread)
+    if (pThread == nullptr)
+    {
         return;
+    }
 
     pthread_t *tmp = pThread;
     pThread = nullptr;
@@ -72,15 +77,18 @@ void WavEngine::Stop()
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
 {
-    if (!pThread)
+    if (pThread != nullptr)
+    {
         return;
+    }
 
     //copy the input [overflow when needed]
     for (size_t i = 0; i < len; ++i)
     {
-        buffer.push(*smps.l++);
-        buffer.push(*smps.r++);
+        buffer.push(*smps._left++);
+        buffer.push(*smps._right++);
     }
+
     work.post();
 }
 
@@ -92,9 +100,11 @@ void WavEngine::newFile(WavFile *_file)
 
     //check state
     if (!file->good())
-        cerr
+    {
+        std::cerr
             << "ERROR: WavEngine handed bad file output WavEngine::newFile()"
-            << endl;
+            << std::endl;
+    }
 }
 
 void WavEngine::destroyFile()
@@ -114,17 +124,13 @@ void *WavEngine::AudioThread()
 
     while (!work.wait() && pThread)
     {
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
         {
             float left = 0.0f, right = 0.0f;
             buffer.pop(left);
             buffer.pop(right);
-            recordbuf_16bit[2 * i] = limit((int)(left * 32767.0f),
-                                           -32768,
-                                           32767);
-            recordbuf_16bit[2 * i + 1] = limit((int)(right * 32767.0f),
-                                               -32768,
-                                               32767);
+            recordbuf_16bit[2 * i] = static_cast<short>(limit(static_cast<int>(left * 32767.0f), -32768, 32767));
+            recordbuf_16bit[2 * i + 1] = static_cast<short>(limit(static_cast<int>(right * 32767.0f), -32768, 32767));
         }
         file->writeStereoSamples(this->_synth->buffersize, recordbuf_16bit);
     }

@@ -85,12 +85,12 @@ void Distorsion::out(const Stereo<float *> &smp)
     if (Pstereo) //Stereo
         for (int i = 0; i < this->_synth->buffersize; ++i)
         {
-            efxoutl[i] = smp.l[i] * inputvol * pangainL;
-            efxoutr[i] = smp.r[i] * inputvol * pangainR;
+            efxoutl[i] = smp._left[i] * inputvol * pangainL;
+            efxoutr[i] = smp._right[i] * inputvol * pangainR;
         }
     else //Mono
         for (int i = 0; i < this->_synth->buffersize; ++i)
-            efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
+            efxoutl[i] = (smp._left[i] * pangainL + smp._right[i] * pangainR) * inputvol;
 
     if (Pprefiltering)
         applyfilters(efxoutl, efxoutr);

@@ -152,7 +152,7 @@ void Reverb::out(const Stereo<float *> &smp)
 
     float inputbuf[this->_synth->buffersize];
     for (int i = 0; i < this->_synth->buffersize; ++i)
-        inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0f;
+        inputbuf[i] = (smp._left[i] + smp._right[i]) / 2.0f;
 
     if (idelay)
         for (int i = 0; i < this->_synth->buffersize; ++i)

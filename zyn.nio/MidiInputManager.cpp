@@ -1,33 +1,41 @@
 #include "MidiInputManager.h"
-#include <zyn.common/globals.h>
 #include "EngineManager.h"
 #include "MidiInput.h"
+#include <zyn.common/globals.h>
 
 #include <iostream>
 #include <utility>
 
-using namespace std;
-
-ostream &operator<<(ostream &out, const MidiEvent &ev)
+std::ostream &operator<<(std::ostream &out, const MidiEvent &ev)
 {
     switch (ev.type)
     {
         case MidiEventTypes::M_NOTE:
+        {
             out << "MidiNote: note(" << ev.num << ")\n"
                 << "          channel(" << ev.channel << ")\n"
                 << "          velocity(" << ev.value << ")";
             break;
-
+        }
         case MidiEventTypes::M_CONTROLLER:
+        {
             out << "MidiCtl: controller(" << ev.num << ")\n"
                 << "         channel(" << ev.channel << ")\n"
                 << "         value(" << ev.value << ")";
             break;
-
+        }
         case MidiEventTypes::M_PGMCHANGE:
+        {
             out << "PgmChange: program(" << ev.num << ")\n"
                 << "           channel(" << ev.channel << ")";
             break;
+        }
+        case MidiEventTypes::M_PRESSURE:
+        {
+            out << "Pressure: program(" << ev.num << ")\n"
+                << "          channel(" << ev.channel << ")";
+            break;
+        }
     }
 
     return out;
@@ -39,29 +47,32 @@ MidiEvent::MidiEvent()
 
 MidiInputManager *MidiInputManager::_instance = nullptr;
 
-MidiInputManager &MidiInputManager::createInstance(IMixer *mixer)
+MidiInputManager &MidiInputManager::CreateInstance(IMixer *mixer)
 {
-    if (MidiInputManager::_instance == nullptr) MidiInputManager::_instance = new MidiInputManager(mixer);
+    if (MidiInputManager::_instance == nullptr)
+    {
+        MidiInputManager::_instance = new MidiInputManager(mixer);
+    }
 
     return *MidiInputManager::_instance;
 }
 
-MidiInputManager &MidiInputManager::getInstance()
+MidiInputManager &MidiInputManager::Instance()
 {
     return *MidiInputManager::_instance;
 }
 
-void MidiInputManager::destroyInstance()
+void MidiInputManager::DestroyInstance()
 {
     delete MidiInputManager::_instance;
     MidiInputManager::_instance = nullptr;
 }
 
 MidiInputManager::MidiInputManager(IMixer *mixer)
-    : queue(100), mixer(mixer)
+    : _queue(100), _mixer(mixer)
 {
-    current = nullptr;
-    work.init(PTHREAD_PROCESS_PRIVATE, 0);
+    _current = nullptr;
+    _work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
 
 MidiInputManager::~MidiInputManager()
@@ -69,93 +80,114 @@ MidiInputManager::~MidiInputManager()
     //lets stop the consumer thread
 }
 
-void MidiInputManager::putEvent(MidiEvent ev)
+void MidiInputManager::PutEvent(MidiEvent ev)
 {
-    if (queue.push(ev)) //check for error
-        cerr << "ERROR: Midi Ringbuffer is FULL" << endl;
+    if (_queue.push(ev)) //check for error
+    {
+        std::cerr << "ERROR: Midi Ringbuffer is FULL" << std::endl;
+    }
     else
-        work.post();
+    {
+        _work.post();
+    }
 }
 
-void MidiInputManager::flush(unsigned frameStart, unsigned frameStop)
+void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
 {
     MidiEvent ev;
-    while (!work.trywait())
+    while (!_work.trywait())
     {
-        queue.peak(ev);
-        if (ev.time < (int)frameStart || ev.time > (int)frameStop)
+        _queue.peak(ev);
+        if (ev.time < frameStart || ev.time > frameStop)
         {
             //Back out of transaction
-            work.post();
+            _work.post();
             //printf("%d vs [%d..%d]\n",ev.time, frameStart, frameStop);
             break;
         }
-        queue.pop(ev);
-        //cout << ev << endl;
+        _queue.pop(ev);
 
         switch (ev.type)
         {
             case MidiEventTypes::M_NOTE:
-                //                dump.dumpnote(ev.channel, ev.num, ev.value);
-
+            {
                 if (ev.value)
-                    this->mixer->NoteOn(ev.channel, ev.num, ev.value);
+                {
+                    this->_mixer->NoteOn(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
+                }
                 else
-                    this->mixer->NoteOff(ev.channel, ev.num);
+                {
+                    this->_mixer->NoteOff(static_cast<char>(ev.channel), static_cast<char>(ev.num));
+                }
                 break;
-
+            }
             case MidiEventTypes::M_CONTROLLER:
-                //                dump.dumpcontroller(ev.channel, ev.num, ev.value);
-                this->mixer->SetController(ev.channel, ev.num, ev.value);
+            {
+                this->_mixer->SetController(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
                 break;
-
+            }
             case MidiEventTypes::M_PGMCHANGE:
-                this->mixer->SetProgram(ev.channel, ev.num);
+            {
+                this->_mixer->SetProgram(static_cast<char>(ev.channel), ev.num);
                 break;
+            }
             case MidiEventTypes::M_PRESSURE:
-                this->mixer->PolyphonicAftertouch(ev.channel, ev.num, ev.value);
+            {
+                this->_mixer->PolyphonicAftertouch(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
                 break;
+            }
         }
     }
 }
 
-bool MidiInputManager::empty() const
+bool MidiInputManager::Empty() const
 {
-    int semvalue = work.getvalue();
+    int semvalue = _work.getvalue();
     return semvalue <= 0;
 }
 
-bool MidiInputManager::setSource(string name)
+MidiInput *MidiInputManager::GetMidiInput(std::string const &name)
 {
-    MidiInput *src = getIn(std::move(name));
+    return dynamic_cast<MidiInput *>(EngineManager::Instance().GetEngine(name));
+}
+
+bool MidiInputManager::SetSource(std::string const &name)
+{
+    MidiInput *src = GetMidiInput(name);
 
     if (!src)
+    {
         return false;
+    }
 
-    if (current)
-        current->setMidiEn(false);
-    current = src;
-    current->setMidiEn(true);
+    if (_current)
+    {
+        _current->SetMidiEnabled(false);
+    }
 
-    bool success = current->getMidiEn();
+    _current = src;
+    _current->SetMidiEnabled(true);
 
     //Keep system in a valid state (aka with a running driver)
-    if (!success)
-        (current = getIn("NULL"))->setMidiEn(true);
+    if (_current->IsMidiEnabled())
+    {
+        return true;
+    }
 
-    return success;
+    _current = GetMidiInput("NULL");
+    _current->SetMidiEnabled(true);
+
+    return false;
 }
 
-string MidiInputManager::getSource() const
+std::string MidiInputManager::GetSource() const
 {
-    if (current)
-        return current->name;
+    if (_current)
+    {
+        return _current->_name;
+    }
+
+    std::cerr << "BUG: No current input in MidiInputManager " << __LINE__ << std::endl;
 
     return "ERROR";
-}
-
-MidiInput *MidiInputManager::getIn(string name)
-{
-    EngineManager &eng = EngineManager::getInstance();
-    return dynamic_cast<MidiInput *>(eng.getEng(std::move(name)));
 }

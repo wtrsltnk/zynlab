@@ -39,11 +39,11 @@ public:
     bool Start();
     void Stop();
 
-    void setAudioEn(bool nval);
-    bool getAudioEn() const;
+    void SetAudioEnabled(bool nval);
+    bool IsAudioEnabled() const;
 
-    void setMidiEn(bool) {}
-    bool getMidiEn() const { return true; }
+    void SetMidiEnabled(bool) {}
+    bool IsMidiEnabled() const { return true; }
 
 protected:
     void *AudioThread();

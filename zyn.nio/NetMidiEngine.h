@@ -23,8 +23,8 @@
 #define NETMIDIENGINE_H
 
 #include "MidiInput.h"
-#include <zyn.net/HttpServer.h>
 #include <thread>
+#include <zyn.net/HttpServer.h>
 
 class NetMidiEngine : public MidiInput
 {
@@ -38,14 +38,14 @@ public:
     virtual bool Start();
     virtual void Stop();
 
-    virtual void setMidiEn(bool nval);
-    virtual bool getMidiEn() const;
+    virtual bool IsMidiEnabled() const;
 
     static int onRecieveRequest(const net::Request &request, net::Response &response);
 
 private:
     net::HttpServer _server;
     std::thread _thread;
+    bool _isRunning;
 };
 
 #endif // NETMIDIENGINE_H

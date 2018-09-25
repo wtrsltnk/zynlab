@@ -20,29 +20,24 @@ public:
     virtual ~AudioOutputManager();
 
     /**Execute a tick*/
-    const Stereo<float *> nextSample(unsigned int frameSize);
-
-    /**Request a new set of samples
-         * @param n number of requested samples (defaults to 1)
-         * @return -1 for locking issues 0 for valid request*/
-    void requestSamples(unsigned int n = 1);
+    const Stereo<float *> NextSample(unsigned int frameSize);
 
     /**Gets requested driver
          * @param name case unsensitive name of driver
          * @return pointer to Audio Out or NULL
          */
-    AudioOutput *getOut(std::string name);
+    AudioOutput *GetAudioOutput(std::string const &name);
 
-    bool setSink(std::string name);
+    bool SetSink(std::string const &name);
 
-    std::string getSink() const;
+    std::string GetSink() const;
 
     friend class EngineManager;
 
 private:
     AudioOutputManager(IMixer *mixer);
     void addSmps(float *l, float *r);
-    unsigned int storedSmps() const { return priBuffCurrent.l - priBuf.l; }
+    unsigned int storedSmps() const { return static_cast<unsigned int>(priBuffCurrent._left - priBuf._left); }
     void removeStaleSmps();
 
     AudioOutput *currentOut; /**<The current output driver*/
@@ -57,7 +52,7 @@ private:
     float *outr;
     IMixer *mixer;
 
-    int stales;
+    unsigned int stales;
 };
 
 #endif // AUDIOOUTPUTMANAGER_H

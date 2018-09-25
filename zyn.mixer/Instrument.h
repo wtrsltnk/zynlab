@@ -192,6 +192,7 @@ private:
     struct
     {
         unsigned char velocity;
+        unsigned char stub[3];
         int mkeyshift; // I'm not sure masterkeyshift should be remembered.
     } monomem[256]{};
     /* 256 is to cover all possible note values.

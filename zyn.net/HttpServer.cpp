@@ -75,7 +75,7 @@ bool HttpServer::Start()
     std::string port = ToString(_port);
 
     // Resolve Local Address And Port
-    auto resultCode = getaddrinfo(NULL, port.c_str(), &_hints, &_result);
+    auto resultCode = getaddrinfo(nullptr, port.c_str(), &_hints, &_result);
     if (0 != resultCode)
     {
         this->_logging("Resolving Address And Port Failed \nError Code: " + ToString(resultCode));
@@ -91,7 +91,7 @@ bool HttpServer::Start()
     }
 
     // Bind
-    resultCode = bind(_listeningSocket, _result->ai_addr, (int)_result->ai_addrlen);
+    resultCode = bind(_listeningSocket, _result->ai_addr, static_cast<int>(_result->ai_addrlen));
     if (SOCKET_ERROR == resultCode)
     {
         this->_logging("Bind Socket Failed");
@@ -115,23 +115,20 @@ bool HttpServer::Start()
 
 void HttpServer::WaitForRequests(std::function<int (const Request &, Response &)> onConnection)
 {
-    while (true)
+    sockaddr_in clientInfo;
+    int clientInfoSize = sizeof(clientInfo);
+
+    auto socket = accept(_listeningSocket, reinterpret_cast<sockaddr*>(&clientInfo), &clientInfoSize);
+    if (INVALID_SOCKET == socket)
     {
-        sockaddr_in clientInfo;
-        int clientInfoSize = sizeof(clientInfo);
+        this->_logging("Accepting Connection Failed");
+    }
+    else
+    {
+        this->_logging("Spinning thread to handle request");
 
-        auto socket = accept(_listeningSocket, (sockaddr*)&clientInfo, &clientInfoSize);
-        if (INVALID_SOCKET == socket)
-        {
-            this->_logging("Accepting Connection Failed");
-        }
-        else
-        {
-            this->_logging("Spinning thread to handle request");
-
-            std::thread t(Request::handleRequest, onConnection, Request(socket, clientInfo));
-            t.detach();
-        }
+        std::thread t(Request::handleRequest, onConnection, Request(socket, clientInfo));
+        t.detach();
     }
 }
 

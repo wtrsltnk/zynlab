@@ -30,8 +30,9 @@
 #include <zyn.net/HttpResponse.h>
 
 NetMidiEngine::NetMidiEngine()
+    : _isRunning(false)
 {
-    this->name = "NET";
+    this->_name = "NET";
     _server.Init();
 }
 
@@ -42,32 +43,29 @@ NetMidiEngine::~NetMidiEngine()
 
 bool NetMidiEngine::Start()
 {
+    _isRunning = true;
     if (!_server.Start())
     {
         return false;
     }
 
     _thread = std::thread([this]() {
-        this->_server.WaitForRequests(this->onRecieveRequest);
+        while (_isRunning)
+        {
+            this->_server.WaitForRequests(this->onRecieveRequest);
+        }
     });
+
     return true;
 }
 
 void NetMidiEngine::Stop()
 {
-    _thread.join();
+    _isRunning = false;
     _server.Stop();
 }
 
-void NetMidiEngine::setMidiEn(bool nval)
-{
-    if (nval)
-        this->Start();
-    else
-        this->Stop();
-}
-
-bool NetMidiEngine::getMidiEn() const
+bool NetMidiEngine::IsMidiEnabled() const
 {
     return _server.IsStarted();
 }
@@ -105,7 +103,7 @@ int NetMidiEngine::onRecieveRequest(const net::Request &request, net::Response &
         ev.channel = channel;
         ev.num = note;
         ev.value = velocity;
-        MidiInputManager::getInstance().putEvent(ev);
+        MidiInputManager::Instance().PutEvent(ev);
 
         response._response = "note-on";
     }
@@ -118,7 +116,7 @@ int NetMidiEngine::onRecieveRequest(const net::Request &request, net::Response &
         ev.channel = channel;
         ev.num = note;
         ev.value = 0;
-        MidiInputManager::getInstance().putEvent(ev);
+        MidiInputManager::Instance().PutEvent(ev);
 
         response._response = "note-off";
     }

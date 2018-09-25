@@ -235,12 +235,12 @@ void AppThreeDee::Render()
             ImGui::Separator();
 
             ImGui::Text("Input");
-            if (ImGui::Button(Nio::getSource().c_str(), ImVec2(55, 20)))
+            if (ImGui::Button(Nio::GetSelectedSource().c_str(), ImVec2(55, 20)))
             {
                 openSelectSinkSource = 1;
             }
             ImGui::Text("Output");
-            if (ImGui::Button(Nio::getSink().c_str(), ImVec2(55, 20)))
+            if (ImGui::Button(Nio::GetSelectedSink().c_str(), ImVec2(55, 20)))
             {
                 openSelectSinkSource = 1;
             }

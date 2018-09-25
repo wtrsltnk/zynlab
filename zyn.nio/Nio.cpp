@@ -1,92 +1,100 @@
 #include "Nio.h"
+
 #include "AudioOutput.h"
 #include "AudioOutputManager.h"
 #include "EngineManager.h"
 #include "MidiInput.h"
 #include "MidiInputManager.h"
-#include "WavEngine.h"
 
 #include <algorithm>
 #include <iostream>
 
-MidiInputManager *in = NULL;
-AudioOutputManager *out = NULL;
-EngineManager *eng = NULL;
+static AudioOutputManager *_audioOutpuManager = nullptr;
+static EngineManager *_engineManager = nullptr;
+static MidiInputManager *_midiInputManager = nullptr;
 
-std::string Nio::defaultSource = IN_DEFAULT;
 std::string Nio::defaultSink = OUT_DEFAULT;
+std::string Nio::defaultSource = IN_DEFAULT;
 
-bool Nio::start(IMixer *mixer)
+bool Nio::Start(IMixer *mixer)
 {
-    in = &MidiInputManager::createInstance(mixer);    //Enable input wrapper
-    out = &AudioOutputManager::createInstance(mixer); //Initialize the Output Systems
-    eng = &EngineManager::createInstance(mixer);      //Initialize The Engines
+    _midiInputManager = &MidiInputManager::CreateInstance(mixer);    //Enable input wrapper
+    _audioOutpuManager = &AudioOutputManager::createInstance(mixer); //Initialize the Output Systems
+    _engineManager = &EngineManager::CreateInstance(mixer);          //Initialize The Engines
 
-    return eng->start();
+    return _engineManager->Start();
 }
 
-void Nio::stop()
+void Nio::Stop()
 {
-    eng->stop();
+    _engineManager->Stop();
 }
 
-void Nio::setDefaultSource(const std::string &name)
+void Nio::SetDefaultSource(const std::string &name)
 {
     defaultSource = name;
     std::transform(defaultSource.begin(), defaultSource.end(), defaultSource.begin(), ::toupper);
 }
 
-void Nio::setDefaultSink(const std::string &name)
+void Nio::SetDefaultSink(const std::string &name)
 {
     defaultSink = name;
     std::transform(defaultSink.begin(), defaultSink.end(), defaultSink.begin(), ::toupper);
 }
 
-bool Nio::setSource(const std::string &name)
+bool Nio::SelectSource(const std::string &name)
 {
-    return in->setSource(name);
+    return _midiInputManager->SetSource(name);
 }
 
-bool Nio::setSink(const std::string &name)
+bool Nio::SelectSink(const std::string &name)
 {
-    return out->setSink(name);
+    return _audioOutpuManager->SetSink(name);
 }
 
-std::set<std::string> Nio::getSources(void)
+std::set<std::string> Nio::GetSources()
 {
     std::set<std::string> sources;
 
-    for (Engine *e : eng->engines)
-        if (dynamic_cast<MidiInput *>(e))
-            sources.insert(e->name);
+    for (Engine *e : _engineManager->engines)
+    {
+        if (dynamic_cast<MidiInput *>(e) != nullptr)
+        {
+            sources.insert(e->_name);
+        }
+    }
 
     return sources;
 }
 
-std::set<std::string> Nio::getSinks(void)
+std::set<std::string> Nio::GetSinks()
 {
     std::set<std::string> sinks;
 
-    for (Engine *e : eng->engines)
-        if (dynamic_cast<AudioOutput *>(e))
-            sinks.insert(e->name);
+    for (Engine *e : _engineManager->engines)
+    {
+        if (dynamic_cast<AudioOutput *>(e) != nullptr)
+        {
+            sinks.insert(e->_name);
+        }
+    }
 
     return sinks;
 }
 
-std::string Nio::getSource()
+std::string Nio::GetSelectedSource()
 {
-    return in->getSource();
+    return _midiInputManager->GetSource();
 }
 
-std::string Nio::getSink()
+std::string Nio::GetSelectedSink()
 {
-    return out->getSink();
+    return _audioOutpuManager->GetSink();
 }
 
-#if JACK
+#ifdef JACK
 #include <jack/jack.h>
-void Nio::preferedSampleRate(unsigned &rate)
+void Nio::preferedSampleRate(unsigned int &rate)
 {
     jack_client_t *client = jack_client_open("temp-client",
                                              JackNoStartServer, 0);
@@ -97,6 +105,6 @@ void Nio::preferedSampleRate(unsigned &rate)
     }
 }
 #else
-void Nio::preferedSampleRate(unsigned &)
+void Nio::preferedSampleRate(unsigned int &)
 {}
 #endif

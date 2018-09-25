@@ -44,8 +44,8 @@ Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, SystemSe
 
 Chorus::~Chorus()
 {
-    delete[] delaySample.l;
-    delete[] delaySample.r;
+    delete[] delaySample._left;
+    delete[] delaySample._right;
 }
 
 //get the delay value in samples; xlfo is the current lfo value
@@ -78,12 +78,12 @@ void Chorus::out(const Stereo<float *> &input)
 
     for (int i = 0; i < this->_synth->buffersize; ++i)
     {
-        float inL = input.l[i];
-        float inR = input.r[i];
+        float inL = input._left[i];
+        float inR = input._right[i];
         //LRcross
         Stereo<float> tmpc(inL, inR);
-        inL = tmpc.l * (1.0f - lrcross) + tmpc.r * lrcross;
-        inR = tmpc.r * (1.0f - lrcross) + tmpc.l * lrcross;
+        inL = tmpc._left * (1.0f - lrcross) + tmpc._right * lrcross;
+        inR = tmpc._right * (1.0f - lrcross) + tmpc._left * lrcross;
 
         //Left channel
 
@@ -99,10 +99,10 @@ void Chorus::out(const Stereo<float *> &input)
 
         float dlhi2 = (dlhi - 1 + maxdelay) % maxdelay;
         float dllo = 1.0f - fmod(tmp, one);
-        efxoutl[i] = cinterpolate(delaySample.l, maxdelay, dlhi2) * dllo + cinterpolate(delaySample.l, maxdelay,
+        efxoutl[i] = cinterpolate(delaySample._left, maxdelay, dlhi2) * dllo + cinterpolate(delaySample._left, maxdelay,
                                                                                         dlhi) *
                                                                                (1.0f - dllo);
-        delaySample.l[dlk] = inL + efxoutl[i] * fb;
+        delaySample._left[dlk] = inL + efxoutl[i] * fb;
 
         //Right channel
 
@@ -117,10 +117,10 @@ void Chorus::out(const Stereo<float *> &input)
 
         dlhi2 = (dlhi - 1 + maxdelay) % maxdelay;
         dllo = 1.0f - fmodf(tmp, one);
-        efxoutr[i] = cinterpolate(delaySample.r, maxdelay, dlhi2) * dllo + cinterpolate(delaySample.r, maxdelay,
+        efxoutr[i] = cinterpolate(delaySample._right, maxdelay, dlhi2) * dllo + cinterpolate(delaySample._right, maxdelay,
                                                                                         dlhi) *
                                                                                (1.0f - dllo);
-        delaySample.r[dlk] = inR + efxoutr[i] * fb;
+        delaySample._right[dlk] = inR + efxoutr[i] * fb;
     }
 
     if (Poutsub)
@@ -140,8 +140,8 @@ void Chorus::out(const Stereo<float *> &input)
 //Cleanup the effect
 void Chorus::cleanup()
 {
-    memset(delaySample.l, 0, maxdelay * sizeof(float));
-    memset(delaySample.r, 0, maxdelay * sizeof(float));
+    memset(delaySample._left, 0, maxdelay * sizeof(float));
+    memset(delaySample._right, 0, maxdelay * sizeof(float));
 }
 
 //Parameter control

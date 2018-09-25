@@ -59,7 +59,7 @@ int exitprogram()
     mixer->Lock();
     mixer->Unlock();
 
-    Nio::stop();
+    Nio::Stop();
 
     delete mixer->_synth;
     delete mixer;
@@ -73,10 +73,10 @@ int main(int /*argc*/, char * /*argv*/ [])
     initprogram();
 
     //Run the Nio system
-    if (!Nio::start(mixer))
+    if (!Nio::Start(mixer))
         return -1;
 
-    Nio::setSink("PA");
+    Nio::SelectSink("PA");
 
     Config::Current().init();
 
