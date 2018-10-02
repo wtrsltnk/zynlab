@@ -33,9 +33,11 @@ class FFTwrapper : public IFFTwrapper
 public:
     /**Constructor
          * @param fftsize The size of samples to be fed to fftw*/
-    FFTwrapper(int fftsize_);
+    FFTwrapper(unsigned int fftsize_);
+
     /**Destructor*/
-    ~FFTwrapper();
+    virtual ~FFTwrapper();
+
     /**Convert Samples to Frequencies using Fourier Transform
          * @param smps Pointer to Samples to be converted; has length fftsize_
          * @param freqs Structure FFTFREQS which stores the frequencies*/
@@ -43,11 +45,12 @@ public:
     void freqs2smps(const fft_t *freqs, float *smps);
 
 private:
-    int fftsize;
+    unsigned int fftsize;
     fftw_real *time;
     fftw_complex *fft;
     fftw_plan planfftw, planfftw_inv;
 };
 
 void FFT_cleanup();
+
 #endif

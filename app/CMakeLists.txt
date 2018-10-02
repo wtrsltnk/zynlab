@@ -79,6 +79,10 @@ target_compile_features(app
     PRIVATE cxx_lambdas
     )
 
+target_compile_definitions(app
+    PRIVATE -DFLTK_GUI
+    )
+
 target_link_libraries(app
     ${FLTK_LIBRARIES}
     ${OPENGL_LIBRARIES}

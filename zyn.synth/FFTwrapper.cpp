@@ -21,23 +21,18 @@
 */
 
 #include "FFTwrapper.h"
-#include <cassert>
 #include <cmath>
 #include <cstring>
 
-FFTwrapper::FFTwrapper(int fftsize_)
+IFFTwrapper::~IFFTwrapper() = default;
+
+FFTwrapper::FFTwrapper(unsigned int fftsize_)
 {
     fftsize = fftsize_;
     time = new fftw_real[fftsize];
     fft = new fftw_complex[fftsize + 1];
-    planfftw = fftw_plan_dft_r2c_1d(fftsize,
-                                    time,
-                                    fft,
-                                    FFTW_ESTIMATE);
-    planfftw_inv = fftw_plan_dft_c2r_1d(fftsize,
-                                        fft,
-                                        time,
-                                        FFTW_ESTIMATE);
+    planfftw = fftw_plan_dft_r2c_1d(static_cast<int>(fftsize), time, fft, FFTW_ESTIMATE);
+    planfftw_inv = fftw_plan_dft_c2r_1d(static_cast<int>(fftsize), fft, time, FFTW_ESTIMATE);
 }
 
 FFTwrapper::~FFTwrapper()
@@ -52,31 +47,35 @@ FFTwrapper::~FFTwrapper()
 void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
 {
     //Load data
-    for (int i = 0; i < fftsize; ++i)
+    for (unsigned int i = 0; i < fftsize; ++i)
+    {
         time[i] = static_cast<double>(smps[i]);
+    }
 
     //DFT
     fftw_execute(planfftw);
 
     //Grab data
-    memcpy((void *)freqs, (const void *)fft, fftsize * sizeof(double));
+    memcpy(static_cast<void *>(freqs), static_cast<const void *>(fft), fftsize * sizeof(double));
 }
 
 void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
 {
     //Load data
-    memcpy((void *)fft, (const void *)freqs, fftsize * sizeof(double));
+    memcpy(static_cast<void *>(fft), static_cast<const void *>(freqs), fftsize * sizeof(double));
 
     //clear unused freq channel
-    fft[fftsize / 2][0] = 0.0f;
-    fft[fftsize / 2][1] = 0.0f;
+    fft[fftsize / 2][0] = 0.0;
+    fft[fftsize / 2][1] = 0.0;
 
     //IDFT
     fftw_execute(planfftw_inv);
 
     //Grab data
-    for (int i = 0; i < fftsize; ++i)
+    for (unsigned int i = 0; i < fftsize; ++i)
+    {
         smps[i] = static_cast<float>(time[i]);
+    }
 }
 
 void FFT_cleanup()

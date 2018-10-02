@@ -95,20 +95,20 @@ void RtEngine::callback(double /*timeStamp*/, std::vector<unsigned char> *messag
             ev.value = message->at(2);
             break;
         }
-        case 0xc0: //Program Change
-        {
-            ev.type = MidiEventTypes::M_PGMCHANGE;
-            ev.channel = chan;
-            ev.num = message->at(1);
-            ev.value = 0;
-            break;
-        }
         case 0xe0: //Pitch Wheel
         {
             ev.type = MidiEventTypes::M_CONTROLLER;
             ev.channel = chan;
             ev.num = C_pitchwheel;
             ev.value = (message->at(1) + message->at(2) * 128) - 8192;
+            break;
+        }
+        case 0xc0: //Program Change
+        {
+            ev.type = MidiEventTypes::M_PGMCHANGE;
+            ev.channel = chan;
+            ev.num = message->at(1);
+            ev.value = 0;
             break;
         }
         default:

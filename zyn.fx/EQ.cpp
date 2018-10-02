@@ -28,7 +28,7 @@
 EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_)
 {
-    for (auto & i : filter)
+    for (auto &i : filter)
     {
         i.Ptype = 0;
         i.Pfreq = 64;
@@ -48,7 +48,7 @@ EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_
 // Cleanup the effect
 void EQ::cleanup()
 {
-    for (auto & i : filter)
+    for (auto &i : filter)
     {
         i.l->cleanup();
         i.r->cleanup();
@@ -58,16 +58,18 @@ void EQ::cleanup()
 //Effect output
 void EQ::out(const Stereo<float *> &smp)
 {
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
         efxoutl[i] = smp._left[i] * volume;
         efxoutr[i] = smp._right[i] * volume;
     }
 
-    for (auto & i : filter)
+    for (auto &i : filter)
     {
         if (i.Ptype == 0)
+        {
             continue;
+        }
         i.l->filterout(efxoutl);
         i.r->filterout(efxoutr);
     }
@@ -91,9 +93,13 @@ void EQ::setpreset(unsigned char npreset)
     };
 
     if (npreset >= NUM_PRESETS)
+    {
         npreset = NUM_PRESETS - 1;
+    }
     for (int n = 0; n < PRESET_SIZE; ++n)
+    {
         changepar(n, presets[npreset][n]);
+    }
     Ppreset = npreset;
 }
 
@@ -102,55 +108,75 @@ void EQ::changepar(int npar, unsigned char value)
     switch (npar)
     {
         case 0:
+        {
             setvolume(value);
             break;
+        }
     }
     if (npar < 10)
+    {
         return;
+    }
 
     int nb = (npar - 10) / 5; //number of the band (filter)
     if (nb >= MAX_EQ_BANDS)
+    {
         return;
+    }
     int bp = npar % 5; //band paramenter
 
     float tmp;
     switch (bp)
     {
         case 0:
+        {
             filter[nb].Ptype = value;
             if (value > 9)
+            {
                 filter[nb].Ptype = 0; //has to be changed if more filters will be added
+            }
             if (filter[nb].Ptype != 0)
             {
                 filter[nb].l->settype(value - 1);
                 filter[nb].r->settype(value - 1);
             }
             break;
+        }
         case 1:
+        {
             filter[nb].Pfreq = value;
             tmp = 600.0f * powf(30.0f, (value - 64.0f) / 64.0f);
             filter[nb].l->setfreq(tmp);
             filter[nb].r->setfreq(tmp);
             break;
+        }
         case 2:
+        {
             filter[nb].Pgain = value;
             tmp = 30.0f * (value - 64.0f) / 64.0f;
             filter[nb].l->setgain(tmp);
             filter[nb].r->setgain(tmp);
             break;
+        }
         case 3:
+        {
             filter[nb].Pq = value;
             tmp = powf(30.0f, (value - 64.0f) / 64.0f);
             filter[nb].l->setq(tmp);
             filter[nb].r->setq(tmp);
             break;
+        }
         case 4:
+        {
             filter[nb].Pstages = value;
             if (value >= MAX_FILTER_STAGES)
+            {
                 filter[nb].Pstages = MAX_FILTER_STAGES - 1;
+            }
             filter[nb].l->setstages(value);
             filter[nb].r->setstages(value);
             break;
+        }
     }
 }
 
@@ -159,47 +185,63 @@ unsigned char EQ::getpar(int npar) const
     switch (npar)
     {
         case 0:
+        {
             return Pvolume;
-            break;
+        }
     }
 
     if (npar < 10)
+    {
         return 0;
+    }
 
     int nb = (npar - 10) / 5; //number of the band (filter)
     if (nb >= MAX_EQ_BANDS)
+    {
         return 0;
+    }
+
     int bp = npar % 5; //band paramenter
     switch (bp)
     {
         case 0:
+        {
             return filter[nb].Ptype;
-            break;
+        }
         case 1:
+        {
             return filter[nb].Pfreq;
-            break;
+        }
         case 2:
+        {
             return filter[nb].Pgain;
-            break;
+        }
         case 3:
+        {
             return filter[nb].Pq;
-            break;
+        }
         case 4:
+        {
             return filter[nb].Pstages;
-            break;
+        }
         default:
+        {
             return 0; //in case of bogus parameter number
+        }
     }
 }
 
 float EQ::getfreqresponse(float freq)
 {
     float resp = 1.0f;
-    for (auto & i : filter)
+    for (auto &i : filter)
     {
         if (i.Ptype == 0)
+        {
             continue;
+        }
         resp *= i.l->H(freq);
     }
+
     return rap2dB(resp * outvolume);
 }

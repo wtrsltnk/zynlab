@@ -35,7 +35,10 @@ Config *Config::_instance = nullptr;
 
 Config &Config::Current()
 {
-    if (Config::_instance == nullptr) Config::_instance = new Config();
+    if (Config::_instance == nullptr)
+    {
+        Config::_instance = new Config();
+    }
 
     return *Config::_instance;
 }
@@ -79,7 +82,9 @@ void Config::init()
     {
         winmididevices[i].name = new char[MAX_STRING_SIZE];
         for (int j = 0; j < MAX_STRING_SIZE; ++j)
+        {
             winmididevices[i].name[j] = '\0';
+        }
     }
 
     //get the midi input devices name
@@ -131,7 +136,10 @@ Config::~Config()
     delete[] cfg.LinuxOSSSeqInDev;
 
     for (int i = 0; i < winmidimax; ++i)
+    {
         delete[] winmididevices[i].name;
+    }
+
     delete[] winmididevices;
 }
 
@@ -144,21 +152,28 @@ void Config::save()
 
 void Config::clearbankrootdirlist()
 {
-    for (auto & i : cfg.bankRootDirList)
+    for (auto &i : cfg.bankRootDirList)
+    {
         i.clear();
+    }
 }
 
 void Config::clearpresetsdirlist()
 {
-    for (auto & i : cfg.presetsDirList)
+    for (auto &i : cfg.presetsDirList)
+    {
         i.clear();
+    }
 }
 
 void Config::readConfig(const char *filename)
 {
     XMLwrapper xmlcfg;
     if (xmlcfg.loadXMLfile(filename) < 0)
+    {
         return;
+    }
+
     if (xmlcfg.enterbranch("CONFIGURATION"))
     {
         cfg.SampleRate = xmlcfg.getparunsigned("sample_rate",
@@ -224,19 +239,23 @@ void Config::readConfig(const char *filename)
 
         //get bankroot dirs
         for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+        {
             if (xmlcfg.enterbranch("BANKROOT", i))
             {
                 cfg.bankRootDirList[i] = xmlcfg.getparstr("bank_root", "");
                 xmlcfg.exitbranch();
             }
+        }
 
         //get preset root dirs
         for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+        {
             if (xmlcfg.enterbranch("PRESETSROOT", i))
             {
                 cfg.presetsDirList[i] = xmlcfg.getparstr("presets_root", "");
                 xmlcfg.exitbranch();
             }
+        }
 
         //linux stuff
         xmlcfg.getparstr("linux_oss_wave_out_dev",
@@ -289,20 +308,24 @@ void Config::saveConfig(const char *filename)
     xmlcfg->addpar("virtual_keyboard_layout", cfg.VirKeybLayout);
 
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+    {
         if (!cfg.bankRootDirList[i].empty())
         {
             xmlcfg->beginbranch("BANKROOT", i);
             xmlcfg->addparstr("bank_root", cfg.bankRootDirList[i]);
             xmlcfg->endbranch();
         }
+    }
 
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+    {
         if (!cfg.presetsDirList[i].empty())
         {
             xmlcfg->beginbranch("PRESETSROOT", i);
             xmlcfg->addparstr("presets_root", cfg.presetsDirList[i]);
             xmlcfg->endbranch();
         }
+    }
 
     xmlcfg->addpar("interpolation", cfg.Interpolation);
 

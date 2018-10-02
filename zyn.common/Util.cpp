@@ -130,7 +130,7 @@ void os_sleep(long length)
 
 std::string legalizeFilename(std::string filename)
 {
-    for (char & i : filename)
+    for (char &i : filename)
     {
         char c = i;
         if (!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
@@ -153,16 +153,14 @@ float SystemSettings::numRandom()
 float interpolate(const float *data, size_t len, float pos)
 {
     assert(len > (size_t)pos + 1);
-    const int l_pos = (int)pos,
-              r_pos = l_pos + 1;
+    const int l_pos = static_cast<int>(pos), r_pos = l_pos + 1;
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
 
 float cinterpolate(const float *data, size_t len, float pos)
 {
-    const int l_pos = ((int)pos) % len,
-              r_pos = (l_pos + 1) % len;
+    const int l_pos = ((int)pos) % len, r_pos = (l_pos + 1) % len;
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
@@ -172,8 +170,10 @@ SystemSettings::SystemSettings()
 {
     alias();
     denormalkillbuf = new float[this->buffersize];
-    for (int i = 0; i < this->buffersize; ++i)
-        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
+    for (unsigned int i = 0; i < this->buffersize; ++i)
+    {
+        denormalkillbuf[i] = (RND - 0.5f) * 1e-16f;
+    }
 }
 
 SystemSettings::~SystemSettings()

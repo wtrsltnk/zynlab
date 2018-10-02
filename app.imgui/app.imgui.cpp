@@ -61,7 +61,7 @@ void AppThreeDee::ResizeCallback(GLFWwindow *window, int width, int height)
         app->onResize(width, height);
 }
 
-void AppThreeDee::onKeyAction(int key, int scancode, int action, int mods)
+void AppThreeDee::onKeyAction(int  /*key*/, int  /*scancode*/, int  /*action*/, int  /*mods*/)
 {
 }
 
@@ -233,7 +233,7 @@ void AppThreeDee::Render(double dt)
     // 1. Show a simple window.
     // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
     {
-        ImGui::Columns(2, NULL, false);
+        ImGui::Columns(2, nullptr, false);
         unsigned char vol = _mixer->Pvolume;
         if (MyKnobUchar("Master", &vol, 0, 128))
         {
@@ -247,7 +247,7 @@ void AppThreeDee::Render(double dt)
             NoteOff();
         }
 
-        ImGui::Columns(1, NULL, false);
+        ImGui::Columns(1, nullptr, false);
         if (ImGui::SliderFloat("BPM", &BPM, 50.f, 200.f))
         {
             speed = 1.0f / (BPM / 60.0f);
@@ -259,7 +259,7 @@ void AppThreeDee::Render(double dt)
     {
         ImGui::Begin("Channels Window", &show_channels_window);
 
-        ImGui::Columns(CHANNEL_COUNT, NULL, false);
+        ImGui::Columns(CHANNEL_COUNT, nullptr, false);
         for (int i = 0; i < CHANNEL_COUNT; i++)
         {
             sprintf(label, "child%d", i);
@@ -323,7 +323,7 @@ void AppThreeDee::Render(double dt)
     {
         ImGui::Begin("Another Window", &show_another_window);
 
-        ImGui::Columns(16, NULL, false);
+        ImGui::Columns(16, nullptr, false);
         for (int i = 0; i < 16; i++)
         {
             ImGui::TextColored(i == step ? ImVec4(0, 1, 0, 1) : ImVec4(0, 0, 0, 1), "*");

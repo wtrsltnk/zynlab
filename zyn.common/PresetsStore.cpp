@@ -23,8 +23,7 @@
 #include <cctype>
 #include <dirent.h>
 #include <iostream>
-#include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <sys/stat.h>
 
 #include "PresetsStore.h"
@@ -43,7 +42,9 @@ PresetsStore::PresetsStore()
 PresetsStore::~PresetsStore()
 {
     if (clipboard.data != nullptr)
+    {
         free(clipboard.data);
+    }
     clearpresets();
 }
 
@@ -53,26 +54,31 @@ void PresetsStore::copyclipboard(XMLwrapper *xml, char *type)
 {
     strcpy(clipboard.type, type);
     if (clipboard.data != nullptr)
+    {
         free(clipboard.data);
+    }
     clipboard.data = xml->getXMLdata();
 }
 
 bool PresetsStore::pasteclipboard(XMLwrapper *xml)
 {
     if (clipboard.data != nullptr)
+    {
         xml->putXMLdata(clipboard.data);
-    else
-        return false;
-    return true;
+        return true;
+    }
+
+    return false;
 }
 
 bool PresetsStore::checkclipboardtype(const char *type)
 {
     //makes LFO's compatible
-    if ((strstr(type,
-                "Plfo") != nullptr) &&
-        (strstr(clipboard.type, "Plfo") != nullptr))
+    if ((strstr(type, "Plfo") != nullptr) && (strstr(clipboard.type, "Plfo") != nullptr))
+    {
         return true;
+    }
+
     return strcmp(type, clipboard.type) == 0;
 }
 
@@ -90,22 +96,23 @@ bool PresetsStore::presetstruct::operator<(const presetstruct &b) const
 
 void PresetsStore::rescanforpresets(const string &type)
 {
-    //std::cout << "Scanning For Presets" << std::endl;
-    //std::cout << "Of Type: " << type << std::endl;
-
     clearpresets();
     string ftype = "." + type.substr(1) + ".xpz";
 
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
     {
         if (Config::Current().cfg.presetsDirList[i].empty())
+        {
             continue;
+        }
 
         //open directory
         string dirname = Config::Current().cfg.presetsDirList[i];
         DIR *dir = opendir(dirname.c_str());
         if (dir == nullptr)
+        {
             continue;
+        }
         struct dirent *fn;
 
         //check all files in directory
@@ -113,15 +120,21 @@ void PresetsStore::rescanforpresets(const string &type)
         {
             string filename = fn->d_name;
             if (filename.find(ftype) == string::npos)
+            {
                 continue;
+            }
 
             //ensure proper path is formed
             char tmpc = dirname[dirname.size() - 1];
             const char *tmps;
             if ((tmpc == '/') || (tmpc == '\\'))
+            {
                 tmps = "";
+            }
             else
+            {
                 tmps = "/";
+            }
 
             string location = "" + dirname + tmps + filename;
 
@@ -142,7 +155,9 @@ void PresetsStore::rescanforpresets(const string &type)
 void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
 {
     if (Config::Current().cfg.presetsDirList[0].empty())
+    {
         return;
+    }
 
     //make the filenames legal
     name = legalizeFilename(name);
@@ -152,9 +167,13 @@ void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
     char tmpc = dirname[dirname.size() - 1];
     const char *tmps;
     if ((tmpc == '/') || (tmpc == '\\'))
+    {
         tmps = "";
+    }
     else
+    {
         tmps = "/";
+    }
 
     string filename("" + dirname + tmps + name + "." + &type[1] + ".xpz");
 
@@ -165,21 +184,31 @@ bool PresetsStore::pastepreset(XMLwrapper *xml, unsigned int npreset)
 {
     npreset--;
     if (npreset >= presets.size())
+    {
         return false;
+    }
+
     string filename = presets[npreset].file;
     if (filename.empty())
+    {
         return false;
-    bool result = (xml->loadXMLfile(filename) >= 0);
-    return result;
+    }
+
+    return xml->loadXMLfile(filename) >= 0;
 }
 
 void PresetsStore::deletepreset(unsigned int npreset)
 {
     npreset--;
     if (npreset >= presets.size())
+    {
         return;
+    }
+
     string filename = presets[npreset].file;
     if (filename.empty())
+    {
         return;
+    }
     remove(filename.c_str());
 }

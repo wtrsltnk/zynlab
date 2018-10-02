@@ -90,11 +90,11 @@ public:
     virtual void Unlock();
 
     //Midi IN
-    virtual void NoteOn(char chan, char note, char velocity);
-    virtual void NoteOff(char chan, char note);
-    virtual void PolyphonicAftertouch(char chan, char note, char velocity);
-    virtual void SetController(char chan, int type, int par);
-    virtual void SetProgram(char chan, unsigned int pgm);
+    virtual void NoteOn(unsigned char chan, unsigned char note, unsigned char velocity);
+    virtual void NoteOff(unsigned char chan, unsigned char note);
+    virtual void PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity);
+    virtual void SetController(unsigned char chan, int type, int par);
+    virtual void SetProgram(unsigned char chan, unsigned int pgm);
 
     void ShutUp();
     int shutup;

@@ -9,6 +9,8 @@ typedef std::complex<fftw_real> fft_t;
 class IFFTwrapper
 {
 public:
+    virtual ~IFFTwrapper();
+
     /**Convert Samples to Frequencies using Fourier Transform
      * @param smps Pointer to Samples to be converted; has length fftsize_
      * @param freqs Structure FFTFREQS which stores the frequencies*/

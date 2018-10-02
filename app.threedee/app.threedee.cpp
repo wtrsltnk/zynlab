@@ -245,7 +245,7 @@ void AppThreeDee::Render()
                 openSelectSinkSource = 1;
             }
 
-            char v = char(_mixer->Pvolume);
+            auto v = char(_mixer->Pvolume);
             if (MyKnobUchar("Volume", &(v), 0, 128, ImVec2(55, 55)))
             {
                 _mixer->setPvolume(v);

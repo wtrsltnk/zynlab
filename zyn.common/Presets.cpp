@@ -93,7 +93,9 @@ void Presets::paste(int npreset)
     }
 
     if (xml->enterbranch(type) == 0)
+    {
         return;
+    }
 
     defaults();
     getfromXML(xml);

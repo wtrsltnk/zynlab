@@ -63,7 +63,7 @@ private:
     {
         char *data;
         char type[MAX_PRESETTYPE_SIZE];
-    } clipboard;
+    } clipboard{};
 
     void clearpresets();
 };
