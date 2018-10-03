@@ -106,7 +106,7 @@ private:
         struct
         {
             bool PADsynth_used;
-        } info;
+        } info{};
     } ins[BANK_SIZE];
 
     std::string dirname;

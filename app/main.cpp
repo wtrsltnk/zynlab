@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
     string loadfile, loadinstrument, execAfterInit;
 
-    while (1)
+    while (true)
     {
         unsigned int tmp = 0;
 
@@ -168,10 +168,10 @@ int main(int argc, char *argv[])
 
 #define GETOP(x)      \
     if (optarguments) \
-    x = optarguments
+    (x) = optarguments
 #define GETOPNUM(x)   \
     if (optarguments) \
-    x = static_cast<unsigned int>(atoi(optarguments))
+    (x) = static_cast<unsigned int>(atoi(optarguments))
 
         if (opt == -1)
             break;

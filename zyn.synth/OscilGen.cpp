@@ -1022,15 +1022,15 @@ void OscilGen::add2XML(XMLwrapper *xml)
         normalize(basefuncFFTfreqs, this->_synth);
 
         xml->beginbranch("BASE_FUNCTION");
-        for (int i = 1; i < this->_synth->oscilsize / 2; ++i)
+        for (unsigned int i = 1; i < this->_synth->oscilsize / 2; ++i)
         {
-            float xc = basefuncFFTfreqs[i].real();
-            float xs = basefuncFFTfreqs[i].imag();
-            if ((std::fabs(xs) > 0.00001f) && (std::fabs(xs) > 0.00001f))
+            double xc = basefuncFFTfreqs[i].real();
+            double xs = basefuncFFTfreqs[i].imag();
+            if ((std::fabs(xs) > 0.00001) && (std::fabs(xc) > 0.00001))
             {
-                xml->beginbranch("BF_HARMONIC", i);
-                xml->addparreal("cos", xc);
-                xml->addparreal("sin", xs);
+                xml->beginbranch("BF_HARMONIC", static_cast<int>(i));
+                xml->addparreal("cos", static_cast<float>(xc));
+                xml->addparreal("sin", static_cast<float>(xs));
                 xml->endbranch();
             }
         }

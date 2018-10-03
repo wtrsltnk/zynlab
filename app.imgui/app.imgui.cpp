@@ -7,8 +7,8 @@
 #include <zyn.mixer/Instrument.h>
 #include <algorithm>
 
-#define MAX_VERTEX_BUFFER 512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
+#define MAX_VERTEX_BUFFER (512 * 1024)
+#define MAX_ELEMENT_BUFFER (128 * 1024)
 
 #define UNUSED(a) (void)a
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

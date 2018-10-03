@@ -44,10 +44,7 @@ EngineManager &EngineManager::Instance()
 
 void EngineManager::DestroyInstance()
 {
-    if (EngineManager::_instance != nullptr)
-    {
-        delete EngineManager::_instance;
-    }
+    delete EngineManager::_instance;
 
     EngineManager::_instance = nullptr;
 }
@@ -167,9 +164,10 @@ bool EngineManager::Start()
 
 void EngineManager::Stop()
 {
-    for (std::list<Engine *>::iterator itr = engines.begin();
-         itr != engines.end(); ++itr)
-        (*itr)->Stop();
+    for (auto &engine : engines)
+    {
+        engine->Stop();
+    }
 }
 
 bool EngineManager::SetDefaultAudioOutput(std::string const &name)

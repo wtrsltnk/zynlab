@@ -217,13 +217,13 @@ bool Microtonal::operator!=(const Microtonal &micro) const
 {
 //A simple macro to test equality MiCRotonal EQuals (not the perfect
 //approach, but good enough)
-#define MCREQ(x)      \
-    if (x != micro.x) \
+#define MCREQ(x)        \
+    if ((x) != micro.x) \
     return true
 
 //for floats
-#define FMCREQ(x)                                              \
-    if (!((x < micro.x + 0.0001f) && (x > micro.x - 0.0001f))) \
+#define FMCREQ(x)                                                  \
+    if (!(((x) < micro.x + 0.0001f) && ((x) > micro.x - 0.0001f))) \
     return true
 
     MCREQ(Pinvertupdown);
@@ -241,7 +241,9 @@ bool Microtonal::operator!=(const Microtonal &micro) const
     MCREQ(Pmappingenabled);
 
     for (int i = 0; i < 128; ++i)
+    {
         MCREQ(Pmapping[i]);
+    }
 
     for (int i = 0; i < octavesize; ++i)
     {

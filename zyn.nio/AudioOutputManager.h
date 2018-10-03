@@ -42,7 +42,7 @@ private:
 
     AudioOutput *currentOut; /**<The current output driver*/
 
-    sem_t requested;
+    sem_t requested{};
 
     /**Buffer*/
     Stereo<float *> priBuf;         //buffer for primary drivers

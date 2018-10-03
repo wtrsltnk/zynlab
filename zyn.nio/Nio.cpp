@@ -13,8 +13,8 @@ static AudioOutputManager *_audioOutpuManager = nullptr;
 static EngineManager *_engineManager = nullptr;
 static MidiInputManager *_midiInputManager = nullptr;
 
-std::string Nio::defaultSink = OUT_DEFAULT;
-std::string Nio::defaultSource = IN_DEFAULT;
+std::string Nio::defaultSink;
+std::string Nio::defaultSource;
 
 bool Nio::Start(IMixer *mixer)
 {

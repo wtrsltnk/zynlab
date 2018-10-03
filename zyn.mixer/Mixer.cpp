@@ -30,14 +30,12 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 using namespace std;
 
-vuData::vuData(void)
+vuData::vuData()
     : outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
       rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
@@ -47,7 +45,7 @@ Mixer::Mixer(SystemSettings *synth_)
 {
     this->_synth = synth_;
 
-    swaplr = 0;
+    swaplr = false;
     off = 0;
     smps = 0;
     bufl = new float[this->_synth->buffersize];
@@ -64,21 +62,21 @@ Mixer::Mixer(SystemSettings *synth_)
         fakepeakpart[npart] = 0;
     }
 
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        part[npart] = new Instrument(this->_synth, &microtonal, fft, &mutex);
+        npart = new Instrument(this->_synth, &microtonal, fft, &mutex);
     }
 
     //Insertion Effects init
-    for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
+    for (auto & nefx : insefx)
     {
-        insefx[nefx] = new EffectManager(1, &mutex, this->_synth);
+        nefx = new EffectManager(true, &mutex, this->_synth);
     }
 
     //System Effects init
-    for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
+    for (auto & nefx : sysefx)
     {
-        sysefx[nefx] = new EffectManager(0, &mutex, this->_synth);
+        nefx = new EffectManager(false, &mutex, this->_synth);
     }
 
     defaults();
@@ -182,11 +180,11 @@ void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocit
  */
 void Mixer::NoteOff(unsigned char chan, unsigned char note)
 {
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        if ((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
+        if ((chan == npart->Prcvchn) && npart->Penabled)
         {
-            part[npart]->NoteOff(note);
+            npart->NoteOff(note);
         }
     }
 }
@@ -202,13 +200,13 @@ void Mixer::PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigne
         return;
     }
 
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        if (chan == part[npart]->Prcvchn)
+        if (chan == npart->Prcvchn)
         {
-            if (part[npart]->Penabled)
+            if (npart->Penabled)
             {
-                part[npart]->PolyphonicAftertouch(note, velocity, keyshift);
+                npart->PolyphonicAftertouch(note, velocity, keyshift);
             }
         }
     }
@@ -221,7 +219,7 @@ void Mixer::SetController(unsigned char chan, int type, int par)
 {
     if ((type == C_dataentryhi) || (type == C_dataentrylo) || (type == C_nrpnhi) || (type == C_nrpnlo))
     { //Process RPN and NRPN by the Master (ignore the chan)
-        ctl.setparameternumber(type, par);
+        ctl.setparameternumber(static_cast<unsigned int>(type), par);
 
         int parhi = -1, parlo = -1, valhi = -1, vallo = -1;
         if (ctl.getnrpn(&parhi, &parlo, &valhi, &vallo) == 0) //this is NRPN
@@ -232,7 +230,7 @@ void Mixer::SetController(unsigned char chan, int type, int par)
                 {
                     if (parlo < NUM_SYS_EFX)
                     {
-                        sysefx[parlo]->seteffectpar_nolock(valhi, vallo);
+                        sysefx[parlo]->seteffectpar_nolock(valhi, static_cast<unsigned char>(vallo));
                     }
                     break;
                 }
@@ -240,7 +238,7 @@ void Mixer::SetController(unsigned char chan, int type, int par)
                 {
                     if (parlo < NUM_INS_EFX)
                     {
-                        insefx[parlo]->seteffectpar_nolock(valhi, vallo);
+                        insefx[parlo]->seteffectpar_nolock(valhi, static_cast<unsigned char>(vallo));
                     }
                     break;
                 }
@@ -249,30 +247,30 @@ void Mixer::SetController(unsigned char chan, int type, int par)
     }
     else if (type == C_bankselectmsb)
     { // Change current bank
-        if (((unsigned int)par < bank.banks.size()) && (bank.banks[par].dir != bank.bankfiletitle))
+        if ((static_cast<size_t>(par) < bank.banks.size()) && (bank.banks[static_cast<size_t>(par)].dir != bank.bankfiletitle))
         {
-            bank.LoadBank(bank.banks[par].dir);
+            bank.LoadBank(bank.banks[static_cast<size_t>(par)].dir);
         }
     }
     else
     {                                                        //other controllers
-        for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart) //Send the controller to all part assigned to the channel
+        for (auto & npart : part) //Send the controller to all part assigned to the channel
         {
-            if ((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+            if ((chan == npart->Prcvchn) && (npart->Penabled != 0))
             {
-                part[npart]->SetController(type, par);
+                npart->SetController(static_cast<unsigned int>(type), par);
             }
         }
 
         if (type == C_allsoundsoff)
         { //cleanup insertion/system FX
-            for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
+            for (auto & nefx : sysefx)
             {
-                sysefx[nefx]->cleanup();
+                nefx->cleanup();
             }
-            for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
+            for (auto & nefx : insefx)
             {
-                insefx[nefx]->cleanup();
+                nefx->cleanup();
             }
         }
     }
@@ -284,17 +282,17 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
     {
         return;
     }
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        if (chan == part[npart]->Prcvchn)
+        if (chan == npart->Prcvchn)
         {
-            bank.LoadFromSlot(pgm, part[npart]);
+            bank.LoadFromSlot(pgm, npart);
 
             //Hack to get pad note parameters to update
             //this is not real time safe and makes assumptions about the calling
             //convention of this function...
             pthread_mutex_unlock(&mutex);
-            part[npart]->applyparameters();
+            npart->applyparameters();
             pthread_mutex_lock(&mutex);
         }
     }
@@ -408,12 +406,12 @@ void Mixer::AudioOut(float *outl, float *outr)
     memset(outr, 0, this->_synth->bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        if (part[npart]->Penabled != 0 && !pthread_mutex_trylock(&part[npart]->load_mutex))
+        if (npart->Penabled != 0 && !pthread_mutex_trylock(&npart->load_mutex))
         {
-            part[npart]->ComputePartSmps();
-            pthread_mutex_unlock(&part[npart]->load_mutex);
+            npart->ComputePartSmps();
+            pthread_mutex_unlock(&npart->load_mutex);
         }
     }
 
@@ -432,18 +430,18 @@ void Mixer::AudioOut(float *outl, float *outr)
     }
 
     //Apply the part volumes and pannings (after insertion effects)
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        if (part[npart]->Penabled == 0)
+        if (npart->Penabled == 0)
         {
             continue;
         }
 
-        Stereo<float> newvol(part[npart]->volume),
-            oldvol(part[npart]->oldvolumel,
-                   part[npart]->oldvolumer);
+        Stereo<float> newvol(npart->volume),
+            oldvol(npart->oldvolumel,
+                   npart->oldvolumer);
 
-        float pan = part[npart]->panning;
+        float pan = npart->panning;
         if (pan < 0.5f)
         {
             newvol._left *= pan * 2.0f;
@@ -460,18 +458,18 @@ void Mixer::AudioOut(float *outl, float *outr)
             {
                 Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol._left, newvol._left, i, this->_synth->buffersize),
                                   INTERPOLATE_AMPLITUDE(oldvol._right, newvol._right, i, this->_synth->buffersize));
-                part[npart]->partoutl[i] *= vol._left;
-                part[npart]->partoutr[i] *= vol._right;
+                npart->partoutl[i] *= vol._left;
+                npart->partoutr[i] *= vol._right;
             }
-            part[npart]->oldvolumel = newvol._left;
-            part[npart]->oldvolumer = newvol._right;
+            npart->oldvolumel = newvol._left;
+            npart->oldvolumer = newvol._right;
         }
         else
         {
             for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
             { //the volume did not changed
-                part[npart]->partoutl[i] *= newvol._left;
-                part[npart]->partoutr[i] *= newvol._right;
+                npart->partoutl[i] *= newvol._left;
+                npart->partoutr[i] *= newvol._right;
             }
         }
     }
@@ -538,14 +536,14 @@ void Mixer::AudioOut(float *outl, float *outr)
     }
 
     //Mix all parts
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        if (part[npart]->Penabled) //only mix active parts
+        if (npart->Penabled) //only mix active parts
         {
             for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
             { //the volume did not changed
-                outl[i] += part[npart]->partoutl[i];
-                outr[i] += part[npart]->partoutr[i];
+                outl[i] += npart->partoutl[i];
+                outr[i] += npart->partoutr[i];
             }
         }
     }
@@ -635,17 +633,17 @@ Mixer::~Mixer()
     delete[] bufl;
     delete[] bufr;
 
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (auto & npart : part)
     {
-        delete part[npart];
+        delete npart;
     }
-    for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
+    for (auto & nefx : insefx)
     {
-        delete insefx[nefx];
+        delete nefx;
     }
-    for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
+    for (auto & nefx : sysefx)
     {
-        delete sysefx[nefx];
+        delete nefx;
     }
 
     delete fft;
@@ -657,25 +655,25 @@ Mixer::~Mixer()
 /*
  * Parameter control
  */
-void Mixer::setPvolume(char Pvolume_)
+void Mixer::setPvolume(unsigned char Pvolume_)
 {
     Pvolume = Pvolume_;
     volume = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
 }
 
-void Mixer::setPkeyshift(char Pkeyshift_)
+void Mixer::setPkeyshift(unsigned char Pkeyshift_)
 {
     Pkeyshift = Pkeyshift_;
-    keyshift = (int)Pkeyshift - 64;
+    keyshift = static_cast<int>(Pkeyshift) - 64;
 }
 
-void Mixer::setPsysefxvol(int Ppart, int Pefx, char Pvol)
+void Mixer::setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol)
 {
     Psysefxvol[Pefx][Ppart] = Pvol;
     sysefxvol[Pefx][Ppart] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
-void Mixer::setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol)
+void Mixer::setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol)
 {
     Psysefxsend[Pefxfrom][Pefxto] = Pvol;
     sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
@@ -691,13 +689,13 @@ void Mixer::ShutUp()
         part[npart]->cleanup();
         fakepeakpart[npart] = 0;
     }
-    for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
+    for (auto & nefx : insefx)
     {
-        insefx[nefx]->cleanup();
+        nefx->cleanup();
     }
-    for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
+    for (auto & nefx : sysefx)
     {
-        sysefx[nefx]->cleanup();
+        nefx->cleanup();
     }
     vuresetpeaks();
     shutup = 0;
@@ -728,8 +726,8 @@ vuData Mixer::getVuData()
 
 void Mixer::applyparameters(bool lockmutex)
 {
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        part[npart]->applyparameters(lockmutex);
+    for (auto & npart : part)
+        npart->applyparameters(lockmutex);
 }
 
 void Mixer::add2XML(XMLwrapper *xml)
@@ -792,7 +790,7 @@ void Mixer::add2XML(XMLwrapper *xml)
 
 int Mixer::getalldata(char **data)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
 
     xml->beginbranch("MASTER");
 
@@ -809,7 +807,7 @@ int Mixer::getalldata(char **data)
 
 void Mixer::putalldata(char *data, int /*size*/)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
     if (!xml->putXMLdata(data))
     {
         delete (xml);
@@ -832,7 +830,7 @@ void Mixer::putalldata(char *data, int /*size*/)
 
 int Mixer::saveXML(const char *filename)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
 
     xml->beginbranch("MASTER");
     add2XML(xml);
@@ -845,7 +843,7 @@ int Mixer::saveXML(const char *filename)
 
 int Mixer::loadXML(const char *filename)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    auto *xml = new XMLwrapper();
     if (xml->loadXMLfile(filename) < 0)
     {
         delete (xml);
@@ -866,9 +864,9 @@ int Mixer::loadXML(const char *filename)
 
 void Mixer::getfromXML(XMLwrapper *xml)
 {
-    setPvolume(xml->getpar127("volume", Pvolume));
-    setPkeyshift(xml->getpar127("key_shift", Pkeyshift));
-    ctl.NRPN.receive = xml->getparbool("nrpn_receive", ctl.NRPN.receive);
+    setPvolume(static_cast<unsigned char>(xml->getpar127("volume", Pvolume)));
+    setPkeyshift(static_cast<unsigned char>(xml->getpar127("key_shift", Pkeyshift)));
+    ctl.NRPN.receive = static_cast<unsigned char>(xml->getparbool("nrpn_receive", ctl.NRPN.receive));
 
     part[0]->Penabled = 0;
     for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
@@ -908,8 +906,7 @@ void Mixer::getfromXML(XMLwrapper *xml)
                 {
                     continue;
                 }
-                setPsysefxvol(partefx, nefx,
-                              xml->getpar127("vol", Psysefxvol[partefx][nefx]));
+                setPsysefxvol(partefx, nefx, static_cast<unsigned char>(xml->getpar127("vol", Psysefxvol[partefx][nefx])));
                 xml->exitbranch();
             }
 
@@ -919,9 +916,7 @@ void Mixer::getfromXML(XMLwrapper *xml)
                 {
                     continue;
                 }
-                setPsysefxsend(nefx, tonefx,
-                               xml->getpar127("send_vol",
-                                              Psysefxsend[nefx][tonefx]));
+                setPsysefxsend(nefx, tonefx, static_cast<unsigned char>(xml->getpar127("send_vol", Psysefxsend[nefx][tonefx])));
                 xml->exitbranch();
             }
             xml->exitbranch();
@@ -937,10 +932,7 @@ void Mixer::getfromXML(XMLwrapper *xml)
             {
                 continue;
             }
-            Pinsparts[nefx] = xml->getpar("part",
-                                          Pinsparts[nefx],
-                                          -2,
-                                          NUM_MIDI_PARTS);
+            Pinsparts[nefx] = static_cast<short>(xml->getpar("part", Pinsparts[nefx], -2, NUM_MIDI_PARTS));
             if (xml->enterbranch("EFFECT"))
             {
                 insefx[nefx]->getfromXML(xml);

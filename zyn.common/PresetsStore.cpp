@@ -99,15 +99,15 @@ void PresetsStore::RescaneForPresets(const string &type)
     ClearPresets();
     string ftype = "." + type.substr(1) + ".xpz";
 
-    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+    for (auto & i : Config::Current().cfg.presetsDirList)
     {
-        if (Config::Current().cfg.presetsDirList[i].empty())
+        if (i.empty())
         {
             continue;
         }
 
         //open directory
-        string dirname = Config::Current().cfg.presetsDirList[i];
+        string dirname = i;
         DIR *dir = opendir(dirname.c_str());
         if (dir == nullptr)
         {

@@ -30,10 +30,7 @@ AudioOutputManager &AudioOutputManager::getInstance()
 
 void AudioOutputManager::destroyInstance()
 {
-    if (AudioOutputManager::_instance != nullptr)
-    {
-        delete AudioOutputManager::_instance;
-    }
+    delete AudioOutputManager::_instance;
 
     AudioOutputManager::_instance = nullptr;
 }
@@ -153,7 +150,7 @@ static size_t resample(float *dest,
                        float s_out,
                        size_t elms)
 {
-    size_t out_elms = static_cast<size_t>(elms * s_out / s_in);
+    auto out_elms = static_cast<size_t>(elms * s_out / s_in);
     float r_pos = 0.0f;
 
     for (size_t i = 0; i < out_elms; ++i, r_pos += s_in / s_out)

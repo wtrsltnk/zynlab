@@ -75,10 +75,7 @@ MidiInputManager::MidiInputManager(IMixer *mixer)
     _work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
 
-MidiInputManager::~MidiInputManager()
-{
-    //lets stop the consumer thread
-}
+MidiInputManager::~MidiInputManager() = default;
 
 void MidiInputManager::PutEvent(MidiEvent ev)
 {

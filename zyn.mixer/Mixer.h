@@ -112,28 +112,28 @@ public:
     void partonoff(int npart, int what);
 
     /**parts \todo see if this can be made to be dynamic*/
-    class Instrument *part[NUM_MIDI_PARTS];
+    class Instrument *part[NUM_MIDI_PARTS]{};
 
     //parameters
 
-    unsigned char Pvolume;
-    unsigned char Pkeyshift;
-    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
-    unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+    unsigned char Pvolume{};
+    unsigned char Pkeyshift{};
+    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS]{};
+    unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};
 
     //parameters control
-    void setPvolume(char Pvolume_);
-    void setPkeyshift(char Pkeyshift_);
-    void setPsysefxvol(int Ppart, int Pefx, char Pvol);
-    void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
+    void setPvolume(unsigned char Pvolume_);
+    void setPkeyshift(unsigned char Pkeyshift_);
+    void setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol);
+    void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol);
 
     //effects
-    class EffectManager *sysefx[NUM_SYS_EFX]; //system
-    class EffectManager *insefx[NUM_INS_EFX]; //insertion
+    class EffectManager *sysefx[NUM_SYS_EFX]{}; //system
+    class EffectManager *insefx[NUM_INS_EFX]{}; //insertion
                                               //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
     //part that's apply the insertion effect; -1 to disable
-    short int Pinsparts[NUM_INS_EFX];
+    short int Pinsparts[NUM_INS_EFX]{};
 
     //peaks for VU-meter
     void vuresetpeaks();
@@ -142,8 +142,8 @@ public:
 
     //peaks for part VU-meters
     /**\todo synchronize this with a mutex*/
-    float vuoutpeakpart[NUM_MIDI_PARTS];
-    unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
+    float vuoutpeakpart[NUM_MIDI_PARTS]{};
+    unsigned char fakepeakpart[NUM_MIDI_PARTS]{}; //this is used to compute the "peak" when the part is disabled
 
     Controller ctl;
     bool swaplr; //if L and R are swapped
@@ -153,15 +153,15 @@ public:
     Bank bank;
 
     IFFTwrapper *fft;
-    pthread_mutex_t mutex;
-    pthread_mutex_t vumutex;
+    pthread_mutex_t mutex{};
+    pthread_mutex_t vumutex{};
 
 private:
     vuData vu;
-    float volume;
-    float sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
-    float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
-    int keyshift;
+    float volume{};
+    float sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS]{};
+    float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};
+    int keyshift{};
 
     //information relevent to generating plugin audio samples
     float *bufl;

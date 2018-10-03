@@ -30,7 +30,6 @@
 #include <string>
 #include <sys/stat.h>
 
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -377,11 +376,11 @@ void Bank::RescanForBanks()
     //remove old banks
     banks.clear();
 
-    for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+    for (auto &i : Config::Current().cfg.bankRootDirList)
     {
-        if (!Config::Current().cfg.bankRootDirList[i].empty())
+        if (!i.empty())
         {
-            ScanRootDirectory(Config::Current().cfg.bankRootDirList[i]);
+            ScanRootDirectory(i);
         }
     }
 
@@ -420,7 +419,7 @@ std::vector<Bank::banksearchstruct> Bank::search(const char *searchFor)
 
     for (bankstruct b : this->banks)
     {
-        for (std::string i : b.instrumentNames)
+        for (std::string const &i : b.instrumentNames)
         {
             if (i.find(strSearchFor) != std::string::npos)
             {
@@ -448,7 +447,7 @@ void Bank::ScanRootDirectory(std::string const &rootdir)
     bankstruct bank;
 
     const char *separator = "/";
-    if (rootdir.size())
+    if (!rootdir.empty())
     {
         char tmp = rootdir[rootdir.size() - 1];
         if ((tmp == '/') || (tmp == '\\'))
@@ -502,9 +501,9 @@ void Bank::ScanRootDirectory(std::string const &rootdir)
 
 void Bank::ClearBank()
 {
-    for (int i = 0; i < BANK_SIZE; ++i)
+    for (auto &in : ins)
     {
-        ins[i] = ins_t();
+        in = ins_t();
     }
 
     bankfiletitle.clear();
@@ -563,10 +562,8 @@ bool Bank::isPADsynth_used(unsigned int ninstrument)
     {
         return false;
     }
-    else
-    {
-        return ins[ninstrument].info.PADsynth_used;
-    }
+
+    return ins[ninstrument].info.PADsynth_used;
 }
 
 void Bank::DeleteFromBank(unsigned int pos)
