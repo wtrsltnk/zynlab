@@ -63,7 +63,7 @@ bool AppThreeDee::SetUp()
     // Setup style
     ImGui::StyleColorsDark();
 
-    _mixer->bank.rescanforbanks();
+    _mixer->bank.RescanForBanks();
 
     return true;
 }
@@ -407,7 +407,7 @@ void AppThreeDee::Render()
         static int currentBank = 0;
         if (ImGui::Combo("Bank", &currentBank, &(bankNames[0]), int(count)))
         {
-            _mixer->bank.loadbank(_mixer->bank.banks[static_cast<size_t>(currentBank - 1)].dir);
+            _mixer->bank.LoadBank(_mixer->bank.banks[static_cast<size_t>(currentBank - 1)].dir);
         }
         ImGui::SameLine();
 
@@ -421,12 +421,12 @@ void AppThreeDee::Render()
         {
             for (unsigned int i = 0; i < BANK_SIZE; i++)
             {
-                auto instrumentName = _mixer->bank.getname(i);
+                auto instrumentName = _mixer->bank.GetName(i);
 
                 if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
                 {
                     pthread_mutex_lock(&_mixer->part[activeInstrument]->load_mutex);
-                    _mixer->bank.loadfromslot(i, _mixer->part[activeInstrument]);
+                    _mixer->bank.LoadFromSlot(i, _mixer->part[activeInstrument]);
                     pthread_mutex_unlock(&_mixer->part[activeInstrument]->load_mutex);
                     _mixer->part[activeInstrument]->applyparameters();
                     ImGui::CloseCurrentPopup();

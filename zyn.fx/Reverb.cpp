@@ -62,8 +62,8 @@ Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings
         apk[i] = 0;
         ap[i] = nullptr;
     }
-    setpreset(Ppreset);
-    cleanup(); //do not call this before the comb initialisation
+    SetPreset(Ppreset);
+    Cleanup(); //do not call this before the comb initialisation
 }
 
 Reverb::~Reverb()
@@ -85,7 +85,7 @@ Reverb::~Reverb()
 }
 
 //Cleanup the effect
-void Reverb::cleanup()
+void Reverb::Cleanup()
 {
     int i, j;
     for (i = 0; i < REV_COMBS * 2; ++i)
@@ -243,7 +243,7 @@ void Reverb::setvolume(unsigned char _Pvolume)
         volume = outvolume = Pvolume / 127.0f;
         if (Pvolume == 0)
         {
-            cleanup();
+            Cleanup();
         }
     }
 }
@@ -444,7 +444,7 @@ void Reverb::settype(unsigned char _Ptype)
         bandwidth->setBaseFrequency(1.0f);
     }
     settime(Ptime);
-    cleanup();
+    Cleanup();
 }
 
 void Reverb::setroomsize(unsigned char _Proomsize)
@@ -474,7 +474,7 @@ void Reverb::setbandwidth(unsigned char _Pbandwidth)
     }
 }
 
-void Reverb::setpreset(unsigned char npreset)
+void Reverb::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 13;
     const int NUM_PRESETS = 13;
@@ -512,16 +512,16 @@ void Reverb::setpreset(unsigned char npreset)
     }
     for (int n = 0; n < PRESET_SIZE; ++n)
     {
-        changepar(n, presets[npreset][n]);
+        ChangeParameter(n, presets[npreset][n]);
     }
     if (insertion)
     {
-        changepar(0, presets[npreset][0] / 2); //lower the volume if reverb is insertion effect
+        ChangeParameter(0, presets[npreset][0] / 2); //lower the volume if reverb is insertion effect
     }
     Ppreset = npreset;
 }
 
-void Reverb::changepar(int npar, unsigned char value)
+void Reverb::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -532,7 +532,7 @@ void Reverb::changepar(int npar, unsigned char value)
         }
         case 1:
         {
-            setpanning(static_cast<char>(value));
+            SetPanning(static_cast<char>(value));
             break;
         }
         case 2:
@@ -589,7 +589,7 @@ void Reverb::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char Reverb::getpar(int npar) const
+unsigned char Reverb::GetParameter(int npar) const
 {
     switch (npar)
     {

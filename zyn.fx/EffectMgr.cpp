@@ -145,7 +145,7 @@ void EffectManager::cleanup()
 {
     if (efx != nullptr)
     {
-        efx->cleanup();
+        efx->Cleanup();
     }
 }
 
@@ -160,7 +160,7 @@ void EffectManager::changepreset_nolock(unsigned char npreset)
 {
     if (efx != nullptr)
     {
-        efx->setpreset(npreset);
+        efx->SetPreset(npreset);
     }
 }
 
@@ -177,7 +177,7 @@ void EffectManager::seteffectpar_nolock(int npar, unsigned char value)
 {
     if (efx != nullptr)
     {
-        efx->changepar(npar, value);
+        efx->ChangeParameter(npar, value);
     }
 }
 
@@ -192,7 +192,7 @@ void EffectManager::seteffectpar(int npar, unsigned char value)
 //Get a parameter of the current effect
 unsigned char EffectManager::geteffectpar(int npar)
 {
-    return efx != nullptr ? efx->getpar(npar) : 0;
+    return efx != nullptr ? efx->GetParameter(npar) : 0;
 }
 
 // Apply the effect
@@ -290,7 +290,7 @@ float EffectManager::sysefxgetvolume()
 // Get the EQ response
 float EffectManager::getEQfreqresponse(float freq)
 {
-    return (nefx == 7) ? efx->getfreqresponse(freq) : 0.0f;
+    return (nefx == 7) ? efx->GetFrequencyResponse(freq) : 0.0f;
 }
 
 void EffectManager::setdryonly(bool value)

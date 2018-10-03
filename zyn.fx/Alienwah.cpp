@@ -29,8 +29,8 @@ Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSett
       oldl(nullptr),
       oldr(nullptr)
 {
-    setpreset(Ppreset);
-    cleanup();
+    SetPreset(Ppreset);
+    Cleanup();
     oldclfol = complex<float>(fb, 0.0f);
     oldclfor = complex<float>(fb, 0.0f);
 }
@@ -90,7 +90,7 @@ void Alienwah::out(const Stereo<float *> &smp)
 }
 
 //Cleanup the effect
-void Alienwah::cleanup()
+void Alienwah::Cleanup()
 {
     for (int i = 0; i < Pdelay; ++i)
     {
@@ -141,10 +141,10 @@ void Alienwah::setdelay(unsigned char _Pdelay)
     Pdelay = (_Pdelay >= MAX_ALIENWAH_DELAY) ? MAX_ALIENWAH_DELAY : _Pdelay;
     oldl = new complex<float>[Pdelay];
     oldr = new complex<float>[Pdelay];
-    cleanup();
+    Cleanup();
 }
 
-void Alienwah::setpreset(unsigned char npreset)
+void Alienwah::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 11;
     const int NUM_PRESETS = 4;
@@ -161,13 +161,13 @@ void Alienwah::setpreset(unsigned char npreset)
     if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
     for (int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+        ChangeParameter(n, presets[npreset][n]);
     if (insertion == 0)
-        changepar(0, presets[npreset][0] / 2); //lower the volume if this is system effect
+        ChangeParameter(0, presets[npreset][0] / 2); //lower the volume if this is system effect
     Ppreset = npreset;
 }
 
-void Alienwah::changepar(int npar, unsigned char value)
+void Alienwah::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -175,7 +175,7 @@ void Alienwah::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setpanning(value);
+            SetPanning(value);
             break;
         case 2:
             lfo.Pfreq = value;
@@ -203,7 +203,7 @@ void Alienwah::changepar(int npar, unsigned char value)
             setdelay(value);
             break;
         case 9:
-            setlrcross(value);
+            SetLRCross(value);
             break;
         case 10:
             setphase(value);
@@ -211,7 +211,7 @@ void Alienwah::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char Alienwah::getpar(int npar) const
+unsigned char Alienwah::GetParameter(int npar) const
 {
     switch (npar)
     {

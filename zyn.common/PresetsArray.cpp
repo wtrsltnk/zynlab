@@ -61,9 +61,9 @@ void PresetsArray::copy(const char *name)
     xml->endbranch();
 
     if (name == nullptr)
-        presetsstore.copyclipboard(xml, type);
+        presetsstore.CopyClipboard(xml, type);
     else
-        presetsstore.copypreset(xml, type, name);
+        presetsstore.CopyPreset(xml, type, name);
 
     delete (xml);
     nelement = -1;
@@ -89,14 +89,14 @@ void PresetsArray::paste(int npreset)
             delete (xml);
             return;
         }
-        if (!presetsstore.pasteclipboard(xml))
+        if (!presetsstore.PasteClipboard(xml))
         {
             delete (xml);
             nelement = -1;
             return;
         }
     }
-    else if (!presetsstore.pastepreset(xml, npreset))
+    else if (!presetsstore.PastePreset(xml, npreset))
     {
         delete (xml);
         nelement = -1;
@@ -131,7 +131,7 @@ bool PresetsArray::checkclipboardtype()
     if (nelement != -1)
         strcat(type, "n");
 
-    return presetsstore.checkclipboardtype(type);
+    return presetsstore.CheckClipboardType(type);
 }
 
 void PresetsArray::rescanforpresets()
@@ -141,7 +141,7 @@ void PresetsArray::rescanforpresets()
     if (nelement != -1)
         strcat(type, "n");
 
-    presetsstore.rescanforpresets(type);
+    presetsstore.RescaneForPresets(type);
 }
 
 void PresetsArray::setelement(int n)

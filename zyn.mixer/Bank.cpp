@@ -27,9 +27,7 @@
 #include <algorithm>
 #include <dirent.h>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <sys/stat.h>
 
 #include <errno.h>
@@ -45,14 +43,12 @@
 //if this file exists into a directory, this make the directory to be considered as a bank, even if it not contains a instrument file
 #define FORCE_BANK_DIR_FILE ".bankdir"
 
-using namespace std;
-
 Bank::Bank()
     : defaultinsname("defaults")
 {
     ClearBank();
     bankfiletitle = dirname;
-    loadbank(Config::Current().cfg.currentBankDir);
+    LoadBank(Config::Current().cfg.currentBankDir);
 }
 
 Bank::~Bank()
@@ -63,35 +59,40 @@ Bank::~Bank()
 /*
  * Get the name of an instrument from the bank
  */
-string Bank::getname(unsigned int ninstrument)
+std::string Bank::GetName(unsigned int ninstrument)
 {
-    if (emptyslot(ninstrument))
+    if (EmptySlot(ninstrument))
+    {
         return defaultinsname;
+    }
+
     return ins[ninstrument].name;
 }
 
 /*
  * Get the numbered name of an instrument from the bank
  */
-string Bank::getnamenumbered(unsigned int ninstrument)
+std::string Bank::GetNameNumbered(unsigned int ninstrument)
 {
-    if (emptyslot(ninstrument))
+    if (EmptySlot(ninstrument))
+    {
         return defaultinsname;
+    }
 
-    return stringFrom(ninstrument + 1) + ". " + getname(ninstrument);
+    return stringFrom(ninstrument + 1) + ". " + GetName(ninstrument);
 }
 
 /*
  * Changes the name of an instrument (and the filename)
  */
-void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
+void Bank::SetName(unsigned int ninstrument, const std::string &newname, int newslot)
 {
-    if (emptyslot(ninstrument))
+    if (EmptySlot(ninstrument))
     {
         return;
     }
 
-    string newfilename;
+    std::string newfilename;
     char tmpfilename[100 + 1];
     tmpfilename[100] = 0;
 
@@ -124,7 +125,7 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
 /*
  * Check if there is no instrument on a slot from the bank
  */
-bool Bank::emptyslot(unsigned int ninstrument)
+bool Bank::EmptySlot(unsigned int ninstrument)
 {
     if (ninstrument >= BANK_SIZE)
     {
@@ -142,9 +143,9 @@ bool Bank::emptyslot(unsigned int ninstrument)
 /*
  * Removes the instrument from the bank
  */
-void Bank::clearslot(unsigned int ninstrument)
+void Bank::ClearSlot(unsigned int ninstrument)
 {
-    if (emptyslot(ninstrument))
+    if (EmptySlot(ninstrument))
     {
         return;
     }
@@ -156,9 +157,9 @@ void Bank::clearslot(unsigned int ninstrument)
 /*
  * Save the instrument to a slot
  */
-void Bank::savetoslot(unsigned int ninstrument, Instrument *part)
+void Bank::SaveToSlot(unsigned int ninstrument, Instrument *part)
 {
-    clearslot(ninstrument);
+    ClearSlot(ninstrument);
 
     const int maxfilename = 200;
     char tmpfilename[maxfilename + 20];
@@ -179,7 +180,7 @@ void Bank::savetoslot(unsigned int ninstrument, Instrument *part)
         }
     }
 
-    string filename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
+    std::string filename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
     remove(filename.c_str());
     part->saveXML(filename.c_str());
@@ -189,9 +190,9 @@ void Bank::savetoslot(unsigned int ninstrument, Instrument *part)
 /*
  * Loads the instrument from the bank
  */
-void Bank::loadfromslot(unsigned int ninstrument, Instrument *part)
+void Bank::LoadFromSlot(unsigned int ninstrument, Instrument *part)
 {
-    if (emptyslot(ninstrument))
+    if (EmptySlot(ninstrument))
     {
         return;
     }
@@ -205,7 +206,7 @@ void Bank::loadfromslot(unsigned int ninstrument, Instrument *part)
 /*
  * Makes current a bank directory
  */
-int Bank::loadbank(string bankdirname)
+int Bank::LoadBank(std::string const &bankdirname)
 {
     DIR *dir = opendir(bankdirname.c_str());
     ClearBank();
@@ -254,7 +255,7 @@ int Bank::loadbank(string bankdirname)
             startname++; //to take out the "-"
         }
 
-        string name = filename;
+        std::string name = filename;
 
         //remove the file extension
         for (unsigned int i = name.size() - 1; i >= 2; i--)
@@ -289,13 +290,15 @@ int Bank::loadbank(string bankdirname)
 /*
  * Makes a new bank, put it on a file and makes it current bank
  */
-int Bank::newbank(string newbankdirname)
+int Bank::NewBank(std::string const &newbankdirname)
 {
-    string bankdir;
+    std::string bankdir;
     bankdir = Config::Current().cfg.bankRootDirList[0];
 
     if (((bankdir[bankdir.size() - 1]) != '/') && ((bankdir[bankdir.size() - 1]) != '\\'))
+    {
         bankdir += "/";
+    }
 
     bankdir += newbankdirname;
 #ifndef _WIN32
@@ -303,20 +306,22 @@ int Bank::newbank(string newbankdirname)
 #else
     if (mkdir(bankdir.c_str()) < 0)
 #endif
+    {
         return -1;
+    }
 
-    const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
+    const std::string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
 
     FILE *tmpfile = fopen(tmpfilename.c_str(), "w+");
     fclose(tmpfile);
 
-    return loadbank(bankdir);
+    return LoadBank(bankdir);
 }
 
 /*
  * Check if the bank is locked (i.e. the file opened was readonly)
  */
-int Bank::locked()
+int Bank::Locked()
 {
     return dirname.empty();
 }
@@ -324,24 +329,24 @@ int Bank::locked()
 /*
  * Swaps a slot with another
  */
-void Bank::swapslot(unsigned int n1, unsigned int n2)
+void Bank::SwapSlot(unsigned int n1, unsigned int n2)
 {
-    if ((n1 == n2) || (locked()))
+    if ((n1 == n2) || (Locked()))
     {
         return;
     }
-    if (emptyslot(n1) && (emptyslot(n2)))
+    if (EmptySlot(n1) && (EmptySlot(n2)))
     {
         return;
     }
-    if (emptyslot(n1)) //change n1 to n2 in order to make
+    if (EmptySlot(n1)) //change n1 to n2 in order to make
     {
-        swap(n1, n2);
+        std::swap(n1, n2);
     }
 
-    if (emptyslot(n2))
+    if (EmptySlot(n2))
     { //this is just a movement from slot1 to slot2
-        setname(n1, getname(n1), static_cast<int>(n2));
+        SetName(n1, GetName(n1), static_cast<int>(n2));
         ins[n2] = ins[n1];
         ins[n1] = ins_t();
     }
@@ -352,9 +357,9 @@ void Bank::swapslot(unsigned int n1, unsigned int n2)
             ins[n2].name += "2";
         }
 
-        setname(n1, getname(n1), static_cast<int>(n2));
-        setname(n2, getname(n2), static_cast<int>(n1));
-        swap(ins[n2], ins[n1]);
+        SetName(n1, GetName(n1), static_cast<int>(n2));
+        SetName(n2, GetName(n2), static_cast<int>(n1));
+        std::swap(ins[n2], ins[n1]);
     }
 }
 
@@ -367,7 +372,7 @@ bool Bank::bankstruct::operator<(const bankstruct &b) const
  * Re-scan for directories containing instrument banks
  */
 
-void Bank::rescanforbanks()
+void Bank::RescanForBanks()
 {
     //remove old banks
     banks.clear();
@@ -376,7 +381,7 @@ void Bank::rescanforbanks()
     {
         if (!Config::Current().cfg.bankRootDirList[i].empty())
         {
-            scanrootdir(Config::Current().cfg.bankRootDirList[i]);
+            ScanRootDirectory(Config::Current().cfg.bankRootDirList[i]);
         }
     }
 
@@ -432,7 +437,7 @@ std::vector<Bank::banksearchstruct> Bank::search(const char *searchFor)
 
 // private stuff
 
-void Bank::scanrootdir(string rootdir)
+void Bank::ScanRootDirectory(std::string const &rootdir)
 {
     DIR *dir = opendir(rootdir.c_str());
     if (dir == nullptr)
@@ -506,7 +511,7 @@ void Bank::ClearBank()
     dirname.clear();
 }
 
-int Bank::AddToBank(unsigned int pos, string filename, string name)
+int Bank::AddToBank(unsigned int pos, std::string const &filename, std::string const &name)
 {
     // Atually this is wrong input, but lets just reset
     if (pos >= BANK_SIZE)

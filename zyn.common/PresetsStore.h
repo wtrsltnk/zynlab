@@ -37,14 +37,14 @@ public:
     ~PresetsStore();
 
     //Clipboard stuff
-    void copyclipboard(XMLwrapper *xml, char *type);
-    bool pasteclipboard(XMLwrapper *xml);
-    bool checkclipboardtype(const char *type);
+    void CopyClipboard(XMLwrapper *xml, char *type);
+    bool PasteClipboard(XMLwrapper *xml);
+    bool CheckClipboardType(const char *type);
 
     //presets stuff
-    void copypreset(XMLwrapper *xml, char *type, std::string name);
-    bool pastepreset(XMLwrapper *xml, unsigned int npreset);
-    void deletepreset(unsigned int npreset);
+    void CopyPreset(XMLwrapper *xml, char *type, std::string name);
+    bool PastePreset(XMLwrapper *xml, unsigned int npreset);
+    void DeletePreset(unsigned int npreset);
 
     struct presetstruct
     {
@@ -56,7 +56,7 @@ public:
     };
     std::vector<presetstruct> presets;
 
-    void rescanforpresets(const std::string &type);
+    void RescaneForPresets(const std::string &type);
 
 private:
     struct
@@ -65,7 +65,7 @@ private:
         char type[MAX_PRESETTYPE_SIZE];
     } clipboard{};
 
-    void clearpresets();
+    void ClearPresets();
 };
 
 extern PresetsStore presetsstore;

@@ -45,7 +45,7 @@ Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *sy
       ndelta(1)
 {
     initdelays();
-    setpreset(Ppreset);
+    SetPreset(Ppreset);
 }
 
 Echo::~Echo()
@@ -55,7 +55,7 @@ Echo::~Echo()
 }
 
 //Cleanup the effect
-void Echo::cleanup()
+void Echo::Cleanup()
 {
     memset(delay._left, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
     memset(delay._right, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
@@ -70,7 +70,7 @@ inline int max(int a, int b)
 //Initialize the delays
 void Echo::initdelays()
 {
-    cleanup();
+    Cleanup();
     //number of seconds to delay left chan
     float dl = avgDelay - lrdelay;
 
@@ -130,7 +130,7 @@ void Echo::setvolume(unsigned char _Pvolume)
     else
         volume = outvolume = Pvolume / 127.0f;
     if (Pvolume == 0)
-        cleanup();
+        Cleanup();
 }
 
 void Echo::setdelay(unsigned char _Pdelay)
@@ -164,7 +164,7 @@ void Echo::sethidamp(unsigned char _Phidamp)
     hidamp = 1.0f - Phidamp / 127.0f;
 }
 
-void Echo::setpreset(unsigned char npreset)
+void Echo::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 7;
     const int NUM_PRESETS = 9;
@@ -183,13 +183,13 @@ void Echo::setpreset(unsigned char npreset)
     if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
     for (int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+        ChangeParameter(n, presets[npreset][n]);
     if (insertion)
         setvolume(presets[npreset][0] / 2); //lower the volume if this is insertion effect
     Ppreset = npreset;
 }
 
-void Echo::changepar(int npar, unsigned char value)
+void Echo::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -197,7 +197,7 @@ void Echo::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setpanning(value);
+            SetPanning(value);
             break;
         case 2:
             setdelay(value);
@@ -206,7 +206,7 @@ void Echo::changepar(int npar, unsigned char value)
             setlrdelay(value);
             break;
         case 4:
-            setlrcross(value);
+            SetLRCross(value);
             break;
         case 5:
             setfb(value);
@@ -217,7 +217,7 @@ void Echo::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char Echo::getpar(int npar) const
+unsigned char Echo::GetParameter(int npar) const
 {
     switch (npar)
     {

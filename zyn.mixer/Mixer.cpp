@@ -251,7 +251,7 @@ void Mixer::SetController(unsigned char chan, int type, int par)
     { // Change current bank
         if (((unsigned int)par < bank.banks.size()) && (bank.banks[par].dir != bank.bankfiletitle))
         {
-            bank.loadbank(bank.banks[par].dir);
+            bank.LoadBank(bank.banks[par].dir);
         }
     }
     else
@@ -288,7 +288,7 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
     {
         if (chan == part[npart]->Prcvchn)
         {
-            bank.loadfromslot(pgm, part[npart]);
+            bank.LoadFromSlot(pgm, part[npart]);
 
             //Hack to get pad note parameters to update
             //this is not real time safe and makes assumptions about the calling

@@ -35,11 +35,11 @@ public:
     Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
     virtual ~Reverb();
     void out(const Stereo<float *> &smp);
-    void cleanup(void);
+    void Cleanup(void);
 
-    void setpreset(unsigned char npreset);
-    void changepar(int npar, unsigned char value);
-    unsigned char getpar(int npar) const;
+    void SetPreset(unsigned char npreset);
+    void ChangeParameter(int npar, unsigned char value);
+    unsigned char GetParameter(int npar) const;
 
 private:
     //Parametrii

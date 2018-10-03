@@ -35,34 +35,35 @@ class Bank
 public:
     /**Constructor*/
     Bank();
-    ~Bank();
-    std::string getname(unsigned int ninstrument);
-    std::string getnamenumbered(unsigned int ninstrument);
-    void setname(unsigned int ninstrument,
-                 const std::string &newname,
-                 int newslot); //if newslot==-1 then this is ignored, else it will be put on that slot
+    virtual ~Bank();
+
+    std::string GetName(unsigned int ninstrument);
+    std::string GetNameNumbered(unsigned int ninstrument);
+    //if newslot==-1 then this is ignored, else it will be put on that slot
+    void SetName(unsigned int ninstrument, const std::string &newname, int newslot);
+
     bool isPADsynth_used(unsigned int ninstrument);
 
     /**returns true when slot is empty*/
-    bool emptyslot(unsigned int ninstrument);
+    bool EmptySlot(unsigned int ninstrument);
 
     /**Empties out the selected slot*/
-    void clearslot(unsigned int ninstrument);
+    void ClearSlot(unsigned int ninstrument);
     /**Saves the given Part to slot*/
-    void savetoslot(unsigned int ninstrument, class Instrument *part);
+    void SaveToSlot(unsigned int ninstrument, class Instrument *part);
     /**Loads the given slot into a Part*/
-    void loadfromslot(unsigned int ninstrument, class Instrument *part);
+    void LoadFromSlot(unsigned int ninstrument, class Instrument *part);
 
     /**Swaps Slots*/
-    void swapslot(unsigned int n1, unsigned int n2);
+    void SwapSlot(unsigned int n1, unsigned int n2);
 
-    int loadbank(std::string bankdirname);
-    int newbank(std::string newbankdirname);
+    int LoadBank(std::string const &bankdirname);
+    int NewBank(std::string const &newbankdirname);
 
     std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
-    int locked();
+    int Locked();
 
-    void rescanforbanks();
+    void RescanForBanks();
 
     struct bankstruct
     {
@@ -88,7 +89,7 @@ private:
     //it adds a filename to the bank
     //if pos is -1 it try to find a position
     //returns -1 if the bank is full, or 0 if the instrument was added
-    int AddToBank(unsigned int pos, std::string filename, std::string name);
+    int AddToBank(unsigned int pos, std::string const &filename, std::string const &name);
 
     void DeleteFromBank(unsigned int pos);
 
@@ -110,7 +111,7 @@ private:
 
     std::string dirname;
 
-    void scanrootdir(std::string rootdir); //scans a root dir for banks
+    void ScanRootDirectory(std::string const &rootdir); //scans a root dir for banks
 };
 
 #endif

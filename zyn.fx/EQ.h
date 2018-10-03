@@ -32,11 +32,11 @@ public:
     EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
     virtual ~EQ() {}
     void out(const Stereo<float *> &smp);
-    void setpreset(unsigned char npreset);
-    void changepar(int npar, unsigned char value);
-    unsigned char getpar(int npar) const;
-    void cleanup(void);
-    float getfreqresponse(float freq);
+    void SetPreset(unsigned char npreset);
+    void ChangeParameter(int npar, unsigned char value);
+    unsigned char GetParameter(int npar) const;
+    void Cleanup(void);
+    float GetFrequencyResponse(float freq);
 
 private:
     //Parameters

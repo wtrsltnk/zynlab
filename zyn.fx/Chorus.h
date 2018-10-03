@@ -37,7 +37,7 @@ public:
     /**Destructor*/
     virtual ~Chorus();
     void out(const Stereo<float *> &input);
-    void setpreset(unsigned char npreset);
+    void SetPreset(unsigned char npreset);
     /**
          * Sets the value of the chosen variable
          *
@@ -56,7 +56,7 @@ public:
          * @param npar number of chosen parameter
          * @param value the new value
          */
-    void changepar(int npar, unsigned char value);
+    void ChangeParameter(int npar, unsigned char value);
     /**
          * Gets the value of the chosen variable
          *
@@ -75,8 +75,8 @@ public:
          * @param npar number of chosen parameter
          * @return the value of the parameter
          */
-    unsigned char getpar(int npar) const;
-    void cleanup(void);
+    unsigned char GetParameter(int npar) const;
+    void Cleanup(void);
 
 private:
     //Chorus Parameters

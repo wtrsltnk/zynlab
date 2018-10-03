@@ -36,8 +36,8 @@ DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, 
       filterl(nullptr),
       filterr(nullptr)
 {
-    setpreset(Ppreset);
-    cleanup();
+    SetPreset(Ppreset);
+    Cleanup();
 }
 
 DynamicFilter::~DynamicFilter()
@@ -53,7 +53,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     if (filterpars->changed)
     {
         filterpars->changed = false;
-        cleanup();
+        Cleanup();
     }
 
     float lfol, lfor;
@@ -96,7 +96,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
 }
 
 // Cleanup the effect
-void DynamicFilter::cleanup()
+void DynamicFilter::Cleanup()
 {
     reinitfilter();
     ms1 = ms2 = ms3 = ms4 = 0.0f;
@@ -136,7 +136,7 @@ void DynamicFilter::reinitfilter()
     filterr = Filter::generate(filterpars, this->_synth);
 }
 
-void DynamicFilter::setpreset(unsigned char npreset)
+void DynamicFilter::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 10;
     const int NUM_PRESETS = 5;
@@ -155,7 +155,7 @@ void DynamicFilter::setpreset(unsigned char npreset)
     if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
     for (int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+        ChangeParameter(n, presets[npreset][n]);
 
     filterpars->defaults();
 
@@ -247,12 +247,12 @@ void DynamicFilter::setpreset(unsigned char npreset)
     //		printf("freq=%d  amp=%d  q=%d\n",filterpars->Pvowels[0].formants[i].freq,filterpars->Pvowels[0].formants[i].amp,filterpars->Pvowels[0].formants[i].q);
     //	    };
     if (insertion == 0) //lower the volume if this is system effect
-        changepar(0, presets[npreset][0] * 0.5f);
+        ChangeParameter(0, presets[npreset][0] * 0.5f);
     Ppreset = npreset;
     reinitfilter();
 }
 
-void DynamicFilter::changepar(int npar, unsigned char value)
+void DynamicFilter::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -260,7 +260,7 @@ void DynamicFilter::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setpanning(value);
+            SetPanning(value);
             break;
         case 2:
             lfo.Pfreq = value;
@@ -295,7 +295,7 @@ void DynamicFilter::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char DynamicFilter::getpar(int npar) const
+unsigned char DynamicFilter::GetParameter(int npar) const
 {
     switch (npar)
     {

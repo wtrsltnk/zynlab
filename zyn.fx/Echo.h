@@ -34,7 +34,7 @@ public:
     virtual ~Echo();
 
     void out(const Stereo<float *> &input);
-    void setpreset(unsigned char npreset);
+    void SetPreset(unsigned char npreset);
     /**
          * Sets the value of the chosen variable
          *
@@ -49,7 +49,7 @@ public:
          * @param npar number of chosen parameter
          * @param value the new value
          */
-    void changepar(int npar, unsigned char value);
+    void ChangeParameter(int npar, unsigned char value);
 
     /**
          * Gets the specified parameter
@@ -65,9 +65,9 @@ public:
          * @param npar number of chosen parameter
          * @return value of parameter
          */
-    unsigned char getpar(int npar) const;
+    unsigned char GetParameter(int npar) const;
     int getnumparams(void);
-    void cleanup(void);
+    void Cleanup(void);
 
 private:
     //Parameters

@@ -49,10 +49,10 @@ public:
     virtual ~Alienwah();
     void out(const Stereo<float *> &smp);
 
-    void setpreset(unsigned char npreset);
-    void changepar(int npar, unsigned char value);
-    unsigned char getpar(int npar) const;
-    void cleanup(void);
+    void SetPreset(unsigned char npreset);
+    void ChangeParameter(int npar, unsigned char value);
+    unsigned char GetParameter(int npar) const;
+    void Cleanup(void);
 
 private:
     //Alienwah Parameters

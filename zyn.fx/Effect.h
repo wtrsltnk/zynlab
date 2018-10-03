@@ -45,20 +45,20 @@ public:
     Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
            FilterParams *filterpars_, unsigned char Ppreset_,
            SystemSettings *synth_);
-    virtual ~Effect() {}
+    virtual ~Effect();
     /**
          * Choose a preset
          * @param npreset number of chosen preset*/
-    virtual void setpreset(unsigned char npreset) = 0;
+    virtual void SetPreset(unsigned char npreset) = 0;
     /**Change parameter npar to value
          * @param npar chosen parameter
          * @param value chosen new value*/
-    virtual void changepar(int npar, unsigned char value) = 0;
+    virtual void ChangeParameter(int npar, unsigned char value) = 0;
     /**Get the value of parameter npar
          * @param npar chosen parameter
          * @return the value of the parameter in an unsigned char or 0 if it
          * does not exist*/
-    virtual unsigned char getpar(int npar) const = 0;
+    virtual unsigned char GetParameter(int npar) const = 0;
     /**Output result of effect based on the given buffers
          *
          * This method should result in the effect generating its results
@@ -71,8 +71,8 @@ public:
     void out(float *const smpsl, float *const smpsr);
     virtual void out(const Stereo<float *> &smp) = 0;
     /**Reset the state of the effect*/
-    virtual void cleanup(void) {}
-    virtual float getfreqresponse(float freq) { return freq; }
+    virtual void Cleanup(void) {}
+    virtual float GetFrequencyResponse(float freq) { return freq; }
 
     unsigned char Ppreset; /**<Currently used preset*/
     float *const efxoutl;  /**<Effect out Left Channel*/
@@ -88,11 +88,11 @@ public:
     FilterParams *filterpars; /**<Parameters for filters used by Effect*/
 
     //Perform L/R crossover
-    static void crossover(float &a, float &b, float crossover);
+    static void CrossOver(float &a, float &b, float CrossOver);
 
 protected:
-    void setpanning(char Ppanning_);
-    void setlrcross(char Plrcross_);
+    void SetPanning(char Ppanning_);
+    void SetLRCross(char Plrcross_);
 
     const bool insertion;
     //panning parameters

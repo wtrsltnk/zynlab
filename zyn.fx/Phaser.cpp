@@ -40,12 +40,12 @@ using namespace std;
 #define ZERO_ 0.00001f // Same idea as above.
 
 Phaser::Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_), lfo(synth_), old(NULL), xn1(NULL),
-      yn1(NULL), diff(0.0f), oldgain(0.0f), fb(0.0f)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_), lfo(synth_), old(nullptr), xn1(nullptr),
+      yn1(nullptr), diff(0.0f), oldgain(0.0f), fb(0.0f)
 {
     analog_setup();
-    setpreset(Ppreset);
-    cleanup();
+    SetPreset(Ppreset);
+    Cleanup();
 }
 
 void Phaser::analog_setup()
@@ -64,7 +64,7 @@ void Phaser::analog_setup()
     offset[10] = 0.2762545f;
     offset[11] = 0.5215785f;
 
-    barber = 0; //Deactivate barber pole phasing by default
+    barber = false; //Deactivate barber pole phasing by default
 
     mis = 1.0f;
     Rmin = 625.0f;   // 2N5457 typical on resistance at Vgs = 0
@@ -78,18 +78,12 @@ void Phaser::analog_setup()
 
 Phaser::~Phaser()
 {
-    if (old._left)
-        delete[] old._left;
-    if (xn1._left)
-        delete[] xn1._left;
-    if (yn1._left)
-        delete[] yn1._left;
-    if (old._right)
-        delete[] old._right;
-    if (xn1._right)
-        delete[] xn1._right;
-    if (yn1._right)
-        delete[] yn1._right;
+    delete[] old._left;
+    delete[] xn1._left;
+    delete[] yn1._left;
+    delete[] old._right;
+    delete[] xn1._right;
+    delete[] yn1._right;
 }
 
 /*
@@ -98,9 +92,13 @@ Phaser::~Phaser()
 void Phaser::out(const Stereo<float *> &input)
 {
     if (Panalog)
+    {
         AnalogPhase(input);
+    }
     else
+    {
         normalPhase(input);
+    }
 }
 
 void Phaser::AnalogPhase(const Stereo<float *> &input)
@@ -133,7 +131,7 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
     g = oldgain;
     oldgain = mod;
 
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
         g._left += diff._left; // Linear interpolation between LFO samples
         g._right += diff._right;
@@ -196,10 +194,8 @@ void Phaser::normalPhase(const Stereo<float *> &input)
     Stereo<float> gain(0.0f), lfoVal(0.0f);
 
     lfo.effectlfoout(&lfoVal._left, &lfoVal._right);
-    gain._left =
-        (expf(lfoVal._left * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
-    gain._right =
-        (expf(lfoVal._right * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
+    gain._left = (expf(lfoVal._left * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
+    gain._right = (expf(lfoVal._right * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
 
     gain._left = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain._left * depth;
     gain._right = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain._right * depth;
@@ -207,22 +203,21 @@ void Phaser::normalPhase(const Stereo<float *> &input)
     gain._left = limit(gain._left, ZERO_, ONE_);
     gain._right = limit(gain._right, ZERO_, ONE_);
 
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
-        float x = (float)i / this->_synth->buffersize_f;
+        float x = static_cast<float>(i) / this->_synth->buffersize_f;
         float x1 = 1.0f - x;
-        //TODO think about making panning an external feature
-        Stereo<float> xn(input._left[i] * pangainL + fb._left,
-                         input._right[i] * pangainR + fb._right);
 
-        Stereo<float> g(gain._left * x + oldgain._left * x1,
-                        gain._right * x + oldgain._right * x1);
+        //TODO think about making panning an external feature
+        Stereo<float> xn(input._left[i] * pangainL + fb._left, input._right[i] * pangainR + fb._right);
+
+        Stereo<float> g(gain._left * x + oldgain._left * x1, gain._right * x + oldgain._right * x1);
 
         xn._left = applyPhase(xn._left, g._left, old._left);
         xn._right = applyPhase(xn._right, g._right, old._right);
 
         //Left/Right crossing
-        crossover(xn._left, xn._right, lrcross);
+        CrossOver(xn._left, xn._right, lrcross);
 
         fb._left = xn._left * feedback;
         fb._right = xn._right * feedback;
@@ -253,7 +248,7 @@ float Phaser::applyPhase(float x, float g, float *old)
 /*
  * Cleanup the effect
  */
-void Phaser::cleanup()
+void Phaser::Cleanup()
 {
     fb = oldgain = Stereo<float>(0.0f);
     for (int i = 0; i < Pstages * 2; ++i)
@@ -276,13 +271,13 @@ void Phaser::cleanup()
 void Phaser::setwidth(unsigned char Pwidth)
 {
     this->Pwidth = Pwidth;
-    width = ((float)Pwidth / 127.0f);
+    width = (static_cast<float>(Pwidth) / 127.0f);
 }
 
 void Phaser::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
-    feedback = (float)(Pfb - 64) / 64.2f;
+    feedback = static_cast<float>(Pfb - 64) / 64.2f;
 }
 
 void Phaser::setvolume(unsigned char Pvolume)
@@ -298,31 +293,25 @@ void Phaser::setvolume(unsigned char Pvolume)
 void Phaser::setdistortion(unsigned char Pdistortion)
 {
     this->Pdistortion = Pdistortion;
-    distortion = (float)Pdistortion / 127.0f;
+    distortion = static_cast<float>(Pdistortion) / 127.0f;
 }
 
 void Phaser::setoffset(unsigned char Poffset)
 {
     this->Poffset = Poffset;
-    offsetpct = (float)Poffset / 127.0f;
+    offsetpct = static_cast<float>(Poffset) / 127.0f;
 }
 
 void Phaser::setstages(unsigned char Pstages)
 {
-    if (old._left)
-        delete[] old._left;
-    if (xn1._left)
-        delete[] xn1._left;
-    if (yn1._left)
-        delete[] yn1._left;
-    if (old._right)
-        delete[] old._right;
-    if (xn1._right)
-        delete[] xn1._right;
-    if (yn1._right)
-        delete[] yn1._right;
+    delete[] old._left;
+    delete[] xn1._left;
+    delete[] yn1._left;
+    delete[] old._right;
+    delete[] xn1._right;
+    delete[] yn1._right;
 
-    this->Pstages = min(MAX_PHASER_STAGES, (int)Pstages);
+    this->Pstages = static_cast<unsigned char>(std::min(MAX_PHASER_STAGES, static_cast<int>(Pstages)));
 
     old = Stereo<float *>(new float[Pstages * 2],
                           new float[Pstages * 2]);
@@ -333,7 +322,7 @@ void Phaser::setstages(unsigned char Pstages)
     yn1 = Stereo<float *>(new float[Pstages],
                           new float[Pstages]);
 
-    cleanup();
+    Cleanup();
 }
 
 void Phaser::setphase(unsigned char Pphase)
@@ -345,10 +334,10 @@ void Phaser::setphase(unsigned char Pphase)
 void Phaser::setdepth(unsigned char Pdepth)
 {
     this->Pdepth = Pdepth;
-    depth = (float)(Pdepth) / 127.0f;
+    depth = static_cast<float>(Pdepth) / 127.0f;
 }
 
-void Phaser::setpreset(unsigned char npreset)
+void Phaser::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 15;
     const int NUM_PRESETS = 12;
@@ -383,13 +372,17 @@ void Phaser::setpreset(unsigned char npreset)
         {64, 64, 1, 10, 1, 64, 70, 40, 12, 10, 0, 110, 1, 20,
          1}};
     if (npreset >= NUM_PRESETS)
+    {
         npreset = NUM_PRESETS - 1;
+    }
     for (int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+    {
+        ChangeParameter(n, presets[npreset][n]);
+    }
     Ppreset = npreset;
 }
 
-void Phaser::changepar(int npar, unsigned char value)
+void Phaser::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -397,7 +390,7 @@ void Phaser::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setpanning(value);
+            SetPanning(static_cast<char>(value));
             break;
         case 2:
             lfo.Pfreq = value;
@@ -426,18 +419,18 @@ void Phaser::changepar(int npar, unsigned char value)
             setstages(value);
             break;
         case 9:
-            setlrcross(value);
+            SetLRCross(static_cast<char>(value));
             setoffset(value);
             break;
         case 10:
-            Poutsub = min((int)value, 1);
+            Poutsub = static_cast<unsigned char>(std::min(static_cast<int>(value), 1));
             break;
         case 11:
             setphase(value);
             setwidth(value);
             break;
         case 12:
-            Phyper = min((int)value, 1);
+            Phyper = static_cast<unsigned char>(std::min(static_cast<int>(value), 1));
             break;
         case 13:
             setdistortion(value);
@@ -448,14 +441,14 @@ void Phaser::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char Phaser::getpar(int npar) const
+unsigned char Phaser::GetParameter(int npar) const
 {
     switch (npar)
     {
         case 0:
             return Pvolume;
         case 1:
-            return Ppanning;
+            return static_cast<unsigned char>(Ppanning);
         case 2:
             return lfo.Pfreq;
         case 3:
@@ -471,13 +464,11 @@ unsigned char Phaser::getpar(int npar) const
         case 8:
             return Pstages;
         case 9:
-            return Plrcross;
-            return Poffset; //same
+            return static_cast<unsigned char>(Plrcross);
         case 10:
             return Poutsub;
         case 11:
-            return Pphase;
-            return Pwidth; //same
+            return static_cast<unsigned char>(Pphase);
         case 12:
             return Phyper;
         case 13:

@@ -34,12 +34,12 @@ Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, SystemSe
 {
     dlk = 0;
     drk = 0;
-    setpreset(Ppreset);
-    changepar(1, 64);
+    SetPreset(Ppreset);
+    ChangeParameter(1, 64);
     lfo.effectlfoout(&lfol, &lfor);
     dl2 = getdelay(lfol);
     dr2 = getdelay(lfor);
-    cleanup();
+    Cleanup();
 }
 
 Chorus::~Chorus()
@@ -138,7 +138,7 @@ void Chorus::out(const Stereo<float *> &input)
 }
 
 //Cleanup the effect
-void Chorus::cleanup()
+void Chorus::Cleanup()
 {
     memset(delaySample._left, 0, maxdelay * sizeof(float));
     memset(delaySample._right, 0, maxdelay * sizeof(float));
@@ -170,7 +170,7 @@ void Chorus::setvolume(unsigned char _Pvolume)
     volume = (!insertion) ? 1.0f : outvolume;
 }
 
-void Chorus::setpreset(unsigned char npreset)
+void Chorus::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 12;
     const int NUM_PRESETS = 10;
@@ -199,11 +199,11 @@ void Chorus::setpreset(unsigned char npreset)
     if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
     for (int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+        ChangeParameter(n, presets[npreset][n]);
     Ppreset = npreset;
 }
 
-void Chorus::changepar(int npar, unsigned char value)
+void Chorus::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -211,7 +211,7 @@ void Chorus::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setpanning(value);
+            SetPanning(value);
             break;
         case 2:
             lfo.Pfreq = value;
@@ -239,7 +239,7 @@ void Chorus::changepar(int npar, unsigned char value)
             setfb(value);
             break;
         case 9:
-            setlrcross(value);
+            SetLRCross(value);
             break;
         case 10:
             Pflangemode = (value > 1) ? 1 : value;
@@ -250,7 +250,7 @@ void Chorus::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char Chorus::getpar(int npar) const
+unsigned char Chorus::GetParameter(int npar) const
 {
     switch (npar)
     {

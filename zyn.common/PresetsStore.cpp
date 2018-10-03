@@ -45,12 +45,12 @@ PresetsStore::~PresetsStore()
     {
         free(clipboard.data);
     }
-    clearpresets();
+    ClearPresets();
 }
 
 //Clipboard management
 
-void PresetsStore::copyclipboard(XMLwrapper *xml, char *type)
+void PresetsStore::CopyClipboard(XMLwrapper *xml, char *type)
 {
     strcpy(clipboard.type, type);
     if (clipboard.data != nullptr)
@@ -60,7 +60,7 @@ void PresetsStore::copyclipboard(XMLwrapper *xml, char *type)
     clipboard.data = xml->getXMLdata();
 }
 
-bool PresetsStore::pasteclipboard(XMLwrapper *xml)
+bool PresetsStore::PasteClipboard(XMLwrapper *xml)
 {
     if (clipboard.data != nullptr)
     {
@@ -71,7 +71,7 @@ bool PresetsStore::pasteclipboard(XMLwrapper *xml)
     return false;
 }
 
-bool PresetsStore::checkclipboardtype(const char *type)
+bool PresetsStore::CheckClipboardType(const char *type)
 {
     //makes LFO's compatible
     if ((strstr(type, "Plfo") != nullptr) && (strstr(clipboard.type, "Plfo") != nullptr))
@@ -83,7 +83,7 @@ bool PresetsStore::checkclipboardtype(const char *type)
 }
 
 //Presets management
-void PresetsStore::clearpresets()
+void PresetsStore::ClearPresets()
 {
     presets.clear();
 }
@@ -94,9 +94,9 @@ bool PresetsStore::presetstruct::operator<(const presetstruct &b) const
     return name < b.name;
 }
 
-void PresetsStore::rescanforpresets(const string &type)
+void PresetsStore::RescaneForPresets(const string &type)
 {
-    clearpresets();
+    ClearPresets();
     string ftype = "." + type.substr(1) + ".xpz";
 
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
@@ -152,7 +152,7 @@ void PresetsStore::rescanforpresets(const string &type)
     sort(presets.begin(), presets.end());
 }
 
-void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
+void PresetsStore::CopyPreset(XMLwrapper *xml, char *type, string name)
 {
     if (Config::Current().cfg.presetsDirList[0].empty())
     {
@@ -180,7 +180,7 @@ void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
     xml->saveXMLfile(filename);
 }
 
-bool PresetsStore::pastepreset(XMLwrapper *xml, unsigned int npreset)
+bool PresetsStore::PastePreset(XMLwrapper *xml, unsigned int npreset)
 {
     npreset--;
     if (npreset >= presets.size())
@@ -197,7 +197,7 @@ bool PresetsStore::pastepreset(XMLwrapper *xml, unsigned int npreset)
     return xml->loadXMLfile(filename) >= 0;
 }
 
-void PresetsStore::deletepreset(unsigned int npreset)
+void PresetsStore::DeletePreset(unsigned int npreset)
 {
     npreset--;
     if (npreset >= presets.size())

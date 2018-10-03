@@ -39,10 +39,10 @@ public:
     Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
     virtual ~Phaser();
     void out(const Stereo<float *> &input);
-    void setpreset(unsigned char npreset);
-    void changepar(int npar, unsigned char value);
-    unsigned char getpar(int npar) const;
-    void cleanup();
+    void SetPreset(unsigned char npreset);
+    void ChangeParameter(int npar, unsigned char value);
+    unsigned char GetParameter(int npar) const;
+    void Cleanup();
 
 private:
     //Phaser parameters

@@ -41,12 +41,12 @@ EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_
     //default values
     Pvolume = 50;
 
-    setpreset(Ppreset);
-    cleanup();
+    SetPreset(Ppreset);
+    Cleanup();
 }
 
 // Cleanup the effect
-void EQ::cleanup()
+void EQ::Cleanup()
 {
     for (auto &i : filter)
     {
@@ -83,7 +83,7 @@ void EQ::setvolume(unsigned char _Pvolume)
     volume = (!insertion) ? 1.0f : outvolume;
 }
 
-void EQ::setpreset(unsigned char npreset)
+void EQ::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 1;
     const int NUM_PRESETS = 2;
@@ -98,12 +98,12 @@ void EQ::setpreset(unsigned char npreset)
     }
     for (int n = 0; n < PRESET_SIZE; ++n)
     {
-        changepar(n, presets[npreset][n]);
+        ChangeParameter(n, presets[npreset][n]);
     }
     Ppreset = npreset;
 }
 
-void EQ::changepar(int npar, unsigned char value)
+void EQ::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -180,7 +180,7 @@ void EQ::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char EQ::getpar(int npar) const
+unsigned char EQ::GetParameter(int npar) const
 {
     switch (npar)
     {
@@ -231,7 +231,7 @@ unsigned char EQ::getpar(int npar) const
     }
 }
 
-float EQ::getfreqresponse(float freq)
+float EQ::GetFrequencyResponse(float freq)
 {
     float resp = 1.0f;
     for (auto &i : filter)

@@ -42,8 +42,8 @@ Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, System
     lpfr = new AnalogFilter(2, 22000, 1, 0, synth_);
     hpfl = new AnalogFilter(3, 20, 1, 0, synth_);
     hpfr = new AnalogFilter(3, 20, 1, 0, synth_);
-    setpreset(Ppreset);
-    cleanup();
+    SetPreset(Ppreset);
+    Cleanup();
 }
 
 Distorsion::~Distorsion()
@@ -55,7 +55,7 @@ Distorsion::~Distorsion()
 }
 
 //Cleanup the effect
-void Distorsion::cleanup()
+void Distorsion::Cleanup()
 {
     lpfl->cleanup();
     hpfl->cleanup();
@@ -133,7 +133,7 @@ void Distorsion::setvolume(unsigned char _Pvolume)
     else
         volume = outvolume = Pvolume / 127.0f;
     if (Pvolume == 0)
-        cleanup();
+        Cleanup();
 }
 
 void Distorsion::setlpf(unsigned char _Plpf)
@@ -152,7 +152,7 @@ void Distorsion::sethpf(unsigned char _Phpf)
     hpfr->setfreq(fr);
 }
 
-void Distorsion::setpreset(unsigned char npreset)
+void Distorsion::SetPreset(unsigned char npreset)
 {
     const int PRESET_SIZE = 11;
     const int NUM_PRESETS = 6;
@@ -173,14 +173,14 @@ void Distorsion::setpreset(unsigned char npreset)
     if (npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
     for (int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+        ChangeParameter(n, presets[npreset][n]);
     if (!insertion) //lower the volume if this is system effect
-        changepar(0, (int)(presets[npreset][0] / 1.5f));
+        ChangeParameter(0, (int)(presets[npreset][0] / 1.5f));
     Ppreset = npreset;
-    cleanup();
+    Cleanup();
 }
 
-void Distorsion::changepar(int npar, unsigned char value)
+void Distorsion::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
@@ -188,10 +188,10 @@ void Distorsion::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setpanning(value);
+            SetPanning(value);
             break;
         case 2:
-            setlrcross(value);
+            SetLRCross(value);
             break;
         case 3:
             Pdrive = value;
@@ -226,7 +226,7 @@ void Distorsion::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char Distorsion::getpar(int npar) const
+unsigned char Distorsion::GetParameter(int npar) const
 {
     switch (npar)
     {
