@@ -11,8 +11,6 @@
 //Nio System
 #include "../zyn.nio/Nio.h"
 
-static Mixer* mixer;
-
 class AppThreeDee
 {
 private:
@@ -41,6 +39,10 @@ public:
     // App specific
     void EditInstrument(int i);
     void SelectInstrument(int i);
+    void StepSequencer();
+
+    bool _isPlaying;
+    int _currentStep;
 };
 
 #endif // _APP_THREE_DEE_H_

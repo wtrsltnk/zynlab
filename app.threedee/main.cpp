@@ -1,15 +1,16 @@
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <imgui.h>
-#include "examples/imgui_impl_opengl3.h"
-
 #include "app.threedee.h"
 
-using namespace std;
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+
+#include <imgui.h>
+
+#include "examples/imgui_impl_opengl3.h"
 
 static int Pexitprogram = 0;
+
+static Mixer *mixer;
 
 //cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
@@ -32,12 +33,12 @@ void initprogram()
 
     synth->alias();
 
-    cerr.precision(1);
-    cerr << std::fixed;
-    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
-    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
+    std::cerr.precision(1);
+    std::cerr << std::fixed;
+    std::cerr << "\nSample Rate = \t\t" << synth->samplerate << std::endl;
+    std::cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << std::endl;
+    std::cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << std::endl;
+    std::cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << std::endl;
 
     mixer = new Mixer(synth);
     mixer->swaplr = Config::Current().cfg.SwapStereo;
@@ -66,25 +67,27 @@ int exitprogram()
     return 0;
 }
 
-int main(int /*argc*/, char */*argv*/[])
+int main(int /*argc*/, char * /*argv*/ [])
 {
     initprogram();
 
     //Run the Nio system
     if (!Nio::Start(mixer))
+    {
         return -1;
+    }
 
     Nio::SelectSink("PA");
     Nio::SelectSource("NET");
 
     Config::Current().init();
 
-    //    mixer->NoteOn(0, 60, 200);
-
     if (glfwInit() == GLFW_FALSE)
+    {
         return -1;
+    }
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "zynlab", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(1024, 768, "zynlab", nullptr, nullptr);
     if (window == nullptr)
     {
         glfwTerminate();
@@ -98,7 +101,7 @@ int main(int /*argc*/, char */*argv*/[])
 
     gladLoadGL();
 
-    AppThreeDee::ResizeCallback(window, 800, 600);
+    AppThreeDee::ResizeCallback(window, 1024, 768);
 
     if (app.SetUp())
     {

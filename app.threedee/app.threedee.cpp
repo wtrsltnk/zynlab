@@ -11,7 +11,7 @@
 #include <map>
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
-    : _mixer(mixer), _window(window), _display_w(800), _display_h(600)
+    : _mixer(mixer), _window(window), _display_w(800), _display_h(600), _isPlaying(false), _currentStep(0)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -136,20 +136,6 @@ static bool MyKnob(const char *label, float *p_value, float v_min, float v_max, 
     return value_changed;
 }
 
-static bool MyKnobUchar(const char *label, char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
-{
-    float val = (p_value[0]) / 128.0f;
-
-    if (MyKnob(label, &val, v_min / 128.0f, v_max / 128.0f, size))
-    {
-        p_value[0] = static_cast<char>(val * 128);
-
-        return true;
-    }
-
-    return false;
-}
-
 static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
 {
     float val = (p_value[0]) / 128.0f;
@@ -190,6 +176,96 @@ void AppThreeDee::SelectInstrument(int i)
     activeInstrument = i;
 }
 
+void AppThreeDee::StepSequencer()
+{
+    const double stepTime = 1.0 / 5.0;
+
+    static std::vector<bool> steps;
+    static int lastStepTriggered = -1;
+    static double lastTime = glfwGetTime();
+    static double noteOffAt = 0;
+    static float gate = 0.7f;
+    double currentTime = glfwGetTime();
+
+    if (currentTime - lastTime > stepTime)
+    {
+        if (_isPlaying)
+        {
+            _currentStep++;
+            if (_currentStep >= static_cast<int>(steps.size()))
+            {
+                _currentStep = 0;
+            }
+        }
+
+        lastTime += stepTime;
+    }
+
+    if (_isPlaying && lastStepTriggered != _currentStep)
+    {
+        if (steps[_currentStep])
+        {
+            _mixer->NoteOn(0, 65, 128);
+            noteOffAt = currentTime + (stepTime * gate);
+        }
+        lastStepTriggered = _currentStep;
+    }
+
+    if (noteOffAt <= currentTime)
+    {
+        _mixer->NoteOff(0, 65);
+    }
+
+    ImGui::Begin("Step Sequencer", nullptr, ImGuiWindowFlags_NoTitleBar);
+    {
+        if (ImGui::Checkbox("Play/Pause", &_isPlaying))
+        {
+            if (steps.empty())
+            {
+                _isPlaying = false;
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop"))
+        {
+            _isPlaying = false;
+            _currentStep = 0;
+        }
+        int stepSize = static_cast<int>(steps.size());
+        if (ImGui::InputInt("Steps", &stepSize))
+        {
+            while (!steps.empty() && static_cast<int>(steps.size()) > stepSize)
+            {
+                steps.pop_back();
+            }
+            while (static_cast<int>(steps.size()) < stepSize)
+            {
+                steps.push_back(0);
+            }
+        }
+        ImGui::SliderFloat("Gate", &gate, 0.1f, 1.0f);
+
+        ImGui::Separator();
+
+        ImGui::PushStyleColor(ImGuiCol_Border, 0xFFFFFFFF);
+        for (size_t i = 0; i < steps.size(); i++)
+        {
+            ImGui::PushID(static_cast<int>(i));
+            ImGui::PushStyleColor(ImGuiCol_Text, static_cast<int>(i) == _currentStep ? 0xFFFFFFFF : 0x00FF00FF);
+            bool b = steps[i];
+            if (ImGui::Selectable("X", &b, 0, ImVec2(50, 50)))
+            {
+                steps[i] = b;
+            }
+            ImGui::PopStyleColor();
+            ImGui::SameLine();
+            ImGui::PopID();
+        }
+        ImGui::PopStyleColor();
+        ImGui::End();
+    }
+}
+
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -198,6 +274,8 @@ void AppThreeDee::Render()
 
     int openSelectInstrument = -1;
     int openSelectSinkSource = -1;
+
+    StepSequencer();
 
     ImGui::Begin("Zynadsubfx", nullptr, ImGuiWindowFlags_NoTitleBar);
     {
@@ -245,7 +323,7 @@ void AppThreeDee::Render()
                 openSelectSinkSource = 1;
             }
 
-            auto v = char(_mixer->Pvolume);
+            auto v = _mixer->Pvolume;
             if (MyKnobUchar("Volume", &(v), 0, 128, ImVec2(55, 55)))
             {
                 _mixer->setPvolume(v);
@@ -464,14 +542,14 @@ void AppThreeDee::Render()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-static std::map<int, char> mappedNotes{
-    {int('Z'), static_cast<char>(65)},
-    {int('X'), static_cast<char>(66)},
-    {int('C'), static_cast<char>(67)},
-    {int('V'), static_cast<char>(68)},
-    {int('B'), static_cast<char>(69)},
-    {int('N'), static_cast<char>(70)},
-    {int('M'), static_cast<char>(71)},
+static std::map<int, unsigned char> mappedNotes{
+    {int('Z'), static_cast<unsigned char>(65)},
+    {int('X'), static_cast<unsigned char>(66)},
+    {int('C'), static_cast<unsigned char>(67)},
+    {int('V'), static_cast<unsigned char>(68)},
+    {int('B'), static_cast<unsigned char>(69)},
+    {int('N'), static_cast<unsigned char>(70)},
+    {int('M'), static_cast<unsigned char>(71)},
 };
 
 void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*/)
@@ -533,11 +611,11 @@ void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*
     {
         if (action == 1)
         {
-            _mixer->NoteOn(static_cast<char>(keyboardChannel), found->second, static_cast<char>(128));
+            _mixer->NoteOn(static_cast<unsigned char>(keyboardChannel), found->second, 128);
         }
         else if (action == 0)
         {
-            _mixer->NoteOff(static_cast<char>(keyboardChannel), found->second);
+            _mixer->NoteOff(static_cast<unsigned char>(keyboardChannel), found->second);
         }
     }
 }
