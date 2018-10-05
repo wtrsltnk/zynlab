@@ -4,12 +4,11 @@
 #include <GL/glextl.h>
 #include <GLFW/glfw3.h>
 
-#include "../zyn.mixer/Mixer.h"
-#include "../zyn.synth/FFTwrapper.h"
 #include <zyn.common/Util.h>
-
-//Nio System
-#include "../zyn.nio/Nio.h"
+#include <zyn.mixer/BankManager.h>
+#include <zyn.mixer/Mixer.h>
+#include <zyn.nio/Nio.h>
+#include <zyn.synth/FFTwrapper.h>
 
 class AppThreeDee
 {

@@ -27,8 +27,6 @@
 
 using namespace std;
 
-IMixer::~IMixer() = default;
-
 Config::Config() = default;
 
 Config *Config::_instance = nullptr;
@@ -74,18 +72,6 @@ void Config::init()
 
     cfg.UserInterfaceMode = 0;
     cfg.VirKeybLayout = 1;
-    winwavemax = 1;
-    winmidimax = 1;
-    //try to find out how many input midi devices are there
-    winmididevices = new winmidionedevice[winmidimax];
-    for (int i = 0; i < winmidimax; ++i)
-    {
-        winmididevices[i].name = new char[MAX_STRING_SIZE];
-        for (int j = 0; j < MAX_STRING_SIZE; ++j)
-        {
-            winmididevices[i].name[j] = '\0';
-        }
-    }
 
     //get the midi input devices name
     cfg.currentBankDir = "./testbnk";
@@ -134,13 +120,6 @@ Config::~Config()
 {
     delete[] cfg.LinuxOSSWaveOutDev;
     delete[] cfg.LinuxOSSSeqInDev;
-
-    for (int i = 0; i < winmidimax; ++i)
-    {
-        delete[] winmididevices[i].name;
-    }
-
-    delete[] winmididevices;
 }
 
 void Config::save()
@@ -269,11 +248,11 @@ void Config::readConfig(const char *filename)
         cfg.WindowsWaveOutId = xmlcfg.getpar("windows_wave_out_id",
                                              cfg.WindowsWaveOutId,
                                              0,
-                                             winwavemax);
+                                             1);
         cfg.WindowsMidiInId = xmlcfg.getpar("windows_midi_in_id",
                                             cfg.WindowsMidiInId,
                                             0,
-                                            winmidimax);
+                                            1);
 
         xmlcfg.exitbranch();
     }

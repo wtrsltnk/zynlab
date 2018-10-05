@@ -63,7 +63,7 @@ bool AppThreeDee::SetUp()
     // Setup style
     ImGui::StyleColorsDark();
 
-    _mixer->bank.RescanForBanks();
+    _mixer->GetBankManager()->RescanForBanks();
 
     return true;
 }
@@ -475,17 +475,17 @@ void AppThreeDee::Render()
     ImGui::SetNextWindowSize(ImVec2(700, 600));
     if (ImGui::BeginPopupModal("popup"))
     {
-        auto count = _mixer->bank.banks.size();
+        auto count = _mixer->GetBankManager()->GetBankCount();
         std::vector<const char *> bankNames;
         bankNames.push_back("");
-        for (int i = 0; i < int(_mixer->bank.banks.size()); i++)
+        for (int i = 0; i < count; i++)
         {
-            bankNames.push_back(_mixer->bank.banks[static_cast<size_t>(i)].name.c_str());
+            bankNames.push_back(_mixer->GetBankManager()->GetBank(i).name.c_str());
         }
         static int currentBank = 0;
         if (ImGui::Combo("Bank", &currentBank, &(bankNames[0]), int(count)))
         {
-            _mixer->bank.LoadBank(_mixer->bank.banks[static_cast<size_t>(currentBank - 1)].dir);
+            _mixer->GetBankManager()->LoadBank(currentBank - 1);
         }
         ImGui::SameLine();
 
@@ -499,12 +499,12 @@ void AppThreeDee::Render()
         {
             for (unsigned int i = 0; i < BANK_SIZE; i++)
             {
-                auto instrumentName = _mixer->bank.GetName(i);
+                auto instrumentName = _mixer->GetBankManager()->GetName(i);
 
                 if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
                 {
                     pthread_mutex_lock(&_mixer->part[activeInstrument]->load_mutex);
-                    _mixer->bank.LoadFromSlot(i, _mixer->part[activeInstrument]);
+                    _mixer->GetBankManager()->LoadFromSlot(i, _mixer->part[activeInstrument]);
                     pthread_mutex_unlock(&_mixer->part[activeInstrument]->load_mutex);
                     _mixer->part[activeInstrument]->applyparameters();
                     ImGui::CloseCurrentPopup();

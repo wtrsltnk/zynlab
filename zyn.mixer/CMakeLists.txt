@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.8)
 project(zyn.mixer)
 
 add_library(zyn.mixer STATIC
-    Bank.cpp
-    Bank.h
+    BankManager.cpp
+    BankManager.h
     Instrument.cpp
     Instrument.h
     Microtonal.cpp

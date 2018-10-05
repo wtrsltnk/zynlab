@@ -49,7 +49,8 @@ public:
         int GzipCompression;
         int Interpolation;
         std::string DumpFile;
-        std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
+        std::string bankRootDirList[MAX_BANK_ROOT_DIRS];
+        std::string currentBankDir;
         std::string presetsDirList[MAX_BANK_ROOT_DIRS];
         int CheckPADsynth;
         int IgnoreProgramChange;
@@ -58,14 +59,7 @@ public:
         std::string LinuxALSAaudioDev;
         std::string nameTag;
     } cfg;
-    int winwavemax{}, winmidimax{}; //number of wave/midi devices on Windows
     int maxstringsize{};
-
-    struct winmidionedevice
-    {
-        char *name;
-    };
-    winmidionedevice *winmididevices{};
 
     void clearbankrootdirlist();
     void clearpresetsdirlist();

@@ -20,6 +20,7 @@ add_library(zyn.common STATIC
     WaveShapeSmps.h
     XmlWrapper.cpp
     XmlWrapper.h
+    globals.cpp
     globals.h
 )
 

@@ -9,6 +9,7 @@
 
 using namespace std;
 
+static BankManager banks;
 static Mixer *mixer;
 
 static int Pexitprogram = 0;
@@ -41,7 +42,7 @@ void initprogram()
     cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
-    mixer = new Mixer(synth);
+    mixer = new Mixer(synth, &banks);
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth->samplerate);

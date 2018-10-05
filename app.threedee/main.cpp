@@ -1,15 +1,13 @@
 
 #include "app.threedee.h"
 
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
-
 #include <imgui.h>
 
 #include "examples/imgui_impl_opengl3.h"
 
 static int Pexitprogram = 0;
 
+static BankManager banka;
 static Mixer *mixer;
 
 //cleanup on signaled exit
@@ -40,7 +38,7 @@ void initprogram()
     std::cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << std::endl;
     std::cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << std::endl;
 
-    mixer = new Mixer(synth);
+    mixer = new Mixer(synth, &banka);
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth->samplerate);

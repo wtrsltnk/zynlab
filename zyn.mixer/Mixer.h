@@ -24,7 +24,6 @@
 #ifndef MIXER_H
 #define MIXER_H
 
-#include "Bank.h"
 #include "Microtonal.h"
 #include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
@@ -53,16 +52,15 @@ class Mixer : public IMixer
 {
 public:
     /** Constructor TODO make private*/
-    Mixer(SystemSettings *synth_);
+    Mixer(SystemSettings *synth_, IBankManager *bank_);
     /** Destructor*/
     virtual ~Mixer();
+
+    virtual IBankManager* GetBankManager();
 
     /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
     int saveXML(const char *filename);
-
-    /**This adds the parameters to the XML data*/
-    void add2XML(XMLwrapper *xml);
 
     void defaults();
 
@@ -71,19 +69,11 @@ public:
     int loadXML(const char *filename);
     void applyparameters(bool lockmutex = true);
 
-    void getfromXML(XMLwrapper *xml);
-
     /**get all data to a newly allocated array (used for VST)
          * @return the datasize*/
     int getalldata(char **data);
     /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
     void putalldata(char *data, int size);
-
-    //Mutex control
-    /**Control the Master's mutex state.
-         * @param lockset either trylock, lock, or unlock.
-         * @return true when successful false otherwise.*/
-    bool mutexLock(lockset request);
 
     // Mutex
     virtual void Lock();
@@ -110,6 +100,9 @@ public:
                                     float *outr);
 
     void partonoff(int npart, int what);
+
+    virtual int GetInstrumentCount();
+    virtual class Instrument *GetInstrument(int index);
 
     /**parts \todo see if this can be made to be dynamic*/
     class Instrument *part[NUM_MIDI_PARTS]{};
@@ -150,11 +143,17 @@ public:
 
     //other objects
     Microtonal microtonal;
-    Bank bank;
+    class IBankManager *bank;
 
     IFFTwrapper *fft;
     pthread_mutex_t mutex{};
     pthread_mutex_t vumutex{};
+
+private:
+    /**This adds the parameters to the XML data*/
+    void add2XML(XMLwrapper *xml);
+    /**This loads the parameters from the XML data*/
+    void getfromXML(XMLwrapper *xml);
 
 private:
     vuData vu;

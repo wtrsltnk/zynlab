@@ -23,7 +23,10 @@
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
+
 #include <stdint.h>
+#include <string>
+#include <vector>
 
 /**
  * The number of harmonics of additive synth
@@ -149,29 +152,29 @@
 #define dB2rap(dB) ((expf((dB)*LOG_10 / 20.0f)))
 #define rap2dB(rap) ((20 * logf(rap) / LOG_10))
 
-#define ZERO(data, size)            \
-    {                               \
+#define ZERO(data, size)                         \
+    {                                            \
         char *data_ = static_cast<char *>(data); \
-        for (int i = 0;             \
-             i < size;              \
-             i++)                   \
-            data_[i] = 0;           \
+        for (int i = 0;                          \
+             i < size;                           \
+             i++)                                \
+            data_[i] = 0;                        \
     }
-#define ZEROUNSIGNED(data, size)    \
-    {                               \
+#define ZEROUNSIGNED(data, size)                                   \
+    {                                                              \
         unsigned char *data_ = static_cast<unsigned char *>(data); \
-        for (int i = 0;             \
-             i < size;              \
-             i++)                   \
-            data_[i] = 0;           \
+        for (int i = 0;                                            \
+             i < size;                                             \
+             i++)                                                  \
+            data_[i] = 0;                                          \
     }
-#define ZERO_float(data, size)        \
-    {                                 \
+#define ZERO_float(data, size)                     \
+    {                                              \
         float *data_ = static_cast<float *>(data); \
-        for (int i = 0;               \
-             i < size;                \
-             i++)                     \
-            data_[i] = 0.0f;          \
+        for (int i = 0;                            \
+             i < size;                             \
+             i++)                                  \
+            data_[i] = 0.0f;                       \
     }
 
 enum ONOFFTYPE
@@ -279,10 +282,56 @@ public:
     static float numRandom(void); //defined in Util.cpp for now
 };
 
+//entries in a bank
+#define BANK_SIZE 160
+
+class Instrument;
+
+class IBankManager
+{
+public:
+    virtual ~IBankManager();
+
+    struct InstrumentBank
+    {
+        bool operator<(const InstrumentBank &b) const;
+        std::string dir;
+        std::string name;
+        std::vector<std::string> instrumentNames;
+    };
+
+    virtual int NewBank(std::string const &newbankdirname) = 0;
+    virtual int LoadBank(int index) = 0;
+    virtual int GetBankCount() = 0;
+    virtual InstrumentBank &GetBank(int index) = 0;
+
+    virtual std::string GetName(unsigned int ninstrument) = 0;
+    virtual std::string GetNameNumbered(unsigned int ninstrument) = 0;
+    virtual void SetName(unsigned int ninstrument, const std::string &newname, int newslot) = 0;
+    virtual bool isPADsynth_used(unsigned int ninstrument) = 0;
+
+    virtual bool EmptySlot(unsigned int ninstrument) = 0;
+    virtual void ClearSlot(unsigned int ninstrument) = 0;
+    virtual void LoadFromSlot(unsigned int ninstrument, Instrument *part) = 0;
+    virtual void SaveToSlot(unsigned int ninstrument, Instrument *part) = 0;
+    virtual void SwapSlot(unsigned int n1, unsigned int n2) = 0;
+
+    virtual std::string const &GetBankFileTitle() = 0;
+    virtual int Locked() = 0;
+    virtual void RescanForBanks() = 0;
+};
+
 class IMixer
 {
 public:
     virtual ~IMixer();
+
+    virtual IBankManager *GetBankManager() = 0;
+
+    // Parts
+    virtual int GetInstrumentCount() = 0;
+    virtual Instrument *GetInstrument(int index) = 0;
+
     // Mutex
     virtual void Lock() = 0;
     virtual void Unlock() = 0;

@@ -33,9 +33,10 @@
 #include <iostream>
 #include <thread>
 
-#include "../zyn.mixer/Instrument.h"
-#include "../zyn.mixer/Mixer.h"
-#include "../zyn.synth/FFTwrapper.h"
+#include <zyn.mixer/Instrument.h>
+#include <zyn.mixer/Mixer.h>
+#include <zyn.mixer/BankManager.h>
+#include <zyn.synth/FFTwrapper.h>
 #include <zyn.common/Util.h>
 
 // Sequencer
@@ -290,7 +291,8 @@ int main(int argc, char *argv[])
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-    mixer = new Mixer(synth);
+    BankManager banks;
+    mixer = new Mixer(synth, &banks);
     mixer->swaplr = swaplr;
 
     if (!loadfile.empty())

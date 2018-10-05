@@ -52,7 +52,7 @@ public:
          * @param mutex_ Pointer to the master pthread_mutex_t*/
     Instrument(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
     /**Destructor*/
-    ~Instrument();
+    virtual ~Instrument();
 
     // Midi commands implemented
     void NoteOn(unsigned char note,

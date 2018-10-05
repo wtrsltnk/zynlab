@@ -20,82 +20,66 @@
 
 */
 
-#ifndef BANK_H
-#define BANK_H
+#ifndef BANKMANAGER_H
+#define BANKMANAGER_H
 
 #include <string>
 #include <vector>
-
-//entries in a bank
-#define BANK_SIZE 160
+#include <zyn.common/globals.h>
 
 /**The instrument Bank*/
-class Bank
+class BankManager : public IBankManager
 {
 public:
     /**Constructor*/
-    Bank();
-    virtual ~Bank();
+    BankManager();
+    virtual ~BankManager();
 
-    std::string GetName(unsigned int ninstrument);
-    std::string GetNameNumbered(unsigned int ninstrument);
+    virtual std::string GetName(unsigned int ninstrument);
+    virtual std::string GetNameNumbered(unsigned int ninstrument);
     //if newslot==-1 then this is ignored, else it will be put on that slot
-    void SetName(unsigned int ninstrument, const std::string &newname, int newslot);
+    virtual void SetName(unsigned int ninstrument, const std::string &newname, int newslot);
 
-    bool isPADsynth_used(unsigned int ninstrument);
+    virtual bool isPADsynth_used(unsigned int ninstrument);
 
     /**returns true when slot is empty*/
-    bool EmptySlot(unsigned int ninstrument);
-
+    virtual bool EmptySlot(unsigned int ninstrument);
     /**Empties out the selected slot*/
-    void ClearSlot(unsigned int ninstrument);
+    virtual void ClearSlot(unsigned int ninstrument);
     /**Saves the given Part to slot*/
-    void SaveToSlot(unsigned int ninstrument, class Instrument *part);
+    virtual void SaveToSlot(unsigned int ninstrument, class Instrument *part);
     /**Loads the given slot into a Part*/
-    void LoadFromSlot(unsigned int ninstrument, class Instrument *part);
-
+    virtual void LoadFromSlot(unsigned int ninstrument, class Instrument *part);
     /**Swaps Slots*/
-    void SwapSlot(unsigned int n1, unsigned int n2);
+    virtual void SwapSlot(unsigned int n1, unsigned int n2);
 
-    int LoadBank(std::string const &bankdirname);
-    int NewBank(std::string const &newbankdirname);
+    virtual int LoadBank(int index);
+    virtual int NewBank(std::string const &newbankdirname);
+    virtual int GetBankCount();
+    virtual InstrumentBank &GetBank(int index);
 
-    std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
-    int Locked();
+    virtual std::string const &GetBankFileTitle();
 
-    void RescanForBanks();
+    virtual int Locked();
 
-    struct bankstruct
-    {
-        bool operator<(const bankstruct &b) const;
-        std::string dir;
-        std::string name;
-        std::vector<std::string> instrumentNames;
-    };
+    virtual void RescanForBanks();
 
-    std::vector<bankstruct> banks;
-
-    struct banksearchstruct
-    {
-        std::string shortBankName;
-        std::string fullBankName;
-        int instrumentSlot;
-        std::string instrumentName;
-    };
-
-    std::vector<banksearchstruct> search(const char *searchFor);
+    std::vector<InstrumentBank> banks;
 
 private:
     //it adds a filename to the bank
     //if pos is -1 it try to find a position
     //returns -1 if the bank is full, or 0 if the instrument was added
     int AddToBank(unsigned int pos, std::string const &filename, std::string const &name);
+    int LoadBankByDirectoryName(std::string const &bankdirname);
 
     void DeleteFromBank(unsigned int pos);
 
     void ClearBank();
 
     std::string defaultinsname;
+
+    std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
 
     struct ins_t
     {
@@ -114,4 +98,4 @@ private:
     void ScanRootDirectory(std::string const &rootdir); //scans a root dir for banks
 };
 
-#endif
+#endif // BANKMANAGER_H

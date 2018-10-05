@@ -1,51 +1,48 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
-header_name {.h}
+version 1.0303 
+header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
-}
+} 
 
 decl {//License: GNU GPL version 2 or later} {private local
-}
+} 
 
 decl {\#include <stdlib.h>} {public local
-}
+} 
 
 decl {\#include <stdio.h>} {public local
-}
+} 
 
 decl {\#include <string.h>} {public local
-}
+} 
 
 decl {\#include <FL/Fl_Button.H>} {public local
-}
+} 
 
 decl {\#include <FL/Fl_File_Chooser.H>} {public local
-}
-
-decl {\#include "zyn.mixer/Mixer.h"} {public local
-}
+} 
 
 decl {\#include "zyn.mixer/Instrument.h"} {public local
-}
+} 
 
-decl {\#include "zyn.mixer/Bank.h"} {public local
-}
+decl {\#include "zyn.common/globals.h"} {public local
+} 
 
 decl {\#include "zyn.common/Config.h"} {public local
-}
+} 
 
 decl {\#include "zyn.common/Util.h"} {public local
-}
+} 
 
 class BankProcess_ {} {
   Function {process()} {return_type {virtual void}
   } {
     code {;} {}
   }
-  decl {Bank *bank;} {public local
+  decl {IBankManager *bank;} {public local
   }
-}
+} 
 
 class BankSlot {: {public Fl_Button,BankProcess_}
 } {
@@ -69,7 +66,7 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_,int *nselected_)} {open
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,IBankManager *bank_,int *nselected_)} {open
   } {
     code {nslot=nslot_;
 what=what_;
@@ -108,24 +105,24 @@ copy_label(bank->GetNameNumbered(nslot).c_str());} {}
   }
   decl {BankProcess_ *bp;} {private local
   }
-}
+} 
 
-class BankUI {open : {public BankProcess_}
+class BankUI {open selected : {public BankProcess_}
 } {
   Function {make_window()} {open
   } {
     Fl_Window bankuiwindow {
       label Bank open
-      xywh {392 123 803 671} type Double
-      code0 {o->label(bank->bankfiletitle.c_str());}
-      code1 {if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");} visible
+      xywh {396 127 795 663} type Double hide
+      code0 {o->label(bank->GetBankFileTitle().c_str());}
+      code1 {if (bank->GetBankFileTitle().empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");}
     } {
       Fl_Tabs {} {open
         xywh {5 10 790 600}
       } {
         Fl_Group {} {
           label Banks open
-          xywh {5 28 790 582} box ENGRAVED_BOX hide
+          xywh {5 28 790 582} box ENGRAVED_BOX
         } {
           Fl_Group {} {
             xywh {15 65 772 490} box ENGRAVED_FRAME
@@ -205,10 +202,10 @@ refreshmainwindow();}
           }
           Fl_Choice banklist {
             callback {int n=o->value();
-std::string dirname=bank->banks[n].dir;
+std::string dirname=bank->GetBank(n).dir;
 if (dirname.empty()) return;
 
-if (bank->LoadBank(dirname)==2)
+if (bank->LoadBank(n)==2)
        fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());
 for (int i=0;i<BANK_SIZE;i++) bs[i]->Refresh();
 refreshmainwindow();} open
@@ -228,33 +225,6 @@ refreshmainwindow();}
             code0 {o->value(Config::Current().cfg.CheckPADsynth);}
           }
         }
-        Fl_Group {} {
-          label {Instrument search} open
-          xywh {5 30 790 580} box ENGRAVED_BOX
-        } {
-          Fl_Input searchFor {
-            callback {Fl::remove_timeout(BankUI::search);
-Fl::add_timeout(0.25, BankUI::search, (void*)this);}
-            xywh {30 55 385 25} when 1
-          }
-          Fl_Browser searchResult {
-            callback {for (int i = 0; i <= o->size(); i++)
-{
-    if (o->selected(i))
-    {
-        Bank::banksearchstruct* sr = (Bank::banksearchstruct*)o->data(i);
-        master->bank.LoadBank(sr->fullBankName);
-        pthread_mutex_lock(&master->part[*npart]->load_mutex);
-        bank->LoadFromSlot(sr->instrumentSlot,master->part[*npart]);
-        pthread_mutex_unlock(&master->part[*npart]->load_mutex);
-        master->part[*npart]->applyparameters();
-        break;
-    }
-};} selected
-            xywh {30 80 385 515} type Select when 1
-            code0 {o->column_char('\\t');}
-          }
-        }
       }
       Fl_Button {} {
         label Close
@@ -269,11 +239,11 @@ Fl::add_timeout(0.25, BankUI::search, (void*)this);}
       }
     }
   }
-  Function {BankUI(Mixer *master_,int *npart_)} {} {
+  Function {BankUI(IMixer *master_,int *npart_)} {} {
     code {fnc=&BankProcess_::process;
 master=master_;
 npart=npart_;
-bank=&master_->bank;
+bank=master_->GetBankManager();
 what=0;
 nselected=-1;
 make_window();
@@ -306,11 +276,11 @@ if ((what==2)&&(bank->EmptySlot(slot)==0)&&(mode!=4)) {//Rename slot
 };
 
 if ((what==1)&&(mode==1)&&(!bank->EmptySlot(slot))){//Reads from slot
-    pthread_mutex_lock(&master->part[*npart]->load_mutex);
-     bank->LoadFromSlot(slot,master->part[*npart]);
-    pthread_mutex_unlock(&master->part[*npart]->load_mutex);
-    master->part[*npart]->applyparameters();
-    snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->GetName(slot).c_str());
+    pthread_mutex_lock(&master->GetPart(*npart)->load_mutex);
+     bank->LoadFromSlot(slot,master->GetPart(*npart));
+    pthread_mutex_unlock(&master->GetPart(*npart)->load_mutex);
+    master->GetPart(*npart)->applyparameters();
+    snprintf((char *)master->GetPart(*npart)->Pname,PART_MAX_NAME_LEN,"%s",bank->GetName(slot).c_str());
      cbwig->do_callback();
      
      if (Config::Current().cfg.BankUIAutoClose!=0)
@@ -322,9 +292,9 @@ if ((what==1)&&(mode==2)){//save(write) to slot
      if (!bank->EmptySlot(slot)){
        if (!fl_choice("Overwrite the slot no. %d ?","No","Yes",NULL,slot+1)) goto nooverwriteslot;
       };
-       pthread_mutex_lock(&master->part[*npart]->load_mutex);
-        bank->SaveToSlot(slot,master->part[*npart]);
-       pthread_mutex_unlock(&master->part[*npart]->load_mutex);
+       pthread_mutex_lock(&master->GetPart(*npart)->load_mutex);
+        bank->SaveToSlot(slot,master->GetPart(*npart));
+       pthread_mutex_unlock(&master->GetPart(*npart)->load_mutex);
 
        bs[slot]->Refresh();
        mode=1;readbutton->value(1);writebutton->value(0);
@@ -360,7 +330,7 @@ if (mode==4){//swap
 if (mode!=4) refreshmainwindow();} {}
   }
   Function {refreshmainwindow()} {} {
-    code {bankuiwindow->label(bank->bankfiletitle.c_str());
+    code {bankuiwindow->label(bank->GetBankFileTitle().c_str());
 mode=1;readbutton->value(1);writebutton->value(0);clearbutton->value(0);swapbutton->value(0);
 nselected=-1;
 if (bank->Locked()){
@@ -386,8 +356,8 @@ for (int i=0;i<BANK_SIZE;i++)
     code {banklist->clear();
 bank->RescanForBanks();
 
-for (unsigned int i=0;i<bank->banks.size();i++) {
-     banklist->add(bank->banks[i].name.c_str());
+for (int i=0;i<bank->GetBankCount();i++) {
+     banklist->add(bank->GetBank(i).name.c_str());
 }
 if (banklist->size() == 0)
      banklist->add(" ");} {}
@@ -399,28 +369,16 @@ removeselection();
 if (beginnerui) modeselect->hide();
 	else modeselect->show();} {}
   }
-  Function {search(void* data)} {open return_type {static void}
-  } {
-    code {auto bankUI = (BankUI*)data;
-bankUI->searchResult->clear();
-bankUI->results = bankUI->master->bank.search(bankUI->searchFor->value());
-for (const Bank::banksearchstruct& i : bankUI->results)
-{
-    bankUI->searchResult->add((i.shortBankName + " - " + i.instrumentName).c_str(), (void*)&i);
-}} {}
-  }
   decl {BankSlot *bs[BANK_SIZE];} {private local
   }
   decl {int slot,what;//"what"=what button is pressed} {private local
   }
   decl {int mode,*npart,nselected;} {private local
   }
-  decl {Mixer *master;} {private local
+  decl {IMixer *master;} {private local
   }
   decl {void (BankProcess_::* fnc)(void);} {private local
   }
   decl {Fl_Valuator *cbwig;} {public local
   }
-  decl {std::vector<Bank::banksearchstruct> results;} {private local
-  }
-}
+} 
