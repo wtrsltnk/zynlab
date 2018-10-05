@@ -39,11 +39,6 @@ Effect::Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
 
 Effect::~Effect() = default;
 
-void Effect::out(float *const smpsl, float *const smpsr)
-{
-    out(Stereo<float *>(smpsl, smpsr));
-}
-
 void Effect::CrossOver(float &a, float &b, float crossover)
 {
     float tmpa = a;

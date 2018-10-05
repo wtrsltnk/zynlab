@@ -27,7 +27,7 @@
 #include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 
-class FilterParams : public PresetsArray
+class FilterParams : public Presets
 {
 protected:
     SystemSettings *_synth;

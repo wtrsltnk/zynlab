@@ -290,7 +290,7 @@ struct ADnoteVoiceParam
     EnvelopeParams *FMAmpEnvelope;
 };
 
-class ADnoteParameters : public PresetsArray
+class ADnoteParameters : public Presets
 {
     SystemSettings *_synth;
 

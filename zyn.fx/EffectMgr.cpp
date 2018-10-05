@@ -220,7 +220,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
         efxoutl[i] = 0.0f;
         efxoutr[i] = 0.0f;
     }
-    efx->out(smpsl, smpsr);
+    efx->out(Stereo<float *>(smpsl, smpsr));
 
     float volume = efx->volume;
 

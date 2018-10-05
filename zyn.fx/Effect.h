@@ -68,7 +68,6 @@ public:
          * @param smpsl Input buffer for the Left channel
          * @param smpsr Input buffer for the Right channel
          */
-    void out(float *const smpsl, float *const smpsr);
     virtual void out(const Stereo<float *> &smp) = 0;
     /**Reset the state of the effect*/
     virtual void Cleanup(void) {}
