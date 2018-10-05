@@ -262,37 +262,37 @@ void Config::readConfig(const char *filename)
 
 void Config::saveConfig(const char *filename)
 {
-    auto *xmlcfg = new XMLwrapper();
+    XMLwrapper xmlcfg;
 
-    xmlcfg->beginbranch("CONFIGURATION");
+    xmlcfg.beginbranch("CONFIGURATION");
 
-    xmlcfg->addparunsigned("sample_rate", cfg.SampleRate);
-    xmlcfg->addparunsigned("sound_buffer_size", cfg.SoundBufferSize);
-    xmlcfg->addparunsigned("oscil_size", cfg.OscilSize);
-    xmlcfg->addparunsigned("swap_stereo", cfg.SwapStereo);
-    xmlcfg->addpar("bank_window_auto_close", cfg.BankUIAutoClose);
+    xmlcfg.addparunsigned("sample_rate", cfg.SampleRate);
+    xmlcfg.addparunsigned("sound_buffer_size", cfg.SoundBufferSize);
+    xmlcfg.addparunsigned("oscil_size", cfg.OscilSize);
+    xmlcfg.addparunsigned("swap_stereo", cfg.SwapStereo);
+    xmlcfg.addpar("bank_window_auto_close", cfg.BankUIAutoClose);
 
-    xmlcfg->addpar("dump_notes_to_file", cfg.DumpNotesToFile);
-    xmlcfg->addpar("dump_append", cfg.DumpAppend);
-    xmlcfg->addparstr("dump_file", cfg.DumpFile);
+    xmlcfg.addpar("dump_notes_to_file", cfg.DumpNotesToFile);
+    xmlcfg.addpar("dump_append", cfg.DumpAppend);
+    xmlcfg.addparstr("dump_file", cfg.DumpFile);
 
-    xmlcfg->addpar("gzip_compression", cfg.GzipCompression);
+    xmlcfg.addpar("gzip_compression", cfg.GzipCompression);
 
-    xmlcfg->addpar("check_pad_synth", cfg.CheckPADsynth);
-    xmlcfg->addpar("ignore_program_change", cfg.IgnoreProgramChange);
+    xmlcfg.addpar("check_pad_synth", cfg.CheckPADsynth);
+    xmlcfg.addpar("ignore_program_change", cfg.IgnoreProgramChange);
 
-    xmlcfg->addparstr("bank_current", cfg.currentBankDir);
+    xmlcfg.addparstr("bank_current", cfg.currentBankDir);
 
-    xmlcfg->addpar("user_interface_mode", cfg.UserInterfaceMode);
-    xmlcfg->addpar("virtual_keyboard_layout", cfg.VirKeybLayout);
+    xmlcfg.addpar("user_interface_mode", cfg.UserInterfaceMode);
+    xmlcfg.addpar("virtual_keyboard_layout", cfg.VirKeybLayout);
 
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
     {
         if (!cfg.bankRootDirList[i].empty())
         {
-            xmlcfg->beginbranch("BANKROOT", i);
-            xmlcfg->addparstr("bank_root", cfg.bankRootDirList[i]);
-            xmlcfg->endbranch();
+            xmlcfg.beginbranch("BANKROOT", i);
+            xmlcfg.addparstr("bank_root", cfg.bankRootDirList[i]);
+            xmlcfg.endbranch();
         }
     }
 
@@ -300,30 +300,28 @@ void Config::saveConfig(const char *filename)
     {
         if (!cfg.presetsDirList[i].empty())
         {
-            xmlcfg->beginbranch("PRESETSROOT", i);
-            xmlcfg->addparstr("presets_root", cfg.presetsDirList[i]);
-            xmlcfg->endbranch();
+            xmlcfg.beginbranch("PRESETSROOT", i);
+            xmlcfg.addparstr("presets_root", cfg.presetsDirList[i]);
+            xmlcfg.endbranch();
         }
     }
 
-    xmlcfg->addpar("interpolation", cfg.Interpolation);
+    xmlcfg.addpar("interpolation", cfg.Interpolation);
 
     //linux stuff
-    xmlcfg->addparstr("linux_oss_wave_out_dev", cfg.LinuxOSSWaveOutDev);
-    xmlcfg->addparstr("linux_oss_seq_in_dev", cfg.LinuxOSSSeqInDev);
+    xmlcfg.addparstr("linux_oss_wave_out_dev", cfg.LinuxOSSWaveOutDev);
+    xmlcfg.addparstr("linux_oss_seq_in_dev", cfg.LinuxOSSSeqInDev);
 
     //windows stuff
-    xmlcfg->addpar("windows_wave_out_id", cfg.WindowsWaveOutId);
-    xmlcfg->addpar("windows_midi_in_id", cfg.WindowsMidiInId);
+    xmlcfg.addpar("windows_wave_out_id", cfg.WindowsWaveOutId);
+    xmlcfg.addpar("windows_midi_in_id", cfg.WindowsMidiInId);
 
-    xmlcfg->endbranch();
+    xmlcfg.endbranch();
 
     int tmp = cfg.GzipCompression;
     cfg.GzipCompression = 0;
-    xmlcfg->saveXMLfile(filename);
+    xmlcfg.saveXMLfile(filename);
     cfg.GzipCompression = tmp;
-
-    delete (xmlcfg);
 }
 
 void Config::getConfigFileName(char *name, int namesize)

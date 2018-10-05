@@ -24,10 +24,10 @@
 #include <cmath>
 
 SUBnoteParameters::SUBnoteParameters(SystemSettings *synth_)
+    : AmpEnvelope(64, 1)
 {
     setpresettype("Psubsynth");
-    AmpEnvelope = new EnvelopeParams(64, 1);
-    AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
+    AmpEnvelope.ADSRinit_dB(0, 40, 127, 25);
     FreqEnvelope = new EnvelopeParams(64, 0);
     FreqEnvelope->ASRinit(30, 50, 64, 60);
     BandWidthEnvelope = new EnvelopeParams(64, 0);
@@ -38,6 +38,14 @@ SUBnoteParameters::SUBnoteParameters(SystemSettings *synth_)
     GlobalFilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
 
     defaults();
+}
+
+SUBnoteParameters::~SUBnoteParameters()
+{
+    delete (FreqEnvelope);
+    delete (BandWidthEnvelope);
+    delete (GlobalFilter);
+    delete (GlobalFilterEnvelope);
 }
 
 void SUBnoteParameters::defaults()
@@ -78,20 +86,11 @@ void SUBnoteParameters::defaults()
     PGlobalFilterVelocityScale = 64;
     PGlobalFilterVelocityScaleFunction = 64;
 
-    AmpEnvelope->defaults();
+    AmpEnvelope.defaults();
     FreqEnvelope->defaults();
     BandWidthEnvelope->defaults();
     GlobalFilter->defaults();
     GlobalFilterEnvelope->defaults();
-}
-
-SUBnoteParameters::~SUBnoteParameters()
-{
-    delete (AmpEnvelope);
-    delete (FreqEnvelope);
-    delete (BandWidthEnvelope);
-    delete (GlobalFilter);
-    delete (GlobalFilterEnvelope);
 }
 
 void SUBnoteParameters::add2XML(XMLwrapper *xml)
@@ -118,7 +117,7 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml)
     xml->addpar("panning", PPanning);
     xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
     xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope->add2XML(xml);
+    AmpEnvelope.add2XML(xml);
     xml->endbranch();
     xml->endbranch();
 
@@ -265,7 +264,7 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml)
                                                    PAmpVelocityScaleFunction);
         if (xml->enterbranch("AMPLITUDE_ENVELOPE"))
         {
-            AmpEnvelope->getfromXML(xml);
+            AmpEnvelope.getfromXML(xml);
             xml->exitbranch();
         }
         xml->exitbranch();

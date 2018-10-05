@@ -100,9 +100,9 @@ public:
     void texttomapping(const char *text);
 
     /**Name of Microtonal tuning*/
-    unsigned char *Pname;
+    unsigned char Pname[MICROTONAL_MAX_NAME_LEN];
     /**Comment about the tuning*/
-    unsigned char *Pcomment;
+    unsigned char Pcomment[MICROTONAL_MAX_NAME_LEN];
 
     void add2XML(XMLwrapper *xml) const;
     void getfromXML(XMLwrapper *xml);

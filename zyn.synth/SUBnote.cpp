@@ -378,7 +378,7 @@ void SUBnote::filter(bpfilter &filter, float *smps)
  */
 void SUBnote::initparameters(float freq)
 {
-    AmpEnvelope = new Envelope(pars->AmpEnvelope, freq, this->_synth);
+    AmpEnvelope = new Envelope(&pars->AmpEnvelope, freq, this->_synth);
     if (pars->PFreqEnvelopeEnabled != 0)
         FreqEnvelope = new Envelope(pars->FreqEnvelope, freq, this->_synth);
     else

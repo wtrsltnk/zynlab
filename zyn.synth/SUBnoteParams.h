@@ -46,7 +46,7 @@ public:
     unsigned char PVolume{};
     unsigned char PPanning{};
     unsigned char PAmpVelocityScaleFunction{};
-    EnvelopeParams *AmpEnvelope;
+    EnvelopeParams AmpEnvelope;
 
     //Frequency Parameters
     unsigned short int PDetune{};

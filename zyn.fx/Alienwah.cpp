@@ -175,7 +175,7 @@ void Alienwah::ChangeParameter(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            SetPanning(value);
+            SetPanning(static_cast<char>(value));
             break;
         case 2:
             lfo.Pfreq = value;
@@ -203,7 +203,7 @@ void Alienwah::ChangeParameter(int npar, unsigned char value)
             setdelay(value);
             break;
         case 9:
-            SetLRCross(value);
+            SetLRCross(static_cast<char>(value));
             break;
         case 10:
             setphase(value);
@@ -218,7 +218,7 @@ unsigned char Alienwah::GetParameter(int npar) const
         case 0:
             return Pvolume;
         case 1:
-            return Ppanning;
+            return static_cast<unsigned char>(Ppanning);
         case 2:
             return lfo.Pfreq;
         case 3:
@@ -234,7 +234,7 @@ unsigned char Alienwah::GetParameter(int npar) const
         case 8:
             return Pdelay;
         case 9:
-            return Plrcross;
+            return static_cast<unsigned char>(Plrcross);
         case 10:
             return Pphase;
         default:

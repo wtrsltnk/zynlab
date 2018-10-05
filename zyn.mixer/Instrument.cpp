@@ -1077,8 +1077,7 @@ void Instrument::ComputePartSmps()
 void Instrument::setPvolume(unsigned char Pvolume_)
 {
     Pvolume = Pvolume_;
-    volume =
-        dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;
+    volume = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;
 }
 
 void Instrument::setPpanning(unsigned char Ppanning_)
@@ -1086,9 +1085,13 @@ void Instrument::setPpanning(unsigned char Ppanning_)
     Ppanning = Ppanning_;
     panning = Ppanning / 127.0f + ctl.panning.pan;
     if (panning < 0.0f)
+    {
         panning = 0.0f;
+    }
     else if (panning > 1.0f)
+    {
         panning = 1.0f;
+    }
 }
 
 /*
@@ -1130,8 +1133,12 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
     }
 
     if (resetallnotes)
+    {
         for (unsigned int k = 0; k < POLIPHONY; ++k)
+        {
             KillNotePos(k);
+        }
+    }
 }
 
 void Instrument::add2XMLinstrument(XMLwrapper *xml)
@@ -1210,7 +1217,9 @@ void Instrument::add2XML(XMLwrapper *xml)
     //parameters
     xml->addparbool("enabled", Penabled);
     if ((Penabled == 0) && (xml->minimal))
+    {
         return;
+    }
 
     xml->addpar("volume", Pvolume);
     xml->addpar("panning", Ppanning);
@@ -1239,41 +1248,43 @@ void Instrument::add2XML(XMLwrapper *xml)
 
 int Instrument::saveXML(const char *filename)
 {
-    XMLwrapper *xml;
-    xml = new XMLwrapper();
+    XMLwrapper xml;
 
-    xml->beginbranch("INSTRUMENT");
-    add2XMLinstrument(xml);
-    xml->endbranch();
+    xml.beginbranch("INSTRUMENT");
+    add2XMLinstrument(&xml);
+    xml.endbranch();
 
-    int result = xml->saveXMLfile(filename);
-    delete (xml);
-    return result;
+    return xml.saveXMLfile(filename);
 }
 
 int Instrument::loadXMLinstrument(const char *filename)
 {
-    auto *xml = new XMLwrapper();
-    if (xml->loadXMLfile(filename) < 0)
+    XMLwrapper xml;
+    if (xml.loadXMLfile(filename) < 0)
     {
-        delete (xml);
         return -1;
     }
 
-    if (xml->enterbranch("INSTRUMENT") == 0)
+    if (xml.enterbranch("INSTRUMENT") == 0)
+    {
         return -10;
-    getfromXMLinstrument(xml);
-    xml->exitbranch();
+    }
 
-    delete (xml);
+    getfromXMLinstrument(&xml);
+    xml.exitbranch();
+
     return 0;
 }
 
 void Instrument::applyparameters(bool lockmutex)
 {
     for (auto &n : kit)
+    {
         if ((n.padpars != nullptr) && (n.Ppadenabled != 0))
+        {
             n.padpars->applyparameters(lockmutex);
+        }
+    }
 }
 
 void Instrument::getfromXMLinstrument(XMLwrapper *xml)

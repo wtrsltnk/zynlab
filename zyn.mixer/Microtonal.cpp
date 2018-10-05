@@ -27,8 +27,6 @@
 
 Microtonal::Microtonal()
 {
-    Pname = new unsigned char[MICROTONAL_MAX_NAME_LEN];
-    Pcomment = new unsigned char[MICROTONAL_MAX_NAME_LEN];
     defaults();
 }
 
@@ -75,10 +73,7 @@ void Microtonal::defaults()
 }
 
 Microtonal::~Microtonal()
-{
-    delete[] Pname;
-    delete[] Pcomment;
-}
+{ }
 
 /*
  * Get the size of the octave
@@ -824,34 +819,31 @@ void Microtonal::getfromXML(XMLwrapper *xml)
 
 int Microtonal::saveXML(const char *filename) const
 {
-    auto *xml = new XMLwrapper();
+    XMLwrapper xml;
 
-    xml->beginbranch("MICROTONAL");
-    add2XML(xml);
-    xml->endbranch();
+    xml.beginbranch("MICROTONAL");
+    add2XML(&xml);
+    xml.endbranch();
 
-    int result = xml->saveXMLfile(filename);
-    delete (xml);
-    return result;
+    return xml.saveXMLfile(filename);
 }
 
 int Microtonal::loadXML(const char *filename)
 {
-    auto *xml = new XMLwrapper();
-    if (xml->loadXMLfile(filename) < 0)
+    XMLwrapper xml;
+
+    if (xml.loadXMLfile(filename) < 0)
     {
-        delete (xml);
         return -1;
     }
 
-    if (xml->enterbranch("MICROTONAL") == 0)
+    if (xml.enterbranch("MICROTONAL") == 0)
     {
         return -10;
     }
 
-    getfromXML(xml);
-    xml->exitbranch();
+    getfromXML(&xml);
+    xml.exitbranch();
 
-    delete (xml);
     return 0;
 }

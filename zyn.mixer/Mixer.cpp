@@ -734,75 +734,68 @@ void Mixer::applyparameters(bool lockmutex)
 
 int Mixer::getalldata(char **data)
 {
-    auto *xml = new XMLwrapper();
+    XMLwrapper xml;
 
-    xml->beginbranch("MASTER");
+    xml.beginbranch("MASTER");
 
     Lock();
-    add2XML(xml);
+    add2XML(&xml);
     Unlock();
 
-    xml->endbranch();
+    xml.endbranch();
 
-    *data = xml->getXMLdata();
-    delete (xml);
+    *data = xml.getXMLdata();
+
     return static_cast<int>(strlen(*data) + 1);
 }
 
 void Mixer::putalldata(char *data, int /*size*/)
 {
-    auto *xml = new XMLwrapper();
-    if (!xml->putXMLdata(data))
+    XMLwrapper xml;
+    if (!xml.putXMLdata(data))
     {
-        delete (xml);
         return;
     }
 
-    if (xml->enterbranch("MASTER") == 0)
+    if (xml.enterbranch("MASTER") == 0)
     {
         return;
     }
 
     Lock();
-    getfromXML(xml);
+    getfromXML(&xml);
     Unlock();
 
-    xml->exitbranch();
-
-    delete (xml);
+    xml.exitbranch();
 }
 
 int Mixer::saveXML(const char *filename)
 {
-    auto *xml = new XMLwrapper();
+    XMLwrapper xml;
 
-    xml->beginbranch("MASTER");
-    add2XML(xml);
-    xml->endbranch();
+    xml.beginbranch("MASTER");
+    add2XML(&xml);
+    xml.endbranch();
 
-    int result = xml->saveXMLfile(filename);
-    delete (xml);
-    return result;
+    return xml.saveXMLfile(filename);
 }
 
 int Mixer::loadXML(const char *filename)
 {
-    auto *xml = new XMLwrapper();
-    if (xml->loadXMLfile(filename) < 0)
+    XMLwrapper xml;
+    if (xml.loadXMLfile(filename) < 0)
     {
-        delete (xml);
         return -1;
     }
 
-    if (xml->enterbranch("MASTER") == 0)
+    if (xml.enterbranch("MASTER") == 0)
     {
         return -10;
     }
 
-    getfromXML(xml);
-    xml->exitbranch();
+    getfromXML(&xml);
+    xml.exitbranch();
 
-    delete (xml);
     return 0;
 }
 

@@ -328,7 +328,7 @@ public:
 
     virtual IBankManager *GetBankManager() = 0;
 
-    // Parts
+    // Instruments
     virtual int GetInstrumentCount() = 0;
     virtual Instrument *GetInstrument(int index) = 0;
 

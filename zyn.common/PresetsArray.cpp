@@ -38,34 +38,48 @@ void PresetsArray::setpresettype(const char *type)
 
 void PresetsArray::copy(const char *name)
 {
-    auto *xml = new XMLwrapper();
+    XMLwrapper xml;
 
     //used only for the clipboard
     if (name == nullptr)
-        xml->minimal = false;
+    {
+        xml.minimal = false;
+    }
 
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
     if (nelement != -1)
+    {
         strcat(type, "n");
+    }
     if (name == nullptr)
+    {
         if (strstr(type, "Plfo") != nullptr)
+        {
             strcpy(type, "Plfo");
-    ;
+        }
+    }
 
-    xml->beginbranch(type);
+    xml.beginbranch(type);
     if (nelement == -1)
-        add2XML(xml);
+    {
+        add2XML(&xml);
+    }
     else
-        add2XMLsection(xml, nelement);
-    xml->endbranch();
+    {
+        add2XMLsection(&xml, nelement);
+    }
+    xml.endbranch();
 
     if (name == nullptr)
-        presetsstore.CopyClipboard(xml, type);
+    {
+        presetsstore.CopyClipboard(&xml, type);
+    }
     else
-        presetsstore.CopyPreset(xml, type, name);
+    {
+        presetsstore.CopyPreset(&xml, type, name);
+    }
 
-    delete (xml);
     nelement = -1;
 }
 
@@ -74,36 +88,38 @@ void PresetsArray::paste(int npreset)
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
     if (nelement != -1)
+    {
         strcat(type, "n");
+    }
     if (npreset == 0)
+    {
         if (strstr(type, "Plfo") != nullptr)
+        {
             strcpy(type, "Plfo");
-    ;
+        }
+    }
 
-    auto *xml = new XMLwrapper();
+    XMLwrapper xml;
     if (npreset == 0)
     {
         if (!checkclipboardtype())
         {
             nelement = -1;
-            delete (xml);
             return;
         }
-        if (!presetsstore.PasteClipboard(xml))
+        if (!presetsstore.PasteClipboard(&xml))
         {
-            delete (xml);
             nelement = -1;
             return;
         }
     }
-    else if (!presetsstore.PastePreset(xml, npreset))
+    else if (!presetsstore.PastePreset(&xml, npreset))
     {
-        delete (xml);
         nelement = -1;
         return;
     }
 
-    if (xml->enterbranch(type) == 0)
+    if (xml.enterbranch(type) == 0)
     {
         nelement = -1;
         return;
@@ -111,16 +127,15 @@ void PresetsArray::paste(int npreset)
     if (nelement == -1)
     {
         defaults();
-        getfromXML(xml);
+        getfromXML(&xml);
     }
     else
     {
         defaults(nelement);
-        getfromXMLsection(xml, nelement);
+        getfromXMLsection(&xml, nelement);
     }
-    xml->exitbranch();
+    xml.exitbranch();
 
-    delete (xml);
     nelement = -1;
 }
 
@@ -129,7 +144,9 @@ bool PresetsArray::checkclipboardtype()
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
     if (nelement != -1)
+    {
         strcat(type, "n");
+    }
 
     return presetsstore.CheckClipboardType(type);
 }
@@ -139,7 +156,9 @@ void PresetsArray::rescanforpresets()
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
     if (nelement != -1)
+    {
         strcat(type, "n");
+    }
 
     presetsstore.RescaneForPresets(type);
 }
