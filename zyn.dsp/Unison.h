@@ -37,7 +37,7 @@ public:
     void setBaseFrequency(float freq);
     void setBandwidth(float bandwidth_cents);
 
-    void process(int bufsize, float *inbuf, float *outbuf = NULL);
+    void process(int bufsize, float *inbuf, float *outbuf = nullptr);
 
 private:
     void updateParameters(void);
@@ -75,4 +75,5 @@ private:
     // current setup
     float samplerate_f;
 };
+
 #endif

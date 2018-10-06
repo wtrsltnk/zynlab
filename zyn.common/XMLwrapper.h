@@ -164,8 +164,7 @@ public:
      * @param min The minimum return value.
      * @param max The maximum return value.
      */
-    int getpar(const std::string &name, int defaultpar, int min,
-               int max) const;
+    int getpar(const std::string &name, int defaultpar, int min, int max) const;
 
     /**
      * Returns the integer value stored in node name.
@@ -177,15 +176,14 @@ public:
      * @param min The minimum return value.
      * @param max The maximum return value.
      */
-    unsigned int getparunsigned(const std::string &name, unsigned int defaultpar, unsigned int min,
-               unsigned int max) const;
+    unsigned int getparunsigned(const std::string &name, unsigned int defaultpar, unsigned int min, unsigned int max) const;
 
     /**
      * Returns the integer value stored in the node with range [0,127].
      * @param name The parameter name.
      * @param defaultpar The default value if the real value is not found.
      */
-    int getpar127(const std::string &name, int defaultpar) const;
+    unsigned char getpar127(const std::string &name, int defaultpar) const;
 
     /**
      * Returns the boolean value stored in the node.
@@ -207,8 +205,7 @@ public:
      * @param name The parameter name.
      * @param defaultpar The default value if the real value is not found.
      */
-    std::string getparstr(const std::string &name,
-                          const std::string &defaultpar) const;
+    std::string getparstr(const std::string &name, const std::string &defaultpar) const;
 
     /**
      * Returns the real value stored in the node.
@@ -224,10 +221,7 @@ public:
      * @param min The minimum value
      * @param max The maximum value
      */
-    float getparreal(const char *name,
-                     float defaultpar,
-                     float min,
-                     float max) const;
+    float getparreal(const char *name, float defaultpar, float min, float max) const;
 
     bool minimal; /**<false if all parameters will be stored (used only for clipboard)*/
 
@@ -247,9 +241,7 @@ private:
      * @param compression Level of gzip compression
      * @param xmldata String to be saved
      */
-    int dosavefile(const char *filename,
-                   int compression,
-                   const char *xmldata) const;
+    int dosavefile(const char *filename, int compression, const char *xmldata) const;
 
     /**
      * Loads specified file and returns data.
@@ -276,8 +268,7 @@ private:
      * @param ... const char * pairs that are in the format attribute_name,
      * attribute_value
      */
-    mxml_node_t *addparams(const char *name, unsigned int params,
-                           ...) const;
+    mxml_node_t *addparams(const char *name, unsigned int params, ...) const;
 
     /**@todo keep these numbers up to date*/
     struct

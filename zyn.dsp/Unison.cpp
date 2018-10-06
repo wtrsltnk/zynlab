@@ -31,7 +31,7 @@ Unison::Unison(int update_period_samples_, float max_delay_sec_, float srate_f)
       uv(nullptr),
       update_period_samples(update_period_samples_),
       update_period_sample_k(0),
-      max_delay((int)(srate_f * max_delay_sec_) + 1),
+      max_delay(static_cast<int>(srate_f * max_delay_sec_) + 1),
       delay_k(0),
       first_time(false),
       delay_buffer(nullptr),
@@ -42,7 +42,7 @@ Unison::Unison(int update_period_samples_, float max_delay_sec_, float srate_f)
     if (max_delay < 10)
         max_delay = 10;
     delay_buffer = new float[max_delay];
-    memset(delay_buffer, 0, max_delay * sizeof(float));
+    memset(delay_buffer, 0, static_cast<unsigned int>(max_delay) * sizeof(float));
     setSize(1);
 }
 
@@ -88,8 +88,11 @@ void Unison::setBandwidth(float bandwidth)
 void Unison::updateParameters()
 {
     if (!uv)
+    {
         return;
-    float increments_per_second = samplerate_f / (float)update_period_samples;
+    }
+
+    float increments_per_second = samplerate_f / static_cast<float>(update_period_samples);
     //	printf("#%g, %g\n",increments_per_second,base_freq);
     for (int i = 0; i < unison_size; ++i)
     {
@@ -98,7 +101,9 @@ void Unison::updateParameters()
         float period = base / base_freq;
         float m = 4.0f / (period * increments_per_second);
         if (SystemSettings::numRandom() < 0.5f)
+        {
             m = -m;
+        }
         uv[i].step = m;
         //		printf("%g %g\n",uv[i].relative_amplitude,period);
     }
@@ -121,13 +126,18 @@ void Unison::updateParameters()
 void Unison::process(int bufsize, float *inbuf, float *outbuf)
 {
     if (!uv)
+    {
         return;
+    }
+
     if (!outbuf)
+    {
         outbuf = inbuf;
+    }
 
     float volume = 1.0f / sqrtf(unison_size);
-    float xpos_step = 1.0f / (float)update_period_samples;
-    float xpos = (float)update_period_sample_k * xpos_step;
+    float xpos_step = 1.0f / static_cast<float>(update_period_samples);
+    float xpos = static_cast<float>(update_period_sample_k) * xpos_step;
     for (int i = 0; i < bufsize; ++i)
     {
         if (update_period_sample_k++ >= update_period_samples)
@@ -142,7 +152,7 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf)
         for (int k = 0; k < unison_size; ++k)
         {
             float vpos = uv[k].realpos1 * (1.0f - xpos) + uv[k].realpos2 * xpos; //optimize
-            float pos = (float)(delay_k + max_delay) - vpos - 1.0f;
+            float pos = static_cast<float>(delay_k + max_delay) - vpos - 1.0f;
             int posi;
             F2I(pos, posi); //optimize!
             int posi_next = posi + 1;
@@ -164,7 +174,9 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf)
 void Unison::updateUnisonData()
 {
     if (!uv)
+    {
         return;
+    }
 
     for (int k = 0; k < unison_size; ++k)
     {

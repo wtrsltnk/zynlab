@@ -229,7 +229,7 @@ enum LegatoMsg
                                           0.49999999f) \
                                     : "st");
 #else
-#define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
+#define F2I(f, i) (i) = ((f > 0) ? (static_cast<int>(f)) : (static_cast<int>(f - 1.0f)));
 #endif
 
 #ifndef O_BINARY
@@ -272,14 +272,14 @@ public:
     unsigned int bufferbytes{};
     float oscilsize_f{};
 
-    inline void alias(void)
+    inline void alias()
     {
         halfsamplerate_f = (samplerate_f = samplerate) / 2.0f;
         buffersize_f = buffersize;
         bufferbytes = buffersize * sizeof(float);
         oscilsize_f = oscilsize;
     }
-    static float numRandom(void); //defined in Util.cpp for now
+    static float numRandom(); //defined in Util.cpp for now
 };
 
 //entries in a bank

@@ -25,14 +25,14 @@
 
 int LFOParams::time;
 
-LFOParams::LFOParams(char Pfreq_,
-                     char Pintensity_,
-                     char Pstartphase_,
-                     char PLFOtype_,
-                     char Prandomness_,
-                     char Pdelay_,
-                     char Pcontinous_,
-                     char fel_)
+LFOParams::LFOParams(unsigned char Pfreq_,
+                     unsigned char Pintensity_,
+                     unsigned char Pstartphase_,
+                     unsigned char PLFOtype_,
+                     unsigned char Prandomness_,
+                     unsigned char Pdelay_,
+                     bool Pcontinous_,
+                     unsigned char fel_)
 {
     switch (fel_)
     {

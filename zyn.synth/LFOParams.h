@@ -30,14 +30,14 @@
 class LFOParams : public Presets
 {
 public:
-    LFOParams(char Pfreq_,
-              char Pintensity_,
-              char Pstartphase_,
-              char PLFOtype_,
-              char Prandomness_,
-              char Pdelay_,
-              char Pcontinous,
-              char fel_);
+    LFOParams(unsigned char Pfreq_,
+              unsigned char Pintensity_,
+              unsigned char Pstartphase_,
+              unsigned char PLFOtype_,
+              unsigned char Prandomness_,
+              unsigned char Pdelay_,
+              bool Pcontinous,
+              unsigned char fel_);
     ~LFOParams();
 
     void add2XML(XMLwrapper *xml);
@@ -53,7 +53,7 @@ public:
     unsigned char Prandomness{}; /**<randomness (0=off)*/
     unsigned char Pfreqrand{};   /**<frequency randomness (0=off)*/
     unsigned char Pdelay{};      /**<delay (0=off)*/
-    unsigned char Pcontinous{};  /**<1 if LFO is continous*/
+    bool Pcontinous{};  /**<1 if LFO is continous*/
     unsigned char Pstretch{};    /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
 
     int fel;         //what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
@@ -66,7 +66,7 @@ private:
     unsigned char DLFOtype;
     unsigned char Drandomness;
     unsigned char Ddelay;
-    unsigned char Dcontinous;
+    bool Dcontinous;
 };
 
 #endif

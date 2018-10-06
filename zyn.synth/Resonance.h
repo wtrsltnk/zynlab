@@ -19,10 +19,11 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+
 #ifndef RESONANCE_H
 #define RESONANCE_H
 
-#include "IFFTwrapper.h"
+#include "ifftwrapper.h"
 #include <zyn.common/Presets.h>
 #include <zyn.common/Util.h>
 #include <zyn.common/XMLwrapper.h>

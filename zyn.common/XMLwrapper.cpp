@@ -482,9 +482,9 @@ unsigned int XMLwrapper::getparunsigned(const string &name, unsigned int default
     return val;
 }
 
-int XMLwrapper::getpar127(const string &name, int defaultpar) const
+unsigned char XMLwrapper::getpar127(const string &name, int defaultpar) const
 {
-    return getpar(name, defaultpar, 0, 127);
+    return static_cast<unsigned char>(getpar(name, defaultpar, 0, 127));
 }
 
 int XMLwrapper::getparbool(const string &name, int defaultpar) const
