@@ -115,7 +115,7 @@ OscilGen::OscilGen(IFFTwrapper *fft_, Resonance *res_, SystemSettings *synth_)
     randseed = 1;
     ADvsPAD = false;
 
-    defaults();
+    Defaults();
 }
 
 OscilGen::~OscilGen()
@@ -126,7 +126,7 @@ OscilGen::~OscilGen()
     delete[] oscilFFTfreqs;
 }
 
-void OscilGen::defaults()
+void OscilGen::Defaults()
 {
     oldbasefunc = 0;
     oldbasepar = 64;
@@ -217,7 +217,7 @@ void OscilGen::convert2sine()
         phase[i] = arg(freqs, i + 1);
     }
 
-    defaults();
+    Defaults();
 
     for (int i = 0; i < MAX_AD_HARMONICS - 1; ++i)
     {
@@ -968,7 +968,7 @@ void OscilGen::getcurrentbasefunction(float *smps)
         getbasefunction(smps); //the sine case
 }
 
-void OscilGen::add2XML(IPresetsSerializer *xml)
+void OscilGen::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("harmonic_mag_type", Phmagtype);
 
@@ -1039,7 +1039,7 @@ void OscilGen::add2XML(IPresetsSerializer *xml)
     }
 }
 
-void OscilGen::getfromXML(IPresetsSerializer *xml)
+void OscilGen::Deserialize(IPresetsSerializer *xml)
 {
     Phmagtype = xml->getpar127("harmonic_mag_type", Phmagtype);
 

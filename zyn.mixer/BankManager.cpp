@@ -198,7 +198,7 @@ void BankManager::LoadFromSlot(unsigned int ninstrument, Instrument *instrument)
     }
 
     instrument->AllNotesOff();
-    instrument->defaultsinstrument();
+    instrument->InstrumentDefaults();
 
     instrument->loadXMLinstrument(ins[ninstrument].filename.c_str());
 }

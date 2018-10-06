@@ -55,13 +55,9 @@ public:
     virtual ~Instrument();
 
     // Midi commands implemented
-    void NoteOn(unsigned char note,
-                unsigned char velocity,
-                int masterkeyshift);
+    void NoteOn(unsigned char note, unsigned char velocity, int masterkeyshift);
     void NoteOff(unsigned char note);
-    void PolyphonicAftertouch(unsigned char note,
-                              unsigned char velocity,
-                              int masterkeyshift);
+    void PolyphonicAftertouch(unsigned char note, unsigned char velocity, int masterkeyshift);
     void AllNotesOff(); //panic
     void SetController(unsigned int type, int par);
     void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
@@ -77,16 +73,7 @@ public:
     int saveXML(const char *filename);
     int loadXMLinstrument(const char *filename);
 
-    void add2XML(IPresetsSerializer *xml);
-    void add2XMLinstrument(IPresetsSerializer *xml);
-
-    void defaults();
-    void defaultsinstrument();
-
     void applyparameters(bool lockmutex = true);
-
-    void getfromXML(IPresetsSerializer *xml);
-    void getfromXMLinstrument(IPresetsSerializer *xml);
 
     void cleanup(bool final = false);
 
@@ -160,6 +147,14 @@ public:
     pthread_mutex_t load_mutex{};
 
     int lastnote;
+
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
+
+    void SerializeInstrument(IPresetsSerializer *xml);
+    void DeserializeInstrument(IPresetsSerializer *xml);
+    void InstrumentDefaults();
 
 private:
     void RunNote(unsigned int k);

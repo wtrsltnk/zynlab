@@ -36,12 +36,12 @@ FilterParams::FilterParams(SystemSettings *synth_,
     Dq = Pq_;
 
     changed = false;
-    defaults();
+    Defaults();
 }
 
 FilterParams::~FilterParams() = default;
 
-void FilterParams::defaults()
+void FilterParams::Defaults()
 {
     Ptype = Dtype;
     Pfreq = Dfreq;
@@ -55,7 +55,7 @@ void FilterParams::defaults()
     Pnumformants = 3;
     Pformantslowness = 64;
     for (int j = 0; j < FF_MAX_VOWELS; ++j)
-        defaults(j);
+        Defaults(j);
     ;
 
     Psequencesize = 3;
@@ -69,7 +69,7 @@ void FilterParams::defaults()
     Pvowelclearness = 64;
 }
 
-void FilterParams::defaults(int n)
+void FilterParams::Defaults(int n)
 {
     int j = n;
     for (auto & formant : Pvowels[j].formants)
@@ -86,7 +86,7 @@ void FilterParams::defaults(int n)
 
 void FilterParams::getfromFilterParams(FilterParams *pars)
 {
-    defaults();
+    Defaults();
 
     if (pars == nullptr)
         return;
@@ -281,7 +281,7 @@ float FilterParams::getformantq(unsigned char q)
     return result;
 }
 
-void FilterParams::add2XMLsection(IPresetsSerializer *xml, int n)
+void FilterParams::SerializeSection(IPresetsSerializer *xml, int n)
 {
     int nvowel = n;
     for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
@@ -294,7 +294,7 @@ void FilterParams::add2XMLsection(IPresetsSerializer *xml, int n)
     }
 }
 
-void FilterParams::add2XML(IPresetsSerializer *xml)
+void FilterParams::Serialize(IPresetsSerializer *xml)
 {
     //filter parameters
     xml->addpar("category", Pcategory);
@@ -317,7 +317,7 @@ void FilterParams::add2XML(IPresetsSerializer *xml)
         for (int nvowel = 0; nvowel < FF_MAX_VOWELS; ++nvowel)
         {
             xml->beginbranch("VOWEL", nvowel);
-            add2XMLsection(xml, nvowel);
+            SerializeSection(xml, nvowel);
             xml->endbranch();
         }
         xml->addpar("sequence_size", Psequencesize);
@@ -333,7 +333,7 @@ void FilterParams::add2XML(IPresetsSerializer *xml)
     }
 }
 
-void FilterParams::getfromXMLsection(IPresetsSerializer *xml, int n)
+void FilterParams::DeserializeSection(IPresetsSerializer *xml, int n)
 {
     int nvowel = n;
     for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
@@ -352,7 +352,7 @@ void FilterParams::getfromXMLsection(IPresetsSerializer *xml, int n)
     }
 }
 
-void FilterParams::getfromXML(IPresetsSerializer *xml)
+void FilterParams::Deserialize(IPresetsSerializer *xml)
 {
     //filter parameters
     Pcategory = xml->getpar127("category", Pcategory);
@@ -376,7 +376,7 @@ void FilterParams::getfromXML(IPresetsSerializer *xml)
         {
             if (xml->enterbranch("VOWEL", nvowel) == 0)
                 continue;
-            getfromXMLsection(xml, nvowel);
+            DeserializeSection(xml, nvowel);
             xml->exitbranch();
         }
         Psequencesize = xml->getpar127("sequence_size", Psequencesize);

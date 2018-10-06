@@ -40,7 +40,8 @@ class AnalogFilter : public Filter
 public:
     AnalogFilter(unsigned char Ftype, float Ffreq, float Fq,
                  unsigned char Fstages, SystemSettings *synth_);
-    ~AnalogFilter();
+    virtual ~AnalogFilter();
+
     void filterout(float *smp);
     void setfreq(float frequency);
     void setfreq_and_q(float frequency, float q_);

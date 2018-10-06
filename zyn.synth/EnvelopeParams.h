@@ -23,8 +23,8 @@
 #ifndef ENVELOPE_PARAMS_H
 #define ENVELOPE_PARAMS_H
 
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
-#include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 
 #define MAX_ENVELOPE_POINTS 40
@@ -48,9 +48,9 @@ public:
     void ASRinit_bw(char A_val, char A_dt, char R_val, char R_dt);
     void converttofree();
 
-    void add2XML(IPresetsSerializer *xml);
-    void defaults();
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
 
     float getdt(char i);
 

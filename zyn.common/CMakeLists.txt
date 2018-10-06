@@ -5,6 +5,8 @@ project(zyn.common)
 add_library(zyn.common STATIC
     Config.cpp
     Config.h
+    IPresetsSerializer.cpp
+    IPresetsSerializer.h
     Presets.cpp
     Presets.h
     PresetsArray.cpp
@@ -20,8 +22,6 @@ add_library(zyn.common STATIC
     WavFile.h
     WaveShapeSmps.cpp
     WaveShapeSmps.h
-    XmlWrapper.cpp
-    XmlWrapper.h
     globals.cpp
     globals.h
 )

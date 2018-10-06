@@ -23,8 +23,8 @@
 #ifndef FILTER_PARAMS_H
 #define FILTER_PARAMS_H
 
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/PresetsArray.h>
-#include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 
 class FilterParams : public Presets
@@ -37,13 +37,13 @@ public:
                  unsigned char Ptype_,
                  unsigned char Pfreq,
                  unsigned char Pq_);
-    ~FilterParams();
+    virtual ~FilterParams();
 
-    void add2XML(IPresetsSerializer *xml);
-    void add2XMLsection(IPresetsSerializer *xml, int n);
-    void defaults();
-    void getfromXML(IPresetsSerializer *xml);
-    void getfromXMLsection(IPresetsSerializer *xml, int n);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
+    void SerializeSection(IPresetsSerializer *xml, int n);
+    void DeserializeSection(IPresetsSerializer *xml, int n);
 
     void getfromFilterParams(FilterParams *pars);
 
@@ -96,7 +96,7 @@ public:
     bool changed;
 
 private:
-    void defaults(int n);
+    void Defaults(int n);
 
     //stored default parameters
     unsigned char Dtype;

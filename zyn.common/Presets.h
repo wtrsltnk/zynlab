@@ -23,8 +23,8 @@
 #ifndef PRESETS_H
 #define PRESETS_H
 
+#include "IPresetsSerializer.h"
 #include "PresetsStore.h"
-#include "XMLwrapper.h"
 
 /**Presets and Clipboard management*/
 class Presets
@@ -48,10 +48,9 @@ public:
 protected:
     void setpresettype(const char *type);
 
-private:
-    virtual void add2XML(IPresetsSerializer *xml) = 0;
-    virtual void getfromXML(IPresetsSerializer *xml) = 0;
-    virtual void defaults() = 0;
+    virtual void Serialize(IPresetsSerializer *xml) = 0;
+    virtual void Deserialize(IPresetsSerializer *xml) = 0;
+    virtual void Defaults() = 0;
 };
 
 #endif

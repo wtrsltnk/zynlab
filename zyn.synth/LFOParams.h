@@ -23,8 +23,8 @@
 #ifndef LFO_PARAMS_H
 #define LFO_PARAMS_H
 
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
-#include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 
 class LFOParams : public Presets
@@ -38,12 +38,11 @@ public:
               unsigned char Pdelay_,
               bool Pcontinous,
               unsigned char fel_);
-    ~LFOParams();
+    virtual ~LFOParams();
 
-    void add2XML(IPresetsSerializer *xml);
-    void defaults();
-    /**Loads the LFO from the xml*/
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
 
     /*  MIDI Parameters*/
     float Pfreq{};               /**<frequency*/

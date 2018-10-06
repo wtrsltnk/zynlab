@@ -24,9 +24,9 @@
 #define RESONANCE_H
 
 #include "ifftwrapper.h"
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Util.h>
-#include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 
 #define N_RES_POINTS 256
@@ -42,9 +42,9 @@ public:
     void interpolatepeaks(int type);
     void randomize(int type);
 
-    void add2XML(IPresetsSerializer *xml);
-    void defaults();
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
 
     float getfreqpos(float freq);
     float getfreqx(float x);

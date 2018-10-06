@@ -29,9 +29,9 @@
 #include "OscilGen.h"
 #include "Resonance.h"
 
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Util.h>
-#include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
 
@@ -46,9 +46,9 @@ public:
     PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
     virtual ~PADnoteParameters();
 
-    void defaults();
-    void add2XML(IPresetsSerializer *xml);
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
 
     //returns a value between 0.0f-1.0f that represents the estimation perceived bandwidth
     float getprofile(float *smp, int size);

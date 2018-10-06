@@ -24,7 +24,7 @@
 #define PRESETSTORE_H
 
 #include "Config.h"
-#include "XMLwrapper.h"
+#include "IPresetsSerializer.h"
 #include <string>
 #include <vector>
 

@@ -157,7 +157,7 @@ void DynamicFilter::SetPreset(unsigned char npreset)
     for (int n = 0; n < PRESET_SIZE; ++n)
         ChangeParameter(n, presets[npreset][n]);
 
-    filterpars->defaults();
+    filterpars->Defaults();
 
     switch (npreset)
     {

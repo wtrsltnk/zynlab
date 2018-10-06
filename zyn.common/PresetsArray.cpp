@@ -64,11 +64,11 @@ void PresetsArray::copy(const char *name)
     xml.beginbranch(type);
     if (nelement == -1)
     {
-        add2XML(&xml);
+        Serialize(&xml);
     }
     else
     {
-        add2XMLsection(&xml, nelement);
+        SerializeSection(&xml, nelement);
     }
     xml.endbranch();
 
@@ -127,13 +127,13 @@ void PresetsArray::paste(int npreset)
     }
     if (nelement == -1)
     {
-        defaults();
-        getfromXML(&xml);
+        Defaults();
+        Deserialize(&xml);
     }
     else
     {
-        defaults(nelement);
-        getfromXMLsection(&xml, nelement);
+        Defaults(nelement);
+        DeserializeSection(&xml, nelement);
     }
     xml.exitbranch();
 

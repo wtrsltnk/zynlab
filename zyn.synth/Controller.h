@@ -23,7 +23,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/globals.h>
 
 /**(Midi) Controllers implementation*/
@@ -36,9 +36,9 @@ public:
     virtual ~Controller();
     void resetall();
 
-    void add2XML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
     void defaults();
-    void getfromXML(IPresetsSerializer *xml);
 
     //Controllers functions
     void setpitchwheel(int value);

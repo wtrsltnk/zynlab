@@ -23,7 +23,7 @@
 #ifndef PRESETSARRAY_H
 #define PRESETSARRAY_H
 
-#include "XMLwrapper.h"
+#include "IPresetsSerializer.h"
 
 #include "Presets.h"
 
@@ -48,12 +48,12 @@ protected:
     void setpresettype(const char *type);
 
 private:
-    virtual void add2XML(IPresetsSerializer *xml) = 0;
-    virtual void getfromXML(IPresetsSerializer *xml) = 0;
-    virtual void defaults() = 0;
-    virtual void add2XMLsection(IPresetsSerializer *xml, int n) = 0;
-    virtual void getfromXMLsection(IPresetsSerializer *xml, int n) = 0;
-    virtual void defaults(int n) = 0;
+    virtual void Serialize(IPresetsSerializer *xml) = 0;
+    virtual void Deserialize(IPresetsSerializer *xml) = 0;
+    virtual void Defaults() = 0;
+    virtual void SerializeSection(IPresetsSerializer *xml, int n) = 0;
+    virtual void DeserializeSection(IPresetsSerializer *xml, int n) = 0;
+    virtual void Defaults(int n) = 0;
     int nelement;
 };
 

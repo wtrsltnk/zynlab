@@ -23,7 +23,7 @@
 #ifndef PRESETSSERIALIZER_H
 #define PRESETSSERIALIZER_H
 
-#include "XMLwrapper.h"
+#include "IPresetsSerializer.h"
 #include <mxml.h>
 #include <string>
 

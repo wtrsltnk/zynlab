@@ -335,7 +335,7 @@ void Controller::setparameternumber(unsigned int type, int value)
     }
 }
 
-void Controller::add2XML(IPresetsSerializer *xml)
+void Controller::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("pitchwheel_bendrange", pitchwheel.bendrange);
 
@@ -364,7 +364,7 @@ void Controller::add2XML(IPresetsSerializer *xml)
     xml->addpar("resonance_bandwidth_depth", resonancebandwidth.depth);
 }
 
-void Controller::getfromXML(IPresetsSerializer *xml)
+void Controller::Deserialize(IPresetsSerializer *xml)
 {
     pitchwheel.bendrange = xml->getpar("pitchwheel_bendrange",
                                        pitchwheel.bendrange,

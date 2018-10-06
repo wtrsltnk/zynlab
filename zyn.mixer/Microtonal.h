@@ -23,7 +23,7 @@
 #ifndef MICROTONAL_H
 #define MICROTONAL_H
 
-#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/globals.h>
 
 #define MAX_OCTAVE_SIZE 128

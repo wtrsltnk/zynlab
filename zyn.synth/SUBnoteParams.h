@@ -24,8 +24,8 @@
 #define SUB_NOTE_PARAMETERS_H
 
 #include "EnvelopeParams.h"
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
-#include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
 
@@ -33,11 +33,12 @@ class SUBnoteParameters : public Presets
 {
 public:
     SUBnoteParameters(SystemSettings *synth_);
-    ~SUBnoteParameters();
+    virtual ~SUBnoteParameters();
 
-    void add2XML(IPresetsSerializer *xml);
-    void defaults();
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
+
     void updateFrequencyMultipliers(void);
 
     //Parameters

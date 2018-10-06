@@ -25,7 +25,7 @@
 #define MIXER_H
 
 #include "Microtonal.h"
-#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/globals.h>
 #include <zyn.synth/Controller.h>
 #include <zyn.synth/ifftwrapper.h>

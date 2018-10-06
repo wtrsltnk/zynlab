@@ -25,12 +25,12 @@
 Resonance::Resonance()
 {
     setpresettype("Presonance");
-    defaults();
+    Defaults();
 }
 
 Resonance::~Resonance() = default;
 
-void Resonance::defaults()
+void Resonance::Defaults()
 {
     Penabled = 0;
     PmaxdB = 20;
@@ -235,7 +235,7 @@ void Resonance::sendcontroller(MidiControllers ctl, float par)
         ctlbw = par;
 }
 
-void Resonance::add2XML(IPresetsSerializer *xml)
+void Resonance::Serialize(IPresetsSerializer *xml)
 {
     xml->addparbool("enabled", Penabled);
 
@@ -255,7 +255,7 @@ void Resonance::add2XML(IPresetsSerializer *xml)
     }
 }
 
-void Resonance::getfromXML(IPresetsSerializer *xml)
+void Resonance::Deserialize(IPresetsSerializer *xml)
 {
     Penabled = xml->getparbool("enabled", Penabled);
 

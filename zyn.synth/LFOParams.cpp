@@ -56,12 +56,12 @@ LFOParams::LFOParams(unsigned char Pfreq_,
     fel = fel_;
     time = 0;
 
-    defaults();
+    Defaults();
 }
 
 LFOParams::~LFOParams() = default;
 
-void LFOParams::defaults()
+void LFOParams::Defaults()
 {
     Pfreq = Dfreq / 127.0f;
     Pintensity = Dintensity;
@@ -74,7 +74,7 @@ void LFOParams::defaults()
     Pstretch = 64;
 }
 
-void LFOParams::add2XML(IPresetsSerializer *xml)
+void LFOParams::Serialize(IPresetsSerializer *xml)
 {
     xml->addparreal("freq", Pfreq);
     xml->addpar("intensity", Pintensity);
@@ -87,7 +87,7 @@ void LFOParams::add2XML(IPresetsSerializer *xml)
     xml->addparbool("continous", Pcontinous);
 }
 
-void LFOParams::getfromXML(IPresetsSerializer *xml)
+void LFOParams::Deserialize(IPresetsSerializer *xml)
 {
     Pfreq = xml->getparreal("freq", Pfreq, 0.0f, 1.0f);
     Pintensity = xml->getpar127("intensity", Pintensity);

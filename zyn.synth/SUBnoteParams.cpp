@@ -37,7 +37,7 @@ SUBnoteParameters::SUBnoteParameters(SystemSettings *synth_)
     GlobalFilterEnvelope = new EnvelopeParams(0, 1);
     GlobalFilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
 
-    defaults();
+    Defaults();
 }
 
 SUBnoteParameters::~SUBnoteParameters()
@@ -48,7 +48,7 @@ SUBnoteParameters::~SUBnoteParameters()
     delete (GlobalFilterEnvelope);
 }
 
-void SUBnoteParameters::defaults()
+void SUBnoteParameters::Defaults()
 {
     PVolume = 96;
     PPanning = 64;
@@ -86,14 +86,14 @@ void SUBnoteParameters::defaults()
     PGlobalFilterVelocityScale = 64;
     PGlobalFilterVelocityScaleFunction = 64;
 
-    AmpEnvelope.defaults();
-    FreqEnvelope->defaults();
-    BandWidthEnvelope->defaults();
-    GlobalFilter->defaults();
-    GlobalFilterEnvelope->defaults();
+    AmpEnvelope.Defaults();
+    FreqEnvelope->Defaults();
+    BandWidthEnvelope->Defaults();
+    GlobalFilter->Defaults();
+    GlobalFilterEnvelope->Defaults();
 }
 
-void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
+void SUBnoteParameters::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("num_stages", Pnumstages);
     xml->addpar("harmonic_mag_type", Phmagtype);
@@ -119,7 +119,7 @@ void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
     xml->addpar("panning", PPanning);
     xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
     xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope.add2XML(xml);
+    AmpEnvelope.Serialize(xml);
     xml->endbranch();
     xml->endbranch();
 
@@ -142,7 +142,7 @@ void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
     if ((PFreqEnvelopeEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("FREQUENCY_ENVELOPE");
-        FreqEnvelope->add2XML(xml);
+        FreqEnvelope->Serialize(xml);
         xml->endbranch();
     }
 
@@ -150,7 +150,7 @@ void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
     if ((PBandWidthEnvelopeEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("BANDWIDTH_ENVELOPE");
-        BandWidthEnvelope->add2XML(xml);
+        BandWidthEnvelope->Serialize(xml);
         xml->endbranch();
     }
     xml->endbranch();
@@ -160,7 +160,7 @@ void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
     if ((PGlobalFilterEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("FILTER");
-        GlobalFilter->add2XML(xml);
+        GlobalFilter->Serialize(xml);
         xml->endbranch();
 
         xml->addpar("filter_velocity_sensing",
@@ -169,7 +169,7 @@ void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
                     PGlobalFilterVelocityScale);
 
         xml->beginbranch("FILTER_ENVELOPE");
-        GlobalFilterEnvelope->add2XML(xml);
+        GlobalFilterEnvelope->Serialize(xml);
         xml->endbranch();
     }
     xml->endbranch();
@@ -178,8 +178,7 @@ void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
 void SUBnoteParameters::updateFrequencyMultipliers()
 {
     float par1 = POvertoneSpread.par1 / 255.0f;
-    float par1pow = powf(10.0f,
-                         -(1.0f - POvertoneSpread.par1 / 255.0f) * 3.0f);
+    float par1pow = powf(10.0f, -(1.0f - POvertoneSpread.par1 / 255.0f) * 3.0f);
     float par2 = POvertoneSpread.par2 / 255.0f;
     float par3 = 1.0f - POvertoneSpread.par3 / 255.0f;
     float result;
@@ -192,52 +191,66 @@ void SUBnoteParameters::updateFrequencyMultipliers()
         switch (POvertoneSpread.type)
         {
             case 1:
-                thresh = (int)(100.0f * par2 * par2) + 1;
+            {
+                thresh = static_cast<int>(100.0f * par2 * par2) + 1;
                 if (n1 < thresh)
                     result = n1;
                 else
                     result = n1 + 8.0f * (n1 - thresh) * par1pow;
                 break;
+            }
             case 2:
-                thresh = (int)(100.0f * par2 * par2) + 1;
+            {
+                thresh = static_cast<int>(100.0f * par2 * par2) + 1;
                 if (n1 < thresh)
                     result = n1;
                 else
                     result = n1 + 0.9f * (thresh - n1) * par1pow;
                 break;
+            }
             case 3:
+            {
                 tmp = par1pow * 100.0f + 1.0f;
                 result = powf(n / tmp, 1.0f - 0.8f * par2) * tmp + 1.0f;
                 break;
+            }
             case 4:
+            {
                 result = n * (1.0f - par1pow) +
                          powf(0.1f * n, 3.0f * par2 + 1.0f) *
                              10.0f * par1pow +
                          1.0f;
                 break;
-
+            }
             case 5:
+            {
                 result = n1 + 2.0f * sinf(n * par2 * par2 * PI * 0.999f) *
                                   std::sqrt(par1pow);
                 break;
+            }
             case 6:
+            {
                 tmp = powf(2.0f * par2, 2.0f) + 0.1f;
                 result = n * powf(par1 * powf(0.8f * n, tmp) + 1.0f, tmp) +
                          1.0f;
                 break;
-
+            }
             case 7:
+            {
                 result = (n1 + par1) / (par1 + 1);
                 break;
+            }
             default:
+            {
                 result = n1;
+            }
         }
         float iresult = std::floor(result + 0.5f);
         POvertoneFreqMult[n] = iresult + par3 * (result - iresult);
     }
 }
 
-void SUBnoteParameters::getfromXML(IPresetsSerializer *xml)
+void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
 {
     Pnumstages = xml->getpar127("num_stages", Pnumstages);
     Phmagtype = xml->getpar127("harmonic_mag_type", Phmagtype);
@@ -266,7 +279,7 @@ void SUBnoteParameters::getfromXML(IPresetsSerializer *xml)
                                                    PAmpVelocityScaleFunction);
         if (xml->enterbranch("AMPLITUDE_ENVELOPE"))
         {
-            AmpEnvelope.getfromXML(xml);
+            AmpEnvelope.Deserialize(xml);
             xml->exitbranch();
         }
         xml->exitbranch();
@@ -293,20 +306,17 @@ void SUBnoteParameters::getfromXML(IPresetsSerializer *xml)
         Pbandwidth = xml->getpar127("bandwidth", Pbandwidth);
         Pbwscale = xml->getpar127("bandwidth_scale", Pbwscale);
 
-        PFreqEnvelopeEnabled = xml->getparbool("freq_envelope_enabled",
-                                               PFreqEnvelopeEnabled);
+        PFreqEnvelopeEnabled = xml->getparbool("freq_envelope_enabled", PFreqEnvelopeEnabled);
         if (xml->enterbranch("FREQUENCY_ENVELOPE"))
         {
-            FreqEnvelope->getfromXML(xml);
+            FreqEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 
-        PBandWidthEnvelopeEnabled = xml->getparbool(
-            "band_width_envelope_enabled",
-            PBandWidthEnvelopeEnabled);
+        PBandWidthEnvelopeEnabled = xml->getparbool("band_width_envelope_enabled", PBandWidthEnvelopeEnabled);
         if (xml->enterbranch("BANDWIDTH_ENVELOPE"))
         {
-            BandWidthEnvelope->getfromXML(xml);
+            BandWidthEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 
@@ -318,7 +328,7 @@ void SUBnoteParameters::getfromXML(IPresetsSerializer *xml)
         PGlobalFilterEnabled = xml->getparbool("enabled", PGlobalFilterEnabled);
         if (xml->enterbranch("FILTER"))
         {
-            GlobalFilter->getfromXML(xml);
+            GlobalFilter->Deserialize(xml);
             xml->exitbranch();
         }
 
@@ -331,7 +341,7 @@ void SUBnoteParameters::getfromXML(IPresetsSerializer *xml)
 
         if (xml->enterbranch("FILTER_ENVELOPE"))
         {
-            GlobalFilterEnvelope->getfromXML(xml);
+            GlobalFilterEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 

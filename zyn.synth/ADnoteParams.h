@@ -301,9 +301,9 @@ public:
     ADnoteGlobalParam GlobalPar;
     ADnoteVoiceParam VoicePar[NUM_VOICES]{};
 
-    void defaults();
-    void add2XML(IPresetsSerializer *xml);
-    void getfromXML(IPresetsSerializer *xml);
+    void Defaults();
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
 
     float getBandwidthDetuneMultiplier();
     float getUnisonFrequencySpreadCents(int nvoice);
@@ -311,14 +311,14 @@ public:
     void set_unison_size_index(int nvoice, int index);
 
 private:
-    void defaults(int n); //n is the nvoice
+    void Defaults(int n); //n is the nvoice
 
     void EnableVoice(int nvoice);
     void KillVoice(int nvoice);
     IFFTwrapper *fft;
 
-    void add2XMLsection(IPresetsSerializer *xml, int n);
-    void getfromXMLsection(IPresetsSerializer *xml, int n);
+    void SerializeSection(IPresetsSerializer *xml, int n);
+    void DeserializeSection(IPresetsSerializer *xml, int n);
 };
 
 #endif

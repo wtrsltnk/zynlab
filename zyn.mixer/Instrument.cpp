@@ -93,10 +93,10 @@ Instrument::Instrument(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrap
     lastpos = 0;                 // lastpos will store previously used NoteOn(...)'s pos.
     lastlegatomodevalid = false; // To store previous legatomodevalid value.
 
-    defaults();
+    Defaults();
 }
 
-void Instrument::defaults()
+void Instrument::Defaults()
 {
     Penabled = 0;
     Pminkey = 0;
@@ -111,11 +111,11 @@ void Instrument::defaults()
     Pvelsns = 64;
     Pveloffs = 64;
     Pkeylimit = 15;
-    defaultsinstrument();
+    InstrumentDefaults();
     ctl.defaults();
 }
 
-void Instrument::defaultsinstrument()
+void Instrument::InstrumentDefaults()
 {
     ZEROUNSIGNED(Pname, PART_MAX_NAME_LEN);
 
@@ -142,13 +142,13 @@ void Instrument::defaultsinstrument()
     }
     kit[0].Penabled = 1;
     kit[0].Padenabled = 1;
-    kit[0].adpars->defaults();
-    kit[0].subpars->defaults();
-    kit[0].padpars->defaults();
+    kit[0].adpars->Defaults();
+    kit[0].subpars->Defaults();
+    kit[0].padpars->Defaults();
 
     for (int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
     {
-        partefx[nefx]->defaults();
+        partefx[nefx]->Defaults();
         Pefxroute[nefx] = 0; //route to next effect
     }
 }
@@ -1141,7 +1141,7 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
     }
 }
 
-void Instrument::add2XMLinstrument(IPresetsSerializer *xml)
+void Instrument::SerializeInstrument(IPresetsSerializer *xml)
 {
     xml->beginbranch("INFO");
     xml->addparstr("name", reinterpret_cast<char *>(Pname));
@@ -1172,7 +1172,7 @@ void Instrument::add2XMLinstrument(IPresetsSerializer *xml)
             if ((kit[i].Padenabled != 0) && (kit[i].adpars != nullptr))
             {
                 xml->beginbranch("ADD_SYNTH_PARAMETERS");
-                kit[i].adpars->add2XML(xml);
+                kit[i].adpars->Serialize(xml);
                 xml->endbranch();
             }
 
@@ -1180,7 +1180,7 @@ void Instrument::add2XMLinstrument(IPresetsSerializer *xml)
             if ((kit[i].Psubenabled != 0) && (kit[i].subpars != nullptr))
             {
                 xml->beginbranch("SUB_SYNTH_PARAMETERS");
-                kit[i].subpars->add2XML(xml);
+                kit[i].subpars->Serialize(xml);
                 xml->endbranch();
             }
 
@@ -1188,7 +1188,7 @@ void Instrument::add2XMLinstrument(IPresetsSerializer *xml)
             if ((kit[i].Ppadenabled != 0) && (kit[i].padpars != nullptr))
             {
                 xml->beginbranch("PAD_SYNTH_PARAMETERS");
-                kit[i].padpars->add2XML(xml);
+                kit[i].padpars->Serialize(xml);
                 xml->endbranch();
             }
         }
@@ -1201,7 +1201,7 @@ void Instrument::add2XMLinstrument(IPresetsSerializer *xml)
     {
         xml->beginbranch("INSTRUMENT_EFFECT", nefx);
         xml->beginbranch("EFFECT");
-        partefx[nefx]->add2XML(xml);
+        partefx[nefx]->Serialize(xml);
         xml->endbranch();
 
         xml->addpar("route", Pefxroute[nefx]);
@@ -1212,7 +1212,7 @@ void Instrument::add2XMLinstrument(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void Instrument::add2XML(IPresetsSerializer *xml)
+void Instrument::Serialize(IPresetsSerializer *xml)
 {
     //parameters
     xml->addparbool("enabled", Penabled);
@@ -1238,11 +1238,11 @@ void Instrument::add2XML(IPresetsSerializer *xml)
     xml->addpar("key_limit", Pkeylimit);
 
     xml->beginbranch("INSTRUMENT");
-    add2XMLinstrument(xml);
+    SerializeInstrument(xml);
     xml->endbranch();
 
     xml->beginbranch("CONTROLLER");
-    ctl.add2XML(xml);
+    ctl.Serialize(xml);
     xml->endbranch();
 }
 
@@ -1251,7 +1251,7 @@ int Instrument::saveXML(const char *filename)
     PresetsSerializer xml;
 
     xml.beginbranch("INSTRUMENT");
-    add2XMLinstrument(&xml);
+    SerializeInstrument(&xml);
     xml.endbranch();
 
     return xml.saveXMLfile(filename);
@@ -1270,7 +1270,7 @@ int Instrument::loadXMLinstrument(const char *filename)
         return -10;
     }
 
-    getfromXMLinstrument(&xml);
+    DeserializeInstrument(&xml);
     xml.exitbranch();
 
     return 0;
@@ -1287,7 +1287,7 @@ void Instrument::applyparameters(bool lockmutex)
     }
 }
 
-void Instrument::getfromXMLinstrument(IPresetsSerializer *xml)
+void Instrument::DeserializeInstrument(IPresetsSerializer *xml)
 {
     if (xml->enterbranch("INFO"))
     {
@@ -1329,21 +1329,21 @@ void Instrument::getfromXMLinstrument(IPresetsSerializer *xml)
             kit[i].Padenabled = static_cast<unsigned char>(xml->getparbool("add_enabled", kit[i].Padenabled));
             if (xml->enterbranch("ADD_SYNTH_PARAMETERS"))
             {
-                kit[i].adpars->getfromXML(xml);
+                kit[i].adpars->Deserialize(xml);
                 xml->exitbranch();
             }
 
             kit[i].Psubenabled = static_cast<unsigned char>(xml->getparbool("sub_enabled", kit[i].Psubenabled));
             if (xml->enterbranch("SUB_SYNTH_PARAMETERS"))
             {
-                kit[i].subpars->getfromXML(xml);
+                kit[i].subpars->Deserialize(xml);
                 xml->exitbranch();
             }
 
             kit[i].Ppadenabled = static_cast<unsigned char>(xml->getparbool("pad_enabled", kit[i].Ppadenabled));
             if (xml->enterbranch("PAD_SYNTH_PARAMETERS"))
             {
-                kit[i].padpars->getfromXML(xml);
+                kit[i].padpars->Deserialize(xml);
                 xml->exitbranch();
             }
 
@@ -1361,7 +1361,7 @@ void Instrument::getfromXMLinstrument(IPresetsSerializer *xml)
                 continue;
             if (xml->enterbranch("EFFECT"))
             {
-                partefx[nefx]->getfromXML(xml);
+                partefx[nefx]->Deserialize(xml);
                 xml->exitbranch();
             }
 
@@ -1374,7 +1374,7 @@ void Instrument::getfromXMLinstrument(IPresetsSerializer *xml)
     }
 }
 
-void Instrument::getfromXML(IPresetsSerializer *xml)
+void Instrument::Deserialize(IPresetsSerializer *xml)
 {
     Penabled = static_cast<unsigned char>(xml->getparbool("enabled", Penabled));
 
@@ -1400,13 +1400,13 @@ void Instrument::getfromXML(IPresetsSerializer *xml)
 
     if (xml->enterbranch("INSTRUMENT"))
     {
-        getfromXMLinstrument(xml);
+        DeserializeInstrument(xml);
         xml->exitbranch();
     }
 
     if (xml->enterbranch("CONTROLLER"))
     {
-        ctl.getfromXML(xml);
+        ctl.Deserialize(xml);
         xml->exitbranch();
     }
 }

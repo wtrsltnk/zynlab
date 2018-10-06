@@ -199,7 +199,7 @@ void EnvelopeParams::converttofree()
     }
 }
 
-void EnvelopeParams::add2XML(IPresetsSerializer *xml)
+void EnvelopeParams::Serialize(IPresetsSerializer *xml)
 {
     xml->addparbool("free_mode", Pfreemode);
     xml->addpar("env_points", Penvpoints);
@@ -228,7 +228,7 @@ void EnvelopeParams::add2XML(IPresetsSerializer *xml)
     }
 }
 
-void EnvelopeParams::getfromXML(IPresetsSerializer *xml)
+void EnvelopeParams::Deserialize(IPresetsSerializer *xml)
 {
     Pfreemode = xml->getparbool("free_mode", Pfreemode);
     Penvpoints = xml->getpar127("env_points", Penvpoints);
@@ -259,7 +259,7 @@ void EnvelopeParams::getfromXML(IPresetsSerializer *xml)
         converttofree();
 }
 
-void EnvelopeParams::defaults()
+void EnvelopeParams::Defaults()
 {
     Penvstretch = Denvstretch;
     Pforcedrelease = Dforcedrelease;

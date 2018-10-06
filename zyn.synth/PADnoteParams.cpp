@@ -53,7 +53,7 @@ PADnoteParameters::PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, 
         i.smp = nullptr;
     newsample.smp = nullptr;
 
-    defaults();
+    Defaults();
 }
 
 PADnoteParameters::~PADnoteParameters()
@@ -71,7 +71,7 @@ PADnoteParameters::~PADnoteParameters()
     delete (FilterLfo);
 }
 
-void PADnoteParameters::defaults()
+void PADnoteParameters::Defaults()
 {
     Pmode = 0;
     Php.base.type = 0;
@@ -90,8 +90,8 @@ void PADnoteParameters::defaults()
     setPbandwidth(500);
     Pbwscale = 0;
 
-    resonance->defaults();
-    oscilgen->defaults();
+    resonance->Defaults();
+    oscilgen->Defaults();
 
     Phrpos.type = 0;
     Phrpos.par1 = 64;
@@ -110,15 +110,15 @@ void PADnoteParameters::defaults()
     PDetune = 8192; //zero
     PCoarseDetune = 0;
     PDetuneType = 1;
-    FreqEnvelope->defaults();
-    FreqLfo->defaults();
+    FreqEnvelope->Defaults();
+    FreqLfo->Defaults();
 
     /* Amplitude Global Parameters */
     PVolume = 90;
     PPanning = 64; //center
     PAmpVelocityScaleFunction = 64;
-    AmpEnvelope->defaults();
-    AmpLfo->defaults();
+    AmpEnvelope->Defaults();
+    AmpLfo->Defaults();
     PPunchStrength = 0;
     PPunchTime = 60;
     PPunchStretch = 64;
@@ -127,9 +127,9 @@ void PADnoteParameters::defaults()
     /* Filter Global Parameters*/
     PFilterVelocityScale = 64;
     PFilterVelocityScaleFunction = 64;
-    GlobalFilter->defaults();
-    FilterEnvelope->defaults();
-    FilterLfo->defaults();
+    GlobalFilter->Defaults();
+    FilterEnvelope->Defaults();
+    FilterLfo->Defaults();
 
     deletesamples();
 }
@@ -695,7 +695,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
     }
 }
 
-void PADnoteParameters::add2XML(IPresetsSerializer *xml)
+void PADnoteParameters::Serialize(IPresetsSerializer *xml)
 {
     xml->setPadSynth(true);
 
@@ -720,11 +720,11 @@ void PADnoteParameters::add2XML(IPresetsSerializer *xml)
     xml->endbranch();
 
     xml->beginbranch("OSCIL");
-    oscilgen->add2XML(xml);
+    oscilgen->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("RESONANCE");
-    resonance->add2XML(xml);
+    resonance->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("HARMONIC_POSITION");
@@ -751,11 +751,11 @@ void PADnoteParameters::add2XML(IPresetsSerializer *xml)
     xml->addpar("punch_velocity_sensing", PPunchVelocitySensing);
 
     xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope->add2XML(xml);
+    AmpEnvelope->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("AMPLITUDE_LFO");
-    AmpLfo->add2XML(xml);
+    AmpLfo->Serialize(xml);
     xml->endbranch();
 
     xml->endbranch();
@@ -768,11 +768,11 @@ void PADnoteParameters::add2XML(IPresetsSerializer *xml)
     xml->addpar("detune_type", PDetuneType);
 
     xml->beginbranch("FREQUENCY_ENVELOPE");
-    FreqEnvelope->add2XML(xml);
+    FreqEnvelope->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("FREQUENCY_LFO");
-    FreqLfo->add2XML(xml);
+    FreqLfo->Serialize(xml);
     xml->endbranch();
     xml->endbranch();
 
@@ -781,20 +781,20 @@ void PADnoteParameters::add2XML(IPresetsSerializer *xml)
     xml->addpar("velocity_sensing", PFilterVelocityScaleFunction);
 
     xml->beginbranch("FILTER");
-    GlobalFilter->add2XML(xml);
+    GlobalFilter->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("FILTER_ENVELOPE");
-    FilterEnvelope->add2XML(xml);
+    FilterEnvelope->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("FILTER_LFO");
-    FilterLfo->add2XML(xml);
+    FilterLfo->Serialize(xml);
     xml->endbranch();
     xml->endbranch();
 }
 
-void PADnoteParameters::getfromXML(IPresetsSerializer *xml)
+void PADnoteParameters::Deserialize(IPresetsSerializer *xml)
 {
     PStereo = xml->getparbool("stereo", PStereo);
     Pmode = xml->getpar127("mode", 0);
@@ -827,13 +827,13 @@ void PADnoteParameters::getfromXML(IPresetsSerializer *xml)
 
     if (xml->enterbranch("OSCIL"))
     {
-        oscilgen->getfromXML(xml);
+        oscilgen->Deserialize(xml);
         xml->exitbranch();
     }
 
     if (xml->enterbranch("RESONANCE"))
     {
-        resonance->getfromXML(xml);
+        resonance->Deserialize(xml);
         xml->exitbranch();
     }
 
@@ -869,11 +869,11 @@ void PADnoteParameters::getfromXML(IPresetsSerializer *xml)
                                                PPunchVelocitySensing);
 
         xml->enterbranch("AMPLITUDE_ENVELOPE");
-        AmpEnvelope->getfromXML(xml);
+        AmpEnvelope->Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("AMPLITUDE_LFO");
-        AmpLfo->getfromXML(xml);
+        AmpLfo->Deserialize(xml);
         xml->exitbranch();
 
         xml->exitbranch();
@@ -888,11 +888,11 @@ void PADnoteParameters::getfromXML(IPresetsSerializer *xml)
         PDetuneType = xml->getpar127("detune_type", PDetuneType);
 
         xml->enterbranch("FREQUENCY_ENVELOPE");
-        FreqEnvelope->getfromXML(xml);
+        FreqEnvelope->Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FREQUENCY_LFO");
-        FreqLfo->getfromXML(xml);
+        FreqLfo->Deserialize(xml);
         xml->exitbranch();
         xml->exitbranch();
     }
@@ -906,15 +906,15 @@ void PADnoteParameters::getfromXML(IPresetsSerializer *xml)
             PFilterVelocityScaleFunction);
 
         xml->enterbranch("FILTER");
-        GlobalFilter->getfromXML(xml);
+        GlobalFilter->Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FILTER_ENVELOPE");
-        FilterEnvelope->getfromXML(xml);
+        FilterEnvelope->Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FILTER_LFO");
-        FilterLfo->getfromXML(xml);
+        FilterLfo->Deserialize(xml);
         xml->exitbranch();
         xml->exitbranch();
     }

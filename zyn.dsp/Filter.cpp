@@ -31,6 +31,8 @@ Filter::Filter(SystemSettings *synth_)
     : outgain(1.0f), _synth(synth_)
 {}
 
+Filter::~Filter() = default;
+
 Filter *Filter::generate(FilterParams *pars, SystemSettings *synth_)
 {
     unsigned char Ftype = pars->Ptype;

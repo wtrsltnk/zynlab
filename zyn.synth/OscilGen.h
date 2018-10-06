@@ -25,8 +25,8 @@
 
 #include "Resonance.h"
 #include "ifftwrapper.h"
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
-#include <zyn.common/XMLwrapper.h>
 #include <zyn.common/globals.h>
 
 class OscilGen : public Presets
@@ -51,9 +51,9 @@ public:
     /**convert oscil to base function*/
     void useasbase();
 
-    void add2XML(IPresetsSerializer *xml);
-    void defaults();
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
 
     void convert2sine();
 

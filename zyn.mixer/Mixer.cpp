@@ -121,7 +121,7 @@ void Mixer::defaults()
 
     for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
-        part[npart]->defaults();
+        part[npart]->Defaults();
         part[npart]->Prcvchn = npart % NUM_MIDI_CHANNELS;
     }
 
@@ -129,14 +129,14 @@ void Mixer::defaults()
 
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
-        insefx[nefx]->defaults();
+        insefx[nefx]->Defaults();
         Pinsparts[nefx] = -1;
     }
 
     //System Effects init
     for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
     {
-        sysefx[nefx]->defaults();
+        sysefx[nefx]->Defaults();
         for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         {
             setPsysefxvol(npart, nefx, 0);
@@ -813,7 +813,7 @@ void Mixer::add2XML(IPresetsSerializer *xml)
     for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
         xml->beginbranch("PART", npart);
-        part[npart]->add2XML(xml);
+        part[npart]->Serialize(xml);
         xml->endbranch();
     }
 
@@ -822,7 +822,7 @@ void Mixer::add2XML(IPresetsSerializer *xml)
     {
         xml->beginbranch("SYSTEM_EFFECT", nefx);
         xml->beginbranch("EFFECT");
-        sysefx[nefx]->add2XML(xml);
+        sysefx[nefx]->Serialize(xml);
         xml->endbranch();
 
         for (int pefx = 0; pefx < NUM_MIDI_PARTS; ++pefx)
@@ -850,7 +850,7 @@ void Mixer::add2XML(IPresetsSerializer *xml)
         xml->addpar("part", Pinsparts[nefx]);
 
         xml->beginbranch("EFFECT");
-        insefx[nefx]->add2XML(xml);
+        insefx[nefx]->Serialize(xml);
         xml->endbranch();
         xml->endbranch();
     }
@@ -871,7 +871,7 @@ void Mixer::getfromXML(IPresetsSerializer *xml)
         {
             continue;
         }
-        part[npart]->getfromXML(xml);
+        part[npart]->Deserialize(xml);
         xml->exitbranch();
     }
 
@@ -892,7 +892,7 @@ void Mixer::getfromXML(IPresetsSerializer *xml)
             }
             if (xml->enterbranch("EFFECT"))
             {
-                sysefx[nefx]->getfromXML(xml);
+                sysefx[nefx]->Deserialize(xml);
                 xml->exitbranch();
             }
 
@@ -931,7 +931,7 @@ void Mixer::getfromXML(IPresetsSerializer *xml)
             Pinsparts[nefx] = static_cast<short>(xml->getpar("part", Pinsparts[nefx], -2, NUM_MIDI_PARTS));
             if (xml->enterbranch("EFFECT"))
             {
-                insefx[nefx]->getfromXML(xml);
+                insefx[nefx]->Deserialize(xml);
                 xml->exitbranch();
             }
             xml->exitbranch();

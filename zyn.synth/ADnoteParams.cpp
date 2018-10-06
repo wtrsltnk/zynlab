@@ -27,7 +27,7 @@
 #include "Resonance.h"
 #include "ifftwrapper.h"
 #include <cmath>
-#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/IPresetsSerializer.h>
 #include <zyn.dsp/FilterParams.h>
 
 int ADnote_unison_sizes[] =
@@ -42,7 +42,7 @@ ADnoteParameters::ADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_)
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         EnableVoice(nvoice);
 
-    defaults();
+    Defaults();
 }
 
 ADnoteGlobalParam::ADnoteGlobalParam(SystemSettings *synth_)
@@ -62,13 +62,13 @@ ADnoteGlobalParam::ADnoteGlobalParam(SystemSettings *synth_)
     Reson = new Resonance();
 }
 
-void ADnoteParameters::defaults()
+void ADnoteParameters::Defaults()
 {
     //Default Parameters
     GlobalPar.defaults();
 
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
-        defaults(nvoice);
+        Defaults(nvoice);
 
     VoicePar[0].Enabled = 1;
 }
@@ -80,16 +80,16 @@ void ADnoteGlobalParam::defaults()
     PDetune = 8192; //zero
     PCoarseDetune = 0;
     PDetuneType = 1;
-    FreqEnvelope->defaults();
-    FreqLfo->defaults();
+    FreqEnvelope->Defaults();
+    FreqLfo->Defaults();
     PBandwidth = 64;
 
     /* Amplitude Global Parameters */
     PVolume = 90;
     PPanning = 64; //center
     PAmpVelocityScaleFunction = 64;
-    AmpEnvelope->defaults();
-    AmpLfo->defaults();
+    AmpEnvelope->Defaults();
+    AmpLfo->Defaults();
     PPunchStrength = 0;
     PPunchTime = 60;
     PPunchStretch = 64;
@@ -99,16 +99,16 @@ void ADnoteGlobalParam::defaults()
     /* Filter Global Parameters*/
     PFilterVelocityScale = 64;
     PFilterVelocityScaleFunction = 64;
-    GlobalFilter->defaults();
-    FilterEnvelope->defaults();
-    FilterLfo->defaults();
-    Reson->defaults();
+    GlobalFilter->Defaults();
+    FilterEnvelope->Defaults();
+    FilterLfo->Defaults();
+    Reson->Defaults();
 }
 
 /*
  * Defaults a voice
  */
-void ADnoteParameters::defaults(int n)
+void ADnoteParameters::Defaults(int n)
 {
     VoicePar[n].defaults();
 }
@@ -163,21 +163,21 @@ void ADnoteVoiceParam::defaults()
     PFMAmpEnvelopeEnabled = 0;
     PFMVelocityScaleFunction = 64;
 
-    OscilSmp->defaults();
-    FMSmp->defaults();
+    OscilSmp->Defaults();
+    FMSmp->Defaults();
 
-    AmpEnvelope->defaults();
-    AmpLfo->defaults();
+    AmpEnvelope->Defaults();
+    AmpLfo->Defaults();
 
-    FreqEnvelope->defaults();
-    FreqLfo->defaults();
+    FreqEnvelope->Defaults();
+    FreqLfo->Defaults();
 
-    VoiceFilter->defaults();
-    FilterEnvelope->defaults();
-    FilterLfo->defaults();
+    VoiceFilter->Defaults();
+    FilterEnvelope->Defaults();
+    FilterLfo->Defaults();
 
-    FMFreqEnvelope->defaults();
-    FMAmpEnvelope->defaults();
+    FMFreqEnvelope->Defaults();
+    FMAmpEnvelope->Defaults();
 }
 
 /*
@@ -315,7 +315,7 @@ void ADnoteParameters::set_unison_size_index(int nvoice, int index)
     VoicePar[nvoice].Unison_size = unison;
 }
 
-void ADnoteParameters::add2XMLsection(IPresetsSerializer *xml, int n)
+void ADnoteParameters::SerializeSection(IPresetsSerializer *xml, int n)
 {
     int nvoice = n;
     if (nvoice >= NUM_VOICES)
@@ -366,7 +366,7 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
     xml->addpar("fm_enabled", PFMEnabled);
 
     xml->beginbranch("OSCIL");
-    OscilSmp->add2XML(xml);
+    OscilSmp->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("AMPLITUDE_PARAMETERS");
@@ -380,14 +380,14 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
     if ((PAmpEnvelopeEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("AMPLITUDE_ENVELOPE");
-        AmpEnvelope->add2XML(xml);
+        AmpEnvelope->Serialize(xml);
         xml->endbranch();
     }
     xml->addparbool("amp_lfo_enabled", PAmpLfoEnabled);
     if ((PAmpLfoEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("AMPLITUDE_LFO");
-        AmpLfo->add2XML(xml);
+        AmpLfo->Serialize(xml);
         xml->endbranch();
     }
     xml->endbranch();
@@ -404,14 +404,14 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
     if ((PFreqEnvelopeEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("FREQUENCY_ENVELOPE");
-        FreqEnvelope->add2XML(xml);
+        FreqEnvelope->Serialize(xml);
         xml->endbranch();
     }
     xml->addparbool("freq_lfo_enabled", PFreqLfoEnabled);
     if ((PFreqLfoEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("FREQUENCY_LFO");
-        FreqLfo->add2XML(xml);
+        FreqLfo->Serialize(xml);
         xml->endbranch();
     }
     xml->endbranch();
@@ -420,7 +420,7 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
     {
         xml->beginbranch("FILTER_PARAMETERS");
         xml->beginbranch("FILTER");
-        VoiceFilter->add2XML(xml);
+        VoiceFilter->Serialize(xml);
         xml->endbranch();
 
         xml->addparbool("filter_envelope_enabled",
@@ -428,7 +428,7 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
         if ((PFilterEnvelopeEnabled != 0) || (!xml->minimal))
         {
             xml->beginbranch("FILTER_ENVELOPE");
-            FilterEnvelope->add2XML(xml);
+            FilterEnvelope->Serialize(xml);
             xml->endbranch();
         }
 
@@ -437,7 +437,7 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
         if ((PFilterLfoEnabled != 0) || (!xml->minimal))
         {
             xml->beginbranch("FILTER_LFO");
-            FilterLfo->add2XML(xml);
+            FilterLfo->Serialize(xml);
             xml->endbranch();
         }
         xml->endbranch();
@@ -458,7 +458,7 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
         if ((PFMAmpEnvelopeEnabled != 0) || (!xml->minimal))
         {
             xml->beginbranch("AMPLITUDE_ENVELOPE");
-            FMAmpEnvelope->add2XML(xml);
+            FMAmpEnvelope->Serialize(xml);
             xml->endbranch();
         }
         xml->beginbranch("MODULATOR");
@@ -471,12 +471,12 @@ void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
         if ((PFMFreqEnvelopeEnabled != 0) || (!xml->minimal))
         {
             xml->beginbranch("FREQUENCY_ENVELOPE");
-            FMFreqEnvelope->add2XML(xml);
+            FMFreqEnvelope->Serialize(xml);
             xml->endbranch();
         }
 
         xml->beginbranch("OSCIL");
-        FMSmp->add2XML(xml);
+        FMSmp->Serialize(xml);
         xml->endbranch();
 
         xml->endbranch();
@@ -499,11 +499,11 @@ void ADnoteGlobalParam::add2XML(IPresetsSerializer *xml)
     xml->addpar("harmonic_randomness_grouping", Hrandgrouping);
 
     xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope->add2XML(xml);
+    AmpEnvelope->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("AMPLITUDE_LFO");
-    AmpLfo->add2XML(xml);
+    AmpLfo->Serialize(xml);
     xml->endbranch();
     xml->endbranch();
 
@@ -516,11 +516,11 @@ void ADnoteGlobalParam::add2XML(IPresetsSerializer *xml)
     xml->addpar("bandwidth", PBandwidth);
 
     xml->beginbranch("FREQUENCY_ENVELOPE");
-    FreqEnvelope->add2XML(xml);
+    FreqEnvelope->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("FREQUENCY_LFO");
-    FreqLfo->add2XML(xml);
+    FreqLfo->Serialize(xml);
     xml->endbranch();
     xml->endbranch();
 
@@ -529,30 +529,30 @@ void ADnoteGlobalParam::add2XML(IPresetsSerializer *xml)
     xml->addpar("velocity_sensing", PFilterVelocityScaleFunction);
 
     xml->beginbranch("FILTER");
-    GlobalFilter->add2XML(xml);
+    GlobalFilter->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("FILTER_ENVELOPE");
-    FilterEnvelope->add2XML(xml);
+    FilterEnvelope->Serialize(xml);
     xml->endbranch();
 
     xml->beginbranch("FILTER_LFO");
-    FilterLfo->add2XML(xml);
+    FilterLfo->Serialize(xml);
     xml->endbranch();
     xml->endbranch();
 
     xml->beginbranch("RESONANCE");
-    Reson->add2XML(xml);
+    Reson->Serialize(xml);
     xml->endbranch();
 }
 
-void ADnoteParameters::add2XML(IPresetsSerializer *xml)
+void ADnoteParameters::Serialize(IPresetsSerializer *xml)
 {
     GlobalPar.add2XML(xml);
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
     {
         xml->beginbranch("VOICE", nvoice);
-        add2XMLsection(xml, nvoice);
+        SerializeSection(xml, nvoice);
         xml->endbranch();
     }
 }
@@ -578,13 +578,13 @@ void ADnoteGlobalParam::getfromXML(IPresetsSerializer *xml)
 
         if (xml->enterbranch("AMPLITUDE_ENVELOPE"))
         {
-            AmpEnvelope->getfromXML(xml);
+            AmpEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 
         if (xml->enterbranch("AMPLITUDE_LFO"))
         {
-            AmpLfo->getfromXML(xml);
+            AmpLfo->Deserialize(xml);
             xml->exitbranch();
         }
 
@@ -599,11 +599,11 @@ void ADnoteGlobalParam::getfromXML(IPresetsSerializer *xml)
         PBandwidth = xml->getpar127("bandwidth", PBandwidth);
 
         xml->enterbranch("FREQUENCY_ENVELOPE");
-        FreqEnvelope->getfromXML(xml);
+        FreqEnvelope->Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FREQUENCY_LFO");
-        FreqLfo->getfromXML(xml);
+        FreqLfo->Deserialize(xml);
         xml->exitbranch();
 
         xml->exitbranch();
@@ -618,27 +618,27 @@ void ADnoteGlobalParam::getfromXML(IPresetsSerializer *xml)
             PFilterVelocityScaleFunction);
 
         xml->enterbranch("FILTER");
-        GlobalFilter->getfromXML(xml);
+        GlobalFilter->Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FILTER_ENVELOPE");
-        FilterEnvelope->getfromXML(xml);
+        FilterEnvelope->Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FILTER_LFO");
-        FilterLfo->getfromXML(xml);
+        FilterLfo->Deserialize(xml);
         xml->exitbranch();
         xml->exitbranch();
     }
 
     if (xml->enterbranch("RESONANCE"))
     {
-        Reson->getfromXML(xml);
+        Reson->Deserialize(xml);
         xml->exitbranch();
     }
 }
 
-void ADnoteParameters::getfromXML(IPresetsSerializer *xml)
+void ADnoteParameters::Deserialize(IPresetsSerializer *xml)
 {
     GlobalPar.getfromXML(xml);
 
@@ -647,12 +647,12 @@ void ADnoteParameters::getfromXML(IPresetsSerializer *xml)
         VoicePar[nvoice].Enabled = 0;
         if (xml->enterbranch("VOICE", nvoice) == 0)
             continue;
-        getfromXMLsection(xml, nvoice);
+        DeserializeSection(xml, nvoice);
         xml->exitbranch();
     }
 }
 
-void ADnoteParameters::getfromXMLsection(IPresetsSerializer *xml, int n)
+void ADnoteParameters::DeserializeSection(IPresetsSerializer *xml, int n)
 {
     int nvoice = n;
     if (nvoice >= NUM_VOICES)
@@ -692,7 +692,7 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
 
     if (xml->enterbranch("OSCIL"))
     {
-        OscilSmp->getfromXML(xml);
+        OscilSmp->Deserialize(xml);
         xml->exitbranch();
     }
 
@@ -708,14 +708,14 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
                                               PAmpEnvelopeEnabled);
         if (xml->enterbranch("AMPLITUDE_ENVELOPE"))
         {
-            AmpEnvelope->getfromXML(xml);
+            AmpEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 
         PAmpLfoEnabled = xml->getparbool("amp_lfo_enabled", PAmpLfoEnabled);
         if (xml->enterbranch("AMPLITUDE_LFO"))
         {
-            AmpLfo->getfromXML(xml);
+            AmpLfo->Deserialize(xml);
             xml->exitbranch();
         }
         xml->exitbranch();
@@ -733,7 +733,7 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
 
         if (xml->enterbranch("FREQUENCY_ENVELOPE"))
         {
-            FreqEnvelope->getfromXML(xml);
+            FreqEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 
@@ -741,7 +741,7 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
 
         if (xml->enterbranch("FREQUENCY_LFO"))
         {
-            FreqLfo->getfromXML(xml);
+            FreqLfo->Deserialize(xml);
             xml->exitbranch();
         }
         xml->exitbranch();
@@ -751,7 +751,7 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
     {
         if (xml->enterbranch("FILTER"))
         {
-            VoiceFilter->getfromXML(xml);
+            VoiceFilter->Deserialize(xml);
             xml->exitbranch();
         }
 
@@ -759,7 +759,7 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
                                                  PFilterEnvelopeEnabled);
         if (xml->enterbranch("FILTER_ENVELOPE"))
         {
-            FilterEnvelope->getfromXML(xml);
+            FilterEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 
@@ -767,7 +767,7 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
                                             PFilterLfoEnabled);
         if (xml->enterbranch("FILTER_LFO"))
         {
-            FilterLfo->getfromXML(xml);
+            FilterLfo->Deserialize(xml);
             xml->exitbranch();
         }
         xml->exitbranch();
@@ -785,7 +785,7 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
                                                 PFMAmpEnvelopeEnabled);
         if (xml->enterbranch("AMPLITUDE_ENVELOPE"))
         {
-            FMAmpEnvelope->getfromXML(xml);
+            FMAmpEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
 
@@ -802,13 +802,13 @@ void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
                                                      PFMFreqEnvelopeEnabled);
             if (xml->enterbranch("FREQUENCY_ENVELOPE"))
             {
-                FMFreqEnvelope->getfromXML(xml);
+                FMFreqEnvelope->Deserialize(xml);
                 xml->exitbranch();
             }
 
             if (xml->enterbranch("OSCIL"))
             {
-                FMSmp->getfromXML(xml);
+                FMSmp->Deserialize(xml);
                 xml->exitbranch();
             }
 
