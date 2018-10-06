@@ -35,9 +35,9 @@ public:
     SUBnoteParameters(SystemSettings *synth_);
     ~SUBnoteParameters();
 
-    void add2XML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
     void defaults();
-    void getfromXML(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
     void updateFrequencyMultipliers(void);
 
     //Parameters

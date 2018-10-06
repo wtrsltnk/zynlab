@@ -32,6 +32,7 @@
 #include <zyn.dsp/FilterParams.h>
 
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 
@@ -298,7 +299,7 @@ void EffectManager::setdryonly(bool value)
     dryonly = value;
 }
 
-void EffectManager::add2XML(XMLwrapper *xml)
+void EffectManager::add2XML(IPresetsSerializer *xml)
 {
     xml->addpar("type", geteffect());
 
@@ -329,7 +330,7 @@ void EffectManager::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void EffectManager::getfromXML(XMLwrapper *xml)
+void EffectManager::getfromXML(IPresetsSerializer *xml)
 {
     changeeffect(xml->getpar127("type", geteffect()));
 

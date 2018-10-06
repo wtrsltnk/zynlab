@@ -49,8 +49,8 @@ protected:
     void setpresettype(const char *type);
 
 private:
-    virtual void add2XML(XMLwrapper *xml) = 0;
-    virtual void getfromXML(XMLwrapper *xml) = 0;
+    virtual void add2XML(IPresetsSerializer *xml) = 0;
+    virtual void getfromXML(IPresetsSerializer *xml) = 0;
     virtual void defaults() = 0;
 };
 

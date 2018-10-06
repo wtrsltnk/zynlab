@@ -93,7 +93,7 @@ void SUBnoteParameters::defaults()
     GlobalFilterEnvelope->defaults();
 }
 
-void SUBnoteParameters::add2XML(XMLwrapper *xml)
+void SUBnoteParameters::add2XML(IPresetsSerializer *xml)
 {
     xml->addpar("num_stages", Pnumstages);
     xml->addpar("harmonic_mag_type", Phmagtype);
@@ -103,7 +103,9 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml)
     for (int i = 0; i < MAX_SUB_HARMONICS; ++i)
     {
         if ((Phmag[i] == 0) && (xml->minimal))
+        {
             continue;
+        }
         xml->beginbranch("HARMONIC", i);
         xml->addpar("mag", Phmag[i]);
         xml->addpar("relbw", Phrelbw[i]);
@@ -235,7 +237,7 @@ void SUBnoteParameters::updateFrequencyMultipliers()
     }
 }
 
-void SUBnoteParameters::getfromXML(XMLwrapper *xml)
+void SUBnoteParameters::getfromXML(IPresetsSerializer *xml)
 {
     Pnumstages = xml->getpar127("num_stages", Pnumstages);
     Phmagtype = xml->getpar127("harmonic_mag_type", Phmagtype);

@@ -23,6 +23,7 @@
 #include "OscilGen.h"
 #include <cassert>
 #include <cmath>
+#include <cstring>
 #include <zyn.common/Util.h>
 #include <zyn.common/globals.h>
 #include <zyn.dsp/Filter.h>

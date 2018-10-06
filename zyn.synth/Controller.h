@@ -36,9 +36,9 @@ public:
     virtual ~Controller();
     void resetall();
 
-    void add2XML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
     void defaults();
-    void getfromXML(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
 
     //Controllers functions
     void setpitchwheel(int value);

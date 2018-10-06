@@ -21,7 +21,7 @@
 */
 
 #include "Config.h"
-#include "XMLwrapper.h"
+#include "PresetsSerializer.h"
 #include <cmath>
 #include <direct.h>
 
@@ -147,7 +147,7 @@ void Config::clearpresetsdirlist()
 
 void Config::readConfig(const char *filename)
 {
-    XMLwrapper xmlcfg;
+    PresetsSerializer xmlcfg;
     if (xmlcfg.loadXMLfile(filename) < 0)
     {
         return;
@@ -262,7 +262,7 @@ void Config::readConfig(const char *filename)
 
 void Config::saveConfig(const char *filename)
 {
-    XMLwrapper xmlcfg;
+    PresetsSerializer xmlcfg;
 
     xmlcfg.beginbranch("CONFIGURATION");
 

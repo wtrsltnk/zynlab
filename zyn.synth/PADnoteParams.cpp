@@ -695,7 +695,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
     }
 }
 
-void PADnoteParameters::add2XML(XMLwrapper *xml)
+void PADnoteParameters::add2XML(IPresetsSerializer *xml)
 {
     xml->setPadSynth(true);
 
@@ -794,7 +794,7 @@ void PADnoteParameters::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void PADnoteParameters::getfromXML(XMLwrapper *xml)
+void PADnoteParameters::getfromXML(IPresetsSerializer *xml)
 {
     PStereo = xml->getparbool("stereo", PStereo);
     Pmode = xml->getpar127("mode", 0);

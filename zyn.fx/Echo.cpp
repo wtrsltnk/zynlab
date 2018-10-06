@@ -24,6 +24,7 @@
 
 #include "Echo.h"
 #include <cmath>
+#include <cstring>
 
 #define MAX_DELAY 2
 

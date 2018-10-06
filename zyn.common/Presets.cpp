@@ -21,6 +21,7 @@
 */
 
 #include "Presets.h"
+#include "PresetsSerializer.h"
 #include <string>
 
 Presets::Presets()
@@ -37,7 +38,7 @@ void Presets::setpresettype(const char *type)
 
 void Presets::copy(const char *name)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
 
     //used only for the clipboard
     if (name == nullptr)
@@ -83,7 +84,7 @@ void Presets::paste(int npreset)
         }
     }
 
-    XMLwrapper xml;
+    PresetsSerializer xml;
     if (npreset == 0)
     {
         if (!checkclipboardtype())

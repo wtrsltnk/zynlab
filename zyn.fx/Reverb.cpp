@@ -26,6 +26,7 @@
 #include <zyn.dsp/Unison.h>
 
 #include <cmath>
+#include <cstring>
 
 Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),

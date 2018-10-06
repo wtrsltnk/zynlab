@@ -9,6 +9,8 @@ add_library(zyn.common STATIC
     Presets.h
     PresetsArray.cpp
     PresetsArray.h
+    PresetsSerializer.cpp
+    PresetsSerializer.h
     PresetsStore.cpp
     PresetsStore.h
     Stereo.h

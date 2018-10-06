@@ -21,8 +21,9 @@
 
 */
 
-#include "Mixer.h"
 #include "Instrument.h"
+#include "Mixer.h"
+#include <zyn.common/PresetsSerializer.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/FFTwrapper.h>
 #include <zyn.synth/LFOParams.h>
@@ -734,7 +735,7 @@ void Mixer::applyparameters(bool lockmutex)
 
 int Mixer::getalldata(char **data)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
 
     xml.beginbranch("MASTER");
 
@@ -751,7 +752,7 @@ int Mixer::getalldata(char **data)
 
 void Mixer::putalldata(char *data, int /*size*/)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
     if (!xml.putXMLdata(data))
     {
         return;
@@ -771,7 +772,7 @@ void Mixer::putalldata(char *data, int /*size*/)
 
 int Mixer::saveXML(const char *filename)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
 
     xml.beginbranch("MASTER");
     add2XML(&xml);
@@ -782,7 +783,7 @@ int Mixer::saveXML(const char *filename)
 
 int Mixer::loadXML(const char *filename)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
     if (xml.loadXMLfile(filename) < 0)
     {
         return -1;
@@ -799,7 +800,7 @@ int Mixer::loadXML(const char *filename)
     return 0;
 }
 
-void Mixer::add2XML(XMLwrapper *xml)
+void Mixer::add2XML(IPresetsSerializer *xml)
 {
     xml->addpar("volume", Pvolume);
     xml->addpar("key_shift", Pkeyshift);
@@ -857,7 +858,7 @@ void Mixer::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void Mixer::getfromXML(XMLwrapper *xml)
+void Mixer::getfromXML(IPresetsSerializer *xml)
 {
     setPvolume(static_cast<unsigned char>(xml->getpar127("volume", Pvolume)));
     setPkeyshift(static_cast<unsigned char>(xml->getpar127("key_shift", Pkeyshift)));

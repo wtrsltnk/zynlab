@@ -235,7 +235,7 @@ void Resonance::sendcontroller(MidiControllers ctl, float par)
         ctlbw = par;
 }
 
-void Resonance::add2XML(XMLwrapper *xml)
+void Resonance::add2XML(IPresetsSerializer *xml)
 {
     xml->addparbool("enabled", Penabled);
 
@@ -255,15 +255,14 @@ void Resonance::add2XML(XMLwrapper *xml)
     }
 }
 
-void Resonance::getfromXML(XMLwrapper *xml)
+void Resonance::getfromXML(IPresetsSerializer *xml)
 {
     Penabled = xml->getparbool("enabled", Penabled);
 
     PmaxdB = xml->getpar127("max_db", PmaxdB);
     Pcenterfreq = xml->getpar127("center_freq", Pcenterfreq);
     Poctavesfreq = xml->getpar127("octaves_freq", Poctavesfreq);
-    Pprotectthefundamental = xml->getparbool("protect_fundamental_frequency",
-                                             Pprotectthefundamental);
+    Pprotectthefundamental = xml->getparbool("protect_fundamental_frequency", Pprotectthefundamental);
     for (int i = 0; i < N_RES_POINTS; ++i)
     {
         if (xml->enterbranch("RESPOINT", i) == 0)

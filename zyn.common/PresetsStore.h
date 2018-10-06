@@ -37,13 +37,13 @@ public:
     ~PresetsStore();
 
     //Clipboard stuff
-    void CopyClipboard(XMLwrapper *xml, char *type);
-    bool PasteClipboard(XMLwrapper *xml);
+    void CopyClipboard(IPresetsSerializer *xml, char *type);
+    bool PasteClipboard(IPresetsSerializer *xml);
     bool CheckClipboardType(const char *type);
 
     //presets stuff
-    void CopyPreset(XMLwrapper *xml, char *type, std::string name);
-    bool PastePreset(XMLwrapper *xml, unsigned int npreset);
+    void CopyPreset(IPresetsSerializer *xml, char *type, std::string name);
+    bool PastePreset(IPresetsSerializer *xml, unsigned int npreset);
     void DeletePreset(unsigned int npreset);
 
     struct presetstruct

@@ -151,9 +151,9 @@ public:
 
 private:
     /**This adds the parameters to the XML data*/
-    void add2XML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
     /**This loads the parameters from the XML data*/
-    void getfromXML(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
 
 private:
     vuData vu;

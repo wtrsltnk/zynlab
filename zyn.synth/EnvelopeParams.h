@@ -48,9 +48,9 @@ public:
     void ASRinit_bw(char A_val, char A_dt, char R_val, char R_dt);
     void converttofree();
 
-    void add2XML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
     void defaults();
-    void getfromXML(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
 
     float getdt(char i);
 

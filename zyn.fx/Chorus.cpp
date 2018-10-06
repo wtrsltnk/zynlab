@@ -22,6 +22,7 @@
 
 #include "Chorus.h"
 #include <cmath>
+#include <cstring>
 #include <iostream>
 
 using namespace std;

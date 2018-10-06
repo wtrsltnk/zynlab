@@ -40,10 +40,10 @@ public:
               unsigned char fel_);
     ~LFOParams();
 
-    void add2XML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
     void defaults();
     /**Loads the LFO from the xml*/
-    void getfromXML(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
 
     /*  MIDI Parameters*/
     float Pfreq{};               /**<frequency*/

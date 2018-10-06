@@ -27,6 +27,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 
 FormantFilter::FormantFilter(FilterParams *pars, SystemSettings *synth_)
     : Filter(synth_)

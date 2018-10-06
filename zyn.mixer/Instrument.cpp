@@ -23,7 +23,7 @@
 #include "Instrument.h"
 #include "Microtonal.h"
 #include <zyn.common/Util.h>
-#include <zyn.common/XMLwrapper.h>
+#include <zyn.common/PresetsSerializer.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/ADnote.h>
 #include <zyn.synth/ADnoteParams.h>
@@ -1141,7 +1141,7 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
     }
 }
 
-void Instrument::add2XMLinstrument(XMLwrapper *xml)
+void Instrument::add2XMLinstrument(IPresetsSerializer *xml)
 {
     xml->beginbranch("INFO");
     xml->addparstr("name", reinterpret_cast<char *>(Pname));
@@ -1212,7 +1212,7 @@ void Instrument::add2XMLinstrument(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void Instrument::add2XML(XMLwrapper *xml)
+void Instrument::add2XML(IPresetsSerializer *xml)
 {
     //parameters
     xml->addparbool("enabled", Penabled);
@@ -1248,7 +1248,7 @@ void Instrument::add2XML(XMLwrapper *xml)
 
 int Instrument::saveXML(const char *filename)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
 
     xml.beginbranch("INSTRUMENT");
     add2XMLinstrument(&xml);
@@ -1259,7 +1259,7 @@ int Instrument::saveXML(const char *filename)
 
 int Instrument::loadXMLinstrument(const char *filename)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
     if (xml.loadXMLfile(filename) < 0)
     {
         return -1;
@@ -1287,7 +1287,7 @@ void Instrument::applyparameters(bool lockmutex)
     }
 }
 
-void Instrument::getfromXMLinstrument(XMLwrapper *xml)
+void Instrument::getfromXMLinstrument(IPresetsSerializer *xml)
 {
     if (xml->enterbranch("INFO"))
     {
@@ -1374,7 +1374,7 @@ void Instrument::getfromXMLinstrument(XMLwrapper *xml)
     }
 }
 
-void Instrument::getfromXML(XMLwrapper *xml)
+void Instrument::getfromXML(IPresetsSerializer *xml)
 {
     Penabled = static_cast<unsigned char>(xml->getparbool("enabled", Penabled));
 

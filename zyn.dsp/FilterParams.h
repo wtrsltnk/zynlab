@@ -39,11 +39,11 @@ public:
                  unsigned char Pq_);
     ~FilterParams();
 
-    void add2XML(XMLwrapper *xml);
-    void add2XMLsection(XMLwrapper *xml, int n);
+    void add2XML(IPresetsSerializer *xml);
+    void add2XMLsection(IPresetsSerializer *xml, int n);
     void defaults();
-    void getfromXML(XMLwrapper *xml);
-    void getfromXMLsection(XMLwrapper *xml, int n);
+    void getfromXML(IPresetsSerializer *xml);
+    void getfromXMLsection(IPresetsSerializer *xml, int n);
 
     void getfromFilterParams(FilterParams *pars);
 

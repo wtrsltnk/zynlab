@@ -35,7 +35,7 @@
 
 class Effect;
 class FilterParams;
-class XMLwrapper;
+class IPresetsSerializer;
 
 /**Effect manager, an interface betwen the program and effects*/
 class EffectManager : public Presets
@@ -44,9 +44,9 @@ public:
     EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_);
     virtual ~EffectManager();
 
-    void add2XML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
     void defaults(void);
-    void getfromXML(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
 
     void out(float *smpsl, float *smpsr);
 

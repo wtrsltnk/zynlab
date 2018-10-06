@@ -74,7 +74,7 @@ void LFOParams::defaults()
     Pstretch = 64;
 }
 
-void LFOParams::add2XML(XMLwrapper *xml)
+void LFOParams::add2XML(IPresetsSerializer *xml)
 {
     xml->addparreal("freq", Pfreq);
     xml->addpar("intensity", Pintensity);
@@ -87,7 +87,7 @@ void LFOParams::add2XML(XMLwrapper *xml)
     xml->addparbool("continous", Pcontinous);
 }
 
-void LFOParams::getfromXML(XMLwrapper *xml)
+void LFOParams::getfromXML(IPresetsSerializer *xml)
 {
     Pfreq = xml->getparreal("freq", Pfreq, 0.0f, 1.0f);
     Pintensity = xml->getpar127("intensity", Pintensity);

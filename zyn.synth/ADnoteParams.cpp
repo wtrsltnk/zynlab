@@ -315,7 +315,7 @@ void ADnoteParameters::set_unison_size_index(int nvoice, int index)
     VoicePar[nvoice].Unison_size = unison;
 }
 
-void ADnoteParameters::add2XMLsection(XMLwrapper *xml, int n)
+void ADnoteParameters::add2XMLsection(IPresetsSerializer *xml, int n)
 {
     int nvoice = n;
     if (nvoice >= NUM_VOICES)
@@ -338,7 +338,7 @@ void ADnoteParameters::add2XMLsection(XMLwrapper *xml, int n)
     VoicePar[nvoice].add2XML(xml, fmoscilused);
 }
 
-void ADnoteVoiceParam::add2XML(XMLwrapper *xml, bool fmoscilused)
+void ADnoteVoiceParam::add2XML(IPresetsSerializer *xml, bool fmoscilused)
 {
     xml->addpar("type", Type);
 
@@ -484,7 +484,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper *xml, bool fmoscilused)
     }
 }
 
-void ADnoteGlobalParam::add2XML(XMLwrapper *xml)
+void ADnoteGlobalParam::add2XML(IPresetsSerializer *xml)
 {
     xml->addparbool("stereo", PStereo);
 
@@ -546,7 +546,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-void ADnoteParameters::add2XML(XMLwrapper *xml)
+void ADnoteParameters::add2XML(IPresetsSerializer *xml)
 {
     GlobalPar.add2XML(xml);
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
@@ -557,7 +557,7 @@ void ADnoteParameters::add2XML(XMLwrapper *xml)
     }
 }
 
-void ADnoteGlobalParam::getfromXML(XMLwrapper *xml)
+void ADnoteGlobalParam::getfromXML(IPresetsSerializer *xml)
 {
     PStereo = xml->getparbool("stereo", PStereo);
 
@@ -638,7 +638,7 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper *xml)
     }
 }
 
-void ADnoteParameters::getfromXML(XMLwrapper *xml)
+void ADnoteParameters::getfromXML(IPresetsSerializer *xml)
 {
     GlobalPar.getfromXML(xml);
 
@@ -652,7 +652,7 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml)
     }
 }
 
-void ADnoteParameters::getfromXMLsection(XMLwrapper *xml, int n)
+void ADnoteParameters::getfromXMLsection(IPresetsSerializer *xml, int n)
 {
     int nvoice = n;
     if (nvoice >= NUM_VOICES)
@@ -661,7 +661,7 @@ void ADnoteParameters::getfromXMLsection(XMLwrapper *xml, int n)
     VoicePar[nvoice].getfromXML(xml, nvoice);
 }
 
-void ADnoteVoiceParam::getfromXML(XMLwrapper *xml, unsigned nvoice)
+void ADnoteVoiceParam::getfromXML(IPresetsSerializer *xml, unsigned nvoice)
 {
     Enabled = xml->getparbool("enabled", 0);
     Unison_size = xml->getpar127("unison_size", Unison_size);

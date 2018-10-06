@@ -35,6 +35,7 @@
 #include <unistd.h>
 
 #include <zyn.common/Config.h>
+#include <zyn.common/PresetsSerializer.h>
 #include <zyn.common/Util.h>
 
 #define INSTRUMENT_EXTENSION ".xiz"
@@ -555,7 +556,7 @@ int BankManager::AddToBank(unsigned int pos, std::string const &filename, std::s
     //see if PADsynth is used
     if (Config::Current().cfg.CheckPADsynth)
     {
-        XMLwrapper xml;
+        PresetsSerializer xml;
         xml.loadXMLfile(ins[pos].filename);
 
         ins[pos].info.PADsynth_used = xml.hasPadSynth();

@@ -54,8 +54,8 @@ struct ADnoteGlobalParam
     ADnoteGlobalParam(SystemSettings *synth_);
     ~ADnoteGlobalParam();
     void defaults();
-    void add2XML(XMLwrapper *xml);
-    void getfromXML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
+    void getfromXML(IPresetsSerializer *xml);
     /* The instrument type  - MONO/STEREO
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
@@ -123,8 +123,8 @@ struct ADnoteGlobalParam
 /***********************************************************/
 struct ADnoteVoiceParam
 {
-    void getfromXML(XMLwrapper *xml, unsigned nvoice);
-    void add2XML(XMLwrapper *xml, bool fmoscilused);
+    void getfromXML(IPresetsSerializer *xml, unsigned nvoice);
+    void add2XML(IPresetsSerializer *xml, bool fmoscilused);
     void defaults();
     void enable(IFFTwrapper *fft, Resonance *Reson, SystemSettings *synth_);
     void kill();
@@ -302,8 +302,8 @@ public:
     ADnoteVoiceParam VoicePar[NUM_VOICES]{};
 
     void defaults();
-    void add2XML(XMLwrapper *xml);
-    void getfromXML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
+    void getfromXML(IPresetsSerializer *xml);
 
     float getBandwidthDetuneMultiplier();
     float getUnisonFrequencySpreadCents(int nvoice);
@@ -317,8 +317,8 @@ private:
     void KillVoice(int nvoice);
     IFFTwrapper *fft;
 
-    void add2XMLsection(XMLwrapper *xml, int n);
-    void getfromXMLsection(XMLwrapper *xml, int n);
+    void add2XMLsection(IPresetsSerializer *xml, int n);
+    void getfromXMLsection(IPresetsSerializer *xml, int n);
 };
 
 #endif

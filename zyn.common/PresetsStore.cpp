@@ -50,7 +50,7 @@ PresetsStore::~PresetsStore()
 
 //Clipboard management
 
-void PresetsStore::CopyClipboard(XMLwrapper *xml, char *type)
+void PresetsStore::CopyClipboard(IPresetsSerializer *xml, char *type)
 {
     strcpy(clipboard.type, type);
     if (clipboard.data != nullptr)
@@ -60,7 +60,7 @@ void PresetsStore::CopyClipboard(XMLwrapper *xml, char *type)
     clipboard.data = xml->getXMLdata();
 }
 
-bool PresetsStore::PasteClipboard(XMLwrapper *xml)
+bool PresetsStore::PasteClipboard(IPresetsSerializer *xml)
 {
     if (clipboard.data != nullptr)
     {
@@ -152,7 +152,7 @@ void PresetsStore::RescaneForPresets(const string &type)
     sort(presets.begin(), presets.end());
 }
 
-void PresetsStore::CopyPreset(XMLwrapper *xml, char *type, string name)
+void PresetsStore::CopyPreset(IPresetsSerializer *xml, char *type, string name)
 {
     if (Config::Current().cfg.presetsDirList[0].empty())
     {
@@ -180,7 +180,7 @@ void PresetsStore::CopyPreset(XMLwrapper *xml, char *type, string name)
     xml->saveXMLfile(filename);
 }
 
-bool PresetsStore::PastePreset(XMLwrapper *xml, unsigned int npreset)
+bool PresetsStore::PastePreset(IPresetsSerializer *xml, unsigned int npreset)
 {
     npreset--;
     if (npreset >= presets.size())

@@ -22,6 +22,8 @@
 
 #include "Microtonal.h"
 #include <cmath>
+#include <cstring>
+#include <zyn.common/PresetsSerializer.h>
 
 #define MAX_LINE_SIZE 80
 
@@ -688,7 +690,7 @@ int Microtonal::loadkbm(const char *filename)
     return 0;
 }
 
-void Microtonal::add2XML(XMLwrapper *xml) const
+void Microtonal::add2XML(IPresetsSerializer *xml) const
 {
     xml->addparstr("name", (char *)Pname);
     xml->addparstr("comment", (char *)Pcomment);
@@ -745,7 +747,7 @@ void Microtonal::add2XML(XMLwrapper *xml) const
     xml->endbranch();
 }
 
-void Microtonal::getfromXML(XMLwrapper *xml)
+void Microtonal::getfromXML(IPresetsSerializer *xml)
 {
     xml->getparstr("name", (char *)Pname, MICROTONAL_MAX_NAME_LEN);
     xml->getparstr("comment", (char *)Pcomment, MICROTONAL_MAX_NAME_LEN);
@@ -819,7 +821,7 @@ void Microtonal::getfromXML(XMLwrapper *xml)
 
 int Microtonal::saveXML(const char *filename) const
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
 
     xml.beginbranch("MICROTONAL");
     add2XML(&xml);
@@ -830,7 +832,7 @@ int Microtonal::saveXML(const char *filename) const
 
 int Microtonal::loadXML(const char *filename)
 {
-    XMLwrapper xml;
+    PresetsSerializer xml;
 
     if (xml.loadXMLfile(filename) < 0)
     {

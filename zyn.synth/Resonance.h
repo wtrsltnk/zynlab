@@ -42,9 +42,9 @@ public:
     void interpolatepeaks(int type);
     void randomize(int type);
 
-    void add2XML(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
     void defaults();
-    void getfromXML(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
 
     float getfreqpos(float freq);
     float getfreqx(float x);

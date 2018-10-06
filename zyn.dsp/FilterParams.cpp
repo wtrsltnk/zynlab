@@ -281,7 +281,7 @@ float FilterParams::getformantq(unsigned char q)
     return result;
 }
 
-void FilterParams::add2XMLsection(XMLwrapper *xml, int n)
+void FilterParams::add2XMLsection(IPresetsSerializer *xml, int n)
 {
     int nvowel = n;
     for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
@@ -294,7 +294,7 @@ void FilterParams::add2XMLsection(XMLwrapper *xml, int n)
     }
 }
 
-void FilterParams::add2XML(XMLwrapper *xml)
+void FilterParams::add2XML(IPresetsSerializer *xml)
 {
     //filter parameters
     xml->addpar("category", Pcategory);
@@ -333,7 +333,7 @@ void FilterParams::add2XML(XMLwrapper *xml)
     }
 }
 
-void FilterParams::getfromXMLsection(XMLwrapper *xml, int n)
+void FilterParams::getfromXMLsection(IPresetsSerializer *xml, int n)
 {
     int nvowel = n;
     for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
@@ -352,7 +352,7 @@ void FilterParams::getfromXMLsection(XMLwrapper *xml, int n)
     }
 }
 
-void FilterParams::getfromXML(XMLwrapper *xml)
+void FilterParams::getfromXML(IPresetsSerializer *xml)
 {
     //filter parameters
     Pcategory = xml->getpar127("category", Pcategory);

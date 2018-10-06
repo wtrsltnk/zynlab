@@ -77,16 +77,16 @@ public:
     int saveXML(const char *filename);
     int loadXMLinstrument(const char *filename);
 
-    void add2XML(XMLwrapper *xml);
-    void add2XMLinstrument(XMLwrapper *xml);
+    void add2XML(IPresetsSerializer *xml);
+    void add2XMLinstrument(IPresetsSerializer *xml);
 
     void defaults();
     void defaultsinstrument();
 
     void applyparameters(bool lockmutex = true);
 
-    void getfromXML(XMLwrapper *xml);
-    void getfromXMLinstrument(XMLwrapper *xml);
+    void getfromXML(IPresetsSerializer *xml);
+    void getfromXMLinstrument(IPresetsSerializer *xml);
 
     void cleanup(bool final = false);
 

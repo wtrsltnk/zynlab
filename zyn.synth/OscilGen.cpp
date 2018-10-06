@@ -25,6 +25,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstring>
 
 //operations on FFTfreqs
 inline void clearAll(fft_t *freqs, SystemSettings *synth_)
@@ -967,7 +968,7 @@ void OscilGen::getcurrentbasefunction(float *smps)
         getbasefunction(smps); //the sine case
 }
 
-void OscilGen::add2XML(XMLwrapper *xml)
+void OscilGen::add2XML(IPresetsSerializer *xml)
 {
     xml->addpar("harmonic_mag_type", Phmagtype);
 
@@ -1038,7 +1039,7 @@ void OscilGen::add2XML(XMLwrapper *xml)
     }
 }
 
-void OscilGen::getfromXML(XMLwrapper *xml)
+void OscilGen::getfromXML(IPresetsSerializer *xml)
 {
     Phmagtype = xml->getpar127("harmonic_mag_type", Phmagtype);
 
