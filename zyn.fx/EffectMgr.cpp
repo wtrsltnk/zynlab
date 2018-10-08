@@ -20,33 +20,35 @@
 
 */
 
+#include "EffectMgr.h"
 #include "Chorus.h"
 #include "Distorsion.h"
 #include "DynamicFilter.h"
 #include "EQ.h"
 #include "Echo.h"
 #include "Effect.h"
-#include "EffectMgr.h"
 #include "Reverb.h"
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.dsp/FilterParams.h>
 
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 using namespace std;
 
-EffectManager::EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_)
-    : insertion(insertion_),
-      efxoutl(new float[synth_->buffersize]),
-      efxoutr(new float[synth_->buffersize]),
-      filterpars(nullptr),
-      _synth(synth_),
-      nefx(0),
-      efx(nullptr),
-      mutex(mutex_),
-      dryonly(false)
+EffectManager::EffectManager() {}
+
+void EffectManager::Init(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_)
 {
+    insertion = insertion_;
+    efxoutl = new float[synth_->buffersize];
+    efxoutr = new float[synth_->buffersize];
+    filterpars = nullptr;
+    _synth = synth_;
+    nefx = 0;
+    efx = nullptr;
+    mutex = mutex_;
+    dryonly = false;
     setpresettype("Peffect");
     memset(efxoutl, 0, this->_synth->bufferbytes);
     memset(efxoutr, 0, this->_synth->bufferbytes);

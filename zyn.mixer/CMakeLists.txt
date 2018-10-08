@@ -7,6 +7,8 @@ add_library(zyn.mixer STATIC
     BankManager.h
     Instrument.cpp
     Instrument.h
+    Meter.cpp
+    Meter.h
     Microtonal.cpp
     Microtonal.h
     Mixer.cpp

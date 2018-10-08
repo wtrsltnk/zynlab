@@ -33,11 +33,11 @@
 #include <iostream>
 #include <thread>
 
+#include <zyn.common/Util.h>
+#include <zyn.mixer/BankManager.h>
 #include <zyn.mixer/Instrument.h>
 #include <zyn.mixer/Mixer.h>
-#include <zyn.mixer/BankManager.h>
 #include <zyn.synth/FFTwrapper.h>
-#include <zyn.common/Util.h>
 
 // Sequencer
 #include "../zyn.seq/Sequencer.h"
@@ -51,8 +51,6 @@
 static MasterUI *ui;
 
 #endif //ENABLE_FLTKGUI
-
-using namespace std;
 
 static Mixer *mixer;
 static Sequencer *seq;
@@ -106,18 +104,20 @@ int main(int argc, char *argv[])
     auto synth = new SystemSettings;
     Config::Current().init();
     int noui = 0;
-    cerr
-        << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
-        << endl;
-    cerr
-        << "                Copyright (c) 2009-2014 Mark McCurry [active maintainer]"
-        << endl;
-    cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
-    cerr << "This program is free software (GNU GPL v.2 or later) and \n";
-    cerr << "it comes with ABSOLUTELY NO WARRANTY.\n"
-         << endl;
+    std::cerr << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
+              << std::endl;
+    std::cerr << "                Copyright (c) 2009-2014 Mark McCurry [active maintainer]"
+              << std::endl;
+    std::cerr << "Compiled: " << __DATE__ << " " << __TIME__
+              << std::endl;
+    std::cerr << "This program is free software (GNU GPL v.2 or later) and \n";
+    std::cerr << "it comes with ABSOLUTELY NO WARRANTY.\n"
+              << std::endl;
+
     if (argc == 1)
-        cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
+    {
+        std::cerr << "Try 'zynaddsubfx --help' for command-line options." << std::endl;
+    }
 
     /* Get the settings from the Config*/
     synth->samplerate = Config::Current().cfg.SampleRate;
@@ -175,88 +175,125 @@ int main(int argc, char *argv[])
     (x) = static_cast<unsigned int>(atoi(optarguments))
 
         if (opt == -1)
+        {
             break;
+        }
 
         switch (opt)
         {
             case 'h':
+            {
                 exitwithhelp = 1;
                 break;
+            }
             case 'v':
+            {
                 exitwithversion = 1;
                 break;
-            case 'Y': /* this command a dummy command (has NO effect)
+            }
+            case 'Y':
+            { /* this command a dummy command (has NO effect)
                         and is used because I need for NSIS installer
                         (NSIS sometimes forces a command line for a
                         program, even if I don't need that; eg. when
                         I want to add a icon to a shortcut.
                      */
                 break;
+            }
             case 'U':
+            {
                 noui = 1;
                 break;
+            }
             case 'l':
+            {
                 GETOP(loadfile);
                 break;
+            }
             case 'L':
+            {
                 GETOP(loadinstrument);
                 break;
+            }
             case 'r':
+            {
                 GETOPNUM(synth->samplerate);
                 if (synth->samplerate < 4000)
                 {
-                    cerr << "ERROR:Incorrect sample rate: " << optarguments
-                         << endl;
+                    std::cerr << "ERROR:Incorrect sample rate: " << optarguments
+                              << std::endl;
                     exit(1);
                 }
                 break;
+            }
             case 'b':
+            {
                 GETOPNUM(synth->buffersize);
                 if (synth->buffersize < 2)
                 {
-                    cerr << "ERROR:Incorrect buffer size: " << optarguments
-                         << endl;
+                    std::cerr << "ERROR:Incorrect buffer size: " << optarguments
+                              << std::endl;
                     exit(1);
                 }
                 break;
+            }
             case 'o':
+            {
                 if (optarguments)
+                {
                     synth->oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
+                }
                 if (synth->oscilsize < MAX_AD_HARMONICS * 2)
+                {
                     synth->oscilsize = MAX_AD_HARMONICS * 2;
-                synth->oscilsize =
-                    static_cast<unsigned int>(powf(2,
-                                                   ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f))));
+                }
+                synth->oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f))));
                 if (tmp != synth->oscilsize)
-                    cerr
-                        << "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                        << synth->oscilsize << "." << endl;
+                {
+                    std::cerr << "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
+                              << synth->oscilsize << "." << std::endl;
+                }
                 break;
+            }
             case 'S':
+            {
                 swaplr = 1;
                 break;
+            }
             case 'I':
+            {
                 if (optarguments)
+                {
                     Nio::SetDefaultSource(optarguments);
+                }
                 break;
+            }
             case 'O':
+            {
                 if (optarguments)
+                {
                     Nio::SetDefaultSink(optarguments);
+                }
                 break;
+            }
             case 'e':
+            {
                 GETOP(execAfterInit);
                 break;
+            }
             case '?':
-                cerr << "ERROR:Bad option or parameter.\n"
-                     << endl;
+            {
+                std::cerr << "ERROR:Bad option or parameter.\n"
+                          << std::endl;
                 exitwithhelp = 1;
                 break;
+            }
         }
     }
 
     if (exitwithversion)
     {
-        cout << "Version: " << VERSION << endl;
+        cout << "Version: " << VERSION << std::endl;
         return 0;
     }
     if (exitwithhelp != 0)
@@ -275,19 +312,19 @@ int main(int argc, char *argv[])
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
-             << endl;
+             << std::endl;
 
         return 0;
     }
 
     synth->alias();
 
-    cerr.precision(1);
-    cerr << std::fixed;
-    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
-    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
+    std::cerr.precision(1);
+    std::cerr << std::fixed;
+    std::cerr << "\nSample Rate = \t\t" << synth->samplerate << std::endl;
+    std::cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << std::endl;
+    std::cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << std::endl;
+    std::cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << std::endl;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
@@ -300,31 +337,30 @@ int main(int argc, char *argv[])
         int tmp = mixer->loadXML(loadfile.c_str());
         if (tmp < 0)
         {
-            cerr << "ERROR: Could not load master file " << loadfile
-                 << "." << endl;
+            std::cerr << "ERROR: Could not load master file " << loadfile
+                      << "." << std::endl;
             exit(1);
         }
         else
         {
             mixer->applyparameters();
-            cout << "Master file loaded." << endl;
+            cout << "Master file loaded." << std::endl;
         }
     }
 
     if (!loadinstrument.empty())
     {
-        int tmp = mixer->part[0]->loadXMLinstrument(
-            loadinstrument.c_str());
+        int tmp = mixer->part[0].loadXMLinstrument(loadinstrument.c_str());
         if (tmp < 0)
         {
-            cerr << "ERROR: Could not load instrument file "
-                 << loadinstrument << '.' << endl;
+            std::cerr << "ERROR: Could not load instrument file "
+                      << loadinstrument << '.' << std::endl;
             exit(1);
         }
         else
         {
-            mixer->part[0]->applyparameters();
-            cout << "Instrument file loaded." << endl;
+            mixer->part[0].applyparameters();
+            cout << "Instrument file loaded." << std::endl;
         }
     }
 
@@ -334,9 +370,11 @@ int main(int argc, char *argv[])
     // Run a system command after starting zynaddsubfx
     if (!execAfterInit.empty())
     {
-        cout << "Executing user supplied command: " << execAfterInit << endl;
+        cout << "Executing user supplied command: " << execAfterInit << std::endl;
         if (system(execAfterInit.c_str()) == -1)
-            cerr << "Command Failed..." << endl;
+        {
+            std::cerr << "Command Failed..." << std::endl;
+        }
     }
 
     seq = new Sequencer(mixer);
@@ -350,7 +388,9 @@ int main(int argc, char *argv[])
         ui->showUI();
 
         if (!ioGood)
+        {
             fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
+        }
     }
 
 #endif

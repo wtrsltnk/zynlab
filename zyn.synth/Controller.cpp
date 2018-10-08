@@ -23,14 +23,16 @@
 #include "Controller.h"
 #include <cmath>
 
-Controller::Controller(SystemSettings *synth_)
-    : _synth(synth_)
+Controller::Controller() {}
+
+Controller::~Controller() = default;
+
+void Controller::Init(SystemSettings *synth_)
 {
+    _synth = synth_;
     defaults();
     resetall();
 }
-
-Controller::~Controller() = default;
 
 void Controller::defaults()
 {

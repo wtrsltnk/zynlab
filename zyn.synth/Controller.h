@@ -32,8 +32,10 @@ class Controller
     SystemSettings *_synth;
 
 public:
-    Controller(SystemSettings *synth_);
+    Controller();
     virtual ~Controller();
+
+    void Init(SystemSettings *synth_);
     void resetall();
 
     void Serialize(IPresetsSerializer *xml);

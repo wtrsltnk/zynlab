@@ -33,9 +33,12 @@
 #include <zyn.synth/SUBnoteParams.h>
 #include <zyn.synth/ifftwrapper.h>
 
-Instrument::Instrument(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_)
-    : _synth(synth_), ctl(synth_)
+Instrument::Instrument(){}
+
+void Instrument::Init(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_)
 {
+    _synth = synth_;
+    ctl.Init(synth_);
     microtonal = microtonal_;
     fft = fft_;
     mutex = mutex_;
@@ -58,7 +61,8 @@ Instrument::Instrument(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrap
     //Part's Insertion Effects init
     for (int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
     {
-        partefx[nefx] = new EffectManager(true, mutex, this->_synth);
+        partefx[nefx] = new EffectManager();
+        partefx[nefx]->Init(true, mutex, this->_synth);
         Pefxbypass[nefx] = false;
     }
 

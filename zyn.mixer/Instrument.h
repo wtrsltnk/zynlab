@@ -50,9 +50,11 @@ public:
          * @param microtonal_ Pointer to the microtonal object
          * @param fft_ Pointer to the FFTwrapper
          * @param mutex_ Pointer to the master pthread_mutex_t*/
-    Instrument(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
+    Instrument();
     /**Destructor*/
     virtual ~Instrument();
+
+    void Init(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
 
     // Midi commands implemented
     void NoteOn(unsigned char note, unsigned char velocity, int masterkeyshift);

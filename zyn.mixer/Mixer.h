@@ -24,27 +24,21 @@
 #ifndef MIXER_H
 #define MIXER_H
 
+#include "Instrument.h"
+#include "Meter.h"
 #include "Microtonal.h"
+#include <pthread.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/globals.h>
 #include <zyn.synth/Controller.h>
 #include <zyn.synth/ifftwrapper.h>
-
-#include <pthread.h>
+#include <zyn.fx/EffectMgr.h>
 
 typedef enum {
     MUTEX_TRYLOCK,
     MUTEX_LOCK,
     MUTEX_UNLOCK
 } lockset;
-
-struct vuData
-{
-    vuData(void);
-    float outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
-        rmspeakl, rmspeakr;
-    int clipped;
-};
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
@@ -89,24 +83,18 @@ public:
     void ShutUp();
     int shutup;
 
-    void vuUpdate(const float *outl, const float *outr);
-
     /**Audio Output*/
     virtual void AudioOut(float *outl, float *outr);
     /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
-    virtual void GetAudioOutSamples(size_t nsamples,
-                                    unsigned samplerate,
-                                    float *outl,
-                                    float *outr);
+    virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr);
 
     void partonoff(int npart, int what);
 
     virtual int GetInstrumentCount();
     virtual class Instrument *GetInstrument(int index);
 
-    /**parts \todo see if this can be made to be dynamic*/
-    class Instrument *part[NUM_MIDI_PARTS]{};
 
+    Meter _meter;
     //parameters
 
     unsigned char Pvolume{};
@@ -120,34 +108,21 @@ public:
     void setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol);
     void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol);
 
-    //effects
-    class EffectManager *sysefx[NUM_SYS_EFX]{}; //system
-    class EffectManager *insefx[NUM_INS_EFX]{}; //insertion
+    Instrument part[NUM_MIDI_PARTS];
+    EffectManager sysefx[NUM_SYS_EFX]; //system
+    EffectManager insefx[NUM_INS_EFX]; //insertion
                                               //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
     //part that's apply the insertion effect; -1 to disable
     short int Pinsparts[NUM_INS_EFX]{};
-
-    //peaks for VU-meter
-    void vuresetpeaks();
-    //get VU-meter data
-    vuData getVuData();
-
-    //peaks for part VU-meters
-    /**\todo synchronize this with a mutex*/
-    float vuoutpeakpart[NUM_MIDI_PARTS]{};
-    unsigned char fakepeakpart[NUM_MIDI_PARTS]{}; //this is used to compute the "peak" when the part is disabled
 
     Controller ctl;
     bool swaplr; //if L and R are swapped
 
     //other objects
     Microtonal microtonal;
-    class IBankManager *bank;
 
     IFFTwrapper *fft;
-    pthread_mutex_t mutex{};
-    pthread_mutex_t vumutex{};
 
 private:
     /**This adds the parameters to the XML data*/
@@ -156,7 +131,8 @@ private:
     void getfromXML(IPresetsSerializer *xml);
 
 private:
-    vuData vu;
+    pthread_mutex_t mutex{};
+    IBankManager *bank;
     float volume{};
     float sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS]{};
     float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};

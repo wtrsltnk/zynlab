@@ -165,9 +165,9 @@ int n=master->_synth->oscilsize/2;
 float spc[n];
 for (int i=0;i<n;i++) spc[i]=0.0;
 
-pthread_mutex_lock(&master->mutex);
+master->Lock();
 pars->oscilgen->getspectrum(n,spc,0);
-pthread_mutex_unlock(&master->mutex);
+master->Unlock();
 
 
 //normalize

@@ -41,9 +41,10 @@ class IPresetsSerializer;
 class EffectManager : public Presets
 {
 public:
-    EffectManager(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_);
+    EffectManager();
     virtual ~EffectManager();
 
+    void Init(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_);
     void Serialize(IPresetsSerializer *xml);
     void Defaults(void);
     void Deserialize(IPresetsSerializer *xml);
@@ -66,7 +67,7 @@ public:
     void seteffectpar_nolock(int npar, unsigned char value);
     unsigned char geteffectpar(int npar);
 
-    const bool insertion;
+    bool insertion;
     float *efxoutl, *efxoutr;
 
     // used by UI
