@@ -54,7 +54,7 @@ Mixer::Mixer(SystemSettings *synth_, IBankManager *bank_)
 
     shutup = 0;
 
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         npart.Init(this->_synth, &microtonal, fft, &mutex);
     }
@@ -89,16 +89,21 @@ IBankManager *Mixer::GetBankManager()
     return bank;
 }
 
+IMeter *Mixer::GetMeter()
+{
+    return &_meter;
+}
+
 void Mixer::Defaults()
 {
     volume = 1.0f;
     setPvolume(80);
     setPkeyshift(64);
 
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
-        part[npart].Defaults();
-        part[npart].Prcvchn = npart % NUM_MIDI_CHANNELS;
+        _instruments[npart].Defaults();
+        _instruments[npart].Prcvchn = npart % NUM_MIDI_CHANNELS;
     }
 
     partonoff(0, 1); //enable the first part
@@ -113,7 +118,7 @@ void Mixer::Defaults()
     for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
     {
         sysefx[nefx].Defaults();
-        for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
         {
             setPsysefxvol(npart, nefx, 0);
         }
@@ -149,14 +154,14 @@ void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocit
         return;
     }
 
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
-        if (chan == part[npart].Prcvchn)
+        if (chan == _instruments[npart].Prcvchn)
         {
             _meter.SetFakePeak(npart, velocity * 2);
-            if (part[npart].Penabled)
+            if (_instruments[npart].Penabled)
             {
-                part[npart].NoteOn(note, velocity, keyshift);
+                _instruments[npart].NoteOn(note, velocity, keyshift);
             }
         }
     }
@@ -167,7 +172,7 @@ void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocit
  */
 void Mixer::NoteOff(unsigned char chan, unsigned char note)
 {
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         if ((chan == npart.Prcvchn) && npart.Penabled)
         {
@@ -187,7 +192,7 @@ void Mixer::PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigne
         return;
     }
 
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         if (chan == npart.Prcvchn)
         {
@@ -237,8 +242,8 @@ void Mixer::SetController(unsigned char chan, int type, int par)
         bank->LoadBank(par);
     }
     else
-    {                            //other controllers
-        for (auto &npart : part) //Send the controller to all part assigned to the channel
+    {                                    //other controllers
+        for (auto &npart : _instruments) //Send the controller to all part assigned to the channel
         {
             if ((chan == npart.Prcvchn) && (npart.Penabled != 0))
             {
@@ -267,7 +272,7 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
         return;
     }
 
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         if (chan == npart.Prcvchn)
         {
@@ -288,7 +293,7 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
  */
 void Mixer::partonoff(int npart, int what)
 {
-    if (npart >= NUM_MIDI_PARTS)
+    if (npart >= NUM_MIXER_CHANNELS)
     {
         return;
     }
@@ -297,12 +302,12 @@ void Mixer::partonoff(int npart, int what)
 
     if (what != 0)
     { //enabled
-        part[npart].Penabled = 1;
+        _instruments[npart].Penabled = 1;
         return;
     }
 
-    part[npart].Penabled = 0;
-    part[npart].cleanup();
+    _instruments[npart].Penabled = 0;
+    _instruments[npart].cleanup();
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
         if (Pinsparts[nefx] == npart)
@@ -328,7 +333,7 @@ void Mixer::AudioOut(float *outl, float *outr)
     memset(outr, 0, this->_synth->bufferbytes);
 
     //Compute part samples and store them part[npart].partoutl,partoutr
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         if (npart.Penabled != 0 && !pthread_mutex_trylock(&npart.load_mutex))
         {
@@ -343,15 +348,15 @@ void Mixer::AudioOut(float *outl, float *outr)
         if (Pinsparts[nefx] >= 0)
         {
             int efxpart = Pinsparts[nefx];
-            if (part[efxpart].Penabled)
+            if (_instruments[efxpart].Penabled)
             {
-                insefx[nefx].out(part[efxpart].partoutl, part[efxpart].partoutr);
+                insefx[nefx].out(_instruments[efxpart].partoutl, _instruments[efxpart].partoutr);
             }
         }
     }
 
     //Apply the part volumes and pannings (after insertion effects)
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         if (npart.Penabled == 0)
         {
@@ -410,7 +415,7 @@ void Mixer::AudioOut(float *outl, float *outr)
         memset(tmpmixr, 0, this->_synth->bufferbytes);
 
         //Mix the channels according to the part settings about System Effect
-        for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
         {
             //skip if the part has no output to effect
             if (Psysefxvol[nefx][npart] == 0)
@@ -418,7 +423,7 @@ void Mixer::AudioOut(float *outl, float *outr)
                 continue;
             }
             //skip if the part is disabled
-            if (part[npart].Penabled == 0)
+            if (_instruments[npart].Penabled == 0)
             {
                 continue;
             }
@@ -426,8 +431,8 @@ void Mixer::AudioOut(float *outl, float *outr)
             const float vol = sysefxvol[nefx][npart];
             for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
             {
-                tmpmixl[i] += part[npart].partoutl[i] * vol;
-                tmpmixr[i] += part[npart].partoutr[i] * vol;
+                tmpmixl[i] += _instruments[npart].partoutl[i] * vol;
+                tmpmixr[i] += _instruments[npart].partoutr[i] * vol;
             }
         }
 
@@ -457,7 +462,7 @@ void Mixer::AudioOut(float *outl, float *outr)
     }
 
     //Mix all parts
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         if (npart.Penabled) //only mix active parts
         {
@@ -485,7 +490,7 @@ void Mixer::AudioOut(float *outl, float *outr)
         outr[i] *= volume;
     }
 
-    _meter.Tick(outl, outr, part, volume);
+    _meter.Tick(outl, outr, _instruments, volume);
 
     //Shutup if it is asked (with fade-out)
     if (shutup)
@@ -545,19 +550,45 @@ void Mixer::GetAudioOutSamples(size_t nsamples,
     }
 }
 
-int Mixer::GetInstrumentCount()
+int Mixer::GetChannelCount() const
 {
-    return NUM_MIDI_PARTS;
+    return NUM_MIXER_CHANNELS;
 }
 
-Instrument *Mixer::GetInstrument(int index)
+Instrument *Mixer::GetChannel(int index)
 {
-    if (index >= 0 && index < NUM_MIDI_PARTS)
+    if (index >= 0 && index < NUM_MIXER_CHANNELS)
     {
-        return &part[index];
+        return &_instruments[index];
     }
 
     return nullptr;
+}
+
+void Mixer::EnableChannel(int index, bool enabled)
+{
+    if (index >= NUM_MIXER_CHANNELS)
+    {
+        return;
+    }
+
+    _meter.SetFakePeak(index, 0);
+
+    if (enabled)
+    { //enabled
+        _instruments[index].Penabled = 1;
+        return;
+    }
+
+    _instruments[index].Penabled = 0;
+    _instruments[index].cleanup();
+    for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
+    {
+        if (Pinsparts[nefx] == index)
+        {
+            insefx[nefx].cleanup();
+        }
+    }
 }
 
 /*
@@ -581,6 +612,11 @@ void Mixer::setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol)
     sysefxvol[Pefx][Ppart] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
+unsigned char Mixer::getPsysefxsend(int Pefxfrom, int Pefxto)
+{
+    return Psysefxsend[Pefxfrom][Pefxto];
+}
+
 void Mixer::setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol)
 {
     Psysefxsend[Pefxfrom][Pefxto] = Pvol;
@@ -592,9 +628,9 @@ void Mixer::setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol)
  */
 void Mixer::ShutUp()
 {
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
-        part[npart].cleanup();
+        _instruments[npart].cleanup();
         _meter.SetFakePeak(npart, 0);
     }
     for (auto &nefx : insefx)
@@ -611,7 +647,7 @@ void Mixer::ShutUp()
 
 void Mixer::applyparameters(bool lockmutex)
 {
-    for (auto &npart : part)
+    for (auto &npart : _instruments)
     {
         npart.applyparameters(lockmutex);
     }
@@ -694,10 +730,10 @@ void Mixer::Serialize(IPresetsSerializer *xml)
     microtonal.Serialize(xml);
     xml->endbranch();
 
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
         xml->beginbranch("PART", npart);
-        part[npart].Serialize(xml);
+        _instruments[npart].Serialize(xml);
         xml->endbranch();
     }
 
@@ -709,7 +745,7 @@ void Mixer::Serialize(IPresetsSerializer *xml)
         sysefx[nefx].Serialize(xml);
         xml->endbranch();
 
-        for (int pefx = 0; pefx < NUM_MIDI_PARTS; ++pefx)
+        for (int pefx = 0; pefx < NUM_MIXER_CHANNELS; ++pefx)
         {
             xml->beginbranch("VOLUME", pefx);
             xml->addpar("vol", Psysefxvol[nefx][pefx]);
@@ -748,14 +784,14 @@ void Mixer::Deserialize(IPresetsSerializer *xml)
     setPkeyshift(static_cast<unsigned char>(xml->getpar127("key_shift", Pkeyshift)));
     ctl.NRPN.receive = static_cast<unsigned char>(xml->getparbool("nrpn_receive", ctl.NRPN.receive));
 
-    part[0].Penabled = 0;
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    _instruments[0].Penabled = 0;
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
         if (xml->enterbranch("PART", npart) == 0)
         {
             continue;
         }
-        part[npart].Deserialize(xml);
+        _instruments[npart].Deserialize(xml);
         xml->exitbranch();
     }
 
@@ -780,7 +816,7 @@ void Mixer::Deserialize(IPresetsSerializer *xml)
                 xml->exitbranch();
             }
 
-            for (int partefx = 0; partefx < NUM_MIDI_PARTS; ++partefx)
+            for (int partefx = 0; partefx < NUM_MIXER_CHANNELS; ++partefx)
             {
                 if (xml->enterbranch("VOLUME", partefx) == 0)
                 {
@@ -812,7 +848,7 @@ void Mixer::Deserialize(IPresetsSerializer *xml)
             {
                 continue;
             }
-            Pinsparts[nefx] = static_cast<short>(xml->getpar("part", Pinsparts[nefx], -2, NUM_MIDI_PARTS));
+            Pinsparts[nefx] = static_cast<short>(xml->getpar("part", Pinsparts[nefx], -2, NUM_MIXER_CHANNELS));
             if (xml->enterbranch("EFFECT"))
             {
                 insefx[nefx].Deserialize(xml);

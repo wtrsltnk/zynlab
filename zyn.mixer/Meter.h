@@ -4,14 +4,7 @@
 #include <pthread.h>
 #include <zyn.common/globals.h>
 
-struct vuData
-{
-    vuData();
-    float outpeakl, outpeakr, maxoutpeakl, maxoutpeakr, rmspeakl, rmspeakr;
-    int clipped;
-};
-
-class Meter
+class Meter : public IMeter
 {
 public:
     Meter(SystemSettings *synth);
@@ -19,20 +12,20 @@ public:
 
     void Tick(const float *outl, const float *outr, class Instrument *part, float volume);
 
-    void SetFakePeak(int instrument, unsigned char velocity);
-    unsigned char GetFakePeak(int instrument);
-    float GetOutPeak(int instrument);
+    virtual void SetFakePeak(int instrument, unsigned char velocity);
+    virtual unsigned char GetFakePeak(int instrument);
+    virtual float GetOutPeak(int instrument);
 
     //peaks for VU-meter
-    void ResetPeaks();
+    virtual void ResetPeaks();
     //get VU-meter data
-    vuData GetVuData();
+    virtual vuData GetVuData();
 
 private:
     vuData vu;
 
-    float vuoutpeakpart[NUM_MIDI_PARTS]{};
-    unsigned char fakepeakpart[NUM_MIDI_PARTS]{};
+    float vuoutpeakpart[NUM_MIXER_CHANNELS]{};
+    unsigned char fakepeakpart[NUM_MIXER_CHANNELS]{};
 
     pthread_mutex_t vumutex{};
     SystemSettings *_synth;

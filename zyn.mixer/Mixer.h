@@ -34,12 +34,6 @@
 #include <zyn.synth/ifftwrapper.h>
 #include <zyn.fx/EffectMgr.h>
 
-typedef enum {
-    MUTEX_TRYLOCK,
-    MUTEX_LOCK,
-    MUTEX_UNLOCK
-} lockset;
-
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
 class Mixer : public IMixer
@@ -51,6 +45,7 @@ public:
     virtual ~Mixer();
 
     virtual IBankManager* GetBankManager();
+    virtual IMeter *GetMeter();
 
     /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
@@ -89,20 +84,22 @@ public:
 
     void partonoff(int npart, int what);
 
-    virtual int GetInstrumentCount();
-    virtual Instrument *GetInstrument(int index);
+    virtual int GetChannelCount() const;
+    virtual Instrument *GetChannel(int index);
+    virtual void EnableChannel(int index, bool enabled);
 
     //parameters
     unsigned char Pvolume{};
     unsigned char Pkeyshift{};
-    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS]{};
+    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS]{};
     unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};
 
     //parameters control
     void setPvolume(unsigned char Pvolume_);
     void setPkeyshift(unsigned char Pkeyshift_);
     void setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol);
-    void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol);
+    virtual unsigned char getPsysefxsend(int Pefxfrom, int Pefxto);
+    virtual void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol);
 
     EffectManager sysefx[NUM_SYS_EFX]; //system
     EffectManager insefx[NUM_INS_EFX]; //insertion
@@ -125,11 +122,11 @@ public:
     void Defaults();
 
 private:
-    Instrument part[NUM_MIDI_PARTS];
+    Instrument _instruments[NUM_MIXER_CHANNELS];
     pthread_mutex_t mutex{};
     IBankManager *bank;
     float volume{};
-    float sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS]{};
+    float sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS]{};
     float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};
     int keyshift{};
 

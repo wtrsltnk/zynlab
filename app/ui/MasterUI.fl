@@ -53,7 +53,7 @@ decl {\#include "SequencerUI.h"} {public local
 decl {\#include "NioUI.h"} {public global
 }
 
-decl {\#include "zyn.mixer/Mixer.h"} {public local
+decl {\#include "zyn.common/globals.h"} {public
 }
 
 decl {\#include "zyn.mixer/Instrument.h"} {public local
@@ -95,7 +95,7 @@ oldrmsdbr=0.0;} {}
 
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
 
-vuData data = master->_meter.GetVuData();
+vuData data = master->GetMeter()->GetVuData();
 
 //master->Lock();
 float dbl=rap2dB(data.outpeakl);
@@ -203,7 +203,7 @@ if ((maxdbr>MIN_DB-20)){
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
 
 if (!active_r()){
-   int fakedb=master->_meter.GetFakePeak(npart);
+   int fakedb=master->GetMeter()->GetFakePeak(npart);
   fl_rectf(ox,oy,lx,ly,140,140,140);
   if (fakedb>0){
     fakedb=(int)(fakedb/255.0*ly)+4;
@@ -214,7 +214,7 @@ if (!active_r()){
 };
 
 //draw the vu lines
-float db=master->_meter.GetOutPeak(npart);
+float db=master->GetMeter()->GetOutPeak(npart);
 
 db=(MIN_DB-db)/MIN_DB; 
 if (db<0.0) db=0.0;
@@ -261,7 +261,7 @@ float  tmp=ly*1.0/MIN_DB;
    case FL_PUSH:
              if (npart>=0) break;
              master->Lock();
-             master->_meter.ResetPeaks();
+             master->GetMeter()->ResetPeaks();
              master->Unlock();
              break;
 };
@@ -297,7 +297,7 @@ labelfont(1);
 labelsize(10);
 align(FL_ALIGN_TOP);
 
-value(master->Psysefxsend[neff1][neff2]);
+value(master->getPsysefxsend(neff1, neff2));
 char tmp[20];snprintf(tmp,20,"%d->%d",neff1+1,neff2+1);
 this->copy_label(tmp);} {}
   }
@@ -330,7 +330,7 @@ class Panellistitem {: {public Fl_Group}
     } {
       Fl_Group panellistitemgroup {open
         private xywh {0 20 70 400} box UP_BOX
-        code0 {if (master->GetInstrument(npart)->Penabled==0) o->deactivate();}
+        code0 {if (master->GetChannel(npart)->Penabled==0) o->deactivate();}
         code1 {set_module_parameters( o );}
       } {
         Fl_Group {} {open
@@ -353,21 +353,21 @@ bankui->show();}
           xywh {5 43 60 26} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
         }
         Fl_Slider partvolume {
-          callback {master->GetInstrument(npart)->setPvolume((int) o->value());}
+          callback {master->GetChannel(npart)->setPvolume((int) o->value());}
           tooltip {Part volume} xywh {10 236 30 153} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
-          code0 {o->value(master->GetInstrument(npart)->Pvolume);}
+          code0 {o->value(master->GetChannel(npart)->Pvolume);}
         }
         Fl_Dial partpanning {
-          callback {master->GetInstrument(npart)->setPpanning((int) o->value());}
+          callback {master->GetChannel(npart)->setPpanning((int) o->value());}
           tooltip {Part panning} xywh {25 392 20 22} maximum 127 step 1
-          code0 {o->value(master->GetInstrument(npart)->Ppanning);}
+          code0 {o->value(master->GetChannel(npart)->Ppanning);}
           class WidgetPDial
         }
         Fl_Choice partrcv {
-          callback {master->GetInstrument(npart)->Prcvchn=(int) o->value();} open
+          callback {master->GetChannel(npart)->Prcvchn=(int) o->value();} open
           tooltip {receive from Midi channel} xywh {5 25 60 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
-          code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
-          code1 {o->value(master->GetInstrument(npart)->Prcvchn);}
+          code0 {char nrstr[10]; for(int i=0;i<NUM_MIXER_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
+          code1 {o->value(master->GetChannel(npart)->Prcvchn);}
         } {}
         Fl_Pack {} {
           label Sends open
@@ -384,7 +384,7 @@ bankui->show();}
       Fl_Check_Button partenabled {
         label 01
         callback {master->Lock();
- master->partonoff(npart,(int) o->value());
+ master->EnableChannel(npart,(int) o->value());
 master->Unlock();
 
 if ((int) o->value()==0) panellistitemgroup->deactivate();
@@ -399,7 +399,7 @@ if ((int) o->value()==0) panellistitemgroup->deactivate();
 o->redraw();}
         private xywh {5 0 45 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 24
         code0 {char tmp[10];snprintf(tmp,10,"%d",npart+1);o->copy_label(tmp);}
-        code1 {o->value(master->GetInstrument(npart)->Penabled);}
+        code1 {o->value(master->GetChannel(npart)->Penabled);}
       }
     }
   }
@@ -421,15 +421,15 @@ end();} {}
   }
   Function {refresh()} {open
   } {
-    code {partenabled->value(master->GetInstrument(npart)->Penabled);
-if (master->GetInstrument(npart)->Penabled!=0) panellistitemgroup->activate();
+    code {partenabled->value(master->GetChannel(npart)->Penabled);
+if (master->GetChannel(npart)->Penabled!=0) panellistitemgroup->activate();
      else panellistitemgroup->deactivate();
 
-partvolume->value(master->GetInstrument(npart)->Pvolume);
-partpanning->value(master->GetInstrument(npart)->Ppanning);
-partrcv->value(master->GetInstrument(npart)->Prcvchn);
+partvolume->value(master->GetChannel(npart)->Pvolume);
+partpanning->value(master->GetChannel(npart)->Ppanning);
+partrcv->value(master->GetChannel(npart)->Prcvchn);
 
-partname->label((char *)master->GetInstrument(npart)->Pname);
+partname->label((char *)master->GetChannel(npart)->Pname);
 
 if ((int)bankui->cbwig->value()!=(npart+1))
    panellistitemgroup->color(fl_rgb_color(160,160,160));
@@ -571,7 +571,7 @@ updatepanel();}
             callback {if (fl_choice("Clear instrument's parameters ?","No","Yes",nullptr)){
 //       int npart=(int)npartcounter->value()-1;
        master->Lock();
-       master->GetInstrument(npart)->InstrumentDefaults();
+       master->GetChannel(npart)->InstrumentDefaults();
        master->Unlock();
 
        npartcounter->do_callback();
@@ -591,13 +591,13 @@ master->Lock();
 //  int npart=(int)npartcounter->value()-1;
 
   //clear all instrument parameters, first
-  master->GetInstrument(npart)->InstrumentDefaults();
+  master->GetChannel(npart)->InstrumentDefaults();
 
   //load the instr. parameters
-  int result=master->GetInstrument(npart)->loadXMLinstrument(filename);
+  int result=master->GetChannel(npart)->loadXMLinstrument(filename);
 
 master->Unlock();
-master->GetInstrument(npart)->applyparameters();
+master->GetChannel(npart)->applyparameters();
 
 npartcounter->do_callback();
 updatepanel();
@@ -623,7 +623,7 @@ if (result) {
 
 
 master->Lock();
-result=master->GetInstrument(npart)->saveXML(filename);
+result=master->GetChannel(npart)->saveXML(filename);
 master->Unlock();
 
 if (result<0) fl_alert("Error: Could not save the file.");
@@ -685,7 +685,7 @@ master->Unlock();}
       } {
         Fl_Group partui {open
           xywh {0 310 383 175}
-          code0 {o->init(master->GetInstrument(0),master,0,bankui);}
+          code0 {o->init(master->GetChannel(0),master,0,bankui);}
           code1 {o->show();}
           class PartUI
         } {}
@@ -876,7 +876,7 @@ if ((int) o->value()==1){
 master->insefx[ninseff].cleanup();} open
             xywh {95 183 80 22} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
             code0 {o->add("Master Out");o->add("Off");}
-            code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
+            code1 {char tmp[50]; for (int i=0;i<NUM_MIXER_CHANNELS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
             code3 {o->value(master->Pinsparts[ninseff]+2);}
           } {}
           Fl_Button {} {
@@ -920,7 +920,7 @@ partuigroup->remove(partui);
 delete partui;
 partui=new PartUI(0,0,765,525);
 partuigroup->add(partui);
-partui->init(master->GetInstrument(nval),master,nval,bankui);
+partui->init(master->GetChannel(nval),master,nval,bankui);
 partui->redraw();
 o->redraw();
 npart=nval;
@@ -929,7 +929,7 @@ updatepanel();
 simplenpartcounter->value(nval+1);
 simplenpartcounter->do_callback();}
         tooltip {The part number} xywh {5 312 50 18} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
-        code0 {o->bounds(1,NUM_MIDI_PARTS);}
+        code0 {o->bounds(1,NUM_MIXER_CHANNELS);}
         code1 {bankui->init(o);}
       }
       Fl_Button {} {
@@ -1023,7 +1023,7 @@ GNU General Public License for details.}
     } {
       Fl_Pack {} {open
         xywh {5 5 1155 425} type HORIZONTAL
-        code0 {for (int i=0;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,422,"");panellistitem[i]->init(master,i,bankui);}}
+        code0 {for (int i=0;i<NUM_MIXER_CHANNELS;i++){panellistitem[i]=new Panellistitem(0,0,70,422,"");panellistitem[i]->init(master,i,bankui);}}
       } {}
       Fl_Button {} {
         label Close
@@ -1101,13 +1101,13 @@ master->Lock();
 //  int npart=(int)npartcounter->value()-1;
 
   //clear all instrument parameters, first
-  master->GetInstrument(npart)->InstrumentDefaults();
+  master->GetChannel(npart)->InstrumentDefaults();
 
   //load the instr. parameters
-  int result=master->GetInstrument(npart)->loadXMLinstrument(filename);
+  int result=master->GetChannel(npart)->loadXMLinstrument(filename);
 
 master->Unlock();
-master->GetInstrument(npart)->applyparameters();
+master->GetChannel(npart)->applyparameters();
 
 simplenpartcounter->do_callback();
 
@@ -1139,7 +1139,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
       }
       Fl_Group simplelistitemgroup {open
         private xywh {125 65 215 145} box UP_FRAME
-        code0 {if (master->GetInstrument(npart)->Penabled==0) o->deactivate();}
+        code0 {if (master->GetChannel(npart)->Penabled==0) o->deactivate();}
       } {
         Fl_Button partname {
           callback {if ((int)bankui->cbwig->value()!=(npart+1)){
@@ -1151,23 +1151,23 @@ bankui->show();}
         }
         Fl_Slider partpanning {
           label Pan
-          callback {master->GetInstrument(npart)->setPpanning((int) o->value());}
+          callback {master->GetChannel(npart)->setPpanning((int) o->value());}
           xywh {185 95 145 15} type {Horz Knob} box NO_BOX labelsize 11 maximum 127 step 1 value 64
-          code0 {o->value(master->GetInstrument(npart)->Ppanning);}
+          code0 {o->value(master->GetChannel(npart)->Ppanning);}
         }
         Fl_Choice partrcv {
           label {Midi Channel Receive}
           callback {virkeys->relaseallkeys(0);
-master->GetInstrument(npart)->Prcvchn=(int) o->value();
+master->GetChannel(npart)->Prcvchn=(int) o->value();
 virkeys->midich=(int) o->value();} open
           tooltip {receive from Midi channel} xywh {140 157 65 18} down_box BORDER_BOX labelsize 10 align 130 textfont 1
-          code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
-          code1 {o->value(master->GetInstrument(npart)->Prcvchn);}
+          code0 {char nrstr[10]; for(int i=0;i<NUM_MIXER_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
+          code1 {o->value(master->GetChannel(npart)->Prcvchn);}
         } {}
         Fl_Dial partvolume {
-          callback {master->GetInstrument(npart)->setPvolume((int) o->value());}
+          callback {master->GetChannel(npart)->setPvolume((int) o->value());}
           xywh {135 95 45 40} labelsize 9 maximum 127 step 1
-          code0 {o->value(master->GetInstrument(npart)->Pvolume);}
+          code0 {o->value(master->GetChannel(npart)->Pvolume);}
           class WidgetPDial
         }
         Fl_Box {} {
@@ -1176,37 +1176,37 @@ virkeys->midich=(int) o->value();} open
         }
         Fl_Check_Button simplepartportamento {
           label Portamento
-          callback {master->GetInstrument(npart)->ctl.portamento.portamento=(int) o->value();}
+          callback {master->GetChannel(npart)->ctl.portamento.portamento=(int) o->value();}
           tooltip {Enable/Disable the portamento} xywh {193 127 79 23} down_box DOWN_BOX labelsize 9
-          code0 {o->value(master->GetInstrument(npart)->ctl.portamento.portamento);}
+          code0 {o->value(master->GetChannel(npart)->ctl.portamento.portamento);}
         }
         Fl_Counter simpleminkcounter {
           label {Min.key}
-          callback {master->GetInstrument(npart)->Pminkey=(int) o->value();
-if (master->GetInstrument(npart)->Pminkey>master->GetInstrument(npart)->Pmaxkey) o->textcolor(FL_RED);
+          callback {master->GetChannel(npart)->Pminkey=(int) o->value();
+if (master->GetChannel(npart)->Pminkey>master->GetChannel(npart)->Pmaxkey) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);}
           tooltip {Minimum key (that the part receives NoteOn messages)} xywh {210 158 40 15} type Simple labelsize 10 minimum 0 maximum 127 step 1 textsize 10
-          code0 {o->value(master->GetInstrument(npart)->Pminkey);}
+          code0 {o->value(master->GetChannel(npart)->Pminkey);}
         }
         Fl_Counter simplemaxkcounter {
           label {Max.key}
-          callback {master->GetInstrument(npart)->Pmaxkey=(int) o->value();
+          callback {master->GetChannel(npart)->Pmaxkey=(int) o->value();
 
-if (master->GetInstrument(npart)->Pminkey>master->GetInstrument(npart)->Pmaxkey) o->textcolor(FL_RED);
+if (master->GetChannel(npart)->Pminkey>master->GetChannel(npart)->Pmaxkey) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);}
           tooltip {Maximum key (that the part receives NoteOn messages)} xywh {255 158 40 15} type Simple labelsize 10 minimum 0 maximum 127 step 1 textsize 10
-          code0 {o->value(master->GetInstrument(npart)->Pmaxkey);}
+          code0 {o->value(master->GetChannel(npart)->Pmaxkey);}
         }
         Fl_Button {} {
           label m
-          callback {if (master->GetInstrument(npart)->lastnote>=0) simpleminkcounter->value(master->GetInstrument(npart)->lastnote);
+          callback {if (master->GetChannel(npart)->lastnote>=0) simpleminkcounter->value(master->GetChannel(npart)->lastnote);
 simpleminkcounter->do_callback();
 simplemaxkcounter->do_callback();}
           tooltip {set the minimum key to the last pressed key} xywh {230 188 15 12} box THIN_UP_BOX labelsize 10
         }
         Fl_Button {} {
           label M
-          callback {if (master->GetInstrument(npart)->lastnote>=0) simplemaxkcounter->value(master->GetInstrument(npart)->lastnote);
+          callback {if (master->GetChannel(npart)->lastnote>=0) simplemaxkcounter->value(master->GetChannel(npart)->lastnote);
 simplemaxkcounter->do_callback();
 simpleminkcounter->do_callback();}
           tooltip {set the maximum key to the last pressed key} xywh {260 188 15 12} box THIN_UP_BOX labelsize 10
@@ -1221,10 +1221,10 @@ simplemaxkcounter->do_callback();}
         }
         Fl_Counter simplepartkeyshiftcounter {
           label KeyShift
-          callback {master->GetInstrument(npart)->Pkeyshift=(int) o->value()+64;}
+          callback {master->GetChannel(npart)->Pkeyshift=(int) o->value()+64;}
           xywh {280 120 50 20} type Simple labelsize 11 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
-          code1 {o->value(master->GetInstrument(npart)->Pkeyshift-64);}
+          code1 {o->value(master->GetChannel(npart)->Pkeyshift-64);}
         }
         Fl_Dial simplesyseffsend {
           callback {master->setPsysefxvol(npart,nsyseff,(int) o->value());}
@@ -1239,7 +1239,7 @@ simplemaxkcounter->do_callback();}
       Fl_Check_Button partenabled {
         label Enabled
         callback {master->Lock();
- master->partonoff(npart,(int) o->value());
+ master->EnableChannel(npart,(int) o->value());
 master->Unlock();
 
 if ((int) o->value()==0) simplelistitemgroup->deactivate();
@@ -1254,7 +1254,7 @@ if ((int) o->value()==0) simplelistitemgroup->deactivate();
 o->redraw();}
         private xywh {250 40 85 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 24
         code0 {//char tmp[10];snprintf(tmp,10,"%d",npart+1);o->copy_label(tmp);}
-        code1 {o->value(master->GetInstrument(npart)->Penabled);}
+        code1 {o->value(master->GetChannel(npart)->Penabled);}
       }
       Fl_Box virkeys {
         label Keyboard
@@ -1447,7 +1447,7 @@ if ((int) o->value()==1){
 master->insefx[ninseff].cleanup();} open
               xywh {435 75 80 20} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
               code0 {o->add("Master Out");o->add("Off");}
-              code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
+              code1 {char tmp[50]; for (int i=0;i<NUM_MIXER_CHANNELS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
               code3 {o->value(master->Pinsparts[ninseff]+2);}
             } {}
             Fl_Button {} {
@@ -1512,9 +1512,9 @@ npartcounter->value(o->value());
 npart=(int) o->value()-1;
 
 simplerefresh();
-virkeys->midich=master->GetInstrument(npart)->Prcvchn;}
+virkeys->midich=master->GetChannel(npart)->Prcvchn;}
         tooltip {The part number} xywh {170 40 70 20} type Simple labelfont 1 align 4 minimum 0 maximum 127 step 1 value 1 textfont 1
-        code0 {o->bounds(1,NUM_MIDI_PARTS);}
+        code0 {o->bounds(1,NUM_MIXER_CHANNELS);}
       }
       Fl_Counter {} {
         label {Keyb.Oct.}
@@ -1573,11 +1573,11 @@ Config::Current().cfg.UserInterfaceMode=2;}
   Function {updatesendwindow()} {} {
     code {for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
   for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)
-    syseffsend[neff1][neff2]->value(master->Psysefxsend[neff1][neff2]);} {}
+    syseffsend[neff1][neff2]->value(master->getPsysefxsend(neff1, neff2));} {}
   }
   Function {updatepanel()} {open
   } {
-    code {for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+    code {for (int npart=0;npart<NUM_MIXER_CHANNELS;npart++){
   panellistitem[npart]->refresh();
 };} {}
   }
@@ -1641,23 +1641,23 @@ delete selectuiwindow;} {}
 };} {}
   }
   Function {simplerefresh()} {} {
-    code {partenabled->value(master->GetInstrument(npart)->Penabled);
-if (master->GetInstrument(npart)->Penabled!=0) simplelistitemgroup->activate();
+    code {partenabled->value(master->GetChannel(npart)->Penabled);
+if (master->GetChannel(npart)->Penabled!=0) simplelistitemgroup->activate();
      else simplelistitemgroup->deactivate();
 
-partvolume->value(master->GetInstrument(npart)->Pvolume);
-partpanning->value(master->GetInstrument(npart)->Ppanning);
-partrcv->value(master->GetInstrument(npart)->Prcvchn);
+partvolume->value(master->GetChannel(npart)->Pvolume);
+partpanning->value(master->GetChannel(npart)->Ppanning);
+partrcv->value(master->GetChannel(npart)->Prcvchn);
 
-if (master->GetInstrument(npart)->Pname[0]!=0) partname->label((char *)master->GetInstrument(npart)->Pname);
+if (master->GetChannel(npart)->Pname[0]!=0) partname->label((char *)master->GetChannel(npart)->Pname);
 	else partname->label("Click here to load a instrument");
 
 simplelistitemgroup->redraw();
-simplepartportamento->value(master->GetInstrument(npart)->ctl.portamento.portamento);
-simpleminkcounter->value(master->GetInstrument(npart)->Pminkey);
-simplemaxkcounter->value(master->GetInstrument(npart)->Pmaxkey);
+simplepartportamento->value(master->GetChannel(npart)->ctl.portamento.portamento);
+simpleminkcounter->value(master->GetChannel(npart)->Pminkey);
+simplemaxkcounter->value(master->GetChannel(npart)->Pmaxkey);
 
-simplepartkeyshiftcounter->value(master->GetInstrument(npart)->Pkeyshift-64);
+simplepartkeyshiftcounter->value(master->GetChannel(npart)->Pkeyshift-64);
 simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
     code {nioui.refresh(this);} {}
   }
@@ -1771,7 +1771,7 @@ simpleinseffnocounter->do_callback();
 simplemasterkeyshiftcounter->value(master->Pkeyshift-64);
 simplemastervolumedial->value(master->Pvolume);    
 simpleglobalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
-virkeys->midich=master->GetInstrument(npart)->Prcvchn;
+virkeys->midich=master->GetChannel(npart)->Prcvchn;
 
 simplerefresh();
 bankui->hide();} {}
@@ -1800,7 +1800,7 @@ bankui->hide();} {}
   }
   decl {char masterwindowlabel[100];} {private local
   }
-  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {private local
+  decl {Panellistitem *panellistitem[NUM_MIXER_CHANNELS];} {private local
   }
   decl {NioUI nioui} {private local
   }

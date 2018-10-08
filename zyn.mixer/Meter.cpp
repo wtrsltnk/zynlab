@@ -12,7 +12,7 @@ Meter::Meter(SystemSettings *synth)
     : _synth(synth)
 {
     pthread_mutex_init(&vumutex, nullptr);
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
         vuoutpeakpart[npart] = 1e-9f;
         fakepeakpart[npart] = 0;
@@ -23,6 +23,8 @@ Meter::~Meter()
 {
     pthread_mutex_destroy(&vumutex);
 }
+
+IMeter::~IMeter() = default;
 
 /*
  * Reset peaks and clear the "cliped" flag (for VU-meter)
@@ -116,7 +118,7 @@ void Meter::Tick(const float *outl, const float *outr, Instrument *part, float v
     vu.rmspeakr = sqrt(vu.rmspeakr / _synth->buffersize_f);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
-    for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
         vuoutpeakpart[npart] = 1.0e-12f;
         if (part[npart].Penabled != 0)

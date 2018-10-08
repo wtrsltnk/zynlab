@@ -47,7 +47,7 @@
 /*
  * Number of parts
  */
-#define NUM_MIDI_PARTS 16
+#define NUM_MIXER_CHANNELS 16
 
 /*
  * Number of Midi channes
@@ -321,16 +321,41 @@ public:
     virtual void RescanForBanks() = 0;
 };
 
+struct vuData
+{
+    vuData();
+    float outpeakl, outpeakr, maxoutpeakl, maxoutpeakr, rmspeakl, rmspeakr;
+    int clipped;
+};
+
+class IMeter
+{
+public:
+    virtual ~IMeter();
+
+    virtual void SetFakePeak(int instrument, unsigned char velocity) = 0;
+    virtual unsigned char GetFakePeak(int instrument) = 0;
+    virtual float GetOutPeak(int instrument) = 0;
+    virtual void ResetPeaks() = 0;
+    virtual vuData GetVuData() = 0;
+};
+
 class IMixer
 {
 public:
     virtual ~IMixer();
 
     virtual IBankManager *GetBankManager() = 0;
+    virtual IMeter *GetMeter() = 0;
 
     // Instruments
-    virtual int GetInstrumentCount() = 0;
-    virtual Instrument *GetInstrument(int index) = 0;
+    virtual int GetChannelCount() const = 0;
+    virtual Instrument *GetChannel(int index) = 0;
+    virtual void EnableChannel(int index, bool enabled) = 0;
+
+    // Effects
+    virtual unsigned char getPsysefxsend(int Pefxfrom, int Pefxto) = 0;
+    virtual void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol) = 0;
 
     // Mutex
     virtual void Lock() = 0;

@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
 
     if (!loadinstrument.empty())
     {
-        int tmp = mixer->GetInstrument(0)->loadXMLinstrument(loadinstrument.c_str());
+        int tmp = mixer->GetChannel(0)->loadXMLinstrument(loadinstrument.c_str());
         if (tmp < 0)
         {
             std::cerr << "ERROR: Could not load instrument file "
@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mixer->GetInstrument(0)->applyparameters();
+            mixer->GetChannel(0)->applyparameters();
             cout << "Instrument file loaded." << std::endl;
         }
     }

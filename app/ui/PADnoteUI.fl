@@ -8,8 +8,11 @@ decl {\#include "zyn.synth/PADnoteParams.h"} {public
 decl {\#include "zyn.common/Util.h"} {public
 } 
 
+decl {\#include "zyn.common/globals.h"} {public
+}
+
 decl {\#include "zyn.mixer/Mixer.h"} {public
-} 
+}
 
 decl {\#include "ResonanceUI.h"} {public
 } 
