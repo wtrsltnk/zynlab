@@ -165,7 +165,7 @@ void AppThreeDee::EditInstrument(int i)
         return;
     }
 
-    _mixer->part[i].Penabled = true;
+    _mixer->GetInstrument(i)->Penabled = true;
 
     activeInstrument = i;
     showInstrumentEditor = true;
@@ -354,10 +354,10 @@ void AppThreeDee::Render()
                     ImVec2 size = ImVec2(87, 18);
                     char label[32];
                     sprintf(label, "CH%d", i + 1);
-                    bool channelEnabled = _mixer->part[i].Penabled != '\0';
+                    bool channelEnabled = _mixer->GetInstrument(i)->Penabled != '\0';
                     if (ImGui::Checkbox(label, &channelEnabled))
                     {
-                        _mixer->part[i].Penabled = channelEnabled ? 1 : 0;
+                        _mixer->GetInstrument(i)->Penabled = channelEnabled ? 1 : 0;
                     }
 
                     if (ImGui::Button("Edit", size))
@@ -365,30 +365,30 @@ void AppThreeDee::Render()
                         EditInstrument(i);
                     }
 
-                    if (ImGui::Button(reinterpret_cast<char *>(_mixer->part[i].Pname), size))
+                    if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetInstrument(i)->Pname), size))
                     {
                         SelectInstrument(i);
                         openSelectInstrument = i;
                     }
 
-                    if (ImGui::IsItemHovered() && _mixer->part[i].Pname[0] > '\0')
+                    if (ImGui::IsItemHovered() && _mixer->GetInstrument(i)->Pname[0] > '\0')
                     {
                         ImGui::BeginTooltip();
                         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                        ImGui::TextUnformatted(reinterpret_cast<char *>(_mixer->part[i].Pname));
+                        ImGui::TextUnformatted(reinterpret_cast<char *>(_mixer->GetInstrument(i)->Pname));
                         ImGui::PopTextWrapPos();
                         ImGui::EndTooltip();
                     }
-                    auto volume = _mixer->part[i].Pvolume;
+                    auto volume = _mixer->GetInstrument(i)->Pvolume;
                     if (MyKnobUchar("volume", &(volume), 0, 128, ImVec2(40, 40)))
                     {
-                        _mixer->part[i].setPvolume(volume);
+                        _mixer->GetInstrument(i)->setPvolume(volume);
                     }
                     ImGui::SameLine();
-                    auto panning = _mixer->part[i].Ppanning;
+                    auto panning = _mixer->GetInstrument(i)->Ppanning;
                     if (MyKnobUchar(" pann", &(panning), 0, 128, ImVec2(40, 40)))
                     {
-                        _mixer->part[i].setPpanning(panning);
+                        _mixer->GetInstrument(i)->setPpanning(panning);
                     }
                     ImGui::PopStyleColor(3);
                     ImGui::PopID();
@@ -415,28 +415,28 @@ void AppThreeDee::Render()
             const char *listbox_items[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
             ImGui::Combo("Part", &activeInstrument, listbox_items, 15);
 
-            bool penabled = _mixer->part[activeInstrument].Penabled != 0;
+            bool penabled = _mixer->GetInstrument(activeInstrument)->Penabled != 0;
             if (ImGui::Checkbox("Enabled", &penabled))
             {
-                _mixer->part[activeInstrument].Penabled = penabled ? 1 : 0;
+                _mixer->GetInstrument(activeInstrument)->Penabled = penabled ? 1 : 0;
             }
 
-            bool add = _mixer->part[activeInstrument].kit[0].Padenabled;
+            bool add = _mixer->GetInstrument(activeInstrument)->kit[0].Padenabled;
             if (ImGui::Checkbox("Add", &add))
             {
-                _mixer->part[activeInstrument].kit[0].Padenabled = add;
+                _mixer->GetInstrument(activeInstrument)->kit[0].Padenabled = add;
             }
 
-            bool sub = _mixer->part[activeInstrument].kit[0].Psubenabled;
+            bool sub = _mixer->GetInstrument(activeInstrument)->kit[0].Psubenabled;
             if (ImGui::Checkbox("Sub", &sub))
             {
-                _mixer->part[activeInstrument].kit[0].Psubenabled = sub;
+                _mixer->GetInstrument(activeInstrument)->kit[0].Psubenabled = sub;
             }
 
-            bool pad = _mixer->part[activeInstrument].kit[0].Ppadenabled;
+            bool pad = _mixer->GetInstrument(activeInstrument)->kit[0].Ppadenabled;
             if (ImGui::Checkbox("Pad", &pad))
             {
-                _mixer->part[activeInstrument].kit[0].Ppadenabled = pad;
+                _mixer->GetInstrument(activeInstrument)->kit[0].Ppadenabled = pad;
             }
 
             if (ImGui::Button("Edit"))
@@ -444,7 +444,7 @@ void AppThreeDee::Render()
                 EditInstrument(activeInstrument);
             }
 
-            if (ImGui::Button(reinterpret_cast<char *>(_mixer->part[activeInstrument].Pname)))
+            if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetInstrument(activeInstrument)->Pname)))
             {
                 SelectInstrument(activeInstrument);
                 openSelectInstrument = activeInstrument;
@@ -503,10 +503,10 @@ void AppThreeDee::Render()
 
                 if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
                 {
-                    pthread_mutex_lock(&_mixer->part[activeInstrument].load_mutex);
-                    _mixer->GetBankManager()->LoadFromSlot(i, &_mixer->part[activeInstrument]);
-                    pthread_mutex_unlock(&_mixer->part[activeInstrument].load_mutex);
-                    _mixer->part[activeInstrument].applyparameters();
+                    pthread_mutex_lock(&_mixer->GetInstrument(activeInstrument)->load_mutex);
+                    _mixer->GetBankManager()->LoadFromSlot(i, _mixer->GetInstrument(activeInstrument));
+                    pthread_mutex_unlock(&_mixer->GetInstrument(activeInstrument)->load_mutex);
+                    _mixer->GetInstrument(activeInstrument)->applyparameters();
                     ImGui::CloseCurrentPopup();
                 }
                 if ((i + 1) % 32 == 0)
@@ -595,7 +595,7 @@ void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*
 
     if (key == GLFW_KEY_SPACE && action == 1)
     {
-        _mixer->part[activeInstrument].Penabled = !_mixer->part[activeInstrument].Penabled;
+        _mixer->GetInstrument(activeInstrument)->Penabled = !_mixer->GetInstrument(activeInstrument)->Penabled;
         return;
     }
 

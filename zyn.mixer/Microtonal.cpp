@@ -690,7 +690,7 @@ int Microtonal::loadkbm(const char *filename)
     return 0;
 }
 
-void Microtonal::add2XML(IPresetsSerializer *xml) const
+void Microtonal::Serialize(IPresetsSerializer *xml) const
 {
     xml->addparstr("name", (char *)Pname);
     xml->addparstr("comment", (char *)Pcomment);
@@ -747,7 +747,7 @@ void Microtonal::add2XML(IPresetsSerializer *xml) const
     xml->endbranch();
 }
 
-void Microtonal::getfromXML(IPresetsSerializer *xml)
+void Microtonal::Deserialize(IPresetsSerializer *xml)
 {
     xml->getparstr("name", (char *)Pname, MICROTONAL_MAX_NAME_LEN);
     xml->getparstr("comment", (char *)Pcomment, MICROTONAL_MAX_NAME_LEN);
@@ -824,7 +824,7 @@ int Microtonal::saveXML(const char *filename) const
     PresetsSerializer xml;
 
     xml.beginbranch("MICROTONAL");
-    add2XML(&xml);
+    Serialize(&xml);
     xml.endbranch();
 
     return xml.saveXMLfile(filename);
@@ -844,7 +844,7 @@ int Microtonal::loadXML(const char *filename)
         return -10;
     }
 
-    getfromXML(&xml);
+    Deserialize(&xml);
     xml.exitbranch();
 
     return 0;

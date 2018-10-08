@@ -266,10 +266,10 @@ void AppThreeDee::Render(double dt)
             ImGui::BeginChild(label);
 
             sprintf(label, "LEVEL %d", i);
-            unsigned char vol = _mixer->part[i].Pvolume;
+            unsigned char vol = _mixer->GetInstrument(i)->Pvolume;
             if (MyKnobUchar(label, &vol, 0, 128))
             {
-                _mixer->part[i].Pvolume = vol;
+                _mixer->GetInstrument(i)->Pvolume = vol;
             }
 
             if (i < 5 || i == 8 || i == 11 || i == 12 || i == 13)
@@ -282,10 +282,10 @@ void AppThreeDee::Render(double dt)
                 {
                     sprintf(label, "TUNING %d", i);
                 }
-                unsigned char vol = _mixer->part[i].Pvolume;
+                unsigned char vol = _mixer->GetInstrument(i)->Pvolume;
                 if (MyKnobUchar(label, &vol, 0, 128))
                 {
-                    _mixer->part[i].Pvolume = vol;
+                    _mixer->GetInstrument(i)->Pvolume = vol;
                 }
             }
             if (i < 2 || i == 8 || i == 9)
@@ -298,10 +298,10 @@ void AppThreeDee::Render(double dt)
                 {
                     sprintf(label, "DECAY %d", i);
                 }
-                unsigned char vol = _mixer->part[i].Pvolume;
+                unsigned char vol = _mixer->GetInstrument(i)->Pvolume;
                 if (MyKnobUchar(label, &vol, 0, 128))
                 {
-                    _mixer->part[i].Pvolume = vol;
+                    _mixer->GetInstrument(i)->Pvolume = vol;
                 }
             }
 

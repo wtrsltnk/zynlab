@@ -104,8 +104,8 @@ public:
     /**Comment about the tuning*/
     unsigned char Pcomment[MICROTONAL_MAX_NAME_LEN];
 
-    void add2XML(IPresetsSerializer *xml) const;
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml) const;
+    void Deserialize(IPresetsSerializer *xml);
     int saveXML(const char *filename) const;
     int loadXML(const char *filename);
 

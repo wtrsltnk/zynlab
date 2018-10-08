@@ -56,7 +56,6 @@ public:
          * @return 0 for ok or <0 if there is an error*/
     int saveXML(const char *filename);
 
-    void defaults();
 
     /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/
@@ -91,12 +90,9 @@ public:
     void partonoff(int npart, int what);
 
     virtual int GetInstrumentCount();
-    virtual class Instrument *GetInstrument(int index);
+    virtual Instrument *GetInstrument(int index);
 
-
-    Meter _meter;
     //parameters
-
     unsigned char Pvolume{};
     unsigned char Pkeyshift{};
     unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS]{};
@@ -108,7 +104,6 @@ public:
     void setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol);
     void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol);
 
-    Instrument part[NUM_MIDI_PARTS];
     EffectManager sysefx[NUM_SYS_EFX]; //system
     EffectManager insefx[NUM_INS_EFX]; //insertion
                                               //      void swapcopyeffects(int what,int type,int neff1,int neff2);
@@ -116,6 +111,7 @@ public:
     //part that's apply the insertion effect; -1 to disable
     short int Pinsparts[NUM_INS_EFX]{};
 
+    Meter _meter;
     Controller ctl;
     bool swaplr; //if L and R are swapped
 
@@ -124,13 +120,12 @@ public:
 
     IFFTwrapper *fft;
 
-private:
-    /**This adds the parameters to the XML data*/
-    void add2XML(IPresetsSerializer *xml);
-    /**This loads the parameters from the XML data*/
-    void getfromXML(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
 
 private:
+    Instrument part[NUM_MIDI_PARTS];
     pthread_mutex_t mutex{};
     IBankManager *bank;
     float volume{};

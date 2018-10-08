@@ -71,7 +71,7 @@ Mixer::Mixer(SystemSettings *synth_, IBankManager *bank_)
         nefx.Init(false, &mutex, this->_synth);
     }
 
-    defaults();
+    Defaults();
 }
 
 Mixer::~Mixer()
@@ -89,7 +89,7 @@ IBankManager *Mixer::GetBankManager()
     return bank;
 }
 
-void Mixer::defaults()
+void Mixer::Defaults()
 {
     volume = 1.0f;
     setPvolume(80);
@@ -624,7 +624,7 @@ int Mixer::getalldata(char **data)
     xml.beginbranch("MASTER");
 
     Lock();
-    add2XML(&xml);
+    Serialize(&xml);
     Unlock();
 
     xml.endbranch();
@@ -648,7 +648,7 @@ void Mixer::putalldata(char *data, int /*size*/)
     }
 
     Lock();
-    getfromXML(&xml);
+    Deserialize(&xml);
     Unlock();
 
     xml.exitbranch();
@@ -659,7 +659,7 @@ int Mixer::saveXML(const char *filename)
     PresetsSerializer xml;
 
     xml.beginbranch("MASTER");
-    add2XML(&xml);
+    Serialize(&xml);
     xml.endbranch();
 
     return xml.saveXMLfile(filename);
@@ -678,20 +678,20 @@ int Mixer::loadXML(const char *filename)
         return -10;
     }
 
-    getfromXML(&xml);
+    Deserialize(&xml);
     xml.exitbranch();
 
     return 0;
 }
 
-void Mixer::add2XML(IPresetsSerializer *xml)
+void Mixer::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("volume", Pvolume);
     xml->addpar("key_shift", Pkeyshift);
     xml->addparbool("nrpn_receive", ctl.NRPN.receive);
 
     xml->beginbranch("MICROTONAL");
-    microtonal.add2XML(xml);
+    microtonal.Serialize(xml);
     xml->endbranch();
 
     for (int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
@@ -742,7 +742,7 @@ void Mixer::add2XML(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void Mixer::getfromXML(IPresetsSerializer *xml)
+void Mixer::Deserialize(IPresetsSerializer *xml)
 {
     setPvolume(static_cast<unsigned char>(xml->getpar127("volume", Pvolume)));
     setPkeyshift(static_cast<unsigned char>(xml->getpar127("key_shift", Pkeyshift)));
@@ -761,7 +761,7 @@ void Mixer::getfromXML(IPresetsSerializer *xml)
 
     if (xml->enterbranch("MICROTONAL"))
     {
-        microtonal.getfromXML(xml);
+        microtonal.Deserialize(xml);
         xml->exitbranch();
     }
 
