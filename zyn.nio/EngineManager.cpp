@@ -28,11 +28,11 @@
 
 EngineManager *EngineManager::_instance = nullptr;
 
-EngineManager &EngineManager::CreateInstance(IMixer *mixer)
+EngineManager &EngineManager::CreateInstance(IAudioGenerator *audioGenerator)
 {
     if (EngineManager::_instance == nullptr)
     {
-        EngineManager::_instance = new EngineManager(mixer);
+        EngineManager::_instance = new EngineManager(audioGenerator);
     }
 
     return *EngineManager::_instance;
@@ -49,9 +49,9 @@ void EngineManager::DestroyInstance()
     EngineManager::_instance = nullptr;
 }
 
-EngineManager::EngineManager(class IMixer *mixer)
+EngineManager::EngineManager(IAudioGenerator *audioGenerator)
 {
-    Engine *defaultEng = new NulEngine(mixer->_synth);
+    Engine *defaultEng = new NulEngine(audioGenerator->SampleRate(), audioGenerator->BufferSize());
 
     //conditional compiling mess (but contained)
     engines.push_back(defaultEng);
@@ -67,7 +67,7 @@ EngineManager::EngineManager(class IMixer *mixer)
     engines.push_back(new JackEngine(mixer->_synth));
 #endif
 #ifdef PORTAUDIO
-    engines.push_back(new PaEngine(mixer->_synth));
+    engines.push_back(new PaEngine(audioGenerator->SampleRate(), audioGenerator->BufferSize()));
 #endif
 #ifdef SDL2
     // TODO Not working yet!

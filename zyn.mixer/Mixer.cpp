@@ -46,8 +46,8 @@ Mixer::Mixer(SystemSettings *synth_, IBankManager *bank_)
     swaplr = false;
     off = 0;
     smps = 0;
-    bufl = new float[this->_synth->buffersize];
-    bufr = new float[this->_synth->buffersize];
+    bufl = new float[this->BufferSize()];
+    bufr = new float[this->BufferSize()];
 
     pthread_mutex_init(&mutex, nullptr);
     fft = new FFTwrapper(this->_synth->oscilsize);
@@ -125,12 +125,32 @@ void Mixer::Defaults()
 
         for (int nefxto = 0; nefxto < NUM_SYS_EFX; ++nefxto)
         {
-            setPsysefxsend(nefx, nefxto, 0);
+            SetSystemEffectSend(nefx, nefxto, 0);
         }
     }
 
     microtonal.defaults();
     ShutUp();
+}
+
+unsigned int Mixer::SampleRate() const
+{
+    return _synth->samplerate;
+}
+
+unsigned int Mixer::BufferSize() const
+{
+    return _synth->buffersize;
+}
+
+unsigned int Mixer::BufferSizeInBytes() const
+{
+    return _synth->bufferbytes;
+}
+
+float Mixer::BufferSizeFloat() const
+{
+    return _synth->buffersize_f;
 }
 
 void Mixer::Lock()
@@ -329,8 +349,8 @@ void Mixer::AudioOut(float *outl, float *outr)
     }
 
     //clean up the output samples (should not be needed?)
-    memset(outl, 0, this->_synth->bufferbytes);
-    memset(outr, 0, this->_synth->bufferbytes);
+    memset(outl, 0, this->BufferSizeInBytes());
+    memset(outr, 0, this->BufferSizeInBytes());
 
     //Compute part samples and store them part[npart].partoutl,partoutr
     for (auto &npart : _instruments)
@@ -380,10 +400,10 @@ void Mixer::AudioOut(float *outl, float *outr)
         //the volume or the panning has changed and needs interpolation
         if (ABOVE_AMPLITUDE_THRESHOLD(oldvol._left, newvol._left) || ABOVE_AMPLITUDE_THRESHOLD(oldvol._right, newvol._right))
         {
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < this->BufferSize(); ++i)
             {
-                Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol._left, newvol._left, i, this->_synth->buffersize),
-                                  INTERPOLATE_AMPLITUDE(oldvol._right, newvol._right, i, this->_synth->buffersize));
+                Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol._left, newvol._left, i, this->BufferSize()),
+                                  INTERPOLATE_AMPLITUDE(oldvol._right, newvol._right, i, this->BufferSize()));
                 npart.partoutl[i] *= vol._left;
                 npart.partoutr[i] *= vol._right;
             }
@@ -392,7 +412,7 @@ void Mixer::AudioOut(float *outl, float *outr)
         }
         else
         {
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < this->BufferSize(); ++i)
             { //the volume did not changed
                 npart.partoutl[i] *= newvol._left;
                 npart.partoutr[i] *= newvol._right;
@@ -408,11 +428,11 @@ void Mixer::AudioOut(float *outl, float *outr)
             continue; //the effect is disabled
         }
 
-        float tmpmixl[this->_synth->buffersize];
-        float tmpmixr[this->_synth->buffersize];
+        float tmpmixl[this->BufferSize()];
+        float tmpmixr[this->BufferSize()];
         //Clean up the samples used by the system effects
-        memset(tmpmixl, 0, this->_synth->bufferbytes);
-        memset(tmpmixr, 0, this->_synth->bufferbytes);
+        memset(tmpmixl, 0, this->BufferSizeInBytes());
+        memset(tmpmixr, 0, this->BufferSizeInBytes());
 
         //Mix the channels according to the part settings about System Effect
         for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
@@ -429,7 +449,7 @@ void Mixer::AudioOut(float *outl, float *outr)
             }
             //the output volume of each part to system effect
             const float vol = sysefxvol[nefx][npart];
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < this->BufferSize(); ++i)
             {
                 tmpmixl[i] += _instruments[npart].partoutl[i] * vol;
                 tmpmixr[i] += _instruments[npart].partoutr[i] * vol;
@@ -442,7 +462,7 @@ void Mixer::AudioOut(float *outl, float *outr)
             if (Psysefxsend[nefxfrom][nefx] != 0)
             {
                 const float vol = sysefxsend[nefxfrom][nefx];
-                for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+                for (unsigned int i = 0; i < this->BufferSize(); ++i)
                 {
                     tmpmixl[i] += sysefx[nefxfrom].efxoutl[i] * vol;
                     tmpmixr[i] += sysefx[nefxfrom].efxoutr[i] * vol;
@@ -454,7 +474,7 @@ void Mixer::AudioOut(float *outl, float *outr)
 
         //Add the System Effect to sound output
         const float outvol = sysefx[nefx].sysefxgetvolume();
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < this->BufferSize(); ++i)
         {
             outl[i] += tmpmixl[i] * outvol;
             outr[i] += tmpmixr[i] * outvol;
@@ -466,7 +486,7 @@ void Mixer::AudioOut(float *outl, float *outr)
     {
         if (npart.Penabled) //only mix active parts
         {
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < this->BufferSize(); ++i)
             { //the volume did not changed
                 outl[i] += npart.partoutl[i];
                 outr[i] += npart.partoutr[i];
@@ -484,7 +504,7 @@ void Mixer::AudioOut(float *outl, float *outr)
     }
 
     //Master Volume
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < this->BufferSize(); ++i)
     {
         outl[i] *= volume;
         outr[i] *= volume;
@@ -495,9 +515,9 @@ void Mixer::AudioOut(float *outl, float *outr)
     //Shutup if it is asked (with fade-out)
     if (shutup)
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < this->BufferSize(); ++i)
         {
-            float tmp = (this->_synth->buffersize_f - i) / this->_synth->buffersize_f;
+            float tmp = (this->BufferSizeFloat() - i) / this->BufferSizeFloat();
             outl[i] *= tmp;
             outr[i] *= tmp;
         }
@@ -510,17 +530,14 @@ void Mixer::AudioOut(float *outl, float *outr)
 
 //TODO review the respective code from yoshimi for this
 //If memory serves correctly, libsamplerate was used
-void Mixer::GetAudioOutSamples(size_t nsamples,
-                               unsigned samplerate,
-                               float *outl,
-                               float *outr)
+void Mixer::GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr)
 {
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job
-    if (this->_synth->samplerate != samplerate)
+    if (this->SampleRate() != samplerate)
     {
-        printf("darn it: %d vs %d\n", this->_synth->samplerate, samplerate);
+        printf("darn it: %d vs %d\n", this->SampleRate(), samplerate);
         return;
     }
 
@@ -537,7 +554,7 @@ void Mixer::GetAudioOutSamples(size_t nsamples,
             AudioOut(bufl, bufr);
             off = 0;
             out_off += smps;
-            smps = this->_synth->buffersize;
+            smps = this->BufferSize();
         }
         else
         { //use some samples
@@ -612,12 +629,12 @@ void Mixer::setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol)
     sysefxvol[Pefx][Ppart] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
-unsigned char Mixer::getPsysefxsend(int Pefxfrom, int Pefxto)
+unsigned char Mixer::GetSystemEffectSend(int Pefxfrom, int Pefxto)
 {
     return Psysefxsend[Pefxfrom][Pefxto];
 }
 
-void Mixer::setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol)
+void Mixer::SetSystemEffectSend(int Pefxfrom, int Pefxto, unsigned char Pvol)
 {
     Psysefxsend[Pefxfrom][Pefxto] = Pvol;
     sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
@@ -832,7 +849,7 @@ void Mixer::Deserialize(IPresetsSerializer *xml)
                 {
                     continue;
                 }
-                setPsysefxsend(nefx, tonefx, static_cast<unsigned char>(xml->getpar127("send_vol", Psysefxsend[nefx][tonefx])));
+                SetSystemEffectSend(nefx, tonefx, static_cast<unsigned char>(xml->getpar127("send_vol", Psysefxsend[nefx][tonefx])));
                 xml->exitbranch();
             }
             xml->exitbranch();

@@ -297,7 +297,7 @@ labelfont(1);
 labelsize(10);
 align(FL_ALIGN_TOP);
 
-value(master->getPsysefxsend(neff1, neff2));
+value(master->GetSystemEffectSend(neff1, neff2));
 char tmp[20];snprintf(tmp,20,"%d->%d",neff1+1,neff2+1);
 this->copy_label(tmp);} {}
   }
@@ -307,7 +307,7 @@ this->copy_label(tmp);} {}
   Function {handle(int event)} {return_type int
   } {
     code {if ((event==FL_PUSH) || (event==FL_DRAG)){
-   master->setPsysefxsend(neff1,neff2,(int) value());
+   master->SetSystemEffectSend(neff1,neff2,(int) value());
 };
 
 return(WidgetPDial::handle(event));} {}
@@ -1573,7 +1573,7 @@ Config::Current().cfg.UserInterfaceMode=2;}
   Function {updatesendwindow()} {} {
     code {for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
   for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)
-    syseffsend[neff1][neff2]->value(master->getPsysefxsend(neff1, neff2));} {}
+    syseffsend[neff1][neff2]->value(master->GetSystemEffectSend(neff1, neff2));} {}
   }
   Function {updatepanel()} {open
   } {

@@ -34,7 +34,7 @@ class WavFile;
 class WavEngine : public AudioOutput
 {
 public:
-    WavEngine(SystemSettings *s);
+    WavEngine(unsigned int sampleRate, unsigned int bufferSize);
     virtual ~WavEngine();
 
     bool openAudio();

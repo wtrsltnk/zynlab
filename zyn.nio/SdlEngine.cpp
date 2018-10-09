@@ -27,8 +27,8 @@
 
 using namespace std;
 
-SdlEngine::SdlEngine(SystemSettings *s)
-    : AudioOutput(s), _dev(0)
+SdlEngine::SdlEngine(unsigned int sampleRate, unsigned int bufferSize)
+    : AudioOutput(sampleRate, bufferSize), _dev(0)
 {
     _name = "SDL2";
 }

@@ -21,13 +21,13 @@
 */
 
 #include "NulEngine.h"
-#include <zyn.common/globals.h>
 
 #include <iostream>
 #include <unistd.h>
+#include <zyn.common/globals.h>
 
-NulEngine::NulEngine(SystemSettings *s)
-    : AudioOutput(s), pThread(nullptr)
+NulEngine::NulEngine(unsigned int sampleRate, unsigned int bufferSize)
+    : AudioOutput(sampleRate, bufferSize), pThread(nullptr)
 {
     _name = "NULL";
     playing_until.tv_sec = 0;
@@ -67,7 +67,7 @@ void *NulEngine::AudioThread()
                 std::cerr << "WARNING - too late" << std::endl;
             }
         }
-        playing_until.tv_usec += this->_synth->buffersize * 1000000 / this->_synth->samplerate;
+        playing_until.tv_usec += this->BufferSize() * 1000000 / this->SampleRate();
         if (remaining < 0)
         {
             playing_until.tv_usec -= remaining;

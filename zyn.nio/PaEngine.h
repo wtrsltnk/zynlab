@@ -23,14 +23,13 @@
 #define PA_ENGINE_H
 
 #include "AudioOutput.h"
-#include <zyn.common/globals.h>
-
 #include <portaudio.h>
+#include <zyn.common/globals.h>
 
 class PaEngine : public AudioOutput
 {
 public:
-    PaEngine(SystemSettings *s);
+    PaEngine(unsigned int sampleRate, unsigned int bufferSize);
     virtual ~PaEngine();
 
     bool Start();

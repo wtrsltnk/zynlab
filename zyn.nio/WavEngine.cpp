@@ -26,8 +26,8 @@
 
 using namespace std;
 
-WavEngine::WavEngine(SystemSettings *s)
-    : AudioOutput(s), file(nullptr), buffer(s->samplerate * 4), pThread(nullptr)
+WavEngine::WavEngine(unsigned int sampleRate, unsigned int bufferSize)
+    : AudioOutput(sampleRate, bufferSize), file(nullptr), buffer(sampleRate * 4), pThread(nullptr)
 {
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
@@ -120,11 +120,11 @@ void *WavEngine::_AudioThread(void *arg)
 
 void *WavEngine::AudioThread()
 {
-    auto *recordbuf_16bit = new short[2 * this->_synth->buffersize];
+    auto *recordbuf_16bit = new short[2 * this->BufferSize()];
 
     while (!work.wait() && pThread)
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < this->BufferSize(); ++i)
         {
             float left = 0.0f, right = 0.0f;
             buffer.pop(left);
@@ -132,7 +132,7 @@ void *WavEngine::AudioThread()
             recordbuf_16bit[2 * i] = static_cast<short>(limit(static_cast<int>(left * 32767.0f), -32768, 32767));
             recordbuf_16bit[2 * i + 1] = static_cast<short>(limit(static_cast<int>(right * 32767.0f), -32768, 32767));
         }
-        file->writeStereoSamples(this->_synth->buffersize, recordbuf_16bit);
+        file->writeStereoSamples(this->BufferSize(), recordbuf_16bit);
     }
 
     delete[] recordbuf_16bit;

@@ -47,11 +47,11 @@ MidiEvent::MidiEvent()
 
 MidiInputManager *MidiInputManager::_instance = nullptr;
 
-MidiInputManager &MidiInputManager::CreateInstance(IMixer *mixer)
+MidiInputManager &MidiInputManager::CreateInstance(IAudioGenerator *audioGenerator)
 {
     if (MidiInputManager::_instance == nullptr)
     {
-        MidiInputManager::_instance = new MidiInputManager(mixer);
+        MidiInputManager::_instance = new MidiInputManager(audioGenerator);
     }
 
     return *MidiInputManager::_instance;
@@ -68,8 +68,8 @@ void MidiInputManager::DestroyInstance()
     MidiInputManager::_instance = nullptr;
 }
 
-MidiInputManager::MidiInputManager(IMixer *mixer)
-    : _queue(100), _mixer(mixer)
+MidiInputManager::MidiInputManager(IAudioGenerator *audioGenerator)
+    : _queue(100), _audioGenerator(audioGenerator)
 {
     _current = nullptr;
     _work.init(PTHREAD_PROCESS_PRIVATE, 0);
@@ -110,27 +110,27 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
             {
                 if (ev.value)
                 {
-                    this->_mixer->NoteOn(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
+                    this->_audioGenerator->NoteOn(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
                 }
                 else
                 {
-                    this->_mixer->NoteOff(static_cast<char>(ev.channel), static_cast<char>(ev.num));
+                    this->_audioGenerator->NoteOff(static_cast<char>(ev.channel), static_cast<char>(ev.num));
                 }
                 break;
             }
             case MidiEventTypes::M_CONTROLLER:
             {
-                this->_mixer->SetController(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
+                this->_audioGenerator->SetController(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
                 break;
             }
             case MidiEventTypes::M_PGMCHANGE:
             {
-                this->_mixer->SetProgram(static_cast<char>(ev.channel), ev.num);
+                this->_audioGenerator->SetProgram(static_cast<char>(ev.channel), ev.num);
                 break;
             }
             case MidiEventTypes::M_PRESSURE:
             {
-                this->_mixer->PolyphonicAftertouch(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
+                this->_audioGenerator->PolyphonicAftertouch(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
                 break;
             }
         }

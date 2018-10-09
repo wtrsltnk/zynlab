@@ -13,11 +13,11 @@
 
 AudioOutputManager *AudioOutputManager::_instance = nullptr;
 
-AudioOutputManager &AudioOutputManager::createInstance(IMixer *mixer)
+AudioOutputManager &AudioOutputManager::createInstance(IAudioGenerator *audioGenerator)
 {
     if (AudioOutputManager::_instance == nullptr)
     {
-        AudioOutputManager::_instance = new AudioOutputManager(mixer);
+        AudioOutputManager::_instance = new AudioOutputManager(audioGenerator);
     }
 
     return *AudioOutputManager::_instance;
@@ -35,19 +35,19 @@ void AudioOutputManager::destroyInstance()
     AudioOutputManager::_instance = nullptr;
 }
 
-AudioOutputManager::AudioOutputManager(IMixer *mixer)
+AudioOutputManager::AudioOutputManager(IAudioGenerator *audioGenerator)
     : priBuf(new float[4096], new float[4096]),
       priBuffCurrent(priBuf),
-      mixer(mixer)
+      _audioGenerator(audioGenerator)
 {
     currentOut = nullptr;
     stales = 0;
 
     //init samples
-    outr = new float[this->mixer->_synth->buffersize];
-    outl = new float[this->mixer->_synth->buffersize];
-    memset(outl, 0, this->mixer->_synth->bufferbytes);
-    memset(outr, 0, this->mixer->_synth->bufferbytes);
+    outr = new float[this->_audioGenerator->BufferSize()];
+    outl = new float[this->_audioGenerator->BufferSize()];
+    memset(outl, 0, this->_audioGenerator->BufferSizeInBytes());
+    memset(outr, 0, this->_audioGenerator->BufferSizeInBytes());
 }
 
 AudioOutputManager::~AudioOutputManager()
@@ -75,15 +75,13 @@ const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
     unsigned int i = 0;
     while (frameSize > storedSmps())
     {
+        this->_audioGenerator->Lock();
         if (!midi.Empty())
         {
-            this->mixer->Lock();
-            midi.Flush(i * this->mixer->_synth->buffersize, (i + 1) * this->mixer->_synth->buffersize);
-            this->mixer->Unlock();
+            midi.Flush(i * this->_audioGenerator->BufferSize(), (i + 1) * this->_audioGenerator->BufferSize());
         }
-        this->mixer->Lock();
-        this->mixer->AudioOut(outl, outr);
-        this->mixer->Unlock();
+        this->_audioGenerator->AudioOut(outl, outr);
+        this->_audioGenerator->Unlock();
         addSmps(outl, outr);
 
         //allow wave file to syphon off stream
@@ -164,7 +162,7 @@ static size_t resample(float *dest,
 void AudioOutputManager::addSmps(float *l, float *r)
 {
     const unsigned int s_out = currentOut->SampleRate();
-    const unsigned int s_sys = this->mixer->_synth->samplerate;
+    const unsigned int s_sys = this->_audioGenerator->SampleRate();
 
     if (s_out != s_sys)
     { //we need to resample
@@ -172,18 +170,18 @@ void AudioOutputManager::addSmps(float *l, float *r)
                                       l,
                                       s_sys,
                                       s_out,
-                                      this->mixer->_synth->buffersize);
-        resample(priBuffCurrent._right, r, s_sys, s_out, this->mixer->_synth->buffersize);
+                                      this->_audioGenerator->BufferSize());
+        resample(priBuffCurrent._right, r, s_sys, s_out, this->_audioGenerator->BufferSize());
 
         priBuffCurrent._left += steps;
         priBuffCurrent._right += steps;
     }
     else
     { //just copy the samples
-        memcpy(priBuffCurrent._left, l, this->mixer->_synth->bufferbytes);
-        memcpy(priBuffCurrent._right, r, this->mixer->_synth->bufferbytes);
-        priBuffCurrent._left += this->mixer->_synth->buffersize;
-        priBuffCurrent._right += this->mixer->_synth->buffersize;
+        memcpy(priBuffCurrent._left, l, this->_audioGenerator->BufferSizeInBytes());
+        memcpy(priBuffCurrent._right, r, this->_audioGenerator->BufferSizeInBytes());
+        priBuffCurrent._left += this->_audioGenerator->BufferSize();
+        priBuffCurrent._right += this->_audioGenerator->BufferSize();
     }
 }
 

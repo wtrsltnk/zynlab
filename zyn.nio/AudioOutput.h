@@ -29,11 +29,8 @@
 
 class AudioOutput : public virtual Engine
 {
-protected:
-    SystemSettings *_synth;
-
 public:
-    AudioOutput(SystemSettings *s);
+    AudioOutput(unsigned int sampleRate, unsigned int _bufferSize);
     virtual ~AudioOutput();
 
     /**Sets the Sample Rate of this Output
@@ -48,7 +45,7 @@ public:
     void SetBufferSize(unsigned int _bufferSize);
 
     /**Gets the Frame Size for output*/
-    unsigned int BufferingSize();
+    unsigned int BufferSize();
 
     virtual void SetAudioEnabled(bool nval);
     virtual bool IsAudioEnabled() const = 0;
@@ -58,8 +55,8 @@ protected:
          * (has nsamples sampled at a rate of samplerate)*/
     const Stereo<float *> NextSample();
 
-    unsigned int samplerate;
-    unsigned int bufferSize;
+    unsigned int _sampleRate;
+    unsigned int _bufferSize;
 };
 
 #endif // AUDIOOUTPUT_H

@@ -2,9 +2,9 @@
 #define ENGINEMANAGER_H
 
 #include "Engine.h"
-
 #include <list>
 #include <string>
+#include <zyn.common/IAudioGenerator.h>
 
 class MidiInput;
 class AudioOutput;
@@ -14,10 +14,10 @@ class EngineManager
 {
     friend class Nio;
     static EngineManager *_instance;
-    EngineManager(class IMixer *mixer);
+    EngineManager(IAudioGenerator *audioGenerator);
 
 public:
-    static EngineManager &CreateInstance(class IMixer *mixer);
+    static EngineManager &CreateInstance(IAudioGenerator *audioGenerator);
     static EngineManager &Instance();
     static void DestroyInstance();
     virtual ~EngineManager();

@@ -1,12 +1,12 @@
 #ifndef AUDIOOUTPUTMANAGER_H
 #define AUDIOOUTPUTMANAGER_H
 
-#include <zyn.common/Stereo.h>
-#include <zyn.common/globals.h>
-
 #include <list>
 #include <semaphore.h>
 #include <string>
+#include <zyn.common/IAudioGenerator.h>
+#include <zyn.common/Stereo.h>
+#include <zyn.common/globals.h>
 
 class AudioOutput;
 class AudioOutputManager
@@ -14,7 +14,7 @@ class AudioOutputManager
     static AudioOutputManager *_instance;
 
 public:
-    static AudioOutputManager &createInstance(IMixer *mixer);
+    static AudioOutputManager &createInstance(IAudioGenerator *audioGenerator);
     static AudioOutputManager &getInstance();
     static void destroyInstance();
     virtual ~AudioOutputManager();
@@ -35,7 +35,7 @@ public:
     friend class EngineManager;
 
 private:
-    AudioOutputManager(IMixer *mixer);
+    AudioOutputManager(IAudioGenerator *audioGenerator);
     void addSmps(float *l, float *r);
     unsigned int storedSmps() const { return static_cast<unsigned int>(priBuffCurrent._left - priBuf._left); }
     void removeStaleSmps();
@@ -50,7 +50,7 @@ private:
 
     float *outl;
     float *outr;
-    IMixer *mixer;
+    IAudioGenerator *_audioGenerator;
 
     unsigned int stales;
 };

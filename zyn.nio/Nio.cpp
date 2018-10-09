@@ -16,11 +16,11 @@ static MidiInputManager *_midiInputManager = nullptr;
 std::string Nio::defaultSink;
 std::string Nio::defaultSource;
 
-bool Nio::Start(IMixer *mixer)
+bool Nio::Start(IAudioGenerator *audioGenerator)
 {
-    _midiInputManager = &MidiInputManager::CreateInstance(mixer);    //Enable input wrapper
-    _audioOutpuManager = &AudioOutputManager::createInstance(mixer); //Initialize the Output Systems
-    _engineManager = &EngineManager::CreateInstance(mixer);          //Initialize The Engines
+    _midiInputManager = &MidiInputManager::CreateInstance(audioGenerator);    //Enable input wrapper
+    _audioOutpuManager = &AudioOutputManager::createInstance(audioGenerator); //Initialize the Output Systems
+    _engineManager = &EngineManager::CreateInstance(audioGenerator);          //Initialize The Engines
 
     return _engineManager->Start();
 }

@@ -5,6 +5,8 @@ project(zyn.common)
 add_library(zyn.common STATIC
     Config.cpp
     Config.h
+    IAudioGenerator.cpp
+    IAudioGenerator.h
     IPresetsSerializer.cpp
     IPresetsSerializer.h
     Presets.cpp
@@ -54,6 +56,7 @@ install(
 install(
     FILES
         ${zyn.common_SOURCE_DIR}/Config.h
+        ${zyn.common_SOURCE_DIR}/IAudioGenerator.h
         ${zyn.common_SOURCE_DIR}/Presets.h
         ${zyn.common_SOURCE_DIR}/PresetsArray.h
         ${zyn.common_SOURCE_DIR}/PresetsStore.h

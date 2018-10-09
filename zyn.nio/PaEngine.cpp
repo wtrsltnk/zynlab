@@ -26,8 +26,8 @@
 
 using namespace std;
 
-PaEngine::PaEngine(SystemSettings *s)
-    : AudioOutput(s), stream(nullptr)
+PaEngine::PaEngine(unsigned int sampleRate, unsigned int bufferSize)
+    : AudioOutput(sampleRate, bufferSize), stream(nullptr)
 {
     _name = "PA";
 }
@@ -62,8 +62,8 @@ bool PaEngine::Start()
     Pa_OpenStream(&stream,
                   nullptr,
                   &outputParameters,
-                  this->_synth->samplerate,
-                  this->_synth->buffersize,
+                  this->SampleRate(),
+                  this->BufferSize(),
                   0,
                   PAprocess,
                   reinterpret_cast<void *>(this));

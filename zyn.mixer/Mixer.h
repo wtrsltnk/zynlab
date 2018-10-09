@@ -28,15 +28,16 @@
 #include "Meter.h"
 #include "Microtonal.h"
 #include <pthread.h>
+#include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/globals.h>
+#include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/Controller.h>
 #include <zyn.synth/ifftwrapper.h>
-#include <zyn.fx/EffectMgr.h>
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
-class Mixer : public IMixer
+class Mixer : public IMixer, public IAudioGenerator
 {
 public:
     /** Constructor TODO make private*/
@@ -62,6 +63,12 @@ public:
     int getalldata(char **data);
     /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
     void putalldata(char *data, int size);
+
+    // Synth settings
+    virtual unsigned int SampleRate() const;
+    virtual unsigned int BufferSize() const;
+    virtual unsigned int BufferSizeInBytes() const;
+    virtual float BufferSizeFloat() const;
 
     // Mutex
     virtual void Lock();
@@ -98,8 +105,8 @@ public:
     void setPvolume(unsigned char Pvolume_);
     void setPkeyshift(unsigned char Pkeyshift_);
     void setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol);
-    virtual unsigned char getPsysefxsend(int Pefxfrom, int Pefxto);
-    virtual void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol);
+    virtual unsigned char GetSystemEffectSend(int Pefxfrom, int Pefxto);
+    virtual void SetSystemEffectSend(int Pefxfrom, int Pefxto, unsigned char Pvol);
 
     EffectManager sysefx[NUM_SYS_EFX]; //system
     EffectManager insefx[NUM_INS_EFX]; //insertion

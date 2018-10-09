@@ -23,17 +23,16 @@
 #ifndef NUL_ENGINE_H
 #define NUL_ENGINE_H
 
-#include <zyn.common/globals.h>
 #include "AudioOutput.h"
 #include "MidiInput.h"
-
 #include <pthread.h>
 #include <sys/time.h>
+#include <zyn.common/globals.h>
 
 class NulEngine : public AudioOutput, MidiInput
 {
 public:
-    NulEngine(SystemSettings *s);
+    NulEngine(unsigned int sampleRate, unsigned int _bufferSize);
     virtual ~NulEngine();
 
     bool Start();

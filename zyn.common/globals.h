@@ -354,8 +354,8 @@ public:
     virtual void EnableChannel(int index, bool enabled) = 0;
 
     // Effects
-    virtual unsigned char getPsysefxsend(int Pefxfrom, int Pefxto) = 0;
-    virtual void setPsysefxsend(int Pefxfrom, int Pefxto, unsigned char Pvol) = 0;
+    virtual unsigned char GetSystemEffectSend(int from, int to) = 0;
+    virtual void SetSystemEffectSend(int from, int to, unsigned char volume) = 0;
 
     // Mutex
     virtual void Lock() = 0;
@@ -368,9 +368,8 @@ public:
     virtual void SetProgram(unsigned char chan, unsigned int pgm) = 0;
     virtual void PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity) = 0;
 
-    /**Audio Output*/
+    // Audio Output
     virtual void AudioOut(float *outl, float *outr) = 0;
-    /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
     virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr) = 0;
 
     SystemSettings *_synth;

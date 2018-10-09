@@ -30,7 +30,7 @@
 class SdlEngine : public AudioOutput
 {
 public:
-    SdlEngine(SystemSettings *s);
+    SdlEngine(unsigned int sampleRate, unsigned int bufferSize);
     virtual ~SdlEngine();
 
     bool Start();
