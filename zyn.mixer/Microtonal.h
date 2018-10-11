@@ -39,12 +39,11 @@ public:
     Microtonal();
     /**Destructor*/
     ~Microtonal();
-    void defaults();
-    /**Calculates the frequency for a given note
-         */
+
+    /**Calculates the frequency for a given note*/
     float getnotefreq(int note, int keyshift) const;
 
-    //Parameters
+public: //Parameters
     /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
     unsigned char Pinvertupdown{};
 
@@ -90,13 +89,9 @@ public:
     int loadscl(const char *filename);
     /**load the mapping from .kbm file*/
     int loadkbm(const char *filename);
-    /**Load text into the internal tunings
-         *
-         *\todo better description*/
+    /**Load text into the internal tunings*/
     int texttotunings(const char *text);
-    /**Load text into the internal mappings
-         *
-         *\todo better description*/
+    /**Load text into the internal mappings*/
     void texttomapping(const char *text);
 
     /**Name of Microtonal tuning*/
@@ -104,8 +99,11 @@ public:
     /**Comment about the tuning*/
     unsigned char Pcomment[MICROTONAL_MAX_NAME_LEN];
 
+public: // Serialization
     void Serialize(IPresetsSerializer *xml) const;
     void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
+
     int saveXML(const char *filename) const;
     int loadXML(const char *filename);
 

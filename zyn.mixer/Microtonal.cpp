@@ -29,10 +29,10 @@
 
 Microtonal::Microtonal()
 {
-    defaults();
+    Defaults();
 }
 
-void Microtonal::defaults()
+void Microtonal::Defaults()
 {
     Pinvertupdown = 0;
     Pinvertupdowncenter = 60;

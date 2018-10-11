@@ -68,16 +68,14 @@ public:
     /* The synthesizer part output */
     void ComputePartSmps(); //Part output
 
-    //instrumentonly: 0 - save all, 1 - save only instrumnet, 2 - save only instrument without the name(used in bank)
-
     //saves the instrument settings to a XML file
     //returns 0 for ok or <0 if there is an error
     int saveXML(const char *filename);
     int loadXMLinstrument(const char *filename);
 
-    void applyparameters(bool lockmutex = true);
+    void ApplyParameters(bool lockmutex = true);
 
-    void cleanup(bool final = false);
+    void Cleanup(bool final = false);
 
     //the part's kit
     struct
@@ -89,30 +87,30 @@ public:
         ADnoteParameters *adpars;
         SUBnoteParameters *subpars;
         PADnoteParameters *padpars;
-    } kit[NUM_KIT_ITEMS]{};
+    } kit[NUM_KIT_ITEMS];
 
     //Part parameters
     void setkeylimit(unsigned char Pkeylimit);
     void setkititemstatus(int kititem, int Penabled_);
 
-    unsigned char Penabled{}; /**<if the part is enabled*/
-    unsigned char Pvolume{};  /**<part volume*/
-    unsigned char Pminkey{};  /**<the minimum key that the part receives noteon messages*/
-    unsigned char Pmaxkey{};  //the maximum key that the part receives noteon messages
+    unsigned char Penabled; /**<if the part is enabled*/
+    unsigned char Pvolume;  /**<part volume*/
+    unsigned char Pminkey;  /**<the minimum key that the part receives noteon messages*/
+    unsigned char Pmaxkey;  //the maximum key that the part receives noteon messages
     void setPvolume(unsigned char Pvolume);
-    unsigned char Pkeyshift{}; //Part keyshift
-    unsigned char Prcvchn{};   //from what midi channel it receive commnads
-    unsigned char Ppanning{};  //part panning
+    unsigned char Pkeyshift; //Part keyshift
+    unsigned char Prcvchn;   //from what midi channel it receive commnads
+    unsigned char Ppanning;  //part panning
     void setPpanning(unsigned char Ppanning);
-    unsigned char Pvelsns{};   //velocity sensing (amplitude velocity scale)
-    unsigned char Pveloffs{};  //velocity offset
-    unsigned char Pnoteon{};   //if the part receives NoteOn messages
-    unsigned char Pkitmode{};  //if the kitmode is enabled
-    unsigned char Pdrummode{}; //if all keys are mapped and the system is 12tET (used for drums)
+    unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
+    unsigned char Pveloffs;  //velocity offset
+    unsigned char Pnoteon;   //if the part receives NoteOn messages
+    unsigned char Pkitmode;  //if the kitmode is enabled
+    unsigned char Pdrummode; //if all keys are mapped and the system is 12tET (used for drums)
 
-    unsigned char Ppolymode{};   //Part mode - 0=monophonic , 1=polyphonic
-    unsigned char Plegatomode{}; // 0=normal, 1=legato
-    unsigned char Pkeylimit{};   //how many keys are alowed to be played same time (0=off), the older will be relased
+    unsigned char Ppolymode;   //Part mode - 0=monophonic , 1=polyphonic
+    unsigned char Plegatomode; // 0=normal, 1=legato
+    unsigned char Pkeylimit;   //how many keys are alowed to be played same time (0=off), the older will be relased
 
     unsigned char *Pname; //name of the instrument
     struct
@@ -120,13 +118,25 @@ public:
         unsigned char Ptype;
         unsigned char Pauthor[MAX_INFO_TEXT_SIZE + 1];
         unsigned char Pcomments[MAX_INFO_TEXT_SIZE + 1];
-    } info{};
+    } info;
 
+public:
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
+    void Defaults();
+
+    void SerializeInstrument(IPresetsSerializer *xml);
+    void DeserializeInstrument(IPresetsSerializer *xml);
+    void InstrumentDefaults();
+
+    float ComputePeak(float volume);
+
+public:
     float *partoutl; //Left channel output of the part
     float *partoutr; //Right channel output of the part
 
-    float *partfxinputl[NUM_PART_EFX + 1]{}, //Left and right signal that pass thru part effects;
-        *partfxinputr[NUM_PART_EFX + 1]{};   //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
+    float *partfxinputl[NUM_PART_EFX + 1]; //Left and right signal that pass thru part effects;
+    float *partfxinputr[NUM_PART_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
     enum NoteStatus
     {
@@ -136,27 +146,21 @@ public:
         KEY_RELASED
     };
 
-    float volume{}, oldvolumel, oldvolumer; //this is applied by Master
-    float panning{};                        //this is applied by Master, too
+    float volume;
+    float oldvolumel;
+    float oldvolumer; //this is applied by Master
+    float panning;    //this is applied by Master, too
 
     Controller ctl; //Part controllers
 
-    EffectManager *partefx[NUM_PART_EFX]{};  //insertion part effects (they are part of the instrument)
-    unsigned char Pefxroute[NUM_PART_EFX]{}; //how the effect's output is routed(to next effect/to out)
-    bool Pefxbypass[NUM_PART_EFX]{};         //if the effects are bypassed
+    EffectManager *partefx[NUM_PART_EFX];  //insertion part effects (they are part of the instrument)
+    unsigned char Pefxroute[NUM_PART_EFX]; //how the effect's output is routed(to next effect/to out)
+    bool Pefxbypass[NUM_PART_EFX];         //if the effects are bypassed
 
-    pthread_mutex_t *mutex;
-    pthread_mutex_t load_mutex{};
+    pthread_mutex_t *_mutex;
+    pthread_mutex_t load_mutex;
 
     int lastnote;
-
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
-    void Defaults();
-
-    void SerializeInstrument(IPresetsSerializer *xml);
-    void DeserializeInstrument(IPresetsSerializer *xml);
-    void InstrumentDefaults();
 
 private:
     void RunNote(unsigned int k);
@@ -173,16 +177,16 @@ private:
         int itemsplaying;
         struct
         {
-            SynthNote *adnote,
-                *subnote,
-                *padnote;
+            SynthNote *adnote;
+            SynthNote *subnote;
+            SynthNote *padnote;
             int sendtoparteffect;
         } kititem[NUM_KIT_ITEMS];
         int time;
     };
 
-    unsigned int lastpos, lastposb{};    // To keep track of previously used pos and posb.
-    bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
+    unsigned int lastpos, lastposb; // To keep track of previously used pos and posb.
+    bool lastlegatomodevalid;         // To keep track of previous legatomodevalid.
 
     // MonoMem stuff
     std::list<unsigned char> monomemnotes; // A list to remember held notes.
@@ -191,17 +195,17 @@ private:
         unsigned char velocity;
         unsigned char stub[3];
         int mkeyshift; // I'm not sure masterkeyshift should be remembered.
-    } monomem[256]{};
+    } monomem[256];
     /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to
            store the velocity and masterkeyshift values of a given note (the list only store note values).
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-    InstrumentNotes partnote[POLIPHONY]{};
+    InstrumentNotes partnote[POLIPHONY];
 
     float oldfreq; //this is used for portamento
-    Microtonal *microtonal;
-    IFFTwrapper *fft;
+    Microtonal *_microtonal;
+    IFFTwrapper *_fft;
 };
 
 #endif

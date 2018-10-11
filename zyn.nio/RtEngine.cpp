@@ -39,9 +39,19 @@ RtEngine::~RtEngine()
 
 bool RtEngine::Start()
 {
-    this->midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynlab");
-    this->midiin->setCallback(RtEngine::callback, this);
-    this->midiin->openPort();
+    try
+    {
+        this->midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynlab");
+        this->midiin->setCallback(RtEngine::callback, this);
+        this->midiin->openPort();
+    }
+    catch (const std::exception &ex)
+    {
+        delete this->midiin;
+        this->midiin = nullptr;
+
+        return false;
+    }
 
     return true;
 }

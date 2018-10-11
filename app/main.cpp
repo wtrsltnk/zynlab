@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mixer->GetChannel(0)->applyparameters();
+            mixer->GetChannel(0)->ApplyParameters();
             cout << "Instrument file loaded." << std::endl;
         }
     }

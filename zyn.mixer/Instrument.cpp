@@ -22,8 +22,8 @@
 
 #include "Instrument.h"
 #include "Microtonal.h"
-#include <zyn.common/Util.h>
 #include <zyn.common/PresetsSerializer.h>
+#include <zyn.common/Util.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/ADnote.h>
 #include <zyn.synth/ADnoteParams.h>
@@ -33,18 +33,18 @@
 #include <zyn.synth/SUBnoteParams.h>
 #include <zyn.synth/ifftwrapper.h>
 
-Instrument::Instrument(){}
+Instrument::Instrument() {}
 
-void Instrument::Init(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_)
+void Instrument::Init(SystemSettings *synth, Microtonal *microtonal, IFFTwrapper *fft, pthread_mutex_t *mutex)
 {
-    _synth = synth_;
-    ctl.Init(synth_);
-    microtonal = microtonal_;
-    fft = fft_;
-    mutex = mutex_;
+    _synth = synth;
+    ctl.Init(synth);
+    _microtonal = microtonal;
+    _fft = fft;
+    _mutex = mutex;
     pthread_mutex_init(&load_mutex, nullptr);
-    partoutl = new float[this->_synth->buffersize];
-    partoutr = new float[this->_synth->buffersize];
+    partoutl = new float[_synth->buffersize];
+    partoutr = new float[_synth->buffersize];
 
     for (auto &n : kit)
     {
@@ -54,22 +54,26 @@ void Instrument::Init(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapp
         n.padpars = nullptr;
     }
 
-    kit[0].adpars = new ADnoteParameters(this->_synth, fft);
-    kit[0].subpars = new SUBnoteParameters(this->_synth);
-    kit[0].padpars = new PADnoteParameters(this->_synth, fft, mutex);
+    kit[0].adpars = new ADnoteParameters(_synth, _fft);
+    kit[0].subpars = new SUBnoteParameters(_synth);
+    kit[0].padpars = new PADnoteParameters(_synth, _fft, _mutex);
 
     //Part's Insertion Effects init
-    for (int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
+    for (auto &nefx : partefx)
     {
-        partefx[nefx] = new EffectManager();
-        partefx[nefx]->Init(true, mutex, this->_synth);
-        Pefxbypass[nefx] = false;
+        nefx = new EffectManager();
+        nefx->Init(true, _mutex, _synth);
+    }
+
+    for (auto &nefx : Pefxbypass)
+    {
+        nefx = false;
     }
 
     for (int n = 0; n < NUM_PART_EFX + 1; ++n)
     {
-        partfxinputl[n] = new float[this->_synth->buffersize];
-        partfxinputr[n] = new float[this->_synth->buffersize];
+        partfxinputl[n] = new float[_synth->buffersize];
+        partfxinputr[n] = new float[_synth->buffersize];
     }
 
     killallnotes = 0;
@@ -88,7 +92,7 @@ void Instrument::Init(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapp
         }
         i.time = 0;
     }
-    cleanup();
+    Cleanup();
 
     Pname = new unsigned char[PART_MAX_NAME_LEN];
 
@@ -157,18 +161,39 @@ void Instrument::InstrumentDefaults()
     }
 }
 
+float Instrument::ComputePeak(float volume)
+{
+    auto peak = 1.0e-12f;
+    if (Penabled != 0)
+    {
+        float *outl = partoutl,
+              *outr = partoutr;
+        for (unsigned int i = 0; i < _synth->buffersize; ++i)
+        {
+            float tmp = fabs(outl[i] + outr[i]);
+            if (tmp > peak)
+            {
+                peak = tmp;
+            }
+        }
+        peak *= volume;
+    }
+
+    return peak;
+}
+
 /*
  * Cleanup the part
  */
-void Instrument::cleanup(bool final_)
+void Instrument::Cleanup(bool final_)
 {
     for (unsigned int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
 
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < _synth->buffersize; ++i)
     {
-        partoutl[i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
-        partoutr[i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
+        partoutl[i] = final_ ? 0.0f : _synth->denormalkillbuf[i];
+        partoutr[i] = final_ ? 0.0f : _synth->denormalkillbuf[i];
     }
 
     ctl.resetall();
@@ -177,17 +202,17 @@ void Instrument::cleanup(bool final_)
 
     for (int n = 0; n < NUM_PART_EFX + 1; ++n)
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < _synth->buffersize; ++i)
         {
-            partfxinputl[n][i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
-            partfxinputr[n][i] = final_ ? 0.0f : this->_synth->denormalkillbuf[i];
+            partfxinputl[n][i] = final_ ? 0.0f : _synth->denormalkillbuf[i];
+            partfxinputr[n][i] = final_ ? 0.0f : _synth->denormalkillbuf[i];
         }
     }
 }
 
 Instrument::~Instrument()
 {
-    cleanup(true);
+    Cleanup(true);
     for (auto &n : kit)
     {
         if (n.adpars != nullptr)
@@ -348,7 +373,7 @@ void Instrument::NoteOn(unsigned char note,
         float notebasefreq;
         if (Pdrummode == 0)
         {
-            notebasefreq = microtonal->getnotefreq(note, keyshift);
+            notebasefreq = _microtonal->getnotefreq(note, keyshift);
             if (notebasefreq < 0.0f)
                 return; //the key is no mapped
         }
@@ -485,7 +510,7 @@ void Instrument::NoteOn(unsigned char note,
             if (kit[0].Padenabled != 0)
                 partnote[pos].kititem[0].adnote = new ADnote(kit[0].adpars,
                                                              &ctl,
-                                                             this->_synth,
+                                                             _synth,
                                                              notebasefreq,
                                                              vel,
                                                              portamento,
@@ -494,7 +519,7 @@ void Instrument::NoteOn(unsigned char note,
             if (kit[0].Psubenabled != 0)
                 partnote[pos].kititem[0].subnote = new SUBnote(kit[0].subpars,
                                                                &ctl,
-                                                               this->_synth,
+                                                               _synth,
                                                                notebasefreq,
                                                                vel,
                                                                portamento,
@@ -503,7 +528,7 @@ void Instrument::NoteOn(unsigned char note,
             if (kit[0].Ppadenabled != 0)
                 partnote[pos].kititem[0].padnote = new PADnote(kit[0].padpars,
                                                                &ctl,
-                                                               this->_synth,
+                                                               _synth,
                                                                notebasefreq,
                                                                vel,
                                                                portamento,
@@ -519,7 +544,7 @@ void Instrument::NoteOn(unsigned char note,
                 if (kit[0].Padenabled != 0)
                     partnote[posb].kititem[0].adnote = new ADnote(kit[0].adpars,
                                                                   &ctl,
-                                                                  this->_synth,
+                                                                  _synth,
                                                                   notebasefreq,
                                                                   vel,
                                                                   portamento,
@@ -529,7 +554,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[posb].kititem[0].subnote = new SUBnote(
                         kit[0].subpars,
                         &ctl,
-                        this->_synth,
+                        _synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -539,7 +564,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[posb].kititem[0].padnote = new PADnote(
                         kit[0].padpars,
                         &ctl,
-                        this->_synth,
+                        _synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -567,7 +592,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[pos].kititem[ci].adnote = new ADnote(
                         item.adpars,
                         &ctl,
-                        this->_synth,
+                        _synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -578,7 +603,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[pos].kititem[ci].subnote = new SUBnote(
                         item.subpars,
                         &ctl,
-                        this->_synth,
+                        _synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -589,7 +614,7 @@ void Instrument::NoteOn(unsigned char note,
                     partnote[pos].kititem[ci].padnote = new PADnote(
                         item.padpars,
                         &ctl,
-                        this->_synth,
+                        _synth,
                         notebasefreq,
                         vel,
                         portamento,
@@ -609,7 +634,7 @@ void Instrument::NoteOn(unsigned char note,
                         partnote[posb].kititem[ci].adnote = new ADnote(
                             item.adpars,
                             &ctl,
-                            this->_synth,
+                            _synth,
                             notebasefreq,
                             vel,
                             portamento,
@@ -619,7 +644,7 @@ void Instrument::NoteOn(unsigned char note,
                         partnote[posb].kititem[ci].subnote =
                             new SUBnote(item.subpars,
                                         &ctl,
-                                        this->_synth,
+                                        _synth,
                                         notebasefreq,
                                         vel,
                                         portamento,
@@ -629,7 +654,7 @@ void Instrument::NoteOn(unsigned char note,
                         partnote[posb].kititem[ci].padnote =
                             new PADnote(item.padpars,
                                         &ctl,
-                                        this->_synth,
+                                        _synth,
                                         notebasefreq,
                                         vel,
                                         portamento,
@@ -924,7 +949,7 @@ void Instrument::KillNotePos(unsigned int pos)
  */
 void Instrument::setkeylimit(unsigned char Pkeylimit)
 {
-    this->Pkeylimit = Pkeylimit;
+    Pkeylimit = Pkeylimit;
     int keylimit = Pkeylimit;
     if (keylimit == 0)
         keylimit = POLIPHONY - 5;
@@ -986,8 +1011,8 @@ void Instrument::RunNote(unsigned int k)
             }
             noteplay++;
 
-            float tmpoutr[this->_synth->buffersize];
-            float tmpoutl[this->_synth->buffersize];
+            float tmpoutr[_synth->buffersize];
+            float tmpoutl[_synth->buffersize];
             (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
 
             if ((*note)->finished())
@@ -995,7 +1020,7 @@ void Instrument::RunNote(unsigned int k)
                 delete (*note);
                 (*note) = nullptr;
             }
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < _synth->buffersize; ++i)
             { //add the note to part(mix)
                 partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
                 partfxinputr[sendcurrenttofx][i] += tmpoutr[i];
@@ -1016,7 +1041,7 @@ void Instrument::RunNote(unsigned int k)
 void Instrument::ComputePartSmps()
 {
     for (unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx)
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < _synth->buffersize; ++i)
         {
             partfxinputl[nefx][i] = 0.0f;
             partfxinputr[nefx][i] = 0.0f;
@@ -1038,20 +1063,20 @@ void Instrument::ComputePartSmps()
         {
             partefx[nefx]->out(partfxinputl[nefx], partfxinputr[nefx]);
             if (Pefxroute[nefx] == 2)
-                for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+                for (unsigned int i = 0; i < _synth->buffersize; ++i)
                 {
                     partfxinputl[nefx + 1][i] += partefx[nefx]->efxoutl[i];
                     partfxinputr[nefx + 1][i] += partefx[nefx]->efxoutr[i];
                 }
         }
         int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_PART_EFX);
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < _synth->buffersize; ++i)
         {
             partfxinputl[routeto][i] += partfxinputl[nefx][i];
             partfxinputr[routeto][i] += partfxinputr[nefx][i];
         }
     }
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < _synth->buffersize; ++i)
     {
         partoutl[i] = partfxinputl[NUM_PART_EFX][i];
         partoutr[i] = partfxinputr[NUM_PART_EFX][i];
@@ -1060,9 +1085,9 @@ void Instrument::ComputePartSmps()
     //Kill All Notes if killallnotes!=0
     if (killallnotes != 0)
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < _synth->buffersize; ++i)
         {
-            float tmp = (this->_synth->buffersize_f - i) / this->_synth->buffersize_f;
+            float tmp = (_synth->buffersize_f - i) / _synth->buffersize_f;
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
         }
@@ -1129,11 +1154,11 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
     else
     {
         if (kit[kititem].adpars == nullptr)
-            kit[kititem].adpars = new ADnoteParameters(this->_synth, fft);
+            kit[kititem].adpars = new ADnoteParameters(_synth, _fft);
         if (kit[kititem].subpars == nullptr)
-            kit[kititem].subpars = new SUBnoteParameters(this->_synth);
+            kit[kititem].subpars = new SUBnoteParameters(_synth);
         if (kit[kititem].padpars == nullptr)
-            kit[kititem].padpars = new PADnoteParameters(this->_synth, fft, mutex);
+            kit[kititem].padpars = new PADnoteParameters(_synth, _fft, _mutex);
     }
 
     if (resetallnotes)
@@ -1280,7 +1305,7 @@ int Instrument::loadXMLinstrument(const char *filename)
     return 0;
 }
 
-void Instrument::applyparameters(bool lockmutex)
+void Instrument::ApplyParameters(bool lockmutex)
 {
     for (auto &n : kit)
     {

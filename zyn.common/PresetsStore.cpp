@@ -19,15 +19,16 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+
+#include "PresetsStore.h"
+#include "Util.h"
+
 #include <algorithm>
 #include <cctype>
 #include <dirent.h>
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
-
-#include "PresetsStore.h"
-#include "Util.h"
 
 using namespace std;
 

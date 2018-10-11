@@ -114,28 +114,14 @@ void Meter::Tick(const float *outl, const float *outr, Instrument *part, float v
         vu.rmspeakl += outl[i] * outl[i];
         vu.rmspeakr += outr[i] * outr[i];
     }
-    vu.rmspeakl = sqrt(vu.rmspeakl / _synth->buffersize_f);
-    vu.rmspeakr = sqrt(vu.rmspeakr / _synth->buffersize_f);
+    vu.rmspeakl = std::sqrt(vu.rmspeakl / _synth->buffersize_f);
+    vu.rmspeakr = std::sqrt(vu.rmspeakr / _synth->buffersize_f);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
-        vuoutpeakpart[npart] = 1.0e-12f;
-        if (part[npart].Penabled != 0)
-        {
-            float *outl = part[npart].partoutl,
-                  *outr = part[npart].partoutr;
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
-            {
-                float tmp = fabs(outl[i] + outr[i]);
-                if (tmp > vuoutpeakpart[npart])
-                {
-                    vuoutpeakpart[npart] = tmp;
-                }
-            }
-            vuoutpeakpart[npart] *= volume;
-        }
-        else if (fakepeakpart[npart] > 1)
+        vuoutpeakpart[npart] = part[npart].ComputePeak(volume);
+        if (!part[npart].Penabled && fakepeakpart[npart] > 1)
         {
             fakepeakpart[npart]--;
         }

@@ -129,7 +129,7 @@ void Mixer::Defaults()
         }
     }
 
-    microtonal.defaults();
+    microtonal.Defaults();
     ShutUp();
 }
 
@@ -302,7 +302,7 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
             //this is not real time safe and makes assumptions about the calling
             //convention of this function...
             Unlock();
-            npart.applyparameters();
+            npart.ApplyParameters();
             Lock();
         }
     }
@@ -327,7 +327,7 @@ void Mixer::partonoff(int npart, int what)
     }
 
     _instruments[npart].Penabled = 0;
-    _instruments[npart].cleanup();
+    _instruments[npart].Cleanup();
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
         if (Pinsparts[nefx] == npart)
@@ -598,7 +598,7 @@ void Mixer::EnableChannel(int index, bool enabled)
     }
 
     _instruments[index].Penabled = 0;
-    _instruments[index].cleanup();
+    _instruments[index].Cleanup();
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
         if (Pinsparts[nefx] == index)
@@ -647,7 +647,7 @@ void Mixer::ShutUp()
 {
     for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
-        _instruments[npart].cleanup();
+        _instruments[npart].Cleanup();
         _meter.SetFakePeak(npart, 0);
     }
     for (auto &nefx : insefx)
@@ -666,7 +666,7 @@ void Mixer::applyparameters(bool lockmutex)
 {
     for (auto &npart : _instruments)
     {
-        npart.applyparameters(lockmutex);
+        npart.ApplyParameters(lockmutex);
     }
 }
 
