@@ -26,7 +26,7 @@
 #include <zyn.common/WavFile.h>
 
 PADnoteParameters::PADnoteParameters(IMixer *mixer)
-    : _synth(mixer->GetSettings())
+    : _synth(mixer->GetSettings()), _mixer(mixer)
 {
     setpresettype("Ppadsynth");
 
@@ -636,12 +636,12 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         //replace the current sample with the new computed sample
         if (lockmutex)
         {
-            pthread_mutex_lock(mutex);
+            _mixer->Lock();
             deletesample(nsample);
             sample[nsample].smp = newsample.smp;
             sample[nsample].size = samplesize;
             sample[nsample].basefreq = basefreq * basefreqadjust;
-            pthread_mutex_unlock(mutex);
+            _mixer->Unlock();
         }
         else
         {
@@ -658,10 +658,10 @@ void PADnoteParameters::applyparameters(bool lockmutex)
     //delete the additional samples that might exists and are not useful
     if (lockmutex)
     {
-        pthread_mutex_lock(mutex);
+        _mixer->Lock();
         for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
             deletesample(i);
-        pthread_mutex_unlock(mutex);
+        _mixer->Unlock();
     }
     else
         for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)

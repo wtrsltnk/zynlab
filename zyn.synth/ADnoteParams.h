@@ -293,6 +293,7 @@ struct ADnoteVoiceParam
 class ADnoteParameters : public Presets
 {
     SystemSettings *_synth;
+    IFFTwrapper *fft;
 
 public:
     ADnoteParameters(IMixer *mixer);
@@ -315,7 +316,6 @@ private:
 
     void EnableVoice(int nvoice);
     void KillVoice(int nvoice);
-    IFFTwrapper *fft;
 
     void SerializeSection(IPresetsSerializer *xml, int n);
     void DeserializeSection(IPresetsSerializer *xml, int n);

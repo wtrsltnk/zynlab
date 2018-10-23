@@ -40,9 +40,33 @@ class SynthNote;
 class XMLWrapper;
 class IFFTwrapper;
 
-//the Channel's kit
-struct Instrument
+enum NoteStatus
 {
+    KEY_OFF,
+    KEY_PLAYING,
+    KEY_RELASED_AND_SUSTAINED,
+    KEY_RELASED
+};
+
+struct ChannelNotes
+{
+    NoteStatus status;
+    int note; //if there is no note playing, the "note"=-1
+    int itemsplaying;
+    struct
+    {
+        SynthNote *adnote;
+        SynthNote *subnote;
+        SynthNote *padnote;
+        int sendtoparteffect;
+    } instumentNotes[NUM_CHANNEL_INSTRUMENTS];
+    int time;
+};
+
+//the Channel's kit
+class Instrument
+{
+public:
     unsigned char Penabled, Pmuted, Pminkey, Pmaxkey;
     unsigned char *Pname;
     unsigned char Padenabled, Psubenabled, Ppadenabled;
@@ -55,17 +79,15 @@ struct Instrument
 /** Channel implementation*/
 class Channel
 {
-    SystemSettings *_synth;
-
 public:
-    /**Constructor
-         * @param microtonal_ Pointer to the microtonal object
-         * @param fft_ Pointer to the FFTwrapper
-         * @param mutex_ Pointer to the master pthread_mutex_t*/
+    /**Constructor*/
     Channel();
     /**Destructor*/
     virtual ~Channel();
 
+    /**Ìnit()
+         * @param fft_ Pointer to the mixer
+         * @param microtonal_ Pointer to the microtonal object*/
     void Init(IMixer *mixer, Microtonal *microtonal_);
 
     // Mutex
@@ -94,7 +116,7 @@ public:
     void Cleanup(bool final = false);
 
     //the Channel's instruments
-    Instrument instruments[NUM_CHANNEL_INSTRUMENTS];
+    Instrument _instruments[NUM_CHANNEL_INSTRUMENTS];
 
     //Channel parameters
     void setkeylimit(unsigned char Pkeylimit);
@@ -145,14 +167,6 @@ public:
     float *partfxinputl[NUM_CHANNEL_EFX + 1]; //Left and right signal that pass thru part effects;
     float *partfxinputr[NUM_CHANNEL_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
-    enum NoteStatus
-    {
-        KEY_OFF,
-        KEY_PLAYING,
-        KEY_RELASED_AND_SUSTAINED,
-        KEY_RELASED
-    };
-
     float volume;
     float oldvolumel;
     float oldvolumer; //this is applied by Master
@@ -174,21 +188,6 @@ private:
 
     int killallnotes; //is set to 1 if I want to kill all notes
 
-    struct InstrumentNotes
-    {
-        NoteStatus status;
-        int note; //if there is no note playing, the "note"=-1
-        int itemsplaying;
-        struct
-        {
-            SynthNote *adnote;
-            SynthNote *subnote;
-            SynthNote *padnote;
-            int sendtoparteffect;
-        } kititem[NUM_CHANNEL_INSTRUMENTS];
-        int time;
-    };
-
     unsigned int lastpos, lastposb; // To keep track of previously used pos and posb.
     bool lastlegatomodevalid;         // To keep track of previous legatomodevalid.
 
@@ -205,10 +204,11 @@ private:
            store the velocity and masterkeyshift values of a given note (the list only store note values).
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-    InstrumentNotes partnote[POLIPHONY];
+    ChannelNotes _channelNotes[POLIPHONY];
 
     float oldfreq; //this is used for portamento
     IMixer *_mixer;
+    SystemSettings *_synth;
     Microtonal *_microtonal;
     IFFTwrapper *_fft;
     pthread_mutex_t _instrumentMutex;

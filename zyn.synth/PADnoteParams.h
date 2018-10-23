@@ -40,6 +40,7 @@
 
 class PADnoteParameters : public Presets
 {
+    IMixer *_mixer;
     SystemSettings *_synth;
 
 public:
@@ -176,7 +177,6 @@ private:
     void deletesamples();
     void deletesample(int n);
 
-    pthread_mutex_t *mutex;
 };
 
 #endif
