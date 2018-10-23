@@ -662,9 +662,9 @@ sendtochoice->value(x);}
       }
       Fl_Choice insefftype {
         label EffType
-        callback {pthread_mutex_lock(part->mutex);
+        callback {master->Lock();
 part->partefx[ninseff]->changeeffect((int) o->value());
-pthread_mutex_unlock(part->mutex);
+master->Unlock();
 inseffectui->refresh(part->partefx[ninseff]);}
         xywh {155 110 70 15} down_box BORDER_BOX labelsize 10 align 6
         code0 {o->value(part->partefx[ninseff]->geteffect());}

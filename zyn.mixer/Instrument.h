@@ -162,8 +162,6 @@ public:
     unsigned char Pefxroute[NUM_PART_EFX]; //how the effect's output is routed(to next effect/to out)
     bool Pefxbypass[NUM_PART_EFX];         //if the effects are bypassed
 
-    pthread_mutex_t *_mixerMutex;
-
     int lastnote;
 
 private:
@@ -211,6 +209,7 @@ private:
     Microtonal *_microtonal;
     IFFTwrapper *_fft;
     pthread_mutex_t _instrumentMutex;
+    pthread_mutex_t *_mixerMutex;
 };
 
 #endif

@@ -56,7 +56,7 @@ void Instrument::Init(SystemSettings *synth, Microtonal *microtonal, IFFTwrapper
 
     kit[0].adpars = new ADnoteParameters(_synth, _fft);
     kit[0].subpars = new SUBnoteParameters(_synth);
-    kit[0].padpars = new PADnoteParameters(_synth, _fft, _mixerMutex);
+    kit[0].padpars = new PADnoteParameters(_synth, _fft, mutex);
 
     //Part's Insertion Effects init
     for (auto &nefx : partefx)
