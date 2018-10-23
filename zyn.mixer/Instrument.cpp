@@ -978,21 +978,27 @@ void Instrument::KillNotePos(unsigned int pos)
  */
 void Instrument::setkeylimit(unsigned char Pkeylimit)
 {
-    Pkeylimit = Pkeylimit;
+    this->Pkeylimit = Pkeylimit;
     int keylimit = Pkeylimit;
     if (keylimit == 0)
+    {
         keylimit = POLIPHONY - 5;
+    }
 
     //release old keys if the number of notes>keylimit
     if (Ppolymode != 0)
     {
         int notecount = 0;
         for (auto &i : partnote)
+        {
             if ((i.status == KEY_PLAYING) || (i.status == KEY_RELASED_AND_SUSTAINED))
+            {
                 notecount++;
-
+            }
+        }
         int oldestnotepos = -1;
         if (notecount > keylimit) //find out the oldest note
+        {
             for (int i = 0; i < POLIPHONY; ++i)
             {
                 int maxtime = 0;
@@ -1002,8 +1008,11 @@ void Instrument::setkeylimit(unsigned char Pkeylimit)
                     oldestnotepos = i;
                 }
             }
+        }
         if (oldestnotepos != -1)
+        {
             RelaseNotePos(static_cast<unsigned int>(oldestnotepos));
+        }
     }
 }
 

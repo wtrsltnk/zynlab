@@ -20,8 +20,8 @@
 
 */
 
-#ifndef PART_H
-#define PART_H
+#ifndef CHANNEL_H
+#define CHANNEL_H
 
 #define MAX_INFO_TEXT_SIZE 1000
 
@@ -212,4 +212,4 @@ private:
     pthread_mutex_t _instrumentMutex;
 };
 
-#endif
+#endif // CHANNEL_H
