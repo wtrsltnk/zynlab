@@ -500,7 +500,7 @@ if (filename==nullptr) return;
 
 master->Lock();
   //clear all parameters
-  master->microtonal.defaults();
+  master->microtonal.Defaults();
 
   //load the data
   int result=master->microtonal.loadXML(filename);
@@ -597,7 +597,7 @@ master->Lock();
   int result=master->GetChannel(npart)->loadXMLinstrument(filename);
 
 master->Unlock();
-master->GetChannel(npart)->applyparameters();
+master->GetChannel(npart)->ApplyParameters();
 
 npartcounter->do_callback();
 updatepanel();
@@ -1107,7 +1107,7 @@ master->Lock();
   int result=master->GetChannel(npart)->loadXMLinstrument(filename);
 
 master->Unlock();
-master->GetChannel(npart)->applyparameters();
+master->GetChannel(npart)->ApplyParameters();
 
 simplenpartcounter->do_callback();
 

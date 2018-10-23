@@ -33,11 +33,11 @@
 int ADnote_unison_sizes[] =
     {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
-ADnoteParameters::ADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_)
-    : GlobalPar(synth_), _synth(synth_)
+ADnoteParameters::ADnoteParameters(IMixer *mixer)
+    : GlobalPar(mixer->GetSettings()), _synth(mixer->GetSettings())
 {
     setpresettype("Padsynth");
-    fft = fft_;
+    fft = mixer->GetFFT();
 
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         EnableVoice(nvoice);

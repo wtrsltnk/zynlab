@@ -295,7 +295,7 @@ class ADnoteParameters : public Presets
     SystemSettings *_synth;
 
 public:
-    ADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_);
+    ADnoteParameters(IMixer *mixer);
     virtual ~ADnoteParameters();
 
     ADnoteGlobalParam GlobalPar;

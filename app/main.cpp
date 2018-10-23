@@ -91,7 +91,7 @@ int exitprogram()
     delete ui;
 #endif // ENABLE_FLTKGUI
 
-    auto synth = mixer->_synth;
+    auto synth = mixer->GetSettings();
     delete mixer;
     delete synth;
     FFT_cleanup();

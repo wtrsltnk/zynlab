@@ -32,7 +32,7 @@
 class SUBnoteParameters : public Presets
 {
 public:
-    SUBnoteParameters(SystemSettings *synth_);
+    SUBnoteParameters(IMixer *mixer);
     virtual ~SUBnoteParameters();
 
     void Serialize(IPresetsSerializer *xml);

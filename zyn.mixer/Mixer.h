@@ -87,6 +87,9 @@ public:
     /**Audio Output*/
     virtual void AudioOut(float *outl, float *outr);
 
+    virtual SystemSettings *GetSettings();
+    virtual IFFTwrapper *GetFFT();
+
     void partonoff(int npart, int what);
 
     virtual int GetChannelCount() const;
@@ -120,8 +123,6 @@ public:
     //other objects
     Microtonal microtonal;
 
-    IFFTwrapper *fft;
-
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
     void Defaults();
@@ -130,6 +131,9 @@ private:
     Instrument _instruments[NUM_MIXER_CHANNELS];
     pthread_mutex_t mutex{};
     IBankManager *bank;
+    IFFTwrapper *fft;
+    SystemSettings *_settings;
+
     float volume{};
     float sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS]{};
     float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};

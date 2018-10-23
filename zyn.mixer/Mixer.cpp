@@ -40,7 +40,7 @@ Mixer::Mixer(SystemSettings *synth_, IBankManager *bank_)
     : _meter(synth_)
 {
     ctl.Init(synth_);
-    this->_synth = synth_;
+    this->_settings = synth_;
     bank = bank_;
 
     swaplr = false;
@@ -50,25 +50,25 @@ Mixer::Mixer(SystemSettings *synth_, IBankManager *bank_)
     bufr = new float[this->BufferSize()];
 
     pthread_mutex_init(&mutex, nullptr);
-    fft = new FFTwrapper(this->_synth->oscilsize);
+    fft = new FFTwrapper(this->_settings->oscilsize);
 
     shutup = 0;
 
     for (auto &npart : _instruments)
     {
-        npart.Init(this->_synth, &microtonal, fft, &mutex);
+        npart.Init(this, &microtonal);
     }
 
     //Insertion Effects init
     for (auto &nefx : insefx)
     {
-        nefx.Init(true, &mutex, this->_synth);
+        nefx.Init(this, true);
     }
 
     //System Effects init
     for (auto &nefx : sysefx)
     {
-        nefx.Init(false, &mutex, this->_synth);
+        nefx.Init(this, false);
     }
 
     Defaults();
@@ -135,22 +135,22 @@ void Mixer::Defaults()
 
 unsigned int Mixer::SampleRate() const
 {
-    return _synth->samplerate;
+    return _settings->samplerate;
 }
 
 unsigned int Mixer::BufferSize() const
 {
-    return _synth->buffersize;
+    return _settings->buffersize;
 }
 
 unsigned int Mixer::BufferSizeInBytes() const
 {
-    return _synth->bufferbytes;
+    return _settings->bufferbytes;
 }
 
 float Mixer::BufferSizeFloat() const
 {
-    return _synth->buffersize_f;
+    return _settings->buffersize_f;
 }
 
 void Mixer::Lock()
@@ -529,6 +529,16 @@ void Mixer::AudioOut(float *outl, float *outr)
 
     //update the LFO's time
     LFOParams::time++;
+}
+
+SystemSettings *Mixer::GetSettings()
+{
+    return _settings;
+}
+
+IFFTwrapper *Mixer::GetFFT()
+{
+    return fft;
 }
 
 int Mixer::GetChannelCount() const

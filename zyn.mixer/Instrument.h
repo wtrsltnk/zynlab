@@ -54,7 +54,7 @@ public:
     /**Destructor*/
     virtual ~Instrument();
 
-    void Init(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
+    void Init(IMixer *mixer, Microtonal *microtonal_);
 
     // Mutex
     void Lock();
@@ -206,10 +206,10 @@ private:
     InstrumentNotes partnote[POLIPHONY];
 
     float oldfreq; //this is used for portamento
+    IMixer *_mixer;
     Microtonal *_microtonal;
     IFFTwrapper *_fft;
     pthread_mutex_t _instrumentMutex;
-    pthread_mutex_t *_mixerMutex;
 };
 
 #endif

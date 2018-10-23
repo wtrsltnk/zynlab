@@ -43,7 +43,7 @@ class PADnoteParameters : public Presets
     SystemSettings *_synth;
 
 public:
-    PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
+    PADnoteParameters(IMixer *mixer);
     virtual ~PADnoteParameters();
 
     void Serialize(IPresetsSerializer *xml);

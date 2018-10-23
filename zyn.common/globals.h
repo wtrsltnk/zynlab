@@ -371,7 +371,8 @@ public:
     // Audio Output
     virtual void AudioOut(float *outl, float *outr) = 0;
 
-    SystemSettings *_synth;
+    virtual SystemSettings *GetSettings() = 0;
+    virtual class IFFTwrapper *GetFFT() = 0;
 };
 
 #endif

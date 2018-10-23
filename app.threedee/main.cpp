@@ -58,7 +58,7 @@ int exitprogram()
 
     Nio::Stop();
 
-    delete mixer->_synth;
+    delete mixer->GetSettings();
     delete mixer;
     FFT_cleanup();
 

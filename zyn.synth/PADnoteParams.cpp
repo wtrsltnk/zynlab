@@ -25,15 +25,13 @@
 #include <cmath>
 #include <zyn.common/WavFile.h>
 
-PADnoteParameters::PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, pthread_mutex_t *mutex_)
-    : _synth(synth_)
+PADnoteParameters::PADnoteParameters(IMixer *mixer)
+    : _synth(mixer->GetSettings())
 {
     setpresettype("Ppadsynth");
 
-    mutex = mutex_;
-
     resonance = new Resonance();
-    oscilgen = new OscilGen(fft_, resonance, synth_);
+    oscilgen = new OscilGen(mixer->GetFFT(), resonance, mixer->GetSettings());
     oscilgen->ADvsPAD = true;
 
     FreqEnvelope = new EnvelopeParams(0, 0);
@@ -44,7 +42,7 @@ PADnoteParameters::PADnoteParameters(SystemSettings *synth_, IFFTwrapper *fft_, 
     AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
     AmpLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 1);
 
-    GlobalFilter = new FilterParams(this->_synth, 2, 94, 40);
+    GlobalFilter = new FilterParams(mixer->GetSettings(), 2, 94, 40);
     FilterEnvelope = new EnvelopeParams(0, 1);
     FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);

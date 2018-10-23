@@ -35,13 +35,13 @@
 
 Instrument::Instrument() {}
 
-void Instrument::Init(SystemSettings *synth, Microtonal *microtonal, IFFTwrapper *fft, pthread_mutex_t *mutex)
+void Instrument::Init(IMixer *mixer, Microtonal *microtonal)
 {
-    _synth = synth;
-    ctl.Init(synth);
+    _mixer = mixer;
+    _synth = mixer->GetSettings();
+    ctl.Init(mixer->GetSettings());
     _microtonal = microtonal;
-    _fft = fft;
-    _mixerMutex = mutex;
+    _fft = mixer->GetFFT();
     pthread_mutex_init(&_instrumentMutex, nullptr);
     partoutl = new float[_synth->buffersize];
     partoutr = new float[_synth->buffersize];
@@ -54,15 +54,15 @@ void Instrument::Init(SystemSettings *synth, Microtonal *microtonal, IFFTwrapper
         n.padpars = nullptr;
     }
 
-    kit[0].adpars = new ADnoteParameters(_synth, _fft);
-    kit[0].subpars = new SUBnoteParameters(_synth);
-    kit[0].padpars = new PADnoteParameters(_synth, _fft, mutex);
+    kit[0].adpars = new ADnoteParameters(_mixer);
+    kit[0].subpars = new SUBnoteParameters(_mixer);
+    kit[0].padpars = new PADnoteParameters(mixer);
 
     //Part's Insertion Effects init
     for (auto &nefx : partefx)
     {
         nefx = new EffectManager();
-        nefx->Init(true, _mixerMutex, _synth);
+        nefx->Init(mixer, true);
     }
 
     for (auto &nefx : Pefxbypass)
@@ -298,11 +298,13 @@ void Instrument::NoteOn(unsigned char note,
 
     pos = -1;
     for (i = 0; i < POLIPHONY; ++i)
+    {
         if (partnote[i].status == KEY_OFF)
         {
             pos = static_cast<int>(i);
             break;
         }
+    }
 
     if ((Plegatomode != 0) && (Pdrummode == 0))
     {
@@ -344,21 +346,26 @@ void Instrument::NoteOn(unsigned char note,
             lastposb = static_cast<unsigned int>(posb); // Keep a trace of used posb
         }
     }
-    else // Legato mode is either off or non-applicable.
-        if (Ppolymode == 0)
-    { //if the mode is 'mono' turn off all other notes
+    else if (Ppolymode == 0)
+    {
+        // Legato mode is either off or non-applicable.
+        //if the mode is 'mono' turn off all other notes
         for (i = 0; i < POLIPHONY; ++i)
+        {
             if (partnote[i].status == KEY_PLAYING)
                 RelaseNotePos(i);
+        }
         RelaseSustainedKeys();
     }
     lastlegatomodevalid = legatomodevalid;
 
     if (pos == -1)
+    {
         //test
         fprintf(stderr,
                 "%s",
                 "NOTES TOO MANY (> POLIPHONY) - (Part.cpp::NoteOn(..))\n");
+    }
     else
     {
         //start the note
@@ -393,12 +400,15 @@ void Instrument::NoteOn(unsigned char note,
                 return; //the key is no mapped
         }
         else
+        {
             notebasefreq = 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
-        ;
+        }
 
         //Portamento
         if (oldfreq < 1.0f)
+        {
             oldfreq = notebasefreq; //this is only the first note is played
+        }
 
         // For Mono/Legato: Force Portamento Off on first
         // notes. That means it is required that the previous note is
@@ -406,13 +416,17 @@ void Instrument::NoteOn(unsigned char note,
         // (that's like Legato).
         int portamento = 0;
         if ((Ppolymode != 0) || (not ismonofirstnote))
+        {
             // I added a third argument to the
             // ctl.initportamento(...) function to be able
             // to tell it if we're doing a legato note.
             portamento = ctl.initportamento(oldfreq, notebasefreq, doinglegato);
+        }
 
         if (portamento != 0)
+        {
             ctl.portamento.noteusing = pos;
+        }
         oldfreq = notebasefreq;
 
         lastpos = static_cast<unsigned int>(pos); // Keep a trace of used pos.
@@ -1169,11 +1183,11 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
     else
     {
         if (kit[kititem].adpars == nullptr)
-            kit[kititem].adpars = new ADnoteParameters(_synth, _fft);
+            kit[kititem].adpars = new ADnoteParameters(_mixer);
         if (kit[kititem].subpars == nullptr)
-            kit[kititem].subpars = new SUBnoteParameters(_synth);
+            kit[kititem].subpars = new SUBnoteParameters(_mixer);
         if (kit[kititem].padpars == nullptr)
-            kit[kititem].padpars = new PADnoteParameters(_synth, _fft, _mixerMutex);
+            kit[kititem].padpars = new PADnoteParameters(_mixer);
     }
 
     if (resetallnotes)

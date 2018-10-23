@@ -38,20 +38,19 @@ using namespace std;
 
 EffectManager::EffectManager() {}
 
-void EffectManager::Init(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_)
+void EffectManager::Init(IMixer *mixer, const bool insertion_)
 {
+    _mixer = mixer;
     insertion = insertion_;
-    efxoutl = new float[synth_->buffersize];
-    efxoutr = new float[synth_->buffersize];
+    efxoutl = new float[_mixer->GetSettings()->buffersize];
+    efxoutr = new float[_mixer->GetSettings()->buffersize];
     filterpars = nullptr;
-    _synth = synth_;
     nefx = 0;
     efx = nullptr;
-    mutex = mutex_;
     dryonly = false;
     setpresettype("Peffect");
-    memset(efxoutl, 0, this->_synth->bufferbytes);
-    memset(efxoutr, 0, this->_synth->bufferbytes);
+    memset(efxoutl, 0, mixer->GetSettings()->bufferbytes);
+    memset(efxoutr, 0, mixer->GetSettings()->bufferbytes);
     Defaults();
 }
 
@@ -78,49 +77,49 @@ void EffectManager::changeeffect(int _nefx)
     }
 
     nefx = _nefx;
-    memset(efxoutl, 0, this->_synth->bufferbytes);
-    memset(efxoutr, 0, this->_synth->bufferbytes);
+    memset(efxoutl, 0, _mixer->GetSettings()->bufferbytes);
+    memset(efxoutr, 0, _mixer->GetSettings()->bufferbytes);
     delete efx;
     switch (nefx)
     {
         case 1:
         {
-            efx = new Reverb(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new Reverb(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         case 2:
         {
-            efx = new Echo(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new Echo(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         case 3:
         {
-            efx = new Chorus(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new Chorus(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         case 4:
         {
-            efx = new Phaser(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new Phaser(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         case 5:
         {
-            efx = new Alienwah(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new Alienwah(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         case 6:
         {
-            efx = new Distorsion(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new Distorsion(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         case 7:
         {
-            efx = new EQ(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new EQ(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         case 8:
         {
-            efx = new DynamicFilter(insertion, efxoutl, efxoutr, this->_synth);
+            efx = new DynamicFilter(insertion, efxoutl, efxoutr, _mixer->GetSettings());
             break;
         }
         //put more effect here
@@ -170,9 +169,9 @@ void EffectManager::changepreset_nolock(unsigned char npreset)
 //Change the preset of the current effect(with thread locking)
 void EffectManager::changepreset(unsigned char npreset)
 {
-    pthread_mutex_lock(mutex);
+    _mixer->Lock();
     changepreset_nolock(npreset);
-    pthread_mutex_unlock(mutex);
+    _mixer->Unlock();
 }
 
 //Change a parameter of the current effect
@@ -187,9 +186,9 @@ void EffectManager::seteffectpar_nolock(int npar, unsigned char value)
 // Change a parameter of the current effect (with thread locking)
 void EffectManager::seteffectpar(int npar, unsigned char value)
 {
-    pthread_mutex_lock(mutex);
+    _mixer->Lock();
     seteffectpar_nolock(npar, value);
-    pthread_mutex_unlock(mutex);
+    _mixer->Unlock();
 }
 
 //Get a parameter of the current effect
@@ -205,7 +204,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
     {
         if (!insertion)
         {
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
             {
                 smpsl[i] = 0.0f;
                 smpsr[i] = 0.0f;
@@ -216,10 +215,10 @@ void EffectManager::out(float *smpsl, float *smpsr)
         return;
     }
 
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
     {
-        smpsl[i] += this->_synth->denormalkillbuf[i];
-        smpsr[i] += this->_synth->denormalkillbuf[i];
+        smpsl[i] += _mixer->GetSettings()->denormalkillbuf[i];
+        smpsr[i] += _mixer->GetSettings()->denormalkillbuf[i];
         efxoutl[i] = 0.0f;
         efxoutr[i] = 0.0f;
     }
@@ -229,8 +228,8 @@ void EffectManager::out(float *smpsl, float *smpsr)
 
     if (nefx == 7)
     { //this is need only for the EQ effect
-        memcpy(smpsl, efxoutl, this->_synth->bufferbytes);
-        memcpy(smpsr, efxoutr, this->_synth->bufferbytes);
+        memcpy(smpsl, efxoutl, _mixer->GetSettings()->bufferbytes);
+        memcpy(smpsr, efxoutr, _mixer->GetSettings()->bufferbytes);
         return;
     }
 
@@ -255,7 +254,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
 
         if (dryonly) //this is used for instrument effect only
         {
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
             {
                 smpsl[i] *= v1;
                 smpsr[i] *= v1;
@@ -265,7 +264,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
         }
         else // normal instrument/insertion effect
         {
-            for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
             {
                 smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
@@ -274,7 +273,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
     }
     else // System effect
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
         {
             efxoutl[i] *= 2.0f * volume;
             efxoutr[i] *= 2.0f * volume;

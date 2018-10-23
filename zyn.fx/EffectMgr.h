@@ -44,7 +44,7 @@ public:
     EffectManager();
     virtual ~EffectManager();
 
-    void Init(const bool insertion_, pthread_mutex_t *mutex_, SystemSettings *synth_);
+    void Init(IMixer *mixer, const bool insertion_);
     void Serialize(IPresetsSerializer *xml);
     void Defaults(void);
     void Deserialize(IPresetsSerializer *xml);
@@ -74,12 +74,11 @@ public:
     float getEQfreqresponse(float freq);
 
     FilterParams *filterpars;
-    SystemSettings *_synth;
+    IMixer *_mixer;
 
 private:
     int nefx;
     Effect *efx;
-    pthread_mutex_t *mutex;
     bool dryonly;
 };
 
