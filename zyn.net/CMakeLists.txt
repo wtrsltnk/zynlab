@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.8)
 project(zyn.net)
 
 add_library(zyn.net STATIC
+    HttpClient.cpp
+    HttpClient.h
     HttpRequest.cpp
     HttpRequest.h
     HttpResponse.cpp
@@ -23,6 +25,7 @@ target_compile_features(zyn.net
 
 target_link_libraries(zyn.net
     ws2_32
+    wininet
     )
 
 target_compile_definitions(zyn.net
@@ -40,6 +43,7 @@ install(
 
 install(
     FILES
+        ${zyn.net_SOURCE_DIR}/HttpClient.h
         ${zyn.net_SOURCE_DIR}/HttpRequest.h
         ${zyn.net_SOURCE_DIR}/HttpResponse.h
         ${zyn.net_SOURCE_DIR}/HttpServer.h

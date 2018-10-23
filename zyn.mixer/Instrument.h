@@ -56,6 +56,11 @@ public:
 
     void Init(SystemSettings *synth_, Microtonal *microtonal_, IFFTwrapper *fft_, pthread_mutex_t *mutex_);
 
+    // Mutex
+    void Lock();
+    bool TryLock();
+    void Unlock();
+
     // Midi commands implemented
     void NoteOn(unsigned char note, unsigned char velocity, int masterkeyshift);
     void NoteOff(unsigned char note);
@@ -66,7 +71,7 @@ public:
     void RelaseAllKeys();       //this is called on AllNotesOff controller
 
     /* The synthesizer part output */
-    void ComputePartSmps(); //Part output
+    void ComputeInstrumentSamples(); //Part output
 
     //saves the instrument settings to a XML file
     //returns 0 for ok or <0 if there is an error
@@ -157,8 +162,7 @@ public:
     unsigned char Pefxroute[NUM_PART_EFX]; //how the effect's output is routed(to next effect/to out)
     bool Pefxbypass[NUM_PART_EFX];         //if the effects are bypassed
 
-    pthread_mutex_t *_mutex;
-    pthread_mutex_t load_mutex;
+    pthread_mutex_t *_mixerMutex;
 
     int lastnote;
 
@@ -206,6 +210,7 @@ private:
     float oldfreq; //this is used for portamento
     Microtonal *_microtonal;
     IFFTwrapper *_fft;
+    pthread_mutex_t _instrumentMutex;
 };
 
 #endif

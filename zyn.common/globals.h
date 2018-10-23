@@ -144,7 +144,7 @@
 /*
  * Interpolate Amplitude
  */
-#define INTERPOLATE_AMPLITUDE(a, b, x, size) ((a) + ((b) - (a)) * (float)(x) / (float)(size))
+#define INTERPOLATE_AMPLITUDE(a, b, x, size) ((a) + ((b) - (a)) * static_cast<float>(x) / static_cast<float>(size))
 
 /*
  * dB
@@ -370,7 +370,6 @@ public:
 
     // Audio Output
     virtual void AudioOut(float *outl, float *outr) = 0;
-    virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr) = 0;
 
     SystemSettings *_synth;
 };

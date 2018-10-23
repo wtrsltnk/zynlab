@@ -353,12 +353,12 @@ void Mixer::AudioOut(float *outl, float *outr)
     memset(outr, 0, this->BufferSizeInBytes());
 
     //Compute part samples and store them part[npart].partoutl,partoutr
-    for (auto &npart : _instruments)
+    for (auto &instrument : _instruments)
     {
-        if (npart.Penabled != 0 && !pthread_mutex_trylock(&npart.load_mutex))
+        if (instrument.Penabled != 0 && !instrument.TryLock())
         {
-            npart.ComputePartSmps();
-            pthread_mutex_unlock(&npart.load_mutex);
+            instrument.ComputeInstrumentSamples();
+            instrument.Unlock();
         }
     }
 
@@ -383,9 +383,8 @@ void Mixer::AudioOut(float *outl, float *outr)
             continue;
         }
 
-        Stereo<float> newvol(npart.volume),
-            oldvol(npart.oldvolumel,
-                   npart.oldvolumer);
+        Stereo<float> newvol(npart.volume);
+        Stereo<float> oldvol(npart.oldvolumel, npart.oldvolumer);
 
         float pan = npart.panning;
         if (pan < 0.5f)
@@ -420,6 +419,9 @@ void Mixer::AudioOut(float *outl, float *outr)
         }
     }
 
+    auto tmpmixl = new float[this->BufferSize()];
+    auto tmpmixr = new float[this->BufferSize()];
+
     //System effects
     for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
     {
@@ -428,8 +430,6 @@ void Mixer::AudioOut(float *outl, float *outr)
             continue; //the effect is disabled
         }
 
-        float tmpmixl[this->BufferSize()];
-        float tmpmixr[this->BufferSize()];
         //Clean up the samples used by the system effects
         memset(tmpmixl, 0, this->BufferSizeInBytes());
         memset(tmpmixr, 0, this->BufferSizeInBytes());
@@ -481,6 +481,9 @@ void Mixer::AudioOut(float *outl, float *outr)
         }
     }
 
+    delete []tmpmixl;
+    delete []tmpmixr;
+
     //Mix all parts
     for (auto &npart : _instruments)
     {
@@ -526,45 +529,6 @@ void Mixer::AudioOut(float *outl, float *outr)
 
     //update the LFO's time
     LFOParams::time++;
-}
-
-//TODO review the respective code from yoshimi for this
-//If memory serves correctly, libsamplerate was used
-void Mixer::GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr)
-{
-    off_t out_off = 0;
-
-    //Fail when resampling rather than doing a poor job
-    if (this->SampleRate() != samplerate)
-    {
-        printf("darn it: %d vs %d\n", this->SampleRate(), samplerate);
-        return;
-    }
-
-    while (nsamples)
-    {
-        //use all available samples
-        if (nsamples >= smps)
-        {
-            memcpy(outl + out_off, bufl + off, sizeof(float) * smps);
-            memcpy(outr + out_off, bufr + off, sizeof(float) * smps);
-            nsamples -= smps;
-
-            //generate samples
-            AudioOut(bufl, bufr);
-            off = 0;
-            out_off += smps;
-            smps = this->BufferSize();
-        }
-        else
-        { //use some samples
-            memcpy(outl + out_off, bufl + off, sizeof(float) * nsamples);
-            memcpy(outr + out_off, bufr + off, sizeof(float) * nsamples);
-            smps -= nsamples;
-            off += nsamples;
-            nsamples = 0;
-        }
-    }
 }
 
 int Mixer::GetChannelCount() const

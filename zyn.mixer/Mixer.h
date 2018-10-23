@@ -86,8 +86,6 @@ public:
 
     /**Audio Output*/
     virtual void AudioOut(float *outl, float *outr);
-    /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
-    virtual void GetAudioOutSamples(size_t nsamples, unsigned samplerate, float *outl, float *outr);
 
     void partonoff(int npart, int what);
 

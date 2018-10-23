@@ -503,10 +503,11 @@ void AppThreeDee::Render()
 
                 if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
                 {
-                    pthread_mutex_lock(&_mixer->GetChannel(activeInstrument)->load_mutex);
-                    _mixer->GetBankManager()->LoadFromSlot(i, _mixer->GetChannel(activeInstrument));
-                    pthread_mutex_unlock(&_mixer->GetChannel(activeInstrument)->load_mutex);
-                    _mixer->GetChannel(activeInstrument)->applyparameters();
+                    auto const &instrument = _mixer->GetChannel(activeInstrument);
+                    instrument->Lock();
+                    _mixer->GetBankManager()->LoadFromSlot(i, instrument);
+                    instrument->Unlock();
+                    instrument->ApplyParameters();
                     ImGui::CloseCurrentPopup();
                 }
                 if ((i + 1) % 32 == 0)
@@ -525,6 +526,24 @@ void AppThreeDee::Render()
 
     if (ImGui::BeginPopupModal("NioPopup"))
     {
+        static int selectedSink = 0, selectedSource = 0;
+        int sinkIndex = 0;
+        for (auto sink : Nio::GetSinks())
+        {
+            if (ImGui::RadioButton(sink.c_str(), &selectedSink, int(sinkIndex++)))
+            {
+                Nio::SelectSink(sink);
+            }
+        }
+        int sourceIndex = 0;
+        for (auto source : Nio::GetSources())
+        {
+            if (ImGui::RadioButton(source.c_str(), &selectedSource, int(sourceIndex++)))
+            {
+                Nio::SelectSource(source);
+            }
+        }
+
         if (ImGui::Button("Close"))
         {
             ImGui::CloseCurrentPopup();

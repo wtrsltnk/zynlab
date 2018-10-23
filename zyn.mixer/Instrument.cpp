@@ -41,8 +41,8 @@ void Instrument::Init(SystemSettings *synth, Microtonal *microtonal, IFFTwrapper
     ctl.Init(synth);
     _microtonal = microtonal;
     _fft = fft;
-    _mutex = mutex;
-    pthread_mutex_init(&load_mutex, nullptr);
+    _mixerMutex = mutex;
+    pthread_mutex_init(&_instrumentMutex, nullptr);
     partoutl = new float[_synth->buffersize];
     partoutr = new float[_synth->buffersize];
 
@@ -56,13 +56,13 @@ void Instrument::Init(SystemSettings *synth, Microtonal *microtonal, IFFTwrapper
 
     kit[0].adpars = new ADnoteParameters(_synth, _fft);
     kit[0].subpars = new SUBnoteParameters(_synth);
-    kit[0].padpars = new PADnoteParameters(_synth, _fft, _mutex);
+    kit[0].padpars = new PADnoteParameters(_synth, _fft, _mixerMutex);
 
     //Part's Insertion Effects init
     for (auto &nefx : partefx)
     {
         nefx = new EffectManager();
-        nefx->Init(true, _mutex, _synth);
+        nefx->Init(true, _mixerMutex, _synth);
     }
 
     for (auto &nefx : Pefxbypass)
@@ -102,6 +102,21 @@ void Instrument::Init(SystemSettings *synth, Microtonal *microtonal, IFFTwrapper
     lastlegatomodevalid = false; // To store previous legatomodevalid value.
 
     Defaults();
+}
+
+void Instrument::Lock()
+{
+    pthread_mutex_lock(&_instrumentMutex);
+}
+
+bool Instrument::TryLock()
+{
+    return pthread_mutex_trylock(&_instrumentMutex);
+}
+
+void Instrument::Unlock()
+{
+    pthread_mutex_unlock(&_instrumentMutex);
 }
 
 void Instrument::Defaults()
@@ -1038,7 +1053,7 @@ void Instrument::RunNote(unsigned int k)
 /*
  * Compute Part samples and store them in the partoutl[] and partoutr[]
  */
-void Instrument::ComputePartSmps()
+void Instrument::ComputeInstrumentSamples()
 {
     for (unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx)
         for (unsigned int i = 0; i < _synth->buffersize; ++i)
@@ -1158,7 +1173,7 @@ void Instrument::setkititemstatus(int kititem, int Penabled_)
         if (kit[kititem].subpars == nullptr)
             kit[kititem].subpars = new SUBnoteParameters(_synth);
         if (kit[kititem].padpars == nullptr)
-            kit[kititem].padpars = new PADnoteParameters(_synth, _fft, _mutex);
+            kit[kititem].padpars = new PADnoteParameters(_synth, _fft, _mixerMutex);
     }
 
     if (resetallnotes)
