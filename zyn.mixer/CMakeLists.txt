@@ -5,8 +5,8 @@ project(zyn.mixer)
 add_library(zyn.mixer STATIC
     BankManager.cpp
     BankManager.h
-    Instrument.cpp
-    Instrument.h
+    Channel.cpp
+    Channel.h
     Meter.cpp
     Meter.h
     Microtonal.cpp
@@ -47,7 +47,7 @@ install(
 install(
     FILES
         ${zyn.mixer_SOURCE_DIR}/Bank.h
-        ${zyn.mixer_SOURCE_DIR}/Instrument.h
+        ${zyn.mixer_SOURCE_DIR}/Channel.h
         ${zyn.mixer_SOURCE_DIR}/Microtonal.h
         ${zyn.mixer_SOURCE_DIR}/Mixer.h
     DESTINATION

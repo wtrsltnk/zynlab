@@ -22,17 +22,17 @@
 */
 
 #include "Mixer.h"
-#include "Instrument.h"
-#include <zyn.common/PresetsSerializer.h>
-#include <zyn.fx/EffectMgr.h>
-#include <zyn.synth/FFTwrapper.h>
-#include <zyn.synth/LFOParams.h>
 
+#include "Channel.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <zyn.common/PresetsSerializer.h>
+#include <zyn.fx/EffectMgr.h>
+#include <zyn.synth/FFTwrapper.h>
+#include <zyn.synth/LFOParams.h>
 
 using namespace std;
 
@@ -546,7 +546,7 @@ int Mixer::GetChannelCount() const
     return NUM_MIXER_CHANNELS;
 }
 
-Instrument *Mixer::GetChannel(int index)
+Channel *Mixer::GetChannel(int index)
 {
     if (index >= 0 && index < NUM_MIXER_CHANNELS)
     {

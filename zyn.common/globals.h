@@ -75,14 +75,14 @@
 #define NUM_INS_EFX 8
 
 /*
- * Number of part's insertion effects
+ * Number of channel's insertion effects
  */
-#define NUM_PART_EFX 3
+#define NUM_CHANNEL_EFX 3
 
 /*
- * Maximum number of the instrument on a part
+ * Maximum number of the instrument on a channel
  */
-#define NUM_KIT_ITEMS 16
+#define NUM_CHANNEL_INSTRUMENTS 16
 
 /*
  * How is applied the velocity sensing
@@ -90,9 +90,9 @@
 #define VELOCITY_MAX_SCALE 8.0f
 
 /*
- * The maximum length of instrument's name
+ * The maximum length of channel's name
  */
-#define PART_MAX_NAME_LEN 30
+#define CHANNEL_MAX_NAME_LEN 30
 
 /*
  * The maximum number of bands of the equaliser
@@ -285,7 +285,7 @@ public:
 //entries in a bank
 #define BANK_SIZE 160
 
-class Instrument;
+class Channel;
 
 class IBankManager
 {
@@ -312,8 +312,8 @@ public:
 
     virtual bool EmptySlot(unsigned int ninstrument) = 0;
     virtual void ClearSlot(unsigned int ninstrument) = 0;
-    virtual void LoadFromSlot(unsigned int ninstrument, Instrument *part) = 0;
-    virtual void SaveToSlot(unsigned int ninstrument, Instrument *part) = 0;
+    virtual void LoadFromSlot(unsigned int ninstrument, Channel *part) = 0;
+    virtual void SaveToSlot(unsigned int ninstrument, Channel *part) = 0;
     virtual void SwapSlot(unsigned int n1, unsigned int n2) = 0;
 
     virtual std::string const &GetBankFileTitle() = 0;
@@ -350,7 +350,7 @@ public:
 
     // Instruments
     virtual int GetChannelCount() const = 0;
-    virtual Instrument *GetChannel(int index) = 0;
+    virtual Channel *GetChannel(int index) = 0;
     virtual void EnableChannel(int index, bool enabled) = 0;
 
     // Effects

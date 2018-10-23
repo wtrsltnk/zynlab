@@ -40,8 +40,20 @@ class SynthNote;
 class XMLWrapper;
 class IFFTwrapper;
 
-/** Part implementation*/
-class Instrument
+//the Channel's kit
+struct Instrument
+{
+    unsigned char Penabled, Pmuted, Pminkey, Pmaxkey;
+    unsigned char *Pname;
+    unsigned char Padenabled, Psubenabled, Ppadenabled;
+    unsigned char Psendtoparteffect;
+    ADnoteParameters *adpars;
+    SUBnoteParameters *subpars;
+    PADnoteParameters *padpars;
+};
+
+/** Channel implementation*/
+class Channel
 {
     SystemSettings *_synth;
 
@@ -50,9 +62,9 @@ public:
          * @param microtonal_ Pointer to the microtonal object
          * @param fft_ Pointer to the FFTwrapper
          * @param mutex_ Pointer to the master pthread_mutex_t*/
-    Instrument();
+    Channel();
     /**Destructor*/
-    virtual ~Instrument();
+    virtual ~Channel();
 
     void Init(IMixer *mixer, Microtonal *microtonal_);
 
@@ -70,8 +82,7 @@ public:
     void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
     void RelaseAllKeys();       //this is called on AllNotesOff controller
 
-    /* The synthesizer part output */
-    void ComputeInstrumentSamples(); //Part output
+    void ComputeInstrumentSamples(); // compute channel output
 
     //saves the instrument settings to a XML file
     //returns 0 for ok or <0 if there is an error
@@ -82,38 +93,29 @@ public:
 
     void Cleanup(bool final = false);
 
-    //the part's kit
-    struct
-    {
-        unsigned char Penabled, Pmuted, Pminkey, Pmaxkey;
-        unsigned char *Pname;
-        unsigned char Padenabled, Psubenabled, Ppadenabled;
-        unsigned char Psendtoparteffect;
-        ADnoteParameters *adpars;
-        SUBnoteParameters *subpars;
-        PADnoteParameters *padpars;
-    } kit[NUM_KIT_ITEMS];
+    //the Channel's instruments
+    Instrument instruments[NUM_CHANNEL_INSTRUMENTS];
 
-    //Part parameters
+    //Channel parameters
     void setkeylimit(unsigned char Pkeylimit);
     void setkititemstatus(int kititem, int Penabled_);
 
-    unsigned char Penabled; /**<if the part is enabled*/
-    unsigned char Pvolume;  /**<part volume*/
-    unsigned char Pminkey;  /**<the minimum key that the part receives noteon messages*/
-    unsigned char Pmaxkey;  //the maximum key that the part receives noteon messages
+    unsigned char Penabled; /**<if the Channel is enabled*/
+    unsigned char Pvolume;  /**<Channel volume*/
+    unsigned char Pminkey;  /**<the minimum key that the Channel receives noteon messages*/
+    unsigned char Pmaxkey;  //the maximum key that the Channel receives noteon messages
     void setPvolume(unsigned char Pvolume);
-    unsigned char Pkeyshift; //Part keyshift
+    unsigned char Pkeyshift; //Channel keyshift
     unsigned char Prcvchn;   //from what midi channel it receive commnads
-    unsigned char Ppanning;  //part panning
+    unsigned char Ppanning;  //Channel panning
     void setPpanning(unsigned char Ppanning);
     unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
     unsigned char Pveloffs;  //velocity offset
-    unsigned char Pnoteon;   //if the part receives NoteOn messages
+    unsigned char Pnoteon;   //if the Channel receives NoteOn messages
     unsigned char Pkitmode;  //if the kitmode is enabled
     unsigned char Pdrummode; //if all keys are mapped and the system is 12tET (used for drums)
 
-    unsigned char Ppolymode;   //Part mode - 0=monophonic , 1=polyphonic
+    unsigned char Ppolymode;   //Channel mode - 0=monophonic , 1=polyphonic
     unsigned char Plegatomode; // 0=normal, 1=legato
     unsigned char Pkeylimit;   //how many keys are alowed to be played same time (0=off), the older will be relased
 
@@ -137,11 +139,11 @@ public:
     float ComputePeak(float volume);
 
 public:
-    float *partoutl; //Left channel output of the part
-    float *partoutr; //Right channel output of the part
+    float *partoutl; //Left channel output of the Channel
+    float *partoutr; //Right channel output of the Channel
 
-    float *partfxinputl[NUM_PART_EFX + 1]; //Left and right signal that pass thru part effects;
-    float *partfxinputr[NUM_PART_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
+    float *partfxinputl[NUM_CHANNEL_EFX + 1]; //Left and right signal that pass thru part effects;
+    float *partfxinputr[NUM_CHANNEL_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
     enum NoteStatus
     {
@@ -156,11 +158,11 @@ public:
     float oldvolumer; //this is applied by Master
     float panning;    //this is applied by Master, too
 
-    Controller ctl; //Part controllers
+    Controller ctl;
 
-    EffectManager *partefx[NUM_PART_EFX];  //insertion part effects (they are part of the instrument)
-    unsigned char Pefxroute[NUM_PART_EFX]; //how the effect's output is routed(to next effect/to out)
-    bool Pefxbypass[NUM_PART_EFX];         //if the effects are bypassed
+    EffectManager *partefx[NUM_CHANNEL_EFX];  //insertion part effects (they are part of the instrument)
+    unsigned char Pefxroute[NUM_CHANNEL_EFX]; //how the effect's output is routed(to next effect/to out)
+    bool Pefxbypass[NUM_CHANNEL_EFX];         //if the effects are bypassed
 
     int lastnote;
 
@@ -183,7 +185,7 @@ private:
             SynthNote *subnote;
             SynthNote *padnote;
             int sendtoparteffect;
-        } kititem[NUM_KIT_ITEMS];
+        } kititem[NUM_CHANNEL_INSTRUMENTS];
         int time;
     };
 

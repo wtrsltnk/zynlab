@@ -24,7 +24,7 @@
 #ifndef MIXER_H
 #define MIXER_H
 
-#include "Instrument.h"
+#include "Channel.h"
 #include "Meter.h"
 #include "Microtonal.h"
 #include <pthread.h>
@@ -93,7 +93,7 @@ public:
     void partonoff(int npart, int what);
 
     virtual int GetChannelCount() const;
-    virtual Instrument *GetChannel(int index);
+    virtual Channel *GetChannel(int index);
     virtual void EnableChannel(int index, bool enabled);
 
     //parameters
@@ -128,7 +128,7 @@ public:
     void Defaults();
 
 private:
-    Instrument _instruments[NUM_MIXER_CHANNELS];
+    Channel _instruments[NUM_MIXER_CHANNELS];
     pthread_mutex_t mutex{};
     IBankManager *bank;
     IFFTwrapper *fft;

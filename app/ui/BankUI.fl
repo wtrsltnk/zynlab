@@ -23,7 +23,7 @@ decl {\#include <FL/Fl_Button.H>} {public local
 decl {\#include <FL/Fl_File_Chooser.H>} {public local
 } 
 
-decl {\#include "zyn.mixer/Instrument.h"} {public local
+decl {\#include "zyn.mixer/Channel.h"} {public local
 } 
 
 decl {\#include "zyn.common/globals.h"} {public local
@@ -283,7 +283,7 @@ if ((what==1)&&(mode==1)&&(!bank->EmptySlot(slot))){//Reads from slot
      bank->LoadFromSlot(slot,master->GetChannel(*npart));
     master->GetChannel(*npart)->Unlock();
     master->GetChannel(*npart)->ApplyParameters();
-    snprintf((char *)master->GetChannel(*npart)->Pname,PART_MAX_NAME_LEN,"%s",bank->GetName(slot).c_str());
+    snprintf((char *)master->GetChannel(*npart)->Pname,CHANNEL_MAX_NAME_LEN,"%s",bank->GetName(slot).c_str());
      cbwig->do_callback();
      
      if (Config::Current().cfg.BankUIAutoClose!=0)

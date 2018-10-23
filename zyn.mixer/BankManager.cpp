@@ -23,17 +23,16 @@
 */
 
 #include "BankManager.h"
-#include "Instrument.h"
+
+#include "Channel.h"
 #include <algorithm>
 #include <dirent.h>
+#include <fcntl.h>
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
-
-#include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #include <zyn.common/Config.h>
 #include <zyn.common/PresetsSerializer.h>
 #include <zyn.common/Util.h>
@@ -157,7 +156,7 @@ void BankManager::ClearSlot(unsigned int ninstrument)
 /*
  * Save the instrument to a slot
  */
-void BankManager::SaveToSlot(unsigned int ninstrument, Instrument *instrument)
+void BankManager::SaveToSlot(unsigned int ninstrument, Channel *instrument)
 {
     ClearSlot(ninstrument);
 
@@ -190,7 +189,7 @@ void BankManager::SaveToSlot(unsigned int ninstrument, Instrument *instrument)
 /*
  * Loads the instrument from the bank
  */
-void BankManager::LoadFromSlot(unsigned int ninstrument, Instrument *instrument)
+void BankManager::LoadFromSlot(unsigned int ninstrument, Channel *instrument)
 {
     if (EmptySlot(ninstrument))
     {

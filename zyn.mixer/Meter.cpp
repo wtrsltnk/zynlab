@@ -1,6 +1,6 @@
 #include "Meter.h"
 
-#include "Instrument.h"
+#include "Channel.h"
 #include <cmath>
 
 vuData::vuData()
@@ -72,7 +72,7 @@ float Meter::GetOutPeak(int instrument)
     return db;
 }
 
-void Meter::Tick(const float *outl, const float *outr, Instrument *part, float volume)
+void Meter::Tick(const float *outl, const float *outr, Channel *part, float volume)
 {
     if (pthread_mutex_trylock(&vumutex))
     {

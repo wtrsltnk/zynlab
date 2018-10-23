@@ -56,7 +56,7 @@ decl {\#include "NioUI.h"} {public global
 decl {\#include "zyn.common/globals.h"} {public
 }
 
-decl {\#include "zyn.mixer/Instrument.h"} {public local
+decl {\#include "zyn.mixer/Channel.h"} {public local
 }
 
 decl {\#include "zyn.seq/Sequencer.h"} {public global

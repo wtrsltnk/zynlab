@@ -1,6 +1,6 @@
 
 #include "app.threedee.h"
-#include <zyn.mixer/Instrument.h>
+#include <zyn.mixer/Channel.h>
 #include <zyn.synth/ADnoteParams.h>
 
 #include <imgui.h>
@@ -421,22 +421,22 @@ void AppThreeDee::Render()
                 _mixer->GetChannel(activeInstrument)->Penabled = penabled ? 1 : 0;
             }
 
-            bool add = _mixer->GetChannel(activeInstrument)->kit[0].Padenabled;
+            bool add = _mixer->GetChannel(activeInstrument)->instruments[0].Padenabled;
             if (ImGui::Checkbox("Add", &add))
             {
-                _mixer->GetChannel(activeInstrument)->kit[0].Padenabled = add;
+                _mixer->GetChannel(activeInstrument)->instruments[0].Padenabled = add;
             }
 
-            bool sub = _mixer->GetChannel(activeInstrument)->kit[0].Psubenabled;
+            bool sub = _mixer->GetChannel(activeInstrument)->instruments[0].Psubenabled;
             if (ImGui::Checkbox("Sub", &sub))
             {
-                _mixer->GetChannel(activeInstrument)->kit[0].Psubenabled = sub;
+                _mixer->GetChannel(activeInstrument)->instruments[0].Psubenabled = sub;
             }
 
-            bool pad = _mixer->GetChannel(activeInstrument)->kit[0].Ppadenabled;
+            bool pad = _mixer->GetChannel(activeInstrument)->instruments[0].Ppadenabled;
             if (ImGui::Checkbox("Pad", &pad))
             {
-                _mixer->GetChannel(activeInstrument)->kit[0].Ppadenabled = pad;
+                _mixer->GetChannel(activeInstrument)->instruments[0].Ppadenabled = pad;
             }
 
             if (ImGui::Button("Edit"))

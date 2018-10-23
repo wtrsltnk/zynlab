@@ -35,7 +35,7 @@
 
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>
-#include <zyn.mixer/Instrument.h>
+#include <zyn.mixer/Channel.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.synth/FFTwrapper.h>
 

@@ -10,7 +10,7 @@ public:
     Meter(SystemSettings *synth);
     virtual ~Meter();
 
-    void Tick(const float *outl, const float *outr, class Instrument *part, float volume);
+    void Tick(const float *outl, const float *outr, class Channel *part, float volume);
 
     virtual void SetFakePeak(int instrument, unsigned char velocity);
     virtual unsigned char GetFakePeak(int instrument);
