@@ -98,7 +98,7 @@ void PADnote::setup(float freq,
 
     if (!legato)
     { //not sure
-        poshi_l = (int)(RND * (size - 1));
+        poshi_l = static_cast<int>(RND * (size - 1));
         if (pars->PStereo != 0)
             poshi_r = (poshi_l + size / 2) % size;
         else
@@ -194,7 +194,7 @@ PADnote::~PADnote()
 inline void PADnote::fadein(float *smps)
 {
     int zerocrossings = 0;
-    for (int i = 1; i < this->_synth->buffersize; ++i)
+    for (int i = 1; i < static_cast<int>(this->_synth->buffersize); ++i)
         if ((smps[i - 1] < 0.0f) && (smps[i] > 0.0f))
             zerocrossings++; //this is only the possitive crossings
 
@@ -204,11 +204,11 @@ inline void PADnote::fadein(float *smps)
 
     int n;
     F2I(tmp, n); //how many samples is the fade-in
-    if (n > this->_synth->buffersize)
-        n = this->_synth->buffersize;
+    if (n > static_cast<int>(this->_synth->buffersize))
+        n = static_cast<int>(this->_synth->buffersize);
     for (int i = 0; i < n; ++i)
     { //fade-in
-        float tmp = 0.5f - cosf((float)i / (float)n * PI) * 0.5f;
+        float tmp = 0.5f - cosf(static_cast<float>(i) / static_cast<float>(n) * PI) * 0.5f;
         smps[i] *= tmp;
     }
 }
@@ -255,7 +255,7 @@ int PADnote::Compute_Linear(float *outl,
         return 1;
     }
     int size = pars->sample[nsample].size;
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (int i = 0; i < static_cast<int>(this->_synth->buffersize); ++i)
     {
         poshi_l += freqhi;
         poshi_r += freqhi;
@@ -289,7 +289,7 @@ int PADnote::Compute_Cubic(float *outl,
     }
     int size = pars->sample[nsample].size;
     float xm1, x0, x1, x2, a, b, c;
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (int i = 0; i < static_cast<int>(this->_synth->buffersize); ++i)
     {
         poshi_l += freqhi;
         poshi_r += freqhi;
@@ -333,7 +333,7 @@ int PADnote::noteout(float *outl, float *outr)
     float *smps = pars->sample[nsample].smp;
     if (smps == nullptr)
     {
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+        for (int i = 0; i < static_cast<int>(this->_synth->buffersize); ++i)
         {
             outl[i] = 0.0f;
             outr[i] = 0.0f;
@@ -343,7 +343,7 @@ int PADnote::noteout(float *outl, float *outr)
     float smpfreq = pars->sample[nsample].basefreq;
 
     float freqrap = realfreq / smpfreq;
-    auto freqhi = (int)(std::floor(freqrap));
+    auto freqhi = static_cast<int>(std::floor(freqrap));
     float freqlo = freqrap - std::floor(freqrap);
 
     if (Config::Current().cfg.Interpolation)
@@ -363,7 +363,7 @@ int PADnote::noteout(float *outl, float *outr)
 
     //Apply the punch
     if (NoteGlobalPar.Punch.Enabled != 0)
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+        for (int i = 0; i < static_cast<int>(this->_synth->buffersize); ++i)
         {
             float punchamp = NoteGlobalPar.Punch.initialvalue * NoteGlobalPar.Punch.t + 1.0f;
             outl[i] *= punchamp;
@@ -377,8 +377,8 @@ int PADnote::noteout(float *outl, float *outr)
         }
 
     if (ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
-        // Amplitude Interpolation
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+    { // Amplitude Interpolation
+        for (int i = 0; i < static_cast<int>(this->_synth->buffersize); ++i)
         {
             float tmpvol = INTERPOLATE_AMPLITUDE(globaloldamplitude,
                                                  globalnewamplitude,
@@ -387,12 +387,15 @@ int PADnote::noteout(float *outl, float *outr)
             outl[i] *= tmpvol * NoteGlobalPar.Panning;
             outr[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
         }
+    }
     else
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+    {
+        for (int i = 0; i < static_cast<int>(this->_synth->buffersize); ++i)
         {
             outl[i] *= globalnewamplitude * NoteGlobalPar.Panning;
             outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
         }
+    }
 
     // Apply legato-specific sound signal modifications
     legato.apply(outl, outr);
@@ -401,9 +404,9 @@ int PADnote::noteout(float *outl, float *outr)
     // If it does, disable the note
     if (NoteGlobalPar.AmpEnvelope->finished() != 0)
     {
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+        for (int i = 0; i < static_cast<int>(this->_synth->buffersize); ++i)
         { //fade-out
-            float tmp = 1.0f - (float)i / this->_synth->buffersize_f;
+            float tmp = 1.0f - static_cast<float>(i) / this->_synth->buffersize_f;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }

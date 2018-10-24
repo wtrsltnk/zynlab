@@ -63,7 +63,7 @@ struct ChannelNotes
     int time;
 };
 
-//the Channel's kit
+//the Channel's instrument
 class Instrument
 {
 public:

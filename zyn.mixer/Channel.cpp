@@ -259,8 +259,8 @@ Channel::~Channel()
  * Note On Messages
  */
 void Channel::NoteOn(unsigned char note,
-                        unsigned char velocity,
-                        int masterkeyshift)
+                     unsigned char velocity,
+                     int masterkeyshift)
 {
     unsigned int i;
     int pos;
@@ -440,15 +440,15 @@ void Channel::NoteOn(unsigned char note,
                 if ((_instruments[0].Padenabled != 0) && (_channelNotes[pos].instumentNotes[0].adnote != nullptr) && (_channelNotes[posb].instumentNotes[0].adnote != nullptr))
                 {
                     _channelNotes[pos].instumentNotes[0].adnote->legatonote(notebasefreq,
-                                                                vel,
-                                                                portamento,
-                                                                note,
-                                                                true); //'true' is to tell it it's being called from here.
+                                                                            vel,
+                                                                            portamento,
+                                                                            note,
+                                                                            true); //'true' is to tell it it's being called from here.
                     _channelNotes[posb].instumentNotes[0].adnote->legatonote(notebasefreq,
-                                                                 vel,
-                                                                 portamento,
-                                                                 note,
-                                                                 true);
+                                                                             vel,
+                                                                             portamento,
+                                                                             note,
+                                                                             true);
                 }
 
                 if ((_instruments[0].Psubenabled != 0) && (_channelNotes[pos].instumentNotes[0].subnote != nullptr) && (_channelNotes[posb].instumentNotes[0].subnote != nullptr))
@@ -539,31 +539,31 @@ void Channel::NoteOn(unsigned char note,
             _channelNotes[pos].instumentNotes[0].sendtoparteffect = 0;
             if (_instruments[0].Padenabled != 0)
                 _channelNotes[pos].instumentNotes[0].adnote = new ADnote(_instruments[0].adpars,
-                                                             &ctl,
-                                                             _synth,
-                                                             notebasefreq,
-                                                             vel,
-                                                             portamento,
-                                                             note,
-                                                             false);
+                                                                         &ctl,
+                                                                         _synth,
+                                                                         notebasefreq,
+                                                                         vel,
+                                                                         portamento,
+                                                                         note,
+                                                                         false);
             if (_instruments[0].Psubenabled != 0)
                 _channelNotes[pos].instumentNotes[0].subnote = new SUBnote(_instruments[0].subpars,
-                                                               &ctl,
-                                                               _synth,
-                                                               notebasefreq,
-                                                               vel,
-                                                               portamento,
-                                                               note,
-                                                               false);
+                                                                           &ctl,
+                                                                           _synth,
+                                                                           notebasefreq,
+                                                                           vel,
+                                                                           portamento,
+                                                                           note,
+                                                                           false);
             if (_instruments[0].Ppadenabled != 0)
                 _channelNotes[pos].instumentNotes[0].padnote = new PADnote(_instruments[0].padpars,
-                                                               &ctl,
-                                                               _synth,
-                                                               notebasefreq,
-                                                               vel,
-                                                               portamento,
-                                                               note,
-                                                               false);
+                                                                           &ctl,
+                                                                           _synth,
+                                                                           notebasefreq,
+                                                                           vel,
+                                                                           portamento,
+                                                                           note,
+                                                                           false);
             if ((_instruments[0].Padenabled != 0) || (_instruments[0].Psubenabled != 0) || (_instruments[0].Ppadenabled != 0))
                 _channelNotes[pos].itemsplaying++;
 
@@ -573,13 +573,13 @@ void Channel::NoteOn(unsigned char note,
                 _channelNotes[posb].instumentNotes[0].sendtoparteffect = 0;
                 if (_instruments[0].Padenabled != 0)
                     _channelNotes[posb].instumentNotes[0].adnote = new ADnote(_instruments[0].adpars,
-                                                                  &ctl,
-                                                                  _synth,
-                                                                  notebasefreq,
-                                                                  vel,
-                                                                  portamento,
-                                                                  note,
-                                                                  true); //true for silent.
+                                                                              &ctl,
+                                                                              _synth,
+                                                                              notebasefreq,
+                                                                              vel,
+                                                                              portamento,
+                                                                              note,
+                                                                              true); //true for silent.
                 if (_instruments[0].Psubenabled != 0)
                     _channelNotes[posb].instumentNotes[0].subnote = new SUBnote(
                         _instruments[0].subpars,
@@ -736,8 +736,8 @@ void Channel::NoteOff(unsigned char note) //relase the key
 }
 
 void Channel::PolyphonicAftertouch(unsigned char note,
-                                      unsigned char velocity,
-                                      int masterkeyshift)
+                                   unsigned char velocity,
+                                   int masterkeyshift)
 {
     (void)masterkeyshift;
     if (!Pnoteon || (note < Pminkey) || (note > Pmaxkey))
@@ -1027,7 +1027,10 @@ void Channel::AllNotesOff()
 
 void Channel::RunNote(unsigned int k)
 {
+    float *tmpoutr = new float[_synth->buffersize];
+    float *tmpoutl = new float[_synth->buffersize];
     unsigned noteplay = 0;
+
     for (int item = 0; item < _channelNotes[k].itemsplaying; ++item)
     {
         int sendcurrenttofx = _channelNotes[k].instumentNotes[item].sendtoparteffect;
@@ -1037,11 +1040,17 @@ void Channel::RunNote(unsigned int k)
             //Select a note
             SynthNote **note = nullptr;
             if (type == 0)
+            {
                 note = &_channelNotes[k].instumentNotes[item].adnote;
+            }
             else if (type == 1)
+            {
                 note = &_channelNotes[k].instumentNotes[item].subnote;
+            }
             else if (type == 2)
+            {
                 note = &_channelNotes[k].instumentNotes[item].padnote;
+            }
 
             //Process if it exists
             if (!(*note))
@@ -1050,8 +1059,6 @@ void Channel::RunNote(unsigned int k)
             }
             noteplay++;
 
-            float tmpoutr[_synth->buffersize];
-            float tmpoutl[_synth->buffersize];
             (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
 
             if ((*note)->finished())
@@ -1066,6 +1073,9 @@ void Channel::RunNote(unsigned int k)
             }
         }
     }
+
+    delete[] tmpoutl;
+    delete[] tmpoutr;
 
     //Kill note if there is no synth on that note
     if (noteplay == 0)
