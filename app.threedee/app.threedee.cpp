@@ -1,10 +1,10 @@
-
 #include "app.threedee.h"
+
 #include <zyn.mixer/Channel.h>
 #include <zyn.synth/ADnoteParams.h>
 
 #include <imgui.h>
-
+// make sure imgui is above the examples headersF
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 #include <algorithm>
@@ -14,6 +14,14 @@ AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _display_w(800), _display_h(600), _isPlaying(false), _currentStep(0)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
+
+    Pattern p1;
+    _tracks[0]._patterns.push_back(p1);
+    Pattern p2;
+    _tracks[0]._patterns.push_back(p2);
+    Pattern p3;
+    _tracks[0]._patterns.push_back(p3);
+    _tracks[1]._patterns.push_back(p3);
 }
 
 AppThreeDee::~AppThreeDee()
@@ -406,6 +414,8 @@ void AppThreeDee::Render()
     }
     ImGui::End();
 
+    ImGuiSequencer(_tracks, NUM_MIDI_CHANNELS);
+
     if (showInstrumentEditor)
     {
         if (ImGui::Begin("Instrument editor", &showInstrumentEditor))
@@ -637,6 +647,61 @@ void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*
             _mixer->NoteOff(static_cast<unsigned char>(keyboardChannel), found->second);
         }
     }
+}
+
+void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
+{
+    ImGui::Begin("Pattern Sequencer", nullptr, ImGuiWindowFlags_NoTitleBar);
+    {
+        ImGui::Columns(NUM_MIDI_CHANNELS);
+
+        for (int i = 0; i < count; i++)
+        {
+            ImGuiTrack(tracks[i], i);
+        }
+        ImGui::End();
+    }
+}
+
+void AppThreeDee::ImGuiTrack(Track &track, int trackIndex)
+{
+    ImGui::BeginGroup();
+    for (int patternIndex = 0; patternIndex < static_cast<int>(track._patterns.size()); patternIndex++)
+    {
+        auto &pattern = track._patterns[patternIndex];
+        for (int eventIndex = 0; eventIndex < NUM_PATTERN_EVENTS; eventIndex++)
+        {
+            auto &event = pattern._events[eventIndex];
+            ImGui::PushID((trackIndex + 1) * 1000 + (patternIndex + 1) * 100 + eventIndex);
+            bool selected = event._velocity > 0;
+            if (ImGui::Selectable("...", &selected, ImGuiSelectableFlags_None, ImVec2(ImGui::CalcItemWidth() + 18, 0)))
+            {
+                event._velocity = selected ? 100 : 0;
+            }
+            ImGui::PopID();
+        }
+    }
+    ImGui::PushID(trackIndex);
+    if (ImGui::Button("+", ImVec2(ImGui::CalcItemWidth() + 18, 0)))
+    {
+        AddPatternToTrack(trackIndex);
+    }
+    ImGui::PopID();
+    ImGui::EndGroup();
+    ImGui::NextColumn();
+}
+
+void AppThreeDee::ImGuiPattern(Pattern &pattern, int trackIndex, int patternIndex)
+{
+}
+
+void AppThreeDee::ImGuiPatternEvent(PatternEvent &event, int trackIndex, int patternIndex, int eventIndex)
+{
+}
+
+void AppThreeDee::AddPatternToTrack(int trackIndex)
+{
+    _tracks[trackIndex]._patterns.push_back(Pattern());
 }
 
 void AppThreeDee::CleanUp()

@@ -4,6 +4,8 @@
 #include "SequencerStep.h"
 #include <map>
 
+#define NUM_PATTERN_EVENTS 16
+
 class PatternEvent
 {
 public:
@@ -21,7 +23,7 @@ class Pattern
 public:
     virtual ~Pattern();
 
-    PatternEvent _events[16];
+    PatternEvent _events[NUM_PATTERN_EVENTS];
 };
 
 #endif // PATTERN_H

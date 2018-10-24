@@ -9,6 +9,7 @@
 #include <zyn.mixer/BankManager.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
+#include <zyn.seq/Track.h>
 #include <zyn.synth/FFTwrapper.h>
 
 class AppThreeDee
@@ -43,6 +44,14 @@ public:
 
     bool _isPlaying;
     int _currentStep;
+    Track _tracks[NUM_MIDI_CHANNELS];
+
+private:
+    void ImGuiSequencer(Track *tracks, int count);
+    void ImGuiTrack(Track &track, int index);
+    void ImGuiPattern(Pattern &pattern, int trackIndex, int patternIndex);
+    void ImGuiPatternEvent(PatternEvent &event, int trackIndex, int patternIndex, int eventIndex);
+    void AddPatternToTrack(int trackIndex);
 };
 
 #endif // _APP_THREE_DEE_H_

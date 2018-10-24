@@ -39,6 +39,7 @@ if(GLFW3_FOUND)
         zyn.synth
         zyn.fx
         zyn.dsp
+        zyn.seq
         zyn.common
         )
 
