@@ -48,7 +48,7 @@ public:
 
 private:
     void ImGuiSequencer(Track *tracks, int count);
-    void ImGuiTrack(Track &track, int index);
+    void ImGuiTrack(Track &track, int index, std::string const &name);
     void ImGuiPattern(Pattern &pattern, int trackIndex, int patternIndex);
     void ImGuiPatternEvent(PatternEvent &event, int trackIndex, int patternIndex, int eventIndex);
     void AddPatternToTrack(int trackIndex);
