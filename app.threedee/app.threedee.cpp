@@ -184,96 +184,6 @@ void AppThreeDee::SelectInstrument(int i)
     activeInstrument = i;
 }
 
-void AppThreeDee::StepSequencer()
-{
-    const double stepTime = 1.0 / 5.0;
-
-    static std::vector<bool> steps;
-    static int lastStepTriggered = -1;
-    static double lastTime = glfwGetTime();
-    static double noteOffAt = 0;
-    static float gate = 0.7f;
-    double currentTime = glfwGetTime();
-
-    if (currentTime - lastTime > stepTime)
-    {
-        if (_isPlaying)
-        {
-            _currentStep++;
-            if (_currentStep >= static_cast<int>(steps.size()))
-            {
-                _currentStep = 0;
-            }
-        }
-
-        lastTime += stepTime;
-    }
-
-    if (_isPlaying && lastStepTriggered != _currentStep)
-    {
-        if (steps[_currentStep])
-        {
-            _mixer->NoteOn(0, 65, 128);
-            noteOffAt = currentTime + (stepTime * gate);
-        }
-        lastStepTriggered = _currentStep;
-    }
-
-    if (noteOffAt <= currentTime)
-    {
-        _mixer->NoteOff(0, 65);
-    }
-
-    ImGui::Begin("Step Sequencer", nullptr, ImGuiWindowFlags_NoTitleBar);
-    {
-        if (ImGui::Checkbox("Play/Pause", &_isPlaying))
-        {
-            if (steps.empty())
-            {
-                _isPlaying = false;
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Stop"))
-        {
-            _isPlaying = false;
-            _currentStep = 0;
-        }
-        int stepSize = static_cast<int>(steps.size());
-        if (ImGui::InputInt("Steps", &stepSize))
-        {
-            while (!steps.empty() && static_cast<int>(steps.size()) > stepSize)
-            {
-                steps.pop_back();
-            }
-            while (static_cast<int>(steps.size()) < stepSize)
-            {
-                steps.push_back(0);
-            }
-        }
-        ImGui::SliderFloat("Gate", &gate, 0.1f, 1.0f);
-
-        ImGui::Separator();
-
-        ImGui::PushStyleColor(ImGuiCol_Border, 0xFFFFFFFF);
-        for (size_t i = 0; i < steps.size(); i++)
-        {
-            ImGui::PushID(static_cast<int>(i));
-            ImGui::PushStyleColor(ImGuiCol_Text, static_cast<int>(i) == _currentStep ? 0xFFFFFFFF : 0x00FF00FF);
-            bool b = steps[i];
-            if (ImGui::Selectable("X", &b, 0, ImVec2(50, 50)))
-            {
-                steps[i] = b;
-            }
-            ImGui::PopStyleColor();
-            ImGui::SameLine();
-            ImGui::PopID();
-        }
-        ImGui::PopStyleColor();
-        ImGui::End();
-    }
-}
-
 static int openSelectInstrument = -1;
 static int openSelectSinkSource = -1;
 
@@ -282,8 +192,6 @@ void AppThreeDee::Render()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
-    StepSequencer();
 
     ImGui::Begin("Zynadsubfx", nullptr, ImGuiWindowFlags_NoTitleBar);
     {
@@ -657,13 +565,27 @@ static int currentStep = 0;
 void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
 {
     auto spacing = 15;
+    auto eventHeight = 17;
     auto buttonWidth = 120;
     auto itemRectCursor = ImVec2();
     auto min = ImVec2();
     auto itemHeight = 0.0f;
-    ImGui::Begin("Pattern Sequencer", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+
+    // Find track track height
+    unsigned int maxPatterns = 0;
+    for (int trackIndex = 0; trackIndex < count; trackIndex++)
     {
-        ImGui::BeginChild("PatternContainer", ImVec2((buttonWidth + spacing) * count, 0), true);
+        auto patterns = tracks[trackIndex]._patterns.size() + tracks[trackIndex]._patternsStart;
+
+        if (maxPatterns < patterns)
+        {
+            maxPatterns = patterns;
+        }
+    }
+
+    ImGui::Begin("Pattern Sequencer", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    {
+        ImGui::BeginChild("PatternContainer", ImVec2((buttonWidth + spacing) * count, NUM_PATTERN_EVENTS * (eventHeight + ImGui::GetStyle().ColumnsMinSpacing + ImGui::GetStyle().ColumnsMinSpacing) * maxPatterns), true);
         ImGui::Columns(NUM_MIDI_CHANNELS);
 
         for (int trackIndex = 0; trackIndex < count; trackIndex++)
@@ -672,16 +594,16 @@ void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
             ImGui::PushID(trackIndex);
             auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(trackIndex)->Pname));
             ImGui::BeginGroup();
-            if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(buttonWidth, 0)))
+            if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(buttonWidth, eventHeight)))
             {
                 SelectInstrument(trackIndex);
                 openSelectInstrument = trackIndex;
             }
-            if (ImGui::Button("edit", ImVec2(buttonWidth, 0)))
+            if (ImGui::Button("edit", ImVec2(buttonWidth, eventHeight)))
             {
                 EditInstrument(trackIndex);
             }
-            if (ImGui::Button("+", ImVec2(buttonWidth, 0)))
+            if (ImGui::Button("+", ImVec2(buttonWidth, eventHeight)))
             {
                 AddPatternToTrack(trackIndex);
             }
@@ -695,7 +617,7 @@ void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
             int step = 0;
             for (int patternIndex = 0; patternIndex < static_cast<int>(tracks[trackIndex]._patterns.size()); patternIndex++)
             {
-                auto &pattern = tracks[trackIndex]._patterns[patternIndex];
+                auto &pattern = tracks[trackIndex]._patterns[static_cast<size_t>(patternIndex)];
                 for (int eventIndex = 0; eventIndex < NUM_PATTERN_EVENTS; eventIndex++)
                 {
                     auto &event = pattern._events[eventIndex];
@@ -707,7 +629,7 @@ void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
                         color.w = 1.0f;
                     }
                     ImGui::PushStyleColor(ImGuiCol_Text, color);
-                    if (ImGui::Selectable("...", &selected, ImGuiSelectableFlags_None, ImVec2(buttonWidth, 0)))
+                    if (ImGui::Selectable("...", &selected, ImGuiSelectableFlags_None, ImVec2(buttonWidth, eventHeight)))
                     {
                         event._velocity = selected ? 100 : 0;
                     }
@@ -739,7 +661,7 @@ void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
         auto clipMin = ImGui::GetWindowPos();
         clipMin.x += ImGui::GetStyle().FramePadding.x;
         clipMin.y += ImGui::GetStyle().FramePadding.y;
-        auto clipMax = ImVec2(clipMin.x + ImGui::GetWindowWidth() - (ImGui::GetStyle().FramePadding.x * 2),
+        auto clipMax = ImVec2(clipMin.x + ImGui::GetWindowWidth() - (ImGui::GetStyle().FramePadding.x * 2) - ImGui::GetStyle().ScrollbarSize,
                               clipMin.y + ImGui::GetWindowHeight() - (ImGui::GetStyle().FramePadding.y * 2));
 
         ImGui::End();

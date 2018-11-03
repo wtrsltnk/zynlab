@@ -40,7 +40,6 @@ public:
     // App specific
     void EditInstrument(int i);
     void SelectInstrument(int i);
-    void StepSequencer();
 
     bool _isPlaying;
     int _currentStep;
