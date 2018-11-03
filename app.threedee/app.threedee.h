@@ -42,15 +42,21 @@ public:
     void SelectInstrument(int i);
 
     bool _isPlaying;
-    int _currentStep;
+    unsigned int _currentStep;
+    float _stepLength;
     Track _tracks[NUM_MIDI_CHANNELS];
 
 private:
+    void ImGuiPlayback();
     void ImGuiSequencer(Track *tracks, int count);
     void ImGuiTrack(Track &track, int index, std::string const &name);
     void ImGuiPattern(Pattern &pattern, int trackIndex, int patternIndex);
     void ImGuiPatternEvent(PatternEvent &event, int trackIndex, int patternIndex, int eventIndex);
     void AddPatternToTrack(int trackIndex);
+    void nextStep(Track *tracks, int count);
+    unsigned int maxPatternCount(Track *tracks, int count);
+    void Stop();
+    void PlayPause();
 };
 
 #endif // _APP_THREE_DEE_H_
