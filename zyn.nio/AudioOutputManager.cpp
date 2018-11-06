@@ -58,6 +58,26 @@ AudioOutputManager::~AudioOutputManager()
     delete[] outl;
 }
 
+//perform a cheap linear interpolation for resampling
+//This will result in some distortion at frame boundries
+//returns number of samples produced
+static size_t resample(float *dest,
+                       const float *src,
+                       float s_in,
+                       float s_out,
+                       size_t elms)
+{
+    auto out_elms = static_cast<size_t>(elms * s_out / s_in);
+    float r_pos = 0.0f;
+
+    for (size_t i = 0; i < out_elms; ++i, r_pos += s_in / s_out)
+    {
+        dest[i] = interpolate(src, elms, r_pos);
+    }
+
+    return out_elms;
+}
+
 /* Sequence of a tick
  * 1) Lets remove old/stale samples
  * 2) Apply appliciable midi events
@@ -69,21 +89,41 @@ AudioOutputManager::~AudioOutputManager()
  */
 const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
 {
-    MidiInputManager &midi = MidiInputManager::Instance();
-
     removeStaleSmps();
     unsigned int i = 0;
     while (frameSize > storedSmps())
     {
         this->_audioGenerator->Lock();
-        if (!midi.Empty())
-        {
-            midi.Flush(i * this->_audioGenerator->BufferSize(), (i + 1) * this->_audioGenerator->BufferSize());
-        }
+        MidiInputManager::Instance()
+                .Flush(i * this->_audioGenerator->BufferSize(), (i + 1) * this->_audioGenerator->BufferSize());
         this->_audioGenerator->AudioOut(outl, outr);
         this->_audioGenerator->Unlock();
-        addSmps(outl, outr);
 
+        const unsigned int s_out = currentOut->SampleRate();
+        const unsigned int s_sys = this->_audioGenerator->SampleRate();
+
+        if (s_out != s_sys)
+        { //we need to resample
+            const size_t stepsLeft = resample(
+                        priBuffCurrent._left,
+                        outl, s_sys, s_out,
+                        this->_audioGenerator->BufferSize());
+
+            const size_t stepsRight = resample(
+                        priBuffCurrent._right,
+                        outr, s_sys, s_out,
+                        this->_audioGenerator->BufferSize());
+
+            priBuffCurrent._left += stepsLeft;
+            priBuffCurrent._right += stepsRight;
+        }
+        else
+        { //just copy the samples
+            memcpy(priBuffCurrent._left, outl, this->_audioGenerator->BufferSizeInBytes());
+            memcpy(priBuffCurrent._right, outr, this->_audioGenerator->BufferSizeInBytes());
+            priBuffCurrent._left += this->_audioGenerator->BufferSize();
+            priBuffCurrent._right += this->_audioGenerator->BufferSize();
+        }
         //allow wave file to syphon off stream
         //        wave->push(Stereo<float *>(outl, outr), synth->buffersize);
 
@@ -137,52 +177,6 @@ std::string AudioOutputManager::GetSink() const
     std::cerr << "BUG: No current output in AudioOutputManager " << __LINE__ << std::endl;
 
     return "ERROR";
-}
-
-//perform a cheap linear interpolation for resampling
-//This will result in some distortion at frame boundries
-//returns number of samples produced
-static size_t resample(float *dest,
-                       const float *src,
-                       float s_in,
-                       float s_out,
-                       size_t elms)
-{
-    auto out_elms = static_cast<size_t>(elms * s_out / s_in);
-    float r_pos = 0.0f;
-
-    for (size_t i = 0; i < out_elms; ++i, r_pos += s_in / s_out)
-    {
-        dest[i] = interpolate(src, elms, r_pos);
-    }
-
-    return out_elms;
-}
-
-void AudioOutputManager::addSmps(float *l, float *r)
-{
-    const unsigned int s_out = currentOut->SampleRate();
-    const unsigned int s_sys = this->_audioGenerator->SampleRate();
-
-    if (s_out != s_sys)
-    { //we need to resample
-        const size_t steps = resample(priBuffCurrent._left,
-                                      l,
-                                      s_sys,
-                                      s_out,
-                                      this->_audioGenerator->BufferSize());
-        resample(priBuffCurrent._right, r, s_sys, s_out, this->_audioGenerator->BufferSize());
-
-        priBuffCurrent._left += steps;
-        priBuffCurrent._right += steps;
-    }
-    else
-    { //just copy the samples
-        memcpy(priBuffCurrent._left, l, this->_audioGenerator->BufferSizeInBytes());
-        memcpy(priBuffCurrent._right, r, this->_audioGenerator->BufferSizeInBytes());
-        priBuffCurrent._left += this->_audioGenerator->BufferSize();
-        priBuffCurrent._right += this->_audioGenerator->BufferSize();
-    }
 }
 
 void AudioOutputManager::removeStaleSmps()

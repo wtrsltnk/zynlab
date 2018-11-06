@@ -125,8 +125,8 @@ if(OssEnable)
 endif()
 
 target_link_libraries(zyn.nio
-    ${zyn.common}
-    ${zyn.net}
+    zyn.common
+    zyn.net
     winmm
     )
 

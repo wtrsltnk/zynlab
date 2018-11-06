@@ -13,6 +13,8 @@ add_library(zyn.seq STATIC
     SequencerStrip.h
     Track.cpp
     Track.h
+    Tracker.cpp
+    Tracker.h
     )
 
 target_include_directories(zyn.seq
@@ -22,6 +24,7 @@ target_include_directories(zyn.seq
 
 target_link_libraries(zyn.seq
     zyn.common
+    zyn.nio
     )
 
 target_compile_features(zyn.seq

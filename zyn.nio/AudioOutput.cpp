@@ -40,7 +40,7 @@ void AudioOutput::SetSamplerate(unsigned int sampleRate)
     _sampleRate = sampleRate;
 }
 
-unsigned int AudioOutput::SampleRate()
+unsigned int AudioOutput::SampleRate() const
 {
     return _sampleRate;
 }
@@ -50,7 +50,7 @@ void AudioOutput::SetBufferSize(unsigned int bufferSize)
     _bufferSize = bufferSize;
 }
 
-unsigned int AudioOutput::BufferSize()
+unsigned int AudioOutput::BufferSize() const
 {
     return _bufferSize;
 }

@@ -1,8 +1,6 @@
 #include "MidiInputManager.h"
 #include "EngineManager.h"
 #include "MidiInput.h"
-#include <zyn.common/globals.h>
-
 #include <iostream>
 #include <utility>
 
@@ -77,6 +75,16 @@ MidiInputManager::MidiInputManager(IAudioGenerator *audioGenerator)
 
 MidiInputManager::~MidiInputManager() = default;
 
+void MidiInputManager::AddHook(IMidiHook *hook)
+{
+    _midiHooks.insert(hook);
+}
+
+void MidiInputManager::RemoveHook(IMidiHook *hook)
+{
+    _midiHooks.erase(hook);
+}
+
 void MidiInputManager::PutEvent(MidiEvent ev)
 {
     if (_queue.push(ev)) //check for error
@@ -91,6 +99,16 @@ void MidiInputManager::PutEvent(MidiEvent ev)
 
 void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
 {
+    for (auto hook : _midiHooks)
+    {
+        hook->Trigger(frameStart, frameStop);
+    }
+
+    if (Empty())
+    {
+        return;
+    }
+
     MidiEvent ev;
     while (!_work.trywait())
     {
@@ -99,7 +117,6 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
         {
             //Back out of transaction
             _work.post();
-            //printf("%d vs [%d..%d]\n",ev.time, frameStart, frameStop);
             break;
         }
         _queue.pop(ev);
@@ -110,27 +127,39 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
             {
                 if (ev.value)
                 {
-                    this->_audioGenerator->NoteOn(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
+                    this->_audioGenerator->NoteOn(
+                        static_cast<unsigned char>(ev.channel),
+                        static_cast<unsigned char>(ev.num),
+                        static_cast<unsigned char>(ev.value));
                 }
                 else
                 {
-                    this->_audioGenerator->NoteOff(static_cast<char>(ev.channel), static_cast<char>(ev.num));
+                    this->_audioGenerator->NoteOff(
+                        static_cast<unsigned char>(ev.channel),
+                        static_cast<unsigned char>(ev.num));
                 }
                 break;
             }
             case MidiEventTypes::M_CONTROLLER:
             {
-                this->_audioGenerator->SetController(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
+                this->_audioGenerator->SetController(
+                    static_cast<unsigned char>(ev.channel),
+                    static_cast<char>(ev.num),
+                    static_cast<char>(ev.value));
                 break;
             }
             case MidiEventTypes::M_PGMCHANGE:
             {
-                this->_audioGenerator->SetProgram(static_cast<char>(ev.channel), ev.num);
+                this->_audioGenerator->SetProgram(
+                    static_cast<unsigned char>(ev.channel), ev.num);
                 break;
             }
             case MidiEventTypes::M_PRESSURE:
             {
-                this->_audioGenerator->PolyphonicAftertouch(static_cast<char>(ev.channel), static_cast<char>(ev.num), static_cast<char>(ev.value));
+                this->_audioGenerator->PolyphonicAftertouch(
+                    static_cast<unsigned char>(ev.channel),
+                    static_cast<unsigned char>(ev.num),
+                    static_cast<unsigned char>(ev.value));
                 break;
             }
         }

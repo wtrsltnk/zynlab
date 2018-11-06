@@ -11,17 +11,10 @@
 #include <map>
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
-    : _mixer(mixer), _window(window), _display_w(800), _display_h(600), _isPlaying(false), _currentStep(0), _stepLength(4.0f)
+    : _mixer(mixer), _window(window), _display_w(800), _display_h(600),
+      _tracker(mixer->GetSettings())
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
-
-    Pattern p1;
-    _tracks[0]._patterns.push_back(p1);
-    Pattern p2;
-    _tracks[0]._patterns.push_back(p2);
-    Pattern p3;
-    _tracks[0]._patterns.push_back(p3);
-    _tracks[1]._patterns.push_back(p3);
 }
 
 AppThreeDee::~AppThreeDee()
@@ -73,6 +66,8 @@ bool AppThreeDee::SetUp()
 
     _mixer->GetBankManager()->RescanForBanks();
 
+    _tracker.SetBpm(120);
+    MidiInputManager::Instance().AddHook(&_tracker);
     return true;
 }
 
@@ -322,7 +317,7 @@ void AppThreeDee::Render()
     }
     ImGui::End();
 
-    ImGuiSequencer(_tracks, NUM_MIDI_CHANNELS);
+    ImGuiSequencer(_tracker.Tracks(), NUM_MIDI_CHANNELS);
 
     if (showInstrumentEditor)
     {
@@ -562,51 +557,21 @@ void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*
     }
 }
 
-void AppThreeDee::nextStep(Track *tracks, int count)
-{
-    if (!_isPlaying)
-    {
-        return;
-    }
-
-    _currentStep++;
-
-    auto maxPatterns = maxPatternCount(tracks, count);
-
-    if (_currentStep >= (maxPatterns * NUM_PATTERN_EVENTS))
-    {
-        _currentStep = 0;
-    }
-
-    // todo check for notes anb play them
-}
-
-unsigned int AppThreeDee::maxPatternCount(Track *tracks, int count)
-{
-    // Find track track height
-    unsigned int maxPatterns = 0;
-    for (int trackIndex = 0; trackIndex < count; trackIndex++)
-    {
-        auto patterns = tracks[trackIndex]._patterns.size() + tracks[trackIndex]._patternsStart;
-
-        if (maxPatterns < patterns)
-        {
-            maxPatterns = patterns;
-        }
-    }
-
-    return maxPatterns;
-}
-
 void AppThreeDee::Stop()
 {
-    _isPlaying = false;
-    _currentStep = 0;
+    _tracker.Stop();
 }
 
 void AppThreeDee::PlayPause()
 {
-    _isPlaying = !_isPlaying;
+    if (_tracker.IsPlaying())
+    {
+        _tracker.Pause();
+    }
+    else
+    {
+        _tracker.Play();
+    }
 }
 
 void AppThreeDee::ImGuiPlayback()
@@ -620,7 +585,7 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        if (_isPlaying)
+        if (_tracker.IsPlaying())
         {
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -640,22 +605,14 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        MyKnob("Speed", &_stepLength, 1.0f, 120.0f, ImVec2(30.0f, 30.0f));
+        //MyKnob("Speed", &_stepLength, 1.0f, 120.0f, ImVec2(30.0f, 30.0f));
+
         ImGui::End();
     }
 }
 
 void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
 {
-    static double lastTime = glfwGetTime();
-    double currentTime = glfwGetTime();
-
-    if (currentTime - lastTime > static_cast<double>(1.0f / _stepLength))
-    {
-        lastTime += static_cast<double>(1.0f / _stepLength);
-        nextStep(tracks, count);
-    }
-
     auto spacing = 15;
     auto eventHeight = 17;
     auto buttonWidth = 120;
@@ -663,7 +620,7 @@ void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
     auto min = ImVec2();
     auto itemHeight = 0.0f;
 
-    auto maxPatterns = maxPatternCount(tracks, count);
+    auto maxPatterns = _tracker.maxPatternCount();
 
     ImGui::Begin("Pattern Sequencer", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_AlwaysVerticalScrollbar);
     {
@@ -733,10 +690,12 @@ void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
                     if (ImGui::Selectable("...", &selected, ImGuiSelectableFlags_None, ImVec2(buttonWidth, eventHeight)))
                     {
                         event._velocity = selected ? 100 : 0;
+                        event._note = selected ? 65 : 0;
+                        event._gate = 60;
                     }
                     ImGui::PopStyleColor();
                     ImGui::PopID();
-                    if (step == _currentStep)
+                    if (step == _tracker.CurrentStep())
                     {
                         itemRectCursor = ImGui::GetItemRectMin();
                         itemHeight = ImGui::GetItemRectSize().y;
@@ -774,7 +733,7 @@ void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
 
 void AppThreeDee::AddPatternToTrack(int trackIndex)
 {
-    _tracks[trackIndex]._patterns.push_back(Pattern());
+    _tracker.Tracks()[trackIndex]._patterns.push_back(Pattern());
 }
 
 void AppThreeDee::CleanUp()

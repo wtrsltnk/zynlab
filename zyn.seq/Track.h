@@ -12,6 +12,8 @@ public:
 
     unsigned int _patternsStart;
     std::vector<Pattern> _patterns;
+
+    PatternEvent *GetPatternEventByStep(unsigned int step);
 };
 
 #endif // TRACK_H

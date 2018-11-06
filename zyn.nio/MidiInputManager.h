@@ -4,6 +4,7 @@
 #include "SafeQueue.h"
 #include "ZynSema.h"
 #include <string>
+#include <set>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/globals.h>
 
@@ -39,20 +40,20 @@ public:
     static void DestroyInstance();
     virtual ~MidiInputManager();
 
+    void AddHook(IMidiHook *hook);
+    void RemoveHook(IMidiHook *hook);
+
     void PutEvent(MidiEvent ev);
-
-    /**Flush the Midi Queue*/
     void Flush(unsigned int frameStart, unsigned int frameStop);
-
     bool Empty() const;
 
     bool SetSource(std::string const &name);
-
     std::string GetSource() const;
 
     friend class EngineManager;
 
 private:
+    std::set<IMidiHook *> _midiHooks;
     SafeQueue<MidiEvent> _queue;
     mutable ZynSema _work;
     class MidiInput *_current;

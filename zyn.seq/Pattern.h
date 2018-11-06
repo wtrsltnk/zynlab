@@ -1,7 +1,6 @@
 #ifndef PATTERN_H
 #define PATTERN_H
 
-#include "SequencerStep.h"
 #include <map>
 
 #define NUM_PATTERN_EVENTS 16

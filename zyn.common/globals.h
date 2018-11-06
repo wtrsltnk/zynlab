@@ -375,4 +375,12 @@ public:
     virtual class IFFTwrapper *GetFFT() = 0;
 };
 
+class IMidiHook
+{
+public:
+    virtual ~IMidiHook();
+
+    virtual void Trigger(unsigned int frameStart, unsigned int frameStop) = 0;
+};
+
 #endif

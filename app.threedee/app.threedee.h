@@ -10,6 +10,7 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
 #include <zyn.seq/Track.h>
+#include <zyn.seq/Tracker.h>
 #include <zyn.synth/FFTwrapper.h>
 
 class AppThreeDee
@@ -41,10 +42,7 @@ public:
     void EditInstrument(int i);
     void SelectInstrument(int i);
 
-    bool _isPlaying;
-    unsigned int _currentStep;
-    float _stepLength;
-    Track _tracks[NUM_MIDI_CHANNELS];
+    Tracker _tracker;
 
 private:
     void ImGuiPlayback();
@@ -53,8 +51,6 @@ private:
     void ImGuiPattern(Pattern &pattern, int trackIndex, int patternIndex);
     void ImGuiPatternEvent(PatternEvent &event, int trackIndex, int patternIndex, int eventIndex);
     void AddPatternToTrack(int trackIndex);
-    void nextStep(Track *tracks, int count);
-    unsigned int maxPatternCount(Track *tracks, int count);
     void Stop();
     void PlayPause();
 };

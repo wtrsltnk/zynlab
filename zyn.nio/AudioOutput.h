@@ -39,13 +39,13 @@ public:
 
     /**Gets the Samples required per Out of this driver
          * not a realtime opperation */
-    unsigned int SampleRate();
+    unsigned int SampleRate() const;
 
     /**Sets the Frame Size for output*/
     void SetBufferSize(unsigned int _bufferSize);
 
     /**Gets the Frame Size for output*/
-    unsigned int BufferSize();
+    unsigned int BufferSize() const;
 
     virtual void SetAudioEnabled(bool nval);
     virtual bool IsAudioEnabled() const = 0;

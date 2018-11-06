@@ -97,7 +97,6 @@ bool SdlEngine::IsAudioEnabled() const
     return this->_dev;
 }
 
-static double v = 0;
 void SdlEngine::process(float *stream, int len)
 {
     const Stereo<float *> smp = NextSample();
