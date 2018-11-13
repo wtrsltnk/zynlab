@@ -5,6 +5,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <imgui.h>
+
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>
 #include <zyn.mixer/Mixer.h>
@@ -12,6 +14,13 @@
 #include <zyn.seq/Track.h>
 #include <zyn.seq/Tracker.h>
 #include <zyn.synth/FFTwrapper.h>
+
+extern bool MyKnob(const char *label, float *p_value,
+                   float v_min, float v_max,
+                   ImVec2 const &size);
+extern bool MyKnobUchar(const char *label, unsigned char *p_value,
+                        unsigned char v_min, unsigned char v_max,
+                        ImVec2 const &size);
 
 class AppThreeDee
 {
@@ -40,6 +49,7 @@ public:
 public:
     // App specific
     void EditInstrument(int i);
+    void EditADSynth(int i);
     void SelectInstrument(int i);
 
     Tracker _tracker;
@@ -53,6 +63,21 @@ private:
     void AddPatternToTrack(int trackIndex);
     void Stop();
     void PlayPause();
+
+    // AD note
+    void ADNoteEditor(ADnoteParameters *parameters);
+    void ADNoteEditorAmplitude(ADnoteParameters *parameters);
+    void ADNoteEditorFilter(ADnoteParameters *parameters);
+    void ADNoteEditorFrequency(ADnoteParameters *parameters);
+
+    // LFO
+    void LFO(class LFOParams *parameters);
+
+    // Envelope
+    void AmplitudeEnvelope(class EnvelopeParams *envelope);
+    void FrequencyEnvelope(class EnvelopeParams *envelope);
+    void FilterEnvelope(class EnvelopeParams *envelope);
+    void BandWidthEnvelope(class EnvelopeParams *envelope);
 };
 
 #endif // _APP_THREE_DEE_H_

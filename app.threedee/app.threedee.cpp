@@ -3,8 +3,6 @@
 #include <zyn.mixer/Channel.h>
 #include <zyn.synth/ADnoteParams.h>
 
-#include <imgui.h>
-// make sure imgui is above the examples headersF
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 #include <algorithm>
@@ -74,7 +72,7 @@ bool AppThreeDee::SetUp()
 // Implementing a simple custom widget using the public API.
 // You may also use the <imgui_internal.h> API to get raw access to more data/helpers, however the internal API isn't guaranteed to be forward compatible.
 // FIXME: Need at least proper label centering + clipping (internal functions RenderTextClipped provides both but api is flaky/temporary)
-static bool MyKnob(const char *label, float *p_value, float v_min, float v_max, ImVec2 const &size)
+bool MyKnob(const char *label, float *p_value, float v_min, float v_max, ImVec2 const &size)
 {
     ImGuiIO &io = ImGui::GetIO();
     ImGuiStyle &style = ImGui::GetStyle();
@@ -139,7 +137,7 @@ static bool MyKnob(const char *label, float *p_value, float v_min, float v_max, 
     return value_changed;
 }
 
-static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
+bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
 {
     float val = (p_value[0]) / 128.0f;
 
@@ -156,6 +154,7 @@ static bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char
 static ImVec4 clear_color = ImColor(114, 144, 154);
 static int activeInstrument = 0;
 static bool showInstrumentEditor = false;
+static bool showAddSynthEditor = false;
 static bool show_simple_user_interface = false;
 static int keyboardChannel = 0;
 
@@ -172,6 +171,19 @@ void AppThreeDee::EditInstrument(int i)
 
     activeInstrument = i;
     showInstrumentEditor = true;
+}
+
+void AppThreeDee::EditADSynth(int i)
+{
+    if (i < 0 || i >= NUM_MIXER_CHANNELS)
+    {
+        return;
+    }
+
+    _mixer->GetChannel(i)->Penabled = true;
+
+    activeInstrument = i;
+    showAddSynthEditor = true;
 }
 
 void AppThreeDee::SelectInstrument(int i)
@@ -319,6 +331,15 @@ void AppThreeDee::Render()
 
     ImGuiSequencer(_tracker.Tracks(), NUM_MIDI_CHANNELS);
 
+    if (showAddSynthEditor)
+    {
+        if (ImGui::Begin("Instrument AD Synth editor", &showAddSynthEditor))
+        {
+            ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
+            ImGui::End();
+        }
+    }
+
     if (showInstrumentEditor)
     {
         if (ImGui::Begin("Instrument editor", &showInstrumentEditor))
@@ -339,6 +360,11 @@ void AppThreeDee::Render()
             {
                 _mixer->GetChannel(activeInstrument)->_instruments[0].Padenabled = add;
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Edit"))
+            {
+                EditADSynth(activeInstrument);
+            }
 
             bool sub = _mixer->GetChannel(activeInstrument)->_instruments[0].Psubenabled;
             if (ImGui::Checkbox("Sub", &sub))
@@ -350,11 +376,6 @@ void AppThreeDee::Render()
             if (ImGui::Checkbox("Pad", &pad))
             {
                 _mixer->GetChannel(activeInstrument)->_instruments[0].Ppadenabled = pad;
-            }
-
-            if (ImGui::Button("Edit"))
-            {
-                EditInstrument(activeInstrument);
             }
 
             if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname)))

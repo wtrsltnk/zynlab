@@ -18,6 +18,16 @@ if(GLFW3_FOUND)
         imgui/imgui_widgets.cpp
         imgui/examples/imgui_impl_opengl3.cpp
         imgui/examples/imgui_impl_glfw.cpp
+        ui/adnote.cpp
+        ui/effect.cpp
+        ui/envelope.cpp
+        ui/filter.cpp
+        ui/lfo.cpp
+        ui/microtonal.cpp
+        ui/oscilgen.cpp
+        ui/padnote.cpp
+        ui/resonance.cpp
+        ui/subnote.cpp
         )
 
     target_include_directories(app.threedee
