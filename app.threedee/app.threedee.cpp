@@ -67,7 +67,7 @@ bool AppThreeDee::SetUp()
     _mixer->GetBankManager()->RescanForBanks();
 
     _tracker.SetBpm(120);
-    MidiInputManager::Instance().AddHook(&_tracker);
+
     return true;
 }
 

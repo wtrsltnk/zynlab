@@ -9,19 +9,19 @@
 struct TrackerMidiEvent
 {
     MidiEvent event;
-    unsigned int trackerFrame;
+    float trackerFrame;
 };
 
-class Tracker : public IMidiHook
+class Tracker
 {
-    Track _tracks[NUM_MIDI_CHANNELS];
     SystemSettings *_settings;
+    Track _tracks[NUM_MIDI_CHANNELS];
     unsigned int _lastFrame;
     bool _isPlaying;
     unsigned int _currentStep;
     unsigned int _bpm;
-    unsigned int _framesPerStep;
-    unsigned int _lastFramesInStep;
+    float _stepTime;
+
     std::vector<TrackerMidiEvent> _trackerEvents;
 
     void NextStep();
@@ -42,8 +42,6 @@ public:
     unsigned int maxPatternCount();
 
     Track *Tracks();
-
-    virtual void Trigger(unsigned int frameStart, unsigned int frameStop);
 };
 
 #endif // TRACKER_H

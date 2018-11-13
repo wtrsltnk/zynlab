@@ -31,5 +31,3 @@ bool IBankManager::InstrumentBank::operator<(const InstrumentBank &b) const
 {
     return name < b.name;
 }
-
-IMidiHook::~IMidiHook() = default;

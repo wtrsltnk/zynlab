@@ -2,27 +2,10 @@
 #include <algorithm>
 
 Tracker::Tracker(SystemSettings *settings)
-    : _settings(settings), _lastFrame(0), _isPlaying(false), _currentStep(0), _framesPerStep(0), _lastFramesInStep(0)
+    : _settings(settings), _lastFrame(0), _isPlaying(false), _currentStep(0)
 {}
 
 Tracker::~Tracker() = default;
-
-void Tracker::Trigger(unsigned int frameStart, unsigned int frameStop)
-{
-    if (!_isPlaying)
-    {
-        return;
-    }
-
-    _lastFramesInStep += (frameStop - frameStart);
-    while (_lastFramesInStep > _framesPerStep)
-    {
-        NextStep();
-        _lastFramesInStep -= _framesPerStep;
-    }
-
-    _lastFrame += (frameStop - frameStart);
-}
 
 unsigned int Tracker::maxPatternCount()
 {
@@ -41,7 +24,18 @@ unsigned int Tracker::maxPatternCount()
     return maxPatterns * NUM_PATTERN_EVENTS;
 }
 
-bool myfunction(TrackerMidiEvent &i, TrackerMidiEvent &j) { return (i.trackerFrame > j.trackerFrame); }
+#define EPSILON  0.0001f
+
+bool myfunction(TrackerMidiEvent &i, TrackerMidiEvent &j)
+{
+    // this will make sure 'note-on' will be fired before 'note-off' when times are exactly the same
+    if (i.trackerFrame - j.trackerFrame < EPSILON)
+    {
+        return i.event.value > j.event.value;
+    }
+
+    return (i.trackerFrame > j.trackerFrame);
+}
 
 void Tracker::NextStep()
 {
@@ -63,7 +57,7 @@ void Tracker::NextStep()
         }
 
         TrackerMidiEvent e1;
-        e1.trackerFrame = _currentStep * _framesPerStep;
+        e1.trackerFrame = _currentStep;
         e1.event.channel = i;
         e1.event.num = event->_note;
         e1.event.time = 0;
@@ -71,7 +65,7 @@ void Tracker::NextStep()
         _trackerEvents.push_back(e1);
 
         TrackerMidiEvent e2;
-        e2.trackerFrame = (_currentStep * _framesPerStep) + _framesPerStep;
+        e2.trackerFrame = _currentStep + _stepTime;
         e2.event.channel = i;
         e2.event.num = event->_note;
         e2.event.time = 0;
@@ -83,7 +77,7 @@ void Tracker::NextStep()
 
     while (!_trackerEvents.empty())
     {
-        if (_trackerEvents.back().trackerFrame > _lastFrame)
+        if (_trackerEvents.back().trackerFrame >= _lastFrame)
         {
             break;
         }
@@ -97,7 +91,7 @@ void Tracker::SetBpm(unsigned int bpm)
 {
     _bpm = bpm;
     auto stepsPerSecond = float(_bpm) / 60.0f;
-    _framesPerStep = static_cast<unsigned int>(float(_settings->samplerate) / stepsPerSecond);
+    _stepTime = 1.0f / stepsPerSecond;
 }
 
 void Tracker::Play()

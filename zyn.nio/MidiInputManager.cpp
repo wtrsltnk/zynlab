@@ -75,16 +75,6 @@ MidiInputManager::MidiInputManager(IAudioGenerator *audioGenerator)
 
 MidiInputManager::~MidiInputManager() = default;
 
-void MidiInputManager::AddHook(IMidiHook *hook)
-{
-    _midiHooks.insert(hook);
-}
-
-void MidiInputManager::RemoveHook(IMidiHook *hook)
-{
-    _midiHooks.erase(hook);
-}
-
 void MidiInputManager::PutEvent(MidiEvent ev)
 {
     if (_queue.push(ev)) //check for error
@@ -99,11 +89,6 @@ void MidiInputManager::PutEvent(MidiEvent ev)
 
 void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
 {
-    for (auto hook : _midiHooks)
-    {
-        hook->Trigger(frameStart, frameStop);
-    }
-
     if (Empty())
     {
         return;
