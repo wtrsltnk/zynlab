@@ -2,15 +2,15 @@
 
 #include <zyn.synth/LFOParams.h>
 
-void AppThreeDee::LFO(LFOParams *params)
+void AppThreeDee::LFO(char const *label, LFOParams *params)
 {
-    ImGui::BeginChild("Amplitude LFO", ImVec2(270, 80), true);
+    ImGui::BeginChild(label, ImVec2(270, 80), true);
 
     ImGui::Columns(2);
     ImGui::SetColumnWidth(0, 190);
     ImGui::SetColumnWidth(1, 80);
 
-    ImGui::Text("Amplitude LFO");
+    ImGui::Text(label);
 
     auto freq = params->Pfreq;
     if (MyKnob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(30, 30)))

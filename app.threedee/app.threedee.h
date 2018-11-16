@@ -71,7 +71,10 @@ private:
     void ADNoteEditorFrequency(ADnoteParameters *parameters);
 
     // LFO
-    void LFO(class LFOParams *parameters);
+    void LFO(char const *label, class LFOParams *parameters);
+
+    // Filter
+    void FilterParameters(class FilterParams *parameters);
 
     // Envelope
     void AmplitudeEnvelope(class EnvelopeParams *envelope);
