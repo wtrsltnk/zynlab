@@ -55,7 +55,7 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
         n.padpars = nullptr;
     }
 
-    _instruments[0].adpars = new ADnoteParameters(_mixer);
+    _instruments[0].adpars = new ADnoteParameters(_mixer->GetSettings(), _mixer->GetFFT());
     _instruments[0].subpars = new SUBnoteParameters(_mixer);
     _instruments[0].padpars = new PADnoteParameters(mixer);
 
@@ -103,6 +103,9 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
     lastlegatomodevalid = false; // To store previous legatomodevalid value.
 
     Defaults();
+
+    _tmpoutr = new float[_synth->buffersize];
+    _tmpoutl = new float[_synth->buffersize];
 }
 
 void Channel::Lock()
@@ -253,6 +256,8 @@ Channel::~Channel()
         delete[] partfxinputl[n];
         delete[] partfxinputr[n];
     }
+    delete []_tmpoutl;
+    delete []_tmpoutr;
 }
 
 /*
@@ -1027,8 +1032,6 @@ void Channel::AllNotesOff()
 
 void Channel::RunNote(unsigned int k)
 {
-    float *tmpoutr = new float[_synth->buffersize];
-    float *tmpoutl = new float[_synth->buffersize];
     unsigned noteplay = 0;
 
     for (int item = 0; item < _channelNotes[k].itemsplaying; ++item)
@@ -1059,7 +1062,7 @@ void Channel::RunNote(unsigned int k)
             }
             noteplay++;
 
-            (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
+            (*note)->noteout(&_tmpoutl[0], &_tmpoutr[0]);
 
             if ((*note)->finished())
             {
@@ -1068,14 +1071,11 @@ void Channel::RunNote(unsigned int k)
             }
             for (unsigned int i = 0; i < _synth->buffersize; ++i)
             { //add the note to part(mix)
-                partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
-                partfxinputr[sendcurrenttofx][i] += tmpoutr[i];
+                partfxinputl[sendcurrenttofx][i] += _tmpoutl[i];
+                partfxinputr[sendcurrenttofx][i] += _tmpoutr[i];
             }
         }
     }
-
-    delete[] tmpoutl;
-    delete[] tmpoutr;
 
     //Kill note if there is no synth on that note
     if (noteplay == 0)
@@ -1203,7 +1203,7 @@ void Channel::setkititemstatus(int kititem, int Penabled_)
     else
     {
         if (_instruments[kititem].adpars == nullptr)
-            _instruments[kititem].adpars = new ADnoteParameters(_mixer);
+            _instruments[kititem].adpars = new ADnoteParameters(_mixer->GetSettings(), _mixer->GetFFT());
         if (_instruments[kititem].subpars == nullptr)
             _instruments[kititem].subpars = new SUBnoteParameters(_mixer);
         if (_instruments[kititem].padpars == nullptr)

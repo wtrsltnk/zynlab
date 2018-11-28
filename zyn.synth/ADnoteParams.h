@@ -292,11 +292,11 @@ struct ADnoteVoiceParam
 
 class ADnoteParameters : public Presets
 {
-    SystemSettings *_synth;
-    IFFTwrapper *fft;
+    SystemSettings *_settings;
+    IFFTwrapper *_fft;
 
 public:
-    ADnoteParameters(IMixer *mixer);
+    ADnoteParameters(SystemSettings *settings, IFFTwrapper *fft);
     virtual ~ADnoteParameters();
 
     ADnoteGlobalParam GlobalPar;

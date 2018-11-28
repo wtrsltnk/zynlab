@@ -79,6 +79,8 @@ public:
 /** Channel implementation*/
 class Channel
 {
+    float *_tmpoutr;
+    float *_tmpoutl;
 public:
     /**Constructor*/
     Channel();
