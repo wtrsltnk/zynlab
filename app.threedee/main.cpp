@@ -115,6 +115,7 @@ int main(int /*argc*/, char * /*argv*/ [])
             app.Render();
 
             glfwSwapBuffers(window);
+            Sleep(50);
         }
         app.CleanUp();
     }

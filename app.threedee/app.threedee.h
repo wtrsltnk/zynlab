@@ -65,6 +65,7 @@ private:
     void PlayPause();
 
     // AD note
+    bool showAddSynthEditor;
     void ADNoteEditor(ADnoteParameters *parameters);
     void ADNoteEditorAmplitude(ADnoteParameters *parameters);
     void ADNoteEditorFilter(ADnoteParameters *parameters);

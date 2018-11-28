@@ -10,7 +10,7 @@
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _display_w(800), _display_h(600),
-      _tracker(mixer->GetSettings())
+      _tracker(mixer->GetSettings()), showAddSynthEditor(false)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -154,7 +154,6 @@ bool MyKnobUchar(const char *label, unsigned char *p_value, unsigned char v_min,
 static ImVec4 clear_color = ImColor(114, 144, 154);
 static int activeInstrument = 0;
 static bool showInstrumentEditor = false;
-static bool showAddSynthEditor = false;
 static bool show_simple_user_interface = false;
 static int keyboardChannel = 0;
 
@@ -333,11 +332,7 @@ void AppThreeDee::Render()
 
     if (showAddSynthEditor)
     {
-        if (ImGui::Begin("Instrument AD Synth editor", &showAddSynthEditor))
-        {
-            ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
-            ImGui::End();
-        }
+        ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
     }
 
     if (showInstrumentEditor)

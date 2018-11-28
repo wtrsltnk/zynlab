@@ -4,19 +4,23 @@
 
 void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
 {
-    ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 300);
-    ImGui::SetColumnWidth(1, 300);
+    if (ImGui::Begin("Instrument AD Synth editor", &showAddSynthEditor, ImVec2(600, 520), -1.0f, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings))
+    {
+        ImGui::Columns(2);
+        ImGui::SetColumnWidth(0, 300);
+        ImGui::SetColumnWidth(1, 300);
 
-    ADNoteEditorAmplitude(parameters);
+        ADNoteEditorAmplitude(parameters);
 
-    ImGui::NextColumn();
+        ImGui::NextColumn();
 
-    ADNoteEditorFilter(parameters);
+        ADNoteEditorFilter(parameters);
 
-    ImGui::Columns(1);
+        ImGui::Columns(1);
 
-    ADNoteEditorFrequency(parameters);
+        ADNoteEditorFrequency(parameters);
+        ImGui::End();
+    }
 }
 
 void AppThreeDee::ADNoteEditorAmplitude(ADnoteParameters *parameters)
@@ -94,7 +98,7 @@ void AppThreeDee::ADNoteEditorFilter(ADnoteParameters *parameters)
 
 void AppThreeDee::ADNoteEditorFrequency(ADnoteParameters *parameters)
 {
-    ImGui::BeginChild("Frequency", ImVec2(584, 200), true);
+    ImGui::BeginChild("Frequency", ImVec2(584, 180), true);
 
     ImGui::Text("FREQUENCY");
 
