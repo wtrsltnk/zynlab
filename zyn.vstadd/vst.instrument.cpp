@@ -4,8 +4,8 @@
 #include <zyn.common/Config.h>
 #include <zyn.common/globals.h>
 #include <zyn.mixer/Channel.h>
-#include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/ADnote.h>
+#include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/Controller.h>
 #include <zyn.synth/FFTwrapper.h>
 
@@ -72,8 +72,8 @@ Zynstrument::Zynstrument(audioMasterCallback audioMaster)
     adpars = new ADnoteParameters(&settings, fft);
     adpars->Defaults();
 
-    _tmpoutr = new float[settings.buffersize];
-    _tmpoutl = new float[settings.buffersize];
+    _tmpoutr = new float[settings.buffersize * 4];
+    _tmpoutl = new float[settings.buffersize * 4];
 }
 
 Zynstrument::~Zynstrument()
@@ -117,17 +117,49 @@ void Zynstrument::getProgramName(char *name)
     }
 }
 
+static VstInt32 last_generatedBufferSize = 0;
+static VstInt32 last_sampleFrames = 0;
+
 void Zynstrument::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
 {
     if (playingNote == nullptr)
     {
+        for (int i = 0; i < settings.buffersize * 4; i++)
+        {
+            _tmpoutl[i] = _tmpoutr[i] = 0;
+        }
+        outputs[0] = &_tmpoutl[0];
+        outputs[1] = &_tmpoutr[0];
+
         return;
     }
 
-    playingNote->noteout(&_tmpoutl[0], &_tmpoutr[0]);
+    if (last_generatedBufferSize != 0 && last_sampleFrames != 0)
+    {
+        auto offset = last_generatedBufferSize - last_sampleFrames;
+        for (int i = 0; i < offset; i++)
+        {
+            _tmpoutl[i] = _tmpoutl[sampleFrames + i];
+            _tmpoutr[i] = _tmpoutr[sampleFrames + i];
+        }
+
+        for (int i = last_sampleFrames; i < settings.buffersize * 4; i++)
+        {
+            _tmpoutl[i] = _tmpoutr[i] = 0;
+        }
+        last_generatedBufferSize = offset;
+    }
+
+    while (last_generatedBufferSize < sampleFrames)
+    {
+        playingNote->noteout(&_tmpoutl[last_generatedBufferSize], &_tmpoutr[last_generatedBufferSize]);
+        last_generatedBufferSize += settings.buffersize;
+    }
 
     outputs[0] = &_tmpoutl[0];
     outputs[1] = &_tmpoutr[0];
+
+    last_sampleFrames = sampleFrames;
 
     if (playingNote->finished())
     {
