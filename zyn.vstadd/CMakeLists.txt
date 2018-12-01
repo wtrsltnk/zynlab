@@ -9,7 +9,6 @@ add_library(zyn.vstadd SHARED
 	)
 
 target_link_libraries(zyn.vstadd
-	zyn.mixer
 	zyn.synth
 	zyn.fx
 	zyn.dsp

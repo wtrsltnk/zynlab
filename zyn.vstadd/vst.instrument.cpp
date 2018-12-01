@@ -239,7 +239,7 @@ VST_EXPORT AEffect *VSTPluginMain(audioMasterCallback audioMaster)
 }
 
 // support for old hosts not looking for VSTPluginMain
-#if (defined TARGET_API_MAC_CARBON && __ppc__)
+#if (TARGET_API_MAC_CARBON && __ppc__)
 VST_EXPORT AEffect *main_macho(audioMasterCallback audioMaster)
 {
     return VSTPluginMain(audioMaster);

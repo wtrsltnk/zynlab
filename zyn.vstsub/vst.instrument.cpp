@@ -1,59 +1,162 @@
+#include "vst.instrument.h"
+#include <aeffeditor.h>
 #include <audioeffectx.h>
 #include <iostream>
 #include <math.h>
+#include <zyn.common/Config.h>
 #include <zyn.common/globals.h>
+#include <zyn.mixer/Channel.h>
+#include <zyn.synth/ADnote.h>
+#include <zyn.synth/ADnoteParams.h>
+#include <zyn.synth/Controller.h>
+#include <zyn.synth/FFTwrapper.h>
+#include <zyn.vst/vstcontrol.h>
+#include <zyn.vst/vstknob.h>
 
-SystemSettings settings;
+#define NUM_PROGRAMS 2
+#define NUM_PARAMS 0
 
-#define NUM_PROGRAMS    2
-#define NUM_PARAMS      0
-
-class Zynstrument : public AudioEffectX
+bool Zynstrument::getEffectName(char *name)
 {
-public:
-    Zynstrument(audioMasterCallback audioMaster);
-    ~Zynstrument();
+    strcpy(name, "zyn.vstsub");
+    return true;
+}
 
-    void processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames);
-    VstInt32 processEvents(VstEvents *ev);
+bool Zynstrument::getVendorString(char *text)
+{
+    strcpy(text, "zyn lab");
+    return true;
+}
 
-    virtual bool getEffectName(char *name)
-    {
-        strcpy(name, "zynstrument");
-        return true;
-    } ///< Fill \e text with a string identifying the effect
-    virtual bool getVendorString(char *text)
-    {
-        strcpy(text, "zyn project");
-        return true;
-    } ///< Fill \e text with a string identifying the vendor
-    virtual bool getProductString(char *text)
-    {
-        strcpy(text, "zynstrument");
-        return true;
-    }                                                 ///< Fill \e text with a string identifying the product name
-    virtual VstInt32 getVendorVersion() { return 0; } ///< Return vendor-specific version
+bool Zynstrument::getProductString(char *text)
+{
+    strcpy(text, "zyn.vstsub");
+    return true;
+}
 
-    virtual bool getProgramNameIndexed(VstInt32 category, VstInt32 index, char *text) { return false; } ///< Fill \e text with name of program \e index (\e category deprecated in VST 2.4)
-    virtual void setProgram(VstInt32 program);                                                          ///< Set the current program to \e program
-};
+VstInt32 Zynstrument::getVendorVersion()
+{
+    return 0;
+}
 
 Zynstrument::Zynstrument(audioMasterCallback audioMaster)
-    : AudioEffectX(audioMaster, NUM_PROGRAMS, NUM_PARAMS)
+    : AudioEffectX(audioMaster, NUM_PROGRAMS, NUM_PARAMS), fft(nullptr), currentProgram(0),
+      parameters(nullptr), playingNote(nullptr),
+      _lastGeneratedBufferSize(0), _lastSampleFrames(0)
 {
-    this->isSynth(true);
+    Config::Current().init();
 
+    /* Get the settings from the Config*/
+    settings.samplerate = Config::Current().cfg.SampleRate;
+    settings.buffersize = Config::Current().cfg.SoundBufferSize;
+    settings.oscilsize = Config::Current().cfg.OscilSize;
     settings.alias();
+
+    ctl.Init(&settings);
+    ctl.defaults();
+    fft = new FFTwrapper(settings.oscilsize);
+
+    parameters = new SUBnoteParameters(&settings, fft);
+    parameters->Defaults();
+
+    _tmpoutr = new float[settings.buffersize * 4];
+    _tmpoutl = new float[settings.buffersize * 4];
+
+    setNumInputs(0);
+    setNumOutputs(2);
+    isSynth(true);
+    setEditor(new ZynEditor(this));
 }
 
 Zynstrument::~Zynstrument()
-{}
+{
+    delete parameters;
+    delete fft;
+    delete editor;
+}
+
+bool Zynstrument::getProgramNameIndexed(VstInt32 /*category*/, VstInt32 index, char *text)
+{
+    if (index == 0)
+    {
+        strcpy_s(text, 9, "preset01");
+        return true;
+    }
+
+    if (index == 1)
+    {
+        strcpy_s(text, 9, "preset02");
+        return true;
+    }
+
+    return false;
+}
 
 void Zynstrument::setProgram(VstInt32 program)
-{}
+{
+    currentProgram = program;
+}
 
-void Zynstrument::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
-{}
+void Zynstrument::getProgramName(char *name)
+{
+    if (currentProgram == 0)
+    {
+        strcpy_s(name, 9, "preset01");
+    }
+
+    if (currentProgram == 1)
+    {
+        strcpy_s(name, 9, "preset02");
+    }
+}
+
+void Zynstrument::processReplacing(float ** /*inputs*/, float **outputs, VstInt32 sampleFrames)
+{
+    if (playingNote == nullptr)
+    {
+        for (unsigned int i = 0; i < settings.buffersize * 4; i++)
+        {
+            _tmpoutl[i] = _tmpoutr[i] = 0;
+        }
+        outputs[0] = &_tmpoutl[0];
+        outputs[1] = &_tmpoutr[0];
+
+        return;
+    }
+
+    if (_lastGeneratedBufferSize != 0 && _lastSampleFrames != 0)
+    {
+        auto offset = _lastGeneratedBufferSize - _lastSampleFrames;
+        for (unsigned int i = 0; i < offset; i++)
+        {
+            _tmpoutl[i] = _tmpoutl[static_cast<unsigned int>(sampleFrames) + i];
+            _tmpoutr[i] = _tmpoutr[static_cast<unsigned int>(sampleFrames) + i];
+        }
+
+        for (unsigned int i = _lastSampleFrames; i < settings.buffersize * 4; i++)
+        {
+            _tmpoutl[i] = _tmpoutr[i] = 0;
+        }
+        _lastGeneratedBufferSize = offset;
+    }
+
+    while (_lastGeneratedBufferSize < static_cast<unsigned int>(sampleFrames))
+    {
+        playingNote->noteout(&_tmpoutl[_lastGeneratedBufferSize], &_tmpoutr[_lastGeneratedBufferSize]);
+        _lastGeneratedBufferSize += settings.buffersize;
+    }
+
+    outputs[0] = &_tmpoutl[0];
+    outputs[1] = &_tmpoutr[0];
+
+    _lastSampleFrames = static_cast<unsigned int>(sampleFrames);
+
+    if (playingNote->finished())
+    {
+        delete playingNote;
+        playingNote = nullptr;
+    }
+}
 
 VstInt32 Zynstrument::processEvents(VstEvents *ev)
 {
@@ -62,7 +165,7 @@ VstInt32 Zynstrument::processEvents(VstEvents *ev)
         if ((ev->events[i])->type != kVstMidiType)
             continue;
 
-        VstMidiEvent *event = (VstMidiEvent *)ev->events[i];
+        auto event = reinterpret_cast<VstMidiEvent *>(ev->events[i]);
         char *midiData = event->midiData;
         VstInt32 status = midiData[0] & 0xf0; // ignoring channel
         if (status == 0x90 || status == 0x80) // we only look at notes
@@ -72,9 +175,25 @@ VstInt32 Zynstrument::processEvents(VstEvents *ev)
             if (status == 0x90)
             {
                 // this->instrument->NoteOn(note, velocity, 0);
+                if (playingNote == nullptr)
+                {
+                    float notebasefreq = 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
+                    playingNote = new SUBnote(parameters,
+                                              &ctl,
+                                              &settings,
+                                              notebasefreq,
+                                              velocity,
+                                              0,
+                                              note,
+                                              false);
+                }
             }
             else
             {
+                if (playingNote != nullptr)
+                {
+                    playingNote->relasekey();
+                }
                 velocity = 0; // note off by velocity 0
                 // this->instrument->NoteOff(note);
             }
@@ -103,13 +222,17 @@ extern "C" {
 VST_EXPORT AEffect *VSTPluginMain(audioMasterCallback audioMaster)
 {
     // Get VST Version of the Host
-    if (!audioMaster(0, audioMasterVersion, 0, 0, 0, 0))
-        return 0; // old version
+    if (!audioMaster(nullptr, audioMasterVersion, 0, 0, nullptr, 0))
+    {
+        return nullptr; // old version
+    }
 
     // Create the AudioEffect
     AudioEffect *effect = createEffectInstance(audioMaster);
     if (!effect)
-        return 0;
+    {
+        return nullptr;
+    }
 
     // Return the VST AEffect structur
     return effect->getAeffect();
