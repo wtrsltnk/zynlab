@@ -24,22 +24,28 @@ else()
 	message(STATUS "VST SDK3 found")
 endif()
 
-include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/
-	${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/
-	)
-
-set(app_SRCS
-	${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffect.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffectx.cpp
+add_library(zyn.vst
+    vstcontrol.cpp
+    vstcontrol.h
+    vstknob.cpp
+    vstknob.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffect.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffectx.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffect.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffectx.h
     )
 
-set(app_HDRS
-	${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffect.h
-	${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffectx.h
-	)
+target_include_directories(zyn.vst
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/
+        ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/
+    )
 
-add_library(zyn.vst
-	${app_SRCS}
-	${app_HDRS}
-	)
+target_compile_features(zyn.vst
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
+        cxx_range_for
+        cxx_thread_local
+    )

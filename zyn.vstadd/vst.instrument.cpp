@@ -1,3 +1,5 @@
+#include "vst.instrument.h"
+#include <aeffeditor.h>
 #include <audioeffectx.h>
 #include <iostream>
 #include <math.h>
@@ -8,55 +10,40 @@
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/Controller.h>
 #include <zyn.synth/FFTwrapper.h>
+#include <zyn.vst/vstcontrol.h>
+#include <zyn.vst/vstknob.h>
 
 #define NUM_PROGRAMS 2
 #define NUM_PARAMS 0
 
-class Zynstrument : public AudioEffectX
+bool Zynstrument::getEffectName(char *name)
 {
-    SystemSettings settings;
-    Controller ctl;
-    FFTwrapper *fft;
-    VstInt32 currentProgram;
-    ADnoteParameters *adpars;
-    SynthNote *playingNote;
-    float *_tmpoutr;
-    float *_tmpoutl;
+    strcpy(name, "zyn.vstadd");
+    return true;
+}
 
-public:
-    Zynstrument(audioMasterCallback audioMaster);
-    ~Zynstrument();
+bool Zynstrument::getVendorString(char *text)
+{
+    strcpy(text, "zyn lab");
+    return true;
+}
 
-    void processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames);
-    VstInt32 processEvents(VstEvents *ev);
+bool Zynstrument::getProductString(char *text)
+{
+    strcpy(text, "zyn.vstadd");
+    return true;
+}
 
-    virtual bool getEffectName(char *name)
-    {
-        strcpy(name, "zyn.vstadd");
-        return true;
-    } ///< Fill \e text with a string identifying the effect
-    virtual bool getVendorString(char *text)
-    {
-        strcpy(text, "zyn lab");
-        return true;
-    } ///< Fill \e text with a string identifying the vendor
-    virtual bool getProductString(char *text)
-    {
-        strcpy(text, "zyn.vstadd");
-        return true;
-    }                                                 ///< Fill \e text with a string identifying the product name
-    virtual VstInt32 getVendorVersion() { return 0; } ///< Return vendor-specific version
-
-    virtual bool getProgramNameIndexed(VstInt32 category, VstInt32 index, char *text); ///< Fill \e text with name of program \e index (\e category deprecated in VST 2.4)
-    virtual void setProgram(VstInt32 program);                                         ///< Set the current program to \e program
-    virtual void getProgramName(char *name);
-};
+VstInt32 Zynstrument::getVendorVersion()
+{
+    return 0;
+}
 
 Zynstrument::Zynstrument(audioMasterCallback audioMaster)
-    : AudioEffectX(audioMaster, NUM_PROGRAMS, NUM_PARAMS), fft(nullptr), currentProgram(0), adpars(nullptr), playingNote(nullptr)
+    : AudioEffectX(audioMaster, NUM_PROGRAMS, NUM_PARAMS), fft(nullptr), currentProgram(0),
+      adpars(nullptr), playingNote(nullptr),
+      _lastGeneratedBufferSize(0), _lastSampleFrames(0)
 {
-    this->isSynth(true);
-
     Config::Current().init();
 
     /* Get the settings from the Config*/
@@ -74,15 +61,21 @@ Zynstrument::Zynstrument(audioMasterCallback audioMaster)
 
     _tmpoutr = new float[settings.buffersize * 4];
     _tmpoutl = new float[settings.buffersize * 4];
+
+    setNumInputs(0);
+    setNumOutputs(2);
+    isSynth(true);
+    setEditor(new ZynEditor(this));
 }
 
 Zynstrument::~Zynstrument()
 {
     delete adpars;
     delete fft;
+    delete editor;
 }
 
-bool Zynstrument::getProgramNameIndexed(VstInt32 category, VstInt32 index, char *text)
+bool Zynstrument::getProgramNameIndexed(VstInt32 /*category*/, VstInt32 index, char *text)
 {
     if (index == 0)
     {
@@ -117,14 +110,11 @@ void Zynstrument::getProgramName(char *name)
     }
 }
 
-static VstInt32 last_generatedBufferSize = 0;
-static VstInt32 last_sampleFrames = 0;
-
-void Zynstrument::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
+void Zynstrument::processReplacing(float ** /*inputs*/, float **outputs, VstInt32 sampleFrames)
 {
     if (playingNote == nullptr)
     {
-        for (int i = 0; i < settings.buffersize * 4; i++)
+        for (unsigned int i = 0; i < settings.buffersize * 4; i++)
         {
             _tmpoutl[i] = _tmpoutr[i] = 0;
         }
@@ -134,32 +124,32 @@ void Zynstrument::processReplacing(float **inputs, float **outputs, VstInt32 sam
         return;
     }
 
-    if (last_generatedBufferSize != 0 && last_sampleFrames != 0)
+    if (_lastGeneratedBufferSize != 0 && _lastSampleFrames != 0)
     {
-        auto offset = last_generatedBufferSize - last_sampleFrames;
-        for (int i = 0; i < offset; i++)
+        auto offset = _lastGeneratedBufferSize - _lastSampleFrames;
+        for (unsigned int i = 0; i < offset; i++)
         {
-            _tmpoutl[i] = _tmpoutl[sampleFrames + i];
-            _tmpoutr[i] = _tmpoutr[sampleFrames + i];
+            _tmpoutl[i] = _tmpoutl[static_cast<unsigned int>(sampleFrames) + i];
+            _tmpoutr[i] = _tmpoutr[static_cast<unsigned int>(sampleFrames) + i];
         }
 
-        for (int i = last_sampleFrames; i < settings.buffersize * 4; i++)
+        for (unsigned int i = _lastSampleFrames; i < settings.buffersize * 4; i++)
         {
             _tmpoutl[i] = _tmpoutr[i] = 0;
         }
-        last_generatedBufferSize = offset;
+        _lastGeneratedBufferSize = offset;
     }
 
-    while (last_generatedBufferSize < sampleFrames)
+    while (_lastGeneratedBufferSize < static_cast<unsigned int>(sampleFrames))
     {
-        playingNote->noteout(&_tmpoutl[last_generatedBufferSize], &_tmpoutr[last_generatedBufferSize]);
-        last_generatedBufferSize += settings.buffersize;
+        playingNote->noteout(&_tmpoutl[_lastGeneratedBufferSize], &_tmpoutr[_lastGeneratedBufferSize]);
+        _lastGeneratedBufferSize += settings.buffersize;
     }
 
     outputs[0] = &_tmpoutl[0];
     outputs[1] = &_tmpoutr[0];
 
-    last_sampleFrames = sampleFrames;
+    _lastSampleFrames = static_cast<unsigned int>(sampleFrames);
 
     if (playingNote->finished())
     {
@@ -175,7 +165,7 @@ VstInt32 Zynstrument::processEvents(VstEvents *ev)
         if ((ev->events[i])->type != kVstMidiType)
             continue;
 
-        VstMidiEvent *event = (VstMidiEvent *)ev->events[i];
+        auto event = reinterpret_cast<VstMidiEvent *>(ev->events[i]);
         char *midiData = event->midiData;
         VstInt32 status = midiData[0] & 0xf0; // ignoring channel
         if (status == 0x90 || status == 0x80) // we only look at notes
@@ -232,20 +222,24 @@ extern "C" {
 VST_EXPORT AEffect *VSTPluginMain(audioMasterCallback audioMaster)
 {
     // Get VST Version of the Host
-    if (!audioMaster(0, audioMasterVersion, 0, 0, 0, 0))
-        return 0; // old version
+    if (!audioMaster(nullptr, audioMasterVersion, 0, 0, nullptr, 0))
+    {
+        return nullptr; // old version
+    }
 
     // Create the AudioEffect
     AudioEffect *effect = createEffectInstance(audioMaster);
     if (!effect)
-        return 0;
+    {
+        return nullptr;
+    }
 
     // Return the VST AEffect structur
     return effect->getAeffect();
 }
 
 // support for old hosts not looking for VSTPluginMain
-#if (TARGET_API_MAC_CARBON && __ppc__)
+#if (defined TARGET_API_MAC_CARBON && __ppc__)
 VST_EXPORT AEffect *main_macho(audioMasterCallback audioMaster)
 {
     return VSTPluginMain(audioMaster);

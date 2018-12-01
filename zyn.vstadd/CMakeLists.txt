@@ -3,16 +3,18 @@ cmake_minimum_required(VERSION 3.8)
 project(zyn.vstadd)
 
 add_library(zyn.vstadd SHARED
+    vst.editor.cpp
     vst.instrument.cpp
+    vst.instrument.h
 	)
 
 target_link_libraries(zyn.vstadd
-	zyn.vst
 	zyn.mixer
 	zyn.synth
 	zyn.fx
 	zyn.dsp
 	zyn.common
+    zyn.vst
 	)
 
 target_include_directories(zyn.vstadd

@@ -141,10 +141,11 @@ target_compile_definitions(zyn.nio
     )
 
 target_compile_features(zyn.nio
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_lambdas
-    PRIVATE cxx_nullptr
-    PRIVATE cxx_strong_enums
+    PRIVATE
+        cxx_auto_type
+        cxx_lambdas
+        cxx_nullptr
+        cxx_strong_enums
     )
 
 install(
