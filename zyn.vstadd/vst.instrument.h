@@ -2,14 +2,13 @@
 #define VST_INSTRUMENT_H
 
 #include <aeffeditor.h>
-#include <audioeffectx.h>
-#include <zyn.common/globals.h>
 #include <zyn.synth/ADnote.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/Controller.h>
 #include <zyn.synth/FFTwrapper.h>
 #include <zyn.vst/vstcontrol.h>
 #include <zyn.vst/vstknob.h>
+#include <zyn.vst/vstplugin.h>
 
 class ZynEditor : public AEffEditor, public VstControl
 {
@@ -27,26 +26,18 @@ public:
     virtual void idle();
 };
 
-class Zynstrument : public AudioEffectX
+class ZynInstrument : public VstPlugin
 {
-    SystemSettings settings;
     Controller ctl;
     FFTwrapper *fft;
     VstInt32 currentProgram;
     ADnoteParameters *adpars;
-    SynthNote *playingNote;
-    float *_tmpoutr;
-    float *_tmpoutl;
-
-    unsigned int _lastGeneratedBufferSize;
-    unsigned int _lastSampleFrames;
 
 public:
-    Zynstrument(audioMasterCallback audioMaster);
-    ~Zynstrument();
+    ZynInstrument(audioMasterCallback audioMaster);
+    virtual ~ZynInstrument();
 
-    void processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames);
-    VstInt32 processEvents(VstEvents *ev);
+    virtual SynthNote *createNote(VstInt32 note, VstInt32 velocity);
 
     virtual bool getEffectName(char *name);
     virtual bool getVendorString(char *text);

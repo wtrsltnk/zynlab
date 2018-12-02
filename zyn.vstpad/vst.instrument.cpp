@@ -8,11 +8,11 @@ SystemSettings settings;
 #define NUM_PROGRAMS    2
 #define NUM_PARAMS      0
 
-class Zynstrument : public AudioEffectX
+class ZynInstrument : public AudioEffectX
 {
 public:
-    Zynstrument(audioMasterCallback audioMaster);
-    ~Zynstrument();
+    ZynInstrument(audioMasterCallback audioMaster);
+    ~ZynInstrument();
 
     void processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames);
     VstInt32 processEvents(VstEvents *ev);
@@ -38,7 +38,7 @@ public:
     virtual void setProgram(VstInt32 program);                                                          ///< Set the current program to \e program
 };
 
-Zynstrument::Zynstrument(audioMasterCallback audioMaster)
+ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
     : AudioEffectX(audioMaster, NUM_PROGRAMS, NUM_PARAMS)
 {
     this->isSynth(true);
@@ -46,16 +46,16 @@ Zynstrument::Zynstrument(audioMasterCallback audioMaster)
     settings.alias();
 }
 
-Zynstrument::~Zynstrument()
+ZynInstrument::~ZynInstrument()
 {}
 
-void Zynstrument::setProgram(VstInt32 program)
+void ZynInstrument::setProgram(VstInt32 program)
 {}
 
-void Zynstrument::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
+void ZynInstrument::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
 {}
 
-VstInt32 Zynstrument::processEvents(VstEvents *ev)
+VstInt32 ZynInstrument::processEvents(VstEvents *ev)
 {
     for (VstInt32 i = 0; i < ev->numEvents; i++)
     {
@@ -86,7 +86,7 @@ VstInt32 Zynstrument::processEvents(VstEvents *ev)
 
 AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
 {
-    return new Zynstrument(audioMaster);
+    return new ZynInstrument(audioMaster);
 }
 
 extern "C" {

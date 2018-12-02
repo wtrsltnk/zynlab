@@ -29,6 +29,8 @@ add_library(zyn.vst
     vstcontrol.h
     vstknob.cpp
     vstknob.h
+    vstplugin.cpp
+    vstplugin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffect.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffectx.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/VST3\ SDK/public.sdk/source/vst2.x/audioeffect.h
