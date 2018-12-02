@@ -1,5 +1,6 @@
 #include "../app.threedee.h"
 
+#include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/ADnoteParams.h>
 
 void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
@@ -62,7 +63,7 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteParameters *parameters)
     ImGui::NextColumn();
 
     auto pan = static_cast<float>(parameters->GlobalPar.PPanning);
-    if (MyKnob("Panning", &pan, 0, 128, ImVec2(40, 40)))
+    if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
     {
         parameters->GlobalPar.PPanning = static_cast<unsigned char>(pan);
     }
@@ -148,7 +149,7 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteParameters *parameters)
     ImGui::NextColumn();
 
     auto bandwidth = static_cast<float>(parameters->GlobalPar.PBandwidth);
-    if (MyKnob("relBW", &(bandwidth), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("relBW", &(bandwidth), 0, 128, ImVec2(30, 30)))
     {
         parameters->GlobalPar.PBandwidth = static_cast<unsigned char>(bandwidth);
 

@@ -1,5 +1,6 @@
 #include "../app.threedee.h"
 
+#include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/LFOParams.h>
 
 void AppThreeDee::LFO(char const *label, LFOParams *params)
@@ -10,10 +11,10 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::SetColumnWidth(0, 190);
     ImGui::SetColumnWidth(1, 80);
 
-    ImGui::Text(label);
+    ImGui::Text("%s", label);
 
     auto freq = params->Pfreq;
-    if (MyKnob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(30, 30)))
+    if (ImGui::Knob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(30, 30)))
     {
         params->Pfreq = freq;
     }
@@ -26,7 +27,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::SameLine();
 
     auto depth = static_cast<float>(params->Pintensity);
-    if (MyKnob("Depth", &(depth), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("Depth", &(depth), 0, 128, ImVec2(30, 30)))
     {
         params->Pintensity = static_cast<unsigned char>(depth);
     }
@@ -39,7 +40,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::SameLine();
 
     auto start = static_cast<float>(params->Pstartphase);
-    if (MyKnob("Start", &(start), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("Start", &(start), 0, 128, ImVec2(30, 30)))
     {
         params->Pstartphase = static_cast<unsigned char>(start);
     }
@@ -52,7 +53,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::SameLine();
 
     auto delay = static_cast<float>(params->Pdelay);
-    if (MyKnob("Delay", &(delay), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("Delay", &(delay), 0, 128, ImVec2(30, 30)))
     {
         params->Pdelay = static_cast<unsigned char>(delay);
     }
@@ -65,7 +66,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::SameLine();
 
     auto stretch = static_cast<float>(params->Pstretch);
-    if (MyKnob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
     {
         params->Pstretch = static_cast<unsigned char>(stretch);
     }
@@ -79,7 +80,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::NextColumn();
 
     auto a_r = static_cast<float>(params->Prandomness);
-    if (MyKnob("A.R", &(a_r), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("A.R", &(a_r), 0, 128, ImVec2(20, 20)))
     {
         params->Prandomness = static_cast<unsigned char>(a_r);
     }
@@ -92,7 +93,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::SameLine();
 
     auto f_r = static_cast<float>(params->Pfreqrand);
-    if (MyKnob("F.R", &(f_r), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("F.R", &(f_r), 0, 128, ImVec2(20, 20)))
     {
         params->Pfreqrand = static_cast<unsigned char>(f_r);
     }

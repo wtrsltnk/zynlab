@@ -15,13 +15,6 @@
 #include <zyn.seq/Tracker.h>
 #include <zyn.synth/FFTwrapper.h>
 
-extern bool MyKnob(const char *label, float *p_value,
-                   float v_min, float v_max,
-                   ImVec2 const &size);
-extern bool MyKnobUchar(const char *label, unsigned char *p_value,
-                        unsigned char v_min, unsigned char v_max,
-                        ImVec2 const &size);
-
 class AppThreeDee
 {
 private:

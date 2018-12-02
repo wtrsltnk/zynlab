@@ -1,5 +1,6 @@
 #include "../app.threedee.h"
 
+#include "../imgui_addons/imgui_knob.h"
 #include <imgui.h>
 #include <zyn.synth/EnvelopeParams.h>
 
@@ -14,7 +15,7 @@ void AppThreeDee::AmplitudeEnvelope(EnvelopeParams *envelope)
     ImGui::Text("Amplitude Envelope");
 
     auto a_dt = static_cast<float>(envelope->PA_dt);
-    if (MyKnob("A.dt", &(a_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("A.dt", &(a_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PA_dt = static_cast<unsigned char>(a_dt);
     }
@@ -27,7 +28,7 @@ void AppThreeDee::AmplitudeEnvelope(EnvelopeParams *envelope)
     ImGui::SameLine();
 
     auto d_dt = static_cast<float>(envelope->PD_dt);
-    if (MyKnob("D.dt", &(d_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("D.dt", &(d_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PD_dt = static_cast<unsigned char>(d_dt);
     }
@@ -40,7 +41,7 @@ void AppThreeDee::AmplitudeEnvelope(EnvelopeParams *envelope)
     ImGui::SameLine();
 
     auto s_val = static_cast<float>(envelope->PS_val);
-    if (MyKnob("S.val", &(s_val), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("S.val", &(s_val), 0, 128, ImVec2(30, 30)))
     {
         envelope->PS_val = static_cast<unsigned char>(s_val);
     }
@@ -53,7 +54,7 @@ void AppThreeDee::AmplitudeEnvelope(EnvelopeParams *envelope)
     ImGui::SameLine();
 
     auto r_dt = static_cast<float>(envelope->PR_dt);
-    if (MyKnob("R.dt", &(r_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("R.dt", &(r_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PR_dt = static_cast<unsigned char>(r_dt);
     }
@@ -66,7 +67,7 @@ void AppThreeDee::AmplitudeEnvelope(EnvelopeParams *envelope)
     ImGui::SameLine();
 
     auto stretch = static_cast<float>(envelope->Penvstretch);
-    if (MyKnob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
     {
         envelope->Penvstretch = static_cast<unsigned char>(stretch);
     }
@@ -110,7 +111,8 @@ void AppThreeDee::AmplitudeEnvelope(EnvelopeParams *envelope)
     ImGui::EndChild();
 }
 
-void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope) {
+void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope)
+{
 
     ImGui::BeginChild("Frequency Envelope", ImVec2(270, 80), true);
 
@@ -121,7 +123,7 @@ void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope) {
     ImGui::Text("Frequency Envelope");
 
     auto a_val = static_cast<float>(envelope->PA_val);
-    if (MyKnob("A.val", &(a_val), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("A.val", &(a_val), 0, 128, ImVec2(30, 30)))
     {
         envelope->PA_val = static_cast<unsigned char>(a_val);
     }
@@ -135,7 +137,7 @@ void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto a_dt = static_cast<float>(envelope->PA_dt);
-    if (MyKnob("A.dt", &(a_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("A.dt", &(a_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PA_dt = static_cast<unsigned char>(a_dt);
     }
@@ -149,7 +151,7 @@ void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto r_dt = static_cast<float>(envelope->PR_dt);
-    if (MyKnob("R.dt", &(r_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("R.dt", &(r_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PR_dt = static_cast<unsigned char>(r_dt);
     }
@@ -163,7 +165,7 @@ void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto r_val = static_cast<float>(envelope->PR_val);
-    if (MyKnob("R.val", &(r_val), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("R.val", &(r_val), 0, 128, ImVec2(30, 30)))
     {
         envelope->PR_val = static_cast<unsigned char>(r_val);
     }
@@ -177,7 +179,7 @@ void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto stretch = static_cast<float>(envelope->Penvstretch);
-    if (MyKnob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
     {
         envelope->Penvstretch = static_cast<unsigned char>(stretch);
     }
@@ -207,14 +209,15 @@ void AppThreeDee::FrequencyEnvelope(EnvelopeParams *envelope) {
     ImGui::EndChild();
 }
 
-void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope) {
+void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope)
+{
 
     ImGui::BeginChild("Filter Envelope", ImVec2(320, 80), true);
 
     ImGui::Text("Filter Envelope");
 
     auto a_val = static_cast<float>(envelope->PA_val);
-    if (MyKnob("A.val", &(a_val), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("A.val", &(a_val), 0, 128, ImVec2(30, 30)))
     {
         envelope->PA_val = static_cast<unsigned char>(a_val);
     }
@@ -227,7 +230,7 @@ void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto a_dt = static_cast<float>(envelope->PA_dt);
-    if (MyKnob("A.dt", &(a_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("A.dt", &(a_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PA_dt = static_cast<unsigned char>(a_dt);
     }
@@ -240,7 +243,7 @@ void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto d_val = static_cast<float>(envelope->PD_val);
-    if (MyKnob("D.val", &(d_val), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("D.val", &(d_val), 0, 128, ImVec2(30, 30)))
     {
         envelope->PD_val = static_cast<unsigned char>(d_val);
     }
@@ -253,7 +256,7 @@ void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto d_dt = static_cast<float>(envelope->PD_dt);
-    if (MyKnob("D.dt", &(d_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("D.dt", &(d_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PD_dt = static_cast<unsigned char>(d_dt);
     }
@@ -266,7 +269,7 @@ void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto r_dt = static_cast<float>(envelope->PR_dt);
-    if (MyKnob("R.dt", &(r_dt), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("R.dt", &(r_dt), 0, 128, ImVec2(30, 30)))
     {
         envelope->PR_dt = static_cast<unsigned char>(r_dt);
     }
@@ -279,7 +282,7 @@ void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto r_val = static_cast<float>(envelope->PR_val);
-    if (MyKnob("R.val", &(r_val), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("R.val", &(r_val), 0, 128, ImVec2(30, 30)))
     {
         envelope->PR_val = static_cast<unsigned char>(r_val);
     }
@@ -292,7 +295,7 @@ void AppThreeDee::FilterEnvelope(EnvelopeParams *envelope) {
     ImGui::SameLine();
 
     auto stretch = static_cast<float>(envelope->Penvstretch);
-    if (MyKnob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
     {
         envelope->Penvstretch = static_cast<unsigned char>(stretch);
     }

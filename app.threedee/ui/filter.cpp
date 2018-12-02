@@ -1,5 +1,6 @@
 #include "../app.threedee.h"
 
+#include "../imgui_addons/imgui_knob.h"
 #include <zyn.dsp/FilterParams.h>
 
 void AppThreeDee::FilterParameters(FilterParams *parameters)
@@ -129,7 +130,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::NextColumn();
 
     auto freq = static_cast<float>(parameters->Pfreq);
-    if (MyKnob("C.Freq", &(freq), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("C.Freq", &(freq), 0, 128, ImVec2(30, 30)))
     {
         parameters->Pfreq = static_cast<unsigned char>(freq);
     }
@@ -143,7 +144,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::SameLine();
 
     auto q = static_cast<float>(parameters->Pq);
-    if (MyKnob(" Q", &(q), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob(" Q", &(q), 0, 128, ImVec2(30, 30)))
     {
         parameters->Pq = static_cast<unsigned char>(q);
     }
@@ -157,7 +158,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::SameLine();
 
     auto freqtrack = static_cast<float>(parameters->Pfreqtrack);
-    if (MyKnob("freq.tr.", &(freqtrack), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("freq.tr.", &(freqtrack), 0, 128, ImVec2(30, 30)))
     {
         parameters->Pfreqtrack = static_cast<unsigned char>(freqtrack);
     }
@@ -171,7 +172,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::SameLine();
 
     auto gain = static_cast<float>(parameters->Pgain);
-    if (MyKnob("gain", &(gain), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("gain", &(gain), 0, 128, ImVec2(20, 20)))
     {
         parameters->Pgain = static_cast<unsigned char>(gain);
     }
