@@ -60,16 +60,16 @@ struct ADnoteGlobalParam
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
 
-    unsigned char PStereo{};
+    unsigned char PStereo;
 
     /******************************************
     *     FREQUENCY GLOBAL PARAMETERS        *
     ******************************************/
-    unsigned short int PDetune{};       //fine detune
-    unsigned short int PCoarseDetune{}; //coarse detune+octave
-    unsigned char PDetuneType{};        //detune type
+    unsigned short int PDetune;       //fine detune
+    unsigned short int PCoarseDetune; //coarse detune+octave
+    unsigned char PDetuneType;        //detune type
 
-    unsigned char PBandwidth{}; //how much the relative fine detunes of the voices are changed
+    unsigned char PBandwidth; //how much the relative fine detunes of the voices are changed
 
     EnvelopeParams *FreqEnvelope; //Frequency Envelope
 
@@ -83,18 +83,18 @@ struct ADnoteGlobalParam
               1 - left
              64 - center
             127 - right */
-    unsigned char PPanning{};
+    unsigned char PPanning;
 
-    unsigned char PVolume{};
+    unsigned char PVolume;
 
-    unsigned char PAmpVelocityScaleFunction{};
+    unsigned char PAmpVelocityScaleFunction;
 
     EnvelopeParams *AmpEnvelope;
 
     LFOParams *AmpLfo;
 
-    unsigned char PPunchStrength{}, PPunchTime{}, PPunchStretch{},
-        PPunchVelocitySensing{};
+    unsigned char PPunchStrength, PPunchTime, PPunchStretch,
+        PPunchVelocitySensing;
 
     /******************************************
     *        FILTER GLOBAL PARAMETERS        *
@@ -102,10 +102,10 @@ struct ADnoteGlobalParam
     FilterParams *GlobalFilter;
 
     // filter velocity sensing
-    unsigned char PFilterVelocityScale{};
+    unsigned char PFilterVelocityScale;
 
     // filter velocity sensing
-    unsigned char PFilterVelocityScaleFunction{};
+    unsigned char PFilterVelocityScaleFunction;
 
     EnvelopeParams *FilterEnvelope;
 
@@ -115,7 +115,7 @@ struct ADnoteGlobalParam
     Resonance *Reson;
 
     //how the randomness is applied to the harmonics on more voices using the same oscillator
-    unsigned char Hrandgrouping{};
+    unsigned char Hrandgrouping;
 };
 
 /***********************************************************/
@@ -300,7 +300,7 @@ public:
     virtual ~ADnoteParameters();
 
     ADnoteGlobalParam GlobalPar;
-    ADnoteVoiceParam VoicePar[NUM_VOICES]{};
+    ADnoteVoiceParam VoicePar[NUM_VOICES];
 
     void Defaults();
     void Serialize(IPresetsSerializer *xml);

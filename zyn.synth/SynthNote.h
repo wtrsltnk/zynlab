@@ -32,7 +32,7 @@ protected:
 
 public:
     SynthNote(SystemSettings *synth_, float freq, float vel, int port, int note, bool quiet);
-    virtual ~SynthNote() {}
+    virtual ~SynthNote();
 
     /**Compute Output Samples
          * @return 0 if note is finished*/
@@ -75,12 +75,12 @@ protected:
         { // Fade In/Out vars
             int length;
             float m, step;
-        } fade{};
+        } fade;
         struct
         { // Note parameters
             float freq, vel;
             int portamento, midinote;
-        } param{};
+        } param;
 
     public: /* Some get routines for legatonote calls (aftertouch feature)*/
         float getFreq() { return param.freq; }

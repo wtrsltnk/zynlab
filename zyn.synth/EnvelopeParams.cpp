@@ -56,7 +56,7 @@ EnvelopeParams::~EnvelopeParams() = default;
 
 float EnvelopeParams::getdt(char i)
 {
-    float result = (powf(2.0f, Penvdt[(int)i] / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
+    float result = (powf(2.0f, Penvdt[static_cast<int>(i)] / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
     return result;
 }
 

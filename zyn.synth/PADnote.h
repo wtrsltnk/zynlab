@@ -54,16 +54,16 @@ private:
                int midinote, bool legato = false);
     void fadein(float *smps);
     void computecurrentparameters();
-    bool finished_{};
+    bool finished_;
     PADnoteParameters *pars;
 
-    int poshi_l{}, poshi_r{};
-    float poslo{};
+    int poshi_l, poshi_r;
+    float poslo;
 
-    float basefreq{};
-    bool firsttime, released{};
+    float basefreq;
+    bool firsttime, released;
 
-    int nsample{}, portamento{};
+    int nsample, portamento;
 
     int Compute_Linear(float *outl,
                        float *outr,
@@ -112,9 +112,9 @@ private:
         Envelope *FilterEnvelope;
 
         LFO *FilterLfo;
-    } NoteGlobalPar{};
+    } NoteGlobalPar;
 
-    float globaloldamplitude{}, globalnewamplitude{}, velocity{}, realfreq{};
+    float globaloldamplitude, globalnewamplitude, velocity, realfreq;
     Controller *ctl;
 };
 

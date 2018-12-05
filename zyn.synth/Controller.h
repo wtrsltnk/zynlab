@@ -80,35 +80,35 @@ public:
         int data;
         short int bendrange; //bendrange is in cents
         float relfreq;       //the relative frequency (default is 1.0f)
-    } pitchwheel{};
+    } pitchwheel;
 
     struct
     { //Expression
         int data;
         float relvolume;
         unsigned char receive;
-    } expression{};
+    } expression;
 
     struct
     { //Panning
         int data;
         float pan;
         unsigned char depth;
-    } panning{};
+    } panning;
 
     struct
     { //Filter cutoff
         int data;
         float relfreq;
         unsigned char depth;
-    } filtercutoff{};
+    } filtercutoff;
 
     struct
     { //Filter Q
         int data;
         float relq;
         unsigned char depth;
-    } filterq{};
+    } filterq;
 
     struct
     { //Bandwidth
@@ -116,7 +116,7 @@ public:
         float relbw;
         unsigned char depth;
         unsigned char exponential;
-    } bandwidth{};
+    } bandwidth;
 
     struct
     { //Modulation Wheel
@@ -124,27 +124,27 @@ public:
         float relmod;
         unsigned char depth;
         unsigned char exponential;
-    } modwheel{};
+    } modwheel;
 
     struct
     { //FM amplitude
         int data;
         float relamp;
         unsigned char receive;
-    } fmamp{};
+    } fmamp;
 
     struct
     { //Volume
         int data;
         float volume;
         unsigned char receive;
-    } volume{};
+    } volume;
 
     struct
     { //Sustain
         int data, sustain;
         unsigned char receive;
-    } sustain{};
+    } sustain;
 
     struct
     { /**<Portamento*/
@@ -204,21 +204,21 @@ public:
         float dx;
         /** this is used for computing oldfreq value from x*/
         float origfreqrap;
-    } portamento{};
+    } portamento;
 
     struct
     { //Resonance Center Frequency
         int data;
         float relcenter;
         unsigned char depth;
-    } resonancecenter{};
+    } resonancecenter;
 
     struct
     { //Resonance Bandwidth
         int data;
         float relbw;
         unsigned char depth;
-    } resonancebandwidth{};
+    } resonancebandwidth;
 
     /** RPN and NPRPN */
     struct
@@ -226,7 +226,7 @@ public:
         int parhi, parlo;
         int valhi, vallo;
         unsigned char receive; //this is saved to disk by Master
-    } NRPN{};
+    } NRPN;
 
 private:
 };

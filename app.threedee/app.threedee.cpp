@@ -115,8 +115,8 @@ void AppThreeDee::SelectInstrument(int i)
 static int openSelectInstrument = -1;
 static int openSelectSinkSource = -1;
 
-bool show_demo_window = true;
-bool show_another_window = false;
+static bool show_demo_window = true;
+static bool show_another_window = true;
 
 void AppThreeDee::Render()
 {
@@ -129,16 +129,16 @@ void AppThreeDee::Render()
         static float f = 0.0f;
         static int counter = 0;
 
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+        ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
+        ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
         ImGui::Checkbox("Another Window", &show_another_window);
 
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
 
-        if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+        if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
             counter++;
         ImGui::SameLine();
         ImGui::Text("counter = %d", counter);
@@ -150,296 +150,325 @@ void AppThreeDee::Render()
     // 3. Show another simple window.
     if (show_another_window)
     {
-        ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::Begin("Another Window", &show_another_window); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
         ImGui::Text("Hello from another window!");
         if (ImGui::Button("Close Me"))
             show_another_window = false;
+
+        if (ImGui::BeginTabBar("blah"))
+        {
+            if (ImGui::BeginTabItem("Global"))
+            {
+                ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
+
+                ImGui::EndTabItem();
+            }
+            static char voiceIds[][64]{
+                "Voice 0",
+                "Voice 1",
+                "Voice 2",
+                "Voice 3",
+                "Voice 4",
+                "Voice 5",
+                "Voice 6",
+                "Voice 7",
+            };
+            for (int i = 0; i < NUM_VOICES; i++)
+            {
+                if (ImGui::BeginTabItem(voiceIds[i]))
+                {
+                    ImGui::EndTabItem();
+                }
+            }
+            ImGui::EndTabBar();
+        }
+
         ImGui::End();
     }
 
-//    ImGui::Begin("Zynadsubfx", nullptr, ImGuiWindowFlags_NoTitleBar);
-//    {
-//        MainMenu();
-//        const char *channels[] = {
-//            "1",
-//            "2",
-//            "3",
-//            "4",
-//            "5",
-//            "6",
-//            "7",
-//            "8",
-//            "9",
-//            "10",
-//            "11",
-//            "12",
-//            "13",
-//            "14",
-//            "15",
-//            "16",
-//        };
-//        ImGui::Combo("Keyboard channel", &keyboardChannel, channels, NUM_MIDI_CHANNELS);
+    //    ImGui::Begin("Zynadsubfx", nullptr, ImGuiWindowFlags_NoTitleBar);
+    //    {
+    //        MainMenu();
+    //        const char *channels[] = {
+    //            "1",
+    //            "2",
+    //            "3",
+    //            "4",
+    //            "5",
+    //            "6",
+    //            "7",
+    //            "8",
+    //            "9",
+    //            "10",
+    //            "11",
+    //            "12",
+    //            "13",
+    //            "14",
+    //            "15",
+    //            "16",
+    //        };
+    //        ImGui::Combo("Keyboard channel", &keyboardChannel, channels, NUM_MIDI_CHANNELS);
 
-//        ImGui::BeginGroup();
-//        {
-//            ImGui::Columns(2);
-//            ImGui::SetColumnWidth(0, 70);
-//            ImGui::SetColumnWidth(1, 8 * 100);
+    //        ImGui::BeginGroup();
+    //        {
+    //            ImGui::Columns(2);
+    //            ImGui::SetColumnWidth(0, 70);
+    //            ImGui::SetColumnWidth(1, 8 * 100);
 
-//            ImGui::Text("MASTER");
-//            ImGui::NextColumn();
-//            ImGui::Text("CHANNELS");
-//            ImGui::NextColumn();
-//            ImGui::Separator();
+    //            ImGui::Text("MASTER");
+    //            ImGui::NextColumn();
+    //            ImGui::Text("CHANNELS");
+    //            ImGui::NextColumn();
+    //            ImGui::Separator();
 
-//            ImGui::Text("Input");
-//            if (ImGui::Button(Nio::GetSelectedSource().c_str(), ImVec2(55, 20)))
-//            {
-//                openSelectSinkSource = 1;
-//            }
-//            ImGui::Text("Output");
-//            if (ImGui::Button(Nio::GetSelectedSink().c_str(), ImVec2(55, 20)))
-//            {
-//                openSelectSinkSource = 1;
-//            }
+    //            ImGui::Text("Input");
+    //            if (ImGui::Button(Nio::GetSelectedSource().c_str(), ImVec2(55, 20)))
+    //            {
+    //                openSelectSinkSource = 1;
+    //            }
+    //            ImGui::Text("Output");
+    //            if (ImGui::Button(Nio::GetSelectedSink().c_str(), ImVec2(55, 20)))
+    //            {
+    //                openSelectSinkSource = 1;
+    //            }
 
-//            auto v = _mixer->Pvolume;
-//            if (ImGui::KnobUchar("Volume", &(v), 0, 128, ImVec2(55, 55)))
-//            {
-//                _mixer->setPvolume(v);
-//            }
+    //            auto v = _mixer->Pvolume;
+    //            if (ImGui::KnobUchar("Volume", &(v), 0, 128, ImVec2(55, 55)))
+    //            {
+    //                _mixer->setPvolume(v);
+    //            }
 
-//            ImGui::NextColumn();
+    //            ImGui::NextColumn();
 
-//            ImGui::BeginChild("Channels");
-//            {
-//                ImGui::Columns(4);
-//                for (int i = 0; i < NUM_MIXER_CHANNELS; i++)
-//                {
-//                    ImGui::PushID(i);
+    //            ImGui::BeginChild("Channels");
+    //            {
+    //                ImGui::Columns(4);
+    //                for (int i = 0; i < NUM_MIXER_CHANNELS; i++)
+    //                {
+    //                    ImGui::PushID(i);
 
-//                    if (i == activeInstrument)
-//                    {
-//                        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.4f, 0.4f)));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
-//                    }
-//                    else
-//                    {
-//                        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_Button));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered));
-//                    }
+    //                    if (i == activeInstrument)
+    //                    {
+    //                        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.4f, 0.4f)));
+    //                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
+    //                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
+    //                    }
+    //                    else
+    //                    {
+    //                        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_Button));
+    //                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+    //                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered));
+    //                    }
 
-//                    ImVec2 size = ImVec2(87, 18);
-//                    char label[32];
-//                    sprintf(label, "CH%d", i + 1);
-//                    bool channelEnabled = _mixer->GetChannel(i)->Penabled != '\0';
-//                    if (ImGui::Checkbox(label, &channelEnabled))
-//                    {
-//                        _mixer->GetChannel(i)->Penabled = channelEnabled ? 1 : 0;
-//                    }
+    //                    ImVec2 size = ImVec2(87, 18);
+    //                    char label[32];
+    //                    sprintf(label, "CH%d", i + 1);
+    //                    bool channelEnabled = _mixer->GetChannel(i)->Penabled != '\0';
+    //                    if (ImGui::Checkbox(label, &channelEnabled))
+    //                    {
+    //                        _mixer->GetChannel(i)->Penabled = channelEnabled ? 1 : 0;
+    //                    }
 
-//                    if (ImGui::Button("Edit", size))
-//                    {
-//                        EditInstrument(i);
-//                    }
+    //                    if (ImGui::Button("Edit", size))
+    //                    {
+    //                        EditInstrument(i);
+    //                    }
 
-//                    if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetChannel(i)->Pname), size))
-//                    {
-//                        SelectInstrument(i);
-//                        openSelectInstrument = i;
-//                    }
+    //                    if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetChannel(i)->Pname), size))
+    //                    {
+    //                        SelectInstrument(i);
+    //                        openSelectInstrument = i;
+    //                    }
 
-//                    if (ImGui::IsItemHovered() && _mixer->GetChannel(i)->Pname[0] > '\0')
-//                    {
-//                        ImGui::BeginTooltip();
-//                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-//                        ImGui::TextUnformatted(reinterpret_cast<char *>(_mixer->GetChannel(i)->Pname));
-//                        ImGui::PopTextWrapPos();
-//                        ImGui::EndTooltip();
-//                    }
-//                    auto volume = _mixer->GetChannel(i)->Pvolume;
-//                    if (ImGui::KnobUchar("volume", &(volume), 0, 128, ImVec2(40, 40)))
-//                    {
-//                        _mixer->GetChannel(i)->setPvolume(volume);
-//                    }
-//                    ImGui::SameLine();
-//                    auto panning = _mixer->GetChannel(i)->Ppanning;
-//                    if (ImGui::KnobUchar(" pann", &(panning), 0, 128, ImVec2(40, 40)))
-//                    {
-//                        _mixer->GetChannel(i)->setPpanning(panning);
-//                    }
-//                    ImGui::PopStyleColor(3);
-//                    ImGui::PopID();
+    //                    if (ImGui::IsItemHovered() && _mixer->GetChannel(i)->Pname[0] > '\0')
+    //                    {
+    //                        ImGui::BeginTooltip();
+    //                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    //                        ImGui::TextUnformatted(reinterpret_cast<char *>(_mixer->GetChannel(i)->Pname));
+    //                        ImGui::PopTextWrapPos();
+    //                        ImGui::EndTooltip();
+    //                    }
+    //                    auto volume = _mixer->GetChannel(i)->Pvolume;
+    //                    if (ImGui::KnobUchar("volume", &(volume), 0, 128, ImVec2(40, 40)))
+    //                    {
+    //                        _mixer->GetChannel(i)->setPvolume(volume);
+    //                    }
+    //                    ImGui::SameLine();
+    //                    auto panning = _mixer->GetChannel(i)->Ppanning;
+    //                    if (ImGui::KnobUchar(" pann", &(panning), 0, 128, ImVec2(40, 40)))
+    //                    {
+    //                        _mixer->GetChannel(i)->setPpanning(panning);
+    //                    }
+    //                    ImGui::PopStyleColor(3);
+    //                    ImGui::PopID();
 
-//                    ImGui::NextColumn();
-//                    if ((i + 1) % 4 == 0)
-//                    {
-//                        ImGui::Separator();
-//                    }
-//                }
-//            }
-//            ImGui::EndChild();
-//        }
-//        ImGui::EndGroup();
-//    }
-//    ImGui::End();
+    //                    ImGui::NextColumn();
+    //                    if ((i + 1) % 4 == 0)
+    //                    {
+    //                        ImGui::Separator();
+    //                    }
+    //                }
+    //            }
+    //            ImGui::EndChild();
+    //        }
+    //        ImGui::EndGroup();
+    //    }
+    //    ImGui::End();
 
-//    ImGuiSequencer(_tracker.Tracks(), NUM_MIDI_CHANNELS);
+    //    ImGuiSequencer(_tracker.Tracks(), NUM_MIDI_CHANNELS);
 
-//    if (showAddSynthEditor)
-//    {
-//        ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
-//    }
+    //    if (showAddSynthEditor)
+    //    {
+    //        ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
+    //    }
 
-//    if (showInstrumentEditor)
-//    {
-//        if (ImGui::Begin("Instrument editor", &showInstrumentEditor))
-//        {
-//            ImGui::Columns(2);
+    //    if (showInstrumentEditor)
+    //    {
+    //        if (ImGui::Begin("Instrument editor", &showInstrumentEditor))
+    //        {
+    //            ImGui::Columns(2);
 
-//            const char *listbox_items[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
-//            ImGui::Combo("Part", &activeInstrument, listbox_items, 15);
+    //            const char *listbox_items[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
+    //            ImGui::Combo("Part", &activeInstrument, listbox_items, 15);
 
-//            bool penabled = _mixer->GetChannel(activeInstrument)->Penabled != 0;
-//            if (ImGui::Checkbox("Enabled", &penabled))
-//            {
-//                _mixer->GetChannel(activeInstrument)->Penabled = penabled ? 1 : 0;
-//            }
+    //            bool penabled = _mixer->GetChannel(activeInstrument)->Penabled != 0;
+    //            if (ImGui::Checkbox("Enabled", &penabled))
+    //            {
+    //                _mixer->GetChannel(activeInstrument)->Penabled = penabled ? 1 : 0;
+    //            }
 
-//            bool add = _mixer->GetChannel(activeInstrument)->_instruments[0].Padenabled;
-//            if (ImGui::Checkbox("Add", &add))
-//            {
-//                _mixer->GetChannel(activeInstrument)->_instruments[0].Padenabled = add;
-//            }
-//            ImGui::SameLine();
-//            if (ImGui::Button("Edit"))
-//            {
-//                EditADSynth(activeInstrument);
-//            }
+    //            bool add = _mixer->GetChannel(activeInstrument)->_instruments[0].Padenabled;
+    //            if (ImGui::Checkbox("Add", &add))
+    //            {
+    //                _mixer->GetChannel(activeInstrument)->_instruments[0].Padenabled = add;
+    //            }
+    //            ImGui::SameLine();
+    //            if (ImGui::Button("Edit"))
+    //            {
+    //                EditADSynth(activeInstrument);
+    //            }
 
-//            bool sub = _mixer->GetChannel(activeInstrument)->_instruments[0].Psubenabled;
-//            if (ImGui::Checkbox("Sub", &sub))
-//            {
-//                _mixer->GetChannel(activeInstrument)->_instruments[0].Psubenabled = sub;
-//            }
+    //            bool sub = _mixer->GetChannel(activeInstrument)->_instruments[0].Psubenabled;
+    //            if (ImGui::Checkbox("Sub", &sub))
+    //            {
+    //                _mixer->GetChannel(activeInstrument)->_instruments[0].Psubenabled = sub;
+    //            }
 
-//            bool pad = _mixer->GetChannel(activeInstrument)->_instruments[0].Ppadenabled;
-//            if (ImGui::Checkbox("Pad", &pad))
-//            {
-//                _mixer->GetChannel(activeInstrument)->_instruments[0].Ppadenabled = pad;
-//            }
+    //            bool pad = _mixer->GetChannel(activeInstrument)->_instruments[0].Ppadenabled;
+    //            if (ImGui::Checkbox("Pad", &pad))
+    //            {
+    //                _mixer->GetChannel(activeInstrument)->_instruments[0].Ppadenabled = pad;
+    //            }
 
-//            if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname)))
-//            {
-//                SelectInstrument(activeInstrument);
-//                openSelectInstrument = activeInstrument;
-//            }
-//            ImGui::NextColumn();
-//            ImGui::Columns(1);
+    //            if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname)))
+    //            {
+    //                SelectInstrument(activeInstrument);
+    //                openSelectInstrument = activeInstrument;
+    //            }
+    //            ImGui::NextColumn();
+    //            ImGui::Columns(1);
 
-//            static bool noteOn = false;
-//            if (ImGui::Button("Note On") && !noteOn)
-//            {
-//                _mixer->NoteOn(0, 65, 120);
-//                noteOn = true;
-//            }
-//            if (ImGui::Button("Note Off") && noteOn)
-//            {
-//                _mixer->NoteOff(0, 65);
-//                noteOn = false;
-//            }
-//            ImGui::End();
-//        }
-//    }
+    //            static bool noteOn = false;
+    //            if (ImGui::Button("Note On") && !noteOn)
+    //            {
+    //                _mixer->NoteOn(0, 65, 120);
+    //                noteOn = true;
+    //            }
+    //            if (ImGui::Button("Note Off") && noteOn)
+    //            {
+    //                _mixer->NoteOff(0, 65);
+    //                noteOn = false;
+    //            }
+    //            ImGui::End();
+    //        }
+    //    }
 
-//    if (openSelectInstrument >= 0)
-//    {
-//        ImGui::OpenPopup("popup");
-//    }
+    //    if (openSelectInstrument >= 0)
+    //    {
+    //        ImGui::OpenPopup("popup");
+    //    }
 
-//    ImGui::SetNextWindowSize(ImVec2(700, 600));
-//    if (ImGui::BeginPopupModal("popup"))
-//    {
-//        auto count = _mixer->GetBankManager()->GetBankCount();
-//        std::vector<const char *> bankNames;
-//        bankNames.push_back("");
-//        for (int i = 0; i < count; i++)
-//        {
-//            bankNames.push_back(_mixer->GetBankManager()->GetBank(i).name.c_str());
-//        }
-//        static int currentBank = 0;
-//        if (ImGui::Combo("Bank", &currentBank, &(bankNames[0]), int(count)))
-//        {
-//            _mixer->GetBankManager()->LoadBank(currentBank - 1);
-//        }
-//        ImGui::SameLine();
+    //    ImGui::SetNextWindowSize(ImVec2(700, 600));
+    //    if (ImGui::BeginPopupModal("popup"))
+    //    {
+    //        auto count = _mixer->GetBankManager()->GetBankCount();
+    //        std::vector<const char *> bankNames;
+    //        bankNames.push_back("");
+    //        for (int i = 0; i < count; i++)
+    //        {
+    //            bankNames.push_back(_mixer->GetBankManager()->GetBank(i).name.c_str());
+    //        }
+    //        static int currentBank = 0;
+    //        if (ImGui::Combo("Bank", &currentBank, &(bankNames[0]), int(count)))
+    //        {
+    //            _mixer->GetBankManager()->LoadBank(currentBank - 1);
+    //        }
+    //        ImGui::SameLine();
 
-//        if (ImGui::Button("Close"))
-//        {
-//            openSelectInstrument = -1;
-//            ImGui::CloseCurrentPopup();
-//        }
+    //        if (ImGui::Button("Close"))
+    //        {
+    //            openSelectInstrument = -1;
+    //            ImGui::CloseCurrentPopup();
+    //        }
 
-//        ImGui::Columns(5);
-//        if (currentBank > 0)
-//        {
-//            for (unsigned int i = 0; i < BANK_SIZE; i++)
-//            {
-//                auto instrumentName = _mixer->GetBankManager()->GetName(i);
+    //        ImGui::Columns(5);
+    //        if (currentBank > 0)
+    //        {
+    //            for (unsigned int i = 0; i < BANK_SIZE; i++)
+    //            {
+    //                auto instrumentName = _mixer->GetBankManager()->GetName(i);
 
-//                if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
-//                {
-//                    auto const &instrument = _mixer->GetChannel(activeInstrument);
-//                    instrument->Lock();
-//                    _mixer->GetBankManager()->LoadFromSlot(i, instrument);
-//                    instrument->Unlock();
-//                    instrument->ApplyParameters();
-//                    openSelectInstrument = -1;
-//                    ImGui::CloseCurrentPopup();
-//                }
-//                if ((i + 1) % 32 == 0)
-//                {
-//                    ImGui::NextColumn();
-//                }
-//            }
-//        }
-//        ImGui::EndPopup();
-//    }
+    //                if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
+    //                {
+    //                    auto const &instrument = _mixer->GetChannel(activeInstrument);
+    //                    instrument->Lock();
+    //                    _mixer->GetBankManager()->LoadFromSlot(i, instrument);
+    //                    instrument->Unlock();
+    //                    instrument->ApplyParameters();
+    //                    openSelectInstrument = -1;
+    //                    ImGui::CloseCurrentPopup();
+    //                }
+    //                if ((i + 1) % 32 == 0)
+    //                {
+    //                    ImGui::NextColumn();
+    //                }
+    //            }
+    //        }
+    //        ImGui::EndPopup();
+    //    }
 
-//    if (openSelectSinkSource >= 0)
-//    {
-//        ImGui::OpenPopup("NioPopup");
-//    }
+    //    if (openSelectSinkSource >= 0)
+    //    {
+    //        ImGui::OpenPopup("NioPopup");
+    //    }
 
-//    if (ImGui::BeginPopupModal("NioPopup"))
-//    {
-//        static int selectedSink = 0, selectedSource = 0;
-//        int sinkIndex = 0;
-//        for (auto sink : Nio::GetSinks())
-//        {
-//            if (ImGui::RadioButton(sink.c_str(), &selectedSink, int(sinkIndex++)))
-//            {
-//                Nio::SelectSink(sink);
-//            }
-//        }
-//        int sourceIndex = 0;
-//        for (auto source : Nio::GetSources())
-//        {
-//            if (ImGui::RadioButton(source.c_str(), &selectedSource, int(sourceIndex++)))
-//            {
-//                Nio::SelectSource(source);
-//            }
-//        }
+    //    if (ImGui::BeginPopupModal("NioPopup"))
+    //    {
+    //        static int selectedSink = 0, selectedSource = 0;
+    //        int sinkIndex = 0;
+    //        for (auto sink : Nio::GetSinks())
+    //        {
+    //            if (ImGui::RadioButton(sink.c_str(), &selectedSink, int(sinkIndex++)))
+    //            {
+    //                Nio::SelectSink(sink);
+    //            }
+    //        }
+    //        int sourceIndex = 0;
+    //        for (auto source : Nio::GetSources())
+    //        {
+    //            if (ImGui::RadioButton(source.c_str(), &selectedSource, int(sourceIndex++)))
+    //            {
+    //                Nio::SelectSource(source);
+    //            }
+    //        }
 
-//        if (ImGui::Button("Close"))
-//        {
-//            openSelectSinkSource = -1;
-//            ImGui::CloseCurrentPopup();
-//        }
-//        ImGui::EndPopup();
-//    }
+    //        if (ImGui::Button("Close"))
+    //        {
+    //            openSelectSinkSource = -1;
+    //            ImGui::CloseCurrentPopup();
+    //        }
+    //        ImGui::EndPopup();
+    //    }
 
     ImGuiPlayback();
 
