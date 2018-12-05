@@ -86,7 +86,7 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteParameters *parameters)
 
     ImGui::EndChild();
 
-    AmplitudeEnvelope(parameters->GlobalPar.AmpEnvelope);
+    Envelope("Amplitude Envelope", parameters->GlobalPar.AmpEnvelope);
     LFO("Amplitude LFO", parameters->GlobalPar.AmpLfo);
 
     ImGui::EndChild();
@@ -100,7 +100,7 @@ void AppThreeDee::ADNoteEditorFilter(ADnoteParameters *parameters)
 
     FilterParameters(parameters->GlobalPar.GlobalFilter);
 
-    FilterEnvelope(parameters->GlobalPar.FilterEnvelope);
+    Envelope("Filter Envelope", parameters->GlobalPar.FilterEnvelope);
 
     LFO("Filter LFo", parameters->GlobalPar.FilterLfo);
 
@@ -176,7 +176,7 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteParameters *parameters)
 
     ImGui::Separator();
 
-    FrequencyEnvelope(parameters->GlobalPar.FreqEnvelope);
+    Envelope("Frequency Envelope", parameters->GlobalPar.FreqEnvelope);
 
     ImGui::SameLine();
 

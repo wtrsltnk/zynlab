@@ -71,10 +71,7 @@ private:
     void FilterParameters(class FilterParams *parameters);
 
     // Envelope
-    void AmplitudeEnvelope(class EnvelopeParams *envelope);
-    void FrequencyEnvelope(class EnvelopeParams *envelope);
-    void FilterEnvelope(class EnvelopeParams *envelope);
-    void BandWidthEnvelope(class EnvelopeParams *envelope);
+    void Envelope(char const *label, class EnvelopeParams *envelope);
 };
 
 #endif // _APP_THREE_DEE_H_
