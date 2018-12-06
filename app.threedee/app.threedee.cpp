@@ -164,7 +164,6 @@ void AppThreeDee::Render()
                 ImGui::EndTabItem();
             }
             static char voiceIds[][64]{
-                "Voice 0",
                 "Voice 1",
                 "Voice 2",
                 "Voice 3",
@@ -172,11 +171,14 @@ void AppThreeDee::Render()
                 "Voice 5",
                 "Voice 6",
                 "Voice 7",
+                "Voice 8",
             };
             for (int i = 0; i < NUM_VOICES; i++)
             {
                 if (ImGui::BeginTabItem(voiceIds[i]))
                 {
+                    ADNoteVoiceEditor(&_mixer->GetChannel(activeInstrument)->_instruments[0].adpars->VoicePar[i]);
+
                     ImGui::EndTabItem();
                 }
             }

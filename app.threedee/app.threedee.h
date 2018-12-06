@@ -14,6 +14,7 @@
 #include <zyn.seq/Track.h>
 #include <zyn.seq/Tracker.h>
 #include <zyn.synth/FFTwrapper.h>
+#include <zyn.synth/ADnoteParams.h>
 
 class AppThreeDee
 {
@@ -60,9 +61,16 @@ private:
     // AD note
     bool showAddSynthEditor;
     void ADNoteEditor(ADnoteParameters *parameters);
-    void ADNoteEditorAmplitude(ADnoteParameters *parameters);
-    void ADNoteEditorFilter(ADnoteParameters *parameters);
-    void ADNoteEditorFrequency(ADnoteParameters *parameters);
+    void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
+    void ADNoteEditorFilter(ADnoteGlobalParam *parameters);
+    void ADNoteEditorFrequency(ADnoteGlobalParam *parameters);
+    void ADNoteVoiceEditor(ADnoteVoiceParam *parameters);
+    void ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters);
+    void ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters);
+    void ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters);
+    void ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters);
+    void ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters);
+    void ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters);
 
     // LFO
     void LFO(char const *label, class LFOParams *parameters);

@@ -6,8 +6,6 @@
 
 void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
 {
-    ImGui::BeginChild(label);
-
     ImGui::Text("%s", label);
 
     if (envelope->Envmode >= 3)
@@ -142,6 +140,4 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     }
     ImGui::SameLine();
     ImGui::Text("frcR.");
-
-    ImGui::EndChild();
 }

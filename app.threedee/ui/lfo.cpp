@@ -5,13 +5,41 @@
 
 void AppThreeDee::LFO(char const *label, LFOParams *params)
 {
-    ImGui::BeginChild(label, ImVec2(270, 80), true);
-
-    ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 190);
-    ImGui::SetColumnWidth(1, 80);
-
     ImGui::Text("%s", label);
+
+    static char const *items[] = {
+        "SINE",
+        "TRI",
+        "SQR",
+        "R.up",
+        "R.dn",
+        "E1dn",
+        "E2dn",
+    };
+    static char const *current_item = nullptr;
+
+    auto type = static_cast<int>(params->PLFOtype);
+    current_item = items[type];
+    if (ImGui::BeginCombo("##lfotype", current_item))
+    {
+        for (int n = 0; n < 7; n++)
+        {
+            bool is_selected = (current_item == items[n]);
+            if (ImGui::Selectable(items[n], is_selected))
+            {
+                current_item = items[n];
+                params->PLFOtype = static_cast<unsigned char>(n);
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::Text("LFO Type");
+        ImGui::EndTooltip();
+    }
 
     auto freq = params->Pfreq;
     if (ImGui::Knob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(30, 30)))
@@ -76,8 +104,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO stretch");
         ImGui::EndTooltip();
     }
-
-    ImGui::NextColumn();
+    ImGui::SameLine();
 
     auto a_r = static_cast<float>(params->Prandomness);
     if (ImGui::Knob("A.R", &(a_r), 0, 128, ImVec2(20, 20)))
@@ -103,39 +130,4 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO Frequency Randomness");
         ImGui::EndTooltip();
     }
-
-    static char const *items[] = {
-        "SINE",
-        "TRI",
-        "SQR",
-        "R.up",
-        "R.dn",
-        "E1dn",
-        "E2dn",
-    };
-    static char const *current_item = nullptr;
-
-    auto type = static_cast<int>(params->PLFOtype);
-    current_item = items[type];
-    if (ImGui::BeginCombo("##lfotype", current_item))
-    {
-        for (int n = 0; n < 7; n++)
-        {
-            bool is_selected = (current_item == items[n]);
-            if (ImGui::Selectable(items[n], is_selected))
-            {
-                current_item = items[n];
-                params->PLFOtype = static_cast<unsigned char>(n);
-            }
-        }
-
-        ImGui::EndCombo();
-    }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO Type");
-        ImGui::EndTooltip();
-    }
-    ImGui::EndChild();
 }

@@ -1,53 +1,59 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0303 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
-
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include "zyn.synth/ADnoteParams.h"} {public
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 } 
 
-decl {\#include "zyn.common/Util.h"} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include "zyn.common/globals.h"} {public
+decl {\#include "zyn.synth/ADnoteParams.h"} {public local
 } 
 
-decl {\#include "ResonanceUI.h"} {public
+decl {\#include "zyn.common/Util.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public
+decl {\#include "zyn.common/globals.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public
+decl {\#include "ResonanceUI.h"} {public local
 } 
 
-decl {\#include <math.h>} {} 
-
-decl {\#include <stdio.h>} {} 
-
-decl {\#include <stdlib.h>} {} 
-
-decl {\#include <string.h>} {} 
-
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <FL/Fl_Box.H>} {public local
 } 
 
-decl {\#include "EnvelopeUI.h"} {public
+decl {\#include <FL/Fl_Group.H>} {public local
 } 
 
-decl {\#include "LFOUI.h"} {public
+decl {\#include <math.h>} {private local
 } 
 
-decl {\#include "FilterUI.h"} {public
+decl {\#include <stdio.h>} {private local
 } 
 
-decl {\#include "OscilGenUI.h"} {public
+decl {\#include <stdlib.h>} {private local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include <string.h>} {private local
+} 
+
+decl {\#include "WidgetPDial.h"} {public local
+} 
+
+decl {\#include "EnvelopeUI.h"} {public local
+} 
+
+decl {\#include "LFOUI.h"} {public local
+} 
+
+decl {\#include "FilterUI.h"} {public local
+} 
+
+decl {\#include "OscilGenUI.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
 } 
 
 class ADvoicelistitem {open : {public Fl_Group}
@@ -55,8 +61,8 @@ class ADvoicelistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {open
-      private xywh {262 736 615 100} type Double box UP_FRAME
-      class Fl_Group visible
+      private xywh {266 740 607 92} type Double box UP_FRAME hide
+      class Fl_Group
     } {
       Fl_Group voicelistitemgroup {
         private xywh {50 0 570 25}
@@ -166,10 +172,14 @@ ADnoteVoiceListItem->redraw();} {}
     code {ADnoteVoiceListItem->hide();
 //delete(ADnoteVoiceListItem);} {}
   }
-  decl {ADnoteParameters *pars;} {}
-  decl {int nvoice;} {}
-  decl {Oscilloscope *osc;} {}
-  decl {Mixer *master;} {}
+  decl {ADnoteParameters *pars;} {private local
+  }
+  decl {int nvoice;} {private local
+  }
+  decl {Oscilloscope *osc;} {private local
+  }
+  decl {Mixer *master;} {private local
+  }
 } 
 
 class ADvoiceUI {open : {public Fl_Group}
@@ -178,7 +188,7 @@ class ADvoiceUI {open : {public Fl_Group}
   } {
     Fl_Window ADnoteVoiceParameters {
       label Voice open
-      xywh {863 89 765 595} type Double box NO_BOX
+      xywh {3665 31 749 579} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group voiceparametersgroup {open
@@ -194,7 +204,7 @@ class ADvoiceUI {open : {public Fl_Group}
             code0 {if (pars->VoicePar[nvoice].PFMEnabled==0) o->deactivate();}
           } {
             Fl_Group modfrequency {
-              label {Mod.FREQUENCY}
+              label {Mod.FREQUENCY} open
               xywh {535 220 220 155} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
             } {
               Fl_Group voiceFMfreqenvgroup {
@@ -399,7 +409,7 @@ o->redraw();}
             }
           }
           Fl_Group {} {
-            label FREQUENCY
+            label FREQUENCY open
             xywh {5 265 525 120} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group voicefreqenvgroup {
@@ -594,7 +604,7 @@ unisonspreadoutput->do_callback();}
             }
             Fl_Dial {} {
               label {V.speed}
-              callback {pars->VoicePar[nvoice].Unison_vibratto_speed=(int)o->value();} selected
+              callback {pars->VoicePar[nvoice].Unison_vibratto_speed=(int)o->value();}
               tooltip {Vibrato Average Speed} xywh {406 555 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->VoicePar[nvoice].Unison_vibratto_speed);}
               class WidgetPDial
@@ -805,12 +815,18 @@ if (oscedit!=NULL) {
 };
 //delete (ADnoteVoiceParameters);} {}
   }
-  decl {int nvoice;} {}
-  decl {ADnoteParameters *pars;} {}
-  decl {OscilEditor *oscedit;} {}
-  decl {Oscilloscope *osc;} {}
-  decl {Oscilloscope *oscFM;} {}
-  decl {Mixer *master;} {}
+  decl {int nvoice;} {private local
+  }
+  decl {ADnoteParameters *pars;} {private local
+  }
+  decl {OscilEditor *oscedit;} {private local
+  }
+  decl {Oscilloscope *osc;} {private local
+  }
+  decl {Oscilloscope *oscFM;} {private local
+  }
+  decl {Mixer *master;} {private local
+  }
 } 
 
 class ADnoteUI {open : {public PresetsUI_}
@@ -818,11 +834,11 @@ class ADnoteUI {open : {public PresetsUI_}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteGlobalParameters {
-      label {ADsynth Global Parameters of the Instrument} open
-      xywh {457 319 540 430} type Double visible
+      label {ADsynth Global Parameters of the Instrument}
+      xywh {2701 557 524 414} type Double visible
     } {
       Fl_Group {} {
-        label FREQUENCY open
+        label FREQUENCY
         xywh {5 280 530 115} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
       } {
         Fl_Group freqenv {
@@ -904,7 +920,7 @@ for (int i=0;i<NUM_VOICES;i++){
         }
         Fl_Value_Slider vsns {
           label {V.Sns}
-          callback {pars->GlobalPar.PAmpVelocityScaleFunction=(int) o->value();}
+          callback {pars->GlobalPar.PAmpVelocityScaleFunction=(int) o->value();} selected
           tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 50 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
           code0 {o->value(pars->GlobalPar.PAmpVelocityScaleFunction);}
         }
@@ -963,7 +979,7 @@ for (int i=0;i<NUM_VOICES;i++){
         }
       }
       Fl_Group {} {
-        label FILTER open selected
+        label FILTER
         xywh {250 5 285 265} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
       } {
         Fl_Group filterenv {
@@ -1027,8 +1043,8 @@ resui->resonancewindow->show();}
       }
     }
     Fl_Window ADnoteVoice {
-      label {ADsynth Voice Parameters} open
-      xywh {1142 229 765 630} type Double visible
+      label {ADsynth Voice Parameters}
+      xywh {1051 187 749 614} type Double hide
     } {
       Fl_Group advoice {open
         xywh {0 0 765 595}
@@ -1068,7 +1084,7 @@ ADnoteVoice->redraw();}
     }
     Fl_Window ADnoteVoiceList {
       label {ADsynth Voices list}
-      xywh {32 266 650 260} type Double hide
+      xywh {36 270 642 252} type Double hide
     } {
       Fl_Text_Display {} {
         label {No.}
@@ -1161,9 +1177,14 @@ for (int i=0;i<NUM_VOICES;i++) voicelistitem[i]->refreshlist();
 resui->refresh();
 currentvoicecounter->do_callback();} {}
   }
-  decl {ADnoteParameters *pars;} {}
-  decl {ResonanceUI *resui;} {}
-  decl {Mixer *master;} {}
-  decl {int nvoice;} {}
-  decl {ADvoicelistitem *voicelistitem[NUM_VOICES];} {}
+  decl {ADnoteParameters *pars;} {private local
+  }
+  decl {ResonanceUI *resui;} {private local
+  }
+  decl {Mixer *master;} {private local
+  }
+  decl {int nvoice;} {private local
+  }
+  decl {ADvoicelistitem *voicelistitem[NUM_VOICES];} {private local
+  }
 } 

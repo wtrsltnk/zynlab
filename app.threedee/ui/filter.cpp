@@ -5,14 +5,6 @@
 
 void AppThreeDee::FilterParameters(FilterParams *parameters)
 {
-    ImGui::BeginChild("Filter Parameters", ImVec2(320, 80), true);
-
-    ImGui::Text("Filter Parameters");
-
-    ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 100);
-    ImGui::SetColumnWidth(1, 220);
-
     static char const *categories[] = {
         "Analog",
         "Formant",
@@ -127,8 +119,6 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         }
     }
 
-    ImGui::NextColumn();
-
     auto freq = static_cast<float>(parameters->Pfreq);
     if (ImGui::Knob("C.Freq", &(freq), 0, 128, ImVec2(30, 30)))
     {
@@ -182,6 +172,4 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         ImGui::Text("Filter output gain/damp");
         ImGui::EndTooltip();
     }
-
-    ImGui::EndChild();
 }
