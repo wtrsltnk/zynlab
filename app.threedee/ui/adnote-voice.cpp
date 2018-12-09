@@ -7,6 +7,20 @@ void AppThreeDee::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("ADsynth Voice Parameters of the Instrument");
 
+    auto enabled = parameters->Enabled != 0;
+    if (ImGui::Checkbox("##enabled", &enabled))
+    {
+        parameters->Enabled = enabled ? 1 : 0;
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::Text("Enable this voice");
+        ImGui::EndTooltip();
+    }
+    ImGui::SameLine();
+    ImGui::Text("Enabled");
+
     if (ImGui::BeginTabBar("ADNote Voice"))
     {
         if (ImGui::BeginTabItem("Oscillator"))

@@ -15,6 +15,7 @@ if(GLFW3_FOUND)
         app.threedee.h
         imgui/imgui.cpp
         imgui/imgui_draw.cpp
+        imgui/imgui_demo.cpp
         imgui/imgui_widgets.cpp
         imgui/examples/imgui_impl_opengl3.cpp
         imgui/examples/imgui_impl_glfw.cpp
