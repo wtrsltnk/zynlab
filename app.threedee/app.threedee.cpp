@@ -75,6 +75,9 @@ bool AppThreeDee::SetUp()
 
 static ImVec4 clear_color = ImColor(114, 144, 154);
 static int activeInstrument = 0;
+static std::map<int, std::string> tracksOfPatterns[NUM_MIXER_CHANNELS];
+static int activePattern = -1;
+
 static bool showInstrumentEditor = false;
 static bool show_simple_user_interface = false;
 static int keyboardChannel = 0;
@@ -118,6 +121,12 @@ static int openSelectSinkSource = -1;
 static bool show_demo_window = true;
 static bool show_another_window = true;
 
+void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label)
+{
+    activeInstrument = trackIndex;
+    activePattern = patternIndex;
+    tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, label));
+}
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -132,7 +141,7 @@ void AppThreeDee::Render()
         static float f = 0.0f;
         static int counter = 0;
 
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
@@ -149,74 +158,81 @@ void AppThreeDee::Render()
         ImGui::End();
         ImGui::PopStyleVar(2);
 
-
-
         ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-        static std::map<int, std::string> tracksOfPatterns[NUM_MIXER_CHANNELS];
-
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
 
+        static int trackHeight = 30;
         ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
-        for (int line = 0; line < NUM_MIXER_CHANNELS; line++)
+        for (int track = 0; track < NUM_MIXER_CHANNELS; track++)
         {
-            auto lastIndex = tracksOfPatterns[line].empty() ? -1 : tracksOfPatterns[line].rbegin()->first;
-            for (int n = 0; n <= lastIndex; n++)
+            ImGui::PushID(track * 1100);
+            auto trackEnabled = _mixer->GetChannel(track)->Penabled == 1;
+            if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
             {
-                if (n > 0) ImGui::SameLine();
-                ImGui::PushID(n + line * 1000);
+                _mixer->GetChannel(track)->Penabled = trackEnabled ? 1 : 0;
+            }
+            ImGui::SameLine();
+            ImGui::Text("#%d", track + 1);
+            ImGui::PopID();
+
+            auto lastIndex = tracksOfPatterns[track].empty() ? -1 : tracksOfPatterns[track].rbegin()->first;
+            for (int pattern = 0; pattern <= lastIndex; pattern++)
+            {
+                ImGui::SameLine();
+                ImGui::PushID(pattern + track * 1000);
                 char num_buf[16];
-                sprintf(num_buf, "%d", n);
-                const char *label = (!(n % 15)) ? "FizzBuzz" : (!(n % 3)) ? "Fizz" : (!(n % 5)) ? "Buzz" : num_buf;
-                float hue = line * 0.05f;
+                sprintf(num_buf, "%d", pattern);
+                const char *label = (!(pattern % 15)) ? "FizzBuzz" : (!(pattern % 3)) ? "Fizz" : (!(pattern % 5)) ? "Buzz" : num_buf;
+                float hue = track * 0.05f;
                 ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue, 0.6f, 0.6f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue, 0.7f, 0.7f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue, 0.8f, 0.8f));
 
-                if (tracksOfPatterns[line].find(n) == tracksOfPatterns[line].end())
+                bool isActive = track == activeInstrument && pattern == activePattern;
+                if (isActive)
                 {
-                    if (ImGui::Button("Add", ImVec2(120.0f, 40.0f)))
+                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+                }
+
+                if (tracksOfPatterns[track].find(pattern) != tracksOfPatterns[track].end())
+                {
+                    if (ImGui::Button(tracksOfPatterns[track][pattern].c_str(), ImVec2(120.0f, trackHeight)))
                     {
-                        tracksOfPatterns[line].insert(std::make_pair(n, label));
+                        activeInstrument = track;
+                        activePattern = pattern;
                     }
                 }
-                else
+                else if (_mixer->GetChannel(track)->Penabled)
                 {
-                    ImGui::Button(tracksOfPatterns[line][n].c_str(), ImVec2(120.0f, 40.0f));
-                    if (ImGui::IsItemActive())
+                    if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
                     {
-                        // Draw a line between the button and the mouse cursor
-                        ImDrawList *draw_list = ImGui::GetWindowDrawList();
-                        draw_list->PushClipRectFullScreen();
-                        draw_list->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f);
-                        draw_list->PopClipRect();
-
-                        // Drag operations gets "unlocked" when the mouse has moved past a certain threshold (the default threshold is stored in io.MouseDragThreshold)
-                        // You can request a lower or higher threshold using the second parameter of IsMouseDragging() and GetMouseDragDelta()
-                        ImVec2 value_raw = ImGui::GetMouseDragDelta(0, 0.0f);
-                        ImVec2 value_with_lock_threshold = ImGui::GetMouseDragDelta(0);
-                        ImVec2 mouse_delta = io.MouseDelta;
-                        ImGui::SameLine();
-                        ImGui::Text("Raw (%.1f, %.1f), WithLockThresold (%.1f, %.1f), MouseDelta (%.1f, %.1f)", value_raw.x, value_raw.y, value_with_lock_threshold.x, value_with_lock_threshold.y, mouse_delta.x, mouse_delta.y);
+                        AddPattern(track, pattern, label);
                     }
+                }
+                if (isActive)
+                {
+                    ImGui::PopStyleColor(1);
+                    ImGui::PopStyleVar(1);
                 }
 
                 ImGui::PopStyleColor(3);
                 ImGui::PopID();
             }
-            if (!tracksOfPatterns[line].empty())
+            if (_mixer->GetChannel(track)->Penabled)
             {
                 ImGui::SameLine();
+                ImGui::PushID(track * 1010);
+                if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+                {
+                    AddPattern(track, lastIndex + 1, "label");
+                }
+                ImGui::PopID();
             }
-            ImGui::PushID(line * 1010);
-            if (ImGui::Button("Add", ImVec2(120.0f, 40.0f)))
-            {
-                tracksOfPatterns[line].insert(std::make_pair(lastIndex + 1, "label"));
-            }
-            ImGui::PopID();
         }
         float scroll_x = ImGui::GetScrollX(), scroll_y = ImGui::GetScrollY(), scroll_max_x = ImGui::GetScrollMaxX();
         ImGui::EndChild();

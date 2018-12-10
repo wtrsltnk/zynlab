@@ -58,6 +58,8 @@ private:
     void Stop();
     void PlayPause();
 
+    void AddPattern(int trackIndex, int patternIndex, char const *label);
+
     // AD note
     bool showAddSynthEditor;
     void ADNoteEditor(ADnoteParameters *parameters);
