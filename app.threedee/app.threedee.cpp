@@ -127,6 +127,21 @@ void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label
     activePattern = patternIndex;
     tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, label));
 }
+
+void AppThreeDee::RemoveActivePattern()
+{
+    if (activeInstrument < 0 || activePattern < 0)
+    {
+        return;
+    }
+
+    std::cout << "Removing pattern #" << activePattern << " of track #" << activeInstrument << std::endl;
+
+    tracksOfPatterns[activeInstrument].erase(activePattern);
+    activeInstrument = -1;
+    activePattern = -1;
+}
+
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -138,9 +153,6 @@ void AppThreeDee::Render()
 
     // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
     {
-        static float f = 0.0f;
-        static int counter = 0;
-
         ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
@@ -158,9 +170,7 @@ void AppThreeDee::Render()
         ImGui::End();
         ImGui::PopStyleVar(2);
 
-        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Begin("Sequencer"); // Create a window called "Hello, world!" and append into it.
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
@@ -186,12 +196,7 @@ void AppThreeDee::Render()
                 ImGui::PushID(pattern + track * 1000);
                 char num_buf[16];
                 sprintf(num_buf, "%d", pattern);
-                const char *label = (!(pattern % 15)) ? "FizzBuzz" : (!(pattern % 3)) ? "Fizz" : (!(pattern % 5)) ? "Buzz" : num_buf;
                 float hue = track * 0.05f;
-                ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue, 0.6f, 0.6f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue, 0.7f, 0.7f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue, 0.8f, 0.8f));
-
                 bool isActive = track == activeInstrument && pattern == activePattern;
                 if (isActive)
                 {
@@ -201,17 +206,22 @@ void AppThreeDee::Render()
 
                 if (tracksOfPatterns[track].find(pattern) != tracksOfPatterns[track].end())
                 {
+                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
+
                     if (ImGui::Button(tracksOfPatterns[track][pattern].c_str(), ImVec2(120.0f, trackHeight)))
                     {
                         activeInstrument = track;
                         activePattern = pattern;
                     }
+                    ImGui::PopStyleColor(3);
                 }
                 else if (_mixer->GetChannel(track)->Penabled)
                 {
                     if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
                     {
-                        AddPattern(track, pattern, label);
+                        AddPattern(track, pattern, "");
                     }
                 }
                 if (isActive)
@@ -220,7 +230,6 @@ void AppThreeDee::Render()
                     ImGui::PopStyleVar(1);
                 }
 
-                ImGui::PopStyleColor(3);
                 ImGui::PopID();
             }
             if (_mixer->GetChannel(track)->Penabled)
@@ -229,12 +238,12 @@ void AppThreeDee::Render()
                 ImGui::PushID(track * 1010);
                 if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
                 {
-                    AddPattern(track, lastIndex + 1, "label");
+                    AddPattern(track, lastIndex + 1, "");
                 }
                 ImGui::PopID();
             }
         }
-        float scroll_x = ImGui::GetScrollX(), scroll_y = ImGui::GetScrollY(), scroll_max_x = ImGui::GetScrollMaxX();
+        float scroll_y = ImGui::GetScrollY();
         ImGui::EndChild();
 
         ImGui::PopStyleVar(2);
@@ -247,8 +256,6 @@ void AppThreeDee::Render()
         ImGui::SameLine();
         ImGui::SmallButton(">>");
         if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f;
-        ImGui::SameLine();
-        ImGui::Text("%.0f/%.0f", scroll_x, scroll_max_x);
         if (scroll_x_delta != 0.0f)
         {
             ImGui::BeginChild("scrolling"); // Demonstrate a trick: you can use Begin to set yourself in the context of another window (here we are already out of your child window)
@@ -275,8 +282,10 @@ void AppThreeDee::Render()
         {
             if (ImGui::BeginTabItem("Global"))
             {
-                ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
-
+                if (activeInstrument >= 0)
+                {
+                    ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
+                }
                 ImGui::EndTabItem();
             }
             static char voiceIds[][64]{
@@ -291,12 +300,15 @@ void AppThreeDee::Render()
             };
             for (int i = 0; i < NUM_VOICES; i++)
             {
-                auto parameters = &_mixer->GetChannel(activeInstrument)->_instruments[0].adpars->VoicePar[i];
-                if (ImGui::BeginTabItem(voiceIds[i]))
+                if (activeInstrument >= 0)
                 {
-                    ADNoteVoiceEditor(parameters);
+                    auto parameters = &_mixer->GetChannel(activeInstrument)->_instruments[0].adpars->VoicePar[i];
+                    if (ImGui::BeginTabItem(voiceIds[i]))
+                    {
+                        ADNoteVoiceEditor(parameters);
 
-                    ImGui::EndTabItem();
+                        ImGui::EndTabItem();
+                    }
                 }
             }
             ImGui::EndTabBar();
@@ -306,6 +318,11 @@ void AppThreeDee::Render()
     }
 
     ImGuiPlayback();
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+    {
+        RemoveActivePattern();
+    }
 
     ImGui::Render();
 
@@ -451,7 +468,7 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        //MyKnob("Speed", &_stepLength, 1.0f, 120.0f, ImVec2(30.0f, 30.0f));
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();
     }

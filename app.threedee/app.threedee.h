@@ -59,6 +59,7 @@ private:
     void PlayPause();
 
     void AddPattern(int trackIndex, int patternIndex, char const *label);
+    void RemoveActivePattern();
 
     // AD note
     bool showAddSynthEditor;
