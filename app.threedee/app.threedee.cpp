@@ -12,7 +12,7 @@
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _display_w(800), _display_h(600),
-      _tracker(mixer->GetSettings()), showAddSynthEditor(false)
+      showAddSynthEditor(false)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -69,8 +69,6 @@ bool AppThreeDee::SetUp()
 
     _mixer->GetBankManager()->RescanForBanks();
 
-    _tracker.SetBpm(120);
-
     return true;
 }
 
@@ -84,47 +82,13 @@ public:
 };
 
 static ImVec4 clear_color = ImColor(114, 144, 154);
-static int activeInstrument = 0;
 static std::map<int, TrackPattern> tracksOfPatterns[NUM_MIXER_CHANNELS];
+static int activeInstrument = 0;
 static int activePattern = -1;
 
 static bool showInstrumentEditor = false;
-static bool show_simple_user_interface = false;
-static int keyboardChannel = 0;
 static bool showPatternEditor = false;
-
-void MainMenu();
-
-void AppThreeDee::EditInstrument(int i)
-{
-    if (i < 0 || i >= NUM_MIXER_CHANNELS)
-    {
-        return;
-    }
-
-    _mixer->GetChannel(i)->Penabled = true;
-
-    activeInstrument = i;
-    showInstrumentEditor = true;
-}
-
-void AppThreeDee::EditADSynth(int i)
-{
-    if (i < 0 || i >= NUM_MIXER_CHANNELS)
-    {
-        return;
-    }
-
-    _mixer->GetChannel(i)->Penabled = true;
-
-    activeInstrument = i;
-    showAddSynthEditor = true;
-}
-
-void AppThreeDee::SelectInstrument(int i)
-{
-    activeInstrument = i;
-}
+static int keyboardChannel = 0;
 
 static int openSelectInstrument = -1;
 static int openSelectSinkSource = -1;
@@ -132,6 +96,7 @@ static int openSelectSinkSource = -1;
 static bool show_demo_window = true;
 static bool show_another_window = true;
 static bool show_pattern_window = false;
+static bool isPlaying = false;
 
 void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label)
 {
@@ -412,19 +377,10 @@ void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*
 
 void AppThreeDee::Stop()
 {
-    _tracker.Stop();
 }
 
 void AppThreeDee::PlayPause()
 {
-    if (_tracker.IsPlaying())
-    {
-        _tracker.Pause();
-    }
-    else
-    {
-        _tracker.Play();
-    }
 }
 
 void AppThreeDee::ImGuiPlayback()
@@ -438,7 +394,7 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        if (_tracker.IsPlaying())
+        if (isPlaying)
         {
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -617,76 +573,4 @@ void AppThreeDee::CleanUp()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-}
-
-void MainMenu()
-{
-    if (ImGui::BeginMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            if (ImGui::MenuItem("New (erase all)..."))
-            {
-            }
-            if (ImGui::MenuItem("Open parameters..."))
-            {
-            }
-            if (ImGui::MenuItem("Save All parameters..."))
-            {
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Load Scale Settings..."))
-            {
-            }
-            if (ImGui::MenuItem("Save Scale Settings..."))
-            {
-            }
-            if (ImGui::MenuItem("Show Scale Settings..."))
-            {
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Settings..."))
-            {
-            }
-            if (ImGui::MenuItem("Copyrights..."))
-            {
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Exit"))
-            {
-            }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Instrument"))
-        {
-            if (ImGui::MenuItem("Clear instrument..."))
-            {
-            }
-            if (ImGui::MenuItem("Open instrument..."))
-            {
-            }
-            if (ImGui::MenuItem("Save instrument..."))
-            {
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Show instrument Bank..."))
-            {
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Virtual keyboard..."))
-            {
-            }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Misc"))
-        {
-            ImGui::MenuItem("Switch User Interface Mode", nullptr, &show_simple_user_interface);
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("NIO"))
-        {
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenuBar();
-    }
 }

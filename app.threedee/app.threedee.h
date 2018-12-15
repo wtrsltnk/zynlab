@@ -40,14 +40,6 @@ public:
     void Render();
     void CleanUp();
 
-public:
-    // App specific
-    void EditInstrument(int i);
-    void EditADSynth(int i);
-    void SelectInstrument(int i);
-
-    Tracker _tracker;
-
 private:
     void ImGuiPlayback();
     void ImGuiSequencer();
