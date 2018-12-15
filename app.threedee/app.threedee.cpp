@@ -7,6 +7,7 @@
 #include "examples/imgui_impl_opengl3.h"
 #include "imgui_addons/imgui_knob.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <map>
 
@@ -80,13 +81,7 @@ static int activePattern = -1;
 static bool showInstrumentEditor = false;
 static bool showPatternEditor = false;
 static int keyboardChannel = 0;
-
-static int openSelectInstrument = -1;
-static int openSelectSinkSource = -1;
-
-static bool show_demo_window = true;
-static bool show_another_window = true;
-static bool show_pattern_window = false;
+static bool showADNoteEditor = true;
 static bool isPlaying = false;
 
 void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label)
@@ -409,7 +404,7 @@ void AppThreeDee::ImGuiSequencer()
                         activePattern = patternIndex;
                         if (ImGui::IsMouseDoubleClicked(0))
                         {
-                            show_pattern_window = true;
+                            EditSelectedPattern();
                         }
                     }
                     ImGui::PopStyleColor(3);
@@ -528,6 +523,63 @@ void AppThreeDee::ImGuiSequencer()
     }
 }
 
+const char *notes[] = {
+    "A",
+    "A#",
+    "B",
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+};
+
+void AppThreeDee::ImGuiPatternEditorWindow()
+{
+    const float noteLabelWidth = 50.0f;
+    const float rowHeight = 30.0f;
+    if (showPatternEditor)
+    {
+        auto &style = ImGui::GetStyle();
+        auto &selectedPattern = GetPattern(activeInstrument, activePattern);
+
+        ImGui::Begin("PatternEditor", &showPatternEditor);
+        auto width = std::fmin(ImGui::GetWindowWidth() - noteLabelWidth, (rowHeight + style.ItemSpacing.x) * 16);
+        auto itemWidth = (width / 16) - (style.ItemSpacing.x * 2);
+        for (int i = 0; i < 88; i++)
+        {
+            ImGui::PushID(i);
+            ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, itemWidth));
+            for (int j = 0; j < 16; j++)
+            {
+                ImGui::SameLine();
+                ImGui::PushID(j);
+                auto found = selectedPattern._notes.find(TrackPatternNote(i, j));
+                bool s = found != selectedPattern._notes.end();
+                if (ImGui::Selectable("##note", &s, 0, ImVec2(itemWidth, itemWidth)))
+                {
+                    if (!s)
+                    {
+                        selectedPattern._notes.erase(TrackPatternNote(i, j));
+                    }
+                    else
+                    {
+                        selectedPattern._notes.insert(TrackPatternNote(i, j));
+                    }
+                }
+                ImGui::PopID();
+            }
+            ImGui::Separator();
+            ImGui::PopID();
+        }
+        ImGui::End();
+    }
+}
+
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -553,15 +605,16 @@ void AppThreeDee::Render()
     ImGui::PopStyleVar(2);
 
     ImGuiSequencer();
-    ImGuiPatternEditorPopup();
+    ImGuiPatternEditorWindow();
 
     // 3. Show another simple window.
-    if (show_another_window)
+    if (showADNoteEditor)
     {
-        ImGui::Begin("Another Window", &show_another_window); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
+        ImGui::Begin("AD note editor", &showADNoteEditor);
         if (ImGui::Button("Close Me"))
-            show_another_window = false;
+        {
+            showADNoteEditor = false;
+        }
 
         if (ImGui::BeginTabBar("blah"))
         {
@@ -620,25 +673,6 @@ void AppThreeDee::Render()
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void AppThreeDee::ImGuiPatternEditorPopup()
-{
-    if (showPatternEditor)
-    {
-        ImGui::OpenPopup("PatternEditorPopup");
-    }
-
-    if (ImGui::BeginPopupModal("PatternEditorPopup", nullptr, ImGuiWindowFlags_Popup))
-    {
-
-        if (ImGui::Button("Close"))
-        {
-            showPatternEditor = false;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
 }
 
 static std::map<int, unsigned char> mappedNotes{

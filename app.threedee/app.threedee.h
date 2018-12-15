@@ -16,13 +16,26 @@
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
 
+class TrackPatternNote
+{
+public:
+    TrackPatternNote() {}
+    TrackPatternNote(int note, int step) : _note(note), _step(step) {}
+
+    bool operator<(TrackPatternNote const &other) const { return (_note < other._note) || (_note == other._note && _step < other._step); }
+    int _note;
+    int _step;
+};
+
 class TrackPattern
 {
 public:
     TrackPattern() {}
     TrackPattern(std::string const &name, float hue) : _name(name), _hue(hue) {}
+
     std::string _name;
     float _hue;
+    std::set<TrackPatternNote> _notes;
 };
 
 class AppThreeDee
@@ -52,7 +65,7 @@ public:
 private:
     void ImGuiPlayback();
     void ImGuiSequencer();
-    void ImGuiPatternEditorPopup();
+    void ImGuiPatternEditorWindow();
     void Stop();
     void PlayPause();
 
