@@ -149,8 +149,6 @@ void AppThreeDee::RemoveActivePattern()
         return;
     }
 
-    std::cout << "Removing pattern #" << activePattern << " of track #" << activeInstrument << std::endl;
-
     tracksOfPatterns[activeInstrument].erase(activePattern);
     activeInstrument = -1;
     activePattern = -1;
@@ -158,12 +156,12 @@ void AppThreeDee::RemoveActivePattern()
 
 void AppThreeDee::MovePatternLeftIfPossible()
 {
-    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
     {
         return;
     }
-
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
 
     auto currentKey = ap->first;
 
@@ -183,22 +181,42 @@ void AppThreeDee::MovePatternLeftIfPossible()
     }
 }
 
-void AppThreeDee::MovePatternLeftForces()
+void AppThreeDee::MovePatternLeftForced()
 {
-    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
     {
         return;
     }
+
+    if (tracksOfPatterns[activeInstrument].begin()->first == 0)
+    {
+        return;
+    }
+
+    for (int i = tracksOfPatterns[activeInstrument].begin()->first; i <= ap->first; i++)
+    {
+        auto itr = tracksOfPatterns[activeInstrument].find(i);
+        if (itr == tracksOfPatterns[activeInstrument].end())
+        {
+            continue;
+        }
+        tracksOfPatterns[activeInstrument].insert(std::make_pair(i - 1, itr->second));
+        tracksOfPatterns[activeInstrument].erase(i);
+    }
+
+    activePattern = activePattern - 1;
 }
 
 void AppThreeDee::MovePatternRightIfPossible()
 {
-    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
     {
         return;
     }
-
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
 
     auto currentKey = ap->first;
     auto currentValue = ap->second;
@@ -214,12 +232,47 @@ void AppThreeDee::MovePatternRightIfPossible()
     }
 }
 
-void AppThreeDee::MovePatternRightForces()
+void AppThreeDee::MovePatternRightForced()
 {
-    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
     {
         return;
     }
+
+    for (int i = tracksOfPatterns[activeInstrument].rbegin()->first; i >= ap->first; i--)
+    {
+        auto itr = tracksOfPatterns[activeInstrument].find(i);
+        if (itr == tracksOfPatterns[activeInstrument].end())
+        {
+            continue;
+        }
+        tracksOfPatterns[activeInstrument].insert(std::make_pair(i + 1, itr->second));
+        tracksOfPatterns[activeInstrument].erase(i);
+    }
+
+    activePattern = activePattern + 1;
+}
+
+void AppThreeDee::SelectFirstPatternInTrack()
+{
+    if (activeInstrument < 0)
+    {
+        return;
+    }
+
+    activePattern = tracksOfPatterns[activeInstrument].begin()->first;
+}
+
+void AppThreeDee::SelectLastPatternInTrack()
+{
+    if (activeInstrument < 0)
+    {
+        return;
+    }
+
+    activePattern = tracksOfPatterns[activeInstrument].rbegin()->first;
 }
 
 void AppThreeDee::Render()
@@ -354,7 +407,7 @@ void AppThreeDee::Render()
             {
                 if (io.KeyShift)
                 {
-                    MovePatternLeftForces();
+                    MovePatternLeftForced();
                 }
                 else
                 {
@@ -365,12 +418,20 @@ void AppThreeDee::Render()
             {
                 if (io.KeyShift)
                 {
-                    MovePatternRightForces();
+                    MovePatternRightForced();
                 }
                 else
                 {
                     MovePatternRightIfPossible();
                 }
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
+            {
+                SelectFirstPatternInTrack();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
+            {
+                SelectLastPatternInTrack();
             }
         }
         ImGui::End();
