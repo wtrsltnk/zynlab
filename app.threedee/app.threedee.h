@@ -60,6 +60,10 @@ private:
 
     void AddPattern(int trackIndex, int patternIndex, char const *label);
     void RemoveActivePattern();
+    void MovePatternLeftIfPossible();
+    void MovePatternLeftForces();
+    void MovePatternRightIfPossible();
+    void MovePatternRightForces();
 
     // AD note
     bool showAddSynthEditor;

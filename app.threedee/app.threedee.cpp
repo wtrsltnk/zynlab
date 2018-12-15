@@ -7,6 +7,7 @@
 #include "examples/imgui_impl_opengl3.h"
 #include "imgui_addons/imgui_knob.h"
 #include <algorithm>
+#include <cstdlib>
 #include <map>
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
@@ -73,9 +74,18 @@ bool AppThreeDee::SetUp()
     return true;
 }
 
+class TrackPattern
+{
+public:
+    TrackPattern() {}
+    TrackPattern(std::string const &name, float hue) : _name(name), _hue(hue) {}
+    std::string _name;
+    float _hue;
+};
+
 static ImVec4 clear_color = ImColor(114, 144, 154);
 static int activeInstrument = 0;
-static std::map<int, std::string> tracksOfPatterns[NUM_MIXER_CHANNELS];
+static std::map<int, TrackPattern> tracksOfPatterns[NUM_MIXER_CHANNELS];
 static int activePattern = -1;
 
 static bool showInstrumentEditor = false;
@@ -120,12 +130,16 @@ static int openSelectSinkSource = -1;
 
 static bool show_demo_window = true;
 static bool show_another_window = true;
+static bool show_pattern_window = false;
 
 void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label)
 {
+    static int n = std::rand() % 255;
+    float hue = n * 0.05f;
     activeInstrument = trackIndex;
     activePattern = patternIndex;
-    tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, label));
+    tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, TrackPattern(label, hue)));
+    n = (n + std::rand()) % 255;
 }
 
 void AppThreeDee::RemoveActivePattern()
@@ -142,6 +156,72 @@ void AppThreeDee::RemoveActivePattern()
     activePattern = -1;
 }
 
+void AppThreeDee::MovePatternLeftIfPossible()
+{
+    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    {
+        return;
+    }
+
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    auto currentKey = ap->first;
+
+    if (currentKey == 0)
+    {
+        return;
+    }
+
+    auto currentValue = ap->second;
+    auto newKey = currentKey - 1;
+
+    if (tracksOfPatterns[activeInstrument].find(newKey) == tracksOfPatterns[activeInstrument].end())
+    {
+        tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
+        tracksOfPatterns[activeInstrument].erase(currentKey);
+        activePattern = newKey;
+    }
+}
+
+void AppThreeDee::MovePatternLeftForces()
+{
+    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    {
+        return;
+    }
+}
+
+void AppThreeDee::MovePatternRightIfPossible()
+{
+    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    {
+        return;
+    }
+
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    auto currentKey = ap->first;
+    auto currentValue = ap->second;
+    auto newKey = currentKey + 1;
+
+    ap++;
+    auto nextKey = ap->first;
+    if (ap == tracksOfPatterns[activeInstrument].end() || newKey < nextKey)
+    {
+        tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
+        tracksOfPatterns[activeInstrument].erase(currentKey);
+        activePattern = newKey;
+    }
+}
+
+void AppThreeDee::MovePatternRightForces()
+{
+    if (activeInstrument < 0 || activePattern < 0 || tracksOfPatterns[activeInstrument].find(activePattern) == tracksOfPatterns[activeInstrument].end())
+    {
+        return;
+    }
+}
+
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -149,29 +229,25 @@ void AppThreeDee::Render()
     ImGui::NewFrame();
     ImGuiIO &io = ImGui::GetIO();
 
-    //ImGui::ShowDemoWindow(&show_demo_window);
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+    ImGuiViewport *viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::Begin("TestDockspace", nullptr, window_flags);
     {
-        ImGuiViewport *viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::Begin("TEstDockspace", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
-
-        ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+        ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    }
+    ImGui::End();
+    ImGui::PopStyleVar(2);
 
-        ImGui::End();
-        ImGui::PopStyleVar(2);
-
-        ImGui::Begin("Sequencer"); // Create a window called "Hello, world!" and append into it.
-
+    ImGui::Begin("Sequencer");
+    {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
 
@@ -194,9 +270,6 @@ void AppThreeDee::Render()
             {
                 ImGui::SameLine();
                 ImGui::PushID(pattern + track * 1000);
-                char num_buf[16];
-                sprintf(num_buf, "%d", pattern);
-                float hue = track * 0.05f;
                 bool isActive = track == activeInstrument && pattern == activePattern;
                 if (isActive)
                 {
@@ -206,14 +279,18 @@ void AppThreeDee::Render()
 
                 if (tracksOfPatterns[track].find(pattern) != tracksOfPatterns[track].end())
                 {
-                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
+                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.6f, 0.6f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.7f, 0.7f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.8f, 0.8f)));
 
-                    if (ImGui::Button(tracksOfPatterns[track][pattern].c_str(), ImVec2(120.0f, trackHeight)))
+                    if (ImGui::Button(tracksOfPatterns[track][pattern]._name.c_str(), ImVec2(120.0f, trackHeight)))
                     {
                         activeInstrument = track;
                         activePattern = pattern;
+                        if (ImGui::IsMouseDoubleClicked(0))
+                        {
+                            show_pattern_window = true;
+                        }
                     }
                     ImGui::PopStyleColor(3);
                 }
@@ -235,7 +312,7 @@ void AppThreeDee::Render()
             if (_mixer->GetChannel(track)->Penabled)
             {
                 ImGui::SameLine();
-                ImGui::PushID(track * 1010);
+                ImGui::PushID((100 + track) * 2010);
                 if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
                 {
                     AddPattern(track, lastIndex + 1, "");
@@ -267,6 +344,44 @@ void AppThreeDee::Render()
         ImGui::SetScrollY(scroll_y);
         ImGui::EndChild();
 
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+        {
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+            {
+                RemoveActivePattern();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+            {
+                if (io.KeyShift)
+                {
+                    MovePatternLeftForces();
+                }
+                else
+                {
+                    MovePatternLeftIfPossible();
+                }
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+            {
+                if (io.KeyShift)
+                {
+                    MovePatternRightForces();
+                }
+                else
+                {
+                    MovePatternRightIfPossible();
+                }
+            }
+        }
+        ImGui::End();
+    }
+
+    if (show_pattern_window)
+    {
+        ImGui::Begin("Pattern Window", &show_pattern_window);
+        ImGui::Text("Hello from pattern window!");
+        if (ImGui::Button("Close Me"))
+            show_pattern_window = false;
         ImGui::End();
     }
 
@@ -319,11 +434,6 @@ void AppThreeDee::Render()
 
     ImGuiPlayback();
 
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
-    {
-        RemoveActivePattern();
-    }
-
     ImGui::Render();
 
     // Update and Render additional Platform Windows
@@ -354,57 +464,6 @@ static std::map<int, unsigned char> mappedNotes{
 
 void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*/)
 {
-    if (key >= GLFW_KEY_F1 && key <= GLFW_KEY_F12)
-    {
-        activeInstrument = keyboardChannel = key - GLFW_KEY_F1;
-
-        return;
-    }
-
-    if (key == GLFW_KEY_LEFT && action == 1)
-    {
-        activeInstrument--;
-        if (activeInstrument < 0)
-        {
-            activeInstrument = NUM_MIDI_CHANNELS + activeInstrument;
-        }
-        return;
-    }
-
-    if (key == GLFW_KEY_UP && action == 1)
-    {
-        activeInstrument -= 4;
-        if (activeInstrument < 0)
-        {
-            activeInstrument = NUM_MIDI_CHANNELS + activeInstrument;
-        }
-        return;
-    }
-
-    if (key == GLFW_KEY_RIGHT && action == 1)
-    {
-        activeInstrument = (activeInstrument + 1) % NUM_MIDI_CHANNELS;
-        return;
-    }
-
-    if (key == GLFW_KEY_DOWN && action == 1)
-    {
-        activeInstrument = (activeInstrument + 4) % NUM_MIDI_CHANNELS;
-        return;
-    }
-
-    if (key == GLFW_KEY_SPACE && action == 1)
-    {
-        _mixer->GetChannel(activeInstrument)->Penabled = !_mixer->GetChannel(activeInstrument)->Penabled;
-        return;
-    }
-
-    if (key == GLFW_KEY_ENTER && action == 1)
-    {
-        EditInstrument(activeInstrument);
-        return;
-    }
-    //    std::cout << key << "-" << scancode << "\n";
     auto found = mappedNotes.find(key);
 
     if (found != mappedNotes.end())
