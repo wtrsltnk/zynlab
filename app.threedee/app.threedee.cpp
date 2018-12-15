@@ -91,6 +91,7 @@ static int activePattern = -1;
 static bool showInstrumentEditor = false;
 static bool show_simple_user_interface = false;
 static int keyboardChannel = 0;
+static bool showPatternEditor = false;
 
 void MainMenu();
 
@@ -275,6 +276,11 @@ void AppThreeDee::SelectLastPatternInTrack()
     activePattern = tracksOfPatterns[activeInstrument].rbegin()->first;
 }
 
+void AppThreeDee::EditSelectedPattern()
+{
+    showPatternEditor = true;
+}
+
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -299,143 +305,7 @@ void AppThreeDee::Render()
     ImGui::End();
     ImGui::PopStyleVar(2);
 
-    ImGui::Begin("Sequencer");
-    {
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
-
-        static int trackHeight = 30;
-        ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
-        for (int track = 0; track < NUM_MIXER_CHANNELS; track++)
-        {
-            ImGui::PushID(track * 1100);
-            auto trackEnabled = _mixer->GetChannel(track)->Penabled == 1;
-            if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
-            {
-                _mixer->GetChannel(track)->Penabled = trackEnabled ? 1 : 0;
-            }
-            ImGui::SameLine();
-            ImGui::Text("#%d", track + 1);
-            ImGui::PopID();
-
-            auto lastIndex = tracksOfPatterns[track].empty() ? -1 : tracksOfPatterns[track].rbegin()->first;
-            for (int pattern = 0; pattern <= lastIndex; pattern++)
-            {
-                ImGui::SameLine();
-                ImGui::PushID(pattern + track * 1000);
-                bool isActive = track == activeInstrument && pattern == activePattern;
-                if (isActive)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-                }
-
-                if (tracksOfPatterns[track].find(pattern) != tracksOfPatterns[track].end())
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.6f, 0.6f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.7f, 0.7f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.8f, 0.8f)));
-
-                    if (ImGui::Button(tracksOfPatterns[track][pattern]._name.c_str(), ImVec2(120.0f, trackHeight)))
-                    {
-                        activeInstrument = track;
-                        activePattern = pattern;
-                        if (ImGui::IsMouseDoubleClicked(0))
-                        {
-                            show_pattern_window = true;
-                        }
-                    }
-                    ImGui::PopStyleColor(3);
-                }
-                else if (_mixer->GetChannel(track)->Penabled)
-                {
-                    if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-                    {
-                        AddPattern(track, pattern, "");
-                    }
-                }
-                if (isActive)
-                {
-                    ImGui::PopStyleColor(1);
-                    ImGui::PopStyleVar(1);
-                }
-
-                ImGui::PopID();
-            }
-            if (_mixer->GetChannel(track)->Penabled)
-            {
-                ImGui::SameLine();
-                ImGui::PushID((100 + track) * 2010);
-                if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-                {
-                    AddPattern(track, lastIndex + 1, "");
-                }
-                ImGui::PopID();
-            }
-        }
-        float scroll_y = ImGui::GetScrollY();
-        ImGui::EndChild();
-
-        ImGui::PopStyleVar(2);
-
-        float scroll_x_delta = 0.0f;
-        ImGui::SmallButton("<<");
-        if (ImGui::IsItemActive()) scroll_x_delta = -ImGui::GetIO().DeltaTime * 1000.0f;
-        ImGui::SameLine();
-        ImGui::Text("Scroll from code");
-        ImGui::SameLine();
-        ImGui::SmallButton(">>");
-        if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f;
-        if (scroll_x_delta != 0.0f)
-        {
-            ImGui::BeginChild("scrolling"); // Demonstrate a trick: you can use Begin to set yourself in the context of another window (here we are already out of your child window)
-            ImGui::SetScrollX(ImGui::GetScrollX() + scroll_x_delta);
-            ImGui::End();
-        }
-
-        ImGui::BeginChild("info");
-        ImGui::SetScrollY(scroll_y);
-        ImGui::EndChild();
-
-        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
-        {
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
-            {
-                RemoveActivePattern();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
-            {
-                if (io.KeyShift)
-                {
-                    MovePatternLeftForced();
-                }
-                else
-                {
-                    MovePatternLeftIfPossible();
-                }
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
-            {
-                if (io.KeyShift)
-                {
-                    MovePatternRightForced();
-                }
-                else
-                {
-                    MovePatternRightIfPossible();
-                }
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
-            {
-                SelectFirstPatternInTrack();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
-            {
-                SelectLastPatternInTrack();
-            }
-        }
-        ImGui::End();
-    }
+    ImGuiSequencer();
 
     if (show_pattern_window)
     {
@@ -594,129 +464,151 @@ void AppThreeDee::ImGuiPlayback()
     }
 }
 
-void AppThreeDee::ImGuiSequencer(Track *tracks, int count)
+void AppThreeDee::ImGuiSequencer()
 {
-    auto spacing = 15;
-    auto eventHeight = 17;
-    auto buttonWidth = 120;
-    auto itemRectCursor = ImVec2();
-    auto min = ImVec2();
-    auto itemHeight = 0.0f;
+    ImGuiIO &io = ImGui::GetIO();
 
-    auto maxPatterns = _tracker.maxPatternCount();
-
-    ImGui::Begin("Pattern Sequencer", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    ImGui::Begin("Sequencer");
     {
-        ImGui::BeginChild("PatternControllers", ImVec2((buttonWidth + spacing) * count, 3 * (eventHeight + ImGui::GetStyle().ColumnsMinSpacing + ImGui::GetStyle().ColumnsMinSpacing)), true, ImGuiWindowFlags_NoScrollWithMouse);
-        ImGui::Columns(NUM_MIDI_CHANNELS);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
 
-        for (int trackIndex = 0; trackIndex < count; trackIndex++)
+        static int trackHeight = 30;
+        ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
+        for (int track = 0; track < NUM_MIXER_CHANNELS; track++)
         {
-            ImGui::SetColumnWidth(trackIndex, buttonWidth + spacing);
-            ImGui::PushID(trackIndex);
-            auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(trackIndex)->Pname));
-            ImGui::BeginGroup();
-            if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(buttonWidth, eventHeight)))
+            ImGui::PushID(track * 1100);
+            auto trackEnabled = _mixer->GetChannel(track)->Penabled == 1;
+            if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
             {
-                SelectInstrument(trackIndex);
-                openSelectInstrument = trackIndex;
+                _mixer->GetChannel(track)->Penabled = trackEnabled ? 1 : 0;
             }
-            if (ImGui::Button("edit", ImVec2(buttonWidth, eventHeight)))
-            {
-                EditInstrument(trackIndex);
-            }
-            if (ImGui::Button("+", ImVec2(buttonWidth, eventHeight)))
-            {
-                AddPatternToTrack(trackIndex);
-            }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::BeginTooltip();
-                ImGui::Text("Insert pattern");
-                ImGui::EndTooltip();
-            }
+            ImGui::SameLine();
+            ImGui::Text("#%d", track + 1);
             ImGui::PopID();
-            ImGui::EndGroup();
-            ImGui::NextColumn();
 
-            if (trackIndex == 0)
+            auto lastIndex = tracksOfPatterns[track].empty() ? -1 : tracksOfPatterns[track].rbegin()->first;
+            for (int pattern = 0; pattern <= lastIndex; pattern++)
             {
-                min = ImVec2(ImGui::GetItemRectMin().x, itemRectCursor.y);
-            }
-        }
-        ImGui::EndChild();
-
-        ImGui::BeginChild("PatternContainer", ImVec2((buttonWidth + spacing) * count, NUM_PATTERN_EVENTS * maxPatterns * (eventHeight + ImGui::GetStyle().ColumnsMinSpacing + ImGui::GetStyle().ColumnsMinSpacing)), true, ImGuiWindowFlags_NoScrollWithMouse);
-        ImGui::Columns(NUM_MIDI_CHANNELS);
-
-        for (int trackIndex = 0; trackIndex < count; trackIndex++)
-        {
-            ImGui::SetColumnWidth(trackIndex, buttonWidth + spacing);
-            ImGui::PushID(trackIndex);
-            auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(trackIndex)->Pname));
-            ImGui::BeginGroup();
-            unsigned int step = 0;
-            for (int patternIndex = 0; patternIndex < static_cast<int>(tracks[trackIndex]._patterns.size()); patternIndex++)
-            {
-                auto &pattern = tracks[trackIndex]._patterns[static_cast<size_t>(patternIndex)];
-                for (int eventIndex = 0; eventIndex < NUM_PATTERN_EVENTS; eventIndex++)
+                ImGui::SameLine();
+                ImGui::PushID(pattern + track * 1000);
+                bool isActive = track == activeInstrument && pattern == activePattern;
+                if (isActive)
                 {
-                    auto &event = pattern._events[eventIndex];
-                    ImGui::PushID((trackIndex + 1) * 1000 + (patternIndex + 1) * 100 + eventIndex);
-                    bool selected = event._velocity > 0;
-                    auto color = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-                    if (eventIndex % 4 == 0)
-                    {
-                        color.w = 1.0f;
-                    }
-                    ImGui::PushStyleColor(ImGuiCol_Text, color);
-                    if (ImGui::Selectable("...", &selected, ImGuiSelectableFlags_None, ImVec2(buttonWidth, eventHeight)))
-                    {
-                        event._velocity = selected ? 100 : 0;
-                        event._note = selected ? 65 : 0;
-                        event._gate = 60;
-                    }
-                    ImGui::PopStyleColor();
-                    ImGui::PopID();
-                    if (step == _tracker.CurrentStep())
-                    {
-                        itemRectCursor = ImGui::GetItemRectMin();
-                        itemHeight = ImGui::GetItemRectSize().y;
-                    }
-                    step++;
+                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
                 }
-                ImGui::Text("___");
-            }
-            ImGui::PopID();
-            ImGui::EndGroup();
-            ImGui::NextColumn();
 
-            if (trackIndex == 0)
+                if (tracksOfPatterns[track].find(pattern) != tracksOfPatterns[track].end())
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.6f, 0.6f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.7f, 0.7f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.8f, 0.8f)));
+
+                    if (ImGui::Button(tracksOfPatterns[track][pattern]._name.c_str(), ImVec2(120.0f, trackHeight)))
+                    {
+                        activeInstrument = track;
+                        activePattern = pattern;
+                        if (ImGui::IsMouseDoubleClicked(0))
+                        {
+                            show_pattern_window = true;
+                        }
+                    }
+                    ImGui::PopStyleColor(3);
+                }
+                else if (_mixer->GetChannel(track)->Penabled)
+                {
+                    if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+                    {
+                        AddPattern(track, pattern, "");
+                    }
+                }
+                if (isActive)
+                {
+                    ImGui::PopStyleColor(1);
+                    ImGui::PopStyleVar(1);
+                }
+
+                ImGui::PopID();
+            }
+            if (_mixer->GetChannel(track)->Penabled)
             {
-                min = ImVec2(ImGui::GetItemRectMin().x, itemRectCursor.y);
+                ImGui::SameLine();
+                ImGui::PushID((100 + track) * 2010);
+                if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+                {
+                    AddPattern(track, lastIndex + 1, "");
+                }
+                ImGui::PopID();
             }
         }
+        float scroll_y = ImGui::GetScrollY();
         ImGui::EndChild();
 
-        auto dl = ImGui::GetOverlayDrawList();
-        auto width = (buttonWidth + ImGui::GetStyle().ColumnsMinSpacing + ImGui::GetStyle().ColumnsMinSpacing + ImGui::GetStyle().ChildBorderSize + ImGui::GetStyle().ChildBorderSize) * count + ImGui::GetStyle().ChildBorderSize;
-        auto max = ImVec2(min.x + width, min.y + itemHeight);
-        auto clipMin = ImGui::GetWindowPos();
-        clipMin.x += ImGui::GetStyle().FramePadding.x;
-        clipMin.y += ImGui::GetStyle().FramePadding.y;
-        auto clipMax = ImVec2(clipMin.x + ImGui::GetWindowWidth() - (ImGui::GetStyle().FramePadding.x * 2) - ImGui::GetStyle().ScrollbarSize,
-                              clipMin.y + ImGui::GetWindowHeight() - (ImGui::GetStyle().FramePadding.y * 2));
+        ImGui::PopStyleVar(2);
 
+        float scroll_x_delta = 0.0f;
+        ImGui::SmallButton("<<");
+        if (ImGui::IsItemActive()) scroll_x_delta = -ImGui::GetIO().DeltaTime * 1000.0f;
+        ImGui::SameLine();
+        ImGui::Text("Scroll from code");
+        ImGui::SameLine();
+        ImGui::SmallButton(">>");
+        if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f;
+        if (scroll_x_delta != 0.0f)
+        {
+            ImGui::BeginChild("scrolling"); // Demonstrate a trick: you can use Begin to set yourself in the context of another window (here we are already out of your child window)
+            ImGui::SetScrollX(ImGui::GetScrollX() + scroll_x_delta);
+            ImGui::End();
+        }
+
+        ImGui::BeginChild("info");
+        ImGui::SetScrollY(scroll_y);
+        ImGui::EndChild();
+
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+        {
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+            {
+                RemoveActivePattern();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+            {
+                if (io.KeyShift)
+                {
+                    MovePatternLeftForced();
+                }
+                else
+                {
+                    MovePatternLeftIfPossible();
+                }
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+            {
+                if (io.KeyShift)
+                {
+                    MovePatternRightForced();
+                }
+                else
+                {
+                    MovePatternRightIfPossible();
+                }
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
+            {
+                SelectFirstPatternInTrack();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
+            {
+                SelectLastPatternInTrack();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Enter)))
+            {
+                EditSelectedPattern();
+            }
+        }
         ImGui::End();
-        dl->PushClipRect(clipMin, clipMax);
-        dl->AddRectFilled(min, max, ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 0.2f)));
-        dl->PopClipRect();
     }
-}
-
-void AppThreeDee::AddPatternToTrack(int trackIndex)
-{
-    _tracker.Tracks()[trackIndex]._patterns.push_back(Pattern());
 }
 
 void AppThreeDee::CleanUp()
@@ -798,287 +690,3 @@ void MainMenu()
         ImGui::EndMenuBar();
     }
 }
-
-//    ImGui::Begin("Zynadsubfx", nullptr, ImGuiWindowFlags_NoTitleBar);
-//    {
-//        MainMenu();
-//        const char *channels[] = {
-//            "1",
-//            "2",
-//            "3",
-//            "4",
-//            "5",
-//            "6",
-//            "7",
-//            "8",
-//            "9",
-//            "10",
-//            "11",
-//            "12",
-//            "13",
-//            "14",
-//            "15",
-//            "16",
-//        };
-//        ImGui::Combo("Keyboard channel", &keyboardChannel, channels, NUM_MIDI_CHANNELS);
-
-//        ImGui::BeginGroup();
-//        {
-//            ImGui::Columns(2);
-//            ImGui::SetColumnWidth(0, 70);
-//            ImGui::SetColumnWidth(1, 8 * 100);
-
-//            ImGui::Text("MASTER");
-//            ImGui::NextColumn();
-//            ImGui::Text("CHANNELS");
-//            ImGui::NextColumn();
-//            ImGui::Separator();
-
-//            ImGui::Text("Input");
-//            if (ImGui::Button(Nio::GetSelectedSource().c_str(), ImVec2(55, 20)))
-//            {
-//                openSelectSinkSource = 1;
-//            }
-//            ImGui::Text("Output");
-//            if (ImGui::Button(Nio::GetSelectedSink().c_str(), ImVec2(55, 20)))
-//            {
-//                openSelectSinkSource = 1;
-//            }
-
-//            auto v = _mixer->Pvolume;
-//            if (ImGui::KnobUchar("Volume", &(v), 0, 128, ImVec2(55, 55)))
-//            {
-//                _mixer->setPvolume(v);
-//            }
-
-//            ImGui::NextColumn();
-
-//            ImGui::BeginChild("Channels");
-//            {
-//                ImGui::Columns(4);
-//                for (int i = 0; i < NUM_MIXER_CHANNELS; i++)
-//                {
-//                    ImGui::PushID(i);
-
-//                    if (i == activeInstrument)
-//                    {
-//                        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.4f, 0.4f)));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(1.0f, 0.6f, 0.6f)));
-//                    }
-//                    else
-//                    {
-//                        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_Button));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-//                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered));
-//                    }
-
-//                    ImVec2 size = ImVec2(87, 18);
-//                    char label[32];
-//                    sprintf(label, "CH%d", i + 1);
-//                    bool channelEnabled = _mixer->GetChannel(i)->Penabled != '\0';
-//                    if (ImGui::Checkbox(label, &channelEnabled))
-//                    {
-//                        _mixer->GetChannel(i)->Penabled = channelEnabled ? 1 : 0;
-//                    }
-
-//                    if (ImGui::Button("Edit", size))
-//                    {
-//                        EditInstrument(i);
-//                    }
-
-//                    if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetChannel(i)->Pname), size))
-//                    {
-//                        SelectInstrument(i);
-//                        openSelectInstrument = i;
-//                    }
-
-//                    if (ImGui::IsItemHovered() && _mixer->GetChannel(i)->Pname[0] > '\0')
-//                    {
-//                        ImGui::BeginTooltip();
-//                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-//                        ImGui::TextUnformatted(reinterpret_cast<char *>(_mixer->GetChannel(i)->Pname));
-//                        ImGui::PopTextWrapPos();
-//                        ImGui::EndTooltip();
-//                    }
-//                    auto volume = _mixer->GetChannel(i)->Pvolume;
-//                    if (ImGui::KnobUchar("volume", &(volume), 0, 128, ImVec2(40, 40)))
-//                    {
-//                        _mixer->GetChannel(i)->setPvolume(volume);
-//                    }
-//                    ImGui::SameLine();
-//                    auto panning = _mixer->GetChannel(i)->Ppanning;
-//                    if (ImGui::KnobUchar(" pann", &(panning), 0, 128, ImVec2(40, 40)))
-//                    {
-//                        _mixer->GetChannel(i)->setPpanning(panning);
-//                    }
-//                    ImGui::PopStyleColor(3);
-//                    ImGui::PopID();
-
-//                    ImGui::NextColumn();
-//                    if ((i + 1) % 4 == 0)
-//                    {
-//                        ImGui::Separator();
-//                    }
-//                }
-//            }
-//            ImGui::EndChild();
-//        }
-//        ImGui::EndGroup();
-//    }
-//    ImGui::End();
-
-//    ImGuiSequencer(_tracker.Tracks(), NUM_MIDI_CHANNELS);
-
-//    if (showAddSynthEditor)
-//    {
-//        ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
-//    }
-
-//    if (showInstrumentEditor)
-//    {
-//        if (ImGui::Begin("Instrument editor", &showInstrumentEditor))
-//        {
-//            ImGui::Columns(2);
-
-//            const char *listbox_items[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
-//            ImGui::Combo("Part", &activeInstrument, listbox_items, 15);
-
-//            bool penabled = _mixer->GetChannel(activeInstrument)->Penabled != 0;
-//            if (ImGui::Checkbox("Enabled", &penabled))
-//            {
-//                _mixer->GetChannel(activeInstrument)->Penabled = penabled ? 1 : 0;
-//            }
-
-//            bool add = _mixer->GetChannel(activeInstrument)->_instruments[0].Padenabled;
-//            if (ImGui::Checkbox("Add", &add))
-//            {
-//                _mixer->GetChannel(activeInstrument)->_instruments[0].Padenabled = add;
-//            }
-//            ImGui::SameLine();
-//            if (ImGui::Button("Edit"))
-//            {
-//                EditADSynth(activeInstrument);
-//            }
-
-//            bool sub = _mixer->GetChannel(activeInstrument)->_instruments[0].Psubenabled;
-//            if (ImGui::Checkbox("Sub", &sub))
-//            {
-//                _mixer->GetChannel(activeInstrument)->_instruments[0].Psubenabled = sub;
-//            }
-
-//            bool pad = _mixer->GetChannel(activeInstrument)->_instruments[0].Ppadenabled;
-//            if (ImGui::Checkbox("Pad", &pad))
-//            {
-//                _mixer->GetChannel(activeInstrument)->_instruments[0].Ppadenabled = pad;
-//            }
-
-//            if (ImGui::Button(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname)))
-//            {
-//                SelectInstrument(activeInstrument);
-//                openSelectInstrument = activeInstrument;
-//            }
-//            ImGui::NextColumn();
-//            ImGui::Columns(1);
-
-//            static bool noteOn = false;
-//            if (ImGui::Button("Note On") && !noteOn)
-//            {
-//                _mixer->NoteOn(0, 65, 120);
-//                noteOn = true;
-//            }
-//            if (ImGui::Button("Note Off") && noteOn)
-//            {
-//                _mixer->NoteOff(0, 65);
-//                noteOn = false;
-//            }
-//            ImGui::End();
-//        }
-//    }
-
-//    if (openSelectInstrument >= 0)
-//    {
-//        ImGui::OpenPopup("popup");
-//    }
-
-//    ImGui::SetNextWindowSize(ImVec2(700, 600));
-//    if (ImGui::BeginPopupModal("popup"))
-//    {
-//        auto count = _mixer->GetBankManager()->GetBankCount();
-//        std::vector<const char *> bankNames;
-//        bankNames.push_back("");
-//        for (int i = 0; i < count; i++)
-//        {
-//            bankNames.push_back(_mixer->GetBankManager()->GetBank(i).name.c_str());
-//        }
-//        static int currentBank = 0;
-//        if (ImGui::Combo("Bank", &currentBank, &(bankNames[0]), int(count)))
-//        {
-//            _mixer->GetBankManager()->LoadBank(currentBank - 1);
-//        }
-//        ImGui::SameLine();
-
-//        if (ImGui::Button("Close"))
-//        {
-//            openSelectInstrument = -1;
-//            ImGui::CloseCurrentPopup();
-//        }
-
-//        ImGui::Columns(5);
-//        if (currentBank > 0)
-//        {
-//            for (unsigned int i = 0; i < BANK_SIZE; i++)
-//            {
-//                auto instrumentName = _mixer->GetBankManager()->GetName(i);
-
-//                if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
-//                {
-//                    auto const &instrument = _mixer->GetChannel(activeInstrument);
-//                    instrument->Lock();
-//                    _mixer->GetBankManager()->LoadFromSlot(i, instrument);
-//                    instrument->Unlock();
-//                    instrument->ApplyParameters();
-//                    openSelectInstrument = -1;
-//                    ImGui::CloseCurrentPopup();
-//                }
-//                if ((i + 1) % 32 == 0)
-//                {
-//                    ImGui::NextColumn();
-//                }
-//            }
-//        }
-//        ImGui::EndPopup();
-//    }
-
-//    if (openSelectSinkSource >= 0)
-//    {
-//        ImGui::OpenPopup("NioPopup");
-//    }
-
-//    if (ImGui::BeginPopupModal("NioPopup"))
-//    {
-//        static int selectedSink = 0, selectedSource = 0;
-//        int sinkIndex = 0;
-//        for (auto sink : Nio::GetSinks())
-//        {
-//            if (ImGui::RadioButton(sink.c_str(), &selectedSink, int(sinkIndex++)))
-//            {
-//                Nio::SelectSink(sink);
-//            }
-//        }
-//        int sourceIndex = 0;
-//        for (auto source : Nio::GetSources())
-//        {
-//            if (ImGui::RadioButton(source.c_str(), &selectedSource, int(sourceIndex++)))
-//            {
-//                Nio::SelectSource(source);
-//            }
-//        }
-
-//        if (ImGui::Button("Close"))
-//        {
-//            openSelectSinkSource = -1;
-//            ImGui::CloseCurrentPopup();
-//        }
-//        ImGui::EndPopup();
-//    }

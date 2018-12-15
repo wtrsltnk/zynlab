@@ -50,11 +50,7 @@ public:
 
 private:
     void ImGuiPlayback();
-    void ImGuiSequencer(Track *tracks, int count);
-    void ImGuiTrack(Track &track, int index, std::string const &name);
-    void ImGuiPattern(Pattern &pattern, int trackIndex, int patternIndex);
-    void ImGuiPatternEvent(PatternEvent &event, int trackIndex, int patternIndex, int eventIndex);
-    void AddPatternToTrack(int trackIndex);
+    void ImGuiSequencer();
     void Stop();
     void PlayPause();
 
@@ -66,6 +62,7 @@ private:
     void MovePatternRightForced();
     void SelectFirstPatternInTrack();
     void SelectLastPatternInTrack();
+    void EditSelectedPattern();
 
     // AD note
     bool showAddSynthEditor;
