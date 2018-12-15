@@ -72,15 +72,6 @@ bool AppThreeDee::SetUp()
     return true;
 }
 
-class TrackPattern
-{
-public:
-    TrackPattern() {}
-    TrackPattern(std::string const &name, float hue) : _name(name), _hue(hue) {}
-    std::string _name;
-    float _hue;
-};
-
 static ImVec4 clear_color = ImColor(114, 144, 154);
 static std::map<int, TrackPattern> tracksOfPatterns[NUM_MIXER_CHANNELS];
 static int activeInstrument = 0;
@@ -175,6 +166,39 @@ void AppThreeDee::MovePatternLeftForced()
     activePattern = activePattern - 1;
 }
 
+void AppThreeDee::SwitchPatternLeft()
+{
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
+    {
+        return;
+    }
+
+    auto currentKey = ap->first;
+
+    if (currentKey <= 0)
+    {
+        return;
+    }
+
+    auto currentValue = ap->second;
+    auto newKey = currentKey - 1;
+
+    tracksOfPatterns->erase(currentKey);
+
+    if (tracksOfPatterns[activeInstrument].find(newKey) != tracksOfPatterns[activeInstrument].end())
+    {
+        auto tmpValue = tracksOfPatterns[activeInstrument].find(newKey)->second;
+        tracksOfPatterns[activeInstrument].erase(newKey);
+        tracksOfPatterns[activeInstrument].insert(std::make_pair(currentKey, tmpValue));
+    }
+
+    tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
+
+    activePattern = newKey;
+}
+
 void AppThreeDee::MovePatternRightIfPossible()
 {
     auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
@@ -221,6 +245,33 @@ void AppThreeDee::MovePatternRightForced()
     activePattern = activePattern + 1;
 }
 
+void AppThreeDee::SwitchPatternRight()
+{
+    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
+
+    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
+    {
+        return;
+    }
+
+    auto currentKey = ap->first;
+    auto currentValue = ap->second;
+    auto newKey = currentKey + 1;
+
+    tracksOfPatterns->erase(currentKey);
+
+    if (tracksOfPatterns[activeInstrument].find(newKey) != tracksOfPatterns[activeInstrument].end())
+    {
+        auto tmpValue = tracksOfPatterns[activeInstrument].find(newKey)->second;
+        tracksOfPatterns[activeInstrument].erase(newKey);
+        tracksOfPatterns[activeInstrument].insert(std::make_pair(currentKey, tmpValue));
+    }
+
+    tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
+
+    activePattern = newKey;
+}
+
 void AppThreeDee::SelectFirstPatternInTrack()
 {
     if (activeInstrument < 0)
@@ -244,6 +295,237 @@ void AppThreeDee::SelectLastPatternInTrack()
 void AppThreeDee::EditSelectedPattern()
 {
     showPatternEditor = true;
+}
+
+void AppThreeDee::SelectPreviousPattern()
+{
+    if (activeInstrument < 0)
+    {
+        return;
+    }
+
+    if (activePattern <= 0)
+    {
+        return;
+    }
+
+    int newIndex = activePattern - 1;
+    while (newIndex >= 0)
+    {
+        if (DoesPatternExistAtIndex(activeInstrument, newIndex))
+        {
+            activePattern = newIndex;
+            break;
+        }
+        newIndex--;
+    }
+}
+
+void AppThreeDee::SelectNextPattern()
+{
+    if (activeInstrument < 0)
+    {
+        return;
+    }
+
+    auto lastIndex = LastPatternIndex(activeInstrument);
+    if (activePattern == lastIndex)
+    {
+        return;
+    }
+
+    int newIndex = activePattern + 1;
+    while (newIndex <= lastIndex)
+    {
+        if (DoesPatternExistAtIndex(activeInstrument, newIndex))
+        {
+            activePattern = newIndex;
+            break;
+        }
+        newIndex++;
+    }
+}
+
+int AppThreeDee::LastPatternIndex(int trackIndex)
+{
+    return tracksOfPatterns[trackIndex].empty() ? -1 : tracksOfPatterns[trackIndex].rbegin()->first;
+}
+
+bool AppThreeDee::DoesPatternExistAtIndex(int trackIndex, int patternIndex)
+{
+    return tracksOfPatterns[trackIndex].find(patternIndex) != tracksOfPatterns[trackIndex].end();
+}
+
+TrackPattern &AppThreeDee::GetPattern(int trackIndex, int patternIndex)
+{
+    return tracksOfPatterns[trackIndex][patternIndex];
+}
+
+void AppThreeDee::ImGuiSequencer()
+{
+    ImGuiIO &io = ImGui::GetIO();
+
+    ImGui::Begin("Sequencer");
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
+
+        static int trackHeight = 30;
+        ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
+        for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+        {
+            ImGui::PushID(trackIndex * 1100);
+            auto trackEnabled = _mixer->GetChannel(trackIndex)->Penabled == 1;
+            if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
+            {
+                _mixer->GetChannel(trackIndex)->Penabled = trackEnabled ? 1 : 0;
+            }
+            ImGui::SameLine();
+            ImGui::Text("#%d", trackIndex + 1);
+            ImGui::PopID();
+
+            auto lastIndex = LastPatternIndex(trackIndex);
+            for (int patternIndex = 0; patternIndex <= lastIndex; patternIndex++)
+            {
+                ImGui::SameLine();
+                ImGui::PushID(patternIndex + trackIndex * 1000);
+                bool isActive = trackIndex == activeInstrument && patternIndex == activePattern;
+                if (isActive)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+                }
+
+                if (DoesPatternExistAtIndex(trackIndex, patternIndex))
+                {
+                    auto &pattern = GetPattern(trackIndex, patternIndex);
+                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(pattern._hue, 0.6f, 0.6f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(pattern._hue, 0.7f, 0.7f)));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(pattern._hue, 0.8f, 0.8f)));
+
+                    if (ImGui::Button(pattern._name.c_str(), ImVec2(120.0f, trackHeight)))
+                    {
+                        activeInstrument = trackIndex;
+                        activePattern = patternIndex;
+                        if (ImGui::IsMouseDoubleClicked(0))
+                        {
+                            show_pattern_window = true;
+                        }
+                    }
+                    ImGui::PopStyleColor(3);
+                }
+                else if (_mixer->GetChannel(trackIndex)->Penabled)
+                {
+                    if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+                    {
+                        AddPattern(trackIndex, patternIndex, "");
+                    }
+                }
+                if (isActive)
+                {
+                    ImGui::PopStyleColor(1);
+                    ImGui::PopStyleVar(1);
+                }
+
+                ImGui::PopID();
+            }
+            if (_mixer->GetChannel(trackIndex)->Penabled)
+            {
+                ImGui::SameLine();
+                ImGui::PushID((100 + trackIndex) * 2010);
+                if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+                {
+                    AddPattern(trackIndex, lastIndex + 1, "");
+                }
+                ImGui::PopID();
+            }
+        }
+        float scroll_y = ImGui::GetScrollY();
+        ImGui::EndChild();
+
+        ImGui::PopStyleVar(2);
+
+        float scroll_x_delta = 0.0f;
+        ImGui::SmallButton("<<");
+        if (ImGui::IsItemActive()) scroll_x_delta = -ImGui::GetIO().DeltaTime * 1000.0f;
+        ImGui::SameLine();
+        ImGui::Text("Scroll from code");
+        ImGui::SameLine();
+        ImGui::SmallButton(">>");
+        if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f;
+        if (scroll_x_delta != 0.0f)
+        {
+            ImGui::BeginChild("scrolling"); // Demonstrate a trick: you can use Begin to set yourself in the context of another window (here we are already out of your child window)
+            ImGui::SetScrollX(ImGui::GetScrollX() + scroll_x_delta);
+            ImGui::End();
+        }
+
+        ImGui::BeginChild("info");
+        ImGui::SetScrollY(scroll_y);
+        ImGui::EndChild();
+
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+        {
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+            {
+                RemoveActivePattern();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+            {
+                if (io.KeyShift && !io.KeyCtrl)
+                {
+                    MovePatternLeftForced();
+                }
+                else if (!io.KeyShift && io.KeyCtrl)
+                {
+                    SwitchPatternLeft();
+                }
+                else
+                {
+                    MovePatternLeftIfPossible();
+                }
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+            {
+                if (io.KeyShift && !io.KeyCtrl)
+                {
+                    MovePatternRightForced();
+                }
+                else if (!io.KeyShift && io.KeyCtrl)
+                {
+                    SwitchPatternRight();
+                }
+                else
+                {
+                    MovePatternRightIfPossible();
+                }
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
+            {
+                SelectFirstPatternInTrack();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
+            {
+                SelectLastPatternInTrack();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Enter)))
+            {
+                EditSelectedPattern();
+            }
+            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Tab)))
+            {
+                if (io.KeyShift)
+                {
+                    SelectPreviousPattern();
+                }
+                else
+                {
+                    SelectNextPattern();
+                }
+            }
+        }
+        ImGui::End();
+    }
 }
 
 void AppThreeDee::Render()
@@ -271,15 +553,7 @@ void AppThreeDee::Render()
     ImGui::PopStyleVar(2);
 
     ImGuiSequencer();
-
-    if (show_pattern_window)
-    {
-        ImGui::Begin("Pattern Window", &show_pattern_window);
-        ImGui::Text("Hello from pattern window!");
-        if (ImGui::Button("Close Me"))
-            show_pattern_window = false;
-        ImGui::End();
-    }
+    ImGuiPatternEditorPopup();
 
     // 3. Show another simple window.
     if (show_another_window)
@@ -346,6 +620,25 @@ void AppThreeDee::Render()
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void AppThreeDee::ImGuiPatternEditorPopup()
+{
+    if (showPatternEditor)
+    {
+        ImGui::OpenPopup("PatternEditorPopup");
+    }
+
+    if (ImGui::BeginPopupModal("PatternEditorPopup", nullptr, ImGuiWindowFlags_Popup))
+    {
+
+        if (ImGui::Button("Close"))
+        {
+            showPatternEditor = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 }
 
 static std::map<int, unsigned char> mappedNotes{
@@ -416,153 +709,6 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-        ImGui::End();
-    }
-}
-
-void AppThreeDee::ImGuiSequencer()
-{
-    ImGuiIO &io = ImGui::GetIO();
-
-    ImGui::Begin("Sequencer");
-    {
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
-
-        static int trackHeight = 30;
-        ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
-        for (int track = 0; track < NUM_MIXER_CHANNELS; track++)
-        {
-            ImGui::PushID(track * 1100);
-            auto trackEnabled = _mixer->GetChannel(track)->Penabled == 1;
-            if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
-            {
-                _mixer->GetChannel(track)->Penabled = trackEnabled ? 1 : 0;
-            }
-            ImGui::SameLine();
-            ImGui::Text("#%d", track + 1);
-            ImGui::PopID();
-
-            auto lastIndex = tracksOfPatterns[track].empty() ? -1 : tracksOfPatterns[track].rbegin()->first;
-            for (int pattern = 0; pattern <= lastIndex; pattern++)
-            {
-                ImGui::SameLine();
-                ImGui::PushID(pattern + track * 1000);
-                bool isActive = track == activeInstrument && pattern == activePattern;
-                if (isActive)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-                }
-
-                if (tracksOfPatterns[track].find(pattern) != tracksOfPatterns[track].end())
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.6f, 0.6f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.7f, 0.7f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(tracksOfPatterns[track][pattern]._hue, 0.8f, 0.8f)));
-
-                    if (ImGui::Button(tracksOfPatterns[track][pattern]._name.c_str(), ImVec2(120.0f, trackHeight)))
-                    {
-                        activeInstrument = track;
-                        activePattern = pattern;
-                        if (ImGui::IsMouseDoubleClicked(0))
-                        {
-                            show_pattern_window = true;
-                        }
-                    }
-                    ImGui::PopStyleColor(3);
-                }
-                else if (_mixer->GetChannel(track)->Penabled)
-                {
-                    if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-                    {
-                        AddPattern(track, pattern, "");
-                    }
-                }
-                if (isActive)
-                {
-                    ImGui::PopStyleColor(1);
-                    ImGui::PopStyleVar(1);
-                }
-
-                ImGui::PopID();
-            }
-            if (_mixer->GetChannel(track)->Penabled)
-            {
-                ImGui::SameLine();
-                ImGui::PushID((100 + track) * 2010);
-                if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-                {
-                    AddPattern(track, lastIndex + 1, "");
-                }
-                ImGui::PopID();
-            }
-        }
-        float scroll_y = ImGui::GetScrollY();
-        ImGui::EndChild();
-
-        ImGui::PopStyleVar(2);
-
-        float scroll_x_delta = 0.0f;
-        ImGui::SmallButton("<<");
-        if (ImGui::IsItemActive()) scroll_x_delta = -ImGui::GetIO().DeltaTime * 1000.0f;
-        ImGui::SameLine();
-        ImGui::Text("Scroll from code");
-        ImGui::SameLine();
-        ImGui::SmallButton(">>");
-        if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f;
-        if (scroll_x_delta != 0.0f)
-        {
-            ImGui::BeginChild("scrolling"); // Demonstrate a trick: you can use Begin to set yourself in the context of another window (here we are already out of your child window)
-            ImGui::SetScrollX(ImGui::GetScrollX() + scroll_x_delta);
-            ImGui::End();
-        }
-
-        ImGui::BeginChild("info");
-        ImGui::SetScrollY(scroll_y);
-        ImGui::EndChild();
-
-        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
-        {
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
-            {
-                RemoveActivePattern();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
-            {
-                if (io.KeyShift)
-                {
-                    MovePatternLeftForced();
-                }
-                else
-                {
-                    MovePatternLeftIfPossible();
-                }
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
-            {
-                if (io.KeyShift)
-                {
-                    MovePatternRightForced();
-                }
-                else
-                {
-                    MovePatternRightIfPossible();
-                }
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
-            {
-                SelectFirstPatternInTrack();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
-            {
-                SelectLastPatternInTrack();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Enter)))
-            {
-                EditSelectedPattern();
-            }
-        }
         ImGui::End();
     }
 }

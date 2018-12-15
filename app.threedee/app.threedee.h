@@ -13,8 +13,17 @@
 #include <zyn.nio/Nio.h>
 #include <zyn.seq/Track.h>
 #include <zyn.seq/Tracker.h>
-#include <zyn.synth/FFTwrapper.h>
 #include <zyn.synth/ADnoteParams.h>
+#include <zyn.synth/FFTwrapper.h>
+
+class TrackPattern
+{
+public:
+    TrackPattern() {}
+    TrackPattern(std::string const &name, float hue) : _name(name), _hue(hue) {}
+    std::string _name;
+    float _hue;
+};
 
 class AppThreeDee
 {
@@ -43,6 +52,7 @@ public:
 private:
     void ImGuiPlayback();
     void ImGuiSequencer();
+    void ImGuiPatternEditorPopup();
     void Stop();
     void PlayPause();
 
@@ -50,11 +60,19 @@ private:
     void RemoveActivePattern();
     void MovePatternLeftIfPossible();
     void MovePatternLeftForced();
+    void SwitchPatternLeft();
     void MovePatternRightIfPossible();
     void MovePatternRightForced();
+    void SwitchPatternRight();
+    void SwitchPatterns(int firstKey, int secondKey);
     void SelectFirstPatternInTrack();
     void SelectLastPatternInTrack();
     void EditSelectedPattern();
+    void SelectPreviousPattern();
+    void SelectNextPattern();
+    int LastPatternIndex(int trackIndex);
+    bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
+    TrackPattern &GetPattern(int trackIndex, int patternIndex);
 
     // AD note
     bool showAddSynthEditor;
