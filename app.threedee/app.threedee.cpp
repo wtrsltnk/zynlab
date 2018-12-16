@@ -370,6 +370,11 @@ void AppThreeDee::ImGuiSequencer()
         ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
         for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
         {
+            float hue = trackIndex * 0.05f;
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
+
             ImGui::PushID(trackIndex * 1100);
             auto trackEnabled = _mixer->GetChannel(trackIndex)->Penabled == 1;
             if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
@@ -377,7 +382,7 @@ void AppThreeDee::ImGuiSequencer()
                 _mixer->GetChannel(trackIndex)->Penabled = trackEnabled ? 1 : 0;
             }
             ImGui::SameLine();
-            ImGui::Text("#%d", trackIndex + 1);
+            ImGui::Text("%02d", trackIndex + 1);
             ImGui::PopID();
 
             auto lastIndex = LastPatternIndex(trackIndex);
@@ -395,10 +400,6 @@ void AppThreeDee::ImGuiSequencer()
                 if (DoesPatternExistAtIndex(trackIndex, patternIndex))
                 {
                     auto &pattern = GetPattern(trackIndex, patternIndex);
-                    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(pattern._hue, 0.6f, 0.6f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(pattern._hue, 0.7f, 0.7f)));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(pattern._hue, 0.8f, 0.8f)));
-
                     if (ImGui::Button(pattern._name.c_str(), ImVec2(120.0f, trackHeight)))
                     {
                         activeInstrument = trackIndex;
@@ -408,7 +409,6 @@ void AppThreeDee::ImGuiSequencer()
                             EditSelectedPattern();
                         }
                     }
-                    ImGui::PopStyleColor(3);
                 }
                 else if (_mixer->GetChannel(trackIndex)->Penabled)
                 {
@@ -435,6 +435,7 @@ void AppThreeDee::ImGuiSequencer()
                 }
                 ImGui::PopID();
             }
+            ImGui::PopStyleColor(3);
         }
         float scroll_y = ImGui::GetScrollY();
         ImGui::EndChild();
@@ -548,7 +549,7 @@ void AppThreeDee::ImGuiPatternEditorWindow()
         auto &style = ImGui::GetStyle();
         auto &selectedPattern = GetPattern(activeInstrument, activePattern);
 
-        ImGui::Begin("PatternEditor", &showPatternEditor);
+        ImGui::Begin("Pattern editor", &showPatternEditor);
         auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
         auto itemWidth = (width / 16) - (style.ItemSpacing.x);
         for (int i = 0; i < 88; i++)
