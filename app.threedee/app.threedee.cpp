@@ -5,6 +5,7 @@
 
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
+#include "imgui_addons/imgui_checkbutton.h"
 #include "imgui_addons/imgui_knob.h"
 #include <algorithm>
 #include <cmath>
@@ -541,26 +542,38 @@ const char *notes[] = {
 void AppThreeDee::ImGuiPatternEditorWindow()
 {
     const float noteLabelWidth = 50.0f;
-    const float rowHeight = 30.0f;
+    const float rowHeight = 20.0f;
     if (showPatternEditor)
     {
         auto &style = ImGui::GetStyle();
         auto &selectedPattern = GetPattern(activeInstrument, activePattern);
 
         ImGui::Begin("PatternEditor", &showPatternEditor);
-        auto width = std::fmin(ImGui::GetWindowWidth() - noteLabelWidth, (rowHeight + style.ItemSpacing.x) * 16);
-        auto itemWidth = (width / 16) - (style.ItemSpacing.x * 2);
+        auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
+        auto itemWidth = (width / 16) - (style.ItemSpacing.x);
         for (int i = 0; i < 88; i++)
         {
+            if (i % 12 == 0)
+            {
+                ImGui::Separator();
+            }
             ImGui::PushID(i);
-            ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, itemWidth));
+            ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, rowHeight));
             for (int j = 0; j < 16; j++)
             {
                 ImGui::SameLine();
                 ImGui::PushID(j);
                 auto found = selectedPattern._notes.find(TrackPatternNote(i, j));
                 bool s = found != selectedPattern._notes.end();
-                if (ImGui::Selectable("##note", &s, 0, ImVec2(itemWidth, itemWidth)))
+                if (j % 4 == 0)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                }
+                else
+                {
+                    ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_FrameBg]);
+                }
+                if (ImGui::CheckButton("##note", &s, ImVec2(itemWidth, rowHeight)))
                 {
                     if (!s)
                     {
@@ -571,9 +584,9 @@ void AppThreeDee::ImGuiPatternEditorWindow()
                         selectedPattern._notes.insert(TrackPatternNote(i, j));
                     }
                 }
+                ImGui::PopStyleColor();
                 ImGui::PopID();
             }
-            ImGui::Separator();
             ImGui::PopID();
         }
         ImGui::End();

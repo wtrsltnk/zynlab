@@ -19,6 +19,8 @@ if(GLFW3_FOUND)
         imgui/imgui_widgets.cpp
         imgui/examples/imgui_impl_opengl3.cpp
         imgui/examples/imgui_impl_glfw.cpp
+        imgui_addons/imgui_checkbutton.cpp
+        imgui_addons/imgui_checkbutton.h
         imgui_addons/imgui_knob.cpp
         imgui_addons/imgui_knob.h
         ui/adnote.cpp
