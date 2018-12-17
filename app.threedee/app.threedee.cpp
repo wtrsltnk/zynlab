@@ -84,6 +84,7 @@ static bool showPatternEditor = false;
 static int keyboardChannel = 0;
 static bool showADNoteEditor = true;
 static bool isPlaying = false;
+static int openSelectInstrument = -1;
 
 void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label)
 {
@@ -357,6 +358,104 @@ TrackPattern &AppThreeDee::GetPattern(int trackIndex, int patternIndex)
     return tracksOfPatterns[trackIndex][patternIndex];
 }
 
+void AppThreeDee::ImGuiSelectedTrack()
+{
+    ImGui::Begin("Selected Track");
+    {
+        auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname));
+        if (ImGui::Button(name.size() == 0 ? "default" : name.c_str()))
+        {
+            openSelectInstrument = activeInstrument;
+        }
+
+        const char *channels[] = {
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+        };
+        int channel = static_cast<int>(_mixer->GetChannel(activeInstrument)->Prcvchn);
+        if (ImGui::Combo("##KeyboardChannel", &channel, channels, NUM_MIDI_CHANNELS))
+        {
+            _mixer->GetChannel(activeInstrument)->Prcvchn = static_cast<unsigned char>(channel);
+        }
+    }
+    ImGui::End();
+
+    if (openSelectInstrument >= 0)
+    {
+        ImGui::OpenPopup("popup");
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(700, 600));
+    if (ImGui::BeginPopupModal("popup"))
+    {
+        auto count = _mixer->GetBankManager()->GetBankCount();
+        std::vector<const char *> bankNames;
+        bankNames.push_back("");
+        for (int i = 0; i < count; i++)
+        {
+            bankNames.push_back(_mixer->GetBankManager()->GetBank(i).name.c_str());
+        }
+        static int currentBank = 0;
+        if (ImGui::Combo("Bank", &currentBank, &(bankNames[0]), int(count)))
+        {
+            _mixer->GetBankManager()->LoadBank(currentBank - 1);
+        }
+
+        static bool autoClose = false;
+        ImGui::SameLine();
+        ImGui::Checkbox("Auto close", &autoClose);
+
+        ImGui::SameLine();
+        if (ImGui::Button("Close"))
+        {
+            openSelectInstrument = -1;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::Columns(5);
+        if (currentBank > 0)
+        {
+            for (unsigned int i = 0; i < BANK_SIZE; i++)
+            {
+                auto instrumentName = _mixer->GetBankManager()->GetName(i);
+
+                if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
+                {
+                    auto const &instrument = _mixer->GetChannel(activeInstrument);
+                    instrument->Lock();
+                    _mixer->GetBankManager()->LoadFromSlot(i, instrument);
+                    instrument->Unlock();
+                    instrument->ApplyParameters();
+                    openSelectInstrument = -1;
+                    if (autoClose)
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                if ((i + 1) % 32 == 0)
+                {
+                    ImGui::NextColumn();
+                }
+            }
+        }
+        ImGui::EndPopup();
+    }
+}
+
 void AppThreeDee::ImGuiSequencer()
 {
     ImGui::Begin("Sequencer");
@@ -380,7 +479,13 @@ void AppThreeDee::ImGuiSequencer()
                 _mixer->GetChannel(trackIndex)->Penabled = trackEnabled ? 1 : 0;
             }
             ImGui::SameLine();
-            ImGui::Text("%02d", trackIndex + 1);
+            char trackLabel[32] = {'\0'};
+            sprintf(trackLabel, "%02d", trackIndex + 1);
+            bool s = trackIndex == activeInstrument;
+            if (ImGui::Selectable(trackLabel, &s, 0, ImVec2(trackHeight, trackHeight)) && s)
+            {
+                activeInstrument = trackIndex;
+            }
             ImGui::PopID();
 
             if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
@@ -389,6 +494,7 @@ void AppThreeDee::ImGuiSequencer()
             }
             else
             {
+                ImGuiNoteSequencer(trackIndex, trackHeight);
             }
 
             ImGui::PopStyleColor(3);
@@ -425,6 +531,7 @@ void AppThreeDee::ImGuiSequencer()
             }
             else
             {
+                ImGuiNoteSequencerEventHandling();
             }
         }
     }
@@ -548,6 +655,14 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
     }
 }
 
+void AppThreeDee::ImGuiNoteSequencer(int trackIndex, float trackHeight)
+{
+}
+
+void AppThreeDee::ImGuiNoteSequencerEventHandling()
+{
+}
+
 const char *notes[] = {
     "A",
     "A#",
@@ -643,6 +758,7 @@ void AppThreeDee::Render()
 
     ImGuiSequencer();
     ImGuiPatternEditorWindow();
+    ImGuiSelectedTrack();
 
     // 3. Show another simple window.
     if (showADNoteEditor)
