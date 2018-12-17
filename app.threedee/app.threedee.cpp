@@ -359,8 +359,6 @@ TrackPattern &AppThreeDee::GetPattern(int trackIndex, int patternIndex)
 
 void AppThreeDee::ImGuiSequencer()
 {
-    ImGuiIO &io = ImGui::GetIO();
-
     ImGui::Begin("Sequencer");
     {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
@@ -385,56 +383,14 @@ void AppThreeDee::ImGuiSequencer()
             ImGui::Text("%02d", trackIndex + 1);
             ImGui::PopID();
 
-            auto lastIndex = LastPatternIndex(trackIndex);
-            for (int patternIndex = 0; patternIndex <= lastIndex; patternIndex++)
+            if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
             {
-                ImGui::SameLine();
-                ImGui::PushID(patternIndex + trackIndex * 1000);
-                bool isActive = trackIndex == activeInstrument && patternIndex == activePattern;
-                if (isActive)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-                }
-
-                if (DoesPatternExistAtIndex(trackIndex, patternIndex))
-                {
-                    auto &pattern = GetPattern(trackIndex, patternIndex);
-                    if (ImGui::Button(pattern._name.c_str(), ImVec2(120.0f, trackHeight)))
-                    {
-                        activeInstrument = trackIndex;
-                        activePattern = patternIndex;
-                        if (ImGui::IsMouseDoubleClicked(0))
-                        {
-                            EditSelectedPattern();
-                        }
-                    }
-                }
-                else if (_mixer->GetChannel(trackIndex)->Penabled)
-                {
-                    if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-                    {
-                        AddPattern(trackIndex, patternIndex, "");
-                    }
-                }
-                if (isActive)
-                {
-                    ImGui::PopStyleColor(1);
-                    ImGui::PopStyleVar(1);
-                }
-
-                ImGui::PopID();
+                ImGuiStepSequencer(trackIndex, trackHeight);
             }
-            if (_mixer->GetChannel(trackIndex)->Penabled)
+            else
             {
-                ImGui::SameLine();
-                ImGui::PushID((100 + trackIndex) * 2010);
-                if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-                {
-                    AddPattern(trackIndex, lastIndex + 1, "");
-                }
-                ImGui::PopID();
             }
+
             ImGui::PopStyleColor(3);
         }
         float scroll_y = ImGui::GetScrollY();
@@ -452,7 +408,7 @@ void AppThreeDee::ImGuiSequencer()
         if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f;
         if (scroll_x_delta != 0.0f)
         {
-            ImGui::BeginChild("scrolling"); // Demonstrate a trick: you can use Begin to set yourself in the context of another window (here we are already out of your child window)
+            ImGui::BeginChild("scrolling");
             ImGui::SetScrollX(ImGui::GetScrollX() + scroll_x_delta);
             ImGui::End();
         }
@@ -463,65 +419,132 @@ void AppThreeDee::ImGuiSequencer()
 
         if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         {
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+            if (activeInstrument >= 0 && _mixer->GetChannel(activeInstrument)->Pkitmode != 0)
             {
-                RemoveActivePattern();
+                ImGuiStepSequencerEventHandling();
             }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+            else
             {
-                if (io.KeyShift && !io.KeyCtrl)
-                {
-                    MovePatternLeftForced();
-                }
-                else if (!io.KeyShift && io.KeyCtrl)
-                {
-                    SwitchPatternLeft();
-                }
-                else
-                {
-                    MovePatternLeftIfPossible();
-                }
             }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+        }
+    }
+    ImGui::End();
+}
+
+void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
+{
+    auto lastIndex = LastPatternIndex(trackIndex);
+    for (int patternIndex = 0; patternIndex <= lastIndex; patternIndex++)
+    {
+        ImGui::SameLine();
+        ImGui::PushID(patternIndex + trackIndex * 1000);
+        bool isActive = trackIndex == activeInstrument && patternIndex == activePattern;
+        if (isActive)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+        }
+
+        if (DoesPatternExistAtIndex(trackIndex, patternIndex))
+        {
+            auto &pattern = GetPattern(trackIndex, patternIndex);
+            if (ImGui::Button(pattern._name.c_str(), ImVec2(120.0f, trackHeight)))
             {
-                if (io.KeyShift && !io.KeyCtrl)
+                activeInstrument = trackIndex;
+                activePattern = patternIndex;
+                if (ImGui::IsMouseDoubleClicked(0))
                 {
-                    MovePatternRightForced();
-                }
-                else if (!io.KeyShift && io.KeyCtrl)
-                {
-                    SwitchPatternRight();
-                }
-                else
-                {
-                    MovePatternRightIfPossible();
-                }
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
-            {
-                SelectFirstPatternInTrack();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
-            {
-                SelectLastPatternInTrack();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Enter)))
-            {
-                EditSelectedPattern();
-            }
-            if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Tab)))
-            {
-                if (io.KeyShift)
-                {
-                    SelectPreviousPattern();
-                }
-                else
-                {
-                    SelectNextPattern();
+                    EditSelectedPattern();
                 }
             }
         }
-        ImGui::End();
+        else if (_mixer->GetChannel(trackIndex)->Penabled)
+        {
+            if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+            {
+                AddPattern(trackIndex, patternIndex, "");
+            }
+        }
+        if (isActive)
+        {
+            ImGui::PopStyleColor(1);
+            ImGui::PopStyleVar(1);
+        }
+
+        ImGui::PopID();
+    }
+    if (_mixer->GetChannel(trackIndex)->Penabled)
+    {
+        ImGui::SameLine();
+        ImGui::PushID((100 + trackIndex) * 2010);
+        if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+        {
+            AddPattern(trackIndex, lastIndex + 1, "");
+        }
+        ImGui::PopID();
+    }
+}
+
+void AppThreeDee::ImGuiStepSequencerEventHandling()
+{
+    ImGuiIO &io = ImGui::GetIO();
+
+    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+    {
+        RemoveActivePattern();
+    }
+    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+    {
+        if (io.KeyShift && !io.KeyCtrl)
+        {
+            MovePatternLeftForced();
+        }
+        else if (!io.KeyShift && io.KeyCtrl)
+        {
+            SwitchPatternLeft();
+        }
+        else
+        {
+            MovePatternLeftIfPossible();
+        }
+    }
+    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+    {
+        if (io.KeyShift && !io.KeyCtrl)
+        {
+            MovePatternRightForced();
+        }
+        else if (!io.KeyShift && io.KeyCtrl)
+        {
+            SwitchPatternRight();
+        }
+        else
+        {
+            MovePatternRightIfPossible();
+        }
+    }
+    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
+    {
+        SelectFirstPatternInTrack();
+    }
+    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
+    {
+        SelectLastPatternInTrack();
+    }
+    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Enter)))
+    {
+        EditSelectedPattern();
+    }
+    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Tab)))
+    {
+        if (io.KeyShift)
+        {
+            SelectPreviousPattern();
+        }
+        else
+        {
+            SelectNextPattern();
+        }
     }
 }
 

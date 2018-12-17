@@ -65,6 +65,8 @@ public:
 private:
     void ImGuiPlayback();
     void ImGuiSequencer();
+    void ImGuiStepSequencer(int trackIndex, float trackHeight);
+    void ImGuiStepSequencerEventHandling();
     void ImGuiPatternEditorWindow();
     void Stop();
     void PlayPause();
