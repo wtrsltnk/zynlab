@@ -508,9 +508,9 @@ void AppThreeDee::ImGuiSelectedTrack()
         float const sliderHeight = 200.0f;
 
         auto sliderPanelHeight =
-            sliderHeight                                 /*Fader height*/
-            + lh                                         /*Instrument button*/
-            + ((width / 1.5f) + (io.ItemSpacing.y * 2)); /*panning knob*/
+            sliderHeight                                   /*Fader height*/
+            + lh                                           /*Instrument button*/
+            + ((width / 2) + lh + (io.ItemSpacing.y * 2)); /*panning knob*/
 
         auto spaceLeft =
             ImGui::GetContentRegionAvail().y /*Available height*/
@@ -561,10 +561,19 @@ void AppThreeDee::ImGuiSelectedTrack()
         ImGui::EndChild();
 
         ImGui::Spacing();
-        if (ImGui::KnobUchar("panning", &_mixer->GetChannel(activeInstrument)->Ppanning, 0, 128, ImVec2(width / 2, width / 2)))
+        ImGui::SameLine(0.0f, width / 4);
+        auto panning = _mixer->GetChannel(activeInstrument)->Ppanning;
+        if (ImGui::KnobUchar("panning", &panning, 0, 128, ImVec2(width / 2, width / 2)))
         {
+            _mixer->GetChannel(activeInstrument)->setPpanning(panning);
         }
 
+        float peakl, peakr;
+        _mixer->GetChannel(activeInstrument)->ComputePeakLeftAndRight(_mixer->GetChannel(activeInstrument)->Pvolume, peakl, peakr);
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::SameLine(0.0f, (width - 20) / 2);
         int v = static_cast<int>(_mixer->GetChannel(activeInstrument)->Pvolume);
         if (ImGui::VSliderInt("##vol", ImVec2(20, sliderHeight - io.ItemSpacing.y), &v, 0, 128))
         {
@@ -591,7 +600,7 @@ void AppThreeDee::ImGuiSelectedTrack()
         ImGui::OpenPopup("Select Instrument");
     }
 
-    ImGui::SetNextWindowSize(ImVec2(700, 600));
+    ImGui::SetNextWindowSize(ImVec2(700, 800));
     if (ImGui::BeginPopupModal("Select Instrument"))
     {
         auto count = _mixer->GetBankManager()->GetBankCount();

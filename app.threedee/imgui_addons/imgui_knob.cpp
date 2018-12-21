@@ -5,11 +5,11 @@ bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, Im
 {
     ImGuiIO &io = ImGui::GetIO();
     ImGuiStyle &style = ImGui::GetStyle();
-    ImVec2 s(size.x-4, size.y-4);
+    ImVec2 s(size.x - 4, size.y - 4);
 
     float radius_outer = std::fmin(s.x, s.y) / 2.0f;
     ImVec2 pos = ImGui::GetCursorScreenPos();
-    pos = ImVec2(pos.x+2, pos.y+2);
+    pos = ImVec2(pos.x + 2, pos.y + 2);
     ImVec2 center = ImVec2(pos.x + radius_outer, pos.y + radius_outer);
 
     float line_height = ImGui::GetTextLineHeight();
@@ -50,7 +50,7 @@ bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, Im
     draw_list->PathStroke(ImGui::GetColorU32(ImGuiCol_FrameBg), false, 3.0f);
     draw_list->AddLine(
         ImVec2(center.x, center.y),
-        ImVec2(center.x + angle_cos * (radius_outer+1), center.y + angle_sin * (radius_outer+1)),
+        ImVec2(center.x + angle_cos * (radius_outer + 1), center.y + angle_sin * (radius_outer + 1)),
         ImGui::GetColorU32(ImGuiCol_SliderGrabActive), 2.0f);
     draw_list->PathArcTo(center, radius_outer, ANGLE_MIN, angle + 0.02f, 16);
     draw_list->PathStroke(ImGui::GetColorU32(ImGuiCol_SliderGrabActive), false, 3.0f);
@@ -58,7 +58,7 @@ bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, Im
 
     if (is_active || is_hovered)
     {
-        ImGui::SetNextWindowPos(ImVec2(pos.x - style.WindowPadding.x, pos.y - (line_height*2) - style.ItemInnerSpacing.y - style.WindowPadding.y));
+        ImGui::SetNextWindowPos(ImVec2(pos.x - style.WindowPadding.x, pos.y - (line_height * 2) - style.ItemInnerSpacing.y - style.WindowPadding.y));
         ImGui::BeginTooltip();
         ImGui::Text("%s %.3f", label, static_cast<double>(*p_value));
         ImGui::EndTooltip();

@@ -201,6 +201,29 @@ float Channel::ComputePeak(float volume)
     return peak;
 }
 
+void Channel::ComputePeakLeftAndRight(float volume, float &peakl, float &peakr)
+{
+    peakl = 1.0e-12f;
+    peakr = 1.0e-12f;
+    if (Penabled != 0)
+    {
+        float *outl = partoutl,
+              *outr = partoutr;
+        for (unsigned int i = 0; i < _synth->buffersize; ++i)
+        {
+            if (outl[i] > peakl)
+            {
+                peakl = outl[i];
+            }
+            if (outr[i] > peakr)
+            {
+                peakr = outr[i];
+            }
+        }
+        peakl *= volume;
+        peakr *= volume;
+    }
+}
 /*
  * Cleanup the part
  */

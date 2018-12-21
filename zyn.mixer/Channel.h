@@ -161,6 +161,7 @@ public:
     void InstrumentDefaults();
 
     float ComputePeak(float volume);
+    void ComputePeakLeftAndRight(float volume, float &peakl, float &peakr);
 
 public:
     float *partoutl; //Left channel output of the Channel
