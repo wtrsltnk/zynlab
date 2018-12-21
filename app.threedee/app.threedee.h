@@ -7,6 +7,7 @@
 
 #include <imgui.h>
 
+#include <chrono>
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>
 #include <zyn.mixer/Mixer.h>
@@ -43,6 +44,11 @@ class AppThreeDee
 private:
     Mixer *_mixer;
     GLFWwindow *_window;
+    std::chrono::milliseconds::rep _lastSequencerTimeInMs;
+    std::chrono::milliseconds::rep _playerTimeInMs;
+    std::chrono::milliseconds::rep _stepTimeInMs;
+    int _bpm;
+    int _currentStep;
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -59,6 +65,7 @@ public:
     virtual ~AppThreeDee();
 
     bool SetUp();
+    void SequencerTick();
     void Render();
     void CleanUp();
 
@@ -68,12 +75,11 @@ private:
     void ImGuiSequencer();
     void ImGuiStepSequencer(int trackIndex, float trackHeight);
     void ImGuiStepSequencerEventHandling();
-    void ImGuiNoteSequencer(int trackIndex, float trackHeight);
-    void ImGuiNoteSequencerEventHandling();
+    void ImGuiPianoRollSequencer(int trackIndex, float trackHeight);
+    void ImGuiPianoRollSequencerEventHandling();
     void ImGuiPatternEditorWindow();
-    void Stop();
-    void PlayPause();
 
+    int CountSongLength();
     void AddPattern(int trackIndex, int patternIndex, char const *label);
     void RemoveActivePattern();
     void MovePatternLeftIfPossible();
@@ -91,6 +97,12 @@ private:
     int LastPatternIndex(int trackIndex);
     bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
     TrackPattern &GetPattern(int trackIndex, int patternIndex);
+    void HitNote(int trackIndex, int note, int durationInMs);
+
+    void Step(int step);
+    bool IsPlaying();
+    void Stop();
+    void PlayPause();
 
     // AD note
     bool showAddSynthEditor;

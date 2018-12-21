@@ -50,6 +50,13 @@ void AppThreeDee::onResize(int width, int height)
     glViewport(0, 0, width, height);
 }
 
+std::chrono::milliseconds::rep calculateStepTime(int bpm)
+{
+    auto beatsPerSecond = static_cast<double>(bpm * 4) / 60.0;
+
+    return static_cast<std::chrono::milliseconds::rep>(1000 / beatsPerSecond);
+}
+
 bool AppThreeDee::SetUp()
 {
     // Setup Dear ImGui binding
@@ -71,6 +78,12 @@ bool AppThreeDee::SetUp()
 
     _mixer->GetBankManager()->RescanForBanks();
 
+    _lastSequencerTimeInMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    _playerTimeInMs = 0;
+    _currentStep = 0;
+    _bpm = 120;
+    _stepTimeInMs = calculateStepTime(_bpm);
+
     return true;
 }
 
@@ -85,6 +98,25 @@ static int keyboardChannel = 0;
 static bool showADNoteEditor = true;
 static bool isPlaying = false;
 static int openSelectInstrument = -1;
+
+int AppThreeDee::CountSongLength()
+{
+    int maxPattern = 0;
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    {
+        auto &pattern = tracksOfPatterns[trackIndex];
+        if (pattern.empty())
+        {
+            continue;
+        }
+        if (pattern.rbegin()->first >= maxPattern)
+        {
+            maxPattern = pattern.rbegin()->first;
+        }
+    }
+
+    return maxPattern + 1;
+}
 
 void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label)
 {
@@ -350,6 +382,11 @@ int AppThreeDee::LastPatternIndex(int trackIndex)
 
 bool AppThreeDee::DoesPatternExistAtIndex(int trackIndex, int patternIndex)
 {
+    if (trackIndex < 0 || trackIndex >= NUM_MIXER_CHANNELS)
+    {
+        return false;
+    }
+
     return tracksOfPatterns[trackIndex].find(patternIndex) != tracksOfPatterns[trackIndex].end();
 }
 
@@ -358,8 +395,110 @@ TrackPattern &AppThreeDee::GetPattern(int trackIndex, int patternIndex)
     return tracksOfPatterns[trackIndex][patternIndex];
 }
 
+int const maxNotes = 255;
+static std::chrono::milliseconds::rep activeNotes[NUM_MIXER_CHANNELS][maxNotes] = {{0}};
+
+void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
+{
+    activeNotes[trackIndex][note] = durationInMs;
+    _mixer->NoteOn(static_cast<unsigned char>(trackIndex), static_cast<unsigned char>(note), 100);
+}
+
+void AppThreeDee::SequencerTick()
+{
+    std::chrono::milliseconds::rep currentTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+
+    auto deltaTime = currentTime - _lastSequencerTimeInMs;
+    _lastSequencerTimeInMs = currentTime;
+
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    {
+        for (int note = 0; note < maxNotes; note++)
+        {
+            if (activeNotes[trackIndex][note] <= 0)
+            {
+                continue;
+            }
+
+            activeNotes[trackIndex][note] -= deltaTime;
+            if (activeNotes[trackIndex][note] <= 0)
+            {
+                _mixer->NoteOff(static_cast<unsigned char>(trackIndex), static_cast<unsigned char>(note));
+            }
+        }
+    }
+    if (!IsPlaying())
+    {
+        return;
+    }
+
+    _playerTimeInMs += deltaTime;
+
+    if (_playerTimeInMs > _stepTimeInMs)
+    {
+        _currentStep++;
+        if (_currentStep >= (CountSongLength() * 16))
+        {
+            _currentStep = 0;
+        }
+        Step(_currentStep);
+        _playerTimeInMs -= _stepTimeInMs;
+    }
+}
+
+void AppThreeDee::Step(int step)
+{
+    auto patternIndex = step / 16;
+    auto stepIndex = step % 16;
+
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    {
+        auto track = tracksOfPatterns[trackIndex];
+        if (track.find(patternIndex) != track.end())
+        {
+            auto pattern = track[patternIndex];
+            for (auto note : pattern._notes)
+            {
+                if (note._step == stepIndex)
+                {
+                    HitNote(trackIndex, note._note, 200);
+                }
+            }
+        }
+    }
+}
+
+bool AppThreeDee::IsPlaying()
+{
+    return isPlaying;
+}
+
+void AppThreeDee::Stop()
+{
+    isPlaying = false;
+    _playerTimeInMs = 0;
+}
+
+void AppThreeDee::PlayPause()
+{
+    isPlaying = !isPlaying;
+
+    if (isPlaying)
+    {
+        Step(_currentStep);
+    }
+}
+
 void AppThreeDee::ImGuiSelectedTrack()
 {
+    if (activeInstrument < 0 || activeInstrument >= NUM_MIXER_CHANNELS)
+    {
+        activeInstrument = -1;
+        return;
+    }
+
     ImGui::Begin("Selected Track");
     {
         auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname));
@@ -387,7 +526,7 @@ void AppThreeDee::ImGuiSelectedTrack()
             "16",
         };
         int channel = static_cast<int>(_mixer->GetChannel(activeInstrument)->Prcvchn);
-        if (ImGui::Combo("##KeyboardChannel", &channel, channels, NUM_MIDI_CHANNELS))
+        if (ImGui::Combo("##KeyboardChannel", &channel, channels, NUM_MIXER_CHANNELS))
         {
             _mixer->GetChannel(activeInstrument)->Prcvchn = static_cast<unsigned char>(channel);
         }
@@ -396,11 +535,11 @@ void AppThreeDee::ImGuiSelectedTrack()
 
     if (openSelectInstrument >= 0)
     {
-        ImGui::OpenPopup("popup");
+        ImGui::OpenPopup("Select Instrument");
     }
 
     ImGui::SetNextWindowSize(ImVec2(700, 600));
-    if (ImGui::BeginPopupModal("popup"))
+    if (ImGui::BeginPopupModal("Select Instrument"))
     {
         auto count = _mixer->GetBankManager()->GetBankCount();
         std::vector<const char *> bankNames;
@@ -426,6 +565,7 @@ void AppThreeDee::ImGuiSelectedTrack()
             ImGui::CloseCurrentPopup();
         }
 
+        ImGui::BeginChild("banks", ImVec2(0, -20));
         ImGui::Columns(5);
         if (currentBank > 0)
         {
@@ -452,6 +592,7 @@ void AppThreeDee::ImGuiSelectedTrack()
                 }
             }
         }
+        ImGui::EndChild();
         ImGui::EndPopup();
     }
 }
@@ -488,13 +629,13 @@ void AppThreeDee::ImGuiSequencer()
             }
             ImGui::PopID();
 
-            if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
+            //if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
             {
                 ImGuiStepSequencer(trackIndex, trackHeight);
             }
-            else
+            //else
             {
-                ImGuiNoteSequencer(trackIndex, trackHeight);
+                ImGuiPianoRollSequencer(trackIndex, trackHeight);
             }
 
             ImGui::PopStyleColor(3);
@@ -525,13 +666,13 @@ void AppThreeDee::ImGuiSequencer()
 
         if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         {
-            if (activeInstrument >= 0 && _mixer->GetChannel(activeInstrument)->Pkitmode != 0)
+            //if (activeInstrument >= 0 && _mixer->GetChannel(activeInstrument)->Pkitmode != 0)
             {
                 ImGuiStepSequencerEventHandling();
             }
-            else
+            //else
             {
-                ImGuiNoteSequencerEventHandling();
+                ImGuiPianoRollSequencerEventHandling();
             }
         }
     }
@@ -655,15 +796,15 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
     }
 }
 
-void AppThreeDee::ImGuiNoteSequencer(int trackIndex, float trackHeight)
+void AppThreeDee::ImGuiPianoRollSequencer(int trackIndex, float trackHeight)
 {
 }
 
-void AppThreeDee::ImGuiNoteSequencerEventHandling()
+void AppThreeDee::ImGuiPianoRollSequencerEventHandling()
 {
 }
 
-const char *notes[] = {
+static const char *notes[] = {
     "A",
     "A#",
     "B",
@@ -684,6 +825,12 @@ void AppThreeDee::ImGuiPatternEditorWindow()
     const float rowHeight = 20.0f;
     if (showPatternEditor)
     {
+        if (!DoesPatternExistAtIndex(activeInstrument, activePattern))
+        {
+            activePattern = -1;
+            return;
+        }
+
         auto &style = ImGui::GetStyle();
         auto &selectedPattern = GetPattern(activeInstrument, activePattern);
 
@@ -697,7 +844,10 @@ void AppThreeDee::ImGuiPatternEditorWindow()
                 ImGui::Separator();
             }
             ImGui::PushID(i);
-            ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, rowHeight));
+            if (ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, rowHeight)))
+            {
+                HitNote(activeInstrument, i, 200);
+            }
             for (int j = 0; j < 16; j++)
             {
                 ImGui::SameLine();
@@ -722,6 +872,7 @@ void AppThreeDee::ImGuiPatternEditorWindow()
                     {
                         selectedPattern._notes.insert(TrackPatternNote(i, j));
                     }
+                    HitNote(activeInstrument, i, 200);
                 }
                 ImGui::PopStyleColor();
                 ImGui::PopID();
@@ -855,14 +1006,6 @@ void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*
     }
 }
 
-void AppThreeDee::Stop()
-{
-}
-
-void AppThreeDee::PlayPause()
-{
-}
-
 void AppThreeDee::ImGuiPlayback()
 {
     ImGui::Begin("Playback");
@@ -895,6 +1038,11 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::SameLine();
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+        if (ImGui::SliderInt("##BPM", &_bpm, 10, 200, "BPM %d"))
+        {
+            _stepTimeInMs = calculateStepTime(_bpm);
+        }
 
         ImGui::End();
     }

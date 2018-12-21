@@ -108,6 +108,8 @@ int main(int /*argc*/, char * /*argv*/ [])
 
         while (glfwWindowShouldClose(window) == 0)
         {
+            app.SequencerTick();
+
             glfwPollEvents();
 
             glClear(GL_COLOR_BUFFER_BIT);
@@ -115,7 +117,6 @@ int main(int /*argc*/, char * /*argv*/ [])
             app.Render();
 
             glfwSwapBuffers(window);
-            //Sleep(50);
         }
         app.CleanUp();
     }
