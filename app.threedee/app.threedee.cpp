@@ -499,37 +499,90 @@ void AppThreeDee::ImGuiSelectedTrack()
         return;
     }
 
+    auto io = ImGui::GetStyle();
+
     ImGui::Begin("Selected Track");
     {
+        auto lh = ImGui::GetItemsLineHeightWithSpacing();
+        auto width = ImGui::GetContentRegionAvail().x;
+        float const sliderHeight = 200.0f;
+
+        auto sliderPanelHeight =
+            sliderHeight                                 /*Fader height*/
+            + lh                                         /*Instrument button*/
+            + ((width / 1.5f) + (io.ItemSpacing.y * 2)); /*panning knob*/
+
+        auto spaceLeft =
+            ImGui::GetContentRegionAvail().y /*Available height*/
+            - sliderPanelHeight              /*Volume fader*/
+            - lh                             /*Settings*/
+            - lh;                            /*Input channel*/
+
+        ImGui::BeginChild("item view", ImVec2(0, -sliderPanelHeight));
+        {
+            if (ImGui::Button("Settings", ImVec2(width, 0)))
+            {
+                showAddSynthEditor = true;
+            }
+
+            const char *channels[] = {
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+            };
+            int channel = static_cast<int>(_mixer->GetChannel(activeInstrument)->Prcvchn);
+            ImGui::PushItemWidth(width);
+            if (ImGui::Combo("##KeyboardChannel", &channel, channels, NUM_MIXER_CHANNELS))
+            {
+                _mixer->GetChannel(activeInstrument)->Prcvchn = static_cast<unsigned char>(channel);
+            }
+
+            auto fxButtonCount = spaceLeft / ImGui::GetItemsLineHeightWithSpacing() - 1;
+            for (int fx = 0; fx < fxButtonCount; fx++)
+            {
+                char fxButton[32] = {0};
+                sprintf(fxButton, "fx %d", fx + 1);
+                ImGui::Button(fxButton, ImVec2(width, 0));
+            }
+        }
+        ImGui::EndChild();
+
+        ImGui::Spacing();
+        if (ImGui::KnobUchar("panning", &_mixer->GetChannel(activeInstrument)->Ppanning, 0, 128, ImVec2(width / 2, width / 2)))
+        {
+        }
+
+        int v = static_cast<int>(_mixer->GetChannel(activeInstrument)->Pvolume);
+        if (ImGui::VSliderInt("##vol", ImVec2(20, sliderHeight - io.ItemSpacing.y), &v, 0, 128))
+        {
+            _mixer->GetChannel(activeInstrument)->setPvolume(static_cast<unsigned char>(v));
+        }
+
+        auto hue = activeInstrument * 0.05f;
+        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
+
         auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname));
-        if (ImGui::Button(name.size() == 0 ? "default" : name.c_str()))
+        if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(width, 0)))
         {
             openSelectInstrument = activeInstrument;
         }
 
-        const char *channels[] = {
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15",
-            "16",
-        };
-        int channel = static_cast<int>(_mixer->GetChannel(activeInstrument)->Prcvchn);
-        if (ImGui::Combo("##KeyboardChannel", &channel, channels, NUM_MIXER_CHANNELS))
-        {
-            _mixer->GetChannel(activeInstrument)->Prcvchn = static_cast<unsigned char>(channel);
-        }
+        ImGui::PopStyleColor(3);
     }
     ImGui::End();
 
@@ -608,11 +661,6 @@ void AppThreeDee::ImGuiSequencer()
         ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
         for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
         {
-            float hue = trackIndex * 0.05f;
-            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
-
             ImGui::PushID(trackIndex * 1100);
             auto trackEnabled = _mixer->GetChannel(trackIndex)->Penabled == 1;
             if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
@@ -620,14 +668,28 @@ void AppThreeDee::ImGuiSequencer()
                 _mixer->GetChannel(trackIndex)->Penabled = trackEnabled ? 1 : 0;
             }
             ImGui::SameLine();
+
+            float hue = trackIndex * 0.05f;
             char trackLabel[32] = {'\0'};
             sprintf(trackLabel, "%02d", trackIndex + 1);
-            bool s = trackIndex == activeInstrument;
-            if (ImGui::Selectable(trackLabel, &s, 0, ImVec2(trackHeight, trackHeight)) && s)
+            bool highLight = trackIndex == activeInstrument;
+            if (highLight)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
+            }
+            if (ImGui::Button(trackLabel, ImVec2(trackHeight, trackHeight)))
             {
                 activeInstrument = trackIndex;
             }
+            if (highLight)
+            {
+                ImGui::PopStyleColor();
+            }
             ImGui::PopID();
+
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
 
             //if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
             {
@@ -1037,12 +1099,15 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
+        ImGui::PushItemWidth(200);
         if (ImGui::SliderInt("##BPM", &_bpm, 10, 200, "BPM %d"))
         {
             _stepTimeInMs = calculateStepTime(_bpm);
         }
+
+        ImGui::SameLine();
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();
     }
