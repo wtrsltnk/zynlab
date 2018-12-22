@@ -1,28 +1,29 @@
 #ifndef PATTERN_H
 #define PATTERN_H
 
-#include <map>
+#include <set>
+#include <string>
 
-#define NUM_PATTERN_EVENTS 16
-
-class PatternEvent
+class TrackPatternNote
 {
 public:
-    PatternEvent();
-    virtual ~PatternEvent();
+    TrackPatternNote() {}
+    TrackPatternNote(unsigned char note, int step) : _note(note), _step(step) {}
 
+    bool operator<(TrackPatternNote const &other) const { return (_note < other._note) || (_note == other._note && _step < other._step); }
     unsigned char _note;
-    unsigned char _velocity;
-    unsigned char _gate;
-    unsigned char _swing;
+    int _step;
 };
 
-class Pattern
+class TrackPattern
 {
 public:
-    virtual ~Pattern();
+    TrackPattern() {}
+    TrackPattern(std::string const &name, float hue) : _name(name), _hue(hue) {}
 
-    PatternEvent _events[NUM_PATTERN_EVENTS];
+    std::string _name;
+    float _hue;
+    std::set<TrackPatternNote> _notes;
 };
 
 #endif // PATTERN_H

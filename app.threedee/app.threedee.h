@@ -12,43 +12,17 @@
 #include <zyn.mixer/BankManager.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
-#include <zyn.seq/Track.h>
-#include <zyn.seq/Tracker.h>
+#include <zyn.seq/Sequencer.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
-
-class TrackPatternNote
-{
-public:
-    TrackPatternNote() {}
-    TrackPatternNote(int note, int step) : _note(note), _step(step) {}
-
-    bool operator<(TrackPatternNote const &other) const { return (_note < other._note) || (_note == other._note && _step < other._step); }
-    int _note;
-    int _step;
-};
-
-class TrackPattern
-{
-public:
-    TrackPattern() {}
-    TrackPattern(std::string const &name, float hue) : _name(name), _hue(hue) {}
-
-    std::string _name;
-    float _hue;
-    std::set<TrackPatternNote> _notes;
-};
 
 class AppThreeDee
 {
 private:
     Mixer *_mixer;
     GLFWwindow *_window;
-    std::chrono::milliseconds::rep _lastSequencerTimeInMs;
-    std::chrono::milliseconds::rep _playerTimeInMs;
-    std::chrono::milliseconds::rep _stepTimeInMs;
-    int _bpm;
-    int _currentStep;
+    Stepper _stepper;
+    Sequencer _sequencer;
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -65,7 +39,7 @@ public:
     virtual ~AppThreeDee();
 
     bool SetUp();
-    void SequencerTick();
+    void Tick();
     void Render();
     void CleanUp();
 
@@ -79,30 +53,8 @@ private:
     void ImGuiPianoRollSequencerEventHandling();
     void ImGuiPatternEditorWindow();
 
-    int CountSongLength();
-    void AddPattern(int trackIndex, int patternIndex, char const *label);
-    void RemoveActivePattern();
-    void MovePatternLeftIfPossible();
-    void MovePatternLeftForced();
-    void SwitchPatternLeft();
-    void MovePatternRightIfPossible();
-    void MovePatternRightForced();
-    void SwitchPatternRight();
-    void SwitchPatterns(int firstKey, int secondKey);
-    void SelectFirstPatternInTrack();
-    void SelectLastPatternInTrack();
     void EditSelectedPattern();
-    void SelectPreviousPattern();
-    void SelectNextPattern();
-    int LastPatternIndex(int trackIndex);
-    bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
-    TrackPattern &GetPattern(int trackIndex, int patternIndex);
     void HitNote(int trackIndex, int note, int durationInMs);
-
-    void Step(int step);
-    bool IsPlaying();
-    void Stop();
-    void PlayPause();
 
     // AD note
     bool showAddSynthEditor;

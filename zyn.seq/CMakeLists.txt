@@ -3,18 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 project(zyn.seq)
 
 add_library(zyn.seq STATIC
-    Pattern.cpp
-    Pattern.h
     Sequencer.cpp
     Sequencer.h
-    SequencerStep.cpp
-    SequencerStep.h
-    SequencerStrip.cpp
-    SequencerStrip.h
-    Track.cpp
-    Track.h
-    Tracker.cpp
-    Tracker.h
     )
 
 target_include_directories(zyn.seq

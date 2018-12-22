@@ -1,201 +1,472 @@
 #include "Sequencer.h"
-#include "SequencerStrip.h"
-#include <zyn.mixer/Mixer.h>
 
-#include <chrono>
-#include <ctime>
-#include <iostream>
+Note::Note() = default;
 
-Sequencer::Sequencer(class IMixer *mixer)
-    : _mixer(mixer), _playThread([this]() { this->runThread(); }),
-      _playingState(PlayingStates::Stopped),
-      _currentStep(0), _prevStep(0), _currentStepTime(0.0),
-      _bpm(100)
+Note::Note(Note const &note)
+    : _note(note._note), _velocity(note._velocity)
+{}
+
+Note::Note(unsigned char note, unsigned char velocity)
+    : _note(note), _velocity(velocity)
+{}
+
+Note::~Note() = default;
+
+ISteppable::~ISteppable() = default;
+
+Stepper::Stepper(ISteppable *steppable, IMixer *mixer)
+    : _steppable(steppable), _mixer(mixer)
+{}
+
+Stepper::~Stepper() = default;
+
+std::chrono::milliseconds::rep calculateStepTime(int bpm)
 {
-    this->_playThread.detach();
+    auto beatsPerSecond = static_cast<double>(bpm * 4) / 60.0;
+
+    return static_cast<std::chrono::milliseconds::rep>(1000 / beatsPerSecond);
 }
 
+void Stepper::Setup()
+{
+
+    _lastSequencerTimeInMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    _playerTimeInMs = 0;
+    _currentStep = 0;
+    _bpm = 120;
+    _stepTimeInMs = calculateStepTime(_bpm);
+}
+
+void Stepper::Tick()
+{
+    std::chrono::milliseconds::rep currentTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+
+    auto deltaTime = currentTime - _lastSequencerTimeInMs;
+    _lastSequencerTimeInMs = currentTime;
+
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    {
+        for (int note = 0; note < maxNotes; note++)
+        {
+            if (_activeNotes[trackIndex][note] <= 0)
+            {
+                continue;
+            }
+
+            _activeNotes[trackIndex][note] -= deltaTime;
+            if (_activeNotes[trackIndex][note] <= 0)
+            {
+                _mixer->NoteOff(static_cast<unsigned char>(trackIndex), static_cast<unsigned char>(note));
+            }
+        }
+    }
+    if (!IsPlaying())
+    {
+        return;
+    }
+
+    _playerTimeInMs += deltaTime;
+
+    if (_playerTimeInMs > _stepTimeInMs)
+    {
+        _currentStep++;
+        if (_currentStep >= (_steppable->CountSongLength() * 16))
+        {
+            _currentStep = 0;
+        }
+        Step(_currentStep);
+        _playerTimeInMs -= _stepTimeInMs;
+    }
+}
+
+void Stepper::HitNote(unsigned char chan, unsigned char note, int durationInMs)
+{
+    _activeNotes[chan][note] = durationInMs;
+    _mixer->NoteOn(chan, note, 100);
+}
+
+int Stepper::Bpm() const
+{
+    return _bpm;
+}
+
+void Stepper::Bpm(int bpm)
+{
+    _bpm = bpm;
+    _stepTimeInMs = calculateStepTime(_bpm);
+}
+
+bool Stepper::IsPlaying()
+{
+    return isPlaying;
+}
+
+void Stepper::Stop()
+{
+    isPlaying = false;
+    _playerTimeInMs = 0;
+}
+
+void Stepper::PlayPause()
+{
+    isPlaying = !isPlaying;
+
+    if (isPlaying)
+    {
+        Step(_currentStep);
+    }
+}
+
+void Stepper::Step(int step)
+{
+    auto patternIndex = step / 16;
+    auto stepIndex = step % 16;
+
+    for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    {
+        auto notes = _steppable->GetNote(trackIndex, patternIndex, stepIndex);
+        for (auto note : notes)
+        {
+            HitNote(trackIndex, note._note, note._velocity);
+        }
+    }
+}
+
+std::vector<Note> Sequencer::GetNote(unsigned char trackIndex, int patternIndex, int stepIndex)
+{
+    std::vector<Note> result;
+
+    auto track = tracksOfPatterns[trackIndex];
+    if (track.find(patternIndex) != track.end())
+    {
+        auto pattern = track[patternIndex];
+        for (auto note : pattern._notes)
+        {
+            if (note._step == stepIndex)
+            {
+                Note n;
+                n._note = note._note;
+                n._velocity = 200;
+                result.push_back(n);
+            }
+        }
+    }
+
+    return result;
+}
+
+Sequencer::Sequencer() = default;
 Sequencer::~Sequencer() = default;
 
-void Sequencer::runThread()
+int Sequencer::CountSongLength()
 {
-    std::clock_t start = std::clock();
-    std::clock_t lastCheck = start;
-
-    while (this->currentState() != PlayingStates::Quit)
+    int maxPattern = 0;
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
     {
-        std::clock_t check = std::clock();
-        if (this->currentState() == PlayingStates::Playing)
+        auto &pattern = tracksOfPatterns[trackIndex];
+        if (pattern.empty())
         {
-            double stepTime = (60.0 / double(this->bpm())) / 4.0;
-            //            std::cout << stepTime << std::endl;
-
-            bool doStepAction = false;
-            this->_changeCurrentStep.lock();
-            this->_currentStepTime += ((check - lastCheck) / double(CLOCKS_PER_SEC));
-            if (this->_currentStepTime >= stepTime)
-            {
-                this->_currentStepTime -= stepTime;
-                this->_prevStep = this->_currentStep;
-                this->_currentStep++;
-                doStepAction = true;
-            }
-            this->_changeCurrentStep.unlock();
-
-            if (doStepAction) this->doStep();
+            continue;
         }
-        lastCheck = check;
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
-}
-
-PlayingStates Sequencer::currentState()
-{
-    this->_changePlayingState.lock();
-    auto result = this->_playingState;
-    this->_changePlayingState.unlock();
-
-    return result;
-}
-
-int Sequencer::currentStep()
-{
-    this->_changeCurrentStep.lock();
-    auto result = this->_currentStep;
-    this->_changeCurrentStep.unlock();
-
-    return result;
-}
-
-void Sequencer::doStep()
-{
-    this->_mixer->Lock();
-    for (SequencerStrip *strip : this->_channels)
-    {
-        auto prev = strip->_steps.find(this->_prevStep % 16);
-        if (prev != strip->_steps.end())
+        if (pattern.rbegin()->first >= maxPattern)
         {
-            this->_mixer->NoteOff(strip->_targetMixerChannel, prev->second._note);
-        }
-
-        auto curr = strip->_steps.find(this->_currentStep % 16);
-        if (curr != strip->_steps.end())
-        {
-            this->_mixer->NoteOn(strip->_targetMixerChannel, curr->second._note, int(curr->second._velocity));
+            maxPattern = pattern.rbegin()->first;
         }
     }
-    this->_mixer->Unlock();
+
+    return maxPattern + 1;
 }
 
-void Sequencer::setBpm(int bpm)
+void Sequencer::AddPattern(int trackIndex, int patternIndex, char const *label)
 {
-    this->_changeBpm.lock();
-    this->_bpm = bpm;
-    this->_changeBpm.unlock();
+    static int n = std::rand() % 255;
+    float hue = n * 0.05f;
+    _activeInstrument = trackIndex;
+    _activePattern = patternIndex;
+    tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, TrackPattern(label, hue)));
+    n = (n + std::rand()) % 255;
 }
 
-int Sequencer::bpm()
+void Sequencer::RemoveActivePattern()
 {
-    this->_changeBpm.lock();
-    auto result = this->_bpm;
-    //    std::cout << result << std::endl;
-    this->_changeBpm.unlock();
-
-    return result;
-}
-
-void Sequencer::Start()
-{
-    auto state = this->currentState();
-
-    // We do not change anymore when we are quitting.
-    if (state == PlayingStates::Quit) return;
-
-    // No need to change when we are already started
-    if (state == PlayingStates::Playing) return;
-
-    // Simply enable playing again when we were paused or stopped
-    if (state == PlayingStates::Paused || state == PlayingStates::Stopped)
+    if (_activeInstrument < 0 || _activePattern < 0)
     {
-        this->_changePlayingState.lock();
-        this->_playingState = PlayingStates::Playing;
-        this->_changePlayingState.unlock();
+        return;
+    }
+
+    tracksOfPatterns[_activeInstrument].erase(_activePattern);
+    _activeInstrument = -1;
+    _activePattern = -1;
+}
+
+void Sequencer::MovePatternLeftIfPossible()
+{
+    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+
+    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    {
+        return;
+    }
+
+    auto currentKey = ap->first;
+
+    if (currentKey == 0)
+    {
+        return;
+    }
+
+    auto currentValue = ap->second;
+    auto newKey = currentKey - 1;
+
+    if (tracksOfPatterns[_activeInstrument].find(newKey) == tracksOfPatterns[_activeInstrument].end())
+    {
+        tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
+        tracksOfPatterns[_activeInstrument].erase(currentKey);
+        _activePattern = newKey;
     }
 }
 
-void Sequencer::Pause()
+void Sequencer::MovePatternLeftForced()
 {
-    auto state = this->currentState();
+    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
-    // We do not change anymore when we are quitting.
-    if (state == PlayingStates::Quit) return;
-
-    // No need to change when we are already paused
-    if (state == PlayingStates::Paused) return;
-
-    if (state == PlayingStates::Stopped || state == PlayingStates::Playing)
+    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
     {
-        this->_changePlayingState.lock();
-        this->_playingState = PlayingStates::Stopped;
-        this->_changePlayingState.unlock();
+        return;
+    }
+
+    if (tracksOfPatterns[_activeInstrument].begin()->first == 0)
+    {
+        return;
+    }
+
+    for (int i = tracksOfPatterns[_activeInstrument].begin()->first; i <= ap->first; i++)
+    {
+        auto itr = tracksOfPatterns[_activeInstrument].find(i);
+        if (itr == tracksOfPatterns[_activeInstrument].end())
+        {
+            continue;
+        }
+        tracksOfPatterns[_activeInstrument].insert(std::make_pair(i - 1, itr->second));
+        tracksOfPatterns[_activeInstrument].erase(i);
+    }
+
+    _activePattern = _activePattern - 1;
+}
+
+void Sequencer::SwitchPatternLeft()
+{
+    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+
+    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    {
+        return;
+    }
+
+    auto currentKey = ap->first;
+
+    if (currentKey <= 0)
+    {
+        return;
+    }
+
+    auto currentValue = ap->second;
+    auto newKey = currentKey - 1;
+
+    tracksOfPatterns->erase(currentKey);
+
+    if (tracksOfPatterns[_activeInstrument].find(newKey) != tracksOfPatterns[_activeInstrument].end())
+    {
+        auto tmpValue = tracksOfPatterns[_activeInstrument].find(newKey)->second;
+        tracksOfPatterns[_activeInstrument].erase(newKey);
+        tracksOfPatterns[_activeInstrument].insert(std::make_pair(currentKey, tmpValue));
+    }
+
+    tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
+
+    _activePattern = newKey;
+}
+
+void Sequencer::MovePatternRightIfPossible()
+{
+    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+
+    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    {
+        return;
+    }
+
+    auto currentKey = ap->first;
+    auto currentValue = ap->second;
+    auto newKey = currentKey + 1;
+
+    ap++;
+    auto nextKey = ap->first;
+    if (ap == tracksOfPatterns[_activeInstrument].end() || newKey < nextKey)
+    {
+        tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
+        tracksOfPatterns[_activeInstrument].erase(currentKey);
+        _activePattern = newKey;
     }
 }
 
-void Sequencer::Stop()
+void Sequencer::MovePatternRightForced()
 {
-    auto state = this->currentState();
+    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
-    // We do not change anymore when we are quitting.
-    if (state == PlayingStates::Quit) return;
-
-    // No need to change when we are already stopped
-    if (state == PlayingStates::Stopped) return;
-
-    // Stop and reset the current step
-    if (state == PlayingStates::Paused || state == PlayingStates::Playing)
+    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
     {
-        this->_changePlayingState.lock();
-        this->_playingState = PlayingStates::Stopped;
-        this->_changePlayingState.unlock();
+        return;
+    }
 
-        this->_changeCurrentStep.lock();
-        this->_prevStep = 0;
-        this->_currentStep = 0;
-        this->_changeCurrentStep.unlock();
+    for (int i = tracksOfPatterns[_activeInstrument].rbegin()->first; i >= ap->first; i--)
+    {
+        auto itr = tracksOfPatterns[_activeInstrument].find(i);
+        if (itr == tracksOfPatterns[_activeInstrument].end())
+        {
+            continue;
+        }
+        tracksOfPatterns[_activeInstrument].insert(std::make_pair(i + 1, itr->second));
+        tracksOfPatterns[_activeInstrument].erase(i);
+    }
+
+    _activePattern = _activePattern + 1;
+}
+
+void Sequencer::SwitchPatternRight()
+{
+    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+
+    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    {
+        return;
+    }
+
+    auto currentKey = ap->first;
+    auto currentValue = ap->second;
+    auto newKey = currentKey + 1;
+
+    tracksOfPatterns->erase(currentKey);
+
+    if (tracksOfPatterns[_activeInstrument].find(newKey) != tracksOfPatterns[_activeInstrument].end())
+    {
+        auto tmpValue = tracksOfPatterns[_activeInstrument].find(newKey)->second;
+        tracksOfPatterns[_activeInstrument].erase(newKey);
+        tracksOfPatterns[_activeInstrument].insert(std::make_pair(currentKey, tmpValue));
+    }
+
+    tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
+
+    _activePattern = newKey;
+}
+
+void Sequencer::SelectFirstPatternInTrack()
+{
+    if (_activeInstrument < 0)
+    {
+        return;
+    }
+
+    _activePattern = tracksOfPatterns[_activeInstrument].begin()->first;
+}
+
+void Sequencer::SelectLastPatternInTrack()
+{
+    if (_activeInstrument < 0)
+    {
+        return;
+    }
+
+    _activePattern = tracksOfPatterns[_activeInstrument].rbegin()->first;
+}
+
+void Sequencer::SelectPreviousPattern()
+{
+    if (_activeInstrument < 0)
+    {
+        return;
+    }
+
+    if (_activePattern <= 0)
+    {
+        return;
+    }
+
+    int newIndex = _activePattern - 1;
+    while (newIndex >= 0)
+    {
+        if (DoesPatternExistAtIndex(_activeInstrument, newIndex))
+        {
+            _activePattern = newIndex;
+            break;
+        }
+        newIndex--;
     }
 }
 
-void Sequencer::Quit()
+void Sequencer::SelectNextPattern()
 {
-    auto state = this->currentState();
+    if (_activeInstrument < 0)
+    {
+        return;
+    }
 
-    // We do not change anymore when we are quitting.
-    if (state == PlayingStates::Quit) return;
+    auto lastIndex = LastPatternIndex(_activeInstrument);
+    if (_activePattern == lastIndex)
+    {
+        return;
+    }
 
-    this->_changePlayingState.lock();
-    this->_playingState = PlayingStates::Quit;
-    this->_changePlayingState.unlock();
+    int newIndex = _activePattern + 1;
+    while (newIndex <= lastIndex)
+    {
+        if (DoesPatternExistAtIndex(_activeInstrument, newIndex))
+        {
+            _activePattern = newIndex;
+            break;
+        }
+        newIndex++;
+    }
 }
 
-void Sequencer::setStep(int step, int note, double velocity)
+int Sequencer::LastPatternIndex(int trackIndex)
 {
-    if (this->_channels.empty()) this->_channels.push_back(new SequencerStrip());
-    std::cout << step << ", " << note << ", " << velocity << std::endl;
-    SequencerStrip *strip = this->_channels.front();
-    if (strip->_steps.find(step - 1) != strip->_steps.end()) strip->_steps.erase(step - 1);
-    strip->_steps.insert(std::make_pair(step - 1, SequencerStep(char(note), char(255 * velocity))));
+    return tracksOfPatterns[trackIndex].empty() ? -1 : tracksOfPatterns[trackIndex].rbegin()->first;
 }
 
-void Sequencer::clearStep(int step)
+bool Sequencer::DoesPatternExistAtIndex(int trackIndex, int patternIndex)
 {
-    std::cout << step << std::endl;
-    SequencerStrip *strip = this->_channels.front();
-    if (strip->_steps.find(step - 1) != strip->_steps.end()) strip->_steps.erase(step - 1);
+    if (trackIndex < 0 || trackIndex >= NUM_MIXER_CHANNELS)
+    {
+        return false;
+    }
+
+    return tracksOfPatterns[trackIndex].find(patternIndex) != tracksOfPatterns[trackIndex].end();
 }
 
-bool Sequencer::isStepOn(int step)
+TrackPattern &Sequencer::GetPattern(int trackIndex, int patternIndex)
 {
-    SequencerStrip *strip = this->_channels.front();
-    return strip->_steps.find(step) != strip->_steps.end();
+    return tracksOfPatterns[trackIndex][patternIndex];
+}
+
+int Sequencer::ActiveInstrument() const
+{
+    return _activeInstrument;
+}
+
+void Sequencer::ActiveInstrument(int newActiveInstrument)
+{
+    _activeInstrument = newActiveInstrument;
+}
+
+int Sequencer::ActivePattern() const
+{
+    return _activePattern;
+}
+
+void Sequencer::ActivePattern(int newActivePattern)
+{
+    _activePattern = newActivePattern;
 }

@@ -108,7 +108,7 @@ int main(int /*argc*/, char * /*argv*/ [])
 
         while (glfwWindowShouldClose(window) == 0)
         {
-            app.SequencerTick();
+            app.Tick();
 
             glfwPollEvents();
 

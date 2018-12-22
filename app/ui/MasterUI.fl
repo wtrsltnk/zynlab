@@ -1,75 +1,75 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
-header_name {.h}
+version 1.0303 
+header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {private local
-}
+} 
 
 decl {//License: GNU GPL version 2 or later} {private local
-}
+} 
 
 decl {\#include <stdlib.h>} {public local
-}
+} 
 
 decl {\#include <stdio.h>} {public local
-}
+} 
 
 decl {\#include <string.h>} {public local
-}
+} 
 
 decl {\#include "WidgetPDial.h"} {public local
-}
+} 
 
 decl {\#include "ADnoteUI.h"} {public local
-}
+} 
 
 decl {\#include "SUBnoteUI.h"} {public local
-}
+} 
 
 decl {\#include "EffUI.h"} {public local
-}
+} 
 
 decl {\#include "VirKeyboard.h"} {public local
-}
+} 
 
 decl {\#include "ConfigUI.h"} {public local
-}
+} 
 
 decl {\#include "BankUI.h"} {public local
-}
+} 
 
 decl {\#include "PartUI.h"} {public local
-}
+} 
 
 decl {\#include "MicrotonalUI.h"} {public local
-}
+} 
 
 decl {\#include "PresetsUI.h"} {public local
-}
+} 
 
 decl {\#include "SequencerUI.h"} {public local
-}
+} 
 
 decl {\#include "NioUI.h"} {public global
-}
-
-decl {\#include "zyn.common/globals.h"} {public
-}
-
-decl {\#include "zyn.mixer/Channel.h"} {public local
-}
-
-decl {\#include "zyn.seq/Sequencer.h"} {public global
-}
-
-decl {\#include "zyn.common/Util.h"} {public local
-}
-
-decl {\#include "common.H"} {public local
-}
+} 
 
 decl {\#include "zyn.common/globals.h"} {public local
-}
+} 
+
+decl {\#include "zyn.mixer/Channel.h"} {public local
+} 
+
+decl {\#include "zyn.seq/Sequencer.h"} {public global
+} 
+
+decl {\#include "zyn.common/Util.h"} {public local
+} 
+
+decl {\#include "common.H"} {public local
+} 
+
+decl {\#include "zyn.common/globals.h"} {public local
+} 
 
 class VUMeter {: {public Fl_Box}
 } {
@@ -275,7 +275,7 @@ return(1);} {}
   }
   decl {float oldrmsdbl,oldrmsdbr;} {private local
   }
-}
+} 
 
 class SysEffSend {: {public WidgetPDial}
 } {
@@ -318,7 +318,7 @@ return(WidgetPDial::handle(event));} {}
   }
   decl {int neff2;} {private local
   }
-}
+} 
 
 class Panellistitem {: {public Fl_Group}
 } {
@@ -450,7 +450,7 @@ panellistitemgroup->redraw();} {}
   }
   decl {PartSysEffSend *psyef[NUM_SYS_EFX];} {private local
   }
-}
+} 
 
 class MasterUI {open
 } {
@@ -467,10 +467,10 @@ class MasterUI {open
  || fl_choice("Exit and leave the unsaved data?","No","Yes",nullptr))) {
     Config::Current().save();
     *exitprogram=1;
-};} open
-      xywh {979 190 390 524} type Double hide xclass zynaddsubfx
+};} open selected
+      xywh {983 194 382 516} type Double xclass zynaddsubfx visible
     } {
-      Fl_Menu_Bar mastermenu {open selected
+      Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
       } {
         Submenu {} {
@@ -963,12 +963,6 @@ panelwindow->show();}
       Fl_Button sm_indicator1 {
         label SM
         xywh {350 5 35 15} box ROUNDED_BOX down_box ROUNDED_BOX color 45 selection_color 93 labelfont 3 labelcolor 39 deactivate
-      }
-      Fl_Button {} {
-        label {Sequence Window}
-        callback {updatepanel();
-sequi->show();}
-        tooltip {Sequence Window} xywh {280 117 105 23} color 51 labelfont 1 labelsize 10
       }
     }
     Fl_Window aboutwindow {
@@ -1603,7 +1597,6 @@ microtonalui=new MicrotonalUI(&master->microtonal);
 virkeyboard=new VirKeyboard(master);
 bankui=new BankUI(master,&npart);
 configui=new ConfigUI();
-sequi=new SequencerUI(seq_);
 
 make_window();
 presetsui=new PresetsUI();
@@ -1804,4 +1797,4 @@ bankui->hide();} {}
   }
   decl {NioUI nioui} {private local
   }
-}
+} 

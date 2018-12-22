@@ -13,7 +13,8 @@
 #include <map>
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
-    : _mixer(mixer), _window(window), _display_w(800), _display_h(600),
+    : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
+      _display_w(800), _display_h(600),
       showAddSynthEditor(false)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
@@ -50,13 +51,6 @@ void AppThreeDee::onResize(int width, int height)
     glViewport(0, 0, width, height);
 }
 
-std::chrono::milliseconds::rep calculateStepTime(int bpm)
-{
-    auto beatsPerSecond = static_cast<double>(bpm * 4) / 60.0;
-
-    return static_cast<std::chrono::milliseconds::rep>(1000 / beatsPerSecond);
-}
-
 bool AppThreeDee::SetUp()
 {
     // Setup Dear ImGui binding
@@ -78,247 +72,22 @@ bool AppThreeDee::SetUp()
 
     _mixer->GetBankManager()->RescanForBanks();
 
-    _lastSequencerTimeInMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    _playerTimeInMs = 0;
-    _currentStep = 0;
-    _bpm = 120;
-    _stepTimeInMs = calculateStepTime(_bpm);
+    _stepper.Setup();
 
     return true;
 }
 
 static ImVec4 clear_color = ImColor(114, 144, 154);
-static std::map<int, TrackPattern> tracksOfPatterns[NUM_MIXER_CHANNELS];
-static int activeInstrument = 0;
-static int activePattern = -1;
 
 static bool showInstrumentEditor = false;
 static bool showPatternEditor = false;
 static int keyboardChannel = 0;
 static bool showADNoteEditor = true;
-static bool isPlaying = false;
 static int openSelectInstrument = -1;
 
-int AppThreeDee::CountSongLength()
+void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
 {
-    int maxPattern = 0;
-    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
-    {
-        auto &pattern = tracksOfPatterns[trackIndex];
-        if (pattern.empty())
-        {
-            continue;
-        }
-        if (pattern.rbegin()->first >= maxPattern)
-        {
-            maxPattern = pattern.rbegin()->first;
-        }
-    }
-
-    return maxPattern + 1;
-}
-
-void AppThreeDee::AddPattern(int trackIndex, int patternIndex, char const *label)
-{
-    static int n = std::rand() % 255;
-    float hue = n * 0.05f;
-    activeInstrument = trackIndex;
-    activePattern = patternIndex;
-    tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, TrackPattern(label, hue)));
-    n = (n + std::rand()) % 255;
-}
-
-void AppThreeDee::RemoveActivePattern()
-{
-    if (activeInstrument < 0 || activePattern < 0)
-    {
-        return;
-    }
-
-    tracksOfPatterns[activeInstrument].erase(activePattern);
-    activeInstrument = -1;
-    activePattern = -1;
-}
-
-void AppThreeDee::MovePatternLeftIfPossible()
-{
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
-
-    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
-    {
-        return;
-    }
-
-    auto currentKey = ap->first;
-
-    if (currentKey == 0)
-    {
-        return;
-    }
-
-    auto currentValue = ap->second;
-    auto newKey = currentKey - 1;
-
-    if (tracksOfPatterns[activeInstrument].find(newKey) == tracksOfPatterns[activeInstrument].end())
-    {
-        tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
-        tracksOfPatterns[activeInstrument].erase(currentKey);
-        activePattern = newKey;
-    }
-}
-
-void AppThreeDee::MovePatternLeftForced()
-{
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
-
-    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
-    {
-        return;
-    }
-
-    if (tracksOfPatterns[activeInstrument].begin()->first == 0)
-    {
-        return;
-    }
-
-    for (int i = tracksOfPatterns[activeInstrument].begin()->first; i <= ap->first; i++)
-    {
-        auto itr = tracksOfPatterns[activeInstrument].find(i);
-        if (itr == tracksOfPatterns[activeInstrument].end())
-        {
-            continue;
-        }
-        tracksOfPatterns[activeInstrument].insert(std::make_pair(i - 1, itr->second));
-        tracksOfPatterns[activeInstrument].erase(i);
-    }
-
-    activePattern = activePattern - 1;
-}
-
-void AppThreeDee::SwitchPatternLeft()
-{
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
-
-    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
-    {
-        return;
-    }
-
-    auto currentKey = ap->first;
-
-    if (currentKey <= 0)
-    {
-        return;
-    }
-
-    auto currentValue = ap->second;
-    auto newKey = currentKey - 1;
-
-    tracksOfPatterns->erase(currentKey);
-
-    if (tracksOfPatterns[activeInstrument].find(newKey) != tracksOfPatterns[activeInstrument].end())
-    {
-        auto tmpValue = tracksOfPatterns[activeInstrument].find(newKey)->second;
-        tracksOfPatterns[activeInstrument].erase(newKey);
-        tracksOfPatterns[activeInstrument].insert(std::make_pair(currentKey, tmpValue));
-    }
-
-    tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
-
-    activePattern = newKey;
-}
-
-void AppThreeDee::MovePatternRightIfPossible()
-{
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
-
-    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
-    {
-        return;
-    }
-
-    auto currentKey = ap->first;
-    auto currentValue = ap->second;
-    auto newKey = currentKey + 1;
-
-    ap++;
-    auto nextKey = ap->first;
-    if (ap == tracksOfPatterns[activeInstrument].end() || newKey < nextKey)
-    {
-        tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
-        tracksOfPatterns[activeInstrument].erase(currentKey);
-        activePattern = newKey;
-    }
-}
-
-void AppThreeDee::MovePatternRightForced()
-{
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
-
-    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
-    {
-        return;
-    }
-
-    for (int i = tracksOfPatterns[activeInstrument].rbegin()->first; i >= ap->first; i--)
-    {
-        auto itr = tracksOfPatterns[activeInstrument].find(i);
-        if (itr == tracksOfPatterns[activeInstrument].end())
-        {
-            continue;
-        }
-        tracksOfPatterns[activeInstrument].insert(std::make_pair(i + 1, itr->second));
-        tracksOfPatterns[activeInstrument].erase(i);
-    }
-
-    activePattern = activePattern + 1;
-}
-
-void AppThreeDee::SwitchPatternRight()
-{
-    auto ap = tracksOfPatterns[activeInstrument].find(activePattern);
-
-    if (activeInstrument < 0 || activePattern < 0 || ap == tracksOfPatterns[activeInstrument].end())
-    {
-        return;
-    }
-
-    auto currentKey = ap->first;
-    auto currentValue = ap->second;
-    auto newKey = currentKey + 1;
-
-    tracksOfPatterns->erase(currentKey);
-
-    if (tracksOfPatterns[activeInstrument].find(newKey) != tracksOfPatterns[activeInstrument].end())
-    {
-        auto tmpValue = tracksOfPatterns[activeInstrument].find(newKey)->second;
-        tracksOfPatterns[activeInstrument].erase(newKey);
-        tracksOfPatterns[activeInstrument].insert(std::make_pair(currentKey, tmpValue));
-    }
-
-    tracksOfPatterns[activeInstrument].insert(std::make_pair(newKey, currentValue));
-
-    activePattern = newKey;
-}
-
-void AppThreeDee::SelectFirstPatternInTrack()
-{
-    if (activeInstrument < 0)
-    {
-        return;
-    }
-
-    activePattern = tracksOfPatterns[activeInstrument].begin()->first;
-}
-
-void AppThreeDee::SelectLastPatternInTrack()
-{
-    if (activeInstrument < 0)
-    {
-        return;
-    }
-
-    activePattern = tracksOfPatterns[activeInstrument].rbegin()->first;
+    _stepper.HitNote(static_cast<unsigned char>(trackIndex), static_cast<unsigned char>(note), durationInMs);
 }
 
 void AppThreeDee::EditSelectedPattern()
@@ -326,176 +95,11 @@ void AppThreeDee::EditSelectedPattern()
     showPatternEditor = true;
 }
 
-void AppThreeDee::SelectPreviousPattern()
-{
-    if (activeInstrument < 0)
-    {
-        return;
-    }
-
-    if (activePattern <= 0)
-    {
-        return;
-    }
-
-    int newIndex = activePattern - 1;
-    while (newIndex >= 0)
-    {
-        if (DoesPatternExistAtIndex(activeInstrument, newIndex))
-        {
-            activePattern = newIndex;
-            break;
-        }
-        newIndex--;
-    }
-}
-
-void AppThreeDee::SelectNextPattern()
-{
-    if (activeInstrument < 0)
-    {
-        return;
-    }
-
-    auto lastIndex = LastPatternIndex(activeInstrument);
-    if (activePattern == lastIndex)
-    {
-        return;
-    }
-
-    int newIndex = activePattern + 1;
-    while (newIndex <= lastIndex)
-    {
-        if (DoesPatternExistAtIndex(activeInstrument, newIndex))
-        {
-            activePattern = newIndex;
-            break;
-        }
-        newIndex++;
-    }
-}
-
-int AppThreeDee::LastPatternIndex(int trackIndex)
-{
-    return tracksOfPatterns[trackIndex].empty() ? -1 : tracksOfPatterns[trackIndex].rbegin()->first;
-}
-
-bool AppThreeDee::DoesPatternExistAtIndex(int trackIndex, int patternIndex)
-{
-    if (trackIndex < 0 || trackIndex >= NUM_MIXER_CHANNELS)
-    {
-        return false;
-    }
-
-    return tracksOfPatterns[trackIndex].find(patternIndex) != tracksOfPatterns[trackIndex].end();
-}
-
-TrackPattern &AppThreeDee::GetPattern(int trackIndex, int patternIndex)
-{
-    return tracksOfPatterns[trackIndex][patternIndex];
-}
-
-int const maxNotes = 255;
-static std::chrono::milliseconds::rep activeNotes[NUM_MIXER_CHANNELS][maxNotes] = {{0}};
-
-void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
-{
-    activeNotes[trackIndex][note] = durationInMs;
-    _mixer->NoteOn(static_cast<unsigned char>(trackIndex), static_cast<unsigned char>(note), 100);
-}
-
-void AppThreeDee::SequencerTick()
-{
-    std::chrono::milliseconds::rep currentTime =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
-            .count();
-
-    auto deltaTime = currentTime - _lastSequencerTimeInMs;
-    _lastSequencerTimeInMs = currentTime;
-
-    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
-    {
-        for (int note = 0; note < maxNotes; note++)
-        {
-            if (activeNotes[trackIndex][note] <= 0)
-            {
-                continue;
-            }
-
-            activeNotes[trackIndex][note] -= deltaTime;
-            if (activeNotes[trackIndex][note] <= 0)
-            {
-                _mixer->NoteOff(static_cast<unsigned char>(trackIndex), static_cast<unsigned char>(note));
-            }
-        }
-    }
-    if (!IsPlaying())
-    {
-        return;
-    }
-
-    _playerTimeInMs += deltaTime;
-
-    if (_playerTimeInMs > _stepTimeInMs)
-    {
-        _currentStep++;
-        if (_currentStep >= (CountSongLength() * 16))
-        {
-            _currentStep = 0;
-        }
-        Step(_currentStep);
-        _playerTimeInMs -= _stepTimeInMs;
-    }
-}
-
-void AppThreeDee::Step(int step)
-{
-    auto patternIndex = step / 16;
-    auto stepIndex = step % 16;
-
-    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
-    {
-        auto track = tracksOfPatterns[trackIndex];
-        if (track.find(patternIndex) != track.end())
-        {
-            auto pattern = track[patternIndex];
-            for (auto note : pattern._notes)
-            {
-                if (note._step == stepIndex)
-                {
-                    HitNote(trackIndex, note._note, 200);
-                }
-            }
-        }
-    }
-}
-
-bool AppThreeDee::IsPlaying()
-{
-    return isPlaying;
-}
-
-void AppThreeDee::Stop()
-{
-    isPlaying = false;
-    _playerTimeInMs = 0;
-}
-
-void AppThreeDee::PlayPause()
-{
-    isPlaying = !isPlaying;
-
-    if (isPlaying)
-    {
-        Step(_currentStep);
-    }
-}
-
 void AppThreeDee::ImGuiSelectedTrack()
 {
-    if (activeInstrument < 0 || activeInstrument >= NUM_MIXER_CHANNELS)
+    if (_sequencer.ActiveInstrument() < 0 || _sequencer.ActiveInstrument() >= NUM_MIXER_CHANNELS)
     {
-        activeInstrument = -1;
+        _sequencer.ActiveInstrument(-1);
         return;
     }
 
@@ -543,11 +147,11 @@ void AppThreeDee::ImGuiSelectedTrack()
                 "15",
                 "16",
             };
-            int channel = static_cast<int>(_mixer->GetChannel(activeInstrument)->Prcvchn);
+            int channel = static_cast<int>(_mixer->GetChannel(_sequencer.ActiveInstrument())->Prcvchn);
             ImGui::PushItemWidth(width);
             if (ImGui::Combo("##KeyboardChannel", &channel, channels, NUM_MIXER_CHANNELS))
             {
-                _mixer->GetChannel(activeInstrument)->Prcvchn = static_cast<unsigned char>(channel);
+                _mixer->GetChannel(_sequencer.ActiveInstrument())->Prcvchn = static_cast<unsigned char>(channel);
             }
 
             auto fxButtonCount = spaceLeft / ImGui::GetItemsLineHeightWithSpacing() - 1;
@@ -562,33 +166,33 @@ void AppThreeDee::ImGuiSelectedTrack()
 
         ImGui::Spacing();
         ImGui::SameLine(0.0f, width / 4);
-        auto panning = _mixer->GetChannel(activeInstrument)->Ppanning;
+        auto panning = _mixer->GetChannel(_sequencer.ActiveInstrument())->Ppanning;
         if (ImGui::KnobUchar("panning", &panning, 0, 128, ImVec2(width / 2, width / 2)))
         {
-            _mixer->GetChannel(activeInstrument)->setPpanning(panning);
+            _mixer->GetChannel(_sequencer.ActiveInstrument())->setPpanning(panning);
         }
 
         float peakl, peakr;
-        _mixer->GetChannel(activeInstrument)->ComputePeakLeftAndRight(_mixer->GetChannel(activeInstrument)->Pvolume, peakl, peakr);
+        _mixer->GetChannel(_sequencer.ActiveInstrument())->ComputePeakLeftAndRight(_mixer->GetChannel(_sequencer.ActiveInstrument())->Pvolume, peakl, peakr);
 
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::SameLine(0.0f, (width - 20) / 2);
-        int v = static_cast<int>(_mixer->GetChannel(activeInstrument)->Pvolume);
+        int v = static_cast<int>(_mixer->GetChannel(_sequencer.ActiveInstrument())->Pvolume);
         if (ImGui::VSliderInt("##vol", ImVec2(20, sliderHeight - io.ItemSpacing.y), &v, 0, 128))
         {
-            _mixer->GetChannel(activeInstrument)->setPvolume(static_cast<unsigned char>(v));
+            _mixer->GetChannel(_sequencer.ActiveInstrument())->setPvolume(static_cast<unsigned char>(v));
         }
 
-        auto hue = activeInstrument * 0.05f;
+        auto hue = _sequencer.ActiveInstrument() * 0.05f;
         ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
 
-        auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(activeInstrument)->Pname));
+        auto name = std::string(reinterpret_cast<char *>(_mixer->GetChannel(_sequencer.ActiveInstrument())->Pname));
         if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(width, 0)))
         {
-            openSelectInstrument = activeInstrument;
+            openSelectInstrument = _sequencer.ActiveInstrument();
         }
 
         ImGui::PopStyleColor(3);
@@ -637,7 +241,7 @@ void AppThreeDee::ImGuiSelectedTrack()
 
                 if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
                 {
-                    auto const &instrument = _mixer->GetChannel(activeInstrument);
+                    auto const &instrument = _mixer->GetChannel(_sequencer.ActiveInstrument());
                     instrument->Lock();
                     _mixer->GetBankManager()->LoadFromSlot(i, instrument);
                     instrument->Unlock();
@@ -681,14 +285,14 @@ void AppThreeDee::ImGuiSequencer()
             float hue = trackIndex * 0.05f;
             char trackLabel[32] = {'\0'};
             sprintf(trackLabel, "%02d", trackIndex + 1);
-            bool highLight = trackIndex == activeInstrument;
+            bool highLight = trackIndex == _sequencer.ActiveInstrument();
             if (highLight)
             {
                 ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
             }
             if (ImGui::Button(trackLabel, ImVec2(trackHeight, trackHeight)))
             {
-                activeInstrument = trackIndex;
+                _sequencer.ActiveInstrument(trackIndex);
             }
             if (highLight)
             {
@@ -737,7 +341,7 @@ void AppThreeDee::ImGuiSequencer()
 
         if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         {
-            //if (activeInstrument >= 0 && _mixer->GetChannel(activeInstrument)->Pkitmode != 0)
+            //if (_sequencer.ActiveInstrument() >= 0 && _mixer->GetChannel(_sequencer.ActiveInstrument())->Pkitmode != 0)
             {
                 ImGuiStepSequencerEventHandling();
             }
@@ -752,25 +356,25 @@ void AppThreeDee::ImGuiSequencer()
 
 void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
 {
-    auto lastIndex = LastPatternIndex(trackIndex);
+    auto lastIndex = _sequencer.LastPatternIndex(trackIndex);
     for (int patternIndex = 0; patternIndex <= lastIndex; patternIndex++)
     {
         ImGui::SameLine();
         ImGui::PushID(patternIndex + trackIndex * 1000);
-        bool isActive = trackIndex == activeInstrument && patternIndex == activePattern;
+        bool isActive = trackIndex == _sequencer.ActiveInstrument() && patternIndex == _sequencer.ActivePattern();
         if (isActive)
         {
             ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
             ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
         }
 
-        if (DoesPatternExistAtIndex(trackIndex, patternIndex))
+        if (_sequencer.DoesPatternExistAtIndex(trackIndex, patternIndex))
         {
-            auto &pattern = GetPattern(trackIndex, patternIndex);
+            auto &pattern = _sequencer.GetPattern(trackIndex, patternIndex);
             if (ImGui::Button(pattern._name.c_str(), ImVec2(120.0f, trackHeight)))
             {
-                activeInstrument = trackIndex;
-                activePattern = patternIndex;
+                _sequencer.ActiveInstrument(trackIndex);
+                _sequencer.ActivePattern(patternIndex);
                 if (ImGui::IsMouseDoubleClicked(0))
                 {
                     EditSelectedPattern();
@@ -781,7 +385,7 @@ void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
         {
             if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
             {
-                AddPattern(trackIndex, patternIndex, "");
+                _sequencer.AddPattern(trackIndex, patternIndex, "");
             }
         }
         if (isActive)
@@ -798,7 +402,7 @@ void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
         ImGui::PushID((100 + trackIndex) * 2010);
         if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
         {
-            AddPattern(trackIndex, lastIndex + 1, "");
+            _sequencer.AddPattern(trackIndex, lastIndex + 1, "");
         }
         ImGui::PopID();
     }
@@ -810,45 +414,45 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
 
     if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
     {
-        RemoveActivePattern();
+        _sequencer.RemoveActivePattern();
     }
     if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
     {
         if (io.KeyShift && !io.KeyCtrl)
         {
-            MovePatternLeftForced();
+            _sequencer.MovePatternLeftForced();
         }
         else if (!io.KeyShift && io.KeyCtrl)
         {
-            SwitchPatternLeft();
+            _sequencer.SwitchPatternLeft();
         }
         else
         {
-            MovePatternLeftIfPossible();
+            _sequencer.MovePatternLeftIfPossible();
         }
     }
     if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
     {
         if (io.KeyShift && !io.KeyCtrl)
         {
-            MovePatternRightForced();
+            _sequencer.MovePatternRightForced();
         }
         else if (!io.KeyShift && io.KeyCtrl)
         {
-            SwitchPatternRight();
+            _sequencer.SwitchPatternRight();
         }
         else
         {
-            MovePatternRightIfPossible();
+            _sequencer.MovePatternRightIfPossible();
         }
     }
     if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
     {
-        SelectFirstPatternInTrack();
+        _sequencer.SelectFirstPatternInTrack();
     }
     if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
     {
-        SelectLastPatternInTrack();
+        _sequencer.SelectLastPatternInTrack();
     }
     if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Enter)))
     {
@@ -858,11 +462,11 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
     {
         if (io.KeyShift)
         {
-            SelectPreviousPattern();
+            _sequencer.SelectPreviousPattern();
         }
         else
         {
-            SelectNextPattern();
+            _sequencer.SelectNextPattern();
         }
     }
 }
@@ -896,14 +500,14 @@ void AppThreeDee::ImGuiPatternEditorWindow()
     const float rowHeight = 20.0f;
     if (showPatternEditor)
     {
-        if (!DoesPatternExistAtIndex(activeInstrument, activePattern))
+        if (!_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
         {
-            activePattern = -1;
+            _sequencer.ActivePattern(-1);
             return;
         }
 
         auto &style = ImGui::GetStyle();
-        auto &selectedPattern = GetPattern(activeInstrument, activePattern);
+        auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
 
         ImGui::Begin("Pattern editor", &showPatternEditor);
         auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
@@ -917,13 +521,13 @@ void AppThreeDee::ImGuiPatternEditorWindow()
             ImGui::PushID(i);
             if (ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, rowHeight)))
             {
-                HitNote(activeInstrument, i, 200);
+                HitNote(_sequencer.ActiveInstrument(), i, 200);
             }
             for (int j = 0; j < 16; j++)
             {
                 ImGui::SameLine();
                 ImGui::PushID(j);
-                auto found = selectedPattern._notes.find(TrackPatternNote(i, j));
+                auto found = selectedPattern._notes.find(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j)));
                 bool s = found != selectedPattern._notes.end();
                 if (j % 4 == 0)
                 {
@@ -943,7 +547,7 @@ void AppThreeDee::ImGuiPatternEditorWindow()
                     {
                         selectedPattern._notes.insert(TrackPatternNote(i, j));
                     }
-                    HitNote(activeInstrument, i, 200);
+                    HitNote(_sequencer.ActiveInstrument(), i, 200);
                 }
                 ImGui::PopStyleColor();
                 ImGui::PopID();
@@ -952,6 +556,11 @@ void AppThreeDee::ImGuiPatternEditorWindow()
         }
         ImGui::End();
     }
+}
+
+void AppThreeDee::Tick()
+{
+    _stepper.Tick();
 }
 
 void AppThreeDee::Render()
@@ -995,9 +604,9 @@ void AppThreeDee::Render()
         {
             if (ImGui::BeginTabItem("Global"))
             {
-                if (activeInstrument >= 0)
+                if (_sequencer.ActiveInstrument() >= 0)
                 {
-                    ADNoteEditor(_mixer->GetChannel(activeInstrument)->_instruments[0].adpars);
+                    ADNoteEditor(_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].adpars);
                 }
                 ImGui::EndTabItem();
             }
@@ -1013,9 +622,9 @@ void AppThreeDee::Render()
             };
             for (int i = 0; i < NUM_VOICES; i++)
             {
-                if (activeInstrument >= 0)
+                if (_sequencer.ActiveInstrument() >= 0)
                 {
-                    auto parameters = &_mixer->GetChannel(activeInstrument)->_instruments[0].adpars->VoicePar[i];
+                    auto parameters = &_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].adpars->VoicePar[i];
                     if (ImGui::BeginTabItem(voiceIds[i]))
                     {
                         ADNoteVoiceEditor(parameters);
@@ -1083,12 +692,12 @@ void AppThreeDee::ImGuiPlayback()
     {
         if (ImGui::Button("Stop"))
         {
-            Stop();
+            _stepper.Stop();
         }
 
         ImGui::SameLine();
 
-        if (isPlaying)
+        if (_stepper.IsPlaying())
         {
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -1101,7 +710,7 @@ void AppThreeDee::ImGuiPlayback()
 
         if (ImGui::Button("Play/Pause"))
         {
-            PlayPause();
+            _stepper.PlayPause();
         }
 
         ImGui::PopStyleColor(2);
@@ -1109,14 +718,15 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::SameLine();
 
         ImGui::PushItemWidth(200);
-        if (ImGui::SliderInt("##BPM", &_bpm, 10, 200, "BPM %d"))
+        auto bpm = _stepper.Bpm();
+        if (ImGui::SliderInt("##BPM", &bpm, 10, 200, "BPM %d"))
         {
-            _stepTimeInMs = calculateStepTime(_bpm);
+            _stepper.Bpm(bpm);
         }
 
         ImGui::SameLine();
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / static_cast<double>(ImGui::GetIO().Framerate), static_cast<double>(ImGui::GetIO().Framerate));
 
         ImGui::End();
     }

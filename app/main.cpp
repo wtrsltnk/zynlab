@@ -39,9 +39,6 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.synth/FFTwrapper.h>
 
-// Sequencer
-#include "../zyn.seq/Sequencer.h"
-
 //Nio System
 #include "../zyn.nio/Nio.h"
 
@@ -82,8 +79,6 @@ int exitprogram()
     //ensure that everything has stopped with the mutex wait
     mixer->Lock();
     mixer->Unlock();
-
-    seq->Quit();
 
     Nio::Stop();
 
@@ -376,8 +371,6 @@ int main(int argc, char *argv[])
             std::cerr << "Command Failed..." << std::endl;
         }
     }
-
-    seq = new Sequencer(mixer);
 
 #ifdef ENABLE_FLTKGUI
 
