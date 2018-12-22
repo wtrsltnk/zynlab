@@ -23,6 +23,7 @@ private:
     GLFWwindow *_window;
     Stepper _stepper;
     Sequencer _sequencer;
+    std::vector<TrackPattern> _clipboardPatterns;
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -38,10 +39,10 @@ public:
     AppThreeDee(GLFWwindow *window, Mixer *mixer);
     virtual ~AppThreeDee();
 
-    bool SetUp();
+    bool Setup();
     void Tick();
     void Render();
-    void CleanUp();
+    void Cleanup();
 
 private:
     void ImGuiPlayback();
@@ -52,6 +53,8 @@ private:
     void ImGuiPianoRollSequencer(int trackIndex, float trackHeight);
     void ImGuiPianoRollSequencerEventHandling();
     void ImGuiPatternEditorWindow();
+    void ImGuiSelectInstrumentPopup();
+    int _currentBank;
 
     void EditSelectedPattern();
     void HitNote(int trackIndex, int note, int durationInMs);

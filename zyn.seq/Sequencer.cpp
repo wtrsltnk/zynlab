@@ -189,6 +189,29 @@ void Sequencer::AddPattern(int trackIndex, int patternIndex, char const *label)
     n = (n + std::rand()) % 255;
 }
 
+bool Sequencer::DoesPatternExistAtIndex(int trackIndex, int patternIndex)
+{
+    if (trackIndex < 0 || trackIndex >= NUM_MIXER_CHANNELS)
+    {
+        return false;
+    }
+
+    return tracksOfPatterns[trackIndex].find(patternIndex) != tracksOfPatterns[trackIndex].end();
+}
+
+TrackPattern &Sequencer::GetPattern(int trackIndex, int patternIndex)
+{
+    return tracksOfPatterns[trackIndex][patternIndex];
+}
+
+void Sequencer::SetPattern(int trackIndex, int patternIndex, TrackPattern const &pattern)
+{
+    _activeInstrument = trackIndex;
+    _activePattern = patternIndex;
+    tracksOfPatterns[trackIndex].erase(patternIndex);
+    tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, pattern));
+}
+
 void Sequencer::RemoveActivePattern()
 {
     if (_activeInstrument < 0 || _activePattern < 0)
@@ -434,21 +457,6 @@ void Sequencer::SelectNextPattern()
 int Sequencer::LastPatternIndex(int trackIndex)
 {
     return tracksOfPatterns[trackIndex].empty() ? -1 : tracksOfPatterns[trackIndex].rbegin()->first;
-}
-
-bool Sequencer::DoesPatternExistAtIndex(int trackIndex, int patternIndex)
-{
-    if (trackIndex < 0 || trackIndex >= NUM_MIXER_CHANNELS)
-    {
-        return false;
-    }
-
-    return tracksOfPatterns[trackIndex].find(patternIndex) != tracksOfPatterns[trackIndex].end();
-}
-
-TrackPattern &Sequencer::GetPattern(int trackIndex, int patternIndex)
-{
-    return tracksOfPatterns[trackIndex][patternIndex];
 }
 
 int Sequencer::ActiveInstrument() const

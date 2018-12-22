@@ -101,7 +101,7 @@ int main(int /*argc*/, char * /*argv*/ [])
 
     AppThreeDee::ResizeCallback(window, 1024, 768);
 
-    if (app.SetUp())
+    if (app.Setup())
     {
         glfwSetKeyCallback(window, AppThreeDee::KeyActionCallback);
         //    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
@@ -118,7 +118,7 @@ int main(int /*argc*/, char * /*argv*/ [])
 
             glfwSwapBuffers(window);
         }
-        app.CleanUp();
+        app.Cleanup();
     }
 
     glfwTerminate();

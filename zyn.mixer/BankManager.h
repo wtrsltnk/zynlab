@@ -56,7 +56,8 @@ public:
     virtual int LoadBank(int index);
     virtual int NewBank(std::string const &newbankdirname);
     virtual int GetBankCount();
-    virtual InstrumentBank &GetBank(int index);
+    virtual std::vector<char const *> const &GetBankNames();
+    virtual InstrumentBank  &GetBank(int index);
 
     virtual std::string const &GetBankFileTitle();
 
@@ -90,8 +91,9 @@ private:
         struct
         {
             bool PADsynth_used;
-        } info{};
+        } info;
     } ins[BANK_SIZE];
+    std::vector<char const *> _bankNames;
 
     std::string dirname;
 

@@ -266,11 +266,11 @@ public:
     unsigned int oscilsize;
 
     //Alias for above terms
-    float samplerate_f{};
-    float halfsamplerate_f{};
-    float buffersize_f{};
-    unsigned int bufferbytes{};
-    float oscilsize_f{};
+    float samplerate_f;
+    float halfsamplerate_f;
+    float buffersize_f;
+    unsigned int bufferbytes;
+    float oscilsize_f;
 
     inline void alias()
     {
@@ -303,6 +303,7 @@ public:
     virtual int NewBank(std::string const &newbankdirname) = 0;
     virtual int LoadBank(int index) = 0;
     virtual int GetBankCount() = 0;
+    virtual std::vector<char const *> const &GetBankNames() = 0;
     virtual InstrumentBank &GetBank(int index) = 0;
 
     virtual std::string GetName(unsigned int ninstrument) = 0;

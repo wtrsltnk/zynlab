@@ -72,6 +72,9 @@ public:
 
     int CountSongLength();
     void AddPattern(int trackIndex, int patternIndex, char const *label);
+    bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
+    TrackPattern &GetPattern(int trackIndex, int patternIndex);
+    void SetPattern(int trackIndex, int patternIndex, TrackPattern const &pattern);
     void RemoveActivePattern();
     void MovePatternLeftIfPossible();
     void MovePatternLeftForced();
@@ -85,8 +88,6 @@ public:
     void SelectPreviousPattern();
     void SelectNextPattern();
     int LastPatternIndex(int trackIndex);
-    bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
-    TrackPattern &GetPattern(int trackIndex, int patternIndex);
 
     int ActiveInstrument() const;
     void ActiveInstrument(int newActiveInstrument);

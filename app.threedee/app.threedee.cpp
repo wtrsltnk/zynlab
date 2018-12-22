@@ -15,7 +15,7 @@
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
       _display_w(800), _display_h(600),
-      showAddSynthEditor(false)
+      _currentBank(0), showAddSynthEditor(false)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -51,7 +51,7 @@ void AppThreeDee::onResize(int width, int height)
     glViewport(0, 0, width, height);
 }
 
-bool AppThreeDee::SetUp()
+bool AppThreeDee::Setup()
 {
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
@@ -71,6 +71,7 @@ bool AppThreeDee::SetUp()
     ImGui::StyleColorsDark();
 
     _mixer->GetBankManager()->RescanForBanks();
+    _mixer->GetBankManager()->LoadBank(_currentBank);
 
     _stepper.Setup();
 
@@ -81,7 +82,6 @@ static ImVec4 clear_color = ImColor(114, 144, 154);
 
 static bool showInstrumentEditor = false;
 static bool showPatternEditor = false;
-static int keyboardChannel = 0;
 static bool showADNoteEditor = true;
 static int openSelectInstrument = -1;
 
@@ -198,26 +198,23 @@ void AppThreeDee::ImGuiSelectedTrack()
         ImGui::PopStyleColor(3);
     }
     ImGui::End();
+}
 
+void AppThreeDee::ImGuiSelectInstrumentPopup()
+{
     if (openSelectInstrument >= 0)
     {
         ImGui::OpenPopup("Select Instrument");
     }
 
-    ImGui::SetNextWindowSize(ImVec2(700, 800));
+    ImGui::SetNextWindowSize(ImVec2(700, 850));
     if (ImGui::BeginPopupModal("Select Instrument"))
     {
         auto count = _mixer->GetBankManager()->GetBankCount();
-        std::vector<const char *> bankNames;
-        bankNames.push_back("");
-        for (int i = 0; i < count; i++)
+        auto const &bankNames = _mixer->GetBankManager()->GetBankNames();
+        if (ImGui::Combo("Bank", &_currentBank, &(bankNames[0]), int(count)))
         {
-            bankNames.push_back(_mixer->GetBankManager()->GetBank(i).name.c_str());
-        }
-        static int currentBank = 0;
-        if (ImGui::Combo("Bank", &currentBank, &(bankNames[0]), int(count)))
-        {
-            _mixer->GetBankManager()->LoadBank(currentBank - 1);
+            _mixer->GetBankManager()->LoadBank(_currentBank);
         }
 
         static bool autoClose = false;
@@ -233,7 +230,7 @@ void AppThreeDee::ImGuiSelectedTrack()
 
         ImGui::BeginChild("banks", ImVec2(0, -20));
         ImGui::Columns(5);
-        if (currentBank > 0)
+        if (_currentBank >= 0)
         {
             for (unsigned int i = 0; i < BANK_SIZE; i++)
             {
@@ -375,10 +372,10 @@ void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
             {
                 _sequencer.ActiveInstrument(trackIndex);
                 _sequencer.ActivePattern(patternIndex);
-                if (ImGui::IsMouseDoubleClicked(0))
-                {
-                    EditSelectedPattern();
-                }
+            }
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                EditSelectedPattern();
             }
         }
         else if (_mixer->GetChannel(trackIndex)->Penabled)
@@ -396,6 +393,7 @@ void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
 
         ImGui::PopID();
     }
+
     if (_mixer->GetChannel(trackIndex)->Penabled)
     {
         ImGui::SameLine();
@@ -412,11 +410,11 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
 {
     ImGuiIO &io = ImGui::GetIO();
 
-    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
     {
         _sequencer.RemoveActivePattern();
     }
-    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
     {
         if (io.KeyShift && !io.KeyCtrl)
         {
@@ -431,7 +429,7 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
             _sequencer.MovePatternLeftIfPossible();
         }
     }
-    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
     {
         if (io.KeyShift && !io.KeyCtrl)
         {
@@ -446,19 +444,19 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
             _sequencer.MovePatternRightIfPossible();
         }
     }
-    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Home)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Home)))
     {
         _sequencer.SelectFirstPatternInTrack();
     }
-    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_End)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_End)))
     {
         _sequencer.SelectLastPatternInTrack();
     }
-    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Enter)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
     {
         EditSelectedPattern();
     }
-    if (ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Tab)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
     {
         if (io.KeyShift)
         {
@@ -469,9 +467,24 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
             _sequencer.SelectNextPattern();
         }
     }
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && io.KeyCtrl)
+    {
+        if (_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
+        {
+            auto pattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
+            _clipboardPatterns.push_back(pattern);
+        }
+    }
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && io.KeyCtrl)
+    {
+        if (!_clipboardPatterns.empty() && _sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
+        {
+            _sequencer.SetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern(), _clipboardPatterns.back());
+        }
+    }
 }
 
-void AppThreeDee::ImGuiPianoRollSequencer(int trackIndex, float trackHeight)
+void AppThreeDee::ImGuiPianoRollSequencer(int /*trackIndex*/, float /*trackHeight*/)
 {
 }
 
@@ -541,11 +554,11 @@ void AppThreeDee::ImGuiPatternEditorWindow()
                 {
                     if (!s)
                     {
-                        selectedPattern._notes.erase(TrackPatternNote(i, j));
+                        selectedPattern._notes.erase(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j)));
                     }
                     else
                     {
-                        selectedPattern._notes.insert(TrackPatternNote(i, j));
+                        selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j)));
                     }
                     HitNote(_sequencer.ActiveInstrument(), i, 200);
                 }
@@ -590,6 +603,7 @@ void AppThreeDee::Render()
     ImGuiSequencer();
     ImGuiPatternEditorWindow();
     ImGuiSelectedTrack();
+    ImGuiSelectInstrumentPopup();
 
     // 3. Show another simple window.
     if (showADNoteEditor)
@@ -659,31 +673,8 @@ void AppThreeDee::Render()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-static std::map<int, unsigned char> mappedNotes{
-    {int('Z'), static_cast<unsigned char>(65)},
-    {int('X'), static_cast<unsigned char>(66)},
-    {int('C'), static_cast<unsigned char>(67)},
-    {int('V'), static_cast<unsigned char>(68)},
-    {int('B'), static_cast<unsigned char>(69)},
-    {int('N'), static_cast<unsigned char>(70)},
-    {int('M'), static_cast<unsigned char>(71)},
-};
-
-void AppThreeDee::onKeyAction(int key, int /*scancode*/, int action, int /*mods*/)
+void AppThreeDee::onKeyAction(int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/)
 {
-    auto found = mappedNotes.find(key);
-
-    if (found != mappedNotes.end())
-    {
-        if (action == 1)
-        {
-            _mixer->NoteOn(static_cast<unsigned char>(keyboardChannel), found->second, 128);
-        }
-        else if (action == 0)
-        {
-            _mixer->NoteOff(static_cast<unsigned char>(keyboardChannel), found->second);
-        }
-    }
 }
 
 void AppThreeDee::ImGuiPlayback()
@@ -732,7 +723,7 @@ void AppThreeDee::ImGuiPlayback()
     }
 }
 
-void AppThreeDee::CleanUp()
+void AppThreeDee::Cleanup()
 {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

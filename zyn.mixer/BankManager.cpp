@@ -340,6 +340,18 @@ int BankManager::GetBankCount()
     return static_cast<int>(banks.size());
 }
 
+std::vector<char const *> const &BankManager::GetBankNames()
+{
+    if (_bankNames.empty())
+    {
+        for (auto &bank : banks)
+        {
+            _bankNames.push_back(bank.name.c_str());
+        }
+    }
+    return _bankNames;
+}
+
 IBankManager::InstrumentBank &BankManager::GetBank(int index)
 {
     if (index >= 0 && index < static_cast<int>(banks.size()))
@@ -410,6 +422,7 @@ void BankManager::RescanForBanks()
 {
     //remove old banks
     banks.clear();
+    _bankNames.clear();
 
     for (auto &i : Config::Current().cfg.bankRootDirList)
     {
@@ -503,8 +516,9 @@ void BankManager::ScanRootDirectory(std::string const &rootdir)
         }
 
         if (isbank)
+        {
             banks.push_back(bank);
-
+        }
         closedir(d);
     }
 
