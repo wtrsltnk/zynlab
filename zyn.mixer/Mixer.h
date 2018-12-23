@@ -97,10 +97,10 @@ public:
     virtual void EnableChannel(int index, bool enabled);
 
     //parameters
-    unsigned char Pvolume{};
-    unsigned char Pkeyshift{};
-    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS]{};
-    unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};
+    unsigned char Pvolume;
+    unsigned char Pkeyshift;
+    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];
+    unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
 
     //parameters control
     void setPvolume(unsigned char Pvolume_);
@@ -114,7 +114,7 @@ public:
                                               //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
     //part that's apply the insertion effect; -1 to disable
-    short int Pinsparts[NUM_INS_EFX]{};
+    short int Pinsparts[NUM_INS_EFX];
 
     Meter _meter;
     Controller ctl;
@@ -129,15 +129,15 @@ public:
 
 private:
     Channel _instruments[NUM_MIXER_CHANNELS];
-    pthread_mutex_t mutex{};
+    pthread_mutex_t mutex;
     IBankManager *bank;
     IFFTwrapper *fft;
     SystemSettings *_settings;
 
-    float volume{};
-    float sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS]{};
-    float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX]{};
-    int keyshift{};
+    float volume;
+    float sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];
+    float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+    int keyshift;
 
     //information relevent to generating plugin audio samples
     float *bufl;

@@ -46,8 +46,9 @@ public:
 
 private:
     void ImGuiPlayback();
+    void ImGuiMasterTrack();
     void ImGuiMixer();
-    void ImGuiTrack(int track, bool showSends, ImVec2 const &size);
+    void ImGuiTrack(int track, bool showSends, bool highlightTrack);
     void ImGuiSelectedTrack();
     void ImGuiSequencer();
     void ImGuiStepSequencer(int trackIndex, float trackHeight);

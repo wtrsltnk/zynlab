@@ -146,7 +146,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::SameLine();
 
     auto q = static_cast<float>(parameters->Pq);
-    if (ImGui::Knob(" Q", &(q), 0, 128, ImVec2(40, 40)))
+    if (ImGui::Knob("Q", &(q), 0, 128, ImVec2(40, 40)))
     {
         parameters->Pq = static_cast<unsigned char>(q);
     }

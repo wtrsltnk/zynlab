@@ -1,7 +1,7 @@
 #include "imgui_knob.h"
 #include <cmath>
 
-bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, ImVec2 const &size)
+bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, ImVec2 const &size)
 {
     ImGuiIO &io = ImGui::GetIO();
     ImGuiStyle &style = ImGui::GetStyle();
@@ -55,7 +55,8 @@ bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, Im
         ImGui::GetColorU32(ImGuiCol_SliderGrabActive), 2.0f);
     draw_list->PathArcTo(center, radius_outer, ANGLE_MIN, angle + 0.02f, 16);
     draw_list->PathStroke(ImGui::GetColorU32(ImGuiCol_SliderGrabActive), false, 3.0f);
-    draw_list->AddText(ImVec2(pos.x, pos.y + radius_outer * 2 + style.ItemInnerSpacing.y), ImGui::GetColorU32(ImGuiCol_Text), label);
+    auto textSize = CalcTextSize(label);
+    draw_list->AddText(ImVec2(pos.x + ((size.x / 2) - (textSize.x / 2)), pos.y + radius_outer * 2 + style.ItemInnerSpacing.y), ImGui::GetColorU32(ImGuiCol_Text), label);
 
     if (is_active || is_hovered)
     {
@@ -68,7 +69,7 @@ bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, Im
     return value_changed;
 }
 
-bool ImGui::KnobUchar(const char *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
+bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
 {
     float val = (p_value[0]) / 128.0f;
 
@@ -80,4 +81,20 @@ bool ImGui::KnobUchar(const char *label, unsigned char *p_value, unsigned char v
     }
 
     return false;
+}
+
+bool ImGui::TextCentered(ImVec2 const &size, char const *label, ...)
+{
+    ImGuiStyle &style = ImGui::GetStyle();
+
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+    auto result = ImGui::InvisibleButton(label, size);
+
+    auto textSize = CalcTextSize(label);
+    draw_list->AddText(ImVec2(pos.x + ((size.x / 2) - (textSize.x / 2)), pos.y + style.ItemInnerSpacing.y), ImGui::GetColorU32(ImGuiCol_Text), label);
+
+    return result;
 }
