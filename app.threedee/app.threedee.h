@@ -46,6 +46,8 @@ public:
 
 private:
     void ImGuiPlayback();
+    void ImGuiMixer();
+    void ImGuiTrack(int track, bool showSends, ImVec2 const &size);
     void ImGuiSelectedTrack();
     void ImGuiSequencer();
     void ImGuiStepSequencer(int trackIndex, float trackHeight);
@@ -76,10 +78,12 @@ private:
     // SUB note
     bool showSUBNoteEditor;
     void SUBNoteEditor(SUBnoteParameters *parameters);
+    void SUBNoteEditorAmplitude(SUBnoteParameters *parameters);
 
     // PAD note
     bool showPADNoteEditor;
     void PADNoteEditor(PADnoteParameters *parameters);
+    void PADNoteEditorAmplitude(PADnoteParameters *parameters);
 
     // LFO
     void LFO(char const *label, class LFOParams *parameters);

@@ -29,7 +29,6 @@ std::chrono::milliseconds::rep calculateStepTime(int bpm)
 
 void Stepper::Setup()
 {
-
     _lastSequencerTimeInMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     _playerTimeInMs = 0;
     _currentStep = 0;

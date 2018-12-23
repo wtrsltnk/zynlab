@@ -5,34 +5,75 @@
 
 void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
 {
-    ImGui::Text("ADsynth Global Parameters of the Instrument");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
-
-    if (ImGui::BeginTabBar("ADNote"))
+    if (showADNoteEditor)
     {
-        if (ImGui::BeginTabItem("Amplitude"))
-        {
-            ADNoteEditorAmplitude(&parameters->GlobalPar);
+        ImGui::Begin("AD note editor", &showADNoteEditor);
 
-            ImGui::EndTabItem();
+        if (ImGui::BeginTabBar("ADnoteTab"))
+        {
+            if (ImGui::BeginTabItem("Global"))
+            {
+                if (_sequencer.ActiveInstrument() >= 0)
+                {
+                    ImGui::Text("ADsynth Global Parameters of the Instrument");
+
+                    ImGui::Spacing();
+                    ImGui::Spacing();
+
+                    if (ImGui::BeginTabBar("ADNote"))
+                    {
+                        if (ImGui::BeginTabItem("Amplitude"))
+                        {
+                            ADNoteEditorAmplitude(&parameters->GlobalPar);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Filter"))
+                        {
+                            ADNoteEditorFilter(&parameters->GlobalPar);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Frequency"))
+                        {
+                            ADNoteEditorFrequency(&parameters->GlobalPar);
+
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
+                    }
+                }
+                ImGui::EndTabItem();
+            }
+            static char voiceIds[][64]{
+                "Voice 1",
+                "Voice 2",
+                "Voice 3",
+                "Voice 4",
+                "Voice 5",
+                "Voice 6",
+                "Voice 7",
+                "Voice 8",
+            };
+            for (int i = 0; i < NUM_VOICES; i++)
+            {
+                if (_sequencer.ActiveInstrument() >= 0)
+                {
+                    auto parameters = &_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].adpars->VoicePar[i];
+                    if (ImGui::BeginTabItem(voiceIds[i]))
+                    {
+                        ADNoteVoiceEditor(parameters);
+
+                        ImGui::EndTabItem();
+                    }
+                }
+            }
+            ImGui::EndTabBar();
         }
 
-        if (ImGui::BeginTabItem("Filter"))
-        {
-            ADNoteEditorFilter(&parameters->GlobalPar);
-
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Frequency"))
-        {
-            ADNoteEditorFrequency(&parameters->GlobalPar);
-
-            ImGui::EndTabItem();
-        }
-        ImGui::EndTabBar();
+        ImGui::End();
     }
 }
 
@@ -43,9 +84,10 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     ImGui::Spacing();
     ImGui::Spacing();
 
+    ImGui::BeginChild("VolSns", ImVec2(250, 50));
     auto vol = static_cast<float>(parameters->PVolume);
-    ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("Vol", &vol, 0, 128))
+    ImGui::PushItemWidth(250);
+    if (ImGui::SliderFloat("##Vol", &vol, 0, 128, "Vol %.3f"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
@@ -56,11 +98,9 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
         ImGui::EndTooltip();
     }
 
-    ImGui::SameLine();
-
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
-    ImGui::PushItemWidth(100);
-    if (ImGui::SliderFloat("V.Sns", &velocityScale, 0, 128))
+    ImGui::PushItemWidth(250);
+    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 128, "V.Sns %.3f"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -70,12 +110,14 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
         ImGui::Text("Velocity Sensing Function (rightmost to disable)");
         ImGui::EndTooltip();
     }
+    ImGui::EndChild();
 
+    ImGui::SameLine();
     ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto pan = static_cast<float>(parameters->PPanning);
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
     {
         parameters->PPanning = static_cast<unsigned char>(pan);
     }
@@ -86,9 +128,8 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
         ImGui::EndTooltip();
     }
 
-    ImGui::SameLine();
     ImGui::Spacing();
-    ImGui::SameLine();
+    ImGui::Spacing();
 
     auto punchStrength = static_cast<float>(parameters->PPunchStrength);
     if (ImGui::Knob("P.Str.", &punchStrength, 0, 128, ImVec2(40, 40)))
