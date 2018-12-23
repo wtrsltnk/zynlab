@@ -119,16 +119,14 @@ void AppThreeDee::ImGuiSelectedTrack()
         auto spaceLeft =
             ImGui::GetContentRegionAvail().y /*Available height*/
             - sliderPanelHeight              /*Volume fader*/
+            - lh                             /*AD button*/
+            - lh                             /*SUB button*/
+            - lh                             /*PAD button*/
             - lh                             /*Settings*/
             - lh;                            /*Input channel*/
 
         ImGui::BeginChild("item view", ImVec2(0, -sliderPanelHeight));
         {
-            if (ImGui::Button("Settings", ImVec2(width, 0)))
-            {
-                showADNoteEditor = true;
-            }
-
             const char *channels[] = {
                 "1",
                 "2",
@@ -152,6 +150,42 @@ void AppThreeDee::ImGuiSelectedTrack()
             if (ImGui::Combo("##KeyboardChannel", &channel, channels, NUM_MIXER_CHANNELS))
             {
                 _mixer->GetChannel(_sequencer.ActiveInstrument())->Prcvchn = static_cast<unsigned char>(channel);
+            }
+
+            auto adEnabled = _mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].Padenabled == 1;
+            if (ImGui::Checkbox("##adEnabled", &adEnabled))
+            {
+                _mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].Padenabled = adEnabled ? 1 : 0;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("edit ad", ImVec2(width - 20 - io.ItemSpacing.x, 20)))
+            {
+                showADNoteEditor = true;
+                ImGui::SetWindowFocus("AD note editor");
+            }
+
+            auto subEnabled = _mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].Psubenabled == 1;
+            if (ImGui::Checkbox("##subEnabled", &subEnabled))
+            {
+                _mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].Psubenabled = subEnabled ? 1 : 0;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("edit sub", ImVec2(width - 20 - io.ItemSpacing.x, 20)))
+            {
+                showSUBNoteEditor = true;
+                ImGui::SetWindowFocus("SUB note editor");
+            }
+
+            auto padEnabled = _mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].Ppadenabled == 1;
+            if (ImGui::Checkbox("##padEnabled", &padEnabled))
+            {
+                _mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].Ppadenabled = padEnabled ? 1 : 0;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("edit pad", ImVec2(width - 20 - io.ItemSpacing.x, 20)))
+            {
+                showPADNoteEditor = true;
+                ImGui::SetWindowFocus("PAD note editor");
             }
 
             auto fxButtonCount = spaceLeft / ImGui::GetItemsLineHeightWithSpacing() - 1;
@@ -605,16 +639,10 @@ void AppThreeDee::Render()
     ImGuiSelectedTrack();
     ImGuiSelectInstrumentPopup();
 
-    // 3. Show another simple window.
     if (showADNoteEditor)
     {
         ImGui::Begin("AD note editor", &showADNoteEditor);
-        if (ImGui::Button("Close Me"))
-        {
-            showADNoteEditor = false;
-        }
-
-        if (ImGui::BeginTabBar("blah"))
+        if (ImGui::BeginTabBar("ADnoteTab"))
         {
             if (ImGui::BeginTabItem("Global"))
             {
@@ -646,6 +674,43 @@ void AppThreeDee::Render()
                         ImGui::EndTabItem();
                     }
                 }
+            }
+            ImGui::EndTabBar();
+        }
+
+        ImGui::End();
+    }
+
+    if (showSUBNoteEditor)
+    {
+        ImGui::Begin("SUB note editor", &showSUBNoteEditor);
+        if (ImGui::BeginTabBar("SUBnoteTab"))
+        {
+            if (ImGui::BeginTabItem("Global"))
+            {
+                if (_sequencer.ActiveInstrument() >= 0)
+                {
+                    SUBNoteEditor(_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].subpars);
+                }
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+
+        ImGui::End();
+    }
+    if (showPADNoteEditor)
+    {
+        ImGui::Begin("PAD note editor", &showPADNoteEditor);
+        if (ImGui::BeginTabBar("PADnoteTab"))
+        {
+            if (ImGui::BeginTabItem("Global"))
+            {
+                if (_sequencer.ActiveInstrument() >= 0)
+                {
+                    PADNoteEditor(_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].padpars);
+                }
+                ImGui::EndTabItem();
             }
             ImGui::EndTabBar();
         }

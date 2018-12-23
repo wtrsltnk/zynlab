@@ -14,6 +14,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
 
     auto category = static_cast<int>(parameters->Pcategory);
     current_category_item = categories[category];
+    ImGui::PushItemWidth(100);
     if (ImGui::BeginCombo("##category", current_category_item))
     {
         for (int n = 0; n < 3; n++)
@@ -35,6 +36,10 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         ImGui::Text("The Category of the Filter (Analog/Formantic/etc.)");
         ImGui::EndTooltip();
     }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     static char const *filter_types[] = {
         "LPF1",
@@ -63,6 +68,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         {
             auto filter_type = static_cast<int>(parameters->Ptype);
             current_filter_type_item = filter_types[filter_type];
+            ImGui::PushItemWidth(100);
             if (ImGui::BeginCombo("##filter_type", current_filter_type_item))
             {
                 for (int n = 0; n < 9; n++)
@@ -95,6 +101,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         {
             auto filter_type = static_cast<int>(parameters->Ptype);
             current_stvarf_filter_type_item = stvarf_filter_types[filter_type];
+            ImGui::PushItemWidth(100);
             if (ImGui::BeginCombo("##stvarf_filter_type", current_stvarf_filter_type_item))
             {
                 for (int n = 0; n < 4; n++)
@@ -119,8 +126,11 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         }
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto freq = static_cast<float>(parameters->Pfreq);
-    if (ImGui::Knob("C.Freq", &(freq), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("C.Freq", &(freq), 0, 128, ImVec2(40, 40)))
     {
         parameters->Pfreq = static_cast<unsigned char>(freq);
     }
@@ -132,9 +142,11 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto q = static_cast<float>(parameters->Pq);
-    if (ImGui::Knob(" Q", &(q), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob(" Q", &(q), 0, 128, ImVec2(40, 40)))
     {
         parameters->Pq = static_cast<unsigned char>(q);
     }
@@ -146,9 +158,11 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto freqtrack = static_cast<float>(parameters->Pfreqtrack);
-    if (ImGui::Knob("freq.tr.", &(freqtrack), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("freq.tr.", &(freqtrack), 0, 128, ImVec2(40, 40)))
     {
         parameters->Pfreqtrack = static_cast<unsigned char>(freqtrack);
     }
@@ -160,9 +174,11 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto gain = static_cast<float>(parameters->Pgain);
-    if (ImGui::Knob("gain", &(gain), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("gain", &(gain), 0, 128, ImVec2(40, 40)))
     {
         parameters->Pgain = static_cast<unsigned char>(gain);
     }
@@ -172,4 +188,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         ImGui::Text("Filter output gain/damp");
         ImGui::EndTooltip();
     }
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 }

@@ -73,6 +73,14 @@ private:
     void ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters);
     void ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters);
 
+    // SUB note
+    bool showSUBNoteEditor;
+    void SUBNoteEditor(SUBnoteParameters *parameters);
+
+    // PAD note
+    bool showPADNoteEditor;
+    void PADNoteEditor(PADnoteParameters *parameters);
+
     // LFO
     void LFO(char const *label, class LFOParams *parameters);
 

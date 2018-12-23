@@ -7,6 +7,9 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
 {
     ImGui::Text("%s", label);
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     static char const *items[] = {
         "SINE",
         "TRI",
@@ -20,6 +23,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
 
     auto type = static_cast<int>(params->PLFOtype);
     current_item = items[type];
+    ImGui::PushItemWidth(100);
     if (ImGui::BeginCombo("##lfotype", current_item))
     {
         for (int n = 0; n < 7; n++)
@@ -41,8 +45,11 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::EndTooltip();
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto freq = params->Pfreq;
-    if (ImGui::Knob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(30, 30)))
+    if (ImGui::Knob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(40, 40)))
     {
         params->Pfreq = freq;
     }
@@ -52,10 +59,13 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO frequency");
         ImGui::EndTooltip();
     }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
     ImGui::SameLine();
 
     auto depth = static_cast<float>(params->Pintensity);
-    if (ImGui::Knob("Depth", &(depth), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("Depth", &(depth), 0, 128, ImVec2(40, 40)))
     {
         params->Pintensity = static_cast<unsigned char>(depth);
     }
@@ -65,10 +75,13 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO amount");
         ImGui::EndTooltip();
     }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
     ImGui::SameLine();
 
     auto start = static_cast<float>(params->Pstartphase);
-    if (ImGui::Knob("Start", &(start), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("Start", &(start), 0, 128, ImVec2(40, 40)))
     {
         params->Pstartphase = static_cast<unsigned char>(start);
     }
@@ -78,10 +91,13 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO startphase (leftmost is random)");
         ImGui::EndTooltip();
     }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
     ImGui::SameLine();
 
     auto delay = static_cast<float>(params->Pdelay);
-    if (ImGui::Knob("Delay", &(delay), 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("Delay", &(delay), 0, 128, ImVec2(40, 40)))
     {
         params->Pdelay = static_cast<unsigned char>(delay);
     }
@@ -91,10 +107,13 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO delay");
         ImGui::EndTooltip();
     }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
     ImGui::SameLine();
 
     auto stretch = static_cast<float>(params->Pstretch);
-    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(40, 40)))
     {
         params->Pstretch = static_cast<unsigned char>(stretch);
     }
@@ -104,10 +123,13 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO stretch");
         ImGui::EndTooltip();
     }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
     ImGui::SameLine();
 
     auto a_r = static_cast<float>(params->Prandomness);
-    if (ImGui::Knob("A.R", &(a_r), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("A.R", &(a_r), 0, 128, ImVec2(30, 30)))
     {
         params->Prandomness = static_cast<unsigned char>(a_r);
     }
@@ -117,10 +139,13 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO Amplitude Randomness");
         ImGui::EndTooltip();
     }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
     ImGui::SameLine();
 
     auto f_r = static_cast<float>(params->Pfreqrand);
-    if (ImGui::Knob("F.R", &(f_r), 0, 128, ImVec2(20, 20)))
+    if (ImGui::Knob("F.R", &(f_r), 0, 128, ImVec2(30, 30)))
     {
         params->Pfreqrand = static_cast<unsigned char>(f_r);
     }
@@ -130,4 +155,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         ImGui::Text("LFO Frequency Randomness");
         ImGui::EndTooltip();
     }
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 }

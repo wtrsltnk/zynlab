@@ -7,6 +7,9 @@ void AppThreeDee::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("ADsynth Voice Parameters of the Instrument");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto enabled = parameters->Enabled != 0;
     if (ImGui::Checkbox("##enabled", &enabled))
     {
@@ -65,11 +68,18 @@ void AppThreeDee::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Oscillator Parameters");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto phase = static_cast<float>(64 - parameters->Poscilphase);
+    ImGui::PushItemWidth(300);
     if (ImGui::SliderFloat("Phase", &phase, 0, 128))
     {
         parameters->PVolume = static_cast<unsigned char>(phase);
     }
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     ImGui::Separator();
 
@@ -79,6 +89,9 @@ void AppThreeDee::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
 void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Oscillator Unison Parameters");
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     static char const *unison_sizes[] = {
         "OFF",
@@ -101,6 +114,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
 
     auto unison_size = static_cast<int>(parameters->PFMEnabled);
     current_unison_size_item = unison_sizes[unison_size];
+    ImGui::PushItemWidth(100);
     if (ImGui::BeginCombo("Unison", current_unison_size_item))
     {
         for (int n = 0; n < 15; n++)
@@ -122,6 +136,10 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
         ImGui::EndTooltip();
     }
 
+    ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine(0.0f, -5.0f);
+
     auto frequency_spread = static_cast<float>(parameters->Unison_frequency_spread);
     if (ImGui::SliderFloat("Frequency Spread", &frequency_spread, 0, 128))
     {
@@ -134,8 +152,11 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
         ImGui::EndTooltip();
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto phase_randomness = static_cast<float>(parameters->Unison_phase_randomness);
-    if (ImGui::Knob("Ph.rand", &phase_randomness, 0, 128, ImVec2(45, 30)))
+    if (ImGui::Knob("Ph.rand", &phase_randomness, 0, 128, ImVec2(40, 40)))
     {
         parameters->Unison_phase_randomness = static_cast<unsigned char>(phase_randomness);
     }
@@ -147,9 +168,11 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine(0.0f, -5.0f);
 
     auto stereo_spread = static_cast<float>(parameters->Unison_stereo_spread);
-    if (ImGui::Knob("Stereo", &stereo_spread, 0, 128, ImVec2(45, 30)))
+    if (ImGui::Knob("Stereo", &stereo_spread, 0, 128, ImVec2(40, 40)))
     {
         parameters->Unison_stereo_spread = static_cast<unsigned char>(stereo_spread);
     }
@@ -161,9 +184,11 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine(0.0f, -5.0f);
 
     auto vibratto = static_cast<float>(parameters->Unison_vibratto);
-    if (ImGui::Knob("Vibrato", &vibratto, 0, 128, ImVec2(45, 30)))
+    if (ImGui::Knob("Vibrato", &vibratto, 0, 128, ImVec2(40, 40)))
     {
         parameters->Unison_vibratto = static_cast<unsigned char>(vibratto);
     }
@@ -175,9 +200,11 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine(0.0f, -5.0f);
 
     auto vibratto_speed = static_cast<float>(parameters->Unison_vibratto_speed);
-    if (ImGui::Knob("V.speed", &vibratto_speed, 0, 128, ImVec2(45, 30)))
+    if (ImGui::Knob("V.speed", &vibratto_speed, 0, 128, ImVec2(40, 40)))
     {
         parameters->Unison_vibratto_speed = static_cast<unsigned char>(vibratto_speed);
     }
@@ -187,13 +214,20 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
         ImGui::Text("Vibrato Average Speed");
         ImGui::EndTooltip();
     }
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 }
 
 void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Amplitude Parameters");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto vol = static_cast<float>(parameters->PVolume);
+    ImGui::PushItemWidth(300);
     if (ImGui::SliderFloat("Vol", &vol, 0, 128))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
@@ -205,7 +239,12 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
+
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+    ImGui::PushItemWidth(100);
     if (ImGui::SliderFloat("V.Sns", &velocityScale, 0, 128))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
@@ -216,6 +255,9 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
         ImGui::Text("Velocity Sensing Function (rightmost to disable)");
         ImGui::EndTooltip();
     }
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     auto pan = static_cast<float>(parameters->PPanning);
     if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
@@ -229,6 +271,9 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     ImGui::Separator();
 
     Envelope("Amplitude Envelope", parameters->AmpEnvelope);
@@ -241,6 +286,9 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 void AppThreeDee::ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Filter Parameters");
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     FilterParameters(parameters->VoiceFilter);
 
@@ -257,7 +305,11 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Frequency Parameters");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto detune = static_cast<float>(parameters->PDetune) - 8192;
+    ImGui::PushItemWidth(300);
     if (ImGui::SliderFloat("Detune", &detune, -35, 35))
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
@@ -269,11 +321,16 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
+
     auto octave = static_cast<int>(parameters->PCoarseDetune / 1024);
     if (octave >= 8)
     {
         octave -= 16;
     }
+    ImGui::PushItemWidth(100);
     if (ImGui::InputInt("Octave", &octave))
     {
         if (octave < -8)
@@ -298,6 +355,9 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     static char const *detune_types[] = {
         "L35cents",
         "L10cents",
@@ -308,6 +368,7 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
 
     auto detune_type = static_cast<int>(parameters->PDetuneType - 1);
     current_detune_types_item = detune_types[detune_type];
+    ImGui::PushItemWidth(100);
     if (ImGui::BeginCombo("Detune type", current_detune_types_item))
     {
         for (int n = 0; n < 4; n++)
@@ -329,6 +390,9 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     ImGui::Separator();
 
     Envelope("Frequency Envelope", parameters->FreqEnvelope);
@@ -342,6 +406,9 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Modulation Parameters");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     static char const *modulation_types[] = {
         "OFF",
         "MORPH",
@@ -353,6 +420,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
     auto modulation_type = static_cast<int>(parameters->PFMEnabled);
     current_modulation_type_item = modulation_types[modulation_type];
+    ImGui::PushItemWidth(200);
     if (ImGui::BeginCombo("Modulation type", current_modulation_type_item))
     {
         for (int n = 0; n < 5; n++)
@@ -374,9 +442,13 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     if (parameters->PFMEnabled > 0)
     {
         auto vol = static_cast<float>(parameters->PVolume);
+        ImGui::PushItemWidth(300);
         if (ImGui::SliderFloat("Vol", &vol, 0, 128))
         {
             parameters->PVolume = static_cast<unsigned char>(vol);
@@ -388,7 +460,12 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             ImGui::EndTooltip();
         }
 
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+
         auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+        ImGui::PushItemWidth(100);
         if (ImGui::SliderFloat("V.Sns", &velocityScale, 0, 128))
         {
             parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
@@ -400,7 +477,11 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             ImGui::EndTooltip();
         }
 
+        ImGui::Spacing();
+        ImGui::Spacing();
+
         auto FMVolumeDamp = static_cast<float>(parameters->PFMVolumeDamp - 64);
+        ImGui::PushItemWidth(100);
         if (ImGui::SliderFloat("F.Damp", &FMVolumeDamp, -64, 63))
         {
             parameters->PFMVolumeDamp = static_cast<unsigned char>(FMVolumeDamp) + 64;
@@ -412,13 +493,11 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             ImGui::EndTooltip();
         }
 
-        ImGui::Separator();
-
-        Envelope("Modulation Amplitude Envelope", parameters->FMAmpEnvelope);
-
-        ImGui::Separator();
+        ImGui::Spacing();
+        ImGui::Spacing();
 
         auto detune = static_cast<float>(parameters->PDetune) - 8192;
+        ImGui::PushItemWidth(300);
         if (ImGui::SliderFloat("Detune", &detune, -35, 35))
         {
             parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
@@ -430,11 +509,16 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             ImGui::EndTooltip();
         }
 
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+
         auto octave = static_cast<int>(parameters->PCoarseDetune / 1024);
         if (octave >= 8)
         {
             octave -= 16;
         }
+        ImGui::PushItemWidth(100);
         if (ImGui::InputInt("Octave", &octave))
         {
             if (octave < -8)
@@ -459,6 +543,9 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             ImGui::EndTooltip();
         }
 
+        ImGui::Spacing();
+        ImGui::Spacing();
+
         static char const *detune_types[] = {
             "L35cents",
             "L10cents",
@@ -469,6 +556,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
         auto detune_type = static_cast<int>(parameters->PDetuneType);
         current_detune_types_item = detune_types[detune_type];
+        ImGui::PushItemWidth(100);
         if (ImGui::BeginCombo("Detune type", current_detune_types_item))
         {
             for (int n = 0; n < 4; n++)
@@ -489,6 +577,13 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             ImGui::Text("Detune type");
             ImGui::EndTooltip();
         }
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        ImGui::Separator();
+
+        Envelope("Modulation Amplitude Envelope", parameters->FMAmpEnvelope);
 
         ImGui::Separator();
 

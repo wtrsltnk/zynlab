@@ -7,6 +7,9 @@ void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
 {
     ImGui::Text("ADsynth Global Parameters of the Instrument");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     if (ImGui::BeginTabBar("ADNote"))
     {
         if (ImGui::BeginTabItem("Amplitude"))
@@ -37,7 +40,11 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto vol = static_cast<float>(parameters->PVolume);
+    ImGui::PushItemWidth(300);
     if (ImGui::SliderFloat("Vol", &vol, 0, 128))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
@@ -49,7 +56,10 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::SameLine();
+
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+    ImGui::PushItemWidth(100);
     if (ImGui::SliderFloat("V.Sns", &velocityScale, 0, 128))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
@@ -60,6 +70,9 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
         ImGui::Text("Velocity Sensing Function (rightmost to disable)");
         ImGui::EndTooltip();
     }
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     auto pan = static_cast<float>(parameters->PPanning);
     if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
@@ -74,9 +87,11 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto punchStrength = static_cast<float>(parameters->PPunchStrength);
-    if (ImGui::Knob("P.Str.", &punchStrength, 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("P.Str.", &punchStrength, 0, 128, ImVec2(40, 40)))
     {
         parameters->PPunchStrength = static_cast<unsigned char>(punchStrength);
     }
@@ -88,9 +103,11 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto punchTime = static_cast<float>(parameters->PPunchTime);
-    if (ImGui::Knob("P.t.", &punchTime, 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("P.t.", &punchTime, 0, 128, ImVec2(40, 40)))
     {
         parameters->PPunchTime = static_cast<unsigned char>(punchTime);
     }
@@ -102,9 +119,11 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto punchStretch = static_cast<float>(parameters->PPunchStretch);
-    if (ImGui::Knob("P.Stc.", &punchStretch, 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("P.Stc.", &punchStretch, 0, 128, ImVec2(40, 40)))
     {
         parameters->PPunchStretch = static_cast<unsigned char>(punchStretch);
     }
@@ -116,9 +135,11 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     }
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto punchVelocitySensing = static_cast<float>(parameters->PPunchVelocitySensing);
-    if (ImGui::Knob("P.Vel.", &punchVelocitySensing, 0, 128, ImVec2(30, 30)))
+    if (ImGui::Knob("P.Vel.", &punchVelocitySensing, 0, 128, ImVec2(40, 40)))
     {
         parameters->PPunchVelocitySensing = static_cast<unsigned char>(punchVelocitySensing);
     }
@@ -129,6 +150,8 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::SameLine();
+    ImGui::Spacing();
     ImGui::SameLine();
 
     auto stereo = parameters->PStereo == 1;
@@ -146,6 +169,8 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     ImGui::Text("Stereo");
 
     ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
 
     auto randomGrouping = parameters->Hrandgrouping == 1;
     if (ImGui::Checkbox("##random_grouping", &randomGrouping))
@@ -161,6 +186,9 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     ImGui::SameLine();
     ImGui::Text("Rnd Grp");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     ImGui::Separator();
 
     Envelope("Amplitude Envelope", parameters->AmpEnvelope);
@@ -173,6 +201,9 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 void AppThreeDee::ADNoteEditorFilter(ADnoteGlobalParam *parameters)
 {
     ImGui::Text("Global Filter Parameters");
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     FilterParameters(parameters->GlobalFilter);
 
@@ -189,7 +220,11 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
 {
     ImGui::Text("Global Frequency Parameters");
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     auto detune = static_cast<float>(parameters->PDetune) - 8192;
+    ImGui::PushItemWidth(300);
     if (ImGui::SliderFloat("Detune", &detune, -35, 35))
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
@@ -201,11 +236,16 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
+
     auto octave = static_cast<int>(parameters->PCoarseDetune / 1024);
     if (octave >= 8)
     {
         octave -= 16;
     }
+    ImGui::PushItemWidth(100);
     if (ImGui::InputInt("Octave", &octave))
     {
         if (octave < -8)
@@ -230,6 +270,25 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
         ImGui::EndTooltip();
     }
 
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    auto bandwidth = static_cast<float>(parameters->PBandwidth);
+    if (ImGui::Knob("relBW", &(bandwidth), 0, 128, ImVec2(40, 40)))
+    {
+        parameters->PBandwidth = static_cast<unsigned char>(bandwidth);
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::Text("Bandwidth - how the relative fine detune of the voice are changed");
+        ImGui::EndTooltip();
+    }
+
+    ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::SameLine();
+
     static char const *detune_types[] = {
         "L35cents",
         "L10cents",
@@ -240,6 +299,7 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
 
     auto detune_type = static_cast<int>(parameters->PDetuneType - 1);
     current_detune_types_item = detune_types[detune_type];
+    ImGui::PushItemWidth(100);
     if (ImGui::BeginCombo("Detune type", current_detune_types_item))
     {
         for (int n = 0; n < 4; n++)
@@ -261,17 +321,8 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
         ImGui::EndTooltip();
     }
 
-    auto bandwidth = static_cast<float>(parameters->PBandwidth);
-    if (ImGui::Knob("relBW", &(bandwidth), 0, 128, ImVec2(30, 30)))
-    {
-        parameters->PBandwidth = static_cast<unsigned char>(bandwidth);
-    }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Bandwidth - how the relative fine detune of the voice are changed");
-        ImGui::EndTooltip();
-    }
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     ImGui::Separator();
 
