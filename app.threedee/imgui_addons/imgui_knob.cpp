@@ -57,7 +57,6 @@ bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, Im
     draw_list->PathStroke(ImGui::GetColorU32(ImGuiCol_SliderGrabActive), false, 3.0f);
     auto textSize = CalcTextSize(label);
     draw_list->AddText(ImVec2(pos.x + ((size.x / 2) - (textSize.x / 2)), pos.y + radius_outer * 2 + style.ItemInnerSpacing.y), ImGui::GetColorU32(ImGuiCol_Text), label);
-
     if (is_active || is_hovered)
     {
         ImGui::SetNextWindowPos(ImVec2(pos.x - style.WindowPadding.x, pos.y - (line_height * 2) - style.ItemInnerSpacing.y - style.WindowPadding.y));
@@ -83,7 +82,7 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
     return false;
 }
 
-bool ImGui::TextCentered(ImVec2 const &size, char const *label, ...)
+bool ImGui::TextCentered(ImVec2 const &size, char const *label)
 {
     ImGuiStyle &style = ImGui::GetStyle();
 

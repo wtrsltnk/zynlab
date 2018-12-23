@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <map>
 #include <iterator>
+#include <map>
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
@@ -55,7 +55,6 @@ void AppThreeDee::onResize(int width, int height)
 
 bool AppThreeDee::Setup()
 {
-    // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
@@ -69,8 +68,7 @@ bool AppThreeDee::Setup()
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    // Setup style
-    ImGui::StyleColorsDark();
+    ImGui::StyleColorsClassic();
 
     _mixer->GetBankManager()->RescanForBanks();
     _mixer->GetBankManager()->LoadBank(_currentBank);
@@ -81,12 +79,13 @@ bool AppThreeDee::Setup()
     return true;
 }
 
-static ImVec4 clear_color = ImColor(190, 190, 200);
+static ImVec4 clear_color = ImColor(90, 90, 100);
 
 static bool showInstrumentEditor = false;
 static bool showPatternEditor = false;
 static bool showMixer = true;
 static int openSelectInstrument = -1;
+static ImVec2 trackSize = ImVec2(150, 0);
 
 void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
 {
@@ -141,11 +140,9 @@ void AppThreeDee::ImGuiSelectedTrack()
 
 void AppThreeDee::ImGuiMasterTrack()
 {
-    ImVec2 size = ImVec2(150, 0);
-
     auto io = ImGui::GetStyle();
 
-    ImGui::BeginChild("Master Track", size, true);
+    ImGui::BeginChild("Master Track", trackSize, true);
     {
         auto lh = ImGui::GetItemsLineHeightWithSpacing();
         auto width = ImGui::GetContentRegionAvail().x;
@@ -217,8 +214,6 @@ void AppThreeDee::ImGuiMasterTrack()
 
 void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
 {
-    ImVec2 size = ImVec2(150, 0);
-
     if (track < 0 || track >= NUM_MIXER_CHANNELS)
     {
         return;
@@ -238,7 +233,7 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
     {
         ImGui::PushStyleColor(ImGuiCol_Border, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
     }
-    ImGui::BeginChild("Track", size, true);
+    ImGui::BeginChild("Track", trackSize, true);
     {
         auto lh = ImGui::GetItemsLineHeightWithSpacing();
         auto width = ImGui::GetContentRegionAvail().x;
@@ -247,6 +242,10 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
         auto sliderPanelHeight =
             sliderHeight + io.ItemSpacing.y /*Fader height*/
             + (40 + lh + io.ItemSpacing.y); /*panning knob*/
+
+        char tmp[32] = {0};
+        sprintf(tmp, "track %d", track + 1);
+        ImGui::TextCentered(ImVec2(width, 20), tmp);
 
         auto trackEnabled = channel->Penabled == 1;
 
@@ -388,61 +387,30 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
 
             if (showSends)
             {
-                auto send1 = static_cast<float>(_mixer->Psysefxvol[0][track]);
-                if (ImGui::Knob("sys effect 1", &send1, 0, 128, ImVec2(width, 40)))
-                {
-                    _mixer->Psysefxvol[0][track] = static_cast<unsigned char>(send1);
-                    _sequencer.ActiveInstrument(track);
-                }
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    ImGui::Text("Volume for send to system effect 1");
-                    ImGui::EndTooltip();
-                }
+                ImGui::TextCentered(ImVec2(width, 20), "Sys FX sends");
 
-                auto send2 = static_cast<float>(_mixer->Psysefxvol[1][track]);
-                if (ImGui::Knob("sys effect 2", &send2, 0, 128, ImVec2(width, 40)))
+                for (int send = 0; send < NUM_SYS_EFX; send++)
                 {
-                    _mixer->Psysefxvol[1][track] = static_cast<unsigned char>(send2);
-                    _sequencer.ActiveInstrument(track);
-                }
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    ImGui::Text("Volume for send to system effect 2");
-                    ImGui::EndTooltip();
-                }
-
-                auto send3 = static_cast<float>(_mixer->Psysefxvol[2][track]);
-                if (ImGui::Knob("sys effect 3", &send3, 0, 128, ImVec2(width, 40)))
-                {
-                    _mixer->Psysefxvol[2][track] = static_cast<unsigned char>(send3);
-                    _sequencer.ActiveInstrument(track);
-                }
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    ImGui::Text("Volume for send to system effect 3");
-                    ImGui::EndTooltip();
-                }
-
-                auto send4 = static_cast<float>(_mixer->Psysefxvol[3][track]);
-                if (ImGui::Knob("sys effect 4", &send4, 0, 128, ImVec2(width, 40)))
-                {
-                    _mixer->Psysefxvol[3][track] = static_cast<unsigned char>(send4);
-                    _sequencer.ActiveInstrument(track);
-                }
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    ImGui::Text("Volume for send to system effect 4");
-                    ImGui::EndTooltip();
+                    auto send1 = static_cast<float>(_mixer->Psysefxvol[0][track]);
+                    char tmp[64] = {0};
+                    sprintf(tmp, "%d ", send+1);
+                    if (ImGui::Knob(tmp, &send1, 0, 128, ImVec2(width, 30)))
+                    {
+                        _mixer->Psysefxvol[send][track] = static_cast<unsigned char>(send1);
+                        _sequencer.ActiveInstrument(track);
+                    }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::Text("Volume for send to system effect %d", send);
+                        ImGui::EndTooltip();
+                    }
                 }
 
                 ImGui::Separator();
             }
 
+            ImGui::TextCentered(ImVec2(width, 20), "Audio FX");
             for (int fx = 0; fx < NUM_CHANNEL_EFX; fx++)
             {
                 char fxButton[32] = {0};

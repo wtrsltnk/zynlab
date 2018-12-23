@@ -13,7 +13,7 @@ IMGUI_API bool KnobUchar(char const *label, unsigned char *p_value,
                          unsigned char v_min, unsigned char v_max,
                          ImVec2 const &size);
 
-IMGUI_API bool TextCentered(ImVec2 const &size, char const *fmt, ...);
+IMGUI_API bool TextCentered(ImVec2 const &size, char const *label);
 
 } // namespace ImGui
 
