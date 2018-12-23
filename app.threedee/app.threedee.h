@@ -60,7 +60,7 @@ private:
     void HitNote(int trackIndex, int note, int durationInMs);
 
     // AD note
-    bool showAddSynthEditor;
+    bool showADNoteEditor;
     void ADNoteEditor(ADnoteParameters *parameters);
     void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
     void ADNoteEditorFilter(ADnoteGlobalParam *parameters);

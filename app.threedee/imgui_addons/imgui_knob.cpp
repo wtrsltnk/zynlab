@@ -31,10 +31,10 @@ bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, Im
     bool value_changed = false;
     bool is_active = ImGui::IsItemActive();
     bool is_hovered = ImGui::IsItemActive();
-    if (is_active && io.MouseDelta.x != 0.0f)
+    if (is_active && io.MouseDelta.y != 0.0f)
     {
         float step = (v_max - v_min) / 200.0f;
-        *p_value += io.MouseDelta.x * step;
+        *p_value -= io.MouseDelta.y * step;
         if (*p_value < v_min)
             *p_value = v_min;
         if (*p_value > v_max)
@@ -46,11 +46,12 @@ bool ImGui::Knob(const char *label, float *p_value, float v_min, float v_max, Im
     float angle_cos = cosf(angle);
     float angle_sin = sinf(angle);
 
+    draw_list->AddCircleFilled(center, radius_outer * 0.7f, ImGui::GetColorU32(ImGuiCol_Button), 16);
     draw_list->PathArcTo(center, radius_outer, ANGLE_MIN, ANGLE_MAX, 16);
     draw_list->PathStroke(ImGui::GetColorU32(ImGuiCol_FrameBg), false, 3.0f);
     draw_list->AddLine(
-        ImVec2(center.x, center.y),
-        ImVec2(center.x + angle_cos * (radius_outer + 1), center.y + angle_sin * (radius_outer + 1)),
+        ImVec2(center.x + angle_cos * (radius_outer * 0.35f), center.y + angle_sin * (radius_outer * 0.35f)),
+        ImVec2(center.x + angle_cos * (radius_outer * 0.7f), center.y + angle_sin * (radius_outer * 0.7f)),
         ImGui::GetColorU32(ImGuiCol_SliderGrabActive), 2.0f);
     draw_list->PathArcTo(center, radius_outer, ANGLE_MIN, angle + 0.02f, 16);
     draw_list->PathStroke(ImGui::GetColorU32(ImGuiCol_SliderGrabActive), false, 3.0f);

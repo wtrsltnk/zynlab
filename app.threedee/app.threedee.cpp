@@ -15,7 +15,7 @@
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
       _display_w(800), _display_h(600),
-      _currentBank(0), showAddSynthEditor(false)
+      _currentBank(0), showADNoteEditor(false)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -126,7 +126,7 @@ void AppThreeDee::ImGuiSelectedTrack()
         {
             if (ImGui::Button("Settings", ImVec2(width, 0)))
             {
-                showAddSynthEditor = true;
+                showADNoteEditor = true;
             }
 
             const char *channels[] = {
