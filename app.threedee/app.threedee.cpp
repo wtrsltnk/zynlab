@@ -86,6 +86,7 @@ static bool showPatternEditor = false;
 static bool showMixer = true;
 static int openSelectInstrument = -1;
 static ImVec2 trackSize = ImVec2(150, 0);
+static float sliderBaseHeight = 150.0f;
 
 void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
 {
@@ -146,8 +147,8 @@ void AppThreeDee::ImGuiMasterTrack()
     {
         auto lh = ImGui::GetItemsLineHeightWithSpacing();
         auto width = ImGui::GetContentRegionAvail().x;
-        float const sliderHeight = 200.0f;
 
+        auto sliderHeight = ImGui::GetContentRegionAvail().y > sliderBaseHeight * 3 ? sliderBaseHeight * 2 : sliderBaseHeight;
         auto sliderPanelHeight =
             sliderHeight + io.ItemSpacing.y /*Fader height*/
             + (40 + lh + io.ItemSpacing.y); /*Find detune*/
@@ -237,8 +238,8 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
     {
         auto lh = ImGui::GetItemsLineHeightWithSpacing();
         auto width = ImGui::GetContentRegionAvail().x;
-        float const sliderHeight = 200.0f;
 
+        auto sliderHeight = ImGui::GetContentRegionAvail().y > sliderBaseHeight * 3 ? sliderBaseHeight * 2 : sliderBaseHeight;
         auto sliderPanelHeight =
             sliderHeight + io.ItemSpacing.y /*Fader height*/
             + (40 + lh + io.ItemSpacing.y); /*panning knob*/
@@ -387,14 +388,12 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
 
             if (showSends)
             {
-                ImGui::TextCentered(ImVec2(width, 20), "Sys FX sends");
-
                 for (int send = 0; send < NUM_SYS_EFX; send++)
                 {
                     auto send1 = static_cast<float>(_mixer->Psysefxvol[0][track]);
                     char tmp[64] = {0};
-                    sprintf(tmp, "%d ", send+1);
-                    if (ImGui::Knob(tmp, &send1, 0, 128, ImVec2(width, 30)))
+                    sprintf(tmp, "%d ", send + 1);
+                    if (ImGui::Knob(tmp, &send1, 0, 128, ImVec2(width / 2, 30)))
                     {
                         _mixer->Psysefxvol[send][track] = static_cast<unsigned char>(send1);
                         _sequencer.ActiveInstrument(track);
@@ -402,15 +401,18 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
                     if (ImGui::IsItemHovered())
                     {
                         ImGui::BeginTooltip();
-                        ImGui::Text("Volume for send to system effect %d", send);
+                        ImGui::Text("Volume for send to system effect %d", send + 1);
                         ImGui::EndTooltip();
+                    }
+                    if (send % 2 == 0)
+                    {
+                        ImGui::SameLine();
                     }
                 }
 
                 ImGui::Separator();
             }
 
-            ImGui::TextCentered(ImVec2(width, 20), "Audio FX");
             for (int fx = 0; fx < NUM_CHANNEL_EFX; fx++)
             {
                 char fxButton[32] = {0};
