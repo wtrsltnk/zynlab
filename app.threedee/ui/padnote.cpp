@@ -3,6 +3,8 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/PADnoteParams.h>
 
+char const *const PADeditorID = "PAD editor";
+
 void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
 {
     if (!showPADNoteEditor)
@@ -10,7 +12,7 @@ void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
         return;
     }
 
-    ImGui::Begin("PAD note editor", &showPADNoteEditor);
+    ImGui::Begin(PADeditorID, &showPADNoteEditor);
 
     if (ImGui::BeginTabBar("PADnoteTab"))
     {
@@ -58,12 +60,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Volume");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Volume");
 
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
@@ -71,12 +68,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Velocity Sensing Function (rightmost to disable)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Velocity Sensing Function (rightmost to disable)");
     ImGui::EndChild();
 
     ImGui::SameLine();
@@ -88,12 +80,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PPanning = static_cast<unsigned char>(pan);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Panning (leftmost is random)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -103,12 +90,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PPunchStrength = static_cast<unsigned char>(punchStrength);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Punch Strength");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Punch Strength");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -119,12 +101,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PPunchTime = static_cast<unsigned char>(punchTime);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Punch time (duration)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Punch time (duration)");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -135,12 +112,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PPunchStretch = static_cast<unsigned char>(punchStretch);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Punch Stretch");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Punch Stretch");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -151,12 +123,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PPunchVelocitySensing = static_cast<unsigned char>(punchVelocitySensing);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Punch Velocity Sensing");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Punch Velocity Sensing");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -167,12 +134,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     {
         parameters->PStereo = stereo ? 1 : 0;
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Stereo");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Stereo");
     ImGui::SameLine();
     ImGui::Text("Stereo");
 

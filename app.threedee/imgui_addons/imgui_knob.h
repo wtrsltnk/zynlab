@@ -1,6 +1,7 @@
 #ifndef IMGUI_KNOB_H
 #define IMGUI_KNOB_H
 
+#include <functional>
 #include <imgui.h>
 
 namespace ImGui {
@@ -14,6 +15,8 @@ IMGUI_API bool KnobUchar(char const *label, unsigned char *p_value,
                          ImVec2 const &size);
 
 IMGUI_API bool TextCentered(ImVec2 const &size, char const *label);
+
+IMGUI_API void ShowTooltipOnHover(char const *tooltip, ...);
 
 } // namespace ImGui
 

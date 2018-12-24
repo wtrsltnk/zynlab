@@ -97,3 +97,18 @@ bool ImGui::TextCentered(ImVec2 const &size, char const *label)
 
     return result;
 }
+
+void ImGui::ShowTooltipOnHover(char const *tooltip, ...)
+{
+    va_list argptr;
+
+    va_start(argptr, tooltip);
+
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::Text(tooltip, argptr);
+        ImGui::EndTooltip();
+    }
+    va_end(argptr);
+}

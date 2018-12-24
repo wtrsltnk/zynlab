@@ -38,12 +38,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
 
         ImGui::EndCombo();
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO Type");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO Type");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -53,12 +48,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     {
         params->Pfreq = freq;
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO frequency");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO frequency");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -69,12 +59,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     {
         params->Pintensity = static_cast<unsigned char>(depth);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO amount");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO amount");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -85,12 +70,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     {
         params->Pstartphase = static_cast<unsigned char>(start);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO startphase (leftmost is random)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO startphase (leftmost is random)");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -101,12 +81,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     {
         params->Pdelay = static_cast<unsigned char>(delay);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO delay");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO delay");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -117,12 +92,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     {
         params->Pstretch = static_cast<unsigned char>(stretch);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO stretch");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO stretch");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -133,12 +103,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     {
         params->Prandomness = static_cast<unsigned char>(a_r);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO Amplitude Randomness");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO Amplitude Randomness");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -149,12 +114,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     {
         params->Pfreqrand = static_cast<unsigned char>(f_r);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("LFO Frequency Randomness");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("LFO Frequency Randomness");
 
     ImGui::Spacing();
     ImGui::Spacing();

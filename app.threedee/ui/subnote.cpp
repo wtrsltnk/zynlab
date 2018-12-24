@@ -3,6 +3,19 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/SUBnoteParams.h>
 
+static char const *overtone_positions[] = {
+    "Harmonic",
+    "ShiftU",
+    "ShiftL",
+    "PowerU",
+    "PowerL",
+    "Sine",
+    "Power",
+    "Shift",
+};
+
+char const *const SUBeditorID = "SUB editor";
+
 void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
 {
     if (!showSUBNoteEditor)
@@ -10,7 +23,7 @@ void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
         return;
     }
 
-    ImGui::Begin("SUB note editor", &showSUBNoteEditor);
+    ImGui::Begin(SUBeditorID, &showSUBNoteEditor);
     if (ImGui::BeginTabBar("SUBnoteTab"))
     {
         if (ImGui::BeginTabItem("Global"))
@@ -89,7 +102,7 @@ void AppThreeDee::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)
         int v = static_cast<int>(parameters->Phmag[i]);
         if (ImGui::VSliderInt("##harmonic", ImVec2(10, 100), &v, 0, 127, ""))
         {
-            parameters->Phmag[i] = v;
+            parameters->Phmag[i] = static_cast<unsigned char>(v);
         }
         ImGui::PopID();
     }
@@ -104,7 +117,7 @@ void AppThreeDee::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)
         int v = static_cast<int>(parameters->Phrelbw[i]);
         if (ImGui::VSliderInt("##subharmonic", ImVec2(10, 100), &v, 0, 127, ""))
         {
-            parameters->Phrelbw[i] = v;
+            parameters->Phrelbw[i] = static_cast<unsigned char>(v);
         }
         ImGui::PopID();
     }
@@ -125,12 +138,7 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Volume");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Volume");
 
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
@@ -138,12 +146,7 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Velocity Sensing Function (rightmost to disable)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Velocity Sensing Function (rightmost to disable)");
     ImGui::EndChild();
 
     ImGui::SameLine();
@@ -155,12 +158,7 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
     {
         parameters->PPanning = static_cast<unsigned char>(pan);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Panning (leftmost is random)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -183,12 +181,7 @@ void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
     {
         parameters->Pbandwidth = static_cast<unsigned char>(bandwidth);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Bandwidth");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Bandwidth");
 
     auto bandwidthScale = static_cast<float>(parameters->Pbwscale);
     ImGui::PushItemWidth(250);
@@ -196,12 +189,7 @@ void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
     {
         parameters->Pbwscale = static_cast<unsigned char>(bandwidthScale);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Bandwidth Scale");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Bandwidth Scale");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -233,16 +221,6 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     ImGui::Spacing();
     ImGui::Spacing();
 
-    static char const *overtone_positions[] = {
-        "Harmonic",
-        "ShiftU",
-        "ShiftL",
-        "PowerU",
-        "PowerL",
-        "Sine",
-        "Power",
-        "Shift",
-    };
     static char const *current_overtone_positions_item = nullptr;
 
     auto overtone_position = static_cast<int>(parameters->POvertoneSpread.type);
@@ -262,12 +240,7 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
 
         ImGui::EndCombo();
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Overtone positions");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Overtone positions");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -277,12 +250,7 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     {
         parameters->POvertoneSpread.par1 = static_cast<unsigned char>(par1);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Overtone spread par 1");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Overtone spread par 1");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -293,12 +261,7 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     {
         parameters->POvertoneSpread.par2 = static_cast<unsigned char>(bandwidth);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Overtone spread par 2");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Overtone spread par 2");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -309,12 +272,7 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     {
         parameters->POvertoneSpread.par3 = static_cast<unsigned char>(forceH);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Overtone spread par 3");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Overtone spread par 3");
 }
 
 void AppThreeDee::SUBNoteEditorFilter(SUBnoteParameters *parameters)
@@ -355,12 +313,7 @@ void AppThreeDee::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Fine detune (cents)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Fine detune (cents)");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -389,12 +342,7 @@ void AppThreeDee::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
         }
         parameters->PCoarseDetune = static_cast<unsigned short>(octave * 1024 + parameters->PCoarseDetune % 1024);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Octave");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Octave");
 
     ImGui::Spacing();
     ImGui::Spacing();

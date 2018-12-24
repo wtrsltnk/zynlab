@@ -18,12 +18,8 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         {
             envelope->PA_val = static_cast<unsigned char>(a_val);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Starting value");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Starting value");
+
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
@@ -34,12 +30,7 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     {
         envelope->PA_dt = static_cast<unsigned char>(a_dt);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Attack time");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Attack time");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -52,12 +43,8 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         {
             envelope->PD_val = static_cast<unsigned char>(d_val);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Decay value");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Decay value");
+
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
@@ -70,12 +57,8 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         {
             envelope->PD_dt = static_cast<unsigned char>(d_dt);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Decay time");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Decay time");
+
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
@@ -88,12 +71,8 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         {
             envelope->PS_val = static_cast<unsigned char>(s_val);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Sustain value");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Sustain value");
+
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
@@ -104,12 +83,7 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     {
         envelope->PR_dt = static_cast<unsigned char>(r_dt);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Release time");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Release time");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -122,12 +96,8 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         {
             envelope->PR_val = static_cast<unsigned char>(r_val);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Release value");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Release value");
+
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
@@ -138,12 +108,7 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     {
         envelope->Penvstretch = static_cast<unsigned char>(stretch);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Envelope stretch (on lower notes makes the envelope longer)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Envelope stretch (on lower notes makes the envelope longer)");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -154,12 +119,7 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     {
         envelope->Pforcedrelease = forcedRelease ? 1 : 0;
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Forced Release");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Forced Release");
 
     ImGui::SameLine();
 

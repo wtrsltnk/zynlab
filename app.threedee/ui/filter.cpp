@@ -3,13 +3,33 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.dsp/FilterParams.h>
 
+static char const *categories[] = {
+    "Analog",
+    "Formant",
+    "StVarF",
+};
+
+static char const *filter_types[] = {
+    "LPF1",
+    "HPF1",
+    "LPF2",
+    "HPF2",
+    "BPF2",
+    "NF2",
+    "PkF2",
+    "LSh2",
+    "HSh2",
+};
+
+static char const *stvarf_filter_types[] = {
+    "1LPDF",
+    "1HPF",
+    "1BPF",
+    "1NF",
+};
+
 void AppThreeDee::FilterParameters(FilterParams *parameters)
 {
-    static char const *categories[] = {
-        "Analog",
-        "Formant",
-        "StVarF",
-    };
     static char const *current_category_item = nullptr;
 
     auto category = static_cast<int>(parameters->Pcategory);
@@ -30,36 +50,14 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
 
         ImGui::EndCombo();
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("The Category of the Filter (Analog/Formantic/etc.)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("The Category of the Filter (Analog/Formantic/etc.)");
 
     ImGui::SameLine();
     ImGui::Spacing();
     ImGui::SameLine();
 
-    static char const *filter_types[] = {
-        "LPF1",
-        "HPF1",
-        "LPF2",
-        "HPF2",
-        "BPF2",
-        "NF2",
-        "PkF2",
-        "LSh2",
-        "HSh2",
-    };
     static char const *current_filter_type_item = nullptr;
 
-    static char const *stvarf_filter_types[] = {
-        "1LPDF",
-        "1HPF",
-        "1BPF",
-        "1NF",
-    };
     static char const *current_stvarf_filter_type_item = nullptr;
 
     switch (category)
@@ -84,12 +82,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
 
                 ImGui::EndCombo();
             }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::BeginTooltip();
-                ImGui::Text("Filter type");
-                ImGui::EndTooltip();
-            }
+            ImGui::ShowTooltipOnHover("Filter type");
             break;
         }
         case 1:
@@ -116,12 +109,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
 
                 ImGui::EndCombo();
             }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::BeginTooltip();
-                ImGui::Text("Filter type");
-                ImGui::EndTooltip();
-            }
+            ImGui::ShowTooltipOnHover("Filter type");
             break;
         }
     }
@@ -134,12 +122,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     {
         parameters->Pfreq = static_cast<unsigned char>(freq);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Center Frequency of the Filter or the base position in the vowel's sequence");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Center Frequency of the Filter or the base position in the vowel's sequence");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -150,12 +133,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     {
         parameters->Pq = static_cast<unsigned char>(q);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Filter resonance or bandwidth");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Filter resonance or bandwidth");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -166,12 +144,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     {
         parameters->Pfreqtrack = static_cast<unsigned char>(freqtrack);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Filter frequency tracking (left is negative, middle is 0, and right is positive)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Filter frequency tracking (left is negative, middle is 0, and right is positive)");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -182,12 +155,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     {
         parameters->Pgain = static_cast<unsigned char>(gain);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Filter output gain/damp");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Filter output gain/damp");
 
     ImGui::Spacing();
     ImGui::Spacing();

@@ -16,6 +16,10 @@
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
 
+extern char const *const ADeditorID;
+extern char const *const SUBeditorID;
+extern char const *const PADeditorID;
+
 class AppThreeDee
 {
 private:

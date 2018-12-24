@@ -3,6 +3,39 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/ADnoteParams.h>
 
+static char const *unison_sizes[] = {
+    "OFF",
+    "Size 2",
+    "Size 3",
+    "Size 4",
+    "Size 5",
+    "Size 6",
+    "Size 8",
+    "Size 10",
+    "Size 12",
+    "Size 15",
+    "Size 20",
+    "Size 25",
+    "Size 30",
+    "Size 40",
+    "Size 50",
+};
+
+static char const *detune_types[] = {
+    "L35cents",
+    "L10cents",
+    "E100cents",
+    "E1200cents",
+};
+
+static char const *modulation_types[] = {
+    "OFF",
+    "MORPH",
+    "RING",
+    "PM",
+    "FM",
+};
+
 void AppThreeDee::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("ADsynth Voice Parameters of the Instrument");
@@ -15,12 +48,7 @@ void AppThreeDee::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
     {
         parameters->Enabled = enabled ? 1 : 0;
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Enable this voice");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Enable this voice");
     ImGui::SameLine();
     ImGui::Text("Enabled");
 
@@ -99,34 +127,12 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     {
         parameters->Unison_frequency_spread = static_cast<unsigned char>(frequency_spread);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Frequency Spread of the Unison (cents)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Frequency Spread of the Unison (cents)");
 
     ImGui::SameLine();
     ImGui::Spacing();
     ImGui::SameLine(0.0f, -5.0f);
 
-    static char const *unison_sizes[] = {
-        "OFF",
-        "Size 2",
-        "Size 3",
-        "Size 4",
-        "Size 5",
-        "Size 6",
-        "Size 8",
-        "Size 10",
-        "Size 12",
-        "Size 15",
-        "Size 20",
-        "Size 25",
-        "Size 30",
-        "Size 40",
-        "Size 50",
-    };
     static char const *current_unison_size_item = nullptr;
 
     auto unison_size = static_cast<int>(parameters->PFMEnabled);
@@ -146,12 +152,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
 
         ImGui::EndCombo();
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Unison size");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Unison size");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -161,12 +162,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     {
         parameters->Unison_phase_randomness = static_cast<unsigned char>(phase_randomness);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Phase randomness");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Phase randomness");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -177,12 +173,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     {
         parameters->Unison_stereo_spread = static_cast<unsigned char>(stereo_spread);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Stereo Spread");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Stereo Spread");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -193,12 +184,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     {
         parameters->Unison_vibratto = static_cast<unsigned char>(vibratto);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Vibrato");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Vibrato");
 
     ImGui::SameLine();
     ImGui::Spacing();
@@ -209,12 +195,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     {
         parameters->Unison_vibratto_speed = static_cast<unsigned char>(vibratto_speed);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Vibrato Average Speed");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Vibrato Average Speed");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -234,12 +215,7 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Volume");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Volume");
 
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
@@ -247,12 +223,7 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Velocity Sensing Function (rightmost to disable)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Velocity Sensing Function (rightmost to disable)");
     ImGui::EndChild();
 
     ImGui::SameLine();
@@ -264,12 +235,7 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
     {
         parameters->PPanning = static_cast<unsigned char>(pan);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Panning (leftmost is random)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -314,23 +280,12 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Fine detune (cents)");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Fine detune (cents)");
 
     ImGui::SameLine();
     ImGui::Spacing();
     ImGui::SameLine();
 
-    static char const *detune_types[] = {
-        "L35cents",
-        "L10cents",
-        "E100cents",
-        "E1200cents",
-    };
     static char const *current_detune_types_item = nullptr;
 
     auto detune_type = static_cast<int>(parameters->PDetuneType - 1);
@@ -350,12 +305,7 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
 
         ImGui::EndCombo();
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Detune type");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Detune type");
 
     auto octave = static_cast<int>(parameters->PCoarseDetune / 1024);
     if (octave >= 8)
@@ -380,12 +330,7 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
         }
         parameters->PCoarseDetune = static_cast<unsigned short>(octave * 1024 + parameters->PCoarseDetune % 1024);
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Octave");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Octave");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -406,13 +351,6 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
     ImGui::Spacing();
     ImGui::Spacing();
 
-    static char const *modulation_types[] = {
-        "OFF",
-        "MORPH",
-        "RING",
-        "PM",
-        "FM",
-    };
     static char const *current_modulation_type_item = nullptr;
 
     auto modulation_type = static_cast<int>(parameters->PFMEnabled);
@@ -432,12 +370,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
         ImGui::EndCombo();
     }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::Text("Modulation type");
-        ImGui::EndTooltip();
-    }
+    ImGui::ShowTooltipOnHover("Modulation type");
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -450,12 +383,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
         {
             parameters->PVolume = static_cast<unsigned char>(vol);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Volume");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Volume");
 
         auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
         ImGui::PushItemWidth(300);
@@ -463,12 +391,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
         {
             parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Velocity Sensing Function (rightmost to disable)");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Velocity Sensing Function (rightmost to disable)");
 
         ImGui::Spacing();
         ImGui::Spacing();
@@ -479,23 +402,12 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
         {
             parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Fine detune (cents)");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Fine detune (cents)");
 
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
 
-        static char const *detune_types[] = {
-            "L35cents",
-            "L10cents",
-            "E100cents",
-            "E1200cents",
-        };
         static char const *current_detune_types_item = nullptr;
 
         auto detune_type = static_cast<int>(parameters->PDetuneType);
@@ -515,12 +427,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
             ImGui::EndCombo();
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Detune type");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Detune type");
 
         auto FMVolumeDamp = static_cast<float>(parameters->PFMVolumeDamp - 64);
         ImGui::PushItemWidth(300);
@@ -528,12 +435,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
         {
             parameters->PFMVolumeDamp = static_cast<unsigned char>(FMVolumeDamp) + 64;
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Modulator Damp at Higher frequency");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Modulator Damp at Higher frequency");
 
         ImGui::SameLine();
         ImGui::Spacing();
@@ -562,12 +464,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             }
             parameters->PCoarseDetune = static_cast<unsigned short>(octave * 1024 + parameters->PCoarseDetune % 1024);
         }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("Octave");
-            ImGui::EndTooltip();
-        }
+        ImGui::ShowTooltipOnHover("Octave");
 
         ImGui::Spacing();
         ImGui::Spacing();
