@@ -79,7 +79,12 @@ private:
     // SUB note
     bool showSUBNoteEditor;
     void SUBNoteEditor(SUBnoteParameters *parameters);
+    void SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters);
     void SUBNoteEditorAmplitude(SUBnoteParameters *parameters);
+    void SUBNoteEditorBandwidth(SUBnoteParameters *parameters);
+    void SUBNoteEditorOvertones(SUBnoteParameters *parameters);
+    void SUBNoteEditorFilter(SUBnoteParameters *parameters);
+    void SUBNoteEditorFrequency(SUBnoteParameters *parameters);
 
     // PAD note
     bool showPADNoteEditor;

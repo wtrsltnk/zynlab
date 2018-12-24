@@ -14,11 +14,6 @@ void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
 
     if (ImGui::BeginTabBar("PADnoteTab"))
     {
-        if (ImGui::BeginTabItem("Harmonic structure"))
-        {
-            ImGui::EndTabItem();
-        }
-
         if (ImGui::BeginTabItem("Envelopes LFOs"))
         {
             ImGui::Text("PADsynth Envelopes and LFOs Parameters of the Instrument");
@@ -38,6 +33,11 @@ void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
             }
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Harmonic structure"))
+        {
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 

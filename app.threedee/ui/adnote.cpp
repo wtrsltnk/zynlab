@@ -266,7 +266,7 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
 
     auto detune = static_cast<float>(parameters->PDetune) - 8192;
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("Detune", &detune, -35, 35))
+    if (ImGui::SliderFloat("##Detune", &detune, -35, 35, "Detune %.3f"))
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
     }
