@@ -121,6 +121,7 @@ static bool showMixer = true;
 static int openSelectInstrument = -1;
 static ImVec2 trackSize = ImVec2(150, 0);
 static float sliderBaseHeight = 150.0f;
+static float const largeModeTreshold = 4.5f;
 
 void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
 {
@@ -153,7 +154,7 @@ void AppThreeDee::ImGuiMixer()
         {
             auto highlightTrack = _sequencer.ActiveInstrument() == track;
             ImGui::PushID(track);
-            ImGuiTrack(track, true, highlightTrack);
+            ImGuiTrack(track, highlightTrack);
             ImGui::SameLine();
             ImGui::PopID();
         }
@@ -164,11 +165,11 @@ void AppThreeDee::ImGuiMixer()
 
 void AppThreeDee::ImGuiSelectedTrack()
 {
-    ImGui::Begin("Selected Track", nullptr, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    ImGui::Begin("Selected Track", nullptr, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     {
         ImGuiMasterTrack();
         ImGui::SameLine();
-        ImGuiTrack(_sequencer.ActiveInstrument(), false, false);
+        ImGuiTrack(_sequencer.ActiveInstrument(), false);
     }
     ImGui::End();
 }
@@ -179,65 +180,120 @@ void AppThreeDee::ImGuiMasterTrack()
 
     ImGui::BeginChild("Master Track", trackSize, true);
     {
-        auto lh = ImGui::GetItemsLineHeightWithSpacing();
-        auto width = ImGui::GetContentRegionAvail().x;
+        auto availableRegion = ImGui::GetContentRegionAvail();
+        auto width = availableRegion.x;
+        auto useLargeMode = availableRegion.y > sliderBaseHeight * largeModeTreshold;
 
-        auto sliderHeight = ImGui::GetContentRegionAvail().y > sliderBaseHeight * 3 ? sliderBaseHeight * 2 : sliderBaseHeight;
-        auto sliderPanelHeight =
-            sliderHeight + io.ItemSpacing.y /*Fader height*/
-            + (40 + lh + io.ItemSpacing.y); /*Find detune*/
+        ImGui::TextCentered(ImVec2(width, 20), "master");
 
-        ImGui::BeginChild("master view", ImVec2(0, -sliderPanelHeight));
+        // Output devices
+        auto sinks = toCharVector(Nio::GetSinks());
+        int selectedSink = 0;
+        ImGui::PushItemWidth(width);
+        if (ImGui::Combo("##Sinks", &selectedSink, &sinks[0], static_cast<int>(sinks.size())))
         {
-            ImGui::TextCentered(ImVec2(width, 20), "master");
-            auto sinks = toCharVector(Nio::GetSinks());
-            int selectedSink = 0;
-            ImGui::PushItemWidth(width);
-            if (ImGui::Combo("##Sinks", &selectedSink, &sinks[0], static_cast<int>(sinks.size())))
-            {
-                Nio::SelectSource(sinks[static_cast<size_t>(selectedSink)]);
-            }
-            ImGui::ShowTooltipOnHover("Ouput device");
-
-            auto sources = toCharVector(Nio::GetSources());
-            int selectedSource = 0;
-            ImGui::PushItemWidth(width);
-            if (ImGui::Combo("##Sources", &selectedSource, &sources[0], static_cast<int>(sources.size())))
-            {
-                Nio::SelectSource(sources[static_cast<size_t>(selectedSource)]);
-            }
-            ImGui::ShowTooltipOnHover("Midi device");
-
-            ImGui::Separator();
-
-            for (int fx = 0; fx < NUM_SYS_EFX; fx++)
-            {
-                char fxButton[32] = {0};
-                sprintf(fxButton, "fx %d", fx + 1);
-                ImGui::Button(fxButton, ImVec2(width, 0));
-            }
+            Nio::SelectSource(sinks[static_cast<size_t>(selectedSink)]);
         }
-        ImGui::EndChild();
+        ImGui::ShowTooltipOnHover("Ouput device");
 
+        // Input devices
+        auto sources = toCharVector(Nio::GetSources());
+        int selectedSource = 0;
+        ImGui::PushItemWidth(width);
+        if (ImGui::Combo("##Sources", &selectedSource, &sources[0], static_cast<int>(sources.size())))
+        {
+            Nio::SelectSource(sources[static_cast<size_t>(selectedSource)]);
+        }
+        ImGui::ShowTooltipOnHover("Midi device");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        // Enable/disable NRPN
+        auto nrpn = _mixer->ctl.NRPN.receive == 1;
+        if (ImGui::Checkbox("##nrpn", &nrpn))
+        {
+            _mixer->ctl.NRPN.receive = nrpn ? 1 : 0;
+        }
+        ImGui::ShowTooltipOnHover("Receive NRPNs");
+        ImGui::SameLine();
+        ImGui::Text("NRPN");
+        ImGui::ShowTooltipOnHover("Receive NRPNs");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        // Enable/disable Portamento
+        auto portamento = _mixer->ctl.portamento.portamento == 1;
+        if (ImGui::Checkbox("##portamento", &portamento))
+        {
+            _mixer->ctl.portamento.portamento = portamento ? 1 : 0;
+        }
+        ImGui::ShowTooltipOnHover("Enable/Disable the portamento");
+        ImGui::SameLine();
+        ImGui::Text("Portamento");
+        ImGui::ShowTooltipOnHover("Enable/Disable the portamento");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        // System effects
+        if (useLargeMode)
+        {
+            ImGui::TextCentered(ImVec2(width, 20), "System FX");
+        }
+        for (int fx = 0; fx < NUM_SYS_EFX; fx++)
+        {
+            char fxButton[32] = {0};
+            sprintf(fxButton, "sys fx %d", fx + 1);
+            ImGui::Button(fxButton, ImVec2(width, 0));
+        }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        // Fine detune
         auto fineDetune = _mixer->microtonal.Pglobalfinedetune;
-        if (ImGui::KnobUchar("detune", &fineDetune, 0, 128, ImVec2(width, 40)))
+        if (ImGui::KnobUchar("fine detune", &fineDetune, 0, 128, ImVec2(width, 40)))
         {
             _mixer->microtonal.Pglobalfinedetune = fineDetune;
         }
+        ImGui::ShowTooltipOnHover("Global fine detune");
 
         ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::SameLine(0.0f, (width - 20) / 2);
-        int v = static_cast<int>(_mixer->Pvolume);
-        if (ImGui::VSliderInt("##mastervol", ImVec2(20, sliderHeight - io.ItemSpacing.y), &v, 0, 128))
+
+        auto faderHeight = ImGui::GetWindowContentRegionMax().y - ImGui::GetCursorPos().y - io.ItemSpacing.y;
+
+        // Master volume
+        if (faderHeight < (40 + ImGui::GetTextLineHeight()))
         {
-            _mixer->setPvolume(static_cast<unsigned char>(v));
+            auto v = _mixer->Pvolume;
+            if (ImGui::KnobUchar("volume", &v, 0, 128, ImVec2(width, 40)))
+            {
+                _mixer->setPvolume(v);
+            }
         }
+        else
+        {
+            ImGui::Spacing();
+            ImGui::SameLine(0.0f, (width - 20) / 2);
+
+            int v = static_cast<int>(_mixer->Pvolume);
+            if (ImGui::VSliderInt("##mastervol", ImVec2(20, faderHeight), &v, 0, 128))
+            {
+                _mixer->setPvolume(static_cast<unsigned char>(v));
+            }
+        }
+        ImGui::ShowTooltipOnHover("Master volume");
     }
     ImGui::EndChild();
 }
 
-void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
+void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 {
     if (track < 0 || track >= NUM_MIXER_CHANNELS)
     {
@@ -263,7 +319,7 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
-        auto useLargeMode = availableRegion.y > sliderBaseHeight * 4;
+        auto useLargeMode = availableRegion.y > sliderBaseHeight * largeModeTreshold;
 
         char tmp[32] = {0};
         sprintf(tmp, "track %d", track + 1);
@@ -302,6 +358,10 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
         ImGui::PopStyleColor(8);
 
         // Select midi channel
+        if (useLargeMode)
+        {
+            ImGui::TextCentered(ImVec2(width, 20), "MIDI channel");
+        }
         int midiChannel = static_cast<int>(channel->Prcvchn);
         ImGui::PushItemWidth(width);
         if (ImGui::Combo("##KeyboardChannel", &midiChannel, channels, NUM_MIXER_CHANNELS))
@@ -370,34 +430,33 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (showSends)
+        if (useLargeMode)
         {
-            if (useLargeMode)
-            {
-                ImGui::TextCentered(ImVec2(width, 20), "Sys FX sends");
-            }
-
-            for (int send = 0; send < NUM_SYS_EFX; send++)
-            {
-                auto send1 = static_cast<float>(_mixer->Psysefxvol[0][track]);
-                char tmp[64] = {0};
-                sprintf(tmp, "%d ", send + 1);
-                if (ImGui::Knob(tmp, &send1, 0, 128, ImVec2(width / 2, 30)))
-                {
-                    _mixer->Psysefxvol[send][track] = static_cast<unsigned char>(send1);
-                    _sequencer.ActiveInstrument(track);
-                }
-                ImGui::ShowTooltipOnHover("Volume for send to system effect %d", send + 1);
-                if (send % 2 == 0)
-                {
-                    ImGui::SameLine();
-                }
-            }
-
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
+            ImGui::TextCentered(ImVec2(width, 20), "Sys FX sends");
         }
+
+        for (int send = 0; send < NUM_SYS_EFX; send++)
+        {
+            ImGui::PushID(send);
+            auto send1 = static_cast<float>(_mixer->Psysefxvol[send][track]);
+            if (ImGui::Knob("", &send1, 0, 128, ImVec2(width / 2, 40)))
+            {
+                _mixer->Psysefxvol[send][track] = static_cast<unsigned char>(send1);
+                _sequencer.ActiveInstrument(track);
+            }
+            char tmp[64] = {'\0'};
+            sprintf(tmp, "Volume for send to system effect %d", (send + 1));
+            ImGui::ShowTooltipOnHover(tmp);
+            if (send % 2 == 0)
+            {
+                ImGui::SameLine();
+            }
+            ImGui::PopID();
+        }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
 
         if (useLargeMode)
         {
@@ -415,12 +474,31 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
         ImGui::Separator();
         ImGui::Spacing();
 
+        auto velsns = channel->Pvelsns;
+        if (ImGui::KnobUchar("vel.sns.", &velsns, 0, 128, ImVec2(width / 2, 30)))
+        {
+            channel->Pvelsns = velsns;
+            _sequencer.ActiveInstrument(track);
+        }
+        ImGui::ShowTooltipOnHover("Velocity Sensing Function");
+
+        ImGui::SameLine();
+
+        auto velofs = channel->Pveloffs;
+        if (ImGui::KnobUchar("vel.ofs.", &velofs, 0, 128, ImVec2(width / 2, 30)))
+        {
+            channel->Pveloffs = velofs;
+            _sequencer.ActiveInstrument(track);
+        }
+        ImGui::ShowTooltipOnHover("Velocity Offset");
+
         auto panning = channel->Ppanning;
         if (ImGui::KnobUchar("panning", &panning, 0, 128, ImVec2(width, 40)))
         {
             channel->setPpanning(panning);
             _sequencer.ActiveInstrument(track);
         }
+        ImGui::ShowTooltipOnHover("Track panning");
 
         float peakl, peakr;
         channel->ComputePeakLeftAndRight(channel->Pvolume, peakl, peakr);
@@ -432,18 +510,18 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
 
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
         {
-            auto vol = channel->Ppanning;
-            if (ImGui::KnobUchar("volume", &vol, 0, 128, ImVec2(width, 40)))
+            auto v = channel->Pvolume;
+            if (ImGui::KnobUchar("volume", &v, 0, 128, ImVec2(width, 40)))
             {
-                channel->setPpanning(vol);
+                channel->setPvolume(v);
                 _sequencer.ActiveInstrument(track);
             }
         }
         else
         {
             ImGui::Spacing();
-
             ImGui::SameLine(0.0f, (width - 20) / 2);
+
             int v = static_cast<int>(channel->Pvolume);
             if (ImGui::VSliderInt("##vol", ImVec2(20, faderHeight), &v, 0, 128))
             {
@@ -451,6 +529,7 @@ void AppThreeDee::ImGuiTrack(int track, bool showSends, bool highlightTrack)
                 _sequencer.ActiveInstrument(track);
             }
         }
+        ImGui::ShowTooltipOnHover("Track volume");
     }
     ImGui::EndChild();
 
@@ -768,6 +847,14 @@ void AppThreeDee::ImGuiPatternEditorWindow()
         auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
 
         ImGui::Begin("Pattern editor", &showPatternEditor);
+        char tmp[256];
+        strcpy(tmp, selectedPattern._name.c_str());
+        if (ImGui::InputText("pattern name", tmp, 256))
+        {
+            selectedPattern._name = tmp;
+        }
+
+        ImGui::BeginChild("Notes");
         auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
         auto itemWidth = (width / 16) - (style.ItemSpacing.x);
         for (int i = 0; i < 88; i++)
@@ -812,6 +899,7 @@ void AppThreeDee::ImGuiPatternEditorWindow()
             }
             ImGui::PopID();
         }
+        ImGui::EndChild();
         ImGui::End();
     }
 }
