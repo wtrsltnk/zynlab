@@ -213,13 +213,17 @@ void AppThreeDee::ImGuiMasterTrack()
         {
             if (_mixer->sysefx[fx].geteffect() == 0)
             {
-                ImGui::Button("+", ImVec2(width, 0));
+                if (ImGui::Button("+", ImVec2(width, 0)))
+                {
+                    _currentSystemEffect = fx;
+                }
             }
             else
             {
-                char fxButton[32] = {0};
-                sprintf(fxButton, "sys fx %d", fx + 1);
-                ImGui::Button(fxButton, ImVec2(width, 0));
+                if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width, 0)))
+                {
+                    _currentSystemEffect = fx;
+                }
             }
         }
 

@@ -25,66 +25,68 @@ char const *const ADeditorID = "AD editor";
 
 void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
 {
-    if (_showADNoteEditor)
+    if (!_showADNoteEditor)
     {
-        ImGui::Begin(ADeditorID, &_showADNoteEditor);
+        return;
+    }
 
-        if (ImGui::BeginTabBar("ADnoteTab"))
+    ImGui::Begin(ADeditorID, &_showADNoteEditor);
+
+    if (ImGui::BeginTabBar("ADnoteTab"))
+    {
+        if (ImGui::BeginTabItem("Global"))
         {
-            if (ImGui::BeginTabItem("Global"))
+            if (_sequencer.ActiveInstrument() >= 0)
             {
-                if (_sequencer.ActiveInstrument() >= 0)
+                ImGui::Text("ADsynth Global Parameters of the Instrument");
+
+                ImGui::Spacing();
+                ImGui::Spacing();
+
+                if (ImGui::BeginTabBar("ADNote"))
                 {
-                    ImGui::Text("ADsynth Global Parameters of the Instrument");
-
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-
-                    if (ImGui::BeginTabBar("ADNote"))
+                    if (ImGui::BeginTabItem("Amplitude"))
                     {
-                        if (ImGui::BeginTabItem("Amplitude"))
-                        {
-                            ADNoteEditorAmplitude(&parameters->GlobalPar);
-
-                            ImGui::EndTabItem();
-                        }
-
-                        if (ImGui::BeginTabItem("Filter"))
-                        {
-                            ADNoteEditorFilter(&parameters->GlobalPar);
-
-                            ImGui::EndTabItem();
-                        }
-
-                        if (ImGui::BeginTabItem("Frequency"))
-                        {
-                            ADNoteEditorFrequency(&parameters->GlobalPar);
-
-                            ImGui::EndTabItem();
-                        }
-                        ImGui::EndTabBar();
-                    }
-                }
-                ImGui::EndTabItem();
-            }
-            for (int i = 0; i < NUM_VOICES; i++)
-            {
-                if (_sequencer.ActiveInstrument() >= 0)
-                {
-                    auto parameters = &_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].adpars->VoicePar[i];
-                    if (ImGui::BeginTabItem(voiceIds[i]))
-                    {
-                        ADNoteVoiceEditor(parameters);
+                        ADNoteEditorAmplitude(&parameters->GlobalPar);
 
                         ImGui::EndTabItem();
                     }
+
+                    if (ImGui::BeginTabItem("Filter"))
+                    {
+                        ADNoteEditorFilter(&parameters->GlobalPar);
+
+                        ImGui::EndTabItem();
+                    }
+
+                    if (ImGui::BeginTabItem("Frequency"))
+                    {
+                        ADNoteEditorFrequency(&parameters->GlobalPar);
+
+                        ImGui::EndTabItem();
+                    }
+                    ImGui::EndTabBar();
                 }
             }
-            ImGui::EndTabBar();
+            ImGui::EndTabItem();
         }
+        for (int i = 0; i < NUM_VOICES; i++)
+        {
+            if (_sequencer.ActiveInstrument() >= 0)
+            {
+                auto parameters = &_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].adpars->VoicePar[i];
+                if (ImGui::BeginTabItem(voiceIds[i]))
+                {
+                    ADNoteVoiceEditor(parameters);
 
-        ImGui::End();
+                    ImGui::EndTabItem();
+                }
+            }
+        }
+        ImGui::EndTabBar();
     }
+
+    ImGui::End();
 }
 
 void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)

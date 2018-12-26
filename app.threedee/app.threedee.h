@@ -58,6 +58,7 @@ private:
     int _openSelectInstrument;
     int _openChangeInstrumentType;
 
+    static char const *const effectNames[];
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -137,6 +138,23 @@ private:
 
     // Envelope
     void Envelope(char const *label, class EnvelopeParams *envelope);
+
+    // Effect
+    int _currentInsertEffect;
+    int _currentSystemEffect;
+    int _currentInstrumentEffect;
+    void InsertEffectEditor();
+    void SystemEffectEditor();
+    void InstrumentEffectEditor();
+    void EffectEditor(EffectManager *effectManager);
+    void EffectReverbEditor(EffectManager *effectManager);
+    void EffectEchoEditor(EffectManager *effectManager);
+    void EffectChorusEditor(EffectManager *effectManager);
+    void EffectPhaserEditor(EffectManager *effectManager);
+    void EffectAlienWahEditor(EffectManager *effectManager);
+    void EffectDistortionEditor(EffectManager *effectManager);
+    void EffectEQEditor(EffectManager *effectManager);
+    void EffectDynFilterEditor(EffectManager *effectManager);
 };
 
 #endif // _APP_THREE_DEE_H_

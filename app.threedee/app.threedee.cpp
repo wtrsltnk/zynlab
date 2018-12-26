@@ -35,7 +35,8 @@ AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
       _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showMixer(true),
       _openSelectInstrument(-1), _openChangeInstrumentType(-1),
       _display_w(800), _display_h(600), _currentBank(0),
-      _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true)
+      _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true),
+      _currentInsertEffect(-1), _currentSystemEffect(-1), _currentInstrumentEffect(-1)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -446,6 +447,9 @@ void AppThreeDee::Render()
     ImGuiPatternEditorWindow();
     ImGuiSelectedTrack();
     ImGuiMixer();
+    InsertEffectEditor();
+    SystemEffectEditor();
+    InstrumentEffectEditor();
 
     ImGuiSelectInstrumentPopup();
     ImGuiChangeInstrumentTypePopup();
