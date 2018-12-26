@@ -36,6 +36,7 @@ if(GLFW3_FOUND)
         ui/padnote.cpp
         ui/resonance.cpp
         ui/subnote.cpp
+        ui/mixer.cpp
         )
 
     target_include_directories(app.threedee

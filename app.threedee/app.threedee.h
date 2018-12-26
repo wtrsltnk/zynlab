@@ -55,6 +55,9 @@ private:
     bool _showInstrumentEditor;
     bool _showPatternEditor;
     bool _showMixer;
+    int _openSelectInstrument;
+    int _openChangeInstrumentType;
+
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
