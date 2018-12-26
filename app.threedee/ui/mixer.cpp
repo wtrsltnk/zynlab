@@ -590,16 +590,9 @@ void AppThreeDee::ImGuiSelectInstrumentPopup()
         ImGui::OpenPopup("Select Instrument");
     }
 
-    ImGui::SetNextWindowSize(ImVec2(700, 850));
+    ImGui::SetNextWindowSize(ImVec2(900, 850));
     if (ImGui::BeginPopupModal("Select Instrument"))
     {
-        auto count = _mixer->GetBankManager()->GetBankCount();
-        auto const &bankNames = _mixer->GetBankManager()->GetBankNames();
-        if (ImGui::Combo("Bank", &_currentBank, &(bankNames[0]), int(count)))
-        {
-            _mixer->GetBankManager()->LoadBank(_currentBank);
-        }
-
         static bool autoClose = false;
         ImGui::SameLine();
         ImGui::Checkbox("Auto close", &autoClose);
@@ -610,6 +603,22 @@ void AppThreeDee::ImGuiSelectInstrumentPopup()
             _openSelectInstrument = -1;
             ImGui::CloseCurrentPopup();
         }
+
+        ImGui::Columns(2);
+        ImGui::SetColumnWidth(0, 200);
+        ImGui::SetColumnWidth(1, 700);
+        auto count = _mixer->GetBankManager()->GetBankCount();
+        auto const &bankNames = _mixer->GetBankManager()->GetBankNames();
+        for (int i = 0; i < count; i++)
+        {
+            bool selected = _currentBank == i;
+            if (ImGui::Selectable(bankNames[static_cast<size_t>(i)], &selected))
+            {
+                _currentBank = i;
+                _mixer->GetBankManager()->LoadBank(_currentBank);
+            }
+        }
+        ImGui::NextColumn();
 
         ImGui::BeginChild("banks", ImVec2(0, -20));
         ImGui::Columns(5);
@@ -696,7 +705,7 @@ void AppThreeDee::AddInsertFx(int track)
     {
         if (_mixer->Pinsparts[i] == -1)
         {
-            _mixer->Pinsparts[i] = track;
+            _mixer->Pinsparts[i] = static_cast<short>(track);
             return;
         }
     }
