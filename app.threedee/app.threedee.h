@@ -89,10 +89,13 @@ private:
     void ImGuiPianoRollSequencerEventHandling();
     void ImGuiPatternEditorWindow();
     void ImGuiSelectInstrumentPopup();
+    void ImGuiChangeInstrumentTypePopup();
     int _currentBank;
 
     void EditSelectedPattern();
     void HitNote(int trackIndex, int note, int durationInMs);
+    void AddInsertFx(int track);
+    void RemoveInsertFxFromTrack(int fx);
 
     // AD note
     bool _showADNoteEditor;

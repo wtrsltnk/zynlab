@@ -18,8 +18,8 @@ bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, Im
     float line_height = ImGui::GetTextLineHeight();
     ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-    float ANGLE_MIN = 3.141592f * 0.75f;
-    float ANGLE_MAX = 3.141592f * 2.25f;
+    float ANGLE_MIN = 3.141592f * 0.70f;
+    float ANGLE_MAX = 3.141592f * 2.30f;
 
     if (s.x != 0.0f && s.y != 0.0f)
     {
