@@ -228,13 +228,25 @@ void AppThreeDee::ImGuiMasterTrack()
         for (int fx = 0; fx < NUM_SYS_EFX; fx++)
         {
             ImGui::PushID(fx);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, io.ItemSpacing.y));
             ImGui::PushStyleColor(ImGuiCol_Button, _mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-            if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width, 0)))
+            if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - (_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
             {
                 _currentSystemEffect = fx;
                 ImGui::SetWindowFocus(SystemFxEditorID);
             }
+            if (_mixer->sysefx[fx].geteffect() != 0)
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("x", ImVec2(20, 20)))
+                {
+                    _currentSystemEffect = fx;
+                    _mixer->sysefx[fx].changeeffect(0);
+                }
+                ImGui::ShowTooltipOnHover("Remove system effect");
+            }
             ImGui::PopStyleColor(1);
+            ImGui::PopStyleVar(1);
             ImGui::PopID();
         }
 
