@@ -7,17 +7,79 @@
 #include "examples/imgui_impl_opengl3.h"
 #include "imgui_addons/imgui_checkbutton.h"
 #include "imgui_addons/imgui_knob.h"
+#include "stb_image.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <iterator>
 #include <map>
 
+static char const *const channels[] = {
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+};
+
+static const char *notes[] = {
+    "A",
+    "A#",
+    "B",
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+};
+
+static char const *instrumentCategoryIconFileNames[] = {
+    "default.png",              // 0
+    "Piano.png",                // 1
+    "Chromatic_Percussion.png", // 2
+    "Organ.png",                // 3
+    "Guitar.png",               // 4
+    "Bass.png",                 // 5
+    "Solo_Strings.png",         // 6
+    "Ensemble.png",             // 7
+    "Brass.png",                // 8
+    "Reed.png",                 // 9
+    "Pipe.png",                 // 10
+    "Synth_Lead.png",           // 11
+    "Synth_Pad.png",            // 12
+    "Synth_Effects.png",        // 13
+    "Ethnic.png",               // 14
+    "Percussive.png",           // 15
+    "Sound_Effects.png",        // 16
+};
+
+static ImVec4 clear_color = ImColor(90, 90, 100);
+
+static int openSelectInstrument = -1;
+static ImVec2 trackSize = ImVec2(150, 0);
+static float sliderBaseHeight = 150.0f;
+static float const largeModeTreshold = 4.5f;
+
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
-      _display_w(800), _display_h(600),
-      _currentBank(0),
-      showADNoteEditor(true), showSUBNoteEditor(true), showPADNoteEditor(true)
+      _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showMixer(true),
+      _display_w(800), _display_h(600), _currentBank(0),
+      _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -76,52 +138,42 @@ bool AppThreeDee::Setup()
     _stepper.Setup();
     _sequencer.ActiveInstrument(0);
 
+    LoadInstrumentIcons();
+
     return true;
 }
 
-static char const *const channels[] = {
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13",
-    "14",
-    "15",
-    "16",
-};
+void AppThreeDee::LoadInstrumentIcons()
+{
+    std::string rootDir = "./icons/Instruments/";
 
-static const char *notes[] = {
-    "A",
-    "A#",
-    "B",
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-};
+    _iconImagesAreLoaded = false;
 
-static ImVec4 clear_color = ImColor(90, 90, 100);
+    for (int i = 0; i < int(InstrumentCategories::COUNT); i++)
+    {
+        GLuint my_opengl_texture;
+        glGenTextures(1, &my_opengl_texture);
 
-static bool showInstrumentEditor = false;
-static bool showPatternEditor = false;
-static bool showMixer = true;
-static int openSelectInstrument = -1;
-static ImVec2 trackSize = ImVec2(150, 0);
-static float sliderBaseHeight = 150.0f;
-static float const largeModeTreshold = 4.5f;
+        auto filename = rootDir + instrumentCategoryIconFileNames[i];
+        int x, y, n;
+        unsigned char *data = stbi_load(filename.c_str(), &x, &y, &n, 0);
+        if (data == nullptr)
+        {
+            std::cout << "Failed to load instrument category " << i << " from file " << filename << std::endl;
+            _iconImages[i] = 0;
+            continue;
+        }
+        _iconImages[i] = my_opengl_texture;
+        _iconImagesAreLoaded = true;
+
+        glBindTexture(GL_TEXTURE_2D, my_opengl_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, n, x, y, 0, n == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+}
 
 void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
 {
@@ -130,7 +182,7 @@ void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
 
 void AppThreeDee::EditSelectedPattern()
 {
-    showPatternEditor = true;
+    _showPatternEditor = true;
 }
 
 std::vector<char const *> toCharVector(std::set<std::string> const &strings)
@@ -146,9 +198,9 @@ std::vector<char const *> toCharVector(std::set<std::string> const &strings)
 
 void AppThreeDee::ImGuiMixer()
 {
-    if (showMixer)
+    if (_showMixer)
     {
-        ImGui::Begin("Mixer", &showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+        ImGui::Begin("Mixer", &_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
 
         for (int track = 0; track <= NUM_MIXER_CHANNELS; track++)
         {
@@ -386,7 +438,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::SameLine();
         if (ImGui::Button("AD", ImVec2(width - 20 - io.ItemSpacing.x, 20)))
         {
-            showADNoteEditor = true;
+            _showADNoteEditor = true;
             ImGui::SetWindowFocus(ADeditorID);
             _sequencer.ActiveInstrument(track);
         }
@@ -403,7 +455,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::SameLine();
         if (ImGui::Button("SUB", ImVec2(width - 20 - io.ItemSpacing.x, 20)))
         {
-            showSUBNoteEditor = true;
+            _showSUBNoteEditor = true;
             ImGui::SetWindowFocus(SUBeditorID);
             _sequencer.ActiveInstrument(track);
         }
@@ -420,7 +472,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::SameLine();
         if (ImGui::Button("PAD", ImVec2(width - 20 - io.ItemSpacing.x, 20)))
         {
-            showPADNoteEditor = true;
+            _showPADNoteEditor = true;
             ImGui::SetWindowFocus(PADeditorID);
             _sequencer.ActiveInstrument(track);
         }
@@ -473,6 +525,18 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
+
+        if (useLargeMode && _iconImagesAreLoaded)
+        {
+            ImGui::Spacing();
+            ImGui::SameLine(0.0f, (width - 64) / 2);
+            ImGui::Image(reinterpret_cast<void *>(_iconImages[channel->info.Ptype]), ImVec2(64, 64));
+
+            ImGui::Text("%d", channel->info.Ptype);
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+        }
 
         auto velsns = channel->Pvelsns;
         if (ImGui::KnobUchar("vel.sns.", &velsns, 0, 128, ImVec2(width / 2, 30)))
@@ -835,7 +899,7 @@ void AppThreeDee::ImGuiPatternEditorWindow()
 {
     const float noteLabelWidth = 50.0f;
     const float rowHeight = 20.0f;
-    if (showPatternEditor)
+    if (_showPatternEditor)
     {
         if (!_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
         {
@@ -846,7 +910,7 @@ void AppThreeDee::ImGuiPatternEditorWindow()
         auto &style = ImGui::GetStyle();
         auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
 
-        ImGui::Begin("Pattern editor", &showPatternEditor);
+        ImGui::Begin("Pattern editor", &_showPatternEditor);
         char tmp[256];
         strcpy(tmp, selectedPattern._name.c_str());
         if (ImGui::InputText("pattern name", tmp, 256))

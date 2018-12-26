@@ -10,6 +10,8 @@ if(GLFW3_FOUND)
 
     add_executable(app.threedee
         glad.c
+        stb_image.cpp
+        stb_image.h
         main.cpp
         app.threedee.cpp
         app.threedee.h

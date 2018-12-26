@@ -18,12 +18,12 @@ char const *const SUBeditorID = "SUB editor";
 
 void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
 {
-    if (!showSUBNoteEditor)
+    if (!_showSUBNoteEditor)
     {
         return;
     }
 
-    ImGui::Begin(SUBeditorID, &showSUBNoteEditor);
+    ImGui::Begin(SUBeditorID, &_showSUBNoteEditor);
     if (ImGui::BeginTabBar("SUBnoteTab"))
     {
         if (ImGui::BeginTabItem("Global"))

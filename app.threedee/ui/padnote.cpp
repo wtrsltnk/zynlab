@@ -7,12 +7,12 @@ char const *const PADeditorID = "PAD editor";
 
 void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
 {
-    if (!showPADNoteEditor)
+    if (!_showPADNoteEditor)
     {
         return;
     }
 
-    ImGui::Begin(PADeditorID, &showPADNoteEditor);
+    ImGui::Begin(PADeditorID, &_showPADNoteEditor);
 
     if (ImGui::BeginTabBar("PADnoteTab"))
     {

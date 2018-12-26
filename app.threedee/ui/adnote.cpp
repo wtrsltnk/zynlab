@@ -25,9 +25,9 @@ char const *const ADeditorID = "AD editor";
 
 void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
 {
-    if (showADNoteEditor)
+    if (_showADNoteEditor)
     {
-        ImGui::Begin(ADeditorID, &showADNoteEditor);
+        ImGui::Begin(ADeditorID, &_showADNoteEditor);
 
         if (ImGui::BeginTabBar("ADnoteTab"))
         {

@@ -20,6 +20,28 @@ extern char const *const ADeditorID;
 extern char const *const SUBeditorID;
 extern char const *const PADeditorID;
 
+enum class InstrumentCategories
+{
+    Unknown,
+    Piano,
+    Chromatic_Percussion,
+    Organ,
+    Guitar,
+    Bass,
+    Solo_Strings,
+    Ensemble,
+    Brass,
+    Reed,
+    Pipe,
+    Synth_Lead,
+    Synth_Pad,
+    Synth_Effects,
+    Ethnic,
+    Percussive,
+    Sound_Effects,
+    COUNT,
+};
+
 class AppThreeDee
 {
 private:
@@ -28,6 +50,11 @@ private:
     Stepper _stepper;
     Sequencer _sequencer;
     std::vector<TrackPattern> _clipboardPatterns;
+    unsigned int _iconImages[int(InstrumentCategories::COUNT)];
+    bool _iconImagesAreLoaded;
+    bool _showInstrumentEditor;
+    bool _showPatternEditor;
+    bool _showMixer;
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -49,6 +76,7 @@ public:
     void Cleanup();
 
 private:
+    void LoadInstrumentIcons();
     void ImGuiPlayback();
     void ImGuiMasterTrack();
     void ImGuiMixer();
@@ -67,7 +95,7 @@ private:
     void HitNote(int trackIndex, int note, int durationInMs);
 
     // AD note
-    bool showADNoteEditor;
+    bool _showADNoteEditor;
     void ADNoteEditor(ADnoteParameters *parameters);
     void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
     void ADNoteEditorFilter(ADnoteGlobalParam *parameters);
@@ -81,7 +109,7 @@ private:
     void ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters);
 
     // SUB note
-    bool showSUBNoteEditor;
+    bool _showSUBNoteEditor;
     void SUBNoteEditor(SUBnoteParameters *parameters);
     void SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters);
     void SUBNoteEditorAmplitude(SUBnoteParameters *parameters);
@@ -91,7 +119,7 @@ private:
     void SUBNoteEditorFrequency(SUBnoteParameters *parameters);
 
     // PAD note
-    bool showPADNoteEditor;
+    bool _showPADNoteEditor;
     void PADNoteEditor(PADnoteParameters *parameters);
     void PADNoteEditorAmplitude(PADnoteParameters *parameters);
 
