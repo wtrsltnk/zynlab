@@ -19,6 +19,9 @@
 extern char const *const ADeditorID;
 extern char const *const SUBeditorID;
 extern char const *const PADeditorID;
+extern char const *const InsertionFxEditorID;
+extern char const *const SystemFxEditorID;
+extern char const *const InstrumentFxEditorID;
 
 enum class InstrumentCategories
 {
@@ -59,6 +62,7 @@ private:
     int _openChangeInstrumentType;
 
     static char const *const effectNames[];
+    static int effectNameCount;
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);

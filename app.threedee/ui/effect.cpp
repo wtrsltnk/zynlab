@@ -2,6 +2,12 @@
 
 #include "../imgui_addons/imgui_knob.h"
 
+char const *const InsertionFxEditorID = "Insert effect";
+char const *const SystemFxEditorID = "System effect";
+char const *const InstrumentFxEditorID = "Instrument effect";
+
+int AppThreeDee::effectNameCount = 9;
+
 char const *const AppThreeDee::effectNames[] = {
     "No effect",
     "Reverb",
@@ -101,10 +107,10 @@ void AppThreeDee::InsertEffectEditor()
         return;
     }
 
-    if (ImGui::Begin("Insert effect"))
-    {
-        EffectEditor(&_mixer->insefx[_currentSystemEffect]);
-    }
+    ImGui::Begin(InsertionFxEditorID);
+
+    EffectEditor(&_mixer->insefx[_currentInsertEffect]);
+
     ImGui::End();
 }
 
@@ -115,10 +121,10 @@ void AppThreeDee::SystemEffectEditor()
         return;
     }
 
-    if (ImGui::Begin("System effect"))
-    {
-        EffectEditor(&_mixer->sysefx[_currentSystemEffect]);
-    }
+    ImGui::Begin(SystemFxEditorID);
+
+    EffectEditor(&_mixer->sysefx[_currentSystemEffect]);
+
     ImGui::End();
 }
 
@@ -131,10 +137,10 @@ void AppThreeDee::InstrumentEffectEditor()
 
     auto channel = _mixer->GetChannel(_sequencer.ActiveInstrument());
 
-    if (ImGui::Begin("Instrument effect"))
-    {
-        EffectEditor(channel->partefx[_currentInstrumentEffect]);
-    }
+    ImGui::Begin(InstrumentFxEditorID);
+
+    EffectEditor(channel->partefx[_currentInstrumentEffect]);
+
     ImGui::End();
 }
 
@@ -167,7 +173,7 @@ bool PresetSelection(char const *label, int &value, char const *const names[], i
 void AppThreeDee::EffectEditor(EffectManager *effectManager)
 {
     auto effect = static_cast<int>(effectManager->geteffect());
-    if (PresetSelection("Effect", effect, effectNames, 9))
+    if (PresetSelection("Effect", effect, effectNames, effectNameCount))
     {
         effectManager->changeeffect(effect);
     }
