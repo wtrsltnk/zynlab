@@ -94,6 +94,16 @@ enum DistorsionPresets
     DistorsionPreFiltering = 10,
 };
 
+enum EQPresets
+{
+    EQVolume = 0,
+    EQBandType = 10,
+    EQBandFrequency = 11,
+    EQBandGain = 12,
+    EQBandQ = 13,
+    EQBandStages = 14,
+};
+
 enum DynFilterPresets
 {
     DynFilterVolume = 0,

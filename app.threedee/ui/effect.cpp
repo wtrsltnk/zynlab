@@ -17,7 +17,7 @@ char const *const AppThreeDee::effectNames[] = {
     "Phaser",
     "AlienWah",
     "Distortion",
-    "EQ",
+    "Equalizer",
     "DynFilter",
 };
 
@@ -130,6 +130,20 @@ static char const *const distortionTypes[] = {
     "Asym2",
     "Pow2",
     "Sign",
+};
+
+static const int eqBandTypeCount = 10;
+static char const *const eqBandTypes[] = {
+    "Off",
+    "Lp1",
+    "Hp1",
+    "Lp2",
+    "Hp2",
+    "Bp2",
+    "N2",
+    "Pk",
+    "LSh",
+    "HSh",
 };
 
 void AppThreeDee::InsertEffectEditor()
@@ -875,6 +889,68 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
 
 void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
 {
+    auto volume = static_cast<float>(effectManager->geteffectpar(EQPresets::EQVolume));
+    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    {
+        effectManager->seteffectpar(EQPresets::EQVolume, static_cast<unsigned char>(volume));
+    }
+    ImGui::ShowTooltipOnHover("Effect Volume");
+
+    if (ImGui::BeginTabBar("EQ bands"))
+    {
+        for (int band = 0; band < MAX_EQ_BANDS; band++)
+        {
+            auto presetStart =  (band * 5);
+            ImGui::PushID(band);
+            auto type = static_cast<int>(effectManager->geteffectpar(presetStart + EQPresets::EQBandType));
+            if (ImGui::BeginTabItem(eqBandTypes[type]))
+            {
+                ImGui::PushItemWidth(100);
+                if (PresetSelection("EQ Type", type, eqBandTypes, eqBandTypeCount))
+                {
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandType, static_cast<unsigned char>(type));
+                }
+
+                auto frequency = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandFrequency));
+                if (ImGui::Knob("Freq", &frequency, 0, 128, ImVec2(40, 40)))
+                {
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandFrequency, static_cast<unsigned char>(frequency));
+                }
+                ImGui::ShowTooltipOnHover("Frequency");
+
+                ImGui::SameLine();
+
+                auto gain = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandGain));
+                if (ImGui::Knob("Gain", &gain, 0, 128, ImVec2(40, 40)))
+                {
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandGain, static_cast<unsigned char>(gain));
+                }
+                ImGui::ShowTooltipOnHover("Gain");
+
+                ImGui::SameLine();
+
+                auto q = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandQ));
+                if (ImGui::Knob("Q", &q, 0, 128, ImVec2(40, 40)))
+                {
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandQ, static_cast<unsigned char>(q));
+                }
+                ImGui::ShowTooltipOnHover("Resonance/Bandwidth");
+
+                ImGui::SameLine();
+
+                auto stages = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandStages));
+                if (ImGui::Knob("St.", &stages, 0, MAX_FILTER_STAGES-1, ImVec2(40, 40)))
+                {
+                    effectManager->seteffectpar(presetStart +  EQPresets::EQBandStages, static_cast<unsigned char>(stages));
+                }
+                ImGui::ShowTooltipOnHover("Additional filter stages");
+
+                ImGui::EndTabItem();
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndTabBar();
+    }
 }
 
 void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)

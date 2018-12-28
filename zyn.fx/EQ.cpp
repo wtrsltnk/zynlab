@@ -46,6 +46,8 @@ EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_
     Cleanup();
 }
 
+EQ::~EQ() {}
+
 // Cleanup the effect
 void EQ::Cleanup()
 {
@@ -108,7 +110,7 @@ void EQ::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case 0:
+        case EQPresets::EQVolume:
         {
             setvolume(value);
             break;
@@ -124,13 +126,15 @@ void EQ::ChangeParameter(int npar, unsigned char value)
     {
         return;
     }
-    int bp = npar % 5; //band paramenter
+    int bp = EQPresets::EQBandType + (npar % 5); //band paramenter
 
     float tmp;
     switch (bp)
     {
-        case 0:
+        case EQPresets::EQBandType:
         {
+            std::cout << "Ptype changes for band " << nb << std::endl;
+
             filter[nb].Ptype = value;
             if (value > 9)
             {
@@ -143,32 +147,40 @@ void EQ::ChangeParameter(int npar, unsigned char value)
             }
             break;
         }
-        case 1:
+        case EQPresets::EQBandFrequency:
         {
+            std::cout << "Pfreq changes for band " << nb << std::endl;
+
             filter[nb].Pfreq = value;
             tmp = 600.0f * powf(30.0f, (value - 64.0f) / 64.0f);
             filter[nb].l->setfreq(tmp);
             filter[nb].r->setfreq(tmp);
             break;
         }
-        case 2:
+        case EQPresets::EQBandGain:
         {
+            std::cout << "Pgain changes for band " << nb << std::endl;
+
             filter[nb].Pgain = value;
             tmp = 30.0f * (value - 64.0f) / 64.0f;
             filter[nb].l->setgain(tmp);
             filter[nb].r->setgain(tmp);
             break;
         }
-        case 3:
+        case EQPresets::EQBandQ:
         {
+            std::cout << "Pq changes for band " << nb << std::endl;
+
             filter[nb].Pq = value;
             tmp = powf(30.0f, (value - 64.0f) / 64.0f);
             filter[nb].l->setq(tmp);
             filter[nb].r->setq(tmp);
             break;
         }
-        case 4:
+        case EQPresets::EQBandStages:
         {
+            std::cout << "Pstages changes for band " << nb << std::endl;
+
             filter[nb].Pstages = value;
             if (value >= MAX_FILTER_STAGES)
             {
@@ -185,7 +197,7 @@ unsigned char EQ::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case EQPresets::EQVolume:
         {
             return Pvolume;
         }
@@ -202,26 +214,26 @@ unsigned char EQ::GetParameter(int npar) const
         return 0;
     }
 
-    int bp = npar % 5; //band paramenter
+    int bp = EQPresets::EQBandType + (npar % 5); //band paramenter
     switch (bp)
     {
-        case 0:
+        case EQPresets::EQBandType:
         {
             return filter[nb].Ptype;
         }
-        case 1:
+        case EQPresets::EQBandFrequency:
         {
             return filter[nb].Pfreq;
         }
-        case 2:
+        case EQPresets::EQBandGain:
         {
             return filter[nb].Pgain;
         }
-        case 3:
+        case EQPresets::EQBandQ:
         {
             return filter[nb].Pq;
         }
-        case 4:
+        case EQPresets::EQBandStages:
         {
             return filter[nb].Pstages;
         }

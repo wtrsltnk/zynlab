@@ -30,7 +30,8 @@ class EQ : public Effect
 {
 public:
     EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
-    virtual ~EQ() {}
+    virtual ~EQ();
+
     void out(const Stereo<float *> &smp);
     void SetPreset(unsigned char npreset);
     void ChangeParameter(int npar, unsigned char value);
@@ -50,7 +51,7 @@ private:
         unsigned char Ptype, Pfreq, Pgain, Pq, Pstages;
         //internal values
         class AnalogFilter *l, *r;
-    } filter[MAX_EQ_BANDS]{};
+    } filter[MAX_EQ_BANDS];
 };
 
 #endif
