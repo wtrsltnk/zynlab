@@ -22,6 +22,7 @@ add_library(zyn.fx STATIC
     Effect.h
     EffectLFO.h
     EffectMgr.h
+    EffectPresets.h
     EQ.h
     Phaser.h
     Reverb.h

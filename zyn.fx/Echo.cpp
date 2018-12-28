@@ -23,6 +23,8 @@
 */
 
 #include "Echo.h"
+
+#include "EffectPresets.h"
 #include <cmath>
 #include <cstring>
 
@@ -105,7 +107,7 @@ void Echo::out(const Stereo<float *> &input)
             rdl * hidamp + old._right * (1.0f - hidamp);
 
         //increment
-        ++pos._left; // += delta.l;
+        ++pos._left;  // += delta.l;
         ++pos._right; // += delta.r;
 
         //ensure that pos is still in bounds

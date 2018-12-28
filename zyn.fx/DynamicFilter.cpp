@@ -21,9 +21,10 @@
 */
 
 #include "DynamicFilter.h"
-#include <zyn.dsp/Filter.h>
 
+#include "EffectPresets.h"
 #include <cmath>
+#include <zyn.dsp/Filter.h>
 
 DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, new FilterParams(synth_, 0, 64, 64), 0, synth_),

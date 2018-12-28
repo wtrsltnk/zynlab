@@ -30,6 +30,8 @@
 */
 
 #include "Phaser.h"
+
+#include "EffectPresets.h"
 #include <algorithm>
 #include <cmath>
 
@@ -185,7 +187,9 @@ float Phaser::applyPhase(float x, float g, float fb,
         xn1[j] = x;
         x = yn1[j];
         if (j == 1)
+        {
             x += fb; //Insert feedback after first phase stage
+        }
     }
     return x;
 }
@@ -285,9 +289,13 @@ void Phaser::setvolume(unsigned char Pvolume)
     this->Pvolume = Pvolume;
     outvolume = Pvolume / 127.0f;
     if (insertion == 0)
+    {
         volume = 1.0f;
+    }
     else
+    {
         volume = outvolume;
+    }
 }
 
 void Phaser::setdistortion(unsigned char Pdistortion)
@@ -386,58 +394,88 @@ void Phaser::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case 0:
+        case PhaserPresets::PhaserVolume:
+        {
             setvolume(value);
             break;
-        case 1:
+        }
+        case PhaserPresets::PhaserPanning:
+        {
             SetPanning(static_cast<char>(value));
             break;
-        case 2:
+        }
+        case PhaserPresets::PhaserLFOFrequency:
+        {
             lfo.Pfreq = value;
             lfo.updateparams();
             break;
-        case 3:
+        }
+        case PhaserPresets::PhaserLFORandomness:
+        {
             lfo.Prandomness = value;
             lfo.updateparams();
             break;
-        case 4:
+        }
+        case PhaserPresets::PhaserLFOFunction:
+        {
             lfo.PLFOtype = value;
             lfo.updateparams();
             barber = (2 == value);
             break;
-        case 5:
+        }
+        case PhaserPresets::PhaserLFOStereo:
+        {
             lfo.Pstereo = value;
             lfo.updateparams();
             break;
-        case 6:
+        }
+        case PhaserPresets::PhaserDepth:
+        {
             setdepth(value);
             break;
-        case 7:
+        }
+        case PhaserPresets::PhaserFeedback:
+        {
             setfb(value);
             break;
-        case 8:
+        }
+        case PhaserPresets::PhaserStages:
+        {
             setstages(value);
             break;
-        case 9:
+        }
+        case PhaserPresets::PhaserChannelRouting:
+        {
             SetLRCross(static_cast<char>(value));
             setoffset(value);
             break;
-        case 10:
+        }
+        case PhaserPresets::PhaserSubtract:
+        {
             Poutsub = static_cast<unsigned char>(std::min(static_cast<int>(value), 1));
             break;
-        case 11:
+        }
+        case PhaserPresets::PhaserPhase:
+        {
             setphase(value);
             setwidth(value);
             break;
-        case 12:
+        }
+        case PhaserPresets::PhaserHyper:
+        {
             Phyper = static_cast<unsigned char>(std::min(static_cast<int>(value), 1));
             break;
-        case 13:
+        }
+        case PhaserPresets::PhaserDistortion:
+        {
             setdistortion(value);
             break;
-        case 14:
+        }
+        case PhaserPresets::PhaserAnalog:
+        {
             Panalog = value;
             break;
+        }
     }
 }
 
@@ -445,37 +483,69 @@ unsigned char Phaser::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case PhaserPresets::PhaserVolume:
+        {
             return Pvolume;
-        case 1:
+        }
+        case PhaserPresets::PhaserPanning:
+        {
             return static_cast<unsigned char>(Ppanning);
-        case 2:
+        }
+        case PhaserPresets::PhaserLFOFrequency:
+        {
             return lfo.Pfreq;
-        case 3:
+        }
+        case PhaserPresets::PhaserLFORandomness:
+        {
             return lfo.Prandomness;
-        case 4:
+        }
+        case PhaserPresets::PhaserLFOFunction:
+        {
             return lfo.PLFOtype;
-        case 5:
+        }
+        case PhaserPresets::PhaserLFOStereo:
+        {
             return lfo.Pstereo;
-        case 6:
+        }
+        case PhaserPresets::PhaserDepth:
+        {
             return Pdepth;
-        case 7:
+        }
+        case PhaserPresets::PhaserFeedback:
+        {
             return Pfb;
-        case 8:
+        }
+        case PhaserPresets::PhaserStages:
+        {
             return Pstages;
-        case 9:
+        }
+        case PhaserPresets::PhaserChannelRouting:
+        {
             return static_cast<unsigned char>(Plrcross);
-        case 10:
+        }
+        case PhaserPresets::PhaserSubtract:
+        {
             return Poutsub;
-        case 11:
+        }
+        case PhaserPresets::PhaserPhase:
+        {
             return static_cast<unsigned char>(Pphase);
-        case 12:
+        }
+        case PhaserPresets::PhaserHyper:
+        {
             return Phyper;
-        case 13:
+        }
+        case PhaserPresets::PhaserDistortion:
+        {
             return Pdistortion;
-        case 14:
+        }
+        case PhaserPresets::PhaserAnalog:
+        {
             return Panalog;
+        }
         default:
+        {
             return 0;
+        }
     }
 }

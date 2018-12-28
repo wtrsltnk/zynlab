@@ -21,6 +21,8 @@
 */
 
 #include "Alienwah.h"
+
+#include "EffectPresets.h"
 #include <cmath>
 
 Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
@@ -56,9 +58,9 @@ void Alienwah::out(const Stereo<float *> &smp)
     clfol = complex<float>(cosf(lfol + phase) * fb, sinf(lfol + phase) * fb); //rework
     clfor = complex<float>(cosf(lfor + phase) * fb, sinf(lfor + phase) * fb); //rework
 
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
-        float x = ((float)i) / this->_synth->buffersize_f;
+        float x = static_cast<float>(i) / this->_synth->buffersize_f;
         float x1 = 1.0f - x;
         //left
         complex<float> tmp = clfol * x + oldclfol * x1;
@@ -79,8 +81,10 @@ void Alienwah::out(const Stereo<float *> &smp)
         float r = out.real() * 10.0f * (fb + 0.1f);
 
         if (++oldk >= Pdelay)
+        {
             oldk = 0;
-        //LRcross
+        }
+        // LRcross
         efxoutl[i] = l * (1.0f - lrcross) + r * lrcross;
         efxoutr[i] = r * (1.0f - lrcross) + l * lrcross;
     }
@@ -113,9 +117,13 @@ void Alienwah::setfb(unsigned char _Pfb)
     fb = fabs((Pfb - 64.0f) / 64.1f);
     fb = sqrtf(fb);
     if (fb < 0.4f)
+    {
         fb = 0.4f;
+    }
     if (Pfb < 64)
+    {
         fb = -fb;
+    }
 }
 
 void Alienwah::setvolume(unsigned char _Pvolume)
@@ -123,9 +131,13 @@ void Alienwah::setvolume(unsigned char _Pvolume)
     Pvolume = _Pvolume;
     outvolume = Pvolume / 127.0f;
     if (insertion == 0)
+    {
         volume = 1.0f;
+    }
     else
+    {
         volume = outvolume;
+    }
 }
 
 void Alienwah::setphase(unsigned char _Pphase)
@@ -159,11 +171,17 @@ void Alienwah::SetPreset(unsigned char npreset)
         {93, 64, 25, 0, 1, 66, 101, 11, 47, 0, 86}};
 
     if (npreset >= NUM_PRESETS)
+    {
         npreset = NUM_PRESETS - 1;
+    }
     for (int n = 0; n < PRESET_SIZE; ++n)
+    {
         ChangeParameter(n, presets[npreset][n]);
+    }
     if (insertion == 0)
-        ChangeParameter(0, presets[npreset][0] / 2); //lower the volume if this is system effect
+    {
+        ChangeParameter(AlienWahPresets::AlienWahVolume, presets[npreset][0] / 2); //lower the volume if this is system effect
+    }
     Ppreset = npreset;
 }
 
@@ -171,41 +189,41 @@ void Alienwah::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case 0:
+        case AlienWahPresets::AlienWahVolume:
             setvolume(value);
             break;
-        case 1:
+        case AlienWahPresets::AlienWahPanning:
             SetPanning(static_cast<char>(value));
             break;
-        case 2:
+        case AlienWahPresets::AlienWahLFOFrequency:
             lfo.Pfreq = value;
             lfo.updateparams();
             break;
-        case 3:
+        case AlienWahPresets::AlienWahLFORandomness:
             lfo.Prandomness = value;
             lfo.updateparams();
             break;
-        case 4:
+        case AlienWahPresets::AlienWahLFOFunction:
             lfo.PLFOtype = value;
             lfo.updateparams();
             break;
-        case 5:
+        case AlienWahPresets::AlienWahLFOStereo:
             lfo.Pstereo = value;
             lfo.updateparams();
             break;
-        case 6:
+        case AlienWahPresets::AlienWahDepth:
             setdepth(value);
             break;
-        case 7:
+        case AlienWahPresets::AlienWahFeedback:
             setfb(value);
             break;
-        case 8:
+        case AlienWahPresets::AlienWahDelay:
             setdelay(value);
             break;
-        case 9:
+        case AlienWahPresets::AlienWahChannelRouting:
             SetLRCross(static_cast<char>(value));
             break;
-        case 10:
+        case AlienWahPresets::AlienWahPhase:
             setphase(value);
             break;
     }
@@ -215,27 +233,27 @@ unsigned char Alienwah::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case AlienWahPresets::AlienWahVolume:
             return Pvolume;
-        case 1:
+        case AlienWahPresets::AlienWahPanning:
             return static_cast<unsigned char>(Ppanning);
-        case 2:
+        case AlienWahPresets::AlienWahLFOFrequency:
             return lfo.Pfreq;
-        case 3:
+        case AlienWahPresets::AlienWahLFORandomness:
             return lfo.Prandomness;
-        case 4:
+        case AlienWahPresets::AlienWahLFOFunction:
             return lfo.PLFOtype;
-        case 5:
+        case AlienWahPresets::AlienWahLFOStereo:
             return lfo.Pstereo;
-        case 6:
+        case AlienWahPresets::AlienWahDepth:
             return Pdepth;
-        case 7:
+        case AlienWahPresets::AlienWahFeedback:
             return Pfb;
-        case 8:
+        case AlienWahPresets::AlienWahDelay:
             return Pdelay;
-        case 9:
+        case AlienWahPresets::AlienWahChannelRouting:
             return static_cast<unsigned char>(Plrcross);
-        case 10:
+        case AlienWahPresets::AlienWahPhase:
             return Pphase;
         default:
             return 0;

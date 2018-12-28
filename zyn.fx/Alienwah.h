@@ -57,11 +57,11 @@ public:
 private:
     //Alienwah Parameters
     EffectLFO lfo; //lfo-ul Alienwah
-    unsigned char Pvolume{};
-    unsigned char Pdepth{}; //the depth of the Alienwah
-    unsigned char Pfb{};    //feedback
-    unsigned char Pdelay{};
-    unsigned char Pphase{};
+    unsigned char Pvolume;
+    unsigned char Pdepth; //the depth of the Alienwah
+    unsigned char Pfb;    //feedback
+    unsigned char Pdelay;
+    unsigned char Pphase;
 
     //Control Parameters
     void setvolume(unsigned char _Pvolume);
@@ -71,10 +71,10 @@ private:
     void setphase(unsigned char _Pphase);
 
     //Internal Values
-    float fb{}, depth{}, phase{};
+    float fb, depth, phase;
     complex<float> *oldl, *oldr;
     complex<float> oldclfol, oldclfor;
-    int oldk{};
+    int oldk;
 };
 
 #endif

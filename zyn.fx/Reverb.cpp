@@ -21,12 +21,13 @@
 */
 
 #include "Reverb.h"
+
+#include "EffectPresets.h"
+#include <cmath>
+#include <cstring>
 #include <zyn.common/Util.h>
 #include <zyn.dsp/AnalogFilter.h>
 #include <zyn.dsp/Unison.h>
-
-#include <cmath>
-#include <cstring>
 
 Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
@@ -517,7 +518,7 @@ void Reverb::SetPreset(unsigned char npreset)
     }
     if (insertion)
     {
-        ChangeParameter(0, presets[npreset][0] / 2); //lower the volume if reverb is insertion effect
+        ChangeParameter(ReverbPresets::ReverbVolume, presets[npreset][0] / 2); //lower the volume if reverb is insertion effect
     }
     Ppreset = npreset;
 }
@@ -526,27 +527,27 @@ void Reverb::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case 0:
+        case ReverbPresets::ReverbVolume:
         {
             setvolume(value);
             break;
         }
-        case 1:
+        case ReverbPresets::ReverbPanning:
         {
             SetPanning(static_cast<char>(value));
             break;
         }
-        case 2:
+        case ReverbPresets::ReverbTime:
         {
             settime(value);
             break;
         }
-        case 3:
+        case ReverbPresets::ReverbInitialDelay:
         {
             setidelay(value);
             break;
         }
-        case 4:
+        case ReverbPresets::ReverbInitialDelayFeedback:
         {
             setidelayfb(value);
             break;
@@ -557,32 +558,32 @@ void Reverb::ChangeParameter(int npar, unsigned char value)
             //      case 6:
             //          seterbalance(value);
             //          break;
-        case 7:
+        case ReverbPresets::ReverbLowPassFilter:
         {
             setlpf(value);
             break;
         }
-        case 8:
+        case ReverbPresets::ReverbHighPassFilter:
         {
             sethpf(value);
             break;
         }
-        case 9:
+        case ReverbPresets::ReverbDampening:
         {
             setlohidamp(value);
             break;
         }
-        case 10:
+        case ReverbPresets::ReverbType:
         {
             settype(value);
             break;
         }
-        case 11:
+        case ReverbPresets::ReverbRoomSize:
         {
             setroomsize(value);
             break;
         }
-        case 12:
+        case ReverbPresets::ReverbBandwidth:
         {
             setbandwidth(value);
             break;
@@ -594,47 +595,47 @@ unsigned char Reverb::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case ReverbPresets::ReverbVolume:
         {
             return Pvolume;
         }
-        case 1:
+        case ReverbPresets::ReverbPanning:
         {
             return static_cast<unsigned char>(Ppanning);
         }
-        case 2:
+        case ReverbPresets::ReverbTime:
         {
             return Ptime;
         }
-        case 3:
+        case ReverbPresets::ReverbInitialDelay:
         {
             return Pidelay;
         }
-        case 4:
+        case ReverbPresets::ReverbInitialDelayFeedback:
         {
             return Pidelayfb;
         }
-        case 7:
+        case ReverbPresets::ReverbLowPassFilter:
         {
             return Plpf;
         }
-        case 8:
+        case ReverbPresets::ReverbHighPassFilter:
         {
             return Phpf;
         }
-        case 9:
+        case ReverbPresets::ReverbDampening:
         {
             return Plohidamp;
         }
-        case 10:
+        case ReverbPresets::ReverbType:
         {
             return Ptype;
         }
-        case 11:
+        case ReverbPresets::ReverbRoomSize:
         {
             return Proomsize;
         }
-        case 12:
+        case ReverbPresets::ReverbBandwidth:
         {
             return Pbandwidth;
         }

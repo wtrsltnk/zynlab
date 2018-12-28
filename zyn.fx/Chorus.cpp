@@ -21,6 +21,8 @@
 */
 
 #include "Chorus.h"
+
+#include "EffectPresets.h"
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -30,7 +32,7 @@ using namespace std;
 Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
       lfo(synth_),
-      maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * synth_->samplerate_f)),
+      maxdelay(static_cast<int>(MAX_CHORUS_DELAY / 1000.0f * synth_->samplerate_f)),
       delaySample(new float[maxdelay], new float[maxdelay])
 {
     dlk = 0;
@@ -77,7 +79,7 @@ void Chorus::out(const Stereo<float *> &input)
     dl2 = getdelay(lfol);
     dr2 = getdelay(lfor);
 
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
         float inL = input._left[i];
         float inR = input._right[i];
@@ -92,17 +94,19 @@ void Chorus::out(const Stereo<float *> &input)
         float mdel =
             (dl1 * (this->_synth->buffersize - i) + dl2 * i) / this->_synth->buffersize_f;
         if (++dlk >= maxdelay)
+        {
             dlk = 0;
+        }
         float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
 
-        dlhi = (int)tmp;
+        dlhi = static_cast<int>(tmp);
         dlhi %= maxdelay;
 
         float dlhi2 = (dlhi - 1 + maxdelay) % maxdelay;
         float dllo = 1.0f - fmod(tmp, one);
         efxoutl[i] = cinterpolate(delaySample._left, maxdelay, dlhi2) * dllo + cinterpolate(delaySample._left, maxdelay,
-                                                                                        dlhi) *
-                                                                               (1.0f - dllo);
+                                                                                            dlhi) *
+                                                                                   (1.0f - dllo);
         delaySample._left[dlk] = inL + efxoutl[i] * fb;
 
         //Right channel
@@ -110,7 +114,9 @@ void Chorus::out(const Stereo<float *> &input)
         //compute the delay in samples using linear interpolation between the lfo delays
         mdel = (dr1 * (this->_synth->buffersize - i) + dr2 * i) / this->_synth->buffersize_f;
         if (++drk >= maxdelay)
+        {
             drk = 0;
+        }
         tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
 
         dlhi = (int)tmp;
@@ -119,8 +125,8 @@ void Chorus::out(const Stereo<float *> &input)
         dlhi2 = (dlhi - 1 + maxdelay) % maxdelay;
         dllo = 1.0f - fmodf(tmp, one);
         efxoutr[i] = cinterpolate(delaySample._right, maxdelay, dlhi2) * dllo + cinterpolate(delaySample._right, maxdelay,
-                                                                                        dlhi) *
-                                                                               (1.0f - dllo);
+                                                                                             dlhi) *
+                                                                                    (1.0f - dllo);
         delaySample._right[dlk] = inR + efxoutr[i] * fb;
     }
 
@@ -198,9 +204,13 @@ void Chorus::SetPreset(unsigned char npreset)
         {64, 64, 55, 105, 0, 24, 39, 19, 17, 0, 0, 1}};
 
     if (npreset >= NUM_PRESETS)
+    {
         npreset = NUM_PRESETS - 1;
+    }
     for (int n = 0; n < PRESET_SIZE; ++n)
+    {
         ChangeParameter(n, presets[npreset][n]);
+    }
     Ppreset = npreset;
 }
 
@@ -208,44 +218,44 @@ void Chorus::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case 0:
+        case ChorusPresets::ChorusVolume:
             setvolume(value);
             break;
-        case 1:
+        case ChorusPresets::ChorusPanning:
             SetPanning(value);
             break;
-        case 2:
+        case ChorusPresets::ChorusLFOFrequency:
             lfo.Pfreq = value;
             lfo.updateparams();
             break;
-        case 3:
+        case ChorusPresets::ChorusLFORandomness:
             lfo.Prandomness = value;
             lfo.updateparams();
             break;
-        case 4:
+        case ChorusPresets::ChorusLFOFunction:
             lfo.PLFOtype = value;
             lfo.updateparams();
             break;
-        case 5:
+        case ChorusPresets::ChorusLFOStereo:
             lfo.Pstereo = value;
             lfo.updateparams();
             break;
-        case 6:
+        case ChorusPresets::ChorusDepth:
             setdepth(value);
             break;
-        case 7:
+        case ChorusPresets::ChorusDelay:
             setdelay(value);
             break;
-        case 8:
+        case ChorusPresets::ChorusFeedback:
             setfb(value);
             break;
-        case 9:
+        case ChorusPresets::ChorusChannelRouting:
             SetLRCross(value);
             break;
-        case 10:
+        case ChorusPresets::ChorusUnused1:
             Pflangemode = (value > 1) ? 1 : value;
             break;
-        case 11:
+        case ChorusPresets::ChorusSubtract:
             Poutsub = (value > 1) ? 1 : value;
             break;
     }
@@ -255,29 +265,29 @@ unsigned char Chorus::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case ChorusPresets::ChorusVolume:
             return Pvolume;
-        case 1:
+        case ChorusPresets::ChorusPanning:
             return Ppanning;
-        case 2:
+        case ChorusPresets::ChorusLFOFrequency:
             return lfo.Pfreq;
-        case 3:
+        case ChorusPresets::ChorusLFORandomness:
             return lfo.Prandomness;
-        case 4:
+        case ChorusPresets::ChorusLFOFunction:
             return lfo.PLFOtype;
-        case 5:
+        case ChorusPresets::ChorusLFOStereo:
             return lfo.Pstereo;
-        case 6:
+        case ChorusPresets::ChorusDepth:
             return Pdepth;
-        case 7:
+        case ChorusPresets::ChorusDelay:
             return Pdelay;
-        case 8:
+        case ChorusPresets::ChorusFeedback:
             return Pfb;
-        case 9:
+        case ChorusPresets::ChorusChannelRouting:
             return Plrcross;
-        case 10:
+        case ChorusPresets::ChorusUnused1:
             return Pflangemode;
-        case 11:
+        case ChorusPresets::ChorusSubtract:
             return Poutsub;
         default:
             return 0;

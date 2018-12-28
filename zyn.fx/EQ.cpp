@@ -21,9 +21,10 @@
 */
 
 #include "EQ.h"
-#include <zyn.dsp/AnalogFilter.h>
 
+#include "EffectPresets.h"
 #include <cmath>
+#include <zyn.dsp/AnalogFilter.h>
 
 EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_)

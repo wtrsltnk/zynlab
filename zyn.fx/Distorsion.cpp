@@ -21,10 +21,11 @@
 */
 
 #include "Distorsion.h"
+
+#include "EffectPresets.h"
+#include <cmath>
 #include <zyn.common/WaveShapeSmps.h>
 #include <zyn.dsp/AnalogFilter.h>
-
-#include <cmath>
 
 Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
     : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
@@ -80,33 +81,49 @@ void Distorsion::out(const Stereo<float *> &smp)
 {
     float inputvol = powf(5.0f, (Pdrive - 32.0f) / 127.0f);
     if (Pnegate)
+    {
         inputvol *= -1.0f;
+    }
 
     if (Pstereo) //Stereo
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+    {
+        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
         {
             efxoutl[i] = smp._left[i] * inputvol * pangainL;
             efxoutr[i] = smp._right[i] * inputvol * pangainR;
         }
+    }
     else //Mono
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+    {
+        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        {
             efxoutl[i] = (smp._left[i] * pangainL + smp._right[i] * pangainR) * inputvol;
+        }
+    }
 
     if (Pprefiltering)
+    {
         applyfilters(efxoutl, efxoutr);
+    }
 
     waveShapeSmps(this->_synth->buffersize, efxoutl, Ptype + 1, Pdrive);
     if (Pstereo)
+    {
         waveShapeSmps(this->_synth->buffersize, efxoutr, Ptype + 1, Pdrive);
+    }
 
     if (!Pprefiltering)
+    {
         applyfilters(efxoutl, efxoutr);
+    }
 
     if (!Pstereo)
+    {
         memcpy(efxoutr, efxoutl, this->_synth->bufferbytes);
+    }
 
     float level = dB2rap(60.0f * Plevel / 127.0f - 40.0f);
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
         float lout = efxoutl[i];
         float rout = efxoutr[i];
@@ -131,9 +148,13 @@ void Distorsion::setvolume(unsigned char _Pvolume)
         volume = 1.0f;
     }
     else
+    {
         volume = outvolume = Pvolume / 127.0f;
+    }
     if (Pvolume == 0)
+    {
         Cleanup();
+    }
 }
 
 void Distorsion::setlpf(unsigned char _Plpf)
@@ -171,11 +192,17 @@ void Distorsion::SetPreset(unsigned char npreset)
         {127, 64, 35, 88, 75, 4, 0, 127, 0, 1, 0}};
 
     if (npreset >= NUM_PRESETS)
+    {
         npreset = NUM_PRESETS - 1;
+    }
     for (int n = 0; n < PRESET_SIZE; ++n)
+    {
         ChangeParameter(n, presets[npreset][n]);
+    }
     if (!insertion) //lower the volume if this is system effect
-        ChangeParameter(0, (int)(presets[npreset][0] / 1.5f));
+    {
+        ChangeParameter(DistorsionPresets::DistorsionVolume, (int)(presets[npreset][0] / 1.5f));
+    }
     Ppreset = npreset;
     Cleanup();
 }
@@ -184,43 +211,51 @@ void Distorsion::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case 0:
+        case DistorsionPresets::DistorsionVolume:
             setvolume(value);
             break;
-        case 1:
+        case DistorsionPresets::DistorsionPanning:
             SetPanning(value);
             break;
-        case 2:
+        case DistorsionPresets::DistorsionChannelRouting:
             SetLRCross(value);
             break;
-        case 3:
+        case DistorsionPresets::DistorsionDrive:
             Pdrive = value;
             break;
-        case 4:
+        case DistorsionPresets::DistorsionLevel:
             Plevel = value;
             break;
-        case 5:
+        case DistorsionPresets::DistorsionType:
             if (value > 13)
+            {
                 Ptype = 13; //this must be increased if more distorsion types are added
+            }
             else
+            {
                 Ptype = value;
+            }
             break;
-        case 6:
+        case DistorsionPresets::DistorsionNegate:
             if (value > 1)
+            {
                 Pnegate = 1;
+            }
             else
+            {
                 Pnegate = value;
+            }
             break;
-        case 7:
+        case DistorsionPresets::DistorsionLowPassFilter:
             setlpf(value);
             break;
-        case 8:
+        case DistorsionPresets::DistorsionHighPassFilter:
             sethpf(value);
             break;
-        case 9:
+        case DistorsionPresets::DistorsionStereo:
             Pstereo = (value > 1) ? 1 : value;
             break;
-        case 10:
+        case DistorsionPresets::DistorsionPreFiltering:
             Pprefiltering = value;
             break;
     }
@@ -230,27 +265,27 @@ unsigned char Distorsion::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case DistorsionPresets::DistorsionVolume:
             return Pvolume;
-        case 1:
+        case DistorsionPresets::DistorsionPanning:
             return Ppanning;
-        case 2:
+        case DistorsionPresets::DistorsionChannelRouting:
             return Plrcross;
-        case 3:
+        case DistorsionPresets::DistorsionDrive:
             return Pdrive;
-        case 4:
+        case DistorsionPresets::DistorsionLevel:
             return Plevel;
-        case 5:
+        case DistorsionPresets::DistorsionType:
             return Ptype;
-        case 6:
+        case DistorsionPresets::DistorsionNegate:
             return Pnegate;
-        case 7:
+        case DistorsionPresets::DistorsionLowPassFilter:
             return Plpf;
-        case 8:
+        case DistorsionPresets::DistorsionHighPassFilter:
             return Phpf;
-        case 9:
+        case DistorsionPresets::DistorsionStereo:
             return Pstereo;
-        case 10:
+        case DistorsionPresets::DistorsionPreFiltering:
             return Pprefiltering;
         default:
             return 0; //in case of bogus parameter number

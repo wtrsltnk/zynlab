@@ -1,6 +1,7 @@
 #include "../app.threedee.h"
 
 #include "../imgui_addons/imgui_knob.h"
+#include <zyn.fx/EffectPresets.h>
 
 char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";
@@ -243,22 +244,6 @@ void AppThreeDee::EffectEditor(EffectManager *effectManager)
     ImGui::PopStyleVar();
 }
 
-enum ReverbPresets
-{
-    ReverbVolume = 0,
-    ReverbPanning = 1,
-    ReverbTime = 2,
-    ReverbInitialDelay = 3,
-    ReverbInitialDelayFeedback = 4,
-    ReverbUnused1 = 5,
-    ReverbUnused2 = 6,
-    ReverbLowPassFilter = 7,
-    ReverbHighPassFilter = 8,
-    ReverbDampening = 9,
-    ReverbType = 10,
-    ReverbRoomSize = 11
-};
-
 void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<int>(effectManager->getpreset());
@@ -361,17 +346,6 @@ void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
     ImGui::SameLine();
 }
 
-enum EchoPresets
-{
-    EchoVolume = 0,
-    EchoPanning = 1,
-    Delay = 2,
-    DelayBetweenLR = 3,
-    LRCrossover = 4,
-    Feedback = 5,
-    EchoDampening = 6,
-};
-
 void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<int>(effectManager->getpreset());
@@ -399,37 +373,37 @@ void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
 
     ImGui::SameLine();
 
-    auto delay = static_cast<float>(effectManager->geteffectpar(EchoPresets::Delay));
+    auto delay = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoDelay));
     if (ImGui::Knob("Delay", &delay, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::Delay, static_cast<unsigned char>(delay));
+        effectManager->seteffectpar(EchoPresets::EchoDelay, static_cast<unsigned char>(delay));
     }
     ImGui::ShowTooltipOnHover("Delay");
 
     ImGui::SameLine();
 
-    auto lrDelay = static_cast<float>(effectManager->geteffectpar(EchoPresets::DelayBetweenLR));
+    auto lrDelay = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoDelayBetweenLR));
     if (ImGui::Knob("LRdl.", &lrDelay, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::DelayBetweenLR, static_cast<unsigned char>(lrDelay));
+        effectManager->seteffectpar(EchoPresets::EchoDelayBetweenLR, static_cast<unsigned char>(lrDelay));
     }
     ImGui::ShowTooltipOnHover("Delay Between L/R");
 
     ImGui::SameLine();
 
-    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(EchoPresets::LRCrossover));
+    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoChannelRouting));
     if (ImGui::Knob("L/R", &lrCrossover, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::LRCrossover, static_cast<unsigned char>(lrCrossover));
+        effectManager->seteffectpar(EchoPresets::EchoChannelRouting, static_cast<unsigned char>(lrCrossover));
     }
-    ImGui::ShowTooltipOnHover("L/R Crossover");
+    ImGui::ShowTooltipOnHover("L/R Channel Routing");
 
     ImGui::SameLine();
 
-    auto feedback = static_cast<float>(effectManager->geteffectpar(EchoPresets::Feedback));
+    auto feedback = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoFeedback));
     if (ImGui::Knob("Fb.", &feedback, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::Feedback, static_cast<unsigned char>(feedback));
+        effectManager->seteffectpar(EchoPresets::EchoFeedback, static_cast<unsigned char>(feedback));
     }
     ImGui::ShowTooltipOnHover("Feedback");
 
@@ -442,22 +416,6 @@ void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Dampening");
 }
-
-enum ChorusPresets
-{
-    ChorusVolume = 0,
-    ChorusPanning = 1,
-    LFOFrequency = 2,
-    LFORandomness = 3,
-    LFOFunction = 4,
-    LFOStereo = 5,
-    ChorusDepth = 6,
-    ChorusDelay = 7,
-    ChorusFeedback = 8,
-    ChannelRouting = 9,
-    ChorusUnused1 = 10,
-    ChorusSubtract = 11,
-};
 
 void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
 {
@@ -523,10 +481,10 @@ void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
 
     ImGui::SameLine();
 
-    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChannelRouting));
+    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusChannelRouting));
     if (ImGui::Knob("L/R", &lrCrossover, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChannelRouting, static_cast<unsigned char>(lrCrossover));
+        effectManager->seteffectpar(ChorusPresets::ChorusChannelRouting, static_cast<unsigned char>(lrCrossover));
     }
     ImGui::ShowTooltipOnHover("Channel Routing");
 
@@ -536,56 +494,39 @@ void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
 
     ImGui::SameLine();
 
-    auto lfoType = static_cast<int>(effectManager->geteffectpar(ChorusPresets::LFOFunction));
+    auto lfoType = static_cast<int>(effectManager->geteffectpar(ChorusPresets::ChorusLFOFunction));
     ImGui::PushItemWidth(100);
     if (PresetSelection("LFO type", lfoType, lfoTypes, lfoTypeCount))
     {
-        effectManager->seteffectpar(ChorusPresets::LFOFunction, static_cast<unsigned char>(lfoType));
+        effectManager->seteffectpar(ChorusPresets::ChorusLFOFunction, static_cast<unsigned char>(lfoType));
     }
     ImGui::ShowTooltipOnHover("LFO function");
 
-    auto frequency = static_cast<float>(effectManager->geteffectpar(ChorusPresets::LFOFrequency));
+    auto frequency = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusLFOFrequency));
     if (ImGui::Knob("Freq", &frequency, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::LFOFrequency, static_cast<unsigned char>(frequency));
+        effectManager->seteffectpar(ChorusPresets::ChorusLFOFrequency, static_cast<unsigned char>(frequency));
     }
     ImGui::ShowTooltipOnHover("LFO Frequency");
 
     ImGui::SameLine();
 
-    auto randomness = static_cast<float>(effectManager->geteffectpar(ChorusPresets::LFORandomness));
+    auto randomness = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusLFORandomness));
     if (ImGui::Knob("Rnd", &randomness, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::LFORandomness, static_cast<unsigned char>(randomness));
+        effectManager->seteffectpar(ChorusPresets::ChorusLFORandomness, static_cast<unsigned char>(randomness));
     }
     ImGui::ShowTooltipOnHover("LFO Randomness");
 
     ImGui::SameLine();
 
-    auto lfoStereo = static_cast<float>(effectManager->geteffectpar(ChorusPresets::LFOStereo));
+    auto lfoStereo = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusLFOStereo));
     if (ImGui::Knob("St.df", &lfoStereo, 0, 128, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::LFOStereo, static_cast<unsigned char>(lfoStereo));
+        effectManager->seteffectpar(ChorusPresets::ChorusLFOStereo, static_cast<unsigned char>(lfoStereo));
     }
     ImGui::ShowTooltipOnHover("LFO Left/Right Channel Phase Shift");
 }
-
-enum PhaserPresets
-{
-    PhaserVolume = 0,
-    PhaserPanning = 1,
-    PhaserLFOFrequency = 2,
-    PhaserLFORandomness = 3,
-    PhaserLFOFunction = 4,
-    PhaserLFOStereo = 5,
-    PhaserDepth = 6,
-    PhaserFeedback = 7,
-    PhaserChannelRouting = 9,
-    PhaserSubtract = 10,
-    PhaserPhase = 11,
-    Hyper = 12,
-    Analog = 14,
-};
 
 void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
 {
@@ -606,19 +547,19 @@ void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
 
     ImGui::SameLine();
 
-    auto hyper = effectManager->geteffectpar(PhaserPresets::Hyper) == 1;
+    auto hyper = effectManager->geteffectpar(PhaserPresets::PhaserHyper) == 1;
     if (ImGui::Checkbox("Hyp", &hyper))
     {
-        effectManager->seteffectpar(PhaserPresets::Hyper, hyper ? 1 : 0);
+        effectManager->seteffectpar(PhaserPresets::PhaserHyper, hyper ? 1 : 0);
     }
     ImGui::ShowTooltipOnHover("Hyper");
 
     ImGui::SameLine();
 
-    auto analog = effectManager->geteffectpar(PhaserPresets::Analog) == 1;
+    auto analog = effectManager->geteffectpar(PhaserPresets::PhaserAnalog) == 1;
     if (ImGui::Checkbox("Analog", &analog))
     {
-        effectManager->seteffectpar(PhaserPresets::Analog, analog ? 1 : 0);
+        effectManager->seteffectpar(PhaserPresets::PhaserAnalog, analog ? 1 : 0);
     }
     ImGui::ShowTooltipOnHover("Analog");
 
@@ -713,21 +654,6 @@ void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("LFO Left/Right Channel Phase Shift");
 }
-
-enum AlienWahPresets
-{
-    AlienWahVolume = 0,
-    AlienWahPanning = 1,
-    AlienWahLFOFrequency = 2,
-    AlienWahLFORandomness = 3,
-    AlienWahLFOFunction = 4,
-    AlienWahLFOStereo = 5,
-    AlienWahDepth = 6,
-    AlienWahFeedback = 7,
-    AlienWahDelay = 8,
-    AlienWahChannelRouting = 9,
-    AlienWahPhase = 10,
-};
 
 void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
 {
@@ -840,21 +766,6 @@ void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
     ImGui::ShowTooltipOnHover("LFO Left/Right Channel Phase Shift");
 }
 
-enum DistorsionPresets
-{
-    DistorsionVolume = 0,
-    DistorsionPanning = 1,
-    DistorsionChannelRouting = 2,
-    DistorsionDrive = 3,
-    DistorsionLevel = 4,
-    DistorsionType = 5,
-    DistorsionNegate = 6,
-    DistorsionLowPassFilter = 7,
-    DistorsionHighPassFilter = 8,
-    DistorsionStereo = 9,
-    DistorsionPreFiltering = 10,
-};
-
 void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<int>(effectManager->getpreset());
@@ -965,20 +876,6 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
 void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
 {
 }
-
-enum DynFilterPresets
-{
-    DynFilterVolume = 0,
-    DynFilterPanning = 1,
-    DynFilterLFOFrequency = 2,
-    DynFilterLFORandomness = 3,
-    DynFilterLFOFunction = 4,
-    DynFilterLFOStereo = 5,
-    DynFilterDepth = 6,
-    DynFilterAmplitudeSense = 7,
-    DynFilterAmplitudeSenseInvert = 8,
-    DynFilterAmplitudeSmooth = 9,
-};
 
 void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
 {
