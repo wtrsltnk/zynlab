@@ -887,6 +887,19 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
     ImGui::ShowTooltipOnHover("High Pass Filter");
 }
 
+float getEQPlotValue(EffectManager *effectManager, int x, int maxX, int maxY)
+{
+    int const maxdB = 20;
+
+    auto pos = static_cast<float>(x) / static_cast<float>(maxX);
+
+    if (pos > 1.0f) pos = 1.0f;
+
+    auto dbresp = effectManager->getEQfreqresponse(20.0f * pow(1000.0f, pos));
+
+    return ((dbresp / maxdB + 1.0f) * maxY / 2.0f);
+}
+
 void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
 {
     auto volume = static_cast<float>(effectManager->geteffectpar(EQPresets::EQVolume));
@@ -896,11 +909,22 @@ void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
+    ImGui::SameLine();
+
+    int lx = 200;
+    int ly = 50;
+    std::vector<float> values;
+    for (int i = 0; i < lx; i++)
+    {
+        values.push_back(getEQPlotValue(effectManager, i, lx, ly));
+    }
+    ImGui::PlotLines("EQ", &(values[0]), static_cast<int>(values.size()), 0, nullptr, 0, ly, ImVec2(lx, ly));
+
     if (ImGui::BeginTabBar("EQ bands"))
     {
         for (int band = 0; band < MAX_EQ_BANDS; band++)
         {
-            auto presetStart =  (band * 5);
+            auto presetStart = (band * 5);
             ImGui::PushID(band);
             auto type = static_cast<int>(effectManager->geteffectpar(presetStart + EQPresets::EQBandType));
             if (ImGui::BeginTabItem(eqBandTypes[type]))
@@ -939,9 +963,9 @@ void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
                 ImGui::SameLine();
 
                 auto stages = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandStages));
-                if (ImGui::Knob("St.", &stages, 0, MAX_FILTER_STAGES-1, ImVec2(40, 40)))
+                if (ImGui::Knob("St.", &stages, 0, 128, ImVec2(40, 40)))
                 {
-                    effectManager->seteffectpar(presetStart +  EQPresets::EQBandStages, static_cast<unsigned char>(stages));
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandStages, static_cast<unsigned char>(stages));
                 }
                 ImGui::ShowTooltipOnHover("Additional filter stages");
 

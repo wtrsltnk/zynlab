@@ -133,8 +133,6 @@ void EQ::ChangeParameter(int npar, unsigned char value)
     {
         case EQPresets::EQBandType:
         {
-            std::cout << "Ptype changes for band " << nb << std::endl;
-
             filter[nb].Ptype = value;
             if (value > 9)
             {
@@ -149,8 +147,6 @@ void EQ::ChangeParameter(int npar, unsigned char value)
         }
         case EQPresets::EQBandFrequency:
         {
-            std::cout << "Pfreq changes for band " << nb << std::endl;
-
             filter[nb].Pfreq = value;
             tmp = 600.0f * powf(30.0f, (value - 64.0f) / 64.0f);
             filter[nb].l->setfreq(tmp);
@@ -159,8 +155,6 @@ void EQ::ChangeParameter(int npar, unsigned char value)
         }
         case EQPresets::EQBandGain:
         {
-            std::cout << "Pgain changes for band " << nb << std::endl;
-
             filter[nb].Pgain = value;
             tmp = 30.0f * (value - 64.0f) / 64.0f;
             filter[nb].l->setgain(tmp);
@@ -169,8 +163,6 @@ void EQ::ChangeParameter(int npar, unsigned char value)
         }
         case EQPresets::EQBandQ:
         {
-            std::cout << "Pq changes for band " << nb << std::endl;
-
             filter[nb].Pq = value;
             tmp = powf(30.0f, (value - 64.0f) / 64.0f);
             filter[nb].l->setq(tmp);
@@ -179,8 +171,6 @@ void EQ::ChangeParameter(int npar, unsigned char value)
         }
         case EQPresets::EQBandStages:
         {
-            std::cout << "Pstages changes for band " << nb << std::endl;
-
             filter[nb].Pstages = value;
             if (value >= MAX_FILTER_STAGES)
             {
