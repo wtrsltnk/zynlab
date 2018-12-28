@@ -889,7 +889,7 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
 
 float getEQPlotValue(EffectManager *effectManager, int x, int maxX, int maxY)
 {
-    int const maxdB = 20;
+    int const maxdB = 30;
 
     auto pos = static_cast<float>(x) / static_cast<float>(maxX);
 
