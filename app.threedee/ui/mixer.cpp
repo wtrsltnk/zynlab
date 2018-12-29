@@ -147,7 +147,12 @@ void AppThreeDee::ImGuiMixer()
 
 void AppThreeDee::ImGuiSelectedTrack()
 {
-    ImGui::Begin("Selected Track", nullptr, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    if (!_showSelectedTrack)
+    {
+        return;
+    }
+
+    ImGui::Begin("Selected Track", &_showSelectedTrack, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     {
         ImGuiMasterTrack();
         ImGui::SameLine();

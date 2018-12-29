@@ -34,7 +34,8 @@ AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
       _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showMixer(true),
       _openSelectInstrument(-1), _openChangeInstrumentType(-1),
-      _display_w(800), _display_h(600), _currentBank(0),
+      _display_w(800), _display_h(600),
+      _showSelectedTrack(true), _currentBank(0),
       _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true),
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentInstrumentEffect(-1)
 {
@@ -457,9 +458,18 @@ void AppThreeDee::Render()
     auto channel = _mixer->GetChannel(_sequencer.ActiveInstrument());
     if (channel != nullptr)
     {
-        ADNoteEditor(channel->_instruments[0].adpars);
-        SUBNoteEditor(channel->_instruments[0].subpars);
-        PADNoteEditor(channel->_instruments[0].padpars);
+        if (channel->_instruments[0].Padenabled)
+        {
+            ADNoteEditor(channel->_instruments[0].adpars);
+        }
+        if (channel->_instruments[0].Psubenabled)
+        {
+            SUBNoteEditor(channel->_instruments[0].subpars);
+        }
+        if (channel->_instruments[0].Ppadenabled)
+        {
+            PADNoteEditor(channel->_instruments[0].padpars);
+        }
     }
 
     ImGuiPlayback();
@@ -490,6 +500,10 @@ void AppThreeDee::ImGuiPlayback()
 {
     ImGui::Begin("Playback");
     {
+        ImGui::Checkbox("Show Selected Track", &_showSelectedTrack);
+
+        ImGui::SameLine();
+
         if (ImGui::Button("Stop"))
         {
             _stepper.Stop();

@@ -85,10 +85,12 @@ public:
 
 private:
     void LoadInstrumentIcons();
+
     void ImGuiPlayback();
     void ImGuiMasterTrack();
     void ImGuiMixer();
     void ImGuiTrack(int track, bool highlightTrack);
+    bool _showSelectedTrack;
     void ImGuiSelectedTrack();
     void ImGuiSequencer();
     void ImGuiStepSequencer(int trackIndex, float trackHeight);
