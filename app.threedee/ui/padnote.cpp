@@ -13,6 +13,7 @@ void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
     }
 
     ImGui::Begin(PADeditorID, &_showPADNoteEditor);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
 
     if (ImGui::BeginTabBar("PADnoteTab"))
     {
@@ -40,6 +41,7 @@ void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
         ImGui::EndTabBar();
     }
 
+    ImGui::PopStyleVar();
     ImGui::End();
 }
 

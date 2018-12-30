@@ -31,6 +31,7 @@ void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
     }
 
     ImGui::Begin(ADeditorID, &_showADNoteEditor);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
 
     if (ImGui::BeginTabBar("ADnoteTab"))
     {
@@ -83,6 +84,7 @@ void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
         ImGui::EndTabBar();
     }
 
+    ImGui::PopStyleVar();
     ImGui::End();
 }
 

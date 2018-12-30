@@ -24,6 +24,8 @@ void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
     }
 
     ImGui::Begin(SUBeditorID, &_showSUBNoteEditor);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+
     if (ImGui::BeginTabBar("SUBnoteTab"))
     {
         if (ImGui::BeginTabItem("Global"))
@@ -83,6 +85,7 @@ void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
         ImGui::EndTabBar();
     }
 
+    ImGui::PopStyleVar();
     ImGui::End();
 }
 
