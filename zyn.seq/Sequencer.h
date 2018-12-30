@@ -6,16 +6,42 @@
 #include <map>
 #include <zyn.common/globals.h>
 
+class TrackPatternNote
+{
+public:
+    TrackPatternNote();
+    TrackPatternNote(unsigned char note, int step, float length);
+
+    bool operator<(TrackPatternNote const &other) const;
+    unsigned char _note;
+    int _step;
+    float _length;
+};
+
+class TrackPattern
+{
+public:
+    TrackPattern();
+    TrackPattern(std::string const &name, float hue);
+
+    std::string _name;
+    float _hue;
+    std::set<TrackPatternNote> _notes;
+
+    bool IsStepCovered(unsigned char note, int step);
+};
+
 class Note
 {
 public:
     Note();
     Note(Note const &note);
-    Note(unsigned char note, unsigned char velocity);
+    Note(unsigned char note, unsigned char velocity, float length);
     virtual ~Note();
 
     unsigned char _note;
     unsigned char _velocity;
+    float _length;
 };
 
 class ISteppable
@@ -24,7 +50,7 @@ public:
     virtual ~ISteppable();
 
     virtual std::vector<Note> GetNote(unsigned char trackIndex, int patternIndex, int stepIndex) = 0;
-    virtual int CountSongLength() = 0;
+    virtual int CountSongLengthInPatterns() = 0;
 };
 
 int const maxNotes = 255;
@@ -50,7 +76,7 @@ public:
 
     void Setup();
     virtual void Tick();
-    void HitNote(unsigned char chan, unsigned char note, int durationInMs);
+    void HitNote(unsigned char chan, unsigned char note, unsigned char velocity, int durationInMs);
 
     bool IsPlaying();
     void Stop();
@@ -70,7 +96,7 @@ public:
     Sequencer();
     virtual ~Sequencer();
 
-    int CountSongLength();
+    int CountSongLengthInPatterns();
     void AddPattern(int trackIndex, int patternIndex, char const *label);
     bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
     TrackPattern &GetPattern(int trackIndex, int patternIndex);
@@ -88,6 +114,7 @@ public:
     void SelectPreviousPattern();
     void SelectNextPattern();
     int LastPatternIndex(int trackIndex);
+    int PatternStepCount(int trackIndex, int patternIndex);
 
     int ActiveInstrument() const;
     void ActiveInstrument(int newActiveInstrument);

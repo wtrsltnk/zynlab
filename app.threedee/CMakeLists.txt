@@ -25,6 +25,8 @@ if(GLFW3_FOUND)
         imgui_addons/imgui_checkbutton.h
         imgui_addons/imgui_knob.cpp
         imgui_addons/imgui_knob.h
+        imgui_addons/imgui_seq.cpp
+        imgui_addons/imgui_seq.h
         ui/adnote.cpp
         ui/adnote-voice.cpp
         ui/effect.cpp

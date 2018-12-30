@@ -57,6 +57,7 @@ private:
     bool _iconImagesAreLoaded;
     bool _showInstrumentEditor;
     bool _showPatternEditor;
+    bool _showPianoRollPatternEditor;
     bool _showMixer;
     int _openSelectInstrument;
     int _openChangeInstrumentType;
@@ -95,15 +96,15 @@ private:
     void ImGuiSequencer();
     void ImGuiStepSequencer(int trackIndex, float trackHeight);
     void ImGuiStepSequencerEventHandling();
+    void ImGuiStepPatternEditorWindow();
     void ImGuiPianoRollSequencer(int trackIndex, float trackHeight);
     void ImGuiPianoRollSequencerEventHandling();
-    void ImGuiPatternEditorWindow();
+    void ImGuiPianoRollPatternEditorWindow();
     void ImGuiSelectInstrumentPopup();
     void ImGuiChangeInstrumentTypePopup();
     int _currentBank;
 
-    void EditSelectedPattern();
-    void HitNote(int trackIndex, int note, int durationInMs);
+    void HitNote(int trackIndex, int note, int velocity, int durationInMs);
     void AddInsertFx(int track);
     void RemoveInsertFxFromTrack(int fx);
 

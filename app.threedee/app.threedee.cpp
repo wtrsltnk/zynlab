@@ -32,7 +32,7 @@ static ImVec4 clear_color = ImColor(90, 90, 100);
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
-      _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showMixer(true),
+      _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showPianoRollPatternEditor(false), _showMixer(true),
       _openSelectInstrument(-1), _openChangeInstrumentType(-1),
       _display_w(800), _display_h(600),
       _showSelectedTrack(true), _currentBank(0),
@@ -101,15 +101,14 @@ bool AppThreeDee::Setup()
     return true;
 }
 
-void AppThreeDee::HitNote(int trackIndex, int note, int durationInMs)
+void AppThreeDee::HitNote(int trackIndex, int note, int velocity, int durationInMs)
 {
-    _stepper.HitNote(static_cast<unsigned char>(trackIndex), static_cast<unsigned char>(note), durationInMs);
+    _stepper.HitNote(static_cast<unsigned char>(trackIndex),
+                     static_cast<unsigned char>(note),
+                     static_cast<unsigned char>(velocity),
+                     durationInMs);
 }
 
-void AppThreeDee::EditSelectedPattern()
-{
-    _showPatternEditor = true;
-}
 void AppThreeDee::ImGuiSequencer()
 {
     ImGui::Begin("Sequencer");
@@ -151,11 +150,11 @@ void AppThreeDee::ImGuiSequencer()
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
 
-            //if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
+            if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
             {
                 ImGuiStepSequencer(trackIndex, trackHeight);
             }
-            //else
+            else
             {
                 ImGuiPianoRollSequencer(trackIndex, trackHeight);
             }
@@ -188,11 +187,11 @@ void AppThreeDee::ImGuiSequencer()
 
         if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         {
-            //if (_sequencer.ActiveInstrument() >= 0 && _mixer->GetChannel(_sequencer.ActiveInstrument())->Pkitmode != 0)
+            if (_sequencer.ActiveInstrument() >= 0 && _mixer->GetChannel(_sequencer.ActiveInstrument())->Pkitmode != 0)
             {
                 ImGuiStepSequencerEventHandling();
             }
-            //else
+            else
             {
                 ImGuiPianoRollSequencerEventHandling();
             }
@@ -225,7 +224,7 @@ void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
             }
             if (ImGui::IsMouseDoubleClicked(0))
             {
-                EditSelectedPattern();
+                _showPatternEditor = true;
             }
         }
         else if (_mixer->GetChannel(trackIndex)->Penabled)
@@ -304,7 +303,7 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
     {
-        EditSelectedPattern();
+        _showPatternEditor = true;
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
     {
@@ -334,85 +333,210 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
     }
 }
 
-void AppThreeDee::ImGuiPianoRollSequencer(int /*trackIndex*/, float /*trackHeight*/)
+static const float noteLabelWidth = 50.0f;
+static const float rowHeight = 20.0f;
+static const float stepWidth = 20.0f;
+
+void AppThreeDee::ImGuiStepPatternEditorWindow()
 {
+    if (!_showPatternEditor)
+    {
+        return;
+    }
+
+    if (!_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
+    {
+        _sequencer.ActivePattern(-1);
+        return;
+    }
+
+    auto &style = ImGui::GetStyle();
+    auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
+
+    ImGui::Begin("Pattern editor", &_showPatternEditor);
+    char tmp[256];
+    strcpy(tmp, selectedPattern._name.c_str());
+    if (ImGui::InputText("pattern name", tmp, 256))
+    {
+        selectedPattern._name = tmp;
+    }
+
+    ImGui::BeginChild("Notes");
+    auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
+    auto itemWidth = (width / 16) - (style.ItemSpacing.x);
+    for (int i = 0; i < 88; i++)
+    {
+        if (i % 12 == 0)
+        {
+            ImGui::Separator();
+        }
+        ImGui::PushID(i);
+        if (ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, rowHeight)))
+        {
+            HitNote(_sequencer.ActiveInstrument(), i, 200, 200);
+        }
+        for (int j = 0; j < 16; j++)
+        {
+            ImGui::SameLine();
+            ImGui::PushID(j);
+            auto found = selectedPattern._notes.find(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+            bool s = found != selectedPattern._notes.end();
+            if (j % 4 == 0)
+            {
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_FrameBg]);
+            }
+            if (ImGui::CheckButton("##note", &s, ImVec2(itemWidth, rowHeight)))
+            {
+                if (!s)
+                {
+                    selectedPattern._notes.erase(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+                }
+                else
+                {
+                    selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+                }
+                HitNote(_sequencer.ActiveInstrument(), i, 200, 200);
+            }
+            ImGui::PopStyleColor();
+            ImGui::PopID();
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndChild();
+    ImGui::End();
+}
+
+void AppThreeDee::ImGuiPianoRollSequencer(int trackIndex, float trackHeight)
+{
+    auto lastIndex = _sequencer.LastPatternIndex(trackIndex);
+    for (int patternIndex = 0; patternIndex <= lastIndex; patternIndex++)
+    {
+        auto count = _sequencer.PatternStepCount(trackIndex, patternIndex);
+
+        ImGui::SameLine();
+        ImGui::PushID(patternIndex + trackIndex * 1000);
+        bool isActive = trackIndex == _sequencer.ActiveInstrument() && patternIndex == _sequencer.ActivePattern();
+        if (isActive)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+        }
+
+        if (_sequencer.DoesPatternExistAtIndex(trackIndex, patternIndex))
+        {
+            auto &pattern = _sequencer.GetPattern(trackIndex, patternIndex);
+            if (ImGui::Button(pattern._name.c_str(), ImVec2(((count - 1) / 16 + 1) * 120.0f, trackHeight)))
+            {
+                _sequencer.ActiveInstrument(trackIndex);
+                _sequencer.ActivePattern(patternIndex);
+            }
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                _showPianoRollPatternEditor = true;
+            }
+        }
+        else if (_mixer->GetChannel(trackIndex)->Penabled)
+        {
+            if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+            {
+                _sequencer.AddPattern(trackIndex, patternIndex, "");
+            }
+        }
+        if (isActive)
+        {
+            ImGui::PopStyleColor(1);
+            ImGui::PopStyleVar(1);
+        }
+
+        ImGui::PopID();
+    }
+    if (_mixer->GetChannel(trackIndex)->Penabled)
+    {
+        ImGui::SameLine();
+        ImGui::PushID((100 + trackIndex) * 2010);
+        if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
+        {
+            _sequencer.AddPattern(trackIndex, lastIndex + 1, "");
+        }
+        ImGui::PopID();
+    }
 }
 
 void AppThreeDee::ImGuiPianoRollSequencerEventHandling()
 {
 }
 
-void AppThreeDee::ImGuiPatternEditorWindow()
+void AppThreeDee::ImGuiPianoRollPatternEditorWindow()
 {
-    const float noteLabelWidth = 50.0f;
-    const float rowHeight = 20.0f;
-    if (_showPatternEditor)
+    if (!_showPianoRollPatternEditor)
     {
-        if (!_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
-        {
-            _sequencer.ActivePattern(-1);
-            return;
-        }
-
-        auto &style = ImGui::GetStyle();
-        auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
-
-        ImGui::Begin("Pattern editor", &_showPatternEditor);
-        char tmp[256];
-        strcpy(tmp, selectedPattern._name.c_str());
-        if (ImGui::InputText("pattern name", tmp, 256))
-        {
-            selectedPattern._name = tmp;
-        }
-
-        ImGui::BeginChild("Notes");
-        auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
-        auto itemWidth = (width / 16) - (style.ItemSpacing.x);
-        for (int i = 0; i < 88; i++)
-        {
-            if (i % 12 == 0)
-            {
-                ImGui::Separator();
-            }
-            ImGui::PushID(i);
-            if (ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, rowHeight)))
-            {
-                HitNote(_sequencer.ActiveInstrument(), i, 200);
-            }
-            for (int j = 0; j < 16; j++)
-            {
-                ImGui::SameLine();
-                ImGui::PushID(j);
-                auto found = selectedPattern._notes.find(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j)));
-                bool s = found != selectedPattern._notes.end();
-                if (j % 4 == 0)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-                }
-                else
-                {
-                    ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_FrameBg]);
-                }
-                if (ImGui::CheckButton("##note", &s, ImVec2(itemWidth, rowHeight)))
-                {
-                    if (!s)
-                    {
-                        selectedPattern._notes.erase(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j)));
-                    }
-                    else
-                    {
-                        selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j)));
-                    }
-                    HitNote(_sequencer.ActiveInstrument(), i, 200);
-                }
-                ImGui::PopStyleColor();
-                ImGui::PopID();
-            }
-            ImGui::PopID();
-        }
-        ImGui::EndChild();
-        ImGui::End();
+        return;
     }
+
+    if (!_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
+    {
+        _sequencer.ActivePattern(-1);
+        return;
+    }
+
+    auto &style = ImGui::GetStyle();
+    auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
+
+    ImGui::Begin("Piano roll editor", &_showPianoRollPatternEditor);
+    char tmp[256];
+    strcpy(tmp, selectedPattern._name.c_str());
+    if (ImGui::InputText("pattern name", tmp, 256))
+    {
+        selectedPattern._name = tmp;
+    }
+
+    ImGui::BeginChild("Notes");
+    for (int i = 0; i < 88; i++)
+    {
+        auto mousey = ImGui::GetMousePos().y - ImGui::GetWindowPos().y + ImGui::GetScrollY();
+        auto mousex = ImGui::GetMousePos().x - ImGui::GetWindowPos().x + ImGui::GetScrollX();
+
+        if (i % 12 == 0)
+        {
+            ImGui::Separator();
+        }
+        ImGui::PushID(i);
+
+        auto min = ImGui::GetCursorPos();
+        if (ImGui::Button(notes[i % 12], ImVec2(noteLabelWidth, rowHeight)))
+        {
+            HitNote(_sequencer.ActiveInstrument(), i, 200, 200);
+        }
+
+        for (auto &note : selectedPattern._notes)
+        {
+            if (note._note != i) continue;
+
+            ImGui::SetCursorPos(ImVec2(noteLabelWidth + style.ItemSpacing.x + note._step * stepWidth, min.y));
+            ImGui::Button("", ImVec2(note._length * stepWidth, rowHeight));
+        }
+
+        auto step = mousex - (noteLabelWidth + style.ItemSpacing.x);
+        if (ImGui::IsWindowFocused() && mousey >= min.y &&
+                mousey <= (min.y + ImGui::GetTextLineHeight()) && step > 0 &&
+                !selectedPattern.IsStepCovered(static_cast<unsigned char>(i), static_cast<int>(step)))
+        {
+            min.x = std::floor((noteLabelWidth + style.ItemSpacing.x + step) / stepWidth) * stepWidth;
+            ImGui::SetCursorPos(min);
+            if (ImGui::Button("+", ImVec2(stepWidth, rowHeight)))
+            {
+                selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<int>((step / stepWidth)), 0.4f));
+            }
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndChild();
+
+    ImGui::End();
 }
 
 void AppThreeDee::Tick()
@@ -445,7 +569,8 @@ void AppThreeDee::Render()
     ImGui::PopStyleVar(2);
 
     ImGuiSequencer();
-    ImGuiPatternEditorWindow();
+    ImGuiStepPatternEditorWindow();
+    ImGuiPianoRollPatternEditorWindow();
     ImGuiSelectedTrack();
     ImGuiMixer();
     InsertEffectEditor();

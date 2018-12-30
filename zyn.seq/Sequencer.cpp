@@ -1,13 +1,41 @@
 #include "Sequencer.h"
+#include <cmath>
+
+TrackPatternNote::TrackPatternNote() {}
+
+TrackPatternNote::TrackPatternNote(unsigned char note, int step, float length)
+    : _note(note), _step(step), _length(length)
+{}
+
+bool TrackPatternNote::operator<(TrackPatternNote const &other) const
+{
+    return (_note < other._note) || (_note == other._note && _step < other._step);
+}
+
+TrackPattern::TrackPattern()
+{}
+
+TrackPattern::TrackPattern(std::string const &name, float hue)
+    : _name(name), _hue(hue)
+{}
+
+bool TrackPattern::IsStepCovered(unsigned char note, int step)
+{
+    for (auto &tnote : _notes)
+    {
+        if (tnote._note == note && tnote._step <= step && (tnote._step +tnote._length) >= step) return true;
+    }
+    return false;
+}
 
 Note::Note() = default;
 
 Note::Note(Note const &note)
-    : _note(note._note), _velocity(note._velocity)
+    : _note(note._note), _velocity(note._velocity), _length(note._length)
 {}
 
-Note::Note(unsigned char note, unsigned char velocity)
-    : _note(note), _velocity(velocity)
+Note::Note(unsigned char note, unsigned char velocity, float length)
+    : _note(note), _velocity(velocity), _length(length)
 {}
 
 Note::~Note() = default;
@@ -71,7 +99,7 @@ void Stepper::Tick()
     if (_playerTimeInMs > _stepTimeInMs)
     {
         _currentStep++;
-        if (_currentStep >= (_steppable->CountSongLength() * 16))
+        if (_currentStep >= (_steppable->CountSongLengthInPatterns() * 16))
         {
             _currentStep = 0;
         }
@@ -80,10 +108,10 @@ void Stepper::Tick()
     }
 }
 
-void Stepper::HitNote(unsigned char chan, unsigned char note, int durationInMs)
+void Stepper::HitNote(unsigned char chan, unsigned char note, unsigned char velocity, int durationInMs)
 {
     _activeNotes[chan][note] = durationInMs;
-    _mixer->NoteOn(chan, note, 100);
+    _mixer->NoteOn(chan, note, velocity);
 }
 
 int Stepper::Bpm() const
@@ -128,7 +156,7 @@ void Stepper::Step(int step)
         auto notes = _steppable->GetNote(trackIndex, patternIndex, stepIndex);
         for (auto note : notes)
         {
-            HitNote(trackIndex, note._note, note._velocity);
+            HitNote(trackIndex, note._note, note._velocity, static_cast<int>(note._length * 1000.0f));
         }
     }
 }
@@ -145,10 +173,7 @@ std::vector<Note> Sequencer::GetNote(unsigned char trackIndex, int patternIndex,
         {
             if (note._step == stepIndex)
             {
-                Note n;
-                n._note = note._note;
-                n._velocity = 200;
-                result.push_back(n);
+                result.push_back(Note(note._note, 200, 0.2f));
             }
         }
     }
@@ -157,11 +182,12 @@ std::vector<Note> Sequencer::GetNote(unsigned char trackIndex, int patternIndex,
 }
 
 Sequencer::Sequencer() = default;
+
 Sequencer::~Sequencer() = default;
 
-int Sequencer::CountSongLength()
+int Sequencer::CountSongLengthInPatterns()
 {
-    int maxPattern = 0;
+    int maxStep = 0;
     for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
     {
         auto &pattern = tracksOfPatterns[trackIndex];
@@ -169,13 +195,13 @@ int Sequencer::CountSongLength()
         {
             continue;
         }
-        if (pattern.rbegin()->first >= maxPattern)
+        if (pattern.rbegin()->first >= maxStep)
         {
-            maxPattern = pattern.rbegin()->first;
+            maxStep = pattern.rbegin()->first;
         }
     }
 
-    return maxPattern + 1;
+    return maxStep + 1;
 }
 
 void Sequencer::AddPattern(int trackIndex, int patternIndex, char const *label)
@@ -456,6 +482,28 @@ void Sequencer::SelectNextPattern()
 int Sequencer::LastPatternIndex(int trackIndex)
 {
     return tracksOfPatterns[trackIndex].empty() ? -1 : tracksOfPatterns[trackIndex].rbegin()->first;
+}
+
+int Sequencer::PatternStepCount(int trackIndex, int patternIndex)
+{
+    if (!DoesPatternExistAtIndex(trackIndex, patternIndex))
+    {
+        return 0;
+    }
+
+    auto pattern = GetPattern(trackIndex, patternIndex);
+
+    int maxSize = 0;
+    for (auto &note : pattern._notes)
+    {
+        auto end = note._step + std::ceil(note._length);
+        if (maxSize < end)
+        {
+            maxSize = static_cast<int>(end);
+        }
+    }
+
+    return maxSize;
 }
 
 int Sequencer::ActiveInstrument() const
