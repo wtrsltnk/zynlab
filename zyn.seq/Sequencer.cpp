@@ -23,7 +23,7 @@ bool TrackPattern::IsStepCovered(unsigned char note, int step)
 {
     for (auto &tnote : _notes)
     {
-        if (tnote._note == note && tnote._step <= step && (tnote._step +tnote._length) >= step) return true;
+        if (tnote._note == note && tnote._step <= step && (tnote._step + tnote._length) >= step) return true;
     }
     return false;
 }
@@ -99,7 +99,7 @@ void Stepper::Tick()
     if (_playerTimeInMs > _stepTimeInMs)
     {
         _currentStep++;
-        if (_currentStep >= (_steppable->CountSongLengthInPatterns() * 16))
+        if (_currentStep >= (_steppable->CountSongLengthInSteps()))
         {
             _currentStep = 0;
         }
@@ -185,7 +185,7 @@ Sequencer::Sequencer() = default;
 
 Sequencer::~Sequencer() = default;
 
-int Sequencer::CountSongLengthInPatterns()
+int Sequencer::CountSongLengthInSteps()
 {
     int maxStep = 0;
     for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
@@ -201,7 +201,7 @@ int Sequencer::CountSongLengthInPatterns()
         }
     }
 
-    return maxStep + 1;
+    return (maxStep + 1) * 16;
 }
 
 void Sequencer::AddPattern(int trackIndex, int patternIndex, char const *label)

@@ -50,7 +50,7 @@ public:
     virtual ~ISteppable();
 
     virtual std::vector<Note> GetNote(unsigned char trackIndex, int patternIndex, int stepIndex) = 0;
-    virtual int CountSongLengthInPatterns() = 0;
+    virtual int CountSongLengthInSteps() = 0;
 };
 
 int const maxNotes = 255;
@@ -96,7 +96,7 @@ public:
     Sequencer();
     virtual ~Sequencer();
 
-    int CountSongLengthInPatterns();
+    int CountSongLengthInSteps();
     void AddPattern(int trackIndex, int patternIndex, char const *label);
     bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
     TrackPattern &GetPattern(int trackIndex, int patternIndex);
