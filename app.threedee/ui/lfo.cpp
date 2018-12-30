@@ -40,9 +40,6 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     }
     ImGui::ShowTooltipOnHover("LFO Type");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     auto freq = params->Pfreq;
     if (ImGui::Knob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(40, 40)))
     {
@@ -50,8 +47,6 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     }
     ImGui::ShowTooltipOnHover("LFO frequency");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto depth = static_cast<float>(params->Pintensity);
@@ -62,8 +57,6 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::ShowTooltipOnHover("LFO amount");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto start = static_cast<float>(params->Pstartphase);
     if (ImGui::Knob("Start", &(start), 0, 128, ImVec2(40, 40)))
@@ -72,8 +65,6 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     }
     ImGui::ShowTooltipOnHover("LFO startphase (leftmost is random)");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto delay = static_cast<float>(params->Pdelay);
@@ -84,8 +75,6 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::ShowTooltipOnHover("LFO delay");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto stretch = static_cast<float>(params->Pstretch);
     if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(40, 40)))
@@ -94,8 +83,6 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     }
     ImGui::ShowTooltipOnHover("LFO stretch");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto a_r = static_cast<float>(params->Prandomness);
@@ -106,8 +93,6 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::ShowTooltipOnHover("LFO Amplitude Randomness");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto f_r = static_cast<float>(params->Pfreqrand);
     if (ImGui::Knob("F.R", &(f_r), 0, 128, ImVec2(30, 30)))
@@ -115,7 +100,4 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
         params->Pfreqrand = static_cast<unsigned char>(f_r);
     }
     ImGui::ShowTooltipOnHover("LFO Frequency Randomness");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
 }

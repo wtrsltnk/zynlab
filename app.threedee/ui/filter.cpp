@@ -53,8 +53,6 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::ShowTooltipOnHover("The Category of the Filter (Analog/Formantic/etc.)");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     static char const *current_filter_type_item = nullptr;
 
@@ -114,9 +112,6 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         }
     }
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     auto freq = static_cast<float>(parameters->Pfreq);
     if (ImGui::Knob("C.Freq", &(freq), 0, 128, ImVec2(40, 40)))
     {
@@ -124,8 +119,6 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     }
     ImGui::ShowTooltipOnHover("Center Frequency of the Filter or the base position in the vowel's sequence");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto q = static_cast<float>(parameters->Pq);
@@ -136,8 +129,6 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::ShowTooltipOnHover("Filter resonance or bandwidth");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto freqtrack = static_cast<float>(parameters->Pfreqtrack);
     if (ImGui::Knob("freq.tr.", &(freqtrack), 0, 128, ImVec2(40, 40)))
@@ -147,8 +138,6 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
     ImGui::ShowTooltipOnHover("Filter frequency tracking (left is negative, middle is 0, and right is positive)");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto gain = static_cast<float>(parameters->Pgain);
     if (ImGui::Knob("gain", &(gain), 0, 128, ImVec2(40, 40)))
@@ -156,7 +145,4 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         parameters->Pgain = static_cast<unsigned char>(gain);
     }
     ImGui::ShowTooltipOnHover("Filter output gain/damp");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
 }

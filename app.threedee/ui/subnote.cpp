@@ -32,9 +32,6 @@ void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
             {
                 ImGui::Text("SUBsynth Global Parameters of the Instrument");
 
-                ImGui::Spacing();
-                ImGui::Spacing();
-
                 if (ImGui::BeginTabBar("SUBNote"))
                 {
                     if (ImGui::BeginTabItem("Amplitude"))
@@ -128,9 +125,6 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
     auto vol = static_cast<float>(parameters->PVolume);
     ImGui::PushItemWidth(250);
@@ -150,8 +144,6 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
     ImGui::EndChild();
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto pan = static_cast<float>(parameters->PPanning);
     if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
@@ -159,9 +151,6 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
         parameters->PPanning = static_cast<unsigned char>(pan);
     }
     ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
 
     ImGui::Separator();
 
@@ -171,9 +160,6 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
 {
     ImGui::Text("Bandwidth Parameters");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
 
     auto bandwidth = static_cast<float>(parameters->Pbandwidth);
     ImGui::PushItemWidth(250);
@@ -190,9 +176,6 @@ void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
         parameters->Pbwscale = static_cast<unsigned char>(bandwidthScale);
     }
     ImGui::ShowTooltipOnHover("Bandwidth Scale");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
 
     ImGui::Separator();
 
@@ -218,9 +201,6 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
 {
     ImGui::Text("Overtone Parameters");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     static char const *current_overtone_positions_item = nullptr;
 
     auto overtone_position = static_cast<int>(parameters->POvertoneSpread.type);
@@ -242,9 +222,6 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Overtone positions");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     auto par1 = static_cast<float>(parameters->POvertoneSpread.par1);
     if (ImGui::Knob("Par1", &(par1), 0, 128, ImVec2(40, 40)))
     {
@@ -252,8 +229,6 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Overtone spread par 1");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto bandwidth = static_cast<float>(parameters->POvertoneSpread.par2);
@@ -263,8 +238,6 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Overtone spread par 2");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto forceH = static_cast<float>(parameters->POvertoneSpread.par3);
@@ -289,9 +262,6 @@ void AppThreeDee::SUBNoteEditorFilter(SUBnoteParameters *parameters)
 
     if (filterEnabled)
     {
-        ImGui::Spacing();
-        ImGui::Spacing();
-
         FilterParameters(parameters->GlobalFilter);
 
         ImGui::Separator();
@@ -304,9 +274,6 @@ void AppThreeDee::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
 {
     ImGui::Text("Global Frequency Parameters");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     auto detune = static_cast<float>(parameters->PDetune) - 8192;
     ImGui::PushItemWidth(300);
     if (ImGui::SliderFloat("##Detune", &detune, -35, 35, "Detune %.3f"))
@@ -315,8 +282,6 @@ void AppThreeDee::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Fine detune (cents)");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto octave = static_cast<int>(parameters->PCoarseDetune / 1024);
@@ -343,9 +308,6 @@ void AppThreeDee::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
         parameters->PCoarseDetune = static_cast<unsigned short>(octave * 1024 + parameters->PCoarseDetune % 1024);
     }
     ImGui::ShowTooltipOnHover("Octave");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
 
     ImGui::Separator();
 

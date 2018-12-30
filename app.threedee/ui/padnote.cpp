@@ -20,9 +20,6 @@ void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
         {
             ImGui::Text("PADsynth Envelopes and LFOs Parameters of the Instrument");
 
-            ImGui::Spacing();
-            ImGui::Spacing();
-
             if (ImGui::BeginTabBar("PADNote"))
             {
                 if (ImGui::BeginTabItem("Amplitude"))
@@ -50,9 +47,6 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
     auto vol = static_cast<float>(parameters->PVolume);
     ImGui::PushItemWidth(250);
@@ -72,8 +66,6 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     ImGui::EndChild();
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto pan = static_cast<float>(parameters->PPanning);
     if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
@@ -82,9 +74,6 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     auto punchStrength = static_cast<float>(parameters->PPunchStrength);
     if (ImGui::Knob("P.Str.", &punchStrength, 0, 128, ImVec2(40, 40)))
     {
@@ -92,8 +81,6 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Punch Strength");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto punchTime = static_cast<float>(parameters->PPunchTime);
@@ -104,8 +91,6 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     ImGui::ShowTooltipOnHover("Punch time (duration)");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto punchStretch = static_cast<float>(parameters->PPunchStretch);
     if (ImGui::Knob("P.Stc.", &punchStretch, 0, 128, ImVec2(40, 40)))
@@ -114,8 +99,6 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Punch Stretch");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto punchVelocitySensing = static_cast<float>(parameters->PPunchVelocitySensing);
@@ -126,8 +109,6 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     ImGui::ShowTooltipOnHover("Punch Velocity Sensing");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     auto stereo = parameters->PStereo == 1;
     if (ImGui::Checkbox("##stereo", &stereo))
@@ -135,11 +116,10 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
         parameters->PStereo = stereo ? 1 : 0;
     }
     ImGui::ShowTooltipOnHover("Stereo");
-    ImGui::SameLine();
-    ImGui::Text("Stereo");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::SameLine();
+
+    ImGui::Text("Stereo");
 
     ImGui::Separator();
 

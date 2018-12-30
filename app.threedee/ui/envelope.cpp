@@ -8,9 +8,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
 {
     ImGui::Text("%s", label);
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     if (envelope->Envmode >= 3)
     {
         auto a_val = static_cast<float>(envelope->PA_val);
@@ -20,8 +17,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         }
         ImGui::ShowTooltipOnHover("Starting value");
 
-        ImGui::SameLine();
-        ImGui::Spacing();
         ImGui::SameLine();
     }
 
@@ -33,8 +28,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     ImGui::ShowTooltipOnHover("Attack time");
 
     ImGui::SameLine();
-    ImGui::Spacing();
-    ImGui::SameLine();
 
     if (envelope->Envmode == 4)
     {
@@ -45,8 +38,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         }
         ImGui::ShowTooltipOnHover("Decay value");
 
-        ImGui::SameLine();
-        ImGui::Spacing();
         ImGui::SameLine();
     }
 
@@ -60,8 +51,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         ImGui::ShowTooltipOnHover("Decay time");
 
         ImGui::SameLine();
-        ImGui::Spacing();
-        ImGui::SameLine();
     }
 
     if (envelope->Envmode < 3)
@@ -74,8 +63,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         ImGui::ShowTooltipOnHover("Sustain value");
 
         ImGui::SameLine();
-        ImGui::Spacing();
-        ImGui::SameLine();
     }
 
     auto r_dt = static_cast<float>(envelope->PR_dt);
@@ -85,8 +72,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     }
     ImGui::ShowTooltipOnHover("Release time");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     if (envelope->Envmode >= 3)
@@ -99,8 +84,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
         ImGui::ShowTooltipOnHover("Release value");
 
         ImGui::SameLine();
-        ImGui::Spacing();
-        ImGui::SameLine();
     }
 
     auto stretch = static_cast<float>(envelope->Penvstretch);
@@ -110,8 +93,6 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     }
     ImGui::ShowTooltipOnHover("Envelope stretch (on lower notes makes the envelope longer)");
 
-    ImGui::SameLine();
-    ImGui::Spacing();
     ImGui::SameLine();
 
     auto forcedRelease = envelope->Pforcedrelease != 0;
@@ -124,7 +105,4 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     ImGui::SameLine();
 
     ImGui::Text("frcR.");
-
-    ImGui::Spacing();
-    ImGui::Spacing();
 }
