@@ -56,7 +56,6 @@ install(
         ${zyn.common_SOURCE_DIR}/Config.h
         ${zyn.common_SOURCE_DIR}/IAudioGenerator.h
         ${zyn.common_SOURCE_DIR}/Presets.h
-        ${zyn.common_SOURCE_DIR}/PresetsArray.h
         ${zyn.common_SOURCE_DIR}/PresetsStore.h
         ${zyn.common_SOURCE_DIR}/Stereo.h
         ${zyn.common_SOURCE_DIR}/Util.h
