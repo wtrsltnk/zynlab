@@ -199,6 +199,31 @@ void EnvelopeParams::converttofree()
     }
 }
 
+void EnvelopeParams::InitPresets()
+{
+    AddPresetAsBool("free_mode", &Pfreemode);
+    AddPreset("env_points", &Penvpoints);
+    AddPreset("env_sustain", &Penvsustain);
+    AddPreset("env_stretch", &Penvstretch);
+    AddPresetAsBool("forced_release", &Pforcedrelease);
+    AddPresetAsBool("linear_envelope", &Plinearenvelope);
+    AddPreset("A_dt", &PA_dt);
+    AddPreset("D_dt", &PD_dt);
+    AddPreset("R_dt", &PR_dt);
+    AddPreset("A_val", &PA_val);
+    AddPreset("D_val", &PD_val);
+    AddPreset("S_val", &PS_val);
+    AddPreset("R_val", &PR_val);
+
+    for (int i = 0; i < Penvpoints; ++i)
+    {
+        auto point = PresetContainer("POINT");
+        if (i != 0) point.AddPreset("dt", &Penvdt[i]);
+        point.AddPreset("val", &Penvval[i]);
+        AddContainer(i, point);
+    }
+}
+
 void EnvelopeParams::Serialize(IPresetsSerializer *xml)
 {
     xml->addparbool("free_mode", Pfreemode);

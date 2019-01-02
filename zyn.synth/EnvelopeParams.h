@@ -30,7 +30,7 @@
 #define MAX_ENVELOPE_POINTS 40
 #define MIN_ENVELOPE_DB -400
 
-class EnvelopeParams : public Presets
+class EnvelopeParams : public WrappedPresets
 {
 public:
     EnvelopeParams(unsigned char Penvstretch_,
@@ -42,6 +42,8 @@ public:
     void ADSRinit_filter(char A_val, char A_dt, char D_val, char D_dt, char R_dt, char R_val);
     void ASRinit_bw(char A_val, char A_dt, char R_val, char R_dt);
     void converttofree();
+
+    void InitPresets();
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);

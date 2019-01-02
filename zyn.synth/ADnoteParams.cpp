@@ -34,7 +34,7 @@ int ADnote_unison_sizes[] =
     {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
 ADnoteParameters::ADnoteParameters(SystemSettings *settings, IFFTwrapper *fft)
-    : _settings(settings), _fft(fft), GlobalPar(settings)
+    : WrappedPresets(),  _settings(settings), _fft(fft), GlobalPar(settings)
 {
     setpresettype("Padsynth");
 
@@ -275,7 +275,26 @@ ADnoteGlobalParam::~ADnoteGlobalParam()
 ADnoteParameters::~ADnoteParameters()
 {
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
+    {
         KillVoice(nvoice);
+    }
+}
+
+void ADnoteParameters::InitPresets()
+{
+    AddPreset("stereo", &GlobalPar.PStereo);
+
+    AddContainer(PresetContainer("AMPLITUDE_PARAMETERS")
+                 .AddPreset("volume", &GlobalPar.PVolume)
+                 .AddPreset("panning", &GlobalPar.PPanning)
+                 .AddPreset("velocity_sensing", &GlobalPar.PAmpVelocityScaleFunction)
+                 .AddPreset("punch_strength", &GlobalPar.PPunchStrength)
+                 .AddPreset("punch_time", &GlobalPar.PPunchTime)
+                 .AddPreset("punch_stretch", &GlobalPar.PPunchStretch)
+                 .AddPreset("punch_velocity_sensing", &GlobalPar.PPunchVelocitySensing)
+                 .AddPreset("harmonic_randomness_grouping", &GlobalPar.Hrandgrouping)
+                 .AddContainer("AMPLITUDE_ENVELOPE", *GlobalPar.AmpEnvelope)
+                 );
 }
 
 int ADnoteParameters::get_unison_size_index(int nvoice)
@@ -322,7 +341,7 @@ void ADnoteParameters::SerializeSection(IPresetsSerializer *xml, int n)
 
     int oscilused = 0, fmoscilused = 0; //if the oscil or fmoscil are used by another voice
 
-    for (auto & i : VoicePar)
+    for (auto &i : VoicePar)
     {
         if (i.Pextoscil == nvoice)
             oscilused = 1;
@@ -547,6 +566,8 @@ void ADnoteGlobalParam::add2XML(IPresetsSerializer *xml)
 
 void ADnoteParameters::Serialize(IPresetsSerializer *xml)
 {
+    //    WriteToBlob(xml);
+
     GlobalPar.add2XML(xml);
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
     {
@@ -639,6 +660,8 @@ void ADnoteGlobalParam::getfromXML(IPresetsSerializer *xml)
 
 void ADnoteParameters::Deserialize(IPresetsSerializer *xml)
 {
+    //    ReadFromBlob(xml);
+
     GlobalPar.getfromXML(xml);
 
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)

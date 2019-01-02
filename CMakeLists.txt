@@ -31,7 +31,7 @@ add_subdirectory("app")
 #add_subdirectory("app.imgui")
 add_subdirectory("app.threedee")
 #add_subdirectory("app.tiny")
-#add_subdirectory("tests")
+add_subdirectory("tests")
 
 if(WIN32 AND BUILD_VST)
     add_subdirectory("zyn.vst")

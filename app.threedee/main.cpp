@@ -75,8 +75,8 @@ int main(int /*argc*/, char * /*argv*/ [])
         return -1;
     }
 
-    //Nio::SelectSink("PA");
-    //Nio::SelectSource("RT");
+    Nio::SelectSink("PA");
+    Nio::SelectSource("RT");
 
     Config::Current().init();
 
