@@ -29,8 +29,6 @@
 /**Presets and Clipboard management*/
 class Presets
 {
-    friend class PresetsArray;
-
 public:
     Presets();
     virtual ~Presets();

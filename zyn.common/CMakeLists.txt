@@ -11,8 +11,6 @@ add_library(zyn.common STATIC
     IPresetsSerializer.h
     Presets.cpp
     Presets.h
-    PresetsArray.cpp
-    PresetsArray.h
     PresetsSerializer.cpp
     PresetsSerializer.h
     PresetsStore.cpp

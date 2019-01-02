@@ -23,8 +23,8 @@
 #ifndef AD_NOTE_PARAMETERS_H
 #define AD_NOTE_PARAMETERS_H
 
-#include <zyn.common/PresetsArray.h>
 #include <zyn.common/Util.h>
+#include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 
 class EnvelopeParams;

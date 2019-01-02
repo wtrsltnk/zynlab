@@ -24,7 +24,7 @@
 #define FILTER_PARAMS_H
 
 #include <zyn.common/IPresetsSerializer.h>
-#include <zyn.common/PresetsArray.h>
+#include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 
 class FilterParams : public Presets

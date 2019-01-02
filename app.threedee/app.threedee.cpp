@@ -150,13 +150,13 @@ void AppThreeDee::ImGuiSequencer()
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
 
-            if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
+            //if (_mixer->GetChannel(trackIndex)->Pkitmode != 0)
             {
                 ImGuiStepSequencer(trackIndex, trackHeight);
             }
-            else
+            //else
             {
-                ImGuiPianoRollSequencer(trackIndex, trackHeight);
+                //ImGuiPianoRollSequencer(trackIndex, trackHeight);
             }
 
             ImGui::PopStyleColor(3);
@@ -187,13 +187,13 @@ void AppThreeDee::ImGuiSequencer()
 
         if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         {
-            if (_sequencer.ActiveInstrument() >= 0 && _mixer->GetChannel(_sequencer.ActiveInstrument())->Pkitmode != 0)
+            //if (_sequencer.ActiveInstrument() >= 0 && _mixer->GetChannel(_sequencer.ActiveInstrument())->Pkitmode != 0)
             {
                 ImGuiStepSequencerEventHandling();
             }
-            else
+            //else
             {
-                ImGuiPianoRollSequencerEventHandling();
+                //ImGuiPianoRollSequencerEventHandling();
             }
         }
     }
