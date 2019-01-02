@@ -34,7 +34,7 @@ int ADnote_unison_sizes[] =
     {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
 ADnoteParameters::ADnoteParameters(SystemSettings *settings, IFFTwrapper *fft)
-    : WrappedPresets(),  _settings(settings), _fft(fft), GlobalPar(settings)
+    : _settings(settings), _fft(fft), GlobalPar(settings)
 {
     setpresettype("Padsynth");
 
@@ -280,22 +280,22 @@ ADnoteParameters::~ADnoteParameters()
     }
 }
 
-void ADnoteParameters::InitPresets()
-{
-    AddPreset("stereo", &GlobalPar.PStereo);
+//void ADnoteParameters::InitPresets()
+//{
+//    AddPreset("stereo", &GlobalPar.PStereo);
 
-    AddContainer(PresetContainer("AMPLITUDE_PARAMETERS")
-                 .AddPreset("volume", &GlobalPar.PVolume)
-                 .AddPreset("panning", &GlobalPar.PPanning)
-                 .AddPreset("velocity_sensing", &GlobalPar.PAmpVelocityScaleFunction)
-                 .AddPreset("punch_strength", &GlobalPar.PPunchStrength)
-                 .AddPreset("punch_time", &GlobalPar.PPunchTime)
-                 .AddPreset("punch_stretch", &GlobalPar.PPunchStretch)
-                 .AddPreset("punch_velocity_sensing", &GlobalPar.PPunchVelocitySensing)
-                 .AddPreset("harmonic_randomness_grouping", &GlobalPar.Hrandgrouping)
-                 .AddContainer("AMPLITUDE_ENVELOPE", *GlobalPar.AmpEnvelope)
-                 );
-}
+//    AddContainer(PresetContainer("AMPLITUDE_PARAMETERS")
+//                 .AddPreset("volume", &GlobalPar.PVolume)
+//                 .AddPreset("panning", &GlobalPar.PPanning)
+//                 .AddPreset("velocity_sensing", &GlobalPar.PAmpVelocityScaleFunction)
+//                 .AddPreset("punch_strength", &GlobalPar.PPunchStrength)
+//                 .AddPreset("punch_time", &GlobalPar.PPunchTime)
+//                 .AddPreset("punch_stretch", &GlobalPar.PPunchStretch)
+//                 .AddPreset("punch_velocity_sensing", &GlobalPar.PPunchVelocitySensing)
+//                 .AddPreset("harmonic_randomness_grouping", &GlobalPar.Hrandgrouping)
+//                 .AddContainer("AMPLITUDE_ENVELOPE", *GlobalPar.AmpEnvelope)
+//                 );
+//}
 
 int ADnoteParameters::get_unison_size_index(int nvoice)
 {
