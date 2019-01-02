@@ -1,22 +1,24 @@
 #include <catch2/catch.hpp>
-#include <zyn.synth/EnvelopeParams.h>
-#include <zyn.common/PresetsSerializer.h>
 #include <iostream>
+#include <zyn.common/PresetsSerializer.h>
+#include <zyn.synth/EnvelopeParams.h>
 
 TEST_CASE("Presets", "[zyn.common]")
 {
     auto sut = EnvelopeParams('\0', '\0');
-
-    auto serializer = PresetsSerializer();
-
     sut.Defaults();
-//    sut.Serialize(&serializer);
+    sut.Pforcedrelease = 1;
 
-//    std::cout << serializer.getXMLdata() << std::endl;
+    auto serializerA = PresetsSerializer();
 
-//    serializer = PresetsSerializer();
+    sut.Serialize(&serializerA);
+
+    std::cout << serializerA.getXMLdata() << std::endl
+              << "------" << std::endl;
+
+    auto serializerB = PresetsSerializer();
     sut.InitPresets();
-    sut.WriteToBlob(&serializer);
+    sut.WriteToBlob(&serializerB);
 
-    std::cout << serializer.getXMLdata() << std::endl;
+    std::cout << serializerB.getXMLdata() << std::endl;
 }

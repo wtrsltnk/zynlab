@@ -241,7 +241,7 @@ void PresetContainer::WriteToBlob(IPresetsSerializer *xml)
         {
             case PresetTypes::UnsignedChar:
             {
-                xml->addpar(_name.c_str(), *(valueReference.uchar_v));
+                xml->addpar(_name.c_str(), static_cast<int>(*(valueReference.uchar_v)));
                 break;
             }
             case PresetTypes::UnsignedShort:
@@ -261,7 +261,7 @@ void PresetContainer::WriteToBlob(IPresetsSerializer *xml)
             }
             case PresetTypes::Boolean:
             {
-                xml->addparbool(_name.c_str(), static_cast<int>(*valueReference.float_v));
+                xml->addparbool(_name.c_str(), static_cast<int>(*valueReference.uchar_v));
                 break;
             }
             case PresetTypes::Container:
