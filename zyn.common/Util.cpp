@@ -36,8 +36,6 @@
 
 prng_t prng_state = 0x1234;
 
-float *denormalkillbuf;
-
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)
  */
@@ -80,7 +78,7 @@ float getdetune(unsigned char type,
             findet = std::fabs(fdetune / 8192.0f) * 10.0f;
             break;
         case 3:
-            cdet = std::fabs(cdetune * 100);
+            cdet = static_cast<int>(std::fabs(cdetune * 100));
             findet = powf(10, std::fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
             break;
         case 4:
@@ -105,27 +103,9 @@ float getdetune(unsigned char type,
 
 bool fileexists(const char *filename)
 {
-    struct stat tmp
-    {};
+    struct stat tmp;
     int result = stat(filename, &tmp);
     return (result >= 0);
-}
-
-void set_realtime()
-{
-#ifdef HAVE_SCHEDULER
-    sched_param sc;
-    sc.sched_priority = 60;
-    //if you want get "sched_setscheduler undeclared" from compilation,
-    //you can safely remove the folowing line:
-    sched_setscheduler(0, SCHED_FIFO, &sc);
-    //if (err==0) printf("Real-time");
-#endif
-}
-
-void os_sleep(long length)
-{
-    usleep(length);
 }
 
 std::string legalizeFilename(std::string filename)
@@ -152,7 +132,7 @@ float SystemSettings::numRandom()
 
 float interpolate(const float *data, size_t len, float pos)
 {
-    assert(len > (size_t)pos + 1);
+    assert(len > static_cast<size_t>(pos + 1));
     const int l_pos = static_cast<int>(pos), r_pos = l_pos + 1;
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
@@ -160,7 +140,7 @@ float interpolate(const float *data, size_t len, float pos)
 
 float cinterpolate(const float *data, size_t len, float pos)
 {
-    const int l_pos = static_cast<int>(pos) % len, r_pos = (l_pos + 1) % len;
+    const unsigned int l_pos = static_cast<unsigned int>(pos) % len, r_pos = (l_pos + 1) % len;
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }

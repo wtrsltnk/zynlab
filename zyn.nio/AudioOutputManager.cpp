@@ -4,7 +4,7 @@
 #include "EngineManager.h"
 #include "MidiInputManager.h"
 #include "WavEngine.h"
-#include <zyn.common/Util.h> //for set_realtime()
+#include <zyn.common/Util.h>
 
 #include <algorithm>
 #include <cassert>
@@ -95,7 +95,7 @@ const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
     {
         this->_audioGenerator->Lock();
         MidiInputManager::Instance()
-                .Flush(i * this->_audioGenerator->BufferSize(), (i + 1) * this->_audioGenerator->BufferSize());
+            .Flush(i * this->_audioGenerator->BufferSize(), (i + 1) * this->_audioGenerator->BufferSize());
         this->_audioGenerator->AudioOut(outl, outr);
         this->_audioGenerator->Unlock();
 
@@ -105,14 +105,14 @@ const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
         if (s_out != s_sys)
         { //we need to resample
             const size_t stepsLeft = resample(
-                        priBuffCurrent._left,
-                        outl, s_sys, s_out,
-                        this->_audioGenerator->BufferSize());
+                priBuffCurrent._left,
+                outl, s_sys, s_out,
+                this->_audioGenerator->BufferSize());
 
             const size_t stepsRight = resample(
-                        priBuffCurrent._right,
-                        outr, s_sys, s_out,
-                        this->_audioGenerator->BufferSize());
+                priBuffCurrent._right,
+                outr, s_sys, s_out,
+                this->_audioGenerator->BufferSize());
 
             priBuffCurrent._left += stepsLeft;
             priBuffCurrent._right += stepsRight;

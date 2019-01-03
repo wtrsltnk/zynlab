@@ -40,15 +40,6 @@ extern float getdetune(unsigned char type,
                        unsigned short int coarsedetune,
                        unsigned short int finedetune);
 
-/**Try to set current thread to realtime priority program priority
- * \todo see if the right pid is being sent
- * \todo see if this is having desired effect, if not then look at
- * pthread_attr_t*/
-void set_realtime();
-
-/**Os independent sleep in microsecond*/
-void os_sleep(long length);
-
 std::string legalizeFilename(std::string filename);
 
 void invSignal(float *sig, size_t len);
@@ -64,7 +55,7 @@ std::string stringFrom(T x)
 template <class T>
 T stringTo(const char *x)
 {
-    std::string str = x != NULL ? x : "0"; //should work for the basic float/int
+    std::string str = x != nullptr ? x : "0"; //should work for the basic float/int
     std::stringstream ss(str);
     T ans;
     ss >> ans;
