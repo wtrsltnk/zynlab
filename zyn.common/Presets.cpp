@@ -128,8 +128,20 @@ void Presets::deletepreset(int npreset)
 }
 
 Preset::Preset(std::string const &name) : _name(name), _type(PresetTypes::Container), _id(0) {}
-Preset::Preset(Preset const &preset) : _name(preset._name), _type(preset._type), _id(0), valueReference(preset.valueReference) {}
-Preset::Preset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max) : _name(name), _type(PresetTypes::UnsignedChar), _id(0)
+Preset::Preset(std::string const &name, Preset const &container)
+    : _name(name), _type(PresetTypes::Container), _id(0),
+      valueReference(container.valueReference),
+      _rangeMin(container._rangeMin), _rangeMax(container._rangeMax),
+      _presets(container._presets)
+{}
+Preset::Preset(Preset const &preset)
+    : _name(preset._name), _type(preset._type), _id(0),
+      valueReference(preset.valueReference),
+      _rangeMin(preset._rangeMin), _rangeMax(preset._rangeMax),
+      _presets(preset._presets)
+{}
+Preset::Preset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
+    : _name(name), _type(PresetTypes::UnsignedChar), _id(0)
 {
     valueReference.uchar_v = value;
     _rangeMin.uchar_min = min;
@@ -139,19 +151,22 @@ Preset::Preset(std::string const &name, unsigned char *value, unsigned char min,
         _type = PresetTypes::Boolean;
     }
 }
-Preset::Preset(std::string const &name, unsigned short int *value, unsigned short int min, unsigned short int max) : _name(name), _type(PresetTypes::UnsignedShort), _id(0)
+Preset::Preset(std::string const &name, unsigned short int *value, unsigned short int min, unsigned short int max)
+    : _name(name), _type(PresetTypes::UnsignedShort), _id(0)
 {
     valueReference.ushort_v = value;
     _rangeMin.ushort_min = min;
     _rangeMax.ushort_max = max;
 }
-Preset::Preset(std::string const &name, short int *value, short int min, short int max) : _name(name), _type(PresetTypes::Short), _id(0)
+Preset::Preset(std::string const &name, short int *value, short int min, short int max)
+    : _name(name), _type(PresetTypes::Short), _id(0)
 {
     valueReference.short_v = value;
     _rangeMin.short_min = min;
     _rangeMax.short_max = max;
 }
-Preset::Preset(std::string const &name, float *value, float min, float max) : _name(name), _type(PresetTypes::Float), _id(0)
+Preset::Preset(std::string const &name, float *value, float min, float max)
+    : _name(name), _type(PresetTypes::Float), _id(0)
 {
     valueReference.float_v = value;
     _rangeMin.float_min = min;
@@ -160,6 +175,8 @@ Preset::Preset(std::string const &name, float *value, float min, float max) : _n
 Preset::~Preset() {}
 
 PresetTypes Preset::Type() const { return _type; }
+
+std::string const &Preset::Name() const { return _name; }
 
 int Preset::Id() const { return _id; }
 
@@ -175,115 +192,122 @@ void Preset::set(unsigned short int v) { *valueReference.ushort_v = v; }
 void Preset::set(short int v) { *valueReference.short_v = v; }
 void Preset::set(float v) { *valueReference.float_v = v; }
 
-PresetContainer::PresetContainer(std::string const &name) : Preset(name) {}
-PresetContainer::PresetContainer(PresetContainer const &presets) : Preset(presets._name), _presets(presets._presets) {}
-PresetContainer::PresetContainer(std::string const &name, PresetContainer const &presets) : Preset(name), _presets(presets._presets) {}
-
-PresetContainer::~PresetContainer() {}
-PresetContainer &PresetContainer::AddPreset(Preset const &preset)
+Preset &Preset::AddPreset(Preset const &preset)
 {
-    _presets.push_back(preset);
+    _presets.push_back(Preset(preset));
     return *this;
 }
-PresetContainer &PresetContainer::AddPreset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
+Preset &Preset::AddPreset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
 {
     _presets.push_back(Preset(name, value, min, max));
     return *this;
 }
-PresetContainer &PresetContainer::AddPreset(std::string const &name, unsigned short int *value, unsigned short int min, unsigned short int max)
+Preset &Preset::AddPreset(std::string const &name, unsigned short int *value, unsigned short int min, unsigned short int max)
 {
     _presets.push_back(Preset(name, value, min, max));
     return *this;
 }
-PresetContainer &PresetContainer::AddPreset(std::string const &name, short int *value, short int min, short int max)
+Preset &Preset::AddPreset(std::string const &name, short int *value, short int min, short int max)
 {
     _presets.push_back(Preset(name, value, min, max));
     return *this;
 }
-PresetContainer &PresetContainer::AddPreset(std::string const &name, float *value, float min, float max)
+Preset &Preset::AddPreset(std::string const &name, float *value, float min, float max)
 {
     _presets.push_back(Preset(name, value, min, max));
     return *this;
 }
-PresetContainer &PresetContainer::AddPresetAsBool(std::string const &name, unsigned char *value)
+Preset &Preset::AddPresetAsBool(std::string const &name, unsigned char *value)
 {
     _presets.push_back(Preset(name, value, 0, 1));
     return *this;
 }
-PresetContainer &PresetContainer::AddContainer(PresetContainer const &container)
+Preset &Preset::AddContainer(Preset const &container)
 {
-    _presets.push_back(container);
+    _presets.push_back(Preset(container));
     return *this;
 }
-PresetContainer &PresetContainer::AddContainer(int index, PresetContainer const &container)
+Preset &Preset::AddContainer(int index, Preset const &container)
 {
-    _presets.push_back(container);
+    _presets.push_back(Preset(container));
     _presets.back().Id(index);
     return *this;
 }
-PresetContainer &PresetContainer::AddContainer(std::string const &name, int index, PresetContainer const &container)
+Preset &Preset::AddContainer(std::string const &name, int index, Preset const &container)
 {
-    _presets.push_back(PresetContainer(name, container));
+    _presets.push_back(Preset(name, container));
     _presets.back().Id(index);
     return *this;
 }
-PresetContainer &PresetContainer::AddContainer(std::string const &name, PresetContainer const &container)
+Preset &Preset::AddContainer(std::string const &name, Preset const &container)
 {
-    _presets.push_back(PresetContainer(name, container));
+    _presets.push_back(Preset(name, container));
     return *this;
 }
 
-void PresetContainer::WriteToBlob(IPresetsSerializer *xml)
+void Preset::WriteToBlob(IPresetsSerializer *xml)
 {
-    for (auto &preset : _presets)
+    switch (Type())
     {
-        switch (preset.Type())
+        case PresetTypes::UnsignedChar:
         {
-            case PresetTypes::UnsignedChar:
+            if (valueReference.uchar_v == nullptr) break;
+            xml->addpar(Name(), static_cast<int>(*(valueReference.uchar_v)));
+            break;
+        }
+        case PresetTypes::UnsignedShort:
+        {
+            if (valueReference.ushort_v == nullptr) break;
+            xml->addpar(Name(), *(valueReference.ushort_v));
+            break;
+        }
+        case PresetTypes::Short:
+        {
+            if (valueReference.short_v == nullptr) break;
+            xml->addpar(Name(), *(valueReference.short_v));
+            break;
+        }
+        case PresetTypes::Float:
+        {
+            if (valueReference.float_v == nullptr) break;
+            xml->addparreal(Name(), *(valueReference.float_v));
+            break;
+        }
+        case PresetTypes::Boolean:
+        {
+            if (valueReference.uchar_v == nullptr) break;
+            xml->addparbool(Name(), static_cast<int>(*valueReference.uchar_v));
+            break;
+        }
+        case PresetTypes::Container:
+        {
+            xml->beginbranch(Name());
+            for (auto &preset : _presets)
             {
-                xml->addpar(_name.c_str(), static_cast<int>(*(valueReference.uchar_v)));
-                break;
+                preset.WriteToBlob(xml);
             }
-            case PresetTypes::UnsignedShort:
-            {
-                xml->addpar(_name.c_str(), *(valueReference.ushort_v));
-                break;
-            }
-            case PresetTypes::Short:
-            {
-                xml->addpar(_name.c_str(), *(valueReference.short_v));
-                break;
-            }
-            case PresetTypes::Float:
-            {
-                xml->addparreal(_name.c_str(), *(valueReference.float_v));
-                break;
-            }
-            case PresetTypes::Boolean:
-            {
-                xml->addparbool(_name.c_str(), static_cast<int>(*valueReference.uchar_v));
-                break;
-            }
-            case PresetTypes::Container:
-            {
-                auto container = dynamic_cast<PresetContainer *>(&preset);
-                if (container == nullptr)
-                {
-                    break;
-                }
-                xml->beginbranch(_name.c_str());
-                container->WriteToBlob(xml);
-                xml->endbranch();
-                break;
-            }
+            xml->endbranch();
+            break;
         }
     }
 }
 
-void PresetContainer::ReadFromBlob(IPresetsSerializer *xml)
+void Preset::ReadFromBlob(IPresetsSerializer *xml)
 {
 }
 
-WrappedPresets::WrappedPresets() : PresetContainer("tbd") {}
+void Preset::WritePresetsToBlob(IPresetsSerializer *xml)
+{
+    for (auto &preset : _presets)
+    {
+        preset.WriteToBlob(xml);
+    }
+}
+
+void Preset::ReadPresetsFromBlob(IPresetsSerializer *xml)
+{
+}
+
+WrappedPresets::WrappedPresets() : Preset("tbd") {}
 
 WrappedPresets::~WrappedPresets() {}

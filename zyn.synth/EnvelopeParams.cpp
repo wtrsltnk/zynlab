@@ -217,7 +217,7 @@ void EnvelopeParams::InitPresets()
 
     for (int i = 0; i < Penvpoints; ++i)
     {
-        auto point = PresetContainer("POINT");
+        Preset point("POINT");
         if (i != 0) point.AddPreset("dt", &Penvdt[i]);
         point.AddPreset("val", &Penvval[i]);
         AddContainer(i, point);

@@ -18,7 +18,7 @@ TEST_CASE("Presets", "[zyn.common]")
 
     auto serializerB = PresetsSerializer();
     sut.InitPresets();
-    sut.WriteToBlob(&serializerB);
+    sut.WritePresetsToBlob(&serializerB);
 
     std::cout << serializerB.getXMLdata() << std::endl;
 }

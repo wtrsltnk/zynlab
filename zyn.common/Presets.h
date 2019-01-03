@@ -25,6 +25,7 @@
 
 #include "IPresetsSerializer.h"
 #include "PresetsStore.h"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -62,11 +63,14 @@ protected:
         short int short_max;
         float float_max;
     } _rangeMax;
+    std::vector<Preset> _presets;
 
-    Preset(std::string const &name);
-
+    void WriteToBlob(IPresetsSerializer *xml);
+    void ReadFromBlob(IPresetsSerializer *xml);
 public:
     Preset(Preset const &preset);
+    Preset(std::string const &name);
+    Preset(std::string const &name, Preset const &preset);
     Preset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
     Preset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
@@ -74,6 +78,7 @@ public:
     virtual ~Preset();
 
     PresetTypes Type() const;
+    std::string const &Name() const;
     int Id() const;
     void Id(int id);
 
@@ -86,32 +91,20 @@ public:
     void set(unsigned short int v);
     void set(short int v);
     void set(float v);
-};
 
-class PresetContainer : public Preset
-{
-protected:
-    std::vector<Preset> _presets;
+    Preset &AddPreset(Preset const &preset);
+    Preset &AddPreset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
+    Preset &AddPreset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
+    Preset &AddPreset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
+    Preset &AddPreset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
+    Preset &AddPresetAsBool(std::string const &name, unsigned char *value);
+    Preset &AddContainer(Preset const &preset);
+    Preset &AddContainer(int index, Preset const &preset);
+    Preset &AddContainer(std::string const &name, Preset const &preset);
+    Preset &AddContainer(std::string const &name, int index, Preset const &preset);
 
-public:
-    PresetContainer(std::string const &name);
-    PresetContainer(PresetContainer const &presets);
-    PresetContainer(std::string const &name, PresetContainer const &presets);
-    virtual ~PresetContainer();
-
-    PresetContainer &AddPreset(Preset const &preset);
-    PresetContainer &AddPreset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
-    PresetContainer &AddPreset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
-    PresetContainer &AddPreset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
-    PresetContainer &AddPreset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
-    PresetContainer &AddPresetAsBool(std::string const &name, unsigned char *value);
-    PresetContainer &AddContainer(PresetContainer const &container);
-    PresetContainer &AddContainer(int index, PresetContainer const &container);
-    PresetContainer &AddContainer(std::string const &name, PresetContainer const &container);
-    PresetContainer &AddContainer(std::string const &name, int index, PresetContainer const &container);
-
-    virtual void WriteToBlob(IPresetsSerializer *xml);
-    virtual void ReadFromBlob(IPresetsSerializer *xml);
+    void WritePresetsToBlob(IPresetsSerializer *xml);
+    void ReadPresetsFromBlob(IPresetsSerializer *xml);
 };
 
 /**Presets and Clipboard management*/
@@ -139,7 +132,7 @@ protected:
     virtual void Defaults() = 0;
 };
 
-class WrappedPresets : public Presets, public PresetContainer
+class WrappedPresets : public Presets, public Preset
 {
 public:
     WrappedPresets();
