@@ -1,4 +1,4 @@
-# zynlib
+# zynlab
 Rearrangement of the zynaddsubfx classes and seperated into libraries.
 
 ```
@@ -18,5 +18,7 @@ cd ../
 robocopy "zynaddsubfx-deps/mingw-32bit/bin" zynlab-build/app *.dll
 robocopy "zynaddsubfx-deps/mingw-32bit/bin" zynlab-build/app.threedee *.dll
 ```
+
+Also added some UI ideas:
 
 ![Screenshot of zyn-studio](screenshots/20181224.png)
