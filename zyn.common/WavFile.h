@@ -28,7 +28,7 @@
 class WavFile
 {
 public:
-    WavFile(const std::string& filename, int samplerate, int channels);
+    WavFile(const std::string &filename, unsigned int samplerate, unsigned short int channels);
     ~WavFile();
 
     bool good() const;
@@ -37,9 +37,9 @@ public:
     void writeStereoSamples(unsigned int nsmps, short int *smps);
 
 private:
-    int sampleswritten;
-    int samplerate;
-    int channels;
+    unsigned int sampleswritten;
+    unsigned int samplerate;
+    unsigned short int channels;
     FILE *file;
 };
 #endif

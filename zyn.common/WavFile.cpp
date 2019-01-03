@@ -26,7 +26,7 @@
 
 using namespace std;
 
-WavFile::WavFile(const string& filename, int samplerate, int channels)
+WavFile::WavFile(const string &filename, unsigned int samplerate, unsigned short int channels)
     : sampleswritten(0), samplerate(samplerate), channels(channels),
       file(fopen(filename.c_str(), "w"))
 
