@@ -328,6 +328,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         char tmp[32] = {0};
         sprintf(tmp, "track %d", track + 1);
         ImGui::TextCentered(ImVec2(width, 20), tmp);
+        if (ImGui::IsItemClicked())
+        {
+            _sequencer.ActiveInstrument(track);
+        }
 
         auto trackEnabled = channel->Penabled == 1;
 
@@ -366,6 +370,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (useLargeMode)
         {
             ImGui::TextCentered(ImVec2(width, 20), "MIDI channel");
+            if (ImGui::IsItemClicked())
+            {
+                _sequencer.ActiveInstrument(track);
+            }
         }
         int midiChannel = static_cast<int>(channel->Prcvchn);
         ImGui::PushItemWidth(width);
@@ -375,6 +383,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             _sequencer.ActiveInstrument(track);
         }
         ImGui::ShowTooltipOnHover("Midi channel");
+        if (ImGui::IsItemClicked())
+        {
+            _sequencer.ActiveInstrument(track);
+        }
 
         ImGui::PopStyleVar();
 
@@ -444,6 +456,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (useLargeMode)
         {
             ImGui::TextCentered(ImVec2(width, 20), "Sys FX sends");
+            if (ImGui::IsItemClicked())
+            {
+                _sequencer.ActiveInstrument(track);
+            }
         }
 
         for (int fx = 0; fx < NUM_SYS_EFX; fx++)
@@ -455,6 +471,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 _currentSystemEffect = fx;
                 ImGui::SetWindowFocus(SystemFxEditorID);
             }
+            if (ImGui::IsItemClicked())
+            {
+                _sequencer.ActiveInstrument(track);
+            }
 
             ImGui::SameLine();
 
@@ -463,8 +483,11 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             auto send1 = static_cast<float>(_mixer->Psysefxvol[fx][track]);
             if (ImGui::Knob(tmp, &send1, 0, 128, ImVec2(20, 20)))
             {
-                _sequencer.ActiveInstrument(track);
                 _mixer->setPsysefxvol(track, fx, static_cast<unsigned char>(send1));
+            }
+            if (ImGui::IsItemClicked())
+            {
+                _sequencer.ActiveInstrument(track);
             }
 
             sprintf(tmp, "Volume for send to system effect %d", (fx + 1));
@@ -486,11 +509,15 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (useLargeMode)
         {
             ImGui::TextCentered(ImVec2(width, 20), "Insert FX");
+            if (ImGui::IsItemClicked())
+            {
+                _sequencer.ActiveInstrument(track);
+            }
         }
         int fillCount = mostInsertEffectsPerChannel;
         for (int fx = 0; fx < NUM_INS_EFX; fx++)
         {
-            ImGui::PushID(fx);
+            ImGui::PushID(100 + fx);
             if (_mixer->Pinsparts[fx] == track)
             {
                 if (ImGui::Button(effectNames[_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
@@ -539,10 +566,14 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (useLargeMode)
         {
             ImGui::TextCentered(ImVec2(width, 20), "Audio FX");
+            if (ImGui::IsItemClicked())
+            {
+                _sequencer.ActiveInstrument(track);
+            }
         }
         for (int fx = 0; fx < NUM_CHANNEL_EFX; fx++)
         {
-            ImGui::PushID(fx);
+            ImGui::PushID(200 + fx);
             ImGui::PushStyleColor(ImGuiCol_Button, channel->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
             if (ImGui::Button(effectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 20)))
             {
@@ -637,6 +668,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::ShowTooltipOnHover("Track volume");
     }
     ImGui::EndChild();
+    if (ImGui::IsItemClicked())
+    {
+        _sequencer.ActiveInstrument(track);
+    }
 
     if (highlightTrack)
     {
