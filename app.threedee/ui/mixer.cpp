@@ -681,13 +681,13 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
 void AppThreeDee::ImGuiSelectInstrumentPopup()
 {
-    if (_openSelectInstrument >= 0)
+    if (_openSelectInstrument < 0)
     {
-        ImGui::OpenPopup("Select Instrument");
+        return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(900, 850));
-    if (ImGui::BeginPopupModal("Select Instrument"))
+    if (ImGui::Begin("Select Instrument"))
     {
         static bool autoClose = false;
         ImGui::SameLine();
@@ -731,9 +731,9 @@ void AppThreeDee::ImGuiSelectInstrumentPopup()
                     _mixer->GetBankManager()->LoadFromSlot(i, instrument);
                     instrument->Unlock();
                     instrument->ApplyParameters();
-                    _openSelectInstrument = -1;
                     if (autoClose)
                     {
+                        _openSelectInstrument = -1;
                         ImGui::CloseCurrentPopup();
                     }
                 }
@@ -744,7 +744,7 @@ void AppThreeDee::ImGuiSelectInstrumentPopup()
             }
         }
         ImGui::EndChild();
-        ImGui::EndPopup();
+        ImGui::End();
     }
 }
 
@@ -755,13 +755,13 @@ void AppThreeDee::ImGuiChangeInstrumentTypePopup()
         return;
     }
 
-    if (_openChangeInstrumentType >= 0)
+    if (_openChangeInstrumentType < 0)
     {
-        ImGui::OpenPopup("Select Instrument Type");
+        return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(570, 500));
-    if (ImGui::BeginPopupModal("Select Instrument Type"))
+    if (ImGui::Begin("Select Instrument Type"))
     {
         ImGui::SameLine();
         if (ImGui::Button("Close"))
@@ -791,7 +791,7 @@ void AppThreeDee::ImGuiChangeInstrumentTypePopup()
             ImGui::ShowTooltipOnHover(instrumentCategoryNames[i]);
         }
         ImGui::EndChild();
-        ImGui::EndPopup();
+        ImGui::End();
     }
 }
 
