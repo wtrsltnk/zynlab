@@ -18,3 +18,5 @@ cd ../
 robocopy "zynaddsubfx-deps/mingw-32bit/bin" zynlab-build/app *.dll
 robocopy "zynaddsubfx-deps/mingw-32bit/bin" zynlab-build/app.threedee *.dll
 ```
+
+![Screenshot of zyn-studio](screenshots/20181224.png)
