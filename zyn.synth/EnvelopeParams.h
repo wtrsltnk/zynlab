@@ -36,11 +36,11 @@ public:
     EnvelopeParams(unsigned char Penvstretch_,
                    unsigned char Pforcedrelease_);
     ~EnvelopeParams();
-    void ADSRinit(char A_dt, char D_dt, char S_val, char R_dt);
-    void ADSRinit_dB(char A_dt, char D_dt, char S_val, char R_dt);
-    void ASRinit(char A_val, char A_dt, char R_val, char R_dt);
-    void ADSRinit_filter(char A_val, char A_dt, char D_val, char D_dt, char R_dt, char R_val);
-    void ASRinit_bw(char A_val, char A_dt, char R_val, char R_dt);
+    void ADSRinit(unsigned char A_dt, unsigned char D_dt, unsigned char S_val, unsigned char R_dt);
+    void ADSRinit_dB(unsigned char A_dt, unsigned char D_dt, unsigned char S_val, unsigned char R_dt);
+    void ASRinit(unsigned char A_val, unsigned char A_dt, unsigned char R_val, unsigned char R_dt);
+    void ADSRinit_filter(unsigned char A_val, unsigned char A_dt, unsigned char D_val, unsigned char D_dt, unsigned char R_dt, unsigned char R_val);
+    void ASRinit_bw(unsigned char A_val, unsigned char A_dt, unsigned char R_val, unsigned char R_dt);
     void converttofree();
 
     void InitPresets();

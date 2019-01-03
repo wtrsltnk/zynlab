@@ -63,7 +63,11 @@ float EnvelopeParams::getdt(char i)
 /*
  * ADSR/ASR... initialisations
  */
-void EnvelopeParams::ADSRinit(char A_dt, char D_dt, char S_val, char R_dt)
+void EnvelopeParams::ADSRinit(
+        unsigned char A_dt,
+        unsigned char D_dt,
+        unsigned char S_val,
+        unsigned char R_dt)
 {
     setpresettype("Penvamplitude");
     Envmode = 1;
@@ -77,7 +81,11 @@ void EnvelopeParams::ADSRinit(char A_dt, char D_dt, char S_val, char R_dt)
     store2defaults();
 }
 
-void EnvelopeParams::ADSRinit_dB(char A_dt, char D_dt, char S_val, char R_dt)
+void EnvelopeParams::ADSRinit_dB(
+        unsigned char A_dt,
+        unsigned char D_dt,
+        unsigned char S_val,
+        unsigned char R_dt)
 {
     setpresettype("Penvamplitude");
     Envmode = 2;
@@ -91,7 +99,11 @@ void EnvelopeParams::ADSRinit_dB(char A_dt, char D_dt, char S_val, char R_dt)
     store2defaults();
 }
 
-void EnvelopeParams::ASRinit(char A_val, char A_dt, char R_val, char R_dt)
+void EnvelopeParams::ASRinit(
+        unsigned char A_val,
+        unsigned char A_dt,
+        unsigned char R_val,
+        unsigned char R_dt)
 {
     setpresettype("Penvfrequency");
     Envmode = 3;
@@ -105,12 +117,13 @@ void EnvelopeParams::ASRinit(char A_val, char A_dt, char R_val, char R_dt)
     store2defaults();
 }
 
-void EnvelopeParams::ADSRinit_filter(char A_val,
-                                     char A_dt,
-                                     char D_val,
-                                     char D_dt,
-                                     char R_dt,
-                                     char R_val)
+void EnvelopeParams::ADSRinit_filter(
+    unsigned char A_val,
+    unsigned char A_dt,
+    unsigned char D_val,
+    unsigned char D_dt,
+    unsigned char R_dt,
+    unsigned char R_val)
 {
     setpresettype("Penvfilter");
     Envmode = 4;
@@ -125,7 +138,11 @@ void EnvelopeParams::ADSRinit_filter(char A_val,
     store2defaults();
 }
 
-void EnvelopeParams::ASRinit_bw(char A_val, char A_dt, char R_val, char R_dt)
+void EnvelopeParams::ASRinit_bw(
+        unsigned char A_val,
+        unsigned char A_dt,
+        unsigned char R_val,
+        unsigned char R_dt)
 {
     setpresettype("Penvbandwidth");
     Envmode = 5;
