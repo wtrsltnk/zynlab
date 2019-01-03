@@ -31,7 +31,7 @@
 
 #define N_RES_POINTS 256
 
-class Resonance : public Presets
+class Resonance : public WrappedPresets
 {
 public:
     Resonance();
@@ -41,6 +41,8 @@ public:
     void smooth();
     void interpolatepeaks(int type);
     void randomize(int type);
+
+    void InitPresets();
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
@@ -55,6 +57,7 @@ public:
 
     //parameters
     unsigned char Penabled;                  //if the ressonance is enabled
+    short Prespointcount;
     unsigned char Prespoints[N_RES_POINTS];  //how many points define the resonance function
     unsigned char PmaxdB;                    //how many dB the signal may be amplified
     unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves

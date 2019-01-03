@@ -70,6 +70,7 @@ protected:
 public:
     Preset(Preset const &preset);
     Preset(std::string const &name);
+    Preset(std::string const &name, int id);
     Preset(std::string const &name, Preset const &preset);
     Preset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);

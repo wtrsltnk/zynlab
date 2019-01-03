@@ -39,6 +39,7 @@ void Resonance::Defaults()
     Pprotectthefundamental = 0;
     ctlcenter = 1.0f;
     ctlbw = 1.0f;
+    Prespointcount = N_RES_POINTS;
     for (unsigned char &Prespoint : Prespoints)
         Prespoint = 64;
 }
@@ -233,6 +234,24 @@ void Resonance::sendcontroller(MidiControllers ctl, float par)
         ctlcenter = par;
     else
         ctlbw = par;
+}
+
+void Resonance::InitPresets()
+{
+    AddPresetAsBool("enabled", &Penabled);
+
+    AddPreset("max_db", &PmaxdB);
+    AddPreset("center_freq", &Pcenterfreq);
+    AddPreset("octaves_freq", &Poctavesfreq);
+    AddPresetAsBool("protect_fundamental_frequency", &Pprotectthefundamental);
+    Prespointcount = N_RES_POINTS;
+    AddPreset("resonance_points", &Prespointcount);
+    for (int i = 0; i < N_RES_POINTS; ++i)
+    {
+        Preset respoint("RESPOINT", i);
+        respoint.AddPreset("val", &Prespoints[i]);
+        AddContainer(respoint);
+    }
 }
 
 void Resonance::Serialize(IPresetsSerializer *xml)

@@ -27,7 +27,7 @@
 #include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 
-class LFOParams : public Presets
+class LFOParams : public WrappedPresets
 {
 public:
     LFOParams(unsigned char Pfreq_,
@@ -36,9 +36,11 @@ public:
               unsigned char PLFOtype_,
               unsigned char Prandomness_,
               unsigned char Pdelay_,
-              bool Pcontinous,
+              unsigned char Pcontinous,
               unsigned char fel_);
     virtual ~LFOParams();
+
+    void InitPresets();
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
@@ -52,7 +54,7 @@ public:
     unsigned char Prandomness; /**<randomness (0=off)*/
     unsigned char Pfreqrand;   /**<frequency randomness (0=off)*/
     unsigned char Pdelay;      /**<delay (0=off)*/
-    bool Pcontinous;  /**<1 if LFO is continous*/
+    unsigned char Pcontinous;  /**<1 if LFO is continous*/
     unsigned char Pstretch;    /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
 
     int fel;         //what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)

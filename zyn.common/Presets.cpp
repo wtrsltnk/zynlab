@@ -127,21 +127,22 @@ void Presets::deletepreset(int npreset)
     presetsstore.DeletePreset(npreset);
 }
 
-Preset::Preset(std::string const &name) : _name(name), _type(PresetTypes::Container), _id(0) {}
+Preset::Preset(std::string const &name) : _name(name), _type(PresetTypes::Container), _id(-1) {}
+Preset::Preset(std::string const &name, int id) : _name(name), _type(PresetTypes::Container), _id(id) {}
 Preset::Preset(std::string const &name, Preset const &container)
-    : _name(name), _type(PresetTypes::Container), _id(0),
+    : _name(name), _type(PresetTypes::Container), _id(container._id),
       valueReference(container.valueReference),
       _rangeMin(container._rangeMin), _rangeMax(container._rangeMax),
       _presets(container._presets)
 {}
 Preset::Preset(Preset const &preset)
-    : _name(preset._name), _type(preset._type), _id(0),
+    : _name(preset._name), _type(preset._type), _id(preset._id),
       valueReference(preset.valueReference),
       _rangeMin(preset._rangeMin), _rangeMax(preset._rangeMax),
       _presets(preset._presets)
 {}
 Preset::Preset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
-    : _name(name), _type(PresetTypes::UnsignedChar), _id(0)
+    : _name(name), _type(PresetTypes::UnsignedChar), _id(-1)
 {
     valueReference.uchar_v = value;
     _rangeMin.uchar_min = min;
@@ -152,21 +153,21 @@ Preset::Preset(std::string const &name, unsigned char *value, unsigned char min,
     }
 }
 Preset::Preset(std::string const &name, unsigned short int *value, unsigned short int min, unsigned short int max)
-    : _name(name), _type(PresetTypes::UnsignedShort), _id(0)
+    : _name(name), _type(PresetTypes::UnsignedShort), _id(-1)
 {
     valueReference.ushort_v = value;
     _rangeMin.ushort_min = min;
     _rangeMax.ushort_max = max;
 }
 Preset::Preset(std::string const &name, short int *value, short int min, short int max)
-    : _name(name), _type(PresetTypes::Short), _id(0)
+    : _name(name), _type(PresetTypes::Short), _id(-1)
 {
     valueReference.short_v = value;
     _rangeMin.short_min = min;
     _rangeMax.short_max = max;
 }
 Preset::Preset(std::string const &name, float *value, float min, float max)
-    : _name(name), _type(PresetTypes::Float), _id(0)
+    : _name(name), _type(PresetTypes::Float), _id(-1)
 {
     valueReference.float_v = value;
     _rangeMin.float_min = min;
@@ -281,7 +282,7 @@ void Preset::WriteToBlob(IPresetsSerializer *xml)
         }
         case PresetTypes::Container:
         {
-            xml->beginbranch(Name());
+            xml->beginbranch(Name(), Id());
             for (auto &preset : _presets)
             {
                 preset.WriteToBlob(xml);
