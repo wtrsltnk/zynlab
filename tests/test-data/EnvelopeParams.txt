@@ -1,0 +1,42 @@
+<?xml version="1.0f" encoding="UTF-8"?>
+<!DOCTYPE ZynAddSubFX-data>
+<ZynAddSubFX-data version-major="2" version-minor="4"
+version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
+<INFORMATION />
+<BASE_PARAMETERS>
+<par name="max_midi_parts" value="16" />
+<par name="max_kit_items_per_instrument" value="16" />
+<par name="max_system_effects" value="4" />
+<par name="max_insertion_effects" value="8" />
+<par name="max_instrument_effects" value="3" />
+<par name="max_addsynth_voices" value="8" />
+</BASE_PARAMETERS>
+<par_bool name="free_mode" value="no" />
+<par name="env_points" value="4" />
+<par name="env_sustain" value="2" />
+<par name="env_stretch" value="0" />
+<par_bool name="forced_release" value="yes" />
+<par_bool name="linear_envelope" value="no" />
+<par name="A_dt" value="11" />
+<par name="D_dt" value="12" />
+<par name="R_dt" value="13" />
+<par name="A_val" value="65" />
+<par name="D_val" value="66" />
+<par name="S_val" value="67" />
+<par name="R_val" value="68" />
+<POINT id="0">
+<par name="val" value="1" />
+</POINT>
+<POINT id="1">
+<par name="dt" value="11" />
+<par name="val" value="126" />
+</POINT>
+<POINT id="2">
+<par name="dt" value="12" />
+<par name="val" value="65" />
+</POINT>
+<POINT id="3">
+<par name="dt" value="13" />
+<par name="val" value="1" />
+</POINT>
+</ZynAddSubFX-data>

@@ -1,5 +1,7 @@
 #include <catch2/catch.hpp>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <zyn.common/PresetsSerializer.h>
 #include <zyn.synth/EnvelopeParams.h>
@@ -22,6 +24,54 @@ TEST_CASE("EnvelopeParams Presets", "[zyn.common]")
     auto presetsB = std::string(serializerB.getXMLdata());
 
     REQUIRE(presetsA == presetsB);
+}
+
+TEST_CASE("EnvelopeParams Presets Deserialization", "[zyn.common]")
+{
+    auto sut = EnvelopeParams('\0', '\0');
+    sut.Defaults();
+    sut.InitPresets();
+
+    REQUIRE(sut.Pforcedrelease == 0);
+    REQUIRE(sut.PA_dt == 10);
+    REQUIRE(sut.PD_dt == 10);
+    REQUIRE(sut.PR_dt == 10);
+    REQUIRE(sut.PA_val == 64);
+    REQUIRE(sut.PD_val == 64);
+    REQUIRE(sut.PS_val == 64);
+    REQUIRE(sut.PR_val == 64);
+    REQUIRE(sut.Penvpoints == 4);
+    REQUIRE(sut.Penvdt[0] == 0);
+    REQUIRE(sut.Penvdt[1] == 10);
+    REQUIRE(sut.Penvdt[2] == 10);
+    REQUIRE(sut.Penvdt[3] == 10);
+    REQUIRE(sut.Penvval[0] == 0);
+    REQUIRE(sut.Penvval[1] == 127);
+    REQUIRE(sut.Penvval[2] == 64);
+    REQUIRE(sut.Penvval[3] == 0);
+
+    auto serializer = PresetsSerializer();
+    serializer.loadXMLfile(std::string(TEST_DATA_PATH) + "EnvelopeParams.txt");
+
+    sut.ReadPresetsFromBlob(&serializer);
+
+    REQUIRE(sut.Pforcedrelease == 1);
+    REQUIRE(sut.PA_dt == 11);
+    REQUIRE(sut.PD_dt == 12);
+    REQUIRE(sut.PR_dt == 13);
+    REQUIRE(sut.PA_val == 65);
+    REQUIRE(sut.PD_val == 66);
+    REQUIRE(sut.PS_val == 67);
+    REQUIRE(sut.PR_val == 68);
+    REQUIRE(sut.Penvpoints == 4);
+    REQUIRE(sut.Penvdt[0] == 0);
+    REQUIRE(sut.Penvdt[1] == 11);
+    REQUIRE(sut.Penvdt[2] == 12);
+    REQUIRE(sut.Penvdt[3] == 13);
+    REQUIRE(sut.Penvval[0] == 1);
+    REQUIRE(sut.Penvval[1] == 126);
+    REQUIRE(sut.Penvval[2] == 65);
+    REQUIRE(sut.Penvval[3] == 1);
 }
 
 TEST_CASE("LFOParams Presets", "[zyn.common]")

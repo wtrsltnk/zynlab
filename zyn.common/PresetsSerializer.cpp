@@ -565,13 +565,13 @@ string PresetsSerializer::getparstr(const string &name,
     return defaultpar;
 }
 
-float PresetsSerializer::getparreal(const char *name, float defaultpar) const
+float PresetsSerializer::getparreal(const std::string &name, float defaultpar) const
 {
     const mxml_node_t *tmp = mxmlFindElement(node,
                                              node,
                                              "par_real",
                                              "name",
-                                             name,
+                                             name.c_str(),
                                              MXML_DESCEND_FIRST);
     if (tmp == nullptr)
         return defaultpar;
@@ -583,7 +583,7 @@ float PresetsSerializer::getparreal(const char *name, float defaultpar) const
     return stringTo<float>(strval);
 }
 
-float PresetsSerializer::getparreal(const char *name,
+float PresetsSerializer::getparreal(const std::string &name,
                                     float defaultpar,
                                     float min,
                                     float max) const

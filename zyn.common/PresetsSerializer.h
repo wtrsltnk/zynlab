@@ -210,7 +210,7 @@ public:
      * @param name The parameter name.
      * @param defaultpar The default value if the real value is not found.
      */
-    float getparreal(const char *name, float defaultpar) const;
+    float getparreal(const std::string &name, float defaultpar) const;
 
     /**
      * Returns the real value stored in the node.
@@ -219,7 +219,7 @@ public:
      * @param min The minimum value
      * @param max The maximum value
      */
-    float getparreal(const char *name, float defaultpar, float min, float max) const;
+    float getparreal(const std::string &name, float defaultpar, float min, float max) const;
 
     bool minimal; /**<false if all parameters will be stored (used only for clipboard)*/
 

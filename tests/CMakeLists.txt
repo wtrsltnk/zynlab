@@ -19,6 +19,11 @@ target_compile_features(tests
     PRIVATE cxx_lambdas
     )
 
+target_compile_definitions(tests
+    PRIVATE
+        TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/test-data/"
+    )
+
 target_link_libraries(tests
     ${ZLIB_LIBRARIES}
     zyn.nio

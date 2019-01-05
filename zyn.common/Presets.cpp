@@ -295,6 +295,54 @@ void Preset::WriteToBlob(IPresetsSerializer *xml)
 
 void Preset::ReadFromBlob(IPresetsSerializer *xml)
 {
+    switch (Type())
+    {
+        case PresetTypes::UnsignedChar:
+        {
+            if (valueReference.uchar_v == nullptr) break;
+            *(valueReference.uchar_v) = xml->getpar127(Name(), *(valueReference.uchar_v));
+            break;
+        }
+        case PresetTypes::UnsignedShort:
+        {
+            if (valueReference.ushort_v == nullptr) break;
+            *(valueReference.ushort_v) = static_cast<unsigned short int>(xml->getpar(Name(), static_cast<unsigned short int>(*(valueReference.ushort_v)), 0, 16383));
+            break;
+        }
+        case PresetTypes::Short:
+        {
+            if (valueReference.short_v == nullptr) break;
+            *(valueReference.short_v) = static_cast<short int>(xml->getpar(Name(), static_cast<int>(*(valueReference.short_v)), -16383, 16383));
+            break;
+        }
+        case PresetTypes::Float:
+        {
+            if (valueReference.float_v == nullptr) break;
+            *(valueReference.float_v) = xml->getparreal(Name(), *(valueReference.float_v));
+            break;
+        }
+        case PresetTypes::Boolean:
+        {
+            if (valueReference.uchar_v == nullptr) break;
+            *valueReference.uchar_v = static_cast<unsigned char>(xml->getparbool(Name(), static_cast<int>(*valueReference.uchar_v)));
+            break;
+        }
+        case PresetTypes::Container:
+        {
+            if (xml->enterbranch(Name(), Id()) == 0)
+            {
+                break;
+            }
+
+            for (auto &preset : _presets)
+            {
+                preset.ReadFromBlob(xml);
+            }
+
+            xml->exitbranch();
+            break;
+        }
+    }
 }
 
 void Preset::WritePresetsToBlob(IPresetsSerializer *xml)
@@ -307,6 +355,10 @@ void Preset::WritePresetsToBlob(IPresetsSerializer *xml)
 
 void Preset::ReadPresetsFromBlob(IPresetsSerializer *xml)
 {
+    for (auto &preset : _presets)
+    {
+        preset.ReadFromBlob(xml);
+    }
 }
 
 WrappedPresets::WrappedPresets() : Preset("tbd") {}

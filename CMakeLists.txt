@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(zynlab)
 
 option(BUILD_VST "enable building all projects using VST" OFF)
+option(BUILD_TESTS "enable building all test projects" OFF)
 
 # Add version information
 set(VERSION "2.4.4")
@@ -31,7 +32,10 @@ add_subdirectory("app")
 #add_subdirectory("app.imgui")
 add_subdirectory("app.threedee")
 #add_subdirectory("app.tiny")
-add_subdirectory("tests")
+
+if(BUILD_TESTS)
+    add_subdirectory("tests")
+endif()
 
 if(WIN32 AND BUILD_VST)
     add_subdirectory("zyn.vst")
