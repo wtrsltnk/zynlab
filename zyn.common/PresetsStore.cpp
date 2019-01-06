@@ -51,7 +51,7 @@ PresetsStore::~PresetsStore()
 
 //Clipboard management
 
-void PresetsStore::CopyClipboard(IPresetsSerializer *xml, char *type)
+void PresetsStore::CopyClipboard(IPresetsSerializer *xml, char const *type)
 {
     strcpy(clipboard.type, type);
     if (clipboard.data != nullptr)
@@ -100,7 +100,7 @@ void PresetsStore::RescaneForPresets(const string &type)
     ClearPresets();
     string ftype = "." + type.substr(1) + ".xpz";
 
-    for (auto & i : Config::Current().cfg.presetsDirList)
+    for (auto &i : Config::Current().cfg.presetsDirList)
     {
         if (i.empty())
         {
@@ -153,7 +153,7 @@ void PresetsStore::RescaneForPresets(const string &type)
     sort(presets.begin(), presets.end());
 }
 
-void PresetsStore::CopyPreset(IPresetsSerializer *xml, char *type, string name)
+void PresetsStore::CopyPreset(IPresetsSerializer *xml, char const *type, string name)
 {
     if (Config::Current().cfg.presetsDirList[0].empty())
     {

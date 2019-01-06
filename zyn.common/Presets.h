@@ -116,17 +116,16 @@ public:
     virtual ~Presets();
 
     virtual void copy(const char *name); /**<if name==NULL, the clipboard is used*/
-    virtual void paste(int npreset);     //npreset==0 for clipboard
+    virtual void paste(unsigned int npreset);     //npreset==0 for clipboard
     virtual bool checkclipboardtype();
-    void deletepreset(int npreset);
+    void deletepreset(unsigned int npreset);
 
-    char type[MAX_PRESETTYPE_SIZE]{};
-    //void setelement(int n);
+    std::string _type;
 
     void rescanforpresets();
 
 protected:
-    void setpresettype(const char *type);
+    void setpresettype(const char *_type);
 
     virtual void Serialize(IPresetsSerializer *xml) = 0;
     virtual void Deserialize(IPresetsSerializer *xml) = 0;

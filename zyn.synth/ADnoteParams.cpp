@@ -314,7 +314,6 @@ int ADnoteParameters::get_unison_size_index(int nvoice)
 
         index++;
     }
-    return 0;
 }
 
 void ADnoteParameters::set_unison_size_index(int nvoice, int index)

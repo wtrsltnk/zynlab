@@ -24,16 +24,13 @@
 #include "PresetsSerializer.h"
 #include <string>
 
-Presets::Presets()
-{
-    type[0] = 0;
-}
+Presets::Presets() = default;
 
 Presets::~Presets() = default;
 
 void Presets::setpresettype(const char *type)
 {
-    strcpy(this->type, type);
+    _type = type;
 }
 
 void Presets::copy(const char *name)
@@ -46,14 +43,13 @@ void Presets::copy(const char *name)
         xml.minimal = false;
     }
 
-    char type[MAX_PRESETTYPE_SIZE];
-    strcpy(type, this->type);
+    std::string type = this->_type;
 
     if (name == nullptr)
     {
-        if (strstr(type, "Plfo") != nullptr)
+        if (type.find("Plfo") != std::string::npos)
         {
-            strcpy(type, "Plfo");
+            type = "Plfo";
         }
     }
 
@@ -63,24 +59,23 @@ void Presets::copy(const char *name)
 
     if (name == nullptr)
     {
-        presetsstore.CopyClipboard(&xml, type);
+        presetsstore.CopyClipboard(&xml, type.c_str());
     }
     else
     {
-        presetsstore.CopyPreset(&xml, type, name);
+        presetsstore.CopyPreset(&xml, type.c_str(), name);
     }
 }
 
-void Presets::paste(int npreset)
+void Presets::paste(unsigned int npreset)
 {
-    char type[MAX_PRESETTYPE_SIZE];
-    strcpy(type, this->type);
+    std::string type = this->_type;
 
     if (npreset == 0)
     {
-        if (strstr(type, "Plfo") != nullptr)
+        if (type.find("Plfo") != std::string::npos)
         {
-            strcpy(type, "Plfo");
+            type = "Plfo";
         }
     }
 
@@ -114,15 +109,15 @@ void Presets::paste(int npreset)
 
 bool Presets::checkclipboardtype()
 {
-    return presetsstore.CheckClipboardType(type);
+    return presetsstore.CheckClipboardType(_type.c_str());
 }
 
 void Presets::rescanforpresets()
 {
-    presetsstore.RescaneForPresets(type);
+    presetsstore.RescaneForPresets(_type);
 }
 
-void Presets::deletepreset(int npreset)
+void Presets::deletepreset(unsigned int npreset)
 {
     presetsstore.DeletePreset(npreset);
 }
