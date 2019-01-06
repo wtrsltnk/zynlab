@@ -8,124 +8,129 @@ vuData::vuData()
       rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
 
-Meter::Meter(SystemSettings *synth)
-    : _synth(synth)
+Meter::Meter()
+    : _synth(nullptr)
 {
-    pthread_mutex_init(&vumutex, nullptr);
-    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
-    {
-        vuoutpeakpart[npart] = 1e-9f;
-        fakepeakpart[npart] = 0;
-    }
 }
 
 Meter::~Meter()
 {
-    pthread_mutex_destroy(&vumutex);
+    pthread_mutex_destroy(&_vumutex);
 }
 
 IMeter::~IMeter() = default;
+
+void Meter::Setup(SystemSettings *synth)
+{
+    _synth = synth;
+    pthread_mutex_init(&_vumutex, nullptr);
+    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
+    {
+        _vuoutpeakpart[npart] = 1e-9f;
+        _fakepeakpart[npart] = 0;
+    }
+}
 
 /*
  * Reset peaks and clear the "cliped" flag (for VU-meter)
  */
 void Meter::ResetPeaks()
 {
-    pthread_mutex_lock(&vumutex);
-    vu.outpeakl = 1e-9f;
-    vu.outpeakr = 1e-9f;
-    vu.maxoutpeakl = 1e-9f;
-    vu.maxoutpeakr = 1e-9f;
-    vu.clipped = 0;
-    pthread_mutex_unlock(&vumutex);
+    pthread_mutex_lock(&_vumutex);
+    _vu.outpeakl = 1e-9f;
+    _vu.outpeakr = 1e-9f;
+    _vu.maxoutpeakl = 1e-9f;
+    _vu.maxoutpeakr = 1e-9f;
+    _vu.clipped = 0;
+    pthread_mutex_unlock(&_vumutex);
 }
 
 vuData Meter::GetVuData()
 {
     vuData tmp;
-    pthread_mutex_lock(&vumutex);
-    tmp = vu;
-    pthread_mutex_unlock(&vumutex);
+    pthread_mutex_lock(&_vumutex);
+    tmp = _vu;
+    pthread_mutex_unlock(&_vumutex);
     return tmp;
 }
 
 void Meter::SetFakePeak(int instrument, unsigned char velocity)
 {
-    fakepeakpart[instrument] = velocity;
+    _fakepeakpart[instrument] = velocity;
 }
 
 unsigned char Meter::GetFakePeak(int instrument)
 {
-    pthread_mutex_lock(&vumutex);
-    unsigned char peak = fakepeakpart[instrument];
-    pthread_mutex_unlock(&vumutex);
+    pthread_mutex_lock(&_vumutex);
+    unsigned char peak = _fakepeakpart[instrument];
+    pthread_mutex_unlock(&_vumutex);
 
     return peak;
 }
 
 float Meter::GetOutPeak(int instrument)
 {
-    pthread_mutex_lock(&vumutex);
-    float db = vuoutpeakpart[instrument];
-    pthread_mutex_unlock(&vumutex);
+    pthread_mutex_lock(&_vumutex);
+    float db = _vuoutpeakpart[instrument];
+    pthread_mutex_unlock(&_vumutex);
 
     return db;
 }
 
 void Meter::Tick(const float *outl, const float *outr, Channel *part, float volume)
 {
-    if (pthread_mutex_trylock(&vumutex))
+    if (pthread_mutex_trylock(&_vumutex))
     {
         return;
     }
 
     //Peak computation (for vumeters)
-    vu.outpeakl = 1e-12f;
-    vu.outpeakr = 1e-12f;
+    _vu.outpeakl = 1e-12f;
+    _vu.outpeakr = 1e-12f;
     for (unsigned int i = 0; i < _synth->buffersize; ++i)
     {
-        if (std::fabs(outl[i]) > vu.outpeakl)
+        if (std::fabs(outl[i]) > _vu.outpeakl)
         {
-            vu.outpeakl = std::fabs(outl[i]);
+            _vu.outpeakl = std::fabs(outl[i]);
         }
-        if (std::fabs(outr[i]) > vu.outpeakr)
+        if (std::fabs(outr[i]) > _vu.outpeakr)
         {
-            vu.outpeakr = std::fabs(outr[i]);
+            _vu.outpeakr = std::fabs(outr[i]);
         }
     }
-    if ((vu.outpeakl > 1.0f) || (vu.outpeakr > 1.0f))
+    if ((_vu.outpeakl > 1.0f) || (_vu.outpeakr > 1.0f))
     {
-        vu.clipped = 1;
+        _vu.clipped = 1;
     }
-    if (vu.maxoutpeakl < vu.outpeakl)
+    if (_vu.maxoutpeakl < _vu.outpeakl)
     {
-        vu.maxoutpeakl = vu.outpeakl;
+        _vu.maxoutpeakl = _vu.outpeakl;
     }
-    if (vu.maxoutpeakr < vu.outpeakr)
+    if (_vu.maxoutpeakr < _vu.outpeakr)
     {
-        vu.maxoutpeakr = vu.outpeakr;
+        _vu.maxoutpeakr = _vu.outpeakr;
     }
 
     //RMS Peak computation (for vumeters)
-    vu.rmspeakl = 1e-12f;
-    vu.rmspeakr = 1e-12f;
+    _vu.rmspeakl = 1e-12f;
+    _vu.rmspeakr = 1e-12f;
     for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
     {
-        vu.rmspeakl += outl[i] * outl[i];
-        vu.rmspeakr += outr[i] * outr[i];
+        _vu.rmspeakl += outl[i] * outl[i];
+        _vu.rmspeakr += outr[i] * outr[i];
     }
-    vu.rmspeakl = std::sqrt(vu.rmspeakl / _synth->buffersize_f);
-    vu.rmspeakr = std::sqrt(vu.rmspeakr / _synth->buffersize_f);
+    _vu.rmspeakl = std::sqrt(_vu.rmspeakl / _synth->buffersize_f);
+    _vu.rmspeakr = std::sqrt(_vu.rmspeakr / _synth->buffersize_f);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
-        vuoutpeakpart[npart] = part[npart].ComputePeak(volume);
-        if (!part[npart].Penabled && fakepeakpart[npart] > 1)
+        _vuoutpeakpart[npart] = part[npart].ComputePeak(volume);
+        if (!part[npart].Penabled && _fakepeakpart[npart] > 1)
         {
-            fakepeakpart[npart]--;
+            _fakepeakpart[npart]--;
         }
     }
 
-    pthread_mutex_unlock(&vumutex);
+    pthread_mutex_unlock(&_vumutex);
 }

@@ -43,10 +43,10 @@
 #define FORCE_BANK_DIR_FILE ".bankdir"
 
 BankManager::BankManager()
-    : defaultinsname("defaults")
+    : _defaultinsname("defaults")
 {
     ClearBank();
-    bankfiletitle = dirname;
+    _bankfiletitle = _dirname;
     LoadBankByDirectoryName(Config::Current().cfg.currentBankDir);
 }
 
@@ -62,10 +62,10 @@ std::string BankManager::GetName(unsigned int ninstrument)
 {
     if (EmptySlot(ninstrument))
     {
-        return defaultinsname;
+        return _defaultinsname;
     }
 
-    return ins[ninstrument].name;
+    return _instrumentsInCurrentBank[ninstrument].name;
 }
 
 /*
@@ -75,7 +75,7 @@ std::string BankManager::GetNameNumbered(unsigned int ninstrument)
 {
     if (EmptySlot(ninstrument))
     {
-        return defaultinsname;
+        return _defaultinsname;
     }
 
     return stringFrom(ninstrument + 1) + ". " + GetName(ninstrument);
@@ -113,12 +113,12 @@ void BankManager::SetName(unsigned int ninstrument, const std::string &newname, 
         }
     }
 
-    newfilename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
+    newfilename = _dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
-    rename(ins[ninstrument].filename.c_str(), newfilename.c_str());
+    rename(_instrumentsInCurrentBank[ninstrument].filename.c_str(), newfilename.c_str());
 
-    ins[ninstrument].filename = newfilename;
-    ins[ninstrument].name = newname;
+    _instrumentsInCurrentBank[ninstrument].filename = newfilename;
+    _instrumentsInCurrentBank[ninstrument].name = newname;
 }
 
 /*
@@ -131,12 +131,12 @@ bool BankManager::EmptySlot(unsigned int ninstrument)
         return true;
     }
 
-    if (ins[ninstrument].filename.empty())
+    if (_instrumentsInCurrentBank[ninstrument].filename.empty())
     {
         return true;
     }
 
-    return !ins[ninstrument].used;
+    return !_instrumentsInCurrentBank[ninstrument].used;
 }
 
 /*
@@ -149,7 +149,7 @@ void BankManager::ClearSlot(unsigned int ninstrument)
         return;
     }
 
-    remove(ins[ninstrument].filename.c_str());
+    remove(_instrumentsInCurrentBank[ninstrument].filename.c_str());
     DeleteFromBank(ninstrument);
 }
 
@@ -179,7 +179,7 @@ void BankManager::SaveToSlot(unsigned int ninstrument, Channel *instrument)
         }
     }
 
-    std::string filename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
+    std::string filename = _dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
     remove(filename.c_str());
     instrument->saveXML(filename.c_str());
@@ -199,7 +199,7 @@ void BankManager::LoadFromSlot(unsigned int ninstrument, Channel *instrument)
     instrument->AllNotesOff();
     instrument->InstrumentDefaults();
 
-    instrument->loadXMLinstrument(ins[ninstrument].filename.c_str());
+    instrument->loadXMLinstrument(_instrumentsInCurrentBank[ninstrument].filename.c_str());
 }
 
 /*
@@ -212,7 +212,7 @@ int BankManager::LoadBank(int index)
         return -1;
     }
 
-    if (banks[static_cast<size_t>(index)].dir == bankfiletitle)
+    if (banks[static_cast<size_t>(index)].dir == _bankfiletitle)
     {
         return -1;
     }
@@ -233,9 +233,9 @@ int BankManager::LoadBankByDirectoryName(std::string const &bankdirname)
         return -1;
     }
 
-    dirname = bankdirname;
+    _dirname = bankdirname;
 
-    bankfiletitle = dirname;
+    _bankfiletitle = _dirname;
 
     struct dirent *fn;
 
@@ -296,9 +296,9 @@ int BankManager::LoadBankByDirectoryName(std::string const &bankdirname)
 
     closedir(dir);
 
-    if (!dirname.empty())
+    if (!_dirname.empty())
     {
-        Config::Current().cfg.currentBankDir = dirname;
+        Config::Current().cfg.currentBankDir = _dirname;
     }
 
     return 0;
@@ -366,7 +366,7 @@ IBankManager::InstrumentBank &BankManager::GetBank(int index)
 
 std::string const &BankManager::GetBankFileTitle()
 {
-    return bankfiletitle;
+    return _bankfiletitle;
 }
 
 /*
@@ -374,7 +374,7 @@ std::string const &BankManager::GetBankFileTitle()
  */
 int BankManager::Locked()
 {
-    return dirname.empty();
+    return _dirname.empty();
 }
 
 /*
@@ -398,19 +398,19 @@ void BankManager::SwapSlot(unsigned int n1, unsigned int n2)
     if (EmptySlot(n2))
     { //this is just a movement from slot1 to slot2
         SetName(n1, GetName(n1), static_cast<int>(n2));
-        ins[n2] = ins[n1];
-        ins[n1] = ins_t();
+        _instrumentsInCurrentBank[n2] = _instrumentsInCurrentBank[n1];
+        _instrumentsInCurrentBank[n1] = ins_t();
     }
     else
     {                                     //if both slots are used
-        if (ins[n1].name == ins[n2].name) //change the name of the second instrument if the name are equal
+        if (_instrumentsInCurrentBank[n1].name == _instrumentsInCurrentBank[n2].name) //change the name of the second instrument if the name are equal
         {
-            ins[n2].name += "2";
+            _instrumentsInCurrentBank[n2].name += "2";
         }
 
         SetName(n1, GetName(n1), static_cast<int>(n2));
         SetName(n2, GetName(n2), static_cast<int>(n1));
-        std::swap(ins[n2], ins[n1]);
+        std::swap(_instrumentsInCurrentBank[n2], _instrumentsInCurrentBank[n1]);
     }
 }
 
@@ -527,13 +527,13 @@ void BankManager::ScanRootDirectory(std::string const &rootdir)
 
 void BankManager::ClearBank()
 {
-    for (auto &in : ins)
+    for (auto &in : _instrumentsInCurrentBank)
     {
         in = ins_t();
     }
 
-    bankfiletitle.clear();
-    dirname.clear();
+    _bankfiletitle.clear();
+    _dirname.clear();
 }
 
 int BankManager::AddToBank(unsigned int pos, std::string const &filename, std::string const &name)
@@ -544,11 +544,11 @@ int BankManager::AddToBank(unsigned int pos, std::string const &filename, std::s
         pos = 0;
     }
 
-    if (pos < BANK_SIZE && ins[pos].used)
+    if (pos < BANK_SIZE && _instrumentsInCurrentBank[pos].used)
     {
         for (unsigned int i = 0; i < BANK_SIZE; i--)
         {
-            if (!ins[i].used)
+            if (!_instrumentsInCurrentBank[i].used)
             {
                 pos = i;
                 break;
@@ -562,21 +562,21 @@ int BankManager::AddToBank(unsigned int pos, std::string const &filename, std::s
 
     DeleteFromBank(pos);
 
-    ins[pos].used = true;
-    ins[pos].name = name;
-    ins[pos].filename = dirname + '/' + filename;
+    _instrumentsInCurrentBank[pos].used = true;
+    _instrumentsInCurrentBank[pos].name = name;
+    _instrumentsInCurrentBank[pos].filename = _dirname + '/' + filename;
 
     //see if PADsynth is used
     if (Config::Current().cfg.CheckPADsynth)
     {
         PresetsSerializer xml;
-        xml.loadXMLfile(ins[pos].filename);
+        xml.loadXMLfile(_instrumentsInCurrentBank[pos].filename);
 
-        ins[pos].info.PADsynth_used = xml.hasPadSynth();
+        _instrumentsInCurrentBank[pos].info.PADsynth_used = xml.hasPadSynth();
     }
     else
     {
-        ins[pos].info.PADsynth_used = false;
+        _instrumentsInCurrentBank[pos].info.PADsynth_used = false;
     }
 
     return 0;
@@ -589,7 +589,7 @@ bool BankManager::isPADsynth_used(unsigned int ninstrument)
         return false;
     }
 
-    return ins[ninstrument].info.PADsynth_used;
+    return _instrumentsInCurrentBank[ninstrument].info.PADsynth_used;
 }
 
 void BankManager::DeleteFromBank(unsigned int pos)
@@ -599,7 +599,7 @@ void BankManager::DeleteFromBank(unsigned int pos)
         return;
     }
 
-    ins[pos] = ins_t();
+    _instrumentsInCurrentBank[pos] = ins_t();
 }
 
 BankManager::ins_t::ins_t()

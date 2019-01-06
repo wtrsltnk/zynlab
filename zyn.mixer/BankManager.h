@@ -73,14 +73,14 @@ private:
     //returns -1 if the bank is full, or 0 if the instrument was added
     int AddToBank(unsigned int pos, std::string const &filename, std::string const &name);
     int LoadBankByDirectoryName(std::string const &bankdirname);
-
     void DeleteFromBank(unsigned int pos);
-
     void ClearBank();
+    void ScanRootDirectory(std::string const &rootdir); //scans a root dir for banks
 
-    std::string defaultinsname;
-
-    std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
+    std::string _defaultinsname;
+    std::string _bankfiletitle; //this is shown on the UI of the bank (the title of the window)
+    std::vector<char const *> _bankNames;
+    std::string _dirname;
 
     struct ins_t
     {
@@ -92,12 +92,7 @@ private:
         {
             bool PADsynth_used;
         } info;
-    } ins[BANK_SIZE];
-    std::vector<char const *> _bankNames;
-
-    std::string dirname;
-
-    void ScanRootDirectory(std::string const &rootdir); //scans a root dir for banks
+    } _instrumentsInCurrentBank[BANK_SIZE];
 };
 
 #endif // BANKMANAGER_H

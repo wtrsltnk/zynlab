@@ -36,21 +36,34 @@
 
 using namespace std;
 
-Mixer::Mixer(SystemSettings *synth_, IBankManager *bank_)
-    : _meter(synth_)
+Mixer::Mixer()
 {
-    ctl.Init(synth_);
-    this->_settings = synth_;
-    bank = bank_;
+}
+
+Mixer::~Mixer()
+{
+    delete[] _bufl;
+    delete[] _bufr;
+
+    delete _fft;
+
+    pthread_mutex_destroy(&_mutex);
+}
+void Mixer::Setup(SystemSettings *settings, IBankManager *bankManager)
+{
+    _settings = settings;
+    _bankManager = bankManager;
+    meter.Setup(settings);
+    ctl.Init(settings);
 
     swaplr = false;
-    off = 0;
-    smps = 0;
-    bufl = new float[this->BufferSize()];
-    bufr = new float[this->BufferSize()];
+    _off = 0;
+    _smps = 0;
+    _bufl = new float[this->BufferSize()];
+    _bufr = new float[this->BufferSize()];
 
-    pthread_mutex_init(&mutex, nullptr);
-    fft = new FFTwrapper(this->_settings->oscilsize);
+    pthread_mutex_init(&_mutex, nullptr);
+    _fft = new FFTwrapper(this->_settings->oscilsize);
 
     shutup = 0;
 
@@ -74,29 +87,19 @@ Mixer::Mixer(SystemSettings *synth_, IBankManager *bank_)
     Defaults();
 }
 
-Mixer::~Mixer()
-{
-    delete[] bufl;
-    delete[] bufr;
-
-    delete fft;
-
-    pthread_mutex_destroy(&mutex);
-}
-
 IBankManager *Mixer::GetBankManager()
 {
-    return bank;
+    return _bankManager;
 }
 
 IMeter *Mixer::GetMeter()
 {
-    return &_meter;
+    return &meter;
 }
 
 void Mixer::Defaults()
 {
-    volume = 1.0f;
+    _volume = 1.0f;
     setPvolume(80);
     setPkeyshift(64);
 
@@ -155,12 +158,12 @@ float Mixer::BufferSizeFloat() const
 
 void Mixer::Lock()
 {
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&_mutex);
 }
 
 void Mixer::Unlock()
 {
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&_mutex);
 }
 
 /*
@@ -178,10 +181,10 @@ void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocit
     {
         if (chan == _instruments[npart].Prcvchn)
         {
-            _meter.SetFakePeak(npart, velocity * 2);
+            meter.SetFakePeak(npart, velocity * 2);
             if (_instruments[npart].Penabled)
             {
-                _instruments[npart].NoteOn(note, velocity, keyshift);
+                _instruments[npart].NoteOn(note, velocity, _keyshift);
             }
         }
     }
@@ -218,7 +221,7 @@ void Mixer::PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigne
         {
             if (npart.Penabled)
             {
-                npart.PolyphonicAftertouch(note, velocity, keyshift);
+                npart.PolyphonicAftertouch(note, velocity, _keyshift);
             }
         }
     }
@@ -259,7 +262,7 @@ void Mixer::SetController(unsigned char chan, int type, int par)
     }
     else if (type == C_bankselectmsb)
     {
-        bank->LoadBank(par);
+        _bankManager->LoadBank(par);
     }
     else
     {                                    //other controllers
@@ -296,7 +299,7 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
     {
         if (chan == npart.Prcvchn)
         {
-            bank->LoadFromSlot(pgm, &npart);
+            _bankManager->LoadFromSlot(pgm, &npart);
 
             //Hack to get pad note parameters to update
             //this is not real time safe and makes assumptions about the calling
@@ -318,7 +321,7 @@ void Mixer::partonoff(int npart, int what)
         return;
     }
 
-    _meter.SetFakePeak(npart, 0);
+    meter.SetFakePeak(npart, 0);
 
     if (what != 0)
     { //enabled
@@ -448,7 +451,7 @@ void Mixer::AudioOut(float *outl, float *outr)
                 continue;
             }
             //the output volume of each part to system effect
-            const float vol = sysefxvol[nefx][npart];
+            const float vol = _sysefxvol[nefx][npart];
             for (unsigned int i = 0; i < this->BufferSize(); ++i)
             {
                 tmpmixl[i] += _instruments[npart].partoutl[i] * vol;
@@ -461,7 +464,7 @@ void Mixer::AudioOut(float *outl, float *outr)
         {
             if (Psysefxsend[nefxfrom][nefx] != 0)
             {
-                const float vol = sysefxsend[nefxfrom][nefx];
+                const float vol = _sysefxsend[nefxfrom][nefx];
                 for (unsigned int i = 0; i < this->BufferSize(); ++i)
                 {
                     tmpmixl[i] += sysefx[nefxfrom].efxoutl[i] * vol;
@@ -509,11 +512,11 @@ void Mixer::AudioOut(float *outl, float *outr)
     //Master Volume
     for (unsigned int i = 0; i < this->BufferSize(); ++i)
     {
-        outl[i] *= volume;
-        outr[i] *= volume;
+        outl[i] *= _volume;
+        outr[i] *= _volume;
     }
 
-    _meter.Tick(outl, outr, _instruments, volume);
+    meter.Tick(outl, outr, _instruments, _volume);
 
     //Shutup if it is asked (with fade-out)
     if (shutup)
@@ -538,7 +541,7 @@ SystemSettings *Mixer::GetSettings()
 
 IFFTwrapper *Mixer::GetFFT()
 {
-    return fft;
+    return _fft;
 }
 
 int Mixer::GetChannelCount() const
@@ -563,7 +566,7 @@ void Mixer::EnableChannel(int index, bool enabled)
         return;
     }
 
-    _meter.SetFakePeak(index, 0);
+    meter.SetFakePeak(index, 0);
 
     if (enabled)
     { //enabled
@@ -588,19 +591,19 @@ void Mixer::EnableChannel(int index, bool enabled)
 void Mixer::setPvolume(unsigned char Pvolume_)
 {
     Pvolume = Pvolume_;
-    volume = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
+    _volume = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
 }
 
 void Mixer::setPkeyshift(unsigned char Pkeyshift_)
 {
     Pkeyshift = Pkeyshift_;
-    keyshift = static_cast<int>(Pkeyshift) - 64;
+    _keyshift = static_cast<int>(Pkeyshift) - 64;
 }
 
 void Mixer::setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol)
 {
     Psysefxvol[Pefx][Ppart] = Pvol;
-    sysefxvol[Pefx][Ppart] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
+    _sysefxvol[Pefx][Ppart] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
 unsigned char Mixer::GetSystemEffectSend(int Pefxfrom, int Pefxto)
@@ -611,7 +614,7 @@ unsigned char Mixer::GetSystemEffectSend(int Pefxfrom, int Pefxto)
 void Mixer::SetSystemEffectSend(int Pefxfrom, int Pefxto, unsigned char Pvol)
 {
     Psysefxsend[Pefxfrom][Pefxto] = Pvol;
-    sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
+    _sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
 /*
@@ -622,7 +625,7 @@ void Mixer::ShutUp()
     for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
         _instruments[npart].Cleanup();
-        _meter.SetFakePeak(npart, 0);
+        meter.SetFakePeak(npart, 0);
     }
     for (auto &nefx : insefx)
     {
@@ -632,7 +635,7 @@ void Mixer::ShutUp()
     {
         nefx.cleanup();
     }
-    _meter.ResetPeaks();
+    meter.ResetPeaks();
     shutup = 0;
 }
 

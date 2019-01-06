@@ -7,8 +7,10 @@
 class Meter : public IMeter
 {
 public:
-    Meter(SystemSettings *synth);
+    Meter();
     virtual ~Meter();
+
+    void Setup(SystemSettings *synth);
 
     void Tick(const float *outl, const float *outr, class Channel *part, float volume);
 
@@ -22,12 +24,12 @@ public:
     virtual vuData GetVuData();
 
 private:
-    vuData vu;
+    vuData _vu;
 
-    float vuoutpeakpart[NUM_MIXER_CHANNELS]{};
-    unsigned char fakepeakpart[NUM_MIXER_CHANNELS]{};
+    float _vuoutpeakpart[NUM_MIXER_CHANNELS];
+    unsigned char _fakepeakpart[NUM_MIXER_CHANNELS];
 
-    pthread_mutex_t vumutex{};
+    pthread_mutex_t _vumutex;
     SystemSettings *_synth;
 };
 

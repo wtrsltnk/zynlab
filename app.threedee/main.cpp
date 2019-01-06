@@ -7,7 +7,8 @@
 
 static int Pexitprogram = 0;
 
-static BankManager banka;
+static SystemSettings settings;
+static BankManager bankManager;
 static Mixer *mixer;
 
 //cleanup on signaled exit
@@ -21,27 +22,26 @@ void sigterm_exit(int /*sig*/)
  */
 void initprogram()
 {
-    auto synth = new SystemSettings;
     Config::Current().init();
 
     /* Get the settings from the Config*/
-    synth->samplerate = Config::Current().cfg.SampleRate;
-    synth->buffersize = Config::Current().cfg.SoundBufferSize;
-    synth->oscilsize = Config::Current().cfg.OscilSize;
-
-    synth->alias();
+    settings.samplerate = Config::Current().cfg.SampleRate;
+    settings.buffersize = Config::Current().cfg.SoundBufferSize;
+    settings.oscilsize = Config::Current().cfg.OscilSize;
+    settings.alias();
 
     std::cerr.precision(1);
     std::cerr << std::fixed;
-    std::cerr << "\nSample Rate = \t\t" << synth->samplerate << std::endl;
-    std::cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << std::endl;
-    std::cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << std::endl;
-    std::cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << std::endl;
+    std::cerr << "\nSample Rate = \t\t" << settings.samplerate << std::endl;
+    std::cerr << "Sound Buffer Size = \t" << settings.buffersize << " samples" << std::endl;
+    std::cerr << "Internal latency = \t\t" << settings.buffersize_f * 1000.0f / settings.samplerate_f << " ms" << std::endl;
+    std::cerr << "ADsynth Oscil.Size = \t" << settings.oscilsize << " samples" << std::endl;
 
-    mixer = new Mixer(synth, &banka);
+    mixer = new Mixer();
+    mixer->Setup(&settings, &bankManager);
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
-    Nio::preferedSampleRate(synth->samplerate);
+    Nio::preferedSampleRate(settings.samplerate);
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
@@ -58,7 +58,6 @@ int exitprogram()
 
     Nio::Stop();
 
-    delete mixer->GetSettings();
     delete mixer;
     FFT_cleanup();
 

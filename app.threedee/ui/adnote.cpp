@@ -72,7 +72,7 @@ void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
         {
             if (_sequencer.ActiveInstrument() >= 0)
             {
-                auto parameters = &_mixer->GetChannel(_sequencer.ActiveInstrument())->_instruments[0].adpars->VoicePar[i];
+                auto parameters = &_mixer->GetChannel(_sequencer.ActiveInstrument())->instruments[0].adpars->VoicePar[i];
                 if (ImGui::BeginTabItem(voiceIds[i]))
                 {
                     ADNoteVoiceEditor(parameters);

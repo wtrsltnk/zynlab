@@ -583,17 +583,17 @@ void AppThreeDee::Render()
     auto channel = _mixer->GetChannel(_sequencer.ActiveInstrument());
     if (channel != nullptr)
     {
-        if (channel->_instruments[0].Padenabled)
+        if (channel->instruments[0].Padenabled)
         {
-            ADNoteEditor(channel->_instruments[0].adpars);
+            ADNoteEditor(channel->instruments[0].adpars);
         }
-        if (channel->_instruments[0].Psubenabled)
+        if (channel->instruments[0].Psubenabled)
         {
-            SUBNoteEditor(channel->_instruments[0].subpars);
+            SUBNoteEditor(channel->instruments[0].subpars);
         }
-        if (channel->_instruments[0].Ppadenabled)
+        if (channel->instruments[0].Ppadenabled)
         {
-            PADNoteEditor(channel->_instruments[0].padpars);
+            PADNoteEditor(channel->instruments[0].padpars);
         }
     }
 

@@ -41,9 +41,11 @@ class Mixer : public IMixer, public IAudioGenerator
 {
 public:
     /** Constructor TODO make private*/
-    Mixer(SystemSettings *synth_, IBankManager *bank_);
+    Mixer();
     /** Destructor*/
     virtual ~Mixer();
+
+    void Setup(SystemSettings *synth_, IBankManager *bank_);
 
     virtual IBankManager* GetBankManager();
     virtual IMeter *GetMeter();
@@ -116,7 +118,7 @@ public:
     //part that's apply the insertion effect; -1 to disable
     short int Pinsparts[NUM_INS_EFX];
 
-    Meter _meter;
+    Meter meter;
     Controller ctl;
     bool swaplr; //if L and R are swapped
 
@@ -129,21 +131,21 @@ public:
 
 private:
     Channel _instruments[NUM_MIXER_CHANNELS];
-    pthread_mutex_t mutex;
-    IBankManager *bank;
-    IFFTwrapper *fft;
+    pthread_mutex_t _mutex;
+    IBankManager *_bankManager;
+    IFFTwrapper *_fft;
     SystemSettings *_settings;
 
-    float volume;
-    float sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];
-    float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
-    int keyshift;
+    float _volume;
+    float _sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];
+    float _sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+    int _keyshift;
 
     //information relevent to generating plugin audio samples
-    float *bufl;
-    float *bufr;
-    off_t off;
-    size_t smps;
+    float *_bufl;
+    float *_bufr;
+    off_t _off;
+    size_t _smps;
 };
 
 #endif // MIXER_H

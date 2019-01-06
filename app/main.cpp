@@ -49,7 +49,9 @@ static MasterUI *ui;
 
 #endif //ENABLE_FLTKGUI
 
-static Mixer *mixer;
+static SystemSettings synth;
+static BankManager banks;
+static Mixer mixer;
 static Sequencer *seq;
 //SYNTH_T* synth;
 static unsigned int swaplr = 0; //1 for left-right swapping
@@ -77,8 +79,8 @@ void set_module_parameters(Fl_Widget *o)
 int exitprogram()
 {
     //ensure that everything has stopped with the mutex wait
-    mixer->Lock();
-    mixer->Unlock();
+    mixer.Lock();
+    mixer.Unlock();
 
     Nio::Stop();
 
@@ -86,9 +88,6 @@ int exitprogram()
     delete ui;
 #endif // ENABLE_FLTKGUI
 
-    auto synth = mixer->GetSettings();
-    delete mixer;
-    delete synth;
     FFT_cleanup();
 
     return 0;
@@ -96,7 +95,6 @@ int exitprogram()
 
 int main(int argc, char *argv[])
 {
-    auto synth = new SystemSettings;
     Config::Current().init();
     int noui = 0;
     std::cerr << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
@@ -115,14 +113,14 @@ int main(int argc, char *argv[])
     }
 
     /* Get the settings from the Config*/
-    synth->samplerate = Config::Current().cfg.SampleRate;
-    synth->buffersize = Config::Current().cfg.SoundBufferSize;
-    synth->oscilsize = Config::Current().cfg.OscilSize;
+    synth.samplerate = Config::Current().cfg.SampleRate;
+    synth.buffersize = Config::Current().cfg.SoundBufferSize;
+    synth.oscilsize = Config::Current().cfg.OscilSize;
     swaplr = Config::Current().cfg.SwapStereo;
 
-    Nio::preferedSampleRate(synth->samplerate);
+    Nio::preferedSampleRate(synth.samplerate);
 
-    synth->alias(); //build aliases
+    synth.alias(); //build aliases
 
     sprng(static_cast<unsigned int>(time(nullptr)));
 
@@ -212,8 +210,8 @@ int main(int argc, char *argv[])
             }
             case 'r':
             {
-                GETOPNUM(synth->samplerate);
-                if (synth->samplerate < 4000)
+                GETOPNUM(synth.samplerate);
+                if (synth.samplerate < 4000)
                 {
                     std::cerr << "ERROR:Incorrect sample rate: " << optarguments
                               << std::endl;
@@ -223,8 +221,8 @@ int main(int argc, char *argv[])
             }
             case 'b':
             {
-                GETOPNUM(synth->buffersize);
-                if (synth->buffersize < 2)
+                GETOPNUM(synth.buffersize);
+                if (synth.buffersize < 2)
                 {
                     std::cerr << "ERROR:Incorrect buffer size: " << optarguments
                               << std::endl;
@@ -236,17 +234,17 @@ int main(int argc, char *argv[])
             {
                 if (optarguments)
                 {
-                    synth->oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
+                    synth.oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
                 }
-                if (synth->oscilsize < MAX_AD_HARMONICS * 2)
+                if (synth.oscilsize < MAX_AD_HARMONICS * 2)
                 {
-                    synth->oscilsize = MAX_AD_HARMONICS * 2;
+                    synth.oscilsize = MAX_AD_HARMONICS * 2;
                 }
-                synth->oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f))));
-                if (tmp != synth->oscilsize)
+                synth.oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(synth.oscilsize - 1.0f) / logf(2.0f))));
+                if (tmp != synth.oscilsize)
                 {
-                    std::cerr << "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                              << synth->oscilsize << "." << std::endl;
+                    std::cerr << "synth.oscilsize is wrong (must be 2^n) or too small. Adjusting to "
+                              << synth.oscilsize << "." << std::endl;
                 }
                 break;
             }
@@ -312,24 +310,23 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    synth->alias();
+    synth.alias();
 
     std::cerr.precision(1);
     std::cerr << std::fixed;
-    std::cerr << "\nSample Rate = \t\t" << synth->samplerate << std::endl;
-    std::cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << std::endl;
-    std::cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << std::endl;
-    std::cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << std::endl;
+    std::cerr << "\nSample Rate = \t\t" << synth.samplerate << std::endl;
+    std::cerr << "Sound Buffer Size = \t" << synth.buffersize << " samples" << std::endl;
+    std::cerr << "Internal latency = \t\t" << synth.buffersize_f * 1000.0f / synth.samplerate_f << " ms" << std::endl;
+    std::cerr << "ADsynth Oscil.Size = \t" << synth.oscilsize << " samples" << std::endl;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-    BankManager banks;
-    mixer = new Mixer(synth, &banks);
-    mixer->swaplr = swaplr;
+    mixer.Setup(&synth, &banks);
+    mixer.swaplr = swaplr;
 
     if (!loadfile.empty())
     {
-        int tmp = mixer->loadXML(loadfile.c_str());
+        int tmp = mixer.loadXML(loadfile.c_str());
         if (tmp < 0)
         {
             std::cerr << "ERROR: Could not load master file " << loadfile
@@ -338,14 +335,14 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mixer->applyparameters();
+            mixer.applyparameters();
             cout << "Master file loaded." << std::endl;
         }
     }
 
     if (!loadinstrument.empty())
     {
-        int tmp = mixer->GetChannel(0)->loadXMLinstrument(loadinstrument.c_str());
+        int tmp = mixer.GetChannel(0)->loadXMLinstrument(loadinstrument.c_str());
         if (tmp < 0)
         {
             std::cerr << "ERROR: Could not load instrument file "
@@ -354,13 +351,13 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mixer->GetChannel(0)->ApplyParameters();
+            mixer.GetChannel(0)->ApplyParameters();
             cout << "Instrument file loaded." << std::endl;
         }
     }
 
     //Run the Nio system
-    bool ioGood = Nio::Start(mixer);
+    bool ioGood = Nio::Start(&mixer);
 
     // Run a system command after starting zynaddsubfx
     if (!execAfterInit.empty())
@@ -374,7 +371,7 @@ int main(int argc, char *argv[])
 
 #ifdef ENABLE_FLTKGUI
 
-    ui = new MasterUI(mixer, seq, &Pexitprogram);
+    ui = new MasterUI(&mixer, seq, &Pexitprogram);
 
     if (!noui)
     {

@@ -99,12 +99,12 @@ class PartKitItem {: {public Fl_Group}
     } {
       Fl_Group partkititemgroup {
         private xywh {55 0 605 20}
-        code0 {if (part->_instruments[n].Penabled==0) o->deactivate();}
+        code0 {if (part->instruments[n].Penabled==0) o->deactivate();}
       } {
         Fl_Counter minkcounter {
-          callback {part->_instruments[n].Pminkey=(int)o->value();}
+          callback {part->instruments[n].Pminkey=(int)o->value();}
           xywh {225 0 55 15} type Simple minimum 0 maximum 128 step 1
-          code0 {o->value(part->_instruments[n].Pminkey);}
+          code0 {o->value(part->instruments[n].Pminkey);}
         }
         Fl_Button {} {
           label m
@@ -132,69 +132,69 @@ maxkcounter->do_callback();}
           label edit
           callback {partui->showparameters(n,0);}
           xywh {420 0 40 15} box THIN_UP_BOX labelsize 11
-          code0 {if (part->_instruments[n].Padenabled==0) o->deactivate();}
+          code0 {if (part->instruments[n].Padenabled==0) o->deactivate();}
           code1 {if (n==0) o->hide();}
         }
         Fl_Button subeditbutton {
           label edit
           callback {partui->showparameters(n,1);}
           xywh {490 0 40 15} box THIN_UP_BOX labelsize 11
-          code0 {if (part->_instruments[n].Psubenabled==0) o->deactivate();}
+          code0 {if (part->instruments[n].Psubenabled==0) o->deactivate();}
           code1 {if (n==0) o->hide();}
         }
         Fl_Check_Button mutedcheck {
-          callback {part->_instruments[n].Pmuted=(int)o->value();}
+          callback {part->instruments[n].Pmuted=(int)o->value();}
           private xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
-          code0 {o->value(part->_instruments[n].Pmuted);}
+          code0 {o->value(part->instruments[n].Pmuted);}
         }
         Fl_Counter maxkcounter {
-          callback {part->_instruments[n].Pmaxkey=(int)o->value();}
+          callback {part->instruments[n].Pmaxkey=(int)o->value();}
           xywh {335 0 55 15} type Simple minimum 0 maximum 128 step 1
-          code0 {o->value(part->_instruments[n].Pmaxkey);}
+          code0 {o->value(part->instruments[n].Pmaxkey);}
         }
         Fl_Button labelbutton {
           label {Bass Drum}
-          callback {const char *tmp=fl_input("Kit item name:",(const char *)part->_instruments[n].Pname);
-if (tmp!=NULL) snprintf((char *)part->_instruments[n].Pname,CHANNEL_MAX_NAME_LEN,"%s",tmp);}
+          callback {const char *tmp=fl_input("Kit item name:",(const char *)part->instruments[n].Pname);
+if (tmp!=NULL) snprintf((char *)part->instruments[n].Pname,CHANNEL_MAX_NAME_LEN,"%s",tmp);}
           xywh {90 0 130 15} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 20
-          code0 {o->label((char *)part->_instruments[n].Pname);}
+          code0 {o->label((char *)part->instruments[n].Pname);}
         }
         Fl_Check_Button adcheck {
-          callback {part->_instruments[n].Padenabled=(int)o->value();
-if (part->_instruments[n].Padenabled!=0) adeditbutton->activate();
+          callback {part->instruments[n].Padenabled=(int)o->value();
+if (part->instruments[n].Padenabled!=0) adeditbutton->activate();
        else  adeditbutton->deactivate();}
           private xywh {400 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
-          code0 {o->value(part->_instruments[n].Padenabled);}
+          code0 {o->value(part->instruments[n].Padenabled);}
           code1 {if (n==0) o->hide();}
         }
         Fl_Check_Button subcheck {
-          callback {part->_instruments[n].Psubenabled=(int)o->value();
-if (part->_instruments[n].Psubenabled!=0) subeditbutton->activate();
+          callback {part->instruments[n].Psubenabled=(int)o->value();
+if (part->instruments[n].Psubenabled!=0) subeditbutton->activate();
        else  subeditbutton->deactivate();}
           private xywh {470 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
-          code0 {o->value(part->_instruments[n].Psubenabled);}
+          code0 {o->value(part->instruments[n].Psubenabled);}
           code1 {if (n==0) o->hide();}
         }
         Fl_Choice sendtoeffect {
-          callback {if (o->value()!=0) part->_instruments[n].Psendtoparteffect=(int)o->value()-1;
-    else part->_instruments[n].Psendtoparteffect=127;} open
+          callback {if (o->value()!=0) part->instruments[n].Psendtoparteffect=(int)o->value()-1;
+    else part->instruments[n].Psendtoparteffect=127;} open
           xywh {615 0 45 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
           code0 {o->add("OFF");char nrstr[10]; for(int i=0;i<NUM_CHANNEL_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};}
-          code1 {o->value(part->_instruments[n].Psendtoparteffect+1);if (part->_instruments[n].Psendtoparteffect==127) o->value(0);}
+          code1 {o->value(part->instruments[n].Psendtoparteffect+1);if (part->instruments[n].Psendtoparteffect==127) o->value(0);}
         } {}
         Fl_Button padeditbutton {
           label edit
           callback {partui->showparameters(n,2);}
           xywh {560 0 40 15} box THIN_UP_BOX labelsize 11
-          code0 {if (part->_instruments[n].Ppadenabled==0) o->deactivate();}
+          code0 {if (part->instruments[n].Ppadenabled==0) o->deactivate();}
           code1 {if (n==0) o->hide();}
         }
         Fl_Check_Button padcheck {
-          callback {part->_instruments[n].Ppadenabled=(int)o->value();
-if (part->_instruments[n].Ppadenabled!=0) padeditbutton->activate();
+          callback {part->instruments[n].Ppadenabled=(int)o->value();
+if (part->instruments[n].Ppadenabled!=0) padeditbutton->activate();
        else padeditbutton->deactivate();}
           private xywh {540 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
-          code0 {o->value(part->_instruments[n].Ppadenabled);}
+          code0 {o->value(part->instruments[n].Ppadenabled);}
           code1 {if (n==0) o->hide();}
         }
       }
@@ -214,7 +214,7 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
 } else o->value(1);}
         private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
         code0 {snprintf(label,10,"%d",n+1);o->label(label);}
-        code1 {o->value(part->_instruments[n].Penabled);}
+        code1 {o->value(part->instruments[n].Penabled);}
         code2 {if (n==0) o->deactivate();}
       }
     }
@@ -224,21 +224,21 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
 part=NULL;} {}
   }
   Function {refresh()} {} {
-    code {enabledcheck->value(part->_instruments[n].Penabled);
-if (part->_instruments[n].Penabled==0) partkititemgroup->deactivate();
+    code {enabledcheck->value(part->instruments[n].Penabled);
+if (part->instruments[n].Penabled==0) partkititemgroup->deactivate();
 else partkititemgroup->activate();
 
-mutedcheck->value(part->_instruments[n].Pmuted);
-labelbutton->label((char *)part->_instruments[n].Pname);
-minkcounter->value(part->_instruments[n].Pminkey);
-maxkcounter->value(part->_instruments[n].Pmaxkey);
-adcheck->value(part->_instruments[n].Padenabled);
+mutedcheck->value(part->instruments[n].Pmuted);
+labelbutton->label((char *)part->instruments[n].Pname);
+minkcounter->value(part->instruments[n].Pminkey);
+maxkcounter->value(part->instruments[n].Pmaxkey);
+adcheck->value(part->instruments[n].Padenabled);
 adcheck->do_callback();
-subcheck->value(part->_instruments[n].Psubenabled);
+subcheck->value(part->instruments[n].Psubenabled);
 subcheck->do_callback();
 
-sendtoeffect->value(part->_instruments[n].Psendtoparteffect+1);
-if (part->_instruments[n].Psendtoparteffect==127) sendtoeffect->value(0);
+sendtoeffect->value(part->instruments[n].Psendtoparteffect+1);
+if (part->instruments[n].Psendtoparteffect==127) sendtoeffect->value(0);
 
 this->redraw();} {
       callback {int answer=1;
@@ -858,16 +858,16 @@ if (part->Pkitmode==0) {
             label Edit
             callback {showparameters(0,2);}
             xywh {215 280 80 35} color 51 selection_color 51 labelfont 1 labelsize 13 align 128
-            code0 {if (part->_instruments[0].Ppadenabled==0) o->deactivate();}
+            code0 {if (part->instruments[0].Ppadenabled==0) o->deactivate();}
           }
           Fl_Check_Button padsynenabledcheck {
             label Enabled
             callback {int x=(int) o->value();
-part->_instruments[0].Ppadenabled=x;
+part->instruments[0].Ppadenabled=x;
 if (x==0) padeditbutton->deactivate();
      else padeditbutton->activate();}
             tooltip {enable/disable PADsynth} xywh {215 255 80 20} box UP_BOX down_box DOWN_BOX color 51 labelfont 1 labelsize 11
-            code1 {o->value(part->_instruments[0].Ppadenabled);}
+            code1 {o->value(part->instruments[0].Ppadenabled);}
           }
         }
         Fl_Group {} {
@@ -877,17 +877,17 @@ if (x==0) padeditbutton->deactivate();
           Fl_Check_Button adsynenabledcheck {
             label Enabled
             callback {int x=(int) o->value();
-part->_instruments[0].Padenabled=x;
+part->instruments[0].Padenabled=x;
 if (x==0) adeditbutton->deactivate();
      else adeditbutton->activate();}
             tooltip {enable/disable ADsynth} xywh {15 255 80 20} box UP_BOX down_box DOWN_BOX color 51 labelfont 1 labelsize 11
-            code1 {o->value(part->_instruments[0].Padenabled);}
+            code1 {o->value(part->instruments[0].Padenabled);}
           }
           Fl_Button adeditbutton {
             label Edit
             callback {showparameters(0,0);}
             xywh {15 281 80 34} color 51 selection_color 51 labelfont 1 labelsize 13 align 128
-            code0 {if (part->_instruments[0].Padenabled==0) o->deactivate();}
+            code0 {if (part->instruments[0].Padenabled==0) o->deactivate();}
           }
         }
         Fl_Group {} {
@@ -897,17 +897,17 @@ if (x==0) adeditbutton->deactivate();
           Fl_Check_Button subsynenabledcheck {
             label Enabled
             callback {int x=(int) o->value();
-part->_instruments[0].Psubenabled=x;
+part->instruments[0].Psubenabled=x;
 if (x==0) subeditbutton->deactivate();
      else subeditbutton->activate();}
             tooltip {enable/disable SUBsynth} xywh {115 255 80 20} box UP_BOX down_box DOWN_BOX color 51 labelfont 1 labelsize 11
-            code1 {o->value(part->_instruments[0].Psubenabled);}
+            code1 {o->value(part->instruments[0].Psubenabled);}
           }
           Fl_Button subeditbutton {
             label Edit
             callback {showparameters(0,1);}
             xywh {115 280 80 35} color 51 selection_color 51 labelfont 1 labelsize 13 align 128
-            code0 {if (part->_instruments[0].Psubenabled==0) o->deactivate();}
+            code0 {if (part->instruments[0].Psubenabled==0) o->deactivate();}
           }
         }
         Fl_Button {} {
@@ -1080,14 +1080,14 @@ if (kititem!=lastkititem){
     if (kititem>=NUM_CHANNEL_INSTRUMENTS) return;//bad kit item
     if (kititem<0) return;
 
-    if (part->_instruments[kititem].adpars!=NULL)
-      adnoteui=new ADnoteUI(part->_instruments[kititem].adpars,master);
+    if (part->instruments[kititem].adpars!=NULL)
+      adnoteui=new ADnoteUI(part->instruments[kititem].adpars,master);
 
-    if (part->_instruments[kititem].subpars!=NULL)
-       subnoteui=new SUBnoteUI(part->_instruments[kititem].subpars);
+    if (part->instruments[kititem].subpars!=NULL)
+       subnoteui=new SUBnoteUI(part->instruments[kititem].subpars);
 
-    if (part->_instruments[kititem].padpars!=NULL)
-      padnoteui=new PADnoteUI(part->_instruments[kititem].padpars,master);
+    if (part->instruments[kititem].padpars!=NULL)
+      padnoteui=new PADnoteUI(part->instruments[kititem].padpars,master);
 
 };
 

@@ -394,10 +394,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         // AD synth enable/disable + edit button
-        auto adEnabled = channel->_instruments[0].Padenabled == 1;
+        auto adEnabled = channel->instruments[0].Padenabled == 1;
         if (ImGui::Checkbox("##adEnabled", &adEnabled))
         {
-            channel->_instruments[0].Padenabled = adEnabled ? 1 : 0;
+            channel->instruments[0].Padenabled = adEnabled ? 1 : 0;
             _sequencer.ActiveInstrument(track);
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
@@ -411,10 +411,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::ShowTooltipOnHover("Edit the AD synth");
 
         // SUB synth enable/disable + edit button
-        auto subEnabled = channel->_instruments[0].Psubenabled == 1;
+        auto subEnabled = channel->instruments[0].Psubenabled == 1;
         if (ImGui::Checkbox("##subEnabled", &subEnabled))
         {
-            channel->_instruments[0].Psubenabled = subEnabled ? 1 : 0;
+            channel->instruments[0].Psubenabled = subEnabled ? 1 : 0;
             _sequencer.ActiveInstrument(track);
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The SUB synth is enabled" : "The AD synth is disabled");
@@ -428,10 +428,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::ShowTooltipOnHover("Edit the SUB synth");
 
         // PAD synth enable/disable + edit button
-        auto padEnabled = channel->_instruments[0].Ppadenabled == 1;
+        auto padEnabled = channel->instruments[0].Ppadenabled == 1;
         if (ImGui::Checkbox("##padEnabled", &padEnabled))
         {
-            channel->_instruments[0].Ppadenabled = padEnabled ? 1 : 0;
+            channel->instruments[0].Ppadenabled = padEnabled ? 1 : 0;
             _sequencer.ActiveInstrument(track);
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The PAD synth is enabled" : "The AD synth is disabled");

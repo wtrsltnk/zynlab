@@ -118,7 +118,7 @@ public:
     void Cleanup(bool final = false);
 
     //the Channel's instruments
-    Instrument _instruments[NUM_CHANNEL_INSTRUMENTS];
+    Instrument instruments[NUM_CHANNEL_INSTRUMENTS];
 
     //Channel parameters
     void setkeylimit(unsigned char Pkeylimit);
@@ -189,19 +189,19 @@ private:
     void RelaseNotePos(unsigned int pos);
     void MonoMemRenote(); // MonoMem stuff.
 
-    int killallnotes; //is set to 1 if I want to kill all notes
+    int _killallnotes; //is set to 1 if I want to kill all notes
 
-    unsigned int lastpos, lastposb; // To keep track of previously used pos and posb.
-    bool lastlegatomodevalid;         // To keep track of previous legatomodevalid.
+    unsigned int _lastpos, _lastposb; // To keep track of previously used pos and posb.
+    bool _lastlegatomodevalid;         // To keep track of previous legatomodevalid.
 
     // MonoMem stuff
-    std::list<unsigned char> monomemnotes; // A list to remember held notes.
+    std::list<unsigned char> _monomemnotes; // A list to remember held notes.
     struct
     {
         unsigned char velocity;
         unsigned char stub[3];
         int mkeyshift; // I'm not sure masterkeyshift should be remembered.
-    } monomem[256];
+    } _monomem[256];
     /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to
            store the velocity and masterkeyshift values of a given note (the list only store note values).
@@ -209,9 +209,9 @@ private:
 
     ChannelNotes _channelNotes[POLIPHONY];
 
-    float oldfreq; //this is used for portamento
+    float _oldfreq; //this is used for portamento
     IMixer *_mixer;
-    SystemSettings *_synth;
+    SystemSettings *_settings;
     Microtonal *_microtonal;
     IFFTwrapper *_fft;
     pthread_mutex_t _instrumentMutex;
