@@ -165,6 +165,16 @@ void AppThreeDee::ImGuiSelectedTrack()
     ImGui::PopStyleVar();
 }
 
+unsigned char indexOf(std::vector<char const *> const &values, std::string const &selectedValue)
+{
+    for (size_t i = 0; i < values.size(); i++)
+    {
+        if (std::string(values[i]) == selectedValue)
+            return static_cast<unsigned char>(i);
+    }
+    return 0;
+}
+
 void AppThreeDee::ImGuiMasterTrack()
 {
     auto io = ImGui::GetStyle();
@@ -179,17 +189,17 @@ void AppThreeDee::ImGuiMasterTrack()
 
         // Output devices
         auto sinks = toCharVector(Nio::GetSinks());
-        int selectedSink = 0;
+        int selectedSink = indexOf(sinks, Nio::GetSelectedSink());
         ImGui::PushItemWidth(width);
         if (ImGui::Combo("##Sinks", &selectedSink, &sinks[0], static_cast<int>(sinks.size())))
         {
-            Nio::SelectSource(sinks[static_cast<size_t>(selectedSink)]);
+            Nio::SelectSink(sinks[static_cast<size_t>(selectedSink)]);
         }
         ImGui::ShowTooltipOnHover("Ouput device");
 
         // Input devices
         auto sources = toCharVector(Nio::GetSources());
-        int selectedSource = 0;
+        int selectedSource = indexOf(sources, Nio::GetSelectedSource());
         ImGui::PushItemWidth(width);
         if (ImGui::Combo("##Sources", &selectedSource, &sources[0], static_cast<int>(sources.size())))
         {
