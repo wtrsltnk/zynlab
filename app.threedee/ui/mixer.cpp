@@ -383,11 +383,11 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             }
         }
         ImGui::PushItemWidth(width);
-        if (ImGui::PresetSelection("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS))
+        if (ImGui::PresetSelection("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
         {
             _sequencer.ActiveInstrument(track);
         }
-        ImGui::ShowTooltipOnHover("Midi channel");
+
         if (ImGui::IsItemClicked())
         {
             _sequencer.ActiveInstrument(track);
@@ -453,9 +453,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        ImGui::Separator();
-
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+
+        ImGui::Separator();
 
         // System effect sends
         if (useLargeMode)
@@ -504,9 +504,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        ImGui::Separator();
-
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+
+        ImGui::Separator();
 
         // Insertion effects
         if (useLargeMode)
@@ -562,9 +562,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+
         ImGui::Separator();
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         // Channel effects
         if (useLargeMode)
         {
