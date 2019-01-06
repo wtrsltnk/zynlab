@@ -218,25 +218,25 @@ void Chorus::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case ChorusPresets::ChorusVolume:
+        case EffectPresets::Volume:
             setvolume(value);
             break;
-        case ChorusPresets::ChorusPanning:
+        case EffectPresets::Panning:
             SetPanning(value);
             break;
-        case ChorusPresets::ChorusLFOFrequency:
+        case EffectPresets::LFOFrequency:
             lfo.Pfreq = value;
             lfo.updateparams();
             break;
-        case ChorusPresets::ChorusLFORandomness:
+        case EffectPresets::LFORandomness:
             lfo.Prandomness = value;
             lfo.updateparams();
             break;
-        case ChorusPresets::ChorusLFOFunction:
+        case EffectPresets::LFOFunction:
             lfo.PLFOtype = value;
             lfo.updateparams();
             break;
-        case ChorusPresets::ChorusLFOStereo:
+        case EffectPresets::LFOStereo:
             lfo.Pstereo = value;
             lfo.updateparams();
             break;
@@ -265,17 +265,17 @@ unsigned char Chorus::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case ChorusPresets::ChorusVolume:
+        case EffectPresets::Volume:
             return Pvolume;
-        case ChorusPresets::ChorusPanning:
+        case EffectPresets::Panning:
             return Ppanning;
-        case ChorusPresets::ChorusLFOFrequency:
+        case EffectPresets::LFOFrequency:
             return lfo.Pfreq;
-        case ChorusPresets::ChorusLFORandomness:
+        case EffectPresets::LFORandomness:
             return lfo.Prandomness;
-        case ChorusPresets::ChorusLFOFunction:
+        case EffectPresets::LFOFunction:
             return lfo.PLFOtype;
-        case ChorusPresets::ChorusLFOStereo:
+        case EffectPresets::LFOStereo:
             return lfo.Pstereo;
         case ChorusPresets::ChorusDepth:
             return Pdepth;

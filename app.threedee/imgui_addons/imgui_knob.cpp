@@ -2,7 +2,7 @@
 #include <cmath>
 #include <stdio.h>
 
-bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, ImVec2 const &size)
+bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, ImVec2 const &size, char const *tooltip)
 {
     bool showLabel = label[0] != '#' && label[1] != '#' && label[0] != '\0';
 
@@ -83,7 +83,7 @@ bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, Im
     return value_changed;
 }
 
-bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size)
+bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size, char const *tooltip)
 {
     bool showLabel = label[0] != '#' && label[1] != '#' && label[0] != '\0';
 
@@ -151,7 +151,11 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
     {
         ImGui::SetNextWindowPos(ImVec2(pos.x - style.WindowPadding.x, pos.y - (line_height * 2) - style.ItemInnerSpacing.y - style.WindowPadding.y));
         ImGui::BeginTooltip();
-        if (showLabel)
+        if (tooltip != nullptr)
+        {
+            ImGui::Text("%s %d", tooltip, static_cast<unsigned int>(*p_value));
+        }
+        else if (showLabel)
         {
             ImGui::Text("%s %d", label, static_cast<unsigned int>(*p_value));
         }

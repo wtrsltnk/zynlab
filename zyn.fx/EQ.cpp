@@ -110,7 +110,7 @@ void EQ::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case EQPresets::EQVolume:
+        case EffectPresets::Volume:
         {
             setvolume(value);
             break;
@@ -187,7 +187,7 @@ unsigned char EQ::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case EQPresets::EQVolume:
+        case EffectPresets::Volume:
         {
             return Pvolume;
         }

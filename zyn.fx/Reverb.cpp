@@ -518,7 +518,7 @@ void Reverb::SetPreset(unsigned char npreset)
     }
     if (insertion)
     {
-        ChangeParameter(ReverbPresets::ReverbVolume, presets[npreset][0] / 2); //lower the volume if reverb is insertion effect
+        ChangeParameter(EffectPresets::Volume, presets[npreset][0] / 2); //lower the volume if reverb is insertion effect
     }
     Ppreset = npreset;
 }
@@ -527,12 +527,12 @@ void Reverb::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case ReverbPresets::ReverbVolume:
+        case EffectPresets::Volume:
         {
             setvolume(value);
             break;
         }
-        case ReverbPresets::ReverbPanning:
+        case EffectPresets::Panning:
         {
             SetPanning(static_cast<char>(value));
             break;
@@ -595,11 +595,11 @@ unsigned char Reverb::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case ReverbPresets::ReverbVolume:
+        case EffectPresets::Volume:
         {
             return Pvolume;
         }
-        case ReverbPresets::ReverbPanning:
+        case EffectPresets::Panning:
         {
             return static_cast<unsigned char>(Ppanning);
         }

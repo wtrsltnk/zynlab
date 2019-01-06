@@ -1,10 +1,18 @@
 #ifndef EFFECTPRESETS_H
 #define EFFECTPRESETS_H
 
+enum EffectPresets
+{
+    Volume = 0,
+    Panning = 1,
+    LFOFrequency = 2,
+    LFORandomness = 3,
+    LFOFunction = 4,
+    LFOStereo = 5,
+};
+
 enum ReverbPresets
 {
-    ReverbVolume = 0,
-    ReverbPanning = 1,
     ReverbTime = 2,
     ReverbInitialDelay = 3,
     ReverbInitialDelayFeedback = 4,
@@ -20,8 +28,6 @@ enum ReverbPresets
 
 enum EchoPresets
 {
-    EchoVolume = 0,
-    EchoPanning = 1,
     EchoDelay = 2,
     EchoDelayBetweenLR = 3,
     EchoChannelRouting = 4,
@@ -31,12 +37,6 @@ enum EchoPresets
 
 enum ChorusPresets
 {
-    ChorusVolume = 0,
-    ChorusPanning = 1,
-    ChorusLFOFrequency = 2,
-    ChorusLFORandomness = 3,
-    ChorusLFOFunction = 4,
-    ChorusLFOStereo = 5,
     ChorusDepth = 6,
     ChorusDelay = 7,
     ChorusFeedback = 8,
@@ -47,12 +47,6 @@ enum ChorusPresets
 
 enum PhaserPresets
 {
-    PhaserVolume = 0,
-    PhaserPanning = 1,
-    PhaserLFOFrequency = 2,
-    PhaserLFORandomness = 3,
-    PhaserLFOFunction = 4,
-    PhaserLFOStereo = 5,
     PhaserDepth = 6,
     PhaserFeedback = 7,
     PhaserStages = 8,
@@ -66,12 +60,6 @@ enum PhaserPresets
 
 enum AlienWahPresets
 {
-    AlienWahVolume = 0,
-    AlienWahPanning = 1,
-    AlienWahLFOFrequency = 2,
-    AlienWahLFORandomness = 3,
-    AlienWahLFOFunction = 4,
-    AlienWahLFOStereo = 5,
     AlienWahDepth = 6,
     AlienWahFeedback = 7,
     AlienWahDelay = 8,
@@ -81,8 +69,6 @@ enum AlienWahPresets
 
 enum DistorsionPresets
 {
-    DistorsionVolume = 0,
-    DistorsionPanning = 1,
     DistorsionChannelRouting = 2,
     DistorsionDrive = 3,
     DistorsionLevel = 4,
@@ -96,7 +82,6 @@ enum DistorsionPresets
 
 enum EQPresets
 {
-    EQVolume = 0,
     EQBandType = 10,
     EQBandFrequency = 11,
     EQBandGain = 12,
@@ -106,12 +91,6 @@ enum EQPresets
 
 enum DynFilterPresets
 {
-    DynFilterVolume = 0,
-    DynFilterPanning = 1,
-    DynFilterLFOFrequency = 2,
-    DynFilterLFORandomness = 3,
-    DynFilterLFOFunction = 4,
-    DynFilterLFOStereo = 5,
     DynFilterDepth = 6,
     DynFilterAmplitudeSense = 7,
     DynFilterAmplitudeSenseInvert = 8,

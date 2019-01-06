@@ -394,36 +394,36 @@ void Phaser::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case PhaserPresets::PhaserVolume:
+        case EffectPresets::Volume:
         {
             setvolume(value);
             break;
         }
-        case PhaserPresets::PhaserPanning:
+        case EffectPresets::Panning:
         {
             SetPanning(static_cast<char>(value));
             break;
         }
-        case PhaserPresets::PhaserLFOFrequency:
+        case EffectPresets::LFOFrequency:
         {
             lfo.Pfreq = value;
             lfo.updateparams();
             break;
         }
-        case PhaserPresets::PhaserLFORandomness:
+        case EffectPresets::LFORandomness:
         {
             lfo.Prandomness = value;
             lfo.updateparams();
             break;
         }
-        case PhaserPresets::PhaserLFOFunction:
+        case EffectPresets::LFOFunction:
         {
             lfo.PLFOtype = value;
             lfo.updateparams();
             barber = (2 == value);
             break;
         }
-        case PhaserPresets::PhaserLFOStereo:
+        case EffectPresets::LFOStereo:
         {
             lfo.Pstereo = value;
             lfo.updateparams();
@@ -483,27 +483,27 @@ unsigned char Phaser::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case PhaserPresets::PhaserVolume:
+        case EffectPresets::Volume:
         {
             return Pvolume;
         }
-        case PhaserPresets::PhaserPanning:
+        case EffectPresets::Panning:
         {
             return static_cast<unsigned char>(Ppanning);
         }
-        case PhaserPresets::PhaserLFOFrequency:
+        case EffectPresets::LFOFrequency:
         {
             return lfo.Pfreq;
         }
-        case PhaserPresets::PhaserLFORandomness:
+        case EffectPresets::LFORandomness:
         {
             return lfo.Prandomness;
         }
-        case PhaserPresets::PhaserLFOFunction:
+        case EffectPresets::LFOFunction:
         {
             return lfo.PLFOtype;
         }
-        case PhaserPresets::PhaserLFOStereo:
+        case EffectPresets::LFOStereo:
         {
             return lfo.Pstereo;
         }

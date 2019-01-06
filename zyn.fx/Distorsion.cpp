@@ -201,7 +201,7 @@ void Distorsion::SetPreset(unsigned char npreset)
     }
     if (!insertion) //lower the volume if this is system effect
     {
-        ChangeParameter(DistorsionPresets::DistorsionVolume, (int)(presets[npreset][0] / 1.5f));
+        ChangeParameter(EffectPresets::Volume, (int)(presets[npreset][0] / 1.5f));
     }
     Ppreset = npreset;
     Cleanup();
@@ -211,10 +211,10 @@ void Distorsion::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case DistorsionPresets::DistorsionVolume:
+        case EffectPresets::Volume:
             setvolume(value);
             break;
-        case DistorsionPresets::DistorsionPanning:
+        case EffectPresets::Panning:
             SetPanning(value);
             break;
         case DistorsionPresets::DistorsionChannelRouting:
@@ -265,9 +265,9 @@ unsigned char Distorsion::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case DistorsionPresets::DistorsionVolume:
+        case EffectPresets::Volume:
             return Pvolume;
-        case DistorsionPresets::DistorsionPanning:
+        case EffectPresets::Panning:
             return Ppanning;
         case DistorsionPresets::DistorsionChannelRouting:
             return Plrcross;

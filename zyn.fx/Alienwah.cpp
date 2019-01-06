@@ -180,7 +180,7 @@ void Alienwah::SetPreset(unsigned char npreset)
     }
     if (insertion == 0)
     {
-        ChangeParameter(AlienWahPresets::AlienWahVolume, presets[npreset][0] / 2); //lower the volume if this is system effect
+        ChangeParameter(EffectPresets::Volume, presets[npreset][0] / 2); //lower the volume if this is system effect
     }
     Ppreset = npreset;
 }
@@ -189,25 +189,25 @@ void Alienwah::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case AlienWahPresets::AlienWahVolume:
+        case EffectPresets::Volume:
             setvolume(value);
             break;
-        case AlienWahPresets::AlienWahPanning:
+        case EffectPresets::Panning:
             SetPanning(static_cast<char>(value));
             break;
-        case AlienWahPresets::AlienWahLFOFrequency:
+        case EffectPresets::LFOFrequency:
             lfo.Pfreq = value;
             lfo.updateparams();
             break;
-        case AlienWahPresets::AlienWahLFORandomness:
+        case EffectPresets::LFORandomness:
             lfo.Prandomness = value;
             lfo.updateparams();
             break;
-        case AlienWahPresets::AlienWahLFOFunction:
+        case EffectPresets::LFOFunction:
             lfo.PLFOtype = value;
             lfo.updateparams();
             break;
-        case AlienWahPresets::AlienWahLFOStereo:
+        case EffectPresets::LFOStereo:
             lfo.Pstereo = value;
             lfo.updateparams();
             break;
@@ -233,17 +233,17 @@ unsigned char Alienwah::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case AlienWahPresets::AlienWahVolume:
+        case EffectPresets::Volume:
             return Pvolume;
-        case AlienWahPresets::AlienWahPanning:
+        case EffectPresets::Panning:
             return static_cast<unsigned char>(Ppanning);
-        case AlienWahPresets::AlienWahLFOFrequency:
+        case EffectPresets::LFOFrequency:
             return lfo.Pfreq;
-        case AlienWahPresets::AlienWahLFORandomness:
+        case EffectPresets::LFORandomness:
             return lfo.Prandomness;
-        case AlienWahPresets::AlienWahLFOFunction:
+        case EffectPresets::LFOFunction:
             return lfo.PLFOtype;
-        case AlienWahPresets::AlienWahLFOStereo:
+        case EffectPresets::LFOStereo:
             return lfo.Pstereo;
         case AlienWahPresets::AlienWahDepth:
             return Pdepth;
