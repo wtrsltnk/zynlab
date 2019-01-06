@@ -1137,8 +1137,8 @@ void Channel::ComputeInstrumentSamples()
             if (Pefxroute[nefx] == 2)
                 for (unsigned int i = 0; i < _settings->buffersize; ++i)
                 {
-                    partfxinputl[nefx + 1][i] += partefx[nefx]->efxoutl[i];
-                    partfxinputr[nefx + 1][i] += partefx[nefx]->efxoutr[i];
+                    partfxinputl[nefx + 1][i] += partefx[nefx]->_effectOutL[i];
+                    partfxinputr[nefx + 1][i] += partefx[nefx]->_effectOutR[i];
                 }
         }
         int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_CHANNEL_EFX);

@@ -1,6 +1,7 @@
 #include "../app.threedee.h"
 
 #include "../imgui_addons/imgui_knob.h"
+#include <zyn.fx/Alienwah.h>
 #include <zyn.fx/EffectPresets.h>
 
 char const *const InsertionFxEditorID = "Insert effect";
@@ -827,5 +828,5 @@ void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
 
     ImGui::Text("Filter");
 
-    FilterParameters(effectManager->filterpars);
+    FilterParameters(effectManager->_filterpars);
 }

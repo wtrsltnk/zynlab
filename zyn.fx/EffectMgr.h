@@ -22,11 +22,6 @@
 #ifndef EFFECTMGR_H
 #define EFFECTMGR_H
 
-#include "Alienwah.h"
-#include "Distorsion.h"
-#include "DynamicFilter.h"
-#include "EQ.h"
-#include "Phaser.h"
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.dsp/FilterParams.h>
@@ -44,9 +39,10 @@ public:
     EffectManager();
     virtual ~EffectManager();
 
-    void Init(IMixer *mixer, const bool insertion_);
+    void Init(IMixer *mixer, const bool _insertion);
+
     void Serialize(IPresetsSerializer *xml);
-    void Defaults(void);
+    void Defaults();
     void Deserialize(IPresetsSerializer *xml);
 
     void out(float *smpsl, float *smpsr);
@@ -54,32 +50,32 @@ public:
     void setdryonly(bool value);
 
     /**get the output(to speakers) volume of the systemeffect*/
-    float sysefxgetvolume(void);
+    float sysefxgetvolume();
 
-    void cleanup(void);
+    void cleanup();
 
     void changeeffect(int nefx_);
-    int geteffect(void);
+    int geteffect();
     void changepreset(unsigned char npreset);
     void changepreset_nolock(unsigned char npreset);
-    unsigned char getpreset(void);
+    unsigned char getpreset();
     void seteffectpar(int npar, unsigned char value);
     void seteffectpar_nolock(int npar, unsigned char value);
     unsigned char geteffectpar(int npar);
 
-    bool insertion;
-    float *efxoutl, *efxoutr;
+    bool _insertion;
+    float *_effectOutL, *_effectOutR;
 
     // used by UI
     float getEQfreqresponse(float freq);
 
-    FilterParams *filterpars;
+    FilterParams *_filterpars;
     IMixer *_mixer;
 
 private:
-    int nefx;
-    Effect *efx;
-    bool dryonly;
+    int _effectType;
+    Effect *_effect;
+    bool _dryonly;
 };
 
 #endif

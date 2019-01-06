@@ -467,8 +467,8 @@ void Mixer::AudioOut(float *outl, float *outr)
                 const float vol = _sysefxsend[nefxfrom][nefx];
                 for (unsigned int i = 0; i < this->BufferSize(); ++i)
                 {
-                    tmpmixl[i] += sysefx[nefxfrom].efxoutl[i] * vol;
-                    tmpmixr[i] += sysefx[nefxfrom].efxoutr[i] * vol;
+                    tmpmixl[i] += sysefx[nefxfrom]._effectOutL[i] * vol;
+                    tmpmixr[i] += sysefx[nefxfrom]._effectOutR[i] * vol;
                 }
             }
         }

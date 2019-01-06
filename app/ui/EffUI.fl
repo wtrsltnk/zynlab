@@ -7,7 +7,10 @@ decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {}
 decl {//License: GNU GPL version 2 or later} {} 
 
 decl {\#include <stdlib.h>} {public
-} 
+}
+
+decl {\#include <cmath>} {public
+}
 
 decl {\#include <stdio.h>} {public
 } 
@@ -31,7 +34,13 @@ decl {\#include "zyn.common/Util.h"} {public
 } 
 
 decl {\#include "zyn.fx/EffectMgr.h"} {public
-} 
+}
+
+decl {\#include "zyn.fx/AlienWah.h"} {public
+}
+
+decl {\#include "zyn.fx/Phaser.h"} {public
+}
 
 decl {\#include "PresetsUI.h"} {public
 } 
@@ -1271,7 +1280,7 @@ refresh(eff);}
       Fl_Group {} {
         label {DynFilter effect  - Filter}
         xywh {5 5 275 75} box FLAT_BOX color 50 align 144
-        code0 {o->init(eff->filterpars,NULL,NULL);}
+        code0 {o->init(eff->_filterpars,NULL,NULL);}
         code1 {o->use_for_dynamic_filter();}
         class FilterUI
       } {}
@@ -1336,7 +1345,7 @@ if (filterwindow!=NULL){
 switch(eff->geteffect()){
      case 1:
 	revp->value(eff->getpreset());
-	revp0->value(eff->geteffectpar(0));if (eff->insertion!=0) revp0->label("D/W");
+    revp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) revp0->label("D/W");
 	revp1->value(eff->geteffectpar(1));
 	revp2->value(eff->geteffectpar(2));
 	revp3->value(eff->geteffectpar(3));
@@ -1354,7 +1363,7 @@ switch(eff->geteffect()){
         break; 
      case 2:
 	echop->value(eff->getpreset());
-	echop0->value(eff->geteffectpar(0));if (eff->insertion!=0) echop0->label("D/W");
+    echop0->value(eff->geteffectpar(0));if (eff->_insertion!=0) echop0->label("D/W");
 	echop1->value(eff->geteffectpar(1));
 	echop2->value(eff->geteffectpar(2));
 	echop3->value(eff->geteffectpar(3));
@@ -1365,7 +1374,7 @@ switch(eff->geteffect()){
         break; 
      case 3:
 	chorusp->value(eff->getpreset());
-	chorusp0->value(eff->geteffectpar(0));if (eff->insertion!=0) chorusp0->label("D/W");
+    chorusp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) chorusp0->label("D/W");
 	chorusp1->value(eff->geteffectpar(1));
 	chorusp2->value(eff->geteffectpar(2));
 	chorusp3->value(eff->geteffectpar(3));
@@ -1380,7 +1389,7 @@ switch(eff->geteffect()){
         break; 
      case 4:
 	phaserp->value(eff->getpreset());
-	phaserp0->value(eff->geteffectpar(0));if (eff->insertion!=0) phaserp0->label("D/W");
+    phaserp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) phaserp0->label("D/W");
 	phaserp1->value(eff->geteffectpar(1));
 	phaserp2->value(eff->geteffectpar(2));
 	phaserp3->value(eff->geteffectpar(3));
@@ -1399,7 +1408,7 @@ switch(eff->geteffect()){
         break; 
      case 5:
 	awp->value(eff->getpreset());
-	awp0->value(eff->geteffectpar(0));if (eff->insertion!=0) awp0->label("D/W");
+    awp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) awp0->label("D/W");
 	awp1->value(eff->geteffectpar(1));
 	awp2->value(eff->geteffectpar(2));
 	awp3->value(eff->geteffectpar(3));
@@ -1415,7 +1424,7 @@ switch(eff->geteffect()){
         break; 
      case 6:
 	distp->value(eff->getpreset());
-	distp0->value(eff->geteffectpar(0));if (eff->insertion!=0) distp0->label("D/W");
+    distp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) distp0->label("D/W");
 	distp1->value(eff->geteffectpar(1));
 	distp2->value(eff->geteffectpar(2));
 	distp3->value(eff->geteffectpar(3));
@@ -1444,7 +1453,7 @@ switch(eff->geteffect()){
         break;
      case 8:make_filter_window();
 	dfp->value(eff->getpreset());
-	dfp0->value(eff->geteffectpar(0));if (eff->insertion!=0) dfp0->label("D/W");
+    dfp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) dfp0->label("D/W");
 	dfp1->value(eff->geteffectpar(1));
 	dfp2->value(eff->geteffectpar(2));
 	dfp3->value(eff->geteffectpar(3));
@@ -2265,7 +2274,7 @@ eqband=0;
 switch(eff->geteffect()){
      case 1:
 	revp->value(eff->getpreset());
-	revp0->value(eff->geteffectpar(0));if (eff->insertion!=0) revp0->label("D/W");
+    revp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) revp0->label("D/W");
 	revp2->value(eff->geteffectpar(2));
 	revp3->value(eff->geteffectpar(3));
 	revp9->value(eff->geteffectpar(9));          
@@ -2273,14 +2282,14 @@ switch(eff->geteffect()){
         break; 
      case 2:
 	echop->value(eff->getpreset());
-	echop0->value(eff->geteffectpar(0));if (eff->insertion!=0) echop0->label("D/W");
+    echop0->value(eff->geteffectpar(0));if (eff->_insertion!=0) echop0->label("D/W");
 	echop2->value(eff->geteffectpar(2));
 	echop5->value(eff->geteffectpar(5));
 	effechowindow->show();
         break; 
      case 3:
 	chorusp->value(eff->getpreset());
-	chorusp0->value(eff->geteffectpar(0));if (eff->insertion!=0) chorusp0->label("D/W");
+    chorusp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) chorusp0->label("D/W");
 	chorusp2->value(eff->geteffectpar(2));
 	chorusp6->value(eff->geteffectpar(6));
 	chorusp7->value(eff->geteffectpar(7));
@@ -2289,7 +2298,7 @@ switch(eff->geteffect()){
         break; 
      case 4:
 	phaserp->value(eff->getpreset());
-	phaserp0->value(eff->geteffectpar(0));if (eff->insertion!=0) phaserp0->label("D/W");
+    phaserp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) phaserp0->label("D/W");
 	phaserp2->value(eff->geteffectpar(2));
 	phaserp5->value(eff->geteffectpar(5));
 	phaserp6->value(eff->geteffectpar(6));
@@ -2299,7 +2308,7 @@ switch(eff->geteffect()){
         break; 
      case 5:
 	awp->value(eff->getpreset());
-	awp0->value(eff->geteffectpar(0));if (eff->insertion!=0) awp0->label("D/W");
+    awp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) awp0->label("D/W");
 	awp2->value(eff->geteffectpar(2));
 	awp6->value(eff->geteffectpar(6));
 	awp8->value(eff->geteffectpar(8));
@@ -2307,7 +2316,7 @@ switch(eff->geteffect()){
         break; 
      case 6:
 	distp->value(eff->getpreset());
-	distp0->value(eff->geteffectpar(0));if (eff->insertion!=0) distp0->label("D/W");
+    distp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) distp0->label("D/W");
 	distp3->value(eff->geteffectpar(3));
 	distp4->value(eff->geteffectpar(4));
 	distp5->value(eff->geteffectpar(5));
@@ -2329,7 +2338,7 @@ switch(eff->geteffect()){
         break;
      case 8:
 	dfp->value(eff->getpreset());
-	dfp0->value(eff->geteffectpar(0));if (eff->insertion!=0) dfp0->label("D/W");
+    dfp0->value(eff->geteffectpar(0));if (eff->_insertion!=0) dfp0->label("D/W");
 	dfp2->value(eff->geteffectpar(2));
 	dfp6->value(eff->geteffectpar(6));
 	dfp7->value(eff->geteffectpar(7));

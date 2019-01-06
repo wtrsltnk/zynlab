@@ -21,12 +21,14 @@
 */
 
 #include "EffectMgr.h"
+#include "Alienwah.h"
 #include "Chorus.h"
 #include "Distorsion.h"
 #include "DynamicFilter.h"
 #include "EQ.h"
 #include "Echo.h"
 #include "Effect.h"
+#include "Phaser.h"
 #include "Reverb.h"
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.dsp/FilterParams.h>
@@ -41,24 +43,24 @@ EffectManager::EffectManager() {}
 void EffectManager::Init(IMixer *mixer, const bool insertion_)
 {
     _mixer = mixer;
-    insertion = insertion_;
-    efxoutl = new float[_mixer->GetSettings()->buffersize];
-    efxoutr = new float[_mixer->GetSettings()->buffersize];
-    filterpars = nullptr;
-    nefx = 0;
-    efx = nullptr;
-    dryonly = false;
+    _insertion = insertion_;
+    _effectOutL = new float[_mixer->GetSettings()->buffersize];
+    _effectOutR = new float[_mixer->GetSettings()->buffersize];
+    _filterpars = nullptr;
+    _effectType = 0;
+    _effect = nullptr;
+    _dryonly = false;
     setpresettype("Peffect");
-    memset(efxoutl, 0, mixer->GetSettings()->bufferbytes);
-    memset(efxoutr, 0, mixer->GetSettings()->bufferbytes);
+    memset(_effectOutL, 0, mixer->GetSettings()->bufferbytes);
+    memset(_effectOutR, 0, mixer->GetSettings()->bufferbytes);
     Defaults();
 }
 
 EffectManager::~EffectManager()
 {
-    delete efx;
-    delete[] efxoutl;
-    delete[] efxoutr;
+    delete _effect;
+    delete[] _effectOutL;
+    delete[] _effectOutR;
 }
 
 void EffectManager::Defaults()
@@ -71,98 +73,98 @@ void EffectManager::Defaults()
 void EffectManager::changeeffect(int _nefx)
 {
     cleanup();
-    if (nefx == _nefx)
+    if (_effectType == _nefx)
     {
         return;
     }
 
-    nefx = _nefx;
-    memset(efxoutl, 0, _mixer->GetSettings()->bufferbytes);
-    memset(efxoutr, 0, _mixer->GetSettings()->bufferbytes);
-    delete efx;
-    switch (nefx)
+    _effectType = _nefx;
+    memset(_effectOutL, 0, _mixer->GetSettings()->bufferbytes);
+    memset(_effectOutR, 0, _mixer->GetSettings()->bufferbytes);
+    delete _effect;
+    switch (_effectType)
     {
         case 1:
         {
-            efx = new Reverb(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new Reverb(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         case 2:
         {
-            efx = new Echo(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new Echo(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         case 3:
         {
-            efx = new Chorus(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new Chorus(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         case 4:
         {
-            efx = new Phaser(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new Phaser(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         case 5:
         {
-            efx = new Alienwah(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new Alienwah(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         case 6:
         {
-            efx = new Distorsion(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new Distorsion(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         case 7:
         {
-            efx = new EQ(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new EQ(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         case 8:
         {
-            efx = new DynamicFilter(insertion, efxoutl, efxoutr, _mixer->GetSettings());
+            _effect = new DynamicFilter(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
             break;
         }
         //put more effect here
         default:
         {
-            efx = nullptr;
+            _effect = nullptr;
             break; //no effect (thru)
         }
     }
 
-    if (efx != nullptr)
+    if (_effect != nullptr)
     {
-        filterpars = efx->filterpars;
+        _filterpars = _effect->filterpars;
     }
 }
 
 //Obtain the effect number
 int EffectManager::geteffect()
 {
-    return nefx;
+    return _effectType;
 }
 
 // Cleanup the current effect
 void EffectManager::cleanup()
 {
-    if (efx != nullptr)
+    if (_effect != nullptr)
     {
-        efx->Cleanup();
+        _effect->Cleanup();
     }
 }
 
 // Get the preset of the current effect
 unsigned char EffectManager::getpreset()
 {
-    return efx != nullptr ? efx->Ppreset : 0;
+    return _effect != nullptr ? _effect->Ppreset : 0;
 }
 
 // Change the preset of the current effect
 void EffectManager::changepreset_nolock(unsigned char npreset)
 {
-    if (efx != nullptr)
+    if (_effect != nullptr)
     {
-        efx->SetPreset(npreset);
+        _effect->SetPreset(npreset);
     }
 }
 
@@ -177,9 +179,9 @@ void EffectManager::changepreset(unsigned char npreset)
 //Change a parameter of the current effect
 void EffectManager::seteffectpar_nolock(int npar, unsigned char value)
 {
-    if (efx != nullptr)
+    if (_effect != nullptr)
     {
-        efx->ChangeParameter(npar, value);
+        _effect->ChangeParameter(npar, value);
     }
 }
 
@@ -194,22 +196,22 @@ void EffectManager::seteffectpar(int npar, unsigned char value)
 //Get a parameter of the current effect
 unsigned char EffectManager::geteffectpar(int npar)
 {
-    return efx != nullptr ? efx->GetParameter(npar) : 0;
+    return _effect != nullptr ? _effect->GetParameter(npar) : 0;
 }
 
 // Apply the effect
 void EffectManager::out(float *smpsl, float *smpsr)
 {
-    if (efx == nullptr)
+    if (_effect == nullptr)
     {
-        if (!insertion)
+        if (!_insertion)
         {
             for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
             {
                 smpsl[i] = 0.0f;
                 smpsr[i] = 0.0f;
-                efxoutl[i] = 0.0f;
-                efxoutr[i] = 0.0f;
+                _effectOutL[i] = 0.0f;
+                _effectOutR[i] = 0.0f;
             }
         }
         return;
@@ -219,22 +221,22 @@ void EffectManager::out(float *smpsl, float *smpsr)
     {
         smpsl[i] += _mixer->GetSettings()->denormalkillbuf[i];
         smpsr[i] += _mixer->GetSettings()->denormalkillbuf[i];
-        efxoutl[i] = 0.0f;
-        efxoutr[i] = 0.0f;
+        _effectOutL[i] = 0.0f;
+        _effectOutR[i] = 0.0f;
     }
-    efx->out(Stereo<float *>(smpsl, smpsr));
+    _effect->out(Stereo<float *>(smpsl, smpsr));
 
-    float volume = efx->volume;
+    float volume = _effect->volume;
 
-    if (nefx == 7)
+    if (_effectType == 7)
     { //this is need only for the EQ effect
-        memcpy(smpsl, efxoutl, _mixer->GetSettings()->bufferbytes);
-        memcpy(smpsr, efxoutr, _mixer->GetSettings()->bufferbytes);
+        memcpy(smpsl, _effectOutL, _mixer->GetSettings()->bufferbytes);
+        memcpy(smpsr, _effectOutR, _mixer->GetSettings()->bufferbytes);
         return;
     }
 
     //Insertion effect
-    if (insertion != 0)
+    if (_insertion != 0)
     {
         float v1, v2;
         if (volume < 0.5f)
@@ -247,27 +249,27 @@ void EffectManager::out(float *smpsl, float *smpsr)
             v1 = (1.0f - volume) * 2.0f;
             v2 = 1.0f;
         }
-        if ((nefx == 1) || (nefx == 2))
+        if ((_effectType == 1) || (_effectType == 2))
         {
             v2 *= v2; //for Reverb and Echo, the wet function is not liniar
         }
 
-        if (dryonly) //this is used for instrument effect only
+        if (_dryonly) //this is used for instrument effect only
         {
             for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
             {
                 smpsl[i] *= v1;
                 smpsr[i] *= v1;
-                efxoutl[i] *= v2;
-                efxoutr[i] *= v2;
+                _effectOutL[i] *= v2;
+                _effectOutR[i] *= v2;
             }
         }
         else // normal instrument/insertion effect
         {
             for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
             {
-                smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
-                smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
+                smpsl[i] = smpsl[i] * v1 + _effectOutL[i] * v2;
+                smpsr[i] = smpsr[i] * v1 + _effectOutR[i] * v2;
             }
         }
     }
@@ -275,10 +277,10 @@ void EffectManager::out(float *smpsl, float *smpsr)
     {
         for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
         {
-            efxoutl[i] *= 2.0f * volume;
-            efxoutr[i] *= 2.0f * volume;
-            smpsl[i] = efxoutl[i];
-            smpsr[i] = efxoutr[i];
+            _effectOutL[i] *= 2.0f * volume;
+            _effectOutR[i] *= 2.0f * volume;
+            smpsl[i] = _effectOutL[i];
+            smpsr[i] = _effectOutR[i];
         }
     }
 }
@@ -286,29 +288,29 @@ void EffectManager::out(float *smpsl, float *smpsr)
 // Get the effect volume for the system effect
 float EffectManager::sysefxgetvolume()
 {
-    return (efx == nullptr) ? 1.0f : efx->outvolume;
+    return (_effect == nullptr) ? 1.0f : _effect->outvolume;
 }
 
 // Get the EQ response
 float EffectManager::getEQfreqresponse(float freq)
 {
-    return (nefx == 7) ? efx->GetFrequencyResponse(freq) : 0.0f;
+    return (_effectType == 7) ? _effect->GetFrequencyResponse(freq) : 0.0f;
 }
 
 void EffectManager::setdryonly(bool value)
 {
-    dryonly = value;
+    _dryonly = value;
 }
 
 void EffectManager::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("type", geteffect());
 
-    if (efx == nullptr || !geteffect())
+    if (_effect == nullptr || !geteffect())
     {
         return;
     }
-    xml->addpar("preset", efx->Ppreset);
+    xml->addpar("preset", _effect->Ppreset);
 
     xml->beginbranch("EFFECT_PARAMETERS");
     for (int n = 0; n < 128; ++n)
@@ -322,10 +324,10 @@ void EffectManager::Serialize(IPresetsSerializer *xml)
         xml->addpar("par", par);
         xml->endbranch();
     }
-    if (filterpars)
+    if (_filterpars)
     {
         xml->beginbranch("FILTER");
-        filterpars->Serialize(xml);
+        _filterpars->Serialize(xml);
         xml->endbranch();
     }
     xml->endbranch();
@@ -335,12 +337,12 @@ void EffectManager::Deserialize(IPresetsSerializer *xml)
 {
     changeeffect(xml->getpar127("type", geteffect()));
 
-    if (efx == nullptr || !geteffect())
+    if (_effect == nullptr || !geteffect())
     {
         return;
     }
 
-    efx->Ppreset = xml->getpar127("preset", efx->Ppreset);
+    _effect->Ppreset = xml->getpar127("preset", _effect->Ppreset);
 
     if (xml->enterbranch("EFFECT_PARAMETERS"))
     {
@@ -355,11 +357,11 @@ void EffectManager::Deserialize(IPresetsSerializer *xml)
             seteffectpar_nolock(n, xml->getpar127("par", par));
             xml->exitbranch();
         }
-        if (filterpars)
+        if (_filterpars)
         {
             if (xml->enterbranch("FILTER"))
             {
-                filterpars->Deserialize(xml);
+                _filterpars->Deserialize(xml);
                 xml->exitbranch();
             }
         }

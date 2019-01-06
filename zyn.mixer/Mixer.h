@@ -30,6 +30,7 @@
 #include <pthread.h>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IPresetsSerializer.h>
+#include <zyn.common/Stereo.h>
 #include <zyn.common/globals.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/Controller.h>
@@ -47,13 +48,12 @@ public:
 
     void Setup(SystemSettings *synth_, IBankManager *bank_);
 
-    virtual IBankManager* GetBankManager();
+    virtual IBankManager *GetBankManager();
     virtual IMeter *GetMeter();
 
     /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
     int saveXML(const char *filename);
-
 
     /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/
@@ -113,7 +113,7 @@ public:
 
     EffectManager sysefx[NUM_SYS_EFX]; //system
     EffectManager insefx[NUM_INS_EFX]; //insertion
-                                              //      void swapcopyeffects(int what,int type,int neff1,int neff2);
+                                       //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
     //part that's apply the insertion effect; -1 to disable
     short int Pinsparts[NUM_INS_EFX];
