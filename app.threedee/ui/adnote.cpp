@@ -95,7 +95,7 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
     auto vol = static_cast<float>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 128, "Vol %.3f"))
+    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
@@ -103,7 +103,7 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 128, "V.Sns %.3f"))
+    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -112,44 +112,34 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(parameters->PPanning);
-    if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPanning = static_cast<unsigned char>(pan);
     }
     ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
-    auto punchStrength = static_cast<float>(parameters->PPunchStrength);
-    if (ImGui::Knob("P.Str.", &punchStrength, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Str.", &parameters->PPunchStrength, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchStrength = static_cast<unsigned char>(punchStrength);
     }
     ImGui::ShowTooltipOnHover("Punch Strength");
 
     ImGui::SameLine();
 
-    auto punchTime = static_cast<float>(parameters->PPunchTime);
-    if (ImGui::Knob("P.t.", &punchTime, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.t.", &parameters->PPunchTime, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchTime = static_cast<unsigned char>(punchTime);
     }
     ImGui::ShowTooltipOnHover("Punch time (duration)");
 
     ImGui::SameLine();
 
-    auto punchStretch = static_cast<float>(parameters->PPunchStretch);
-    if (ImGui::Knob("P.Stc.", &punchStretch, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Stc.", &parameters->PPunchStretch, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchStretch = static_cast<unsigned char>(punchStretch);
     }
     ImGui::ShowTooltipOnHover("Punch Stretch");
 
     ImGui::SameLine();
 
-    auto punchVelocitySensing = static_cast<float>(parameters->PPunchVelocitySensing);
-    if (ImGui::Knob("P.Vel.", &punchVelocitySensing, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Vel.", &parameters->PPunchVelocitySensing, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchVelocitySensing = static_cast<unsigned char>(punchVelocitySensing);
     }
     ImGui::ShowTooltipOnHover("Punch Velocity Sensing");
 
@@ -242,10 +232,8 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
     }
     ImGui::ShowTooltipOnHover("Octave");
 
-    auto bandwidth = static_cast<float>(parameters->PBandwidth);
-    if (ImGui::Knob("relBW", &(bandwidth), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("relBW", &(parameters->PBandwidth), 0, 127, ImVec2(40, 40)))
     {
-        parameters->PBandwidth = static_cast<unsigned char>(bandwidth);
     }
     ImGui::ShowTooltipOnHover("Bandwidth - how the relative fine detune of the voice are changed");
 

@@ -264,7 +264,7 @@ void AppThreeDee::ImGuiMasterTrack()
 
         // Fine detune
         auto fineDetune = _mixer->microtonal.Pglobalfinedetune;
-        if (ImGui::KnobUchar("fine detune", &fineDetune, 0, 128, ImVec2(width, 40)))
+        if (ImGui::KnobUchar("fine detune", &fineDetune, 0, 127, ImVec2(width, 40)))
         {
             _mixer->microtonal.Pglobalfinedetune = fineDetune;
         }
@@ -276,7 +276,7 @@ void AppThreeDee::ImGuiMasterTrack()
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
         {
             auto v = _mixer->Pvolume;
-            if (ImGui::KnobUchar("volume", &v, 0, 128, ImVec2(width, 40)))
+            if (ImGui::KnobUchar("volume", &v, 0, 127, ImVec2(width, 40)))
             {
                 _mixer->setPvolume(v);
             }
@@ -480,10 +480,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
             char tmp[64] = {'\0'};
             sprintf(tmp, "##send_%d", fx);
-            auto send1 = static_cast<float>(_mixer->Psysefxvol[fx][track]);
-            if (ImGui::Knob(tmp, &send1, 0, 128, ImVec2(20, 20)))
+            if (ImGui::KnobUchar(tmp, &(_mixer->Psysefxvol[fx][track]), 0, 127, ImVec2(20, 20)))
             {
-                _mixer->setPsysefxvol(track, fx, static_cast<unsigned char>(send1));
+                _mixer->setPsysefxvol(track, fx, _mixer->Psysefxvol[fx][track]);
             }
             if (ImGui::IsItemClicked())
             {
@@ -613,7 +612,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         }
 
         auto velsns = channel->Pvelsns;
-        if (ImGui::KnobUchar("vel.sns.", &velsns, 0, 128, ImVec2(width / 2, 30)))
+        if (ImGui::KnobUchar("vel.sns.", &velsns, 0, 127, ImVec2(width / 2, 30)))
         {
             channel->Pvelsns = velsns;
             _sequencer.ActiveInstrument(track);
@@ -623,7 +622,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::SameLine();
 
         auto velofs = channel->Pveloffs;
-        if (ImGui::KnobUchar("vel.ofs.", &velofs, 0, 128, ImVec2(width / 2, 30)))
+        if (ImGui::KnobUchar("vel.ofs.", &velofs, 0, 127, ImVec2(width / 2, 30)))
         {
             channel->Pveloffs = velofs;
             _sequencer.ActiveInstrument(track);
@@ -631,7 +630,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::ShowTooltipOnHover("Velocity Offset");
 
         auto panning = channel->Ppanning;
-        if (ImGui::KnobUchar("panning", &panning, 0, 128, ImVec2(width, 40)))
+        if (ImGui::KnobUchar("panning", &panning, 0, 127, ImVec2(width, 40)))
         {
             channel->setPpanning(panning);
             _sequencer.ActiveInstrument(track);
@@ -647,7 +646,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
         {
             auto v = channel->Pvolume;
-            if (ImGui::KnobUchar("volume", &v, 0, 128, ImVec2(width, 40)))
+            if (ImGui::KnobUchar("volume", &v, 0, 127, ImVec2(width, 40)))
             {
                 channel->setPvolume(v);
                 _sequencer.ActiveInstrument(track);

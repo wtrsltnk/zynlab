@@ -140,37 +140,29 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     }
     ImGui::ShowTooltipOnHover("Unison size");
 
-    auto phase_randomness = static_cast<float>(parameters->Unison_phase_randomness);
-    if (ImGui::Knob("Ph.rand", &phase_randomness, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Ph.rand", &parameters->Unison_phase_randomness, 0, 127, ImVec2(40, 40)))
     {
-        parameters->Unison_phase_randomness = static_cast<unsigned char>(phase_randomness);
     }
     ImGui::ShowTooltipOnHover("Phase randomness");
 
     ImGui::SameLine();
 
-    auto stereo_spread = static_cast<float>(parameters->Unison_stereo_spread);
-    if (ImGui::Knob("Stereo", &stereo_spread, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Stereo", &parameters->Unison_stereo_spread, 0, 127, ImVec2(40, 40)))
     {
-        parameters->Unison_stereo_spread = static_cast<unsigned char>(stereo_spread);
     }
     ImGui::ShowTooltipOnHover("Stereo Spread");
 
     ImGui::SameLine();
 
-    auto vibratto = static_cast<float>(parameters->Unison_vibratto);
-    if (ImGui::Knob("Vibrato", &vibratto, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Vibrato", &parameters->Unison_vibratto, 0, 127, ImVec2(40, 40)))
     {
-        parameters->Unison_vibratto = static_cast<unsigned char>(vibratto);
     }
     ImGui::ShowTooltipOnHover("Vibrato");
 
     ImGui::SameLine();
 
-    auto vibratto_speed = static_cast<float>(parameters->Unison_vibratto_speed);
-    if (ImGui::Knob("V.speed", &vibratto_speed, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("V.speed", &parameters->Unison_vibratto_speed, 0, 127, ImVec2(40, 40)))
     {
-        parameters->Unison_vibratto_speed = static_cast<unsigned char>(vibratto_speed);
     }
     ImGui::ShowTooltipOnHover("Vibrato Average Speed");
 }
@@ -199,10 +191,8 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(parameters->PPanning);
-    if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPanning = static_cast<unsigned char>(pan);
     }
     ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 

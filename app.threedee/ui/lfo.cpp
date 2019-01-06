@@ -40,64 +40,50 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     }
     ImGui::ShowTooltipOnHover("LFO Type");
 
-    auto freq = params->Pfreq;
-    if (ImGui::Knob("Freq.", &(freq), 0.0f, 1.0f, ImVec2(40, 40)))
+    if (ImGui::Knob("Freq.", &(params->Pfreq), 0.0f, 1.0f, ImVec2(40, 40)))
     {
-        params->Pfreq = freq;
     }
     ImGui::ShowTooltipOnHover("LFO frequency");
 
     ImGui::SameLine();
 
-    auto depth = static_cast<float>(params->Pintensity);
-    if (ImGui::Knob("Depth", &(depth), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Depth", &(params->Pintensity), 0, 127, ImVec2(40, 40)))
     {
-        params->Pintensity = static_cast<unsigned char>(depth);
     }
     ImGui::ShowTooltipOnHover("LFO amount");
 
     ImGui::SameLine();
 
-    auto start = static_cast<float>(params->Pstartphase);
-    if (ImGui::Knob("Start", &(start), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Start", &(params->Pstartphase), 0, 127, ImVec2(40, 40)))
     {
-        params->Pstartphase = static_cast<unsigned char>(start);
     }
     ImGui::ShowTooltipOnHover("LFO startphase (leftmost is random)");
 
     ImGui::SameLine();
 
-    auto delay = static_cast<float>(params->Pdelay);
-    if (ImGui::Knob("Delay", &(delay), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Delay", &(params->Pdelay), 0, 127, ImVec2(40, 40)))
     {
-        params->Pdelay = static_cast<unsigned char>(delay);
     }
     ImGui::ShowTooltipOnHover("LFO delay");
 
     ImGui::SameLine();
 
-    auto stretch = static_cast<float>(params->Pstretch);
-    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Str.", &(params->Pstretch), 0, 127, ImVec2(40, 40)))
     {
-        params->Pstretch = static_cast<unsigned char>(stretch);
     }
     ImGui::ShowTooltipOnHover("LFO stretch");
 
     ImGui::SameLine();
 
-    auto a_r = static_cast<float>(params->Prandomness);
-    if (ImGui::Knob("A.R", &(a_r), 0, 128, ImVec2(30, 30)))
+    if (ImGui::KnobUchar("A.R", &(params->Prandomness), 0, 127, ImVec2(30, 30)))
     {
-        params->Prandomness = static_cast<unsigned char>(a_r);
     }
     ImGui::ShowTooltipOnHover("LFO Amplitude Randomness");
 
     ImGui::SameLine();
 
-    auto f_r = static_cast<float>(params->Pfreqrand);
-    if (ImGui::Knob("F.R", &(f_r), 0, 128, ImVec2(30, 30)))
+    if (ImGui::KnobUchar("F.R", &(params->Pfreqrand), 0, 127, ImVec2(30, 30)))
     {
-        params->Pfreqrand = static_cast<unsigned char>(f_r);
     }
     ImGui::ShowTooltipOnHover("LFO Frequency Randomness");
 }

@@ -273,67 +273,67 @@ void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
     ImGui::PushItemWidth(100);
     if (PresetSelection("Type", type, reverbTypeNames, reverbTypeNameCount))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbType, static_cast<unsigned char>(type));
+        effectManager->seteffectpar(ReverbPresets::ReverbType, type);
     }
 
-    auto volume = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(ReverbPresets::ReverbVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(ReverbPresets::ReverbVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbPanning));
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    auto pan = effectManager->geteffectpar(ReverbPresets::ReverbPanning);
+    if (ImGui::KnobUchar("Pan", &pan, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbPanning, static_cast<unsigned char>(pan));
+        effectManager->seteffectpar(ReverbPresets::ReverbPanning, pan);
     }
     ImGui::ShowTooltipOnHover("Panning");
 
     ImGui::SameLine();
 
-    auto roomSize = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbRoomSize));
-    if (ImGui::Knob("Size", &roomSize, 0, 128, ImVec2(40, 40)))
+    auto roomSize = effectManager->geteffectpar(ReverbPresets::ReverbRoomSize);
+    if (ImGui::KnobUchar("Size", &roomSize, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbRoomSize, static_cast<unsigned char>(roomSize));
+        effectManager->seteffectpar(ReverbPresets::ReverbRoomSize, roomSize);
     }
     ImGui::ShowTooltipOnHover("Room Size");
 
     ImGui::SameLine();
 
-    auto time = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbTime));
-    if (ImGui::Knob("Time", &time, 0, 128, ImVec2(40, 40)))
+    auto time = effectManager->geteffectpar(ReverbPresets::ReverbTime);
+    if (ImGui::KnobUchar("Time", &time, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbTime, static_cast<unsigned char>(time));
+        effectManager->seteffectpar(ReverbPresets::ReverbTime, time);
     }
     ImGui::ShowTooltipOnHover("Duration of Effect");
 
     ImGui::SameLine();
 
-    auto lpf = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbLowPassFilter));
-    if (ImGui::Knob("LPF", &lpf, 0, 128, ImVec2(40, 40)))
+    auto lpf = effectManager->geteffectpar(ReverbPresets::ReverbLowPassFilter);
+    if (ImGui::KnobUchar("LPF", &lpf, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbLowPassFilter, static_cast<unsigned char>(lpf));
+        effectManager->seteffectpar(ReverbPresets::ReverbLowPassFilter, lpf);
     }
     ImGui::ShowTooltipOnHover("Low Pass Filter");
 
     ImGui::SameLine();
 
-    auto hpf = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbHighPassFilter));
-    if (ImGui::Knob("HPF", &hpf, 0, 128, ImVec2(40, 40)))
+    auto hpf = effectManager->geteffectpar(ReverbPresets::ReverbHighPassFilter);
+    if (ImGui::KnobUchar("HPF", &hpf, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbHighPassFilter, static_cast<unsigned char>(hpf));
+        effectManager->seteffectpar(ReverbPresets::ReverbHighPassFilter, hpf);
     }
     ImGui::ShowTooltipOnHover("High Pass Filter");
 
     ImGui::SameLine();
 
-    auto dampening = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbDampening));
-    if (ImGui::Knob("Damp.", &dampening, 0, 128, ImVec2(40, 40)))
+    auto dampening = effectManager->geteffectpar(ReverbPresets::ReverbDampening);
+    if (ImGui::KnobUchar("Damp.", &dampening, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbDampening, static_cast<unsigned char>(dampening));
+        effectManager->seteffectpar(ReverbPresets::ReverbDampening, dampening);
     }
     ImGui::ShowTooltipOnHover("Dampening");
 
@@ -341,19 +341,19 @@ void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
 
     ImGui::Text("Initial Delay");
 
-    auto initialDelay = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbInitialDelay));
-    if (ImGui::Knob("Delay", &initialDelay, 0, 128, ImVec2(40, 40)))
+    auto initialDelay = effectManager->geteffectpar(ReverbPresets::ReverbInitialDelay);
+    if (ImGui::KnobUchar("Delay", &initialDelay, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbInitialDelay, static_cast<unsigned char>(initialDelay));
+        effectManager->seteffectpar(ReverbPresets::ReverbInitialDelay, initialDelay);
     }
     ImGui::ShowTooltipOnHover("Initial Delay");
 
     ImGui::SameLine();
 
-    auto initialDelayFeedback = static_cast<float>(effectManager->geteffectpar(ReverbPresets::ReverbInitialDelayFeedback));
-    if (ImGui::Knob("Fb.", &initialDelayFeedback, 0, 128, ImVec2(40, 40)))
+    auto initialDelayFeedback = effectManager->geteffectpar(ReverbPresets::ReverbInitialDelayFeedback);
+    if (ImGui::KnobUchar("Fb.", &initialDelayFeedback, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ReverbPresets::ReverbInitialDelayFeedback, static_cast<unsigned char>(initialDelayFeedback));
+        effectManager->seteffectpar(ReverbPresets::ReverbInitialDelayFeedback, initialDelayFeedback);
     }
     ImGui::ShowTooltipOnHover("Initial Delay Feedback");
 
@@ -369,64 +369,64 @@ void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
         effectManager->changepreset(static_cast<unsigned char>(preset));
     }
 
-    auto volume = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(EchoPresets::EchoVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::EchoVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(EchoPresets::EchoVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoPanning));
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    auto pan = effectManager->geteffectpar(EchoPresets::EchoPanning);
+    if (ImGui::KnobUchar("Pan", &pan, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::EchoPanning, static_cast<unsigned char>(pan));
+        effectManager->seteffectpar(EchoPresets::EchoPanning, pan);
     }
     ImGui::ShowTooltipOnHover("Panning");
 
     ImGui::SameLine();
 
-    auto delay = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoDelay));
-    if (ImGui::Knob("Delay", &delay, 0, 128, ImVec2(40, 40)))
+    auto delay = effectManager->geteffectpar(EchoPresets::EchoDelay);
+    if (ImGui::KnobUchar("Delay", &delay, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::EchoDelay, static_cast<unsigned char>(delay));
+        effectManager->seteffectpar(EchoPresets::EchoDelay, delay);
     }
     ImGui::ShowTooltipOnHover("Delay");
 
     ImGui::SameLine();
 
-    auto lrDelay = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoDelayBetweenLR));
-    if (ImGui::Knob("LRdl.", &lrDelay, 0, 128, ImVec2(40, 40)))
+    auto lrDelay = effectManager->geteffectpar(EchoPresets::EchoDelayBetweenLR);
+    if (ImGui::KnobUchar("LRdl.", &lrDelay, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::EchoDelayBetweenLR, static_cast<unsigned char>(lrDelay));
+        effectManager->seteffectpar(EchoPresets::EchoDelayBetweenLR, lrDelay);
     }
     ImGui::ShowTooltipOnHover("Delay Between L/R");
 
     ImGui::SameLine();
 
-    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoChannelRouting));
-    if (ImGui::Knob("L/R", &lrCrossover, 0, 128, ImVec2(40, 40)))
+    auto lrCrossover = effectManager->geteffectpar(EchoPresets::EchoChannelRouting);
+    if (ImGui::KnobUchar("L/R", &lrCrossover, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::EchoChannelRouting, static_cast<unsigned char>(lrCrossover));
+        effectManager->seteffectpar(EchoPresets::EchoChannelRouting, lrCrossover);
     }
     ImGui::ShowTooltipOnHover("L/R Channel Routing");
 
     ImGui::SameLine();
 
-    auto feedback = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoFeedback));
-    if (ImGui::Knob("Fb.", &feedback, 0, 128, ImVec2(40, 40)))
+    auto feedback = effectManager->geteffectpar(EchoPresets::EchoFeedback);
+    if (ImGui::KnobUchar("Fb.", &feedback, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::EchoFeedback, static_cast<unsigned char>(feedback));
+        effectManager->seteffectpar(EchoPresets::EchoFeedback, feedback);
     }
     ImGui::ShowTooltipOnHover("Feedback");
 
     ImGui::SameLine();
 
-    auto dampening = static_cast<float>(effectManager->geteffectpar(EchoPresets::EchoDampening));
-    if (ImGui::Knob("Damp.", &dampening, 0, 128, ImVec2(40, 40)))
+    auto dampening = effectManager->geteffectpar(EchoPresets::EchoDampening);
+    if (ImGui::KnobUchar("Damp.", &dampening, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EchoPresets::EchoDampening, static_cast<unsigned char>(dampening));
+        effectManager->seteffectpar(EchoPresets::EchoDampening, dampening);
     }
     ImGui::ShowTooltipOnHover("Dampening");
 }
@@ -450,55 +450,55 @@ void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Inverts output");
 
-    auto volume = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(ChorusPresets::ChorusVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(ChorusPresets::ChorusVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusPanning));
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    auto pan = effectManager->geteffectpar(ChorusPresets::ChorusPanning);
+    if (ImGui::KnobUchar("Pan", &pan, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusPanning, static_cast<unsigned char>(pan));
+        effectManager->seteffectpar(ChorusPresets::ChorusPanning, pan);
     }
     ImGui::ShowTooltipOnHover("Panning");
 
     ImGui::SameLine();
 
-    auto delay = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusDelay));
-    if (ImGui::Knob("Delay", &delay, 0, 128, ImVec2(40, 40)))
+    auto delay = effectManager->geteffectpar(ChorusPresets::ChorusDelay);
+    if (ImGui::KnobUchar("Delay", &delay, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusDelay, static_cast<unsigned char>(delay));
+        effectManager->seteffectpar(ChorusPresets::ChorusDelay, delay);
     }
     ImGui::ShowTooltipOnHover("Delay");
 
     ImGui::SameLine();
 
-    auto feedback = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusFeedback));
-    if (ImGui::Knob("Fb.", &feedback, 0, 128, ImVec2(40, 40)))
+    auto feedback = effectManager->geteffectpar(ChorusPresets::ChorusFeedback);
+    if (ImGui::KnobUchar("Fb.", &feedback, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusFeedback, static_cast<unsigned char>(feedback));
+        effectManager->seteffectpar(ChorusPresets::ChorusFeedback, feedback);
     }
     ImGui::ShowTooltipOnHover("Feedback");
 
     ImGui::SameLine();
 
-    auto depth = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusDepth));
-    if (ImGui::Knob("Depth", &depth, 0, 128, ImVec2(40, 40)))
+    auto depth = effectManager->geteffectpar(ChorusPresets::ChorusDepth);
+    if (ImGui::KnobUchar("Depth", &depth, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusDepth, static_cast<unsigned char>(depth));
+        effectManager->seteffectpar(ChorusPresets::ChorusDepth, depth);
     }
     ImGui::ShowTooltipOnHover("Depth");
 
     ImGui::SameLine();
 
-    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusChannelRouting));
-    if (ImGui::Knob("L/R", &lrCrossover, 0, 128, ImVec2(40, 40)))
+    auto lrCrossover = effectManager->geteffectpar(ChorusPresets::ChorusChannelRouting);
+    if (ImGui::KnobUchar("L/R", &lrCrossover, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusChannelRouting, static_cast<unsigned char>(lrCrossover));
+        effectManager->seteffectpar(ChorusPresets::ChorusChannelRouting, lrCrossover);
     }
     ImGui::ShowTooltipOnHover("Channel Routing");
 
@@ -516,28 +516,28 @@ void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("LFO function");
 
-    auto frequency = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusLFOFrequency));
-    if (ImGui::Knob("Freq", &frequency, 0, 128, ImVec2(40, 40)))
+    auto frequency = effectManager->geteffectpar(ChorusPresets::ChorusLFOFrequency);
+    if (ImGui::KnobUchar("Freq", &frequency, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusLFOFrequency, static_cast<unsigned char>(frequency));
+        effectManager->seteffectpar(ChorusPresets::ChorusLFOFrequency, frequency);
     }
     ImGui::ShowTooltipOnHover("LFO Frequency");
 
     ImGui::SameLine();
 
-    auto randomness = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusLFORandomness));
-    if (ImGui::Knob("Rnd", &randomness, 0, 128, ImVec2(40, 40)))
+    auto randomness = effectManager->geteffectpar(ChorusPresets::ChorusLFORandomness);
+    if (ImGui::KnobUchar("Rnd", &randomness, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusLFORandomness, static_cast<unsigned char>(randomness));
+        effectManager->seteffectpar(ChorusPresets::ChorusLFORandomness, randomness);
     }
     ImGui::ShowTooltipOnHover("LFO Randomness");
 
     ImGui::SameLine();
 
-    auto lfoStereo = static_cast<float>(effectManager->geteffectpar(ChorusPresets::ChorusLFOStereo));
-    if (ImGui::Knob("St.df", &lfoStereo, 0, 128, ImVec2(40, 40)))
+    auto lfoStereo = effectManager->geteffectpar(ChorusPresets::ChorusLFOStereo);
+    if (ImGui::KnobUchar("St.df", &lfoStereo, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(ChorusPresets::ChorusLFOStereo, static_cast<unsigned char>(lfoStereo));
+        effectManager->seteffectpar(ChorusPresets::ChorusLFOStereo, lfoStereo);
     }
     ImGui::ShowTooltipOnHover("LFO Left/Right Channel Phase Shift");
 }
@@ -577,55 +577,55 @@ void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Analog");
 
-    auto volume = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(PhaserPresets::PhaserVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(PhaserPresets::PhaserVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserPanning));
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    auto pan = effectManager->geteffectpar(PhaserPresets::PhaserPanning);
+    if (ImGui::KnobUchar("Pan", &pan, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserPanning, static_cast<unsigned char>(pan));
+        effectManager->seteffectpar(PhaserPresets::PhaserPanning, pan);
     }
     ImGui::ShowTooltipOnHover("Panning");
 
     ImGui::SameLine();
 
-    auto phase = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserPhase));
-    if (ImGui::Knob("Phase", &phase, 0, 128, ImVec2(40, 40)))
+    auto phase = effectManager->geteffectpar(PhaserPresets::PhaserPhase);
+    if (ImGui::KnobUchar("Phase", &phase, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserPhase, static_cast<unsigned char>(phase));
+        effectManager->seteffectpar(PhaserPresets::PhaserPhase, phase);
     }
     ImGui::ShowTooltipOnHover("Phase");
 
     ImGui::SameLine();
 
-    auto feedback = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserFeedback));
-    if (ImGui::Knob("Fb.", &feedback, 0, 128, ImVec2(40, 40)))
+    auto feedback = effectManager->geteffectpar(PhaserPresets::PhaserFeedback);
+    if (ImGui::KnobUchar("Fb.", &feedback, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserFeedback, static_cast<unsigned char>(feedback));
+        effectManager->seteffectpar(PhaserPresets::PhaserFeedback, feedback);
     }
     ImGui::ShowTooltipOnHover("Feedback");
 
     ImGui::SameLine();
 
-    auto depth = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserDepth));
-    if (ImGui::Knob("Depth", &depth, 0, 128, ImVec2(40, 40)))
+    auto depth = effectManager->geteffectpar(PhaserPresets::PhaserDepth);
+    if (ImGui::KnobUchar("Depth", &depth, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserDepth, static_cast<unsigned char>(depth));
+        effectManager->seteffectpar(PhaserPresets::PhaserDepth, depth);
     }
     ImGui::ShowTooltipOnHover("Depth");
 
     ImGui::SameLine();
 
-    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserChannelRouting));
-    if (ImGui::Knob("L/R", &lrCrossover, 0, 128, ImVec2(40, 40)))
+    auto lrCrossover = effectManager->geteffectpar(PhaserPresets::PhaserChannelRouting);
+    if (ImGui::KnobUchar("L/R", &lrCrossover, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserChannelRouting, static_cast<unsigned char>(lrCrossover));
+        effectManager->seteffectpar(PhaserPresets::PhaserChannelRouting, lrCrossover);
     }
     ImGui::ShowTooltipOnHover("Channel Routing");
 
@@ -643,28 +643,28 @@ void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("LFO function");
 
-    auto frequency = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserLFOFrequency));
-    if (ImGui::Knob("Freq", &frequency, 0, 128, ImVec2(40, 40)))
+    auto frequency = effectManager->geteffectpar(PhaserPresets::PhaserLFOFrequency);
+    if (ImGui::KnobUchar("Freq", &frequency, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserLFOFrequency, static_cast<unsigned char>(frequency));
+        effectManager->seteffectpar(PhaserPresets::PhaserLFOFrequency, frequency);
     }
     ImGui::ShowTooltipOnHover("LFO Frequency");
 
     ImGui::SameLine();
 
-    auto randomness = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserLFORandomness));
-    if (ImGui::Knob("Rnd", &randomness, 0, 128, ImVec2(40, 40)))
+    auto randomness = effectManager->geteffectpar(PhaserPresets::PhaserLFORandomness);
+    if (ImGui::KnobUchar("Rnd", &randomness, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserLFORandomness, static_cast<unsigned char>(randomness));
+        effectManager->seteffectpar(PhaserPresets::PhaserLFORandomness, randomness);
     }
     ImGui::ShowTooltipOnHover("LFO Randomness");
 
     ImGui::SameLine();
 
-    auto lfoStereo = static_cast<float>(effectManager->geteffectpar(PhaserPresets::PhaserLFOStereo));
-    if (ImGui::Knob("St.df", &lfoStereo, 0, 128, ImVec2(40, 40)))
+    auto lfoStereo = effectManager->geteffectpar(PhaserPresets::PhaserLFOStereo);
+    if (ImGui::KnobUchar("St.df", &lfoStereo, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(PhaserPresets::PhaserLFOStereo, static_cast<unsigned char>(lfoStereo));
+        effectManager->seteffectpar(PhaserPresets::PhaserLFOStereo, lfoStereo);
     }
     ImGui::ShowTooltipOnHover("LFO Left/Right Channel Phase Shift");
 }
@@ -679,64 +679,64 @@ void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Effect presets");
 
-    auto volume = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(AlienWahPresets::AlienWahVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahPanning));
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    auto pan = effectManager->geteffectpar(AlienWahPresets::AlienWahPanning);
+    if (ImGui::KnobUchar("Pan", &pan, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahPanning, static_cast<unsigned char>(pan));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahPanning, pan);
     }
     ImGui::ShowTooltipOnHover("Panning");
 
     ImGui::SameLine();
 
-    auto phase = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahPhase));
-    if (ImGui::Knob("Phase", &phase, 0, 128, ImVec2(40, 40)))
+    auto phase = effectManager->geteffectpar(AlienWahPresets::AlienWahPhase);
+    if (ImGui::KnobUchar("Phase", &phase, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahPhase, static_cast<unsigned char>(phase));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahPhase, phase);
     }
     ImGui::ShowTooltipOnHover("Phase");
 
     ImGui::SameLine();
 
-    auto feedback = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahFeedback));
-    if (ImGui::Knob("Fb.", &feedback, 0, 128, ImVec2(40, 40)))
+    auto feedback = effectManager->geteffectpar(AlienWahPresets::AlienWahFeedback);
+    if (ImGui::KnobUchar("Fb.", &feedback, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahFeedback, static_cast<unsigned char>(feedback));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahFeedback, feedback);
     }
     ImGui::ShowTooltipOnHover("Feedback");
 
     ImGui::SameLine();
 
-    auto depth = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahDepth));
-    if (ImGui::Knob("Depth", &depth, 0, 128, ImVec2(40, 40)))
+    auto depth = effectManager->geteffectpar(AlienWahPresets::AlienWahDepth);
+    if (ImGui::KnobUchar("Depth", &depth, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahDepth, static_cast<unsigned char>(depth));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahDepth, depth);
     }
     ImGui::ShowTooltipOnHover("Depth");
 
     ImGui::SameLine();
 
-    auto lrCrossover = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahChannelRouting));
-    if (ImGui::Knob("L/R", &lrCrossover, 0, 128, ImVec2(40, 40)))
+    auto lrCrossover = effectManager->geteffectpar(AlienWahPresets::AlienWahChannelRouting);
+    if (ImGui::KnobUchar("L/R", &lrCrossover, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahChannelRouting, static_cast<unsigned char>(lrCrossover));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahChannelRouting, lrCrossover);
     }
     ImGui::ShowTooltipOnHover("Channel Routing");
 
     ImGui::SameLine();
 
-    auto delay = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahDelay));
-    if (ImGui::Knob("Delay", &delay, 1, MAX_ALIENWAH_DELAY, ImVec2(40, 40)))
+    auto delay = effectManager->geteffectpar(AlienWahPresets::AlienWahDelay);
+    if (ImGui::KnobUchar("Delay", &delay, 1, MAX_ALIENWAH_DELAY, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahDelay, static_cast<unsigned char>(delay));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahDelay, delay);
     }
     ImGui::ShowTooltipOnHover("Delay");
 
@@ -754,28 +754,28 @@ void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("LFO function");
 
-    auto frequency = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahLFOFrequency));
-    if (ImGui::Knob("Freq", &frequency, 0, 128, ImVec2(40, 40)))
+    auto frequency = effectManager->geteffectpar(AlienWahPresets::AlienWahLFOFrequency);
+    if (ImGui::KnobUchar("Freq", &frequency, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahLFOFrequency, static_cast<unsigned char>(frequency));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahLFOFrequency, frequency);
     }
     ImGui::ShowTooltipOnHover("LFO Frequency");
 
     ImGui::SameLine();
 
-    auto randomness = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahLFORandomness));
-    if (ImGui::Knob("Rnd", &randomness, 0, 128, ImVec2(40, 40)))
+    auto randomness = effectManager->geteffectpar(AlienWahPresets::AlienWahLFORandomness);
+    if (ImGui::KnobUchar("Rnd", &randomness, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahLFORandomness, static_cast<unsigned char>(randomness));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahLFORandomness, randomness);
     }
     ImGui::ShowTooltipOnHover("LFO Randomness");
 
     ImGui::SameLine();
 
-    auto lfoStereo = static_cast<float>(effectManager->geteffectpar(AlienWahPresets::AlienWahLFOStereo));
-    if (ImGui::Knob("St.df", &lfoStereo, 0, 128, ImVec2(40, 40)))
+    auto lfoStereo = effectManager->geteffectpar(AlienWahPresets::AlienWahLFOStereo);
+    if (ImGui::KnobUchar("St.df", &lfoStereo, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(AlienWahPresets::AlienWahLFOStereo, static_cast<unsigned char>(lfoStereo));
+        effectManager->seteffectpar(AlienWahPresets::AlienWahLFOStereo, lfoStereo);
     }
     ImGui::ShowTooltipOnHover("LFO Left/Right Channel Phase Shift");
 }
@@ -825,64 +825,64 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Stereo (0=mono, 1=stereo)");
 
-    auto volume = static_cast<float>(effectManager->geteffectpar(DistorsionPresets::DistorsionVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(DistorsionPresets::DistorsionVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DistorsionPresets::DistorsionVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(DistorsionPresets::DistorsionVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(effectManager->geteffectpar(DistorsionPresets::DistorsionPanning));
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    auto pan = effectManager->geteffectpar(DistorsionPresets::DistorsionPanning);
+    if (ImGui::KnobUchar("Pan", &pan, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DistorsionPresets::DistorsionPanning, static_cast<unsigned char>(pan));
+        effectManager->seteffectpar(DistorsionPresets::DistorsionPanning, pan);
     }
     ImGui::ShowTooltipOnHover("Panning");
 
     ImGui::SameLine();
 
-    auto channelRouting = static_cast<float>(effectManager->geteffectpar(DistorsionPresets::DistorsionChannelRouting));
-    if (ImGui::Knob("L/R", &channelRouting, 0, 128, ImVec2(40, 40)))
+    auto channelRouting = effectManager->geteffectpar(DistorsionPresets::DistorsionChannelRouting);
+    if (ImGui::KnobUchar("L/R", &channelRouting, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DistorsionPresets::DistorsionChannelRouting, static_cast<unsigned char>(channelRouting));
+        effectManager->seteffectpar(DistorsionPresets::DistorsionChannelRouting, channelRouting);
     }
     ImGui::ShowTooltipOnHover("Channel Routing");
 
     ImGui::SameLine();
 
-    auto drive = static_cast<float>(effectManager->geteffectpar(DistorsionPresets::DistorsionDrive));
-    if (ImGui::Knob("Drive", &drive, 0, 128, ImVec2(40, 40)))
+    auto drive = effectManager->geteffectpar(DistorsionPresets::DistorsionDrive);
+    if (ImGui::KnobUchar("Drive", &drive, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DistorsionPresets::DistorsionDrive, static_cast<unsigned char>(drive));
+        effectManager->seteffectpar(DistorsionPresets::DistorsionDrive, drive);
     }
     ImGui::ShowTooltipOnHover("Input Amplification");
 
     ImGui::SameLine();
 
-    auto level = static_cast<float>(effectManager->geteffectpar(DistorsionPresets::DistorsionLevel));
-    if (ImGui::Knob("Level", &level, 0, 128, ImVec2(40, 40)))
+    auto level = effectManager->geteffectpar(DistorsionPresets::DistorsionLevel);
+    if (ImGui::KnobUchar("Level", &level, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DistorsionPresets::DistorsionLevel, static_cast<unsigned char>(level));
+        effectManager->seteffectpar(DistorsionPresets::DistorsionLevel, level);
     }
     ImGui::ShowTooltipOnHover("Output Amplification");
 
     ImGui::SameLine();
 
-    auto lpf = static_cast<float>(effectManager->geteffectpar(DistorsionPresets::DistorsionLowPassFilter));
-    if (ImGui::Knob("LPF", &lpf, 0, 128, ImVec2(40, 40)))
+    auto lpf = effectManager->geteffectpar(DistorsionPresets::DistorsionLowPassFilter);
+    if (ImGui::KnobUchar("LPF", &lpf, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DistorsionPresets::DistorsionLowPassFilter, static_cast<unsigned char>(lpf));
+        effectManager->seteffectpar(DistorsionPresets::DistorsionLowPassFilter, lpf);
     }
     ImGui::ShowTooltipOnHover("Low Pass Filter");
 
     ImGui::SameLine();
 
-    auto hpf = static_cast<float>(effectManager->geteffectpar(DistorsionPresets::DistorsionHighPassFilter));
-    if (ImGui::Knob("HPF", &hpf, 0, 128, ImVec2(40, 40)))
+    auto hpf = effectManager->geteffectpar(DistorsionPresets::DistorsionHighPassFilter);
+    if (ImGui::KnobUchar("HPF", &hpf, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DistorsionPresets::DistorsionHighPassFilter, static_cast<unsigned char>(hpf));
+        effectManager->seteffectpar(DistorsionPresets::DistorsionHighPassFilter, hpf);
     }
     ImGui::ShowTooltipOnHover("High Pass Filter");
 }
@@ -902,10 +902,10 @@ float getEQPlotValue(EffectManager *effectManager, int x, int maxX, int maxY)
 
 void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
 {
-    auto volume = static_cast<float>(effectManager->geteffectpar(EQPresets::EQVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(EQPresets::EQVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(EQPresets::EQVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(EQPresets::EQVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
@@ -935,37 +935,37 @@ void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
                     effectManager->seteffectpar(presetStart + EQPresets::EQBandType, static_cast<unsigned char>(type));
                 }
 
-                auto frequency = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandFrequency));
-                if (ImGui::Knob("Freq", &frequency, 0, 128, ImVec2(40, 40)))
+                auto frequency = effectManager->geteffectpar(presetStart + EQPresets::EQBandFrequency);
+                if (ImGui::KnobUchar("Freq", &frequency, 0, 127, ImVec2(40, 40)))
                 {
-                    effectManager->seteffectpar(presetStart + EQPresets::EQBandFrequency, static_cast<unsigned char>(frequency));
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandFrequency, frequency);
                 }
                 ImGui::ShowTooltipOnHover("Frequency");
 
                 ImGui::SameLine();
 
-                auto gain = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandGain));
-                if (ImGui::Knob("Gain", &gain, 0, 128, ImVec2(40, 40)))
+                auto gain = effectManager->geteffectpar(presetStart + EQPresets::EQBandGain);
+                if (ImGui::KnobUchar("Gain", &gain, 0, 127, ImVec2(40, 40)))
                 {
-                    effectManager->seteffectpar(presetStart + EQPresets::EQBandGain, static_cast<unsigned char>(gain));
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandGain, gain);
                 }
                 ImGui::ShowTooltipOnHover("Gain");
 
                 ImGui::SameLine();
 
-                auto q = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandQ));
-                if (ImGui::Knob("Q", &q, 0, 128, ImVec2(40, 40)))
+                auto q = effectManager->geteffectpar(presetStart + EQPresets::EQBandQ);
+                if (ImGui::KnobUchar("Q", &q, 0, 127, ImVec2(40, 40)))
                 {
-                    effectManager->seteffectpar(presetStart + EQPresets::EQBandQ, static_cast<unsigned char>(q));
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandQ, q);
                 }
                 ImGui::ShowTooltipOnHover("Resonance/Bandwidth");
 
                 ImGui::SameLine();
 
-                auto stages = static_cast<float>(effectManager->geteffectpar(presetStart + EQPresets::EQBandStages));
-                if (ImGui::Knob("St.", &stages, 0, 128, ImVec2(40, 40)))
+                auto stages = effectManager->geteffectpar(presetStart + EQPresets::EQBandStages);
+                if (ImGui::KnobUchar("St.", &stages, 0, 127, ImVec2(40, 40)))
                 {
-                    effectManager->seteffectpar(presetStart + EQPresets::EQBandStages, static_cast<unsigned char>(stages));
+                    effectManager->seteffectpar(presetStart + EQPresets::EQBandStages, stages);
                 }
                 ImGui::ShowTooltipOnHover("Additional filter stages");
 
@@ -986,28 +986,28 @@ void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
         effectManager->changepreset(static_cast<unsigned char>(preset));
     }
 
-    auto volume = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterVolume));
-    if (ImGui::Knob("Vol", &volume, 0, 128, ImVec2(40, 40)))
+    auto volume = effectManager->geteffectpar(DynFilterPresets::DynFilterVolume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterVolume, static_cast<unsigned char>(volume));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterVolume, volume);
     }
     ImGui::ShowTooltipOnHover("Effect Volume");
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterPanning));
-    if (ImGui::Knob("Pan", &pan, 0, 128, ImVec2(40, 40)))
+    auto pan = effectManager->geteffectpar(DynFilterPresets::DynFilterPanning);
+    if (ImGui::KnobUchar("Pan", &pan, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterPanning, static_cast<unsigned char>(pan));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterPanning, pan);
     }
     ImGui::ShowTooltipOnHover("Panning");
 
     ImGui::SameLine();
 
-    auto depth = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterDepth));
-    if (ImGui::Knob("Depth", &depth, 0, 128, ImVec2(40, 40)))
+    auto depth = effectManager->geteffectpar(DynFilterPresets::DynFilterDepth);
+    if (ImGui::KnobUchar("Depth", &depth, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterDepth, static_cast<unsigned char>(depth));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterDepth, depth);
     }
     ImGui::ShowTooltipOnHover("Depth");
 
@@ -1024,19 +1024,19 @@ void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Lower filter freq when the input amplitude rises");
 
-    auto ampSense = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterAmplitudeSense));
-    if (ImGui::Knob("Sense", &ampSense, 0, 128, ImVec2(40, 40)))
+    auto ampSense = effectManager->geteffectpar(DynFilterPresets::DynFilterAmplitudeSense);
+    if (ImGui::KnobUchar("Sense", &ampSense, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterAmplitudeSense, static_cast<unsigned char>(ampSense));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterAmplitudeSense, ampSense);
     }
     ImGui::ShowTooltipOnHover("How the filter varies according to the input amplitude");
 
     ImGui::SameLine();
 
-    auto ampSmooth = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterAmplitudeSmooth));
-    if (ImGui::Knob("Smooth", &ampSmooth, 0, 128, ImVec2(40, 40)))
+    auto ampSmooth = effectManager->geteffectpar(DynFilterPresets::DynFilterAmplitudeSmooth);
+    if (ImGui::KnobUchar("Smooth", &ampSmooth, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterAmplitudeSmooth, static_cast<unsigned char>(ampSmooth));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterAmplitudeSmooth, ampSmooth);
     }
     ImGui::ShowTooltipOnHover("How smooth the input amplitude changes the filter");
 
@@ -1054,28 +1054,28 @@ void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("LFO function");
 
-    auto frequency = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterLFOFrequency));
-    if (ImGui::Knob("Freq", &frequency, 0, 128, ImVec2(40, 40)))
+    auto frequency = effectManager->geteffectpar(DynFilterPresets::DynFilterLFOFrequency);
+    if (ImGui::KnobUchar("Freq", &frequency, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterLFOFrequency, static_cast<unsigned char>(frequency));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterLFOFrequency, frequency);
     }
     ImGui::ShowTooltipOnHover("LFO Frequency");
 
     ImGui::SameLine();
 
-    auto randomness = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterLFORandomness));
-    if (ImGui::Knob("Rnd", &randomness, 0, 128, ImVec2(40, 40)))
+    auto randomness = effectManager->geteffectpar(DynFilterPresets::DynFilterLFORandomness);
+    if (ImGui::KnobUchar("Rnd", &randomness, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterLFORandomness, static_cast<unsigned char>(randomness));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterLFORandomness, randomness);
     }
     ImGui::ShowTooltipOnHover("LFO Randomness");
 
     ImGui::SameLine();
 
-    auto lfoStereo = static_cast<float>(effectManager->geteffectpar(DynFilterPresets::DynFilterLFOStereo));
-    if (ImGui::Knob("St.df", &lfoStereo, 0, 128, ImVec2(40, 40)))
+    auto lfoStereo = effectManager->geteffectpar(DynFilterPresets::DynFilterLFOStereo);
+    if (ImGui::KnobUchar("St.df", &lfoStereo, 0, 127, ImVec2(40, 40)))
     {
-        effectManager->seteffectpar(DynFilterPresets::DynFilterLFOStereo, static_cast<unsigned char>(lfoStereo));
+        effectManager->seteffectpar(DynFilterPresets::DynFilterLFOStereo, lfoStereo);
     }
     ImGui::ShowTooltipOnHover("LFO Left/Right Channel Phase Shift");
 

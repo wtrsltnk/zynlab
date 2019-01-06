@@ -112,37 +112,29 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         }
     }
 
-    auto freq = static_cast<float>(parameters->Pfreq);
-    if (ImGui::Knob("C.Freq", &(freq), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("C.Freq", &(parameters->Pfreq), 0, 127, ImVec2(40, 40)))
     {
-        parameters->Pfreq = static_cast<unsigned char>(freq);
     }
     ImGui::ShowTooltipOnHover("Center Frequency of the Filter or the base position in the vowel's sequence");
 
     ImGui::SameLine();
 
-    auto q = static_cast<float>(parameters->Pq);
-    if (ImGui::Knob("Q", &(q), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Q", &(parameters->Pq), 0, 127, ImVec2(40, 40)))
     {
-        parameters->Pq = static_cast<unsigned char>(q);
     }
     ImGui::ShowTooltipOnHover("Filter resonance or bandwidth");
 
     ImGui::SameLine();
 
-    auto freqtrack = static_cast<float>(parameters->Pfreqtrack);
-    if (ImGui::Knob("freq.tr.", &(freqtrack), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("freq.tr.", &(parameters->Pfreqtrack), 0, 127, ImVec2(40, 40)))
     {
-        parameters->Pfreqtrack = static_cast<unsigned char>(freqtrack);
     }
     ImGui::ShowTooltipOnHover("Filter frequency tracking (left is negative, middle is 0, and right is positive)");
 
     ImGui::SameLine();
 
-    auto gain = static_cast<float>(parameters->Pgain);
-    if (ImGui::Knob("gain", &(gain), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("gain", &(parameters->Pgain), 0, 127, ImVec2(40, 40)))
     {
-        parameters->Pgain = static_cast<unsigned char>(gain);
     }
     ImGui::ShowTooltipOnHover("Filter output gain/damp");
 }

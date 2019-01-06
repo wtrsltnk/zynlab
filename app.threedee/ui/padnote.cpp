@@ -69,44 +69,34 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(parameters->PPanning);
-    if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPanning = static_cast<unsigned char>(pan);
     }
     ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
-    auto punchStrength = static_cast<float>(parameters->PPunchStrength);
-    if (ImGui::Knob("P.Str.", &punchStrength, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Str.", &parameters->PPunchStrength, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchStrength = static_cast<unsigned char>(punchStrength);
     }
     ImGui::ShowTooltipOnHover("Punch Strength");
 
     ImGui::SameLine();
 
-    auto punchTime = static_cast<float>(parameters->PPunchTime);
-    if (ImGui::Knob("P.t.", &punchTime, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.t.", &parameters->PPunchTime, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchTime = static_cast<unsigned char>(punchTime);
     }
     ImGui::ShowTooltipOnHover("Punch time (duration)");
 
     ImGui::SameLine();
 
-    auto punchStretch = static_cast<float>(parameters->PPunchStretch);
-    if (ImGui::Knob("P.Stc.", &punchStretch, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Stc.", &parameters->PPunchStretch, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchStretch = static_cast<unsigned char>(punchStretch);
     }
     ImGui::ShowTooltipOnHover("Punch Stretch");
 
     ImGui::SameLine();
 
-    auto punchVelocitySensing = static_cast<float>(parameters->PPunchVelocitySensing);
-    if (ImGui::Knob("P.Vel.", &punchVelocitySensing, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Vel.", &parameters->PPunchVelocitySensing, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPunchVelocitySensing = static_cast<unsigned char>(punchVelocitySensing);
     }
     ImGui::ShowTooltipOnHover("Punch Velocity Sensing");
 

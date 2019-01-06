@@ -10,20 +10,16 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
 
     if (envelope->Envmode >= 3)
     {
-        auto a_val = static_cast<float>(envelope->PA_val);
-        if (ImGui::Knob("A.val", &(a_val), 0, 128, ImVec2(40, 40)))
+        if (ImGui::KnobUchar("A.val", &(envelope->PA_val), 0, 127, ImVec2(40, 40)))
         {
-            envelope->PA_val = static_cast<unsigned char>(a_val);
         }
         ImGui::ShowTooltipOnHover("Starting value");
 
         ImGui::SameLine();
     }
 
-    auto a_dt = static_cast<float>(envelope->PA_dt);
-    if (ImGui::Knob("A.dt", &(a_dt), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("A.dt", &(envelope->PA_dt), 0, 127, ImVec2(40, 40)))
     {
-        envelope->PA_dt = static_cast<unsigned char>(a_dt);
     }
     ImGui::ShowTooltipOnHover("Attack time");
 
@@ -31,10 +27,8 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
 
     if (envelope->Envmode == 4)
     {
-        auto d_val = static_cast<float>(envelope->PD_val);
-        if (ImGui::Knob("D.val", &(d_val), 0, 128, ImVec2(40, 40)))
+        if (ImGui::KnobUchar("D.val", &(envelope->PD_val), 0, 127, ImVec2(40, 40)))
         {
-            envelope->PD_val = static_cast<unsigned char>(d_val);
         }
         ImGui::ShowTooltipOnHover("Decay value");
 
@@ -43,10 +37,8 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
 
     if (envelope->Envmode != 3 && envelope->Envmode != 5)
     {
-        auto d_dt = static_cast<float>(envelope->PD_dt);
-        if (ImGui::Knob("D.dt", &(d_dt), 0, 128, ImVec2(40, 40)))
+        if (ImGui::KnobUchar("D.dt", &(envelope->PD_dt), 0, 127, ImVec2(40, 40)))
         {
-            envelope->PD_dt = static_cast<unsigned char>(d_dt);
         }
         ImGui::ShowTooltipOnHover("Decay time");
 
@@ -55,20 +47,16 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
 
     if (envelope->Envmode < 3)
     {
-        auto s_val = static_cast<float>(envelope->PS_val);
-        if (ImGui::Knob("S.val", &(s_val), 0, 128, ImVec2(40, 40)))
+        if (ImGui::KnobUchar("S.val", &(envelope->PS_val), 0, 127, ImVec2(40, 40)))
         {
-            envelope->PS_val = static_cast<unsigned char>(s_val);
         }
         ImGui::ShowTooltipOnHover("Sustain value");
 
         ImGui::SameLine();
     }
 
-    auto r_dt = static_cast<float>(envelope->PR_dt);
-    if (ImGui::Knob("R.dt", &(r_dt), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("R.dt", &(envelope->PR_dt), 0, 127, ImVec2(40, 40)))
     {
-        envelope->PR_dt = static_cast<unsigned char>(r_dt);
     }
     ImGui::ShowTooltipOnHover("Release time");
 
@@ -76,20 +64,16 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
 
     if (envelope->Envmode >= 3)
     {
-        auto r_val = static_cast<float>(envelope->PR_val);
-        if (ImGui::Knob("R.val", &(r_val), 0, 128, ImVec2(40, 40)))
+        if (ImGui::KnobUchar("R.val", &(envelope->PR_val), 0, 127, ImVec2(40, 40)))
         {
-            envelope->PR_val = static_cast<unsigned char>(r_val);
         }
         ImGui::ShowTooltipOnHover("Release value");
 
         ImGui::SameLine();
     }
 
-    auto stretch = static_cast<float>(envelope->Penvstretch);
-    if (ImGui::Knob("Str.", &(stretch), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Str.", &(envelope->Penvstretch), 0, 127, ImVec2(40, 40)))
     {
-        envelope->Penvstretch = static_cast<unsigned char>(stretch);
     }
     ImGui::ShowTooltipOnHover("Envelope stretch (on lower notes makes the envelope longer)");
 

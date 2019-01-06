@@ -148,10 +148,8 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 
     ImGui::SameLine();
 
-    auto pan = static_cast<float>(parameters->PPanning);
-    if (ImGui::Knob("Panning", &pan, 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
     {
-        parameters->PPanning = static_cast<unsigned char>(pan);
     }
     ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
@@ -225,28 +223,22 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     }
     ImGui::ShowTooltipOnHover("Overtone positions");
 
-    auto par1 = static_cast<float>(parameters->POvertoneSpread.par1);
-    if (ImGui::Knob("Par1", &(par1), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Par1", &(parameters->POvertoneSpread.par1), 0, 127, ImVec2(40, 40)))
     {
-        parameters->POvertoneSpread.par1 = static_cast<unsigned char>(par1);
     }
     ImGui::ShowTooltipOnHover("Overtone spread par 1");
 
     ImGui::SameLine();
 
-    auto bandwidth = static_cast<float>(parameters->POvertoneSpread.par2);
-    if (ImGui::Knob("Par2", &(bandwidth), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Par2", &(parameters->POvertoneSpread.par2), 0, 127, ImVec2(40, 40)))
     {
-        parameters->POvertoneSpread.par2 = static_cast<unsigned char>(bandwidth);
     }
     ImGui::ShowTooltipOnHover("Overtone spread par 2");
 
     ImGui::SameLine();
 
-    auto forceH = static_cast<float>(parameters->POvertoneSpread.par3);
-    if (ImGui::Knob("ForceH", &(forceH), 0, 128, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("ForceH", &(parameters->POvertoneSpread.par3), 0, 127, ImVec2(40, 40)))
     {
-        parameters->POvertoneSpread.par3 = static_cast<unsigned char>(forceH);
     }
     ImGui::ShowTooltipOnHover("Overtone spread par 3");
 }
