@@ -95,7 +95,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
 
     auto phase = static_cast<float>(64 - parameters->Poscilphase);
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("##Phase", &phase, 0, 128, "Phase %.3f"))
+    if (ImGui::SliderFloat("##Phase", &phase, 0, 127, "Phase %.3f"))
     {
         parameters->PVolume = static_cast<unsigned char>(phase);
     }
@@ -111,7 +111,7 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
 
     auto frequency_spread = static_cast<float>(parameters->Unison_frequency_spread);
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("##Frequency Spread", &frequency_spread, 0, 128, "Frequency Spread %.3f"))
+    if (ImGui::SliderFloat("##Frequency Spread", &frequency_spread, 0, 127, "Frequency Spread %.3f"))
     {
         parameters->Unison_frequency_spread = static_cast<unsigned char>(frequency_spread);
     }
@@ -140,31 +140,27 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     }
     ImGui::ShowTooltipOnHover("Unison size");
 
-    if (ImGui::KnobUchar("Ph.rand", &parameters->Unison_phase_randomness, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Ph.rand", &parameters->Unison_phase_randomness, 0, 127, ImVec2(40, 40), "Phase randomness"))
     {
     }
-    ImGui::ShowTooltipOnHover("Phase randomness");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Stereo", &parameters->Unison_stereo_spread, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Stereo", &parameters->Unison_stereo_spread, 0, 127, ImVec2(40, 40), "Stereo Spread"))
     {
     }
-    ImGui::ShowTooltipOnHover("Stereo Spread");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Vibrato", &parameters->Unison_vibratto, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Vibrato", &parameters->Unison_vibratto, 0, 127, ImVec2(40, 40), "Vibrato"))
     {
     }
-    ImGui::ShowTooltipOnHover("Vibrato");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("V.speed", &parameters->Unison_vibratto_speed, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("V.speed", &parameters->Unison_vibratto_speed, 0, 127, ImVec2(40, 40), "Vibrato Average Speed"))
     {
     }
-    ImGui::ShowTooltipOnHover("Vibrato Average Speed");
 }
 
 void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
@@ -174,7 +170,7 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
     auto vol = static_cast<float>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 128, "Vol %.3f"))
+    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
@@ -182,7 +178,7 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 128, "V.Sns %.3f"))
+    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -191,10 +187,9 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40), "Panning (leftmost is random)"))
     {
     }
-    ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
     ImGui::Separator();
 
@@ -318,7 +313,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
     {
         auto vol = static_cast<float>(parameters->PVolume);
         ImGui::PushItemWidth(300);
-        if (ImGui::SliderFloat("##Vol", &vol, 0, 128, "Vol %.3f"))
+        if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
         {
             parameters->PVolume = static_cast<unsigned char>(vol);
         }
@@ -326,7 +321,7 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
         auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
         ImGui::PushItemWidth(300);
-        if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 128, "V.Sns %.3f"))
+        if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
         {
             parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
         }

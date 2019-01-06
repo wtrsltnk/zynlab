@@ -112,36 +112,31 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40), "Panning (leftmost is random)"))
     {
     }
-    ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
-    if (ImGui::KnobUchar("P.Str.", &parameters->PPunchStrength, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Str.", &parameters->PPunchStrength, 0, 127, ImVec2(40, 40), "Punch Strength"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch Strength");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("P.t.", &parameters->PPunchTime, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.t.", &parameters->PPunchTime, 0, 127, ImVec2(40, 40), "Punch time (duration)"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch time (duration)");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("P.Stc.", &parameters->PPunchStretch, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Stc.", &parameters->PPunchStretch, 0, 127, ImVec2(40, 40), "Punch Stretch"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch Stretch");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("P.Vel.", &parameters->PPunchVelocitySensing, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Vel.", &parameters->PPunchVelocitySensing, 0, 127, ImVec2(40, 40), "Punch Velocity Sensing"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch Velocity Sensing");
 
     ImGui::SameLine();
 
@@ -232,10 +227,9 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
     }
     ImGui::ShowTooltipOnHover("Octave");
 
-    if (ImGui::KnobUchar("relBW", &(parameters->PBandwidth), 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("relBW", &(parameters->PBandwidth), 0, 127, ImVec2(40, 40), "Bandwidth - how the relative fine detune of the voice are changed"))
     {
     }
-    ImGui::ShowTooltipOnHover("Bandwidth - how the relative fine detune of the voice are changed");
 
     ImGui::SameLine();
 

@@ -52,7 +52,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
     auto vol = static_cast<float>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 128, "Vol %.3f"))
+    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
@@ -60,7 +60,7 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
 
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 128, "V.Sns %.3f"))
+    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -69,36 +69,31 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40), "Panning (leftmost is random)"))
     {
     }
-    ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
-    if (ImGui::KnobUchar("P.Str.", &parameters->PPunchStrength, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Str.", &parameters->PPunchStrength, 0, 127, ImVec2(40, 40), "Punch Strength"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch Strength");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("P.t.", &parameters->PPunchTime, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.t.", &parameters->PPunchTime, 0, 127, ImVec2(40, 40), "Punch time (duration)"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch time (duration)");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("P.Stc.", &parameters->PPunchStretch, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Stc.", &parameters->PPunchStretch, 0, 127, ImVec2(40, 40), "Punch Stretch"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch Stretch");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("P.Vel.", &parameters->PPunchVelocitySensing, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("P.Vel.", &parameters->PPunchVelocitySensing, 0, 127, ImVec2(40, 40), "Punch Velocity Sensing"))
     {
     }
-    ImGui::ShowTooltipOnHover("Punch Velocity Sensing");
 
     ImGui::SameLine();
 

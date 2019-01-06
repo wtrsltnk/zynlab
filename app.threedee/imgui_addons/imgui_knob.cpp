@@ -69,7 +69,11 @@ bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, Im
     {
         ImGui::SetNextWindowPos(ImVec2(pos.x - style.WindowPadding.x, pos.y - (line_height * 2) - style.ItemInnerSpacing.y - style.WindowPadding.y));
         ImGui::BeginTooltip();
-        if (showLabel)
+        if (tooltip != nullptr)
+        {
+            ImGui::Text("%s\nValue : %.3f", tooltip, static_cast<double>(*p_value));
+        }
+        else if (showLabel)
         {
             ImGui::Text("%s %.3f", label, static_cast<double>(*p_value));
         }
@@ -153,7 +157,7 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
         ImGui::BeginTooltip();
         if (tooltip != nullptr)
         {
-            ImGui::Text("%s %d", tooltip, static_cast<unsigned int>(*p_value));
+            ImGui::Text("%s\nValue : %d", tooltip, static_cast<unsigned int>(*p_value));
         }
         else if (showLabel)
         {
@@ -165,6 +169,31 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
         }
         ImGui::EndTooltip();
     }
+
+    return value_changed;
+}
+
+bool ImGui::PresetSelection(char const *label, unsigned char &value, char const *const names[], int nameCount, char const *tooltip)
+{
+    bool value_changed = false;
+
+    auto current_effect_item = names[value];
+    if (ImGui::BeginCombo(label, current_effect_item))
+    {
+        for (unsigned char n = 0; n < nameCount; n++)
+        {
+            bool is_selected = (current_effect_item == names[n]);
+            if (ImGui::Selectable(names[n], is_selected))
+            {
+                current_effect_item = names[n];
+                value = n;
+                value_changed = true;
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+    ImGui::ShowTooltipOnHover(tooltip == nullptr ? label : tooltip);
 
     return value_changed;
 }

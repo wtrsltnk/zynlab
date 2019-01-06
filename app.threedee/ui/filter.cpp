@@ -3,12 +3,14 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.dsp/FilterParams.h>
 
+static const int category_count = 3;
 static char const *categories[] = {
     "Analog",
     "Formant",
     "StVarF",
 };
 
+static const int filter_type_count = 9;
 static char const *filter_types[] = {
     "LPF1",
     "HPF1",
@@ -21,6 +23,7 @@ static char const *filter_types[] = {
     "HSh2",
 };
 
+static const int stvarf_filter_type_count = 4;
 static char const *stvarf_filter_types[] = {
     "1LPDF",
     "1HPF",
@@ -30,57 +33,21 @@ static char const *stvarf_filter_types[] = {
 
 void AppThreeDee::FilterParameters(FilterParams *parameters)
 {
-    static char const *current_category_item = nullptr;
-
-    auto category = static_cast<int>(parameters->Pcategory);
-    current_category_item = categories[category];
     ImGui::PushItemWidth(100);
-    if (ImGui::BeginCombo("##category", current_category_item))
+    if (ImGui::PresetSelection("##category", parameters->Pcategory, categories, category_count, "The Category of the Filter (Analog/Formantic/etc.)"))
     {
-        for (int n = 0; n < 3; n++)
-        {
-            bool is_selected = (current_category_item == categories[n]);
-            if (ImGui::Selectable(categories[n], is_selected))
-            {
-                current_category_item = categories[n];
-                parameters->Pcategory = static_cast<unsigned char>(n);
-                parameters->Ptype = 0;
-            }
-        }
-
-        ImGui::EndCombo();
     }
-    ImGui::ShowTooltipOnHover("The Category of the Filter (Analog/Formantic/etc.)");
 
     ImGui::SameLine();
 
-    static char const *current_filter_type_item = nullptr;
-
-    static char const *current_stvarf_filter_type_item = nullptr;
-
-    switch (category)
+    switch (parameters->Pcategory)
     {
         default:
         {
-            auto filter_type = static_cast<int>(parameters->Ptype);
-            current_filter_type_item = filter_types[filter_type];
             ImGui::PushItemWidth(100);
-            if (ImGui::BeginCombo("##filter_type", current_filter_type_item))
+            if (ImGui::PresetSelection("##filter_type", parameters->Ptype, filter_types, filter_type_count, "Filter type"))
             {
-                for (int n = 0; n < 9; n++)
-                {
-                    bool is_selected = (current_filter_type_item == filter_types[n]);
-                    if (ImGui::Selectable(filter_types[n], is_selected))
-                    {
-                        current_filter_type_item = filter_types[n];
-                        parameters->Ptype = static_cast<unsigned char>(n);
-                        parameters->changed = true;
-                    }
-                }
-
-                ImGui::EndCombo();
             }
-            ImGui::ShowTooltipOnHover("Filter type");
             break;
         }
         case 1:
@@ -90,51 +57,33 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         }
         case 2:
         {
-            auto filter_type = static_cast<int>(parameters->Ptype);
-            current_stvarf_filter_type_item = stvarf_filter_types[filter_type];
             ImGui::PushItemWidth(100);
-            if (ImGui::BeginCombo("##stvarf_filter_type", current_stvarf_filter_type_item))
+            if (ImGui::PresetSelection("##stvarf_filter_type", parameters->Ptype, stvarf_filter_types, stvarf_filter_type_count, "Filter type"))
             {
-                for (int n = 0; n < 4; n++)
-                {
-                    bool is_selected = (current_stvarf_filter_type_item == stvarf_filter_types[n]);
-                    if (ImGui::Selectable(stvarf_filter_types[n], is_selected))
-                    {
-                        current_stvarf_filter_type_item = stvarf_filter_types[n];
-                        parameters->Ptype = static_cast<unsigned char>(n);
-                    }
-                }
-
-                ImGui::EndCombo();
             }
-            ImGui::ShowTooltipOnHover("Filter type");
             break;
         }
     }
 
-    if (ImGui::KnobUchar("C.Freq", &(parameters->Pfreq), 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("C.Freq", &(parameters->Pfreq), 0, 127, ImVec2(40, 40), "Center Frequency of the Filter or the base position in the vowel's sequence"))
     {
     }
-    ImGui::ShowTooltipOnHover("Center Frequency of the Filter or the base position in the vowel's sequence");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Q", &(parameters->Pq), 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Q", &(parameters->Pq), 0, 127, ImVec2(40, 40), "Filter resonance or bandwidth"))
     {
     }
-    ImGui::ShowTooltipOnHover("Filter resonance or bandwidth");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("freq.tr.", &(parameters->Pfreqtrack), 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("freq.tr.", &(parameters->Pfreqtrack), 0, 127, ImVec2(40, 40), "Filter frequency tracking (left is negative, middle is 0, and right is positive)"))
     {
     }
-    ImGui::ShowTooltipOnHover("Filter frequency tracking (left is negative, middle is 0, and right is positive)");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("gain", &(parameters->Pgain), 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("gain", &(parameters->Pgain), 0, 127, ImVec2(40, 40), "Filter output gain/damp"))
     {
     }
-    ImGui::ShowTooltipOnHover("Filter output gain/damp");
 }

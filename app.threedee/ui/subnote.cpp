@@ -3,6 +3,7 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/SUBnoteParams.h>
 
+static const int overtone_position_count = 8;
 static char const *overtone_positions[] = {
     "Harmonic",
     "ShiftU",
@@ -131,7 +132,7 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
     auto vol = static_cast<float>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 128, "Vol %.3f"))
+    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
@@ -139,7 +140,7 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 
     auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 128, "V.Sns %.3f"))
+    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -148,10 +149,9 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Panning", &parameters->PPanning, 0, 127, ImVec2(40, 40), "Panning (leftmost is random)"))
     {
     }
-    ImGui::ShowTooltipOnHover("Panning (leftmost is random)");
 
     ImGui::Separator();
 
@@ -164,7 +164,7 @@ void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
 
     auto bandwidth = static_cast<float>(parameters->Pbandwidth);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Bandwidth", &bandwidth, 0, 128, "Bandwidth %.3f"))
+    if (ImGui::SliderFloat("##Bandwidth", &bandwidth, 0, 127, "Bandwidth %.3f"))
     {
         parameters->Pbandwidth = static_cast<unsigned char>(bandwidth);
     }
@@ -172,7 +172,7 @@ void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
 
     auto bandwidthScale = static_cast<float>(parameters->Pbwscale);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##BandwidthScale", &bandwidthScale, 0, 128, "Scale %.3f"))
+    if (ImGui::SliderFloat("##BandwidthScale", &bandwidthScale, 0, 127, "Scale %.3f"))
     {
         parameters->Pbwscale = static_cast<unsigned char>(bandwidthScale);
     }
@@ -202,45 +202,26 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
 {
     ImGui::Text("Overtone Parameters");
 
-    static char const *current_overtone_positions_item = nullptr;
-
-    auto overtone_position = static_cast<int>(parameters->POvertoneSpread.type);
-    current_overtone_positions_item = overtone_positions[overtone_position];
     ImGui::PushItemWidth(100);
-    if (ImGui::BeginCombo("Overtone positions", current_overtone_positions_item))
-    {
-        for (int n = 0; n < 8; n++)
-        {
-            bool is_selected = (current_overtone_positions_item == overtone_positions[n]);
-            if (ImGui::Selectable(overtone_positions[n], is_selected))
-            {
-                current_overtone_positions_item = overtone_positions[n];
-                parameters->POvertoneSpread.type = static_cast<unsigned char>(n);
-            }
-        }
-
-        ImGui::EndCombo();
-    }
-    ImGui::ShowTooltipOnHover("Overtone positions");
-
-    if (ImGui::KnobUchar("Par1", &(parameters->POvertoneSpread.par1), 0, 127, ImVec2(40, 40)))
+    if (ImGui::PresetSelection("Overtone positions", parameters->POvertoneSpread.type, overtone_positions, overtone_position_count, "Overtone positions"))
     {
     }
-    ImGui::ShowTooltipOnHover("Overtone spread par 1");
+
+    if (ImGui::KnobUchar("Par1", &(parameters->POvertoneSpread.par1), 0, 127, ImVec2(40, 40), "Overtone spread par 1"))
+    {
+    }
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("Par2", &(parameters->POvertoneSpread.par2), 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("Par2", &(parameters->POvertoneSpread.par2), 0, 127, ImVec2(40, 40), "Overtone spread par 2"))
     {
     }
-    ImGui::ShowTooltipOnHover("Overtone spread par 2");
 
     ImGui::SameLine();
 
-    if (ImGui::KnobUchar("ForceH", &(parameters->POvertoneSpread.par3), 0, 127, ImVec2(40, 40)))
+    if (ImGui::KnobUchar("ForceH", &(parameters->POvertoneSpread.par3), 0, 127, ImVec2(40, 40), "Overtone spread par 3"))
     {
     }
-    ImGui::ShowTooltipOnHover("Overtone spread par 3");
 }
 
 void AppThreeDee::SUBNoteEditorFilter(SUBnoteParameters *parameters)
