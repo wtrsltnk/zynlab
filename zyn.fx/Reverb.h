@@ -69,24 +69,24 @@ private:
     void processmono(int ch, float *output, const float *inputbuf);
 
     //Parameters
-    int lohidamptype{}; //0=disable, 1=highdamp (lowpass), 2=lowdamp (highpass)
-    int idelaylen{};
-    int idelayk{};
-    float lohifb{};
-    float idelayfb{};
+    int lohidamptype; //0=disable, 1=highdamp (lowpass), 2=lowdamp (highpass)
+    int idelaylen;
+    int idelayk;
+    float lohifb;
+    float idelayfb;
     float roomsize;
     float rs; //rs is used to "normalise" the volume according to the roomsize
-    int comblen[REV_COMBS * 2]{};
-    int aplen[REV_APS * 2]{};
+    int comblen[REV_COMBS * 2];
+    int aplen[REV_APS * 2];
     class Unison *bandwidth;
 
     //Internal Variables
-    float *comb[REV_COMBS * 2]{};
-    int combk[REV_COMBS * 2]{};
-    float combfb[REV_COMBS * 2]{}; //feedback-ul fiecarui filtru "comb"
-    float lpcomb[REV_COMBS * 2]{}; //pentru Filtrul LowPass
-    float *ap[REV_APS * 2]{};
-    int apk[REV_APS * 2]{};
+    float *comb[REV_COMBS * 2];
+    int combk[REV_COMBS * 2];
+    float combfb[REV_COMBS * 2]; //feedback-ul fiecarui filtru "comb"
+    float lpcomb[REV_COMBS * 2]; //pentru Filtrul LowPass
+    float *ap[REV_APS * 2];
+    int apk[REV_APS * 2];
     float *idelay;
     class AnalogFilter *lpf, *hpf; //filters
 };

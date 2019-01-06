@@ -57,10 +57,10 @@ private:
     void reinitfilter(void);
 
     //Internal Values
-    float depth{}, ampsns{}, ampsmooth{};
+    float depth, ampsns, ampsmooth;
 
     class Filter *filterl, *filterr;
-    float ms1{}, ms2{}, ms3{}, ms4{}; //mean squares
+    float ms1, ms2, ms3, ms4; //mean squares
 };
 
 #endif

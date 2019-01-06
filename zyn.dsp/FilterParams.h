@@ -58,7 +58,7 @@ public:
     unsigned char Pnumformants;              //how many formants are used
     unsigned char Pformantslowness;          //how slow varies the formants
     unsigned char Pvowelclearness;           //how vowels are kept clean (how much try to avoid "mixed" vowels)
-    unsigned char Pcenterfreq{}, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
+    unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
 
     struct
     {

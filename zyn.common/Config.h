@@ -59,7 +59,7 @@ public:
         std::string LinuxALSAaudioDev;
         std::string nameTag;
     } cfg;
-    int maxstringsize{};
+    int maxstringsize;
 
     void clearbankrootdirlist();
     void clearpresetsdirlist();

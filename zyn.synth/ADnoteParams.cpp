@@ -64,7 +64,7 @@ ADnoteGlobalParam::ADnoteGlobalParam()
 void ADnoteParameters::Defaults()
 {
     //Default Parameters
-    GlobalPar.defaults();
+    GlobalPar.Defaults();
 
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         Defaults(nvoice);
@@ -72,7 +72,7 @@ void ADnoteParameters::Defaults()
     VoicePar[0].Enabled = 1;
 }
 
-void ADnoteGlobalParam::defaults()
+void ADnoteGlobalParam::Defaults()
 {
     /* Frequency Global Parameters */
     PStereo = 1;    //stereo
@@ -109,10 +109,10 @@ void ADnoteGlobalParam::defaults()
  */
 void ADnoteParameters::Defaults(int n)
 {
-    VoicePar[n].defaults();
+    VoicePar[n].Defaults();
 }
 
-void ADnoteVoiceParam::defaults()
+void ADnoteVoiceParam::Defaults()
 {
     Enabled = 0;
 
@@ -184,10 +184,10 @@ void ADnoteVoiceParam::defaults()
  */
 void ADnoteParameters::EnableVoice(int nvoice)
 {
-    VoicePar[nvoice].enable(_fft, GlobalPar.Reson);
+    VoicePar[nvoice].Enable(_fft, GlobalPar.Reson);
 }
 
-void ADnoteVoiceParam::enable(IFFTwrapper *fft, Resonance *Reson)
+void ADnoteVoiceParam::Enable(IFFTwrapper *fft, Resonance *Reson)
 {
     OscilSmp = new OscilGen(fft, Reson);
     FMSmp = new OscilGen(fft, nullptr);
@@ -236,12 +236,12 @@ float ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice)
 /*
  * Kill the voice
  */
-void ADnoteParameters::KillVoice(int nvoice)
+void ADnoteParameters::DisableVoice(int nvoice)
 {
-    VoicePar[nvoice].kill();
+    VoicePar[nvoice].Disable();
 }
 
-void ADnoteVoiceParam::kill()
+void ADnoteVoiceParam::Disable()
 {
     delete OscilSmp;
     delete FMSmp;
@@ -276,7 +276,7 @@ ADnoteParameters::~ADnoteParameters()
 {
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
     {
-        KillVoice(nvoice);
+        DisableVoice(nvoice);
     }
 }
 

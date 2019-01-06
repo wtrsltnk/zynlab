@@ -8,8 +8,8 @@ public:
     SequencerStep(const SequencerStep &clone);
 
     SequencerStep &operator=(const SequencerStep &clone);
-    char _note{};
-    char _velocity{};
+    char _note;
+    char _velocity;
 };
 
 #endif // SEQUENCERSTEP_H

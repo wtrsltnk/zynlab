@@ -42,10 +42,10 @@ private:
     float getlfoshape(float x);
 
     float xl, xr;
-    float incx{};
+    float incx;
     float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
     float lfornd;
-    char lfotype{};
+    char lfotype;
 };
 
 #endif

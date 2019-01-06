@@ -45,40 +45,40 @@ public:
 
 public: //Parameters
     /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
-    unsigned char Pinvertupdown{};
+    unsigned char Pinvertupdown;
 
     /**the central key of the inversion*/
-    unsigned char Pinvertupdowncenter{};
+    unsigned char Pinvertupdowncenter;
 
     /**0 for 12 key temperate scale, 1 for microtonal*/
-    unsigned char Penabled{};
+    unsigned char Penabled;
 
     /**the note of "A" key*/
-    unsigned char PAnote{};
+    unsigned char PAnote;
 
     /**the frequency of the "A" note*/
-    float PAfreq{};
+    float PAfreq;
 
     /**if the scale is "tuned" to a note, you can tune to other note*/
-    unsigned char Pscaleshift{};
+    unsigned char Pscaleshift;
 
     //first and last key (to retune)
-    unsigned char Pfirstkey{};
-    unsigned char Plastkey{};
+    unsigned char Pfirstkey;
+    unsigned char Plastkey;
 
     /**The middle note where scale degree 0 is mapped to*/
-    unsigned char Pmiddlenote{};
+    unsigned char Pmiddlenote;
 
     /**Map size*/
-    unsigned char Pmapsize{};
+    unsigned char Pmapsize;
 
     /**Mapping ON/OFF*/
-    unsigned char Pmappingenabled{};
+    unsigned char Pmappingenabled;
     /**Mapping (keys)*/
-    short int Pmapping[128]{};
+    short int Pmapping[128];
 
     /**Fine detune to be applied to all notes*/
-    unsigned char Pglobalfinedetune{};
+    unsigned char Pglobalfinedetune;
 
     // Functions
     /** Return the current octave size*/
@@ -114,7 +114,7 @@ public: // Serialization
 private:
     int linetotunings(unsigned int nline, const char *line);
     int loadline(FILE *file, char *line); //loads a line from the text file, while ignoring the lines beggining with "!"
-    unsigned char octavesize{};
+    unsigned char octavesize;
     struct
     {
         unsigned char type; //1 for cents or 2 for division
@@ -125,7 +125,7 @@ private:
 
         //the real tunning is x1/x2
         unsigned int x1, x2;
-    } octave[MAX_OCTAVE_SIZE]{}, tmpoctave[MAX_OCTAVE_SIZE]{};
+    } octave[MAX_OCTAVE_SIZE], tmpoctave[MAX_OCTAVE_SIZE];
 };
 
 #endif

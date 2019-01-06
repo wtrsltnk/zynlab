@@ -53,13 +53,14 @@ struct ADnoteGlobalParam
 {
     ADnoteGlobalParam();
     ~ADnoteGlobalParam();
-    void defaults();
+
+    void Defaults();
     void add2XML(IPresetsSerializer *xml);
     void getfromXML(IPresetsSerializer *xml);
+
     /* The instrument type  - MONO/STEREO
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
-
     unsigned char PStereo;
 
     /******************************************
@@ -123,11 +124,13 @@ struct ADnoteGlobalParam
 /***********************************************************/
 struct ADnoteVoiceParam
 {
+    void Defaults();
     void getfromXML(IPresetsSerializer *xml, unsigned nvoice);
     void add2XML(IPresetsSerializer *xml, bool fmoscilused);
-    void defaults();
-    void enable(IFFTwrapper *fft, Resonance *Reson);
-    void kill();
+
+    void Enable(IFFTwrapper *fft, Resonance *Reson);
+    void Disable();
+
     /** If the voice is enabled */
     unsigned char Enabled;
 
@@ -314,7 +317,7 @@ private:
     void Defaults(int n); //n is the nvoice
 
     void EnableVoice(int nvoice);
-    void KillVoice(int nvoice);
+    void DisableVoice(int nvoice);
 
     void SerializeSection(IPresetsSerializer *xml, int n);
     void DeserializeSection(IPresetsSerializer *xml, int n);

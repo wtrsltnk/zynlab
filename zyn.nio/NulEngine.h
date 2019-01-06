@@ -49,7 +49,7 @@ protected:
     static void *_AudioThread(void *arg);
 
 private:
-    struct timeval playing_until{};
+    struct timeval playing_until;
     pthread_t *pThread;
 };
 
