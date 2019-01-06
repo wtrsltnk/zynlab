@@ -141,7 +141,7 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     ImGui::SameLine();
 
     auto stereo = parameters->PStereo == 1;
-    if (ImGui::Checkbox("##stereo", &stereo))
+    if (ImGui::Checkbox("Stereo", &stereo))
     {
         parameters->PStereo = stereo ? 1 : 0;
     }
@@ -149,20 +149,12 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 
     ImGui::SameLine();
 
-    ImGui::Text("Stereo");
-
-    ImGui::SameLine();
-
     auto randomGrouping = parameters->Hrandgrouping == 1;
-    if (ImGui::Checkbox("##random_grouping", &randomGrouping))
+    if (ImGui::Checkbox("Rnd Grp", &randomGrouping))
     {
         parameters->Hrandgrouping = randomGrouping ? 1 : 0;
     }
     ImGui::ShowTooltipOnHover("How the Harmonic Amplitude is applied to voices that use the same oscillator");
-
-    ImGui::SameLine();
-
-    ImGui::Text("Rnd Grp");
 
     ImGui::Separator();
 

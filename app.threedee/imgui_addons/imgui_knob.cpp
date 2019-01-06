@@ -173,7 +173,7 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
     return value_changed;
 }
 
-bool ImGui::PresetSelection(char const *label, unsigned char &value, char const *const names[], int nameCount, char const *tooltip)
+bool ImGui::DropDown(char const *label, unsigned char &value, char const *const names[], int nameCount, char const *tooltip)
 {
     bool value_changed = false;
 

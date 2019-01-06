@@ -98,15 +98,11 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
     ImGui::SameLine();
 
     auto stereo = parameters->PStereo == 1;
-    if (ImGui::Checkbox("##stereo", &stereo))
+    if (ImGui::Checkbox("Stereo", &stereo))
     {
         parameters->PStereo = stereo ? 1 : 0;
     }
     ImGui::ShowTooltipOnHover("Stereo");
-
-    ImGui::SameLine();
-
-    ImGui::Text("Stereo");
 
     ImGui::Separator();
 

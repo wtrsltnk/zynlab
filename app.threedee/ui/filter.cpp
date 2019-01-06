@@ -34,7 +34,7 @@ static char const *stvarf_filter_types[] = {
 void AppThreeDee::FilterParameters(FilterParams *parameters)
 {
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("##category", parameters->Pcategory, categories, category_count, "The Category of the Filter (Analog/Formantic/etc.)"))
+    if (ImGui::DropDown("##category", parameters->Pcategory, categories, category_count, "The Category of the Filter (Analog/Formantic/etc.)"))
     {
     }
 
@@ -45,7 +45,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         default:
         {
             ImGui::PushItemWidth(100);
-            if (ImGui::PresetSelection("##filter_type", parameters->Ptype, filter_types, filter_type_count, "Filter type"))
+            if (ImGui::DropDown("##filter_type", parameters->Ptype, filter_types, filter_type_count, "Filter type"))
             {
             }
             break;
@@ -58,7 +58,7 @@ void AppThreeDee::FilterParameters(FilterParams *parameters)
         case 2:
         {
             ImGui::PushItemWidth(100);
-            if (ImGui::PresetSelection("##stvarf_filter_type", parameters->Ptype, stvarf_filter_types, stvarf_filter_type_count, "Filter type"))
+            if (ImGui::DropDown("##stvarf_filter_type", parameters->Ptype, stvarf_filter_types, stvarf_filter_type_count, "Filter type"))
             {
             }
             break;

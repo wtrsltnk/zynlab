@@ -19,7 +19,7 @@ void AppThreeDee::LFO(char const *label, LFOParams *params)
     ImGui::Text("%s", label);
 
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("##lfotype", params->PLFOtype, lfo_types, lfo_type_count, "LFO Type"))
+    if (ImGui::DropDown("##lfotype", params->PLFOtype, lfo_types, lfo_type_count, "LFO Type"))
     {
     }
 

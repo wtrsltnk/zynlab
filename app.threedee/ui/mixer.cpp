@@ -191,7 +191,7 @@ void AppThreeDee::ImGuiMasterTrack()
         auto sinks = toCharVector(Nio::GetSinks());
         auto selectedSink = indexOf(sinks, Nio::GetSelectedSink());
         ImGui::PushItemWidth(width);
-        if (ImGui::PresetSelection("##Sinks", selectedSink, &sinks[0], static_cast<int>(sinks.size()), "Ouput device"))
+        if (ImGui::DropDown("##Sinks", selectedSink, &sinks[0], static_cast<int>(sinks.size()), "Ouput device"))
         {
             Nio::SelectSink(sinks[static_cast<size_t>(selectedSink)]);
         }
@@ -200,33 +200,27 @@ void AppThreeDee::ImGuiMasterTrack()
         auto sources = toCharVector(Nio::GetSources());
         auto selectedSource = indexOf(sources, Nio::GetSelectedSource());
         ImGui::PushItemWidth(width);
-        if (ImGui::PresetSelection("##Sources", selectedSource, &sources[0], static_cast<int>(sources.size()), "Midi device"))
+        if (ImGui::DropDown("##Sources", selectedSource, &sources[0], static_cast<int>(sources.size()), "Midi device"))
         {
             Nio::SelectSource(sources[static_cast<size_t>(selectedSource)]);
         }
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 2));
 
         // Enable/disable NRPN
         auto nrpn = _mixer->ctl.NRPN.receive == 1;
-        if (ImGui::Checkbox("##nrpn", &nrpn))
+        if (ImGui::Checkbox("NRPN", &nrpn))
         {
             _mixer->ctl.NRPN.receive = nrpn ? 1 : 0;
         }
         ImGui::ShowTooltipOnHover("Receive NRPNs");
-        ImGui::SameLine();
-        ImGui::Text("NRPN");
-        ImGui::ShowTooltipOnHover("Receive NRPNs");
 
         // Enable/disable Portamento
         auto portamento = _mixer->ctl.portamento.portamento == 1;
-        if (ImGui::Checkbox("##portamento", &portamento))
+        if (ImGui::Checkbox("Portamento", &portamento))
         {
             _mixer->ctl.portamento.portamento = portamento ? 1 : 0;
         }
-        ImGui::ShowTooltipOnHover("Enable/Disable the portamento");
-        ImGui::SameLine();
-        ImGui::Text("Portamento");
         ImGui::ShowTooltipOnHover("Enable/Disable the portamento");
 
         ImGui::PopStyleVar();
@@ -383,7 +377,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             }
         }
         ImGui::PushItemWidth(width);
-        if (ImGui::PresetSelection("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
+        if (ImGui::DropDown("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
         {
             _sequencer.ActiveInstrument(track);
         }
@@ -453,9 +447,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-
         ImGui::Separator();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
         // System effect sends
         if (useLargeMode)
@@ -504,9 +498,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-
         ImGui::Separator();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
         // Insertion effects
         if (useLargeMode)
@@ -562,9 +556,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-
         ImGui::Separator();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
         // Channel effects
         if (useLargeMode)
@@ -603,11 +597,11 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        ImGui::Spacing();
-
         if (useLargeMode && _iconImagesAreLoaded)
         {
-            ImGui::SameLine(0.0f, (width - 64) / 2);
+            ImGui::Spacing();
+
+            ImGui::SameLine(0.0f, (width - 64 - io.ItemSpacing.x) / 2);
             if (ImGui::ImageButton(reinterpret_cast<void *>(_iconImages[channel->info.Ptype]), ImVec2(64, 64)))
             {
                 _openChangeInstrumentType = track;

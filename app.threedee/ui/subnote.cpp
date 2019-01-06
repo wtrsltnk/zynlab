@@ -203,7 +203,7 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     ImGui::Text("Overtone Parameters");
 
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Overtone positions", parameters->POvertoneSpread.type, overtone_positions, overtone_position_count, "Overtone positions"))
+    if (ImGui::DropDown("Overtone positions", parameters->POvertoneSpread.type, overtone_positions, overtone_position_count, "Overtone positions"))
     {
     }
 
@@ -227,14 +227,10 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
 void AppThreeDee::SUBNoteEditorFilter(SUBnoteParameters *parameters)
 {
     bool filterEnabled = parameters->PGlobalFilterEnabled == 1;
-    if (ImGui::Checkbox("##subnotefilterenabled", &filterEnabled))
+    if (ImGui::Checkbox("Global Filter Parameters", &filterEnabled))
     {
         parameters->PGlobalFilterEnabled = filterEnabled ? 1 : 0;
     }
-
-    ImGui::SameLine();
-
-    ImGui::Text("Global Filter Parameters");
 
     if (filterEnabled)
     {

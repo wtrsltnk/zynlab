@@ -41,13 +41,11 @@ void AppThreeDee::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
     ImGui::Text("ADsynth Voice Parameters of the Instrument");
 
     auto enabled = parameters->Enabled != 0;
-    if (ImGui::Checkbox("##enabled", &enabled))
+    if (ImGui::Checkbox("Enabled", &enabled))
     {
         parameters->Enabled = enabled ? 1 : 0;
     }
     ImGui::ShowTooltipOnHover("Enable this voice");
-    ImGui::SameLine();
-    ImGui::Text("Enabled");
 
     if (ImGui::BeginTabBar("ADNote Voice"))
     {

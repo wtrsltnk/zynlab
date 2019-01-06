@@ -72,13 +72,9 @@ void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
     ImGui::SameLine();
 
     auto forcedRelease = envelope->Pforcedrelease != 0;
-    if (ImGui::Checkbox("##forcedrelease", &forcedRelease))
+    if (ImGui::Checkbox("frcR.", &forcedRelease))
     {
         envelope->Pforcedrelease = forcedRelease ? 1 : 0;
     }
     ImGui::ShowTooltipOnHover("Forced Release");
-
-    ImGui::SameLine();
-
-    ImGui::Text("frcR.");
 }

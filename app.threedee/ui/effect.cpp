@@ -215,7 +215,7 @@ void LFOEditor(EffectManager *effectManager, char const *label)
 
     auto lfoType = effectManager->geteffectpar(EffectPresets::LFOFunction);
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("LFO type", lfoType, lfoTypes, lfoTypeCount, "LFO function"))
+    if (ImGui::DropDown("LFO type", lfoType, lfoTypes, lfoTypeCount, "LFO function"))
     {
         effectManager->seteffectpar(EffectPresets::LFOFunction, lfoType);
     }
@@ -248,7 +248,7 @@ void AppThreeDee::EffectEditor(EffectManager *effectManager)
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     auto effect = static_cast<unsigned char>(effectManager->geteffect());
     ImGui::PushItemWidth(250);
-    if (ImGui::PresetSelection("Effect", effect, effectNames, effectNameCount, "Selected Effect"))
+    if (ImGui::DropDown("Effect", effect, effectNames, effectNameCount, "Selected Effect"))
     {
         effectManager->changeeffect(effect);
     }
@@ -289,7 +289,7 @@ void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Preset", preset, reverbPresetNames, 13))
+    if (ImGui::DropDown("Preset", preset, reverbPresetNames, 13))
     {
         effectManager->changepreset(preset);
     }
@@ -298,7 +298,7 @@ void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
 
     auto type = static_cast<unsigned char>(effectManager->geteffectpar(ReverbPresets::ReverbType));
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Type", type, reverbTypeNames, reverbTypeNameCount))
+    if (ImGui::DropDown("Type", type, reverbTypeNames, reverbTypeNameCount))
     {
         effectManager->seteffectpar(ReverbPresets::ReverbType, type);
     }
@@ -370,7 +370,7 @@ void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Preset", preset, echoPresetNames, 9))
+    if (ImGui::DropDown("Preset", preset, echoPresetNames, 9))
     {
         effectManager->changepreset(preset);
     }
@@ -422,7 +422,7 @@ void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Preset", preset, chorusPresetNames, 10, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, chorusPresetNames, 10, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -479,7 +479,7 @@ void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Preset", preset, phaserPresetNames, 12, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, phaserPresetNames, 12, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -552,7 +552,7 @@ void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Preset", preset, alienWahPresetNames, 4, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, alienWahPresetNames, 4, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -608,7 +608,7 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Preset", preset, distortionPresetNames, 6, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, distortionPresetNames, 6, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -617,7 +617,7 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
 
     auto type = static_cast<unsigned char>(effectManager->geteffectpar(DistorsionPresets::DistorsionType));
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Type", type, distortionTypes, distortionTypeCount, "Distortion Type"))
+    if (ImGui::DropDown("Type", type, distortionTypes, distortionTypeCount, "Distortion Type"))
     {
         effectManager->changepreset(type);
     }
@@ -732,7 +732,7 @@ void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
             if (ImGui::BeginTabItem(eqBandTypes[type]))
             {
                 ImGui::PushItemWidth(100);
-                if (ImGui::PresetSelection("EQ Type", type, eqBandTypes, eqBandTypeCount, "Equalizer type"))
+                if (ImGui::DropDown("EQ Type", type, eqBandTypes, eqBandTypeCount, "Equalizer type"))
                 {
                     effectManager->seteffectpar(presetStart + EQPresets::EQBandType, type);
                 }
@@ -779,7 +779,7 @@ void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::PresetSelection("Preset", preset, dynFilterPresetNames, 5, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, dynFilterPresetNames, 5, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
