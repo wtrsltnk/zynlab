@@ -10,7 +10,7 @@ public:
     Meter();
     virtual ~Meter();
 
-    void Setup(SystemSettings *synth);
+    void Setup();
 
     void Tick(const float *outl, const float *outr, class Channel *part, float volume);
 
@@ -30,7 +30,6 @@ private:
     unsigned char _fakepeakpart[NUM_MIXER_CHANNELS];
 
     pthread_mutex_t _vumutex;
-    SystemSettings *_synth;
 };
 
 #endif // METER_H

@@ -29,12 +29,11 @@
 #include <cstdio>
 #include <cstring>
 
-FormantFilter::FormantFilter(FilterParams *pars, SystemSettings *synth_)
-    : Filter(synth_)
+FormantFilter::FormantFilter(FilterParams *pars)
 {
     numformants = pars->Pnumformants;
     for (int i = 0; i < numformants; ++i)
-        formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages, synth_);
+        formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages);
     cleanup();
 
     for (int j = 0; j < FF_MAX_VOWELS; ++j)
@@ -194,26 +193,26 @@ void FormantFilter::setfreq_and_q(float frequency, float q_)
 
 void FormantFilter::filterout(float *smp)
 {
-    float inbuffer[this->_synth->buffersize];
+    float inbuffer[SystemSettings::Instance().buffersize];
 
-    memcpy(inbuffer, smp, this->_synth->bufferbytes);
-    memset(smp, 0, this->_synth->bufferbytes);
+    memcpy(inbuffer, smp, SystemSettings::Instance().bufferbytes);
+    memset(smp, 0, SystemSettings::Instance().bufferbytes);
 
     for (int j = 0; j < numformants; ++j)
     {
-        float tmpbuf[this->_synth->buffersize];
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+        float tmpbuf[SystemSettings::Instance().buffersize];
+        for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);
 
         if (ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for (int i = 0; i < this->_synth->buffersize; ++i)
+            for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
                 smp[i] += tmpbuf[i] * INTERPOLATE_AMPLITUDE(oldformantamp[j],
                                                             currentformants[j].amp,
                                                             i,
-                                                            this->_synth->buffersize);
+                                                            SystemSettings::Instance().buffersize);
         else
-            for (int i = 0; i < this->_synth->buffersize; ++i)
+            for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
         oldformantamp[j] = currentformants[j].amp;
     }

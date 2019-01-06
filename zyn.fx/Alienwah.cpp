@@ -25,11 +25,8 @@
 #include "EffectPresets.h"
 #include <cmath>
 
-Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
-      lfo(synth_),
-      oldl(nullptr),
-      oldr(nullptr)
+Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0), oldl(nullptr), oldr(nullptr)
 {
     SetPreset(Ppreset);
     Cleanup();
@@ -58,9 +55,9 @@ void Alienwah::out(const Stereo<float *> &smp)
     clfol = complex<float>(cosf(lfol + phase) * fb, sinf(lfol + phase) * fb); //rework
     clfor = complex<float>(cosf(lfor + phase) * fb, sinf(lfor + phase) * fb); //rework
 
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        float x = static_cast<float>(i) / this->_synth->buffersize_f;
+        float x = static_cast<float>(i) / SystemSettings::Instance().buffersize_f;
         float x1 = 1.0f - x;
         //left
         complex<float> tmp = clfol * x + oldclfol * x1;

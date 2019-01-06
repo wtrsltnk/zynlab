@@ -7,7 +7,6 @@
 
 static int Pexitprogram = 0;
 
-static SystemSettings settings;
 static BankManager bankManager;
 static Mixer *mixer;
 
@@ -25,23 +24,23 @@ void initprogram()
     Config::Current().init();
 
     /* Get the settings from the Config*/
-    settings.samplerate = Config::Current().cfg.SampleRate;
-    settings.buffersize = Config::Current().cfg.SoundBufferSize;
-    settings.oscilsize = Config::Current().cfg.OscilSize;
-    settings.alias();
+    SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
+    SystemSettings::Instance().buffersize = Config::Current().cfg.SoundBufferSize;
+    SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
+    SystemSettings::Instance().alias();
 
     std::cerr.precision(1);
     std::cerr << std::fixed;
-    std::cerr << "\nSample Rate = \t\t" << settings.samplerate << std::endl;
-    std::cerr << "Sound Buffer Size = \t" << settings.buffersize << " samples" << std::endl;
-    std::cerr << "Internal latency = \t\t" << settings.buffersize_f * 1000.0f / settings.samplerate_f << " ms" << std::endl;
-    std::cerr << "ADsynth Oscil.Size = \t" << settings.oscilsize << " samples" << std::endl;
+    std::cerr << "\nSample Rate = \t\t" << SystemSettings::Instance().samplerate << std::endl;
+    std::cerr << "Sound Buffer Size = \t" << SystemSettings::Instance().buffersize << " samples" << std::endl;
+    std::cerr << "Internal latency = \t\t" << SystemSettings::Instance().buffersize_f * 1000.0f / SystemSettings::Instance().samplerate_f << " ms" << std::endl;
+    std::cerr << "ADsynth Oscil.Size = \t" << SystemSettings::Instance().oscilsize << " samples" << std::endl;
 
     mixer = new Mixer();
-    mixer->Setup(&settings, &bankManager);
+    mixer->Setup(&bankManager);
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
-    Nio::preferedSampleRate(settings.samplerate);
+    Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);

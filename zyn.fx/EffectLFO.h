@@ -29,10 +29,8 @@
  * \todo see if this should inherit LFO*/
 class EffectLFO
 {
-    SystemSettings *_synth;
-
 public:
-    EffectLFO(SystemSettings *synth_);
+    EffectLFO();
     ~EffectLFO();
     void effectlfoout(float *outl, float *outr);
     void updateparams(void);

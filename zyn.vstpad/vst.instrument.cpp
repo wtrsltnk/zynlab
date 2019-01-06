@@ -3,10 +3,10 @@
 #include <math.h>
 #include <zyn.common/globals.h>
 
-SystemSettings settings;
+static SystemSettings &settings = SystemSettings::Instance();
 
-#define NUM_PROGRAMS    2
-#define NUM_PARAMS      0
+#define NUM_PROGRAMS 2
+#define NUM_PARAMS 0
 
 class ZynInstrument : public AudioEffectX
 {
@@ -34,8 +34,8 @@ public:
     }                                                 ///< Fill \e text with a string identifying the product name
     virtual VstInt32 getVendorVersion() { return 0; } ///< Return vendor-specific version
 
-    virtual bool getProgramNameIndexed(VstInt32 category, VstInt32 index, char *text) { return false; } ///< Fill \e text with name of program \e index (\e category deprecated in VST 2.4)
-    virtual void setProgram(VstInt32 program);                                                          ///< Set the current program to \e program
+    virtual bool getProgramNameIndexed(VstInt32 /*category*/, VstInt32 /*index*/, char * /*text*/) { return false; } ///< Fill \e text with name of program \e index (\e category deprecated in VST 2.4)
+    virtual void setProgram(VstInt32 program);                                                                       ///< Set the current program to \e program
 };
 
 ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
@@ -49,10 +49,10 @@ ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
 ZynInstrument::~ZynInstrument()
 {}
 
-void ZynInstrument::setProgram(VstInt32 program)
+void ZynInstrument::setProgram(VstInt32 /*program*/)
 {}
 
-void ZynInstrument::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
+void ZynInstrument::processReplacing(float ** /*inputs*/, float ** /*outputs*/, VstInt32 /*sampleFrames*/)
 {}
 
 VstInt32 ZynInstrument::processEvents(VstEvents *ev)
@@ -62,7 +62,7 @@ VstInt32 ZynInstrument::processEvents(VstEvents *ev)
         if ((ev->events[i])->type != kVstMidiType)
             continue;
 
-        VstMidiEvent *event = (VstMidiEvent *)ev->events[i];
+        VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(ev->events[i]);
         char *midiData = event->midiData;
         VstInt32 status = midiData[0] & 0xf0; // ignoring channel
         if (status == 0x90 || status == 0x80) // we only look at notes

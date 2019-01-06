@@ -23,8 +23,7 @@
 #include "Envelope.h"
 #include <cmath>
 
-Envelope::Envelope(EnvelopeParams *envpars, float basefreq, SystemSettings *synth_)
-    : _synth(synth_)
+Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
 {
     int i;
     envpoints = envpars->Penvpoints;
@@ -38,7 +37,7 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq, SystemSettings *synt
     if (envpars->Pfreemode == 0)
         envpars->converttofree();
 
-    float bufferdt = this->_synth->buffersize_f / this->_synth->samplerate_f;
+    float bufferdt = SystemSettings::Instance().buffersize_f / SystemSettings::Instance().samplerate_f;
 
     int mode = envpars->Envmode;
 
@@ -163,12 +162,12 @@ float Envelope::envout()
 
 inline float Envelope::env_dB2rap(float db)
 {
-    return (powf(10.0f, db / 20.0f) - 0.01) / .99f;
+    return (powf(10.0, db / 20.0) - 0.01) / .99;
 }
 
 inline float Envelope::env_rap2dB(float rap)
 {
-    return 20.0f * log10f(rap * 0.99f + 0.01);
+    return 20.0f * log10f(rap * 0.99 + 0.01);
 }
 
 /*

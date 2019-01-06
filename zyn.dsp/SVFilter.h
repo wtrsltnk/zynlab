@@ -29,11 +29,7 @@
 class SVFilter : public Filter
 {
 public:
-    SVFilter(unsigned char Ftype,
-             float Ffreq,
-             float Fq,
-             unsigned char Fstages,
-             SystemSettings *synth_);
+    SVFilter(unsigned char Ftype, float Ffreq, float Fq, unsigned char Fstages);
     virtual ~SVFilter();
 
     void filterout(float *smp);

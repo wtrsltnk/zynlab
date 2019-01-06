@@ -41,7 +41,6 @@
 class PADnoteParameters : public Presets
 {
     IMixer *_mixer;
-    SystemSettings *_synth;
 
 public:
     PADnoteParameters(IMixer *mixer);

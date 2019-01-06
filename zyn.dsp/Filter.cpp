@@ -27,13 +27,13 @@
 #include "SVFilter.h"
 #include <cmath>
 
-Filter::Filter(SystemSettings *synth_)
-    : outgain(1.0f), _synth(synth_)
+Filter::Filter()
+    : outgain(1.0f)
 {}
 
 Filter::~Filter() = default;
 
-Filter *Filter::generate(FilterParams *pars, SystemSettings *synth_)
+Filter *Filter::generate(FilterParams *pars)
 {
     unsigned char Ftype = pars->Ptype;
     unsigned char Fstages = pars->Pstages;
@@ -42,16 +42,16 @@ Filter *Filter::generate(FilterParams *pars, SystemSettings *synth_)
     switch (pars->Pcategory)
     {
         case 1:
-            filter = new FormantFilter(pars, synth_);
+            filter = new FormantFilter(pars);
             break;
         case 2:
-            filter = new SVFilter(Ftype, 1000.0f, pars->getq(), Fstages, synth_);
+            filter = new SVFilter(Ftype, 1000.0f, pars->getq(), Fstages);
             filter->outgain = dB2rap(pars->getgain());
             if (filter->outgain > 1.0f)
                 filter->outgain = std::sqrt(filter->outgain);
             break;
         default:
-            filter = new AnalogFilter(Ftype, 1000.0f, pars->getq(), Fstages, synth_);
+            filter = new AnalogFilter(Ftype, 1000.0f, pars->getq(), Fstages);
             if ((Ftype >= 6) && (Ftype <= 8))
                 filter->setgain(pars->getgain());
             else

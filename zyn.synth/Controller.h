@@ -29,13 +29,11 @@
 /**(Midi) Controllers implementation*/
 class Controller
 {
-    SystemSettings *_synth;
-
 public:
     Controller();
     virtual ~Controller();
 
-    void Init(SystemSettings *synth_);
+    void Init();
     void resetall();
 
     void Serialize(IPresetsSerializer *xml);

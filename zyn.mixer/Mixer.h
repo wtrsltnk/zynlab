@@ -46,7 +46,7 @@ public:
     /** Destructor*/
     virtual ~Mixer();
 
-    void Setup(SystemSettings *synth_, IBankManager *bank_);
+    void Setup(IBankManager *bank_);
 
     virtual IBankManager *GetBankManager();
     virtual IMeter *GetMeter();
@@ -89,7 +89,6 @@ public:
     /**Audio Output*/
     virtual void AudioOut(float *outl, float *outr);
 
-    virtual SystemSettings *GetSettings();
     virtual IFFTwrapper *GetFFT();
 
     void partonoff(int npart, int what);
@@ -134,7 +133,6 @@ private:
     pthread_mutex_t _mutex;
     IBankManager *_bankManager;
     IFFTwrapper *_fft;
-    SystemSettings *_settings;
 
     float _volume;
     float _sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];

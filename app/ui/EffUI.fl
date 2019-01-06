@@ -134,7 +134,7 @@ oiy=getresponse(ly,getfreqx(0.0));
 fl_begin_line();
 for (i=1;i<lx;i++){
    float frq=getfreqx(i/(float) lx);
-   if (frq>eff->_mixer->GetSettings()->samplerate/2) break;
+   if (frq>SystemSettings::Instance().samplerate/2) break;
    iy=getresponse(ly,frq);
    if ((oiy>=0) && (oiy<ly) &&
        (iy>=0) && (iy<ly) )

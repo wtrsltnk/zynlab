@@ -41,8 +41,8 @@ using namespace std;
 #define ONE_ 0.99999f  // To prevent LFO ever reaching 1.0f for filter stability purposes
 #define ZERO_ 0.00001f // Same idea as above.
 
-Phaser::Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_), lfo(synth_), old(nullptr), xn1(nullptr),
+Phaser::Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0), old(nullptr), xn1(nullptr),
       yn1(nullptr), diff(0.0f), oldgain(0.0f), fb(0.0f)
 {
     analog_setup();
@@ -74,8 +74,8 @@ void Phaser::analog_setup()
     Rmx = Rmin / Rmax;
     Rconst = 1.0f + Rmx; // Handle parallel resistor relationship
     C = 0.00000005f;     // 50 nF
-    CFs = 2.0f * this->_synth->samplerate_f * C;
-    invperiod = 1.0f / this->_synth->buffersize_f;
+    CFs = 2.0f * SystemSettings::Instance().samplerate_f * C;
+    invperiod = 1.0f / SystemSettings::Instance().buffersize_f;
 }
 
 Phaser::~Phaser()
@@ -133,7 +133,7 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
     g = oldgain;
     oldgain = mod;
 
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         g._left += diff._left; // Linear interpolation between LFO samples
         g._right += diff._right;
@@ -157,8 +157,8 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
 
     if (Poutsub)
     {
-        invSignal(efxoutl, this->_synth->buffersize);
-        invSignal(efxoutr, this->_synth->buffersize);
+        invSignal(efxoutl, SystemSettings::Instance().buffersize);
+        invSignal(efxoutr, SystemSettings::Instance().buffersize);
     }
 }
 
@@ -207,9 +207,9 @@ void Phaser::normalPhase(const Stereo<float *> &input)
     gain._left = limit(gain._left, ZERO_, ONE_);
     gain._right = limit(gain._right, ZERO_, ONE_);
 
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        float x = static_cast<float>(i) / this->_synth->buffersize_f;
+        float x = static_cast<float>(i) / SystemSettings::Instance().buffersize_f;
         float x1 = 1.0f - x;
 
         //TODO think about making panning an external feature
@@ -233,8 +233,8 @@ void Phaser::normalPhase(const Stereo<float *> &input)
 
     if (Poutsub)
     {
-        invSignal(efxoutl, this->_synth->buffersize);
-        invSignal(efxoutr, this->_synth->buffersize);
+        invSignal(efxoutl, SystemSettings::Instance().buffersize);
+        invSignal(efxoutr, SystemSettings::Instance().buffersize);
     }
 }
 

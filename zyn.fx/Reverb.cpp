@@ -29,8 +29,8 @@
 #include <zyn.dsp/AnalogFilter.h>
 #include <zyn.dsp/Unison.h>
 
-Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
+Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0),
       // defaults
       Pvolume(48),
       Ptime(64),
@@ -137,7 +137,7 @@ void Reverb::processmono(int ch, float *output, const float *inputbuf)
         const int comblength = comblen[j];
         float &lpcombj = lpcomb[j];
 
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             float fbout = comb[j][ck] * combfb[j];
             fbout = fbout * (1.0f - lohifb) + lpcombj * lohifb;
@@ -157,7 +157,7 @@ void Reverb::processmono(int ch, float *output, const float *inputbuf)
     {
         int &ak = apk[j];
         const int aplength = aplen[j];
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             float tmp = ap[j][ak];
             ap[j][ak] = 0.7f * tmp + output[i];
@@ -178,15 +178,15 @@ void Reverb::out(const Stereo<float *> &smp)
         return;
     }
 
-    float inputbuf[this->_synth->buffersize];
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    float inputbuf[SystemSettings::Instance().buffersize];
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         inputbuf[i] = (smp._left[i] + smp._right[i]) / 2.0f;
     }
 
     if (idelay)
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             //Initial delay r
             float tmp = inputbuf[i] + idelay[idelayk] * idelayfb;
@@ -202,7 +202,7 @@ void Reverb::out(const Stereo<float *> &smp)
 
     if (bandwidth)
     {
-        bandwidth->process(this->_synth->buffersize, inputbuf);
+        bandwidth->process(SystemSettings::Instance().buffersize, inputbuf);
     }
 
     if (lpf)
@@ -224,7 +224,7 @@ void Reverb::out(const Stereo<float *> &smp)
         lvol *= 2.0f;
         rvol *= 2.0f;
     }
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         efxoutl[i] *= lvol;
         efxoutr[i] *= rvol;
@@ -257,7 +257,7 @@ void Reverb::settime(unsigned char _Ptime)
 
     for (int i = 0; i < REV_COMBS * 2; ++i)
     {
-        combfb[i] = -expf(static_cast<float>(comblen[i] / this->_synth->samplerate_f * logf(0.001f) / t));
+        combfb[i] = -expf(static_cast<float>(comblen[i] / SystemSettings::Instance().samplerate_f * logf(0.001f) / t));
     }
     //the feedback is negative because it removes the DC
 }
@@ -290,7 +290,7 @@ void Reverb::setidelay(unsigned char _Pidelay)
     delete[] idelay;
     idelay = nullptr;
 
-    idelaylen = static_cast<int>(this->_synth->samplerate_f * delay / 1000);
+    idelaylen = static_cast<int>(SystemSettings::Instance().samplerate_f * delay / 1000);
     if (idelaylen > 1)
     {
         idelayk = 0;
@@ -319,7 +319,7 @@ void Reverb::sethpf(unsigned char _Phpf)
         float fr = expf(powf(Phpf / 127.0f, 0.5f) * logf(10000.0f)) + 20.0f;
         if (hpf == nullptr)
         {
-            hpf = new AnalogFilter(3, fr, 1, 0, this->_synth);
+            hpf = new AnalogFilter(3, fr, 1, 0);
         }
         else
         {
@@ -341,7 +341,7 @@ void Reverb::setlpf(unsigned char _Plpf)
     {
         float fr = expf(powf(Plpf / 127.0f, 0.5f) * logf(25000.0f)) + 40.0f;
         if (!lpf)
-            lpf = new AnalogFilter(2, fr, 1, 0, this->_synth);
+            lpf = new AnalogFilter(2, fr, 1, 0);
         else
             lpf->setfreq(fr);
     }
@@ -373,7 +373,7 @@ void Reverb::settype(unsigned char _Ptype)
     }
 
     // adjust the combs according to the samplerate
-    float samplerate_adjust = this->_synth->samplerate_f / 44100.0f;
+    float samplerate_adjust = SystemSettings::Instance().samplerate_f / 44100.0f;
     float tmp;
     for (int i = 0; i < REV_COMBS * 2; ++i)
     {
@@ -441,7 +441,7 @@ void Reverb::settype(unsigned char _Ptype)
         //not been verified yet.
         //As this cannot be resized in a RT context, a good upper bound should
         //be found
-        bandwidth = new Unison(this->_synth->buffersize / 4 + 1, 2.0f, this->_synth->samplerate_f);
+        bandwidth = new Unison(SystemSettings::Instance().buffersize / 4 + 1, 2.0f, SystemSettings::Instance().samplerate_f);
         bandwidth->setSize(50);
         bandwidth->setBaseFrequency(1.0f);
     }

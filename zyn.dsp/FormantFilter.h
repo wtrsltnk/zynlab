@@ -29,7 +29,7 @@
 class FormantFilter : public Filter
 {
 public:
-    FormantFilter(class FilterParams *pars, SystemSettings *synth_);
+    FormantFilter(class FilterParams *pars);
     virtual ~FormantFilter();
 
     void filterout(float *smp);

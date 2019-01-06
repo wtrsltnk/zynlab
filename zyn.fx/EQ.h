@@ -29,7 +29,7 @@
 class EQ : public Effect
 {
 public:
-    EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
+    EQ(bool insertion_, float *efxoutl_, float *efxoutr_);
     virtual ~EQ();
 
     void out(const Stereo<float *> &smp);

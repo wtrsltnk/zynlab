@@ -44,15 +44,15 @@ void EffectManager::Init(IMixer *mixer, const bool insertion_)
 {
     _mixer = mixer;
     _insertion = insertion_;
-    _effectOutL = new float[_mixer->GetSettings()->buffersize];
-    _effectOutR = new float[_mixer->GetSettings()->buffersize];
+    _effectOutL = new float[SystemSettings::Instance().buffersize];
+    _effectOutR = new float[SystemSettings::Instance().buffersize];
     _filterpars = nullptr;
     _effectType = 0;
     _effect = nullptr;
     _dryonly = false;
     setpresettype("Peffect");
-    memset(_effectOutL, 0, mixer->GetSettings()->bufferbytes);
-    memset(_effectOutR, 0, mixer->GetSettings()->bufferbytes);
+    memset(_effectOutL, 0, SystemSettings::Instance().bufferbytes);
+    memset(_effectOutR, 0, SystemSettings::Instance().bufferbytes);
     Defaults();
 }
 
@@ -79,49 +79,49 @@ void EffectManager::changeeffect(int _nefx)
     }
 
     _effectType = _nefx;
-    memset(_effectOutL, 0, _mixer->GetSettings()->bufferbytes);
-    memset(_effectOutR, 0, _mixer->GetSettings()->bufferbytes);
+    memset(_effectOutL, 0, SystemSettings::Instance().bufferbytes);
+    memset(_effectOutR, 0, SystemSettings::Instance().bufferbytes);
     delete _effect;
     switch (_effectType)
     {
         case 1:
         {
-            _effect = new Reverb(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new Reverb(_insertion, _effectOutL, _effectOutR);
             break;
         }
         case 2:
         {
-            _effect = new Echo(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new Echo(_insertion, _effectOutL, _effectOutR);
             break;
         }
         case 3:
         {
-            _effect = new Chorus(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new Chorus(_insertion, _effectOutL, _effectOutR);
             break;
         }
         case 4:
         {
-            _effect = new Phaser(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new Phaser(_insertion, _effectOutL, _effectOutR);
             break;
         }
         case 5:
         {
-            _effect = new Alienwah(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new Alienwah(_insertion, _effectOutL, _effectOutR);
             break;
         }
         case 6:
         {
-            _effect = new Distorsion(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new Distorsion(_insertion, _effectOutL, _effectOutR);
             break;
         }
         case 7:
         {
-            _effect = new EQ(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new EQ(_insertion, _effectOutL, _effectOutR);
             break;
         }
         case 8:
         {
-            _effect = new DynamicFilter(_insertion, _effectOutL, _effectOutR, _mixer->GetSettings());
+            _effect = new DynamicFilter(_insertion, _effectOutL, _effectOutR);
             break;
         }
         //put more effect here
@@ -206,7 +206,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
     {
         if (!_insertion)
         {
-            for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             {
                 smpsl[i] = 0.0f;
                 smpsr[i] = 0.0f;
@@ -217,10 +217,10 @@ void EffectManager::out(float *smpsl, float *smpsr)
         return;
     }
 
-    for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        smpsl[i] += _mixer->GetSettings()->denormalkillbuf[i];
-        smpsr[i] += _mixer->GetSettings()->denormalkillbuf[i];
+        smpsl[i] += SystemSettings::Instance().denormalkillbuf[i];
+        smpsr[i] += SystemSettings::Instance().denormalkillbuf[i];
         _effectOutL[i] = 0.0f;
         _effectOutR[i] = 0.0f;
     }
@@ -230,8 +230,8 @@ void EffectManager::out(float *smpsl, float *smpsr)
 
     if (_effectType == 7)
     { //this is need only for the EQ effect
-        memcpy(smpsl, _effectOutL, _mixer->GetSettings()->bufferbytes);
-        memcpy(smpsr, _effectOutR, _mixer->GetSettings()->bufferbytes);
+        memcpy(smpsl, _effectOutL, SystemSettings::Instance().bufferbytes);
+        memcpy(smpsr, _effectOutR, SystemSettings::Instance().bufferbytes);
         return;
     }
 
@@ -256,7 +256,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
 
         if (_dryonly) //this is used for instrument effect only
         {
-            for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             {
                 smpsl[i] *= v1;
                 smpsr[i] *= v1;
@@ -266,7 +266,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
         }
         else // normal instrument/insertion effect
         {
-            for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             {
                 smpsl[i] = smpsl[i] * v1 + _effectOutL[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + _effectOutR[i] * v2;
@@ -275,7 +275,7 @@ void EffectManager::out(float *smpsl, float *smpsr)
     }
     else // System effect
     {
-        for (unsigned int i = 0; i < _mixer->GetSettings()->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             _effectOutL[i] *= 2.0f * volume;
             _effectOutR[i] *= 2.0f * volume;

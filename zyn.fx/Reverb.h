@@ -32,8 +32,9 @@
 class Reverb : public Effect
 {
 public:
-    Reverb(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
+    Reverb(bool insertion_, float *efxoutl_, float *efxoutr_);
     virtual ~Reverb();
+
     void out(const Stereo<float *> &smp);
     void Cleanup(void);
 

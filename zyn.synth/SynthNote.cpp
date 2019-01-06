@@ -1,8 +1,8 @@
 #include "SynthNote.h"
 #include <cstring>
 
-SynthNote::SynthNote(SystemSettings *synth_, float freq, float vel, int port, int note, bool quiet)
-    : _synth(synth_), legato(this, freq, vel, port, note, quiet)
+SynthNote::SynthNote(float freq, float vel, int port, int note, bool quiet)
+    : legato(this, freq, vel, port, note, quiet)
 {}
 
 SynthNote::~SynthNote() = default;
@@ -12,7 +12,7 @@ SynthNote::Legato::Legato(SynthNote *note_, float freq, float vel, int port,
 {
     // Initialise some legato-specific vars
     msg = LM_Norm;
-    fade.length = static_cast<int>(this->_note->_synth->samplerate_f * 0.005f); // 0.005f seems ok.
+    fade.length = static_cast<int>(SystemSettings::Instance().samplerate_f * 0.005f); // 0.005f seems ok.
     if (fade.length < 1)
         fade.length = 1; // (if something's fishy)
     fade.step = (1.0f / fade.length);
@@ -62,8 +62,8 @@ void SynthNote::Legato::apply(float *outl, float *outr)
     if (silent) // Silencer
         if (msg != LM_FadeIn)
         {
-            memset(outl, 0, this->_note->_synth->bufferbytes);
-            memset(outr, 0, this->_note->_synth->bufferbytes);
+            memset(outl, 0, SystemSettings::Instance().bufferbytes);
+            memset(outr, 0, SystemSettings::Instance().bufferbytes);
         }
     switch (msg)
     {
@@ -71,7 +71,7 @@ void SynthNote::Legato::apply(float *outl, float *outr)
             if (decounter == -10)
                 decounter = fade.length;
             //Yea, could be done without the loop...
-            for (unsigned int i = 0; i < this->_note->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             {
                 decounter--;
                 if (decounter < 1)
@@ -90,7 +90,7 @@ void SynthNote::Legato::apply(float *outl, float *outr)
             if (decounter == -10)
                 decounter = fade.length;
             silent = false;
-            for (unsigned int i = 0; i < this->_note->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             {
                 decounter--;
                 if (decounter < 1)
@@ -107,12 +107,12 @@ void SynthNote::Legato::apply(float *outl, float *outr)
         case LM_FadeOut: // Fade-out, then set the catch-up
             if (decounter == -10)
                 decounter = fade.length;
-            for (unsigned int i = 0; i < this->_note->_synth->buffersize; ++i)
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             {
                 decounter--;
                 if (decounter < 1)
                 {
-                    for (unsigned int j = i; j < this->_note->_synth->buffersize; ++j)
+                    for (unsigned int j = i; j < SystemSettings::Instance().buffersize; ++j)
                     {
                         outl[j] = 0.0f;
                         outr[j] = 0.0f;

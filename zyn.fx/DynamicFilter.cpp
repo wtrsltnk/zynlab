@@ -26,9 +26,8 @@
 #include <cmath>
 #include <zyn.dsp/Filter.h>
 
-DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, new FilterParams(synth_, 0, 64, 64), 0, synth_),
-      lfo(synth_),
+DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_)
+    : Effect(insertion_, efxoutl_, efxoutr_, new FilterParams(0, 64, 64), 0),
       Pvolume(110),
       Pdepth(0),
       Pampsns(90),
@@ -64,7 +63,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     const float freq = filterpars->getfreq();
     const float q = filterpars->getq();
 
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         efxoutl[i] = smp._left[i];
         efxoutr[i] = smp._right[i];
@@ -89,7 +88,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     filterr->filterout(efxoutr);
 
     //panning
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         efxoutl[i] *= pangainL;
         efxoutr[i] *= pangainR;
@@ -133,8 +132,8 @@ void DynamicFilter::reinitfilter()
 {
     delete filterl;
     delete filterr;
-    filterl = Filter::generate(filterpars, this->_synth);
-    filterr = Filter::generate(filterpars, this->_synth);
+    filterl = Filter::generate(filterpars);
+    filterr = Filter::generate(filterpars);
 }
 
 void DynamicFilter::SetPreset(unsigned char npreset)

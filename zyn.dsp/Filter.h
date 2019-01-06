@@ -29,10 +29,10 @@ class Filter
 {
 public:
     static float getrealfreq(float freqpitch);
-    static Filter *generate(class FilterParams *pars, SystemSettings *synth_);
+    static Filter *generate(class FilterParams *pars);
 
 public:
-    Filter(SystemSettings *synth_);
+    Filter();
     virtual ~Filter();
 
     virtual void filterout(float *smp) = 0;
@@ -43,7 +43,6 @@ public:
 
 protected:
     float outgain;
-    SystemSettings *_synth;
 };
 
 #endif

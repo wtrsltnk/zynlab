@@ -27,8 +27,8 @@
 #include <zyn.common/WaveShapeSmps.h>
 #include <zyn.dsp/AnalogFilter.h>
 
-Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
+Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0),
       Pvolume(50),
       Pdrive(90),
       Plevel(64),
@@ -39,10 +39,10 @@ Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, System
       Pstereo(0),
       Pprefiltering(0)
 {
-    lpfl = new AnalogFilter(2, 22000, 1, 0, synth_);
-    lpfr = new AnalogFilter(2, 22000, 1, 0, synth_);
-    hpfl = new AnalogFilter(3, 20, 1, 0, synth_);
-    hpfr = new AnalogFilter(3, 20, 1, 0, synth_);
+    lpfl = new AnalogFilter(2, 22000, 1, 0);
+    lpfr = new AnalogFilter(2, 22000, 1, 0);
+    hpfl = new AnalogFilter(3, 20, 1, 0);
+    hpfr = new AnalogFilter(3, 20, 1, 0);
     SetPreset(Ppreset);
     Cleanup();
 }
@@ -87,7 +87,7 @@ void Distorsion::out(const Stereo<float *> &smp)
 
     if (Pstereo) //Stereo
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             efxoutl[i] = smp._left[i] * inputvol * pangainL;
             efxoutr[i] = smp._right[i] * inputvol * pangainR;
@@ -95,7 +95,7 @@ void Distorsion::out(const Stereo<float *> &smp)
     }
     else //Mono
     {
-        for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             efxoutl[i] = (smp._left[i] * pangainL + smp._right[i] * pangainR) * inputvol;
         }
@@ -106,10 +106,10 @@ void Distorsion::out(const Stereo<float *> &smp)
         applyfilters(efxoutl, efxoutr);
     }
 
-    waveShapeSmps(this->_synth->buffersize, efxoutl, Ptype + 1, Pdrive);
+    waveShapeSmps(SystemSettings::Instance().buffersize, efxoutl, Ptype + 1, Pdrive);
     if (Pstereo)
     {
-        waveShapeSmps(this->_synth->buffersize, efxoutr, Ptype + 1, Pdrive);
+        waveShapeSmps(SystemSettings::Instance().buffersize, efxoutr, Ptype + 1, Pdrive);
     }
 
     if (!Pprefiltering)
@@ -119,11 +119,11 @@ void Distorsion::out(const Stereo<float *> &smp)
 
     if (!Pstereo)
     {
-        memcpy(efxoutr, efxoutl, this->_synth->bufferbytes);
+        memcpy(efxoutr, efxoutl, SystemSettings::Instance().bufferbytes);
     }
 
     float level = dB2rap(60.0f * Plevel / 127.0f - 40.0f);
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         float lout = efxoutl[i];
         float rout = efxoutr[i];

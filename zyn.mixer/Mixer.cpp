@@ -49,12 +49,11 @@ Mixer::~Mixer()
 
     pthread_mutex_destroy(&_mutex);
 }
-void Mixer::Setup(SystemSettings *settings, IBankManager *bankManager)
+void Mixer::Setup(IBankManager *bankManager)
 {
-    _settings = settings;
     _bankManager = bankManager;
-    meter.Setup(settings);
-    ctl.Init(settings);
+    meter.Setup();
+    ctl.Init();
 
     swaplr = false;
     _off = 0;
@@ -63,7 +62,7 @@ void Mixer::Setup(SystemSettings *settings, IBankManager *bankManager)
     _bufr = new float[this->BufferSize()];
 
     pthread_mutex_init(&_mutex, nullptr);
-    _fft = new FFTwrapper(this->_settings->oscilsize);
+    _fft = new FFTwrapper(SystemSettings::Instance().oscilsize);
 
     shutup = 0;
 
@@ -138,22 +137,22 @@ void Mixer::Defaults()
 
 unsigned int Mixer::SampleRate() const
 {
-    return _settings->samplerate;
+    return SystemSettings::Instance().samplerate;
 }
 
 unsigned int Mixer::BufferSize() const
 {
-    return _settings->buffersize;
+    return SystemSettings::Instance().buffersize;
 }
 
 unsigned int Mixer::BufferSizeInBytes() const
 {
-    return _settings->bufferbytes;
+    return SystemSettings::Instance().bufferbytes;
 }
 
 float Mixer::BufferSizeFloat() const
 {
-    return _settings->buffersize_f;
+    return SystemSettings::Instance().buffersize_f;
 }
 
 void Mixer::Lock()
@@ -532,11 +531,6 @@ void Mixer::AudioOut(float *outl, float *outr)
 
     //update the LFO's time
     LFOParams::time++;
-}
-
-SystemSettings *Mixer::GetSettings()
-{
-    return _settings;
 }
 
 IFFTwrapper *Mixer::GetFFT()

@@ -49,11 +49,10 @@ static MasterUI *ui;
 
 #endif //ENABLE_FLTKGUI
 
-static SystemSettings synth;
 static BankManager banks;
 static Mixer mixer;
 static Sequencer *seq;
-//SYNTH_T* synth;
+
 static unsigned int swaplr = 0; //1 for left-right swapping
 
 static int Pexitprogram = 0; //if the UI set this to 1, the program will exit
@@ -113,14 +112,14 @@ int main(int argc, char *argv[])
     }
 
     /* Get the settings from the Config*/
-    synth.samplerate = Config::Current().cfg.SampleRate;
-    synth.buffersize = Config::Current().cfg.SoundBufferSize;
-    synth.oscilsize = Config::Current().cfg.OscilSize;
+    SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
+    SystemSettings::Instance().buffersize = Config::Current().cfg.SoundBufferSize;
+    SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
     swaplr = Config::Current().cfg.SwapStereo;
 
-    Nio::preferedSampleRate(synth.samplerate);
+    Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
 
-    synth.alias(); //build aliases
+    SystemSettings::Instance().alias(); //build aliases
 
     sprng(static_cast<unsigned int>(time(nullptr)));
 
@@ -210,8 +209,8 @@ int main(int argc, char *argv[])
             }
             case 'r':
             {
-                GETOPNUM(synth.samplerate);
-                if (synth.samplerate < 4000)
+                GETOPNUM(SystemSettings::Instance().samplerate);
+                if (SystemSettings::Instance().samplerate < 4000)
                 {
                     std::cerr << "ERROR:Incorrect sample rate: " << optarguments
                               << std::endl;
@@ -221,8 +220,8 @@ int main(int argc, char *argv[])
             }
             case 'b':
             {
-                GETOPNUM(synth.buffersize);
-                if (synth.buffersize < 2)
+                GETOPNUM(SystemSettings::Instance().buffersize);
+                if (SystemSettings::Instance().buffersize < 2)
                 {
                     std::cerr << "ERROR:Incorrect buffer size: " << optarguments
                               << std::endl;
@@ -234,17 +233,17 @@ int main(int argc, char *argv[])
             {
                 if (optarguments)
                 {
-                    synth.oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
+                    SystemSettings::Instance().oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
                 }
-                if (synth.oscilsize < MAX_AD_HARMONICS * 2)
+                if (SystemSettings::Instance().oscilsize < MAX_AD_HARMONICS * 2)
                 {
-                    synth.oscilsize = MAX_AD_HARMONICS * 2;
+                    SystemSettings::Instance().oscilsize = MAX_AD_HARMONICS * 2;
                 }
-                synth.oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(synth.oscilsize - 1.0f) / logf(2.0f))));
-                if (tmp != synth.oscilsize)
+                SystemSettings::Instance().oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(SystemSettings::Instance().oscilsize - 1.0f) / logf(2.0f))));
+                if (tmp != SystemSettings::Instance().oscilsize)
                 {
                     std::cerr << "synth.oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                              << synth.oscilsize << "." << std::endl;
+                              << SystemSettings::Instance().oscilsize << "." << std::endl;
                 }
                 break;
             }
@@ -310,18 +309,18 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    synth.alias();
+    SystemSettings::Instance().alias();
 
     std::cerr.precision(1);
     std::cerr << std::fixed;
-    std::cerr << "\nSample Rate = \t\t" << synth.samplerate << std::endl;
-    std::cerr << "Sound Buffer Size = \t" << synth.buffersize << " samples" << std::endl;
-    std::cerr << "Internal latency = \t\t" << synth.buffersize_f * 1000.0f / synth.samplerate_f << " ms" << std::endl;
-    std::cerr << "ADsynth Oscil.Size = \t" << synth.oscilsize << " samples" << std::endl;
+    std::cerr << "\nSample Rate = \t\t" << SystemSettings::Instance().samplerate << std::endl;
+    std::cerr << "Sound Buffer Size = \t" << SystemSettings::Instance().buffersize << " samples" << std::endl;
+    std::cerr << "Internal latency = \t\t" << SystemSettings::Instance().buffersize_f * 1000.0f / SystemSettings::Instance().samplerate_f << " ms" << std::endl;
+    std::cerr << "ADsynth Oscil.Size = \t" << SystemSettings::Instance().oscilsize << " samples" << std::endl;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-    mixer.Setup(&synth, &banks);
+    mixer.Setup(&banks);
     mixer.swaplr = swaplr;
 
     if (!loadfile.empty())

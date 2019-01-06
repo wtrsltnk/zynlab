@@ -43,8 +43,7 @@ public:
          * @param Ppreset_ chosen preset
          * @return Initialized Effect object*/
     Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
-           FilterParams *filterpars_, unsigned char Ppreset_,
-           SystemSettings *synth_);
+           FilterParams *filterpars_, unsigned char Ppreset_);
     virtual ~Effect();
     /**
          * Choose a preset
@@ -100,9 +99,6 @@ protected:
     float pangainR;
     char Plrcross; // L/R mix
     float lrcross;
-
-    // current setup
-    SystemSettings *_synth;
 };
 
 #endif

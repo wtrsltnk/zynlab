@@ -7,11 +7,11 @@ ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
     : VstPlugin(audioMaster, NUM_PROGRAMS, NUM_PARAMS), fft(nullptr), currentProgram(0),
       parameters(nullptr)
 {
-    ctl.Init(&settings);
+    ctl.Init();
     ctl.defaults();
     fft = new FFTwrapper(settings.oscilsize);
 
-    parameters = new SUBnoteParameters(&settings, fft);
+    parameters = new SUBnoteParameters(fft);
     parameters->Defaults();
 
     setNumInputs(0);
@@ -79,7 +79,6 @@ SynthNote *ZynInstrument::createNote(VstInt32 note, VstInt32 velocity)
     float notebasefreq = 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
     return new SUBnote(parameters,
                        &ctl,
-                       &settings,
                        notebasefreq,
                        velocity,
                        0,

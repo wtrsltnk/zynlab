@@ -156,6 +156,13 @@ SystemSettings::SystemSettings()
     }
 }
 
+SystemSettings& SystemSettings::Instance()
+{
+    static SystemSettings instance;
+
+    return instance;
+}
+
 SystemSettings::~SystemSettings()
 {
     delete[] this->denormalkillbuf;

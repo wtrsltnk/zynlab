@@ -29,15 +29,13 @@
 /**Class for creating Low Frequency Ocillators*/
 class LFO
 {
-    SystemSettings *_synth;
-
 public:
     /**Constructor
      *
      * @param lfopars pointer to a LFOParams object
      * @param basefreq base frequency of LFO
      */
-    LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_);
+    LFO(LFOParams *lfopars, float basefreq);
     /**Deconstructor*/
     virtual ~LFO();
     float lfoout();

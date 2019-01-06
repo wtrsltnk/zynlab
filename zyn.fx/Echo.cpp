@@ -30,8 +30,8 @@
 
 #define MAX_DELAY 2
 
-Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_),
+Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0),
       Pvolume(50),
       Pdelay(60),
       Plrdelay(100),
@@ -40,8 +40,8 @@ Echo::Echo(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *sy
       delayTime(1),
       lrdelay(0),
       avgDelay(0),
-      delay(new float[(int)(MAX_DELAY * synth_->samplerate)],
-            new float[(int)(MAX_DELAY * synth_->samplerate)]),
+      delay(new float[(int)(MAX_DELAY * SystemSettings::Instance().samplerate)],
+            new float[(int)(MAX_DELAY * SystemSettings::Instance().samplerate)]),
       old(0.0f),
       pos(0),
       delta(1),
@@ -60,8 +60,8 @@ Echo::~Echo()
 //Cleanup the effect
 void Echo::Cleanup()
 {
-    memset(delay._left, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
-    memset(delay._right, 0, MAX_DELAY * this->_synth->samplerate * sizeof(float));
+    memset(delay._left, 0, MAX_DELAY * SystemSettings::Instance().samplerate * sizeof(float));
+    memset(delay._right, 0, MAX_DELAY * SystemSettings::Instance().samplerate * sizeof(float));
     old = Stereo<float>(0.0f);
 }
 
@@ -80,14 +80,14 @@ void Echo::initdelays()
     //number of seconds to delay right chan
     float dr = avgDelay + lrdelay;
 
-    ndelta._left = max(1, (int)(dl * this->_synth->samplerate));
-    ndelta._right = max(1, (int)(dr * this->_synth->samplerate));
+    ndelta._left = max(1, (int)(dl * SystemSettings::Instance().samplerate));
+    ndelta._right = max(1, (int)(dr * SystemSettings::Instance().samplerate));
 }
 
 //Effect output
 void Echo::out(const Stereo<float *> &input)
 {
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         float ldl = delay._left[pos._left];
         float rdl = delay._right[pos._right];
@@ -101,9 +101,9 @@ void Echo::out(const Stereo<float *> &input)
         rdl = input._right[i] * pangainR - rdl * fb;
 
         //LowPass Filter
-        old._left = delay._left[(pos._left + delta._left) % (MAX_DELAY * this->_synth->samplerate)] =
+        old._left = delay._left[(pos._left + delta._left) % (MAX_DELAY * SystemSettings::Instance().samplerate)] =
             ldl * hidamp + old._left * (1.0f - hidamp);
-        old._right = delay._right[(pos._right + delta._right) % (MAX_DELAY * this->_synth->samplerate)] =
+        old._right = delay._right[(pos._right + delta._right) % (MAX_DELAY * SystemSettings::Instance().samplerate)] =
             rdl * hidamp + old._right * (1.0f - hidamp);
 
         //increment
@@ -111,8 +111,8 @@ void Echo::out(const Stereo<float *> &input)
         ++pos._right; // += delta.r;
 
         //ensure that pos is still in bounds
-        pos._left %= MAX_DELAY * this->_synth->samplerate;
-        pos._right %= MAX_DELAY * this->_synth->samplerate;
+        pos._left %= MAX_DELAY * SystemSettings::Instance().samplerate;
+        pos._right %= MAX_DELAY * SystemSettings::Instance().samplerate;
 
         //adjust delay if needed
         delta._left = (15 * delta._left + ndelta._left) / 16;

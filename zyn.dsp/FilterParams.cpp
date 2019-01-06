@@ -24,11 +24,7 @@
 #include <cmath>
 #include <zyn.common/Util.h>
 
-FilterParams::FilterParams(SystemSettings *synth_,
-                           unsigned char Ptype_,
-                           unsigned char Pfreq_,
-                           unsigned char Pq_)
-    : _synth(synth_)
+FilterParams::FilterParams(unsigned char Ptype_, unsigned char Pfreq_, unsigned char Pq_)
 {
     setpresettype("Pfilter");
     Dtype = Ptype_;
@@ -205,9 +201,9 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
 
         filter_amp = getformantamp(Pvowels[nvowel].formants[nformant].amp);
 
-        if (filter_freq <= (this->_synth->samplerate / 2 - 100.0f))
+        if (filter_freq <= (SystemSettings::Instance().samplerate / 2 - 100.0f))
         {
-            omega = 2 * PI * filter_freq / this->_synth->samplerate_f;
+            omega = 2 * PI * filter_freq / SystemSettings::Instance().samplerate_f;
             sn = sinf(omega);
             cs = cosf(omega);
             alpha = sn / (2 * filter_q);
@@ -224,13 +220,13 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
         for (int i = 0; i < nfreqs; ++i)
         {
             float freq = getfreqx(i / (float)nfreqs);
-            if (freq > this->_synth->samplerate / 2)
+            if (freq > SystemSettings::Instance().samplerate / 2)
             {
                 for (int tmp = i; tmp < nfreqs; ++tmp)
                     freqs[tmp] = 0.0f;
                 break;
             }
-            float fr = freq / this->_synth->samplerate * PI * 2.0f;
+            float fr = freq / SystemSettings::Instance().samplerate * PI * 2.0f;
             float x = c[0], y = 0.0f;
             for (int n = 1; n < 3; ++n)
             {

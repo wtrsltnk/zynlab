@@ -34,7 +34,6 @@ class PADnote : public SynthNote
 public:
     PADnote(PADnoteParameters *parameters,
             Controller *ctl_,
-            SystemSettings *synth_,
             float freq,
             float velocity,
             int portamento_,

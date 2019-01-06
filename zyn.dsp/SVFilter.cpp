@@ -21,18 +21,17 @@
 */
 
 #include "SVFilter.h"
-#include <zyn.common/Util.h>
 
 #include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <zyn.common/Util.h>
 
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
-                   unsigned char Fstages, SystemSettings *synth_)
-    : Filter(synth_),
-      type(Ftype),
+                   unsigned char Fstages)
+    : type(Ftype),
       stages(Fstages),
       freq(Ffreq),
       q(Fq),
@@ -47,12 +46,11 @@ SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
     setfreq_and_q(Ffreq, Fq);
 }
 
-SVFilter::~SVFilter()
-= default;
+SVFilter::~SVFilter() = default;
 
 void SVFilter::cleanup()
 {
-    for (auto & i : st)
+    for (auto &i : st)
         i.low = i.high = i.band = i.notch = 0.0f;
     oldabovenq = false;
     abovenq = false;
@@ -60,7 +58,7 @@ void SVFilter::cleanup()
 
 void SVFilter::computefiltercoefs()
 {
-    par.f = freq / this->_synth->samplerate_f * 4.0f;
+    par.f = freq / SystemSettings::Instance().samplerate_f * 4.0f;
     if (par.f > 0.99999f)
         par.f = 0.99999f;
     par.q = 1.0f - atanf(sqrtf(q)) * 2.0f / PI;
@@ -77,7 +75,7 @@ void SVFilter::setfreq(float frequency)
         rap = 1.0f / rap;
 
     oldabovenq = abovenq;
-    abovenq = frequency > (this->_synth->samplerate_f / 2 - 500.0f);
+    abovenq = frequency > (SystemSettings::Instance().samplerate_f / 2 - 500.0f);
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
@@ -147,7 +145,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
             std::cerr << "Impossible SVFilter type encountered [" << type << "]" << std::endl;
     }
 
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         x.low = x.low + par.f * x.band;
         x.high = par.q_sqrt * smp[i] - x.low - par.q * x.band;
@@ -164,20 +162,20 @@ void SVFilter::filterout(float *smp)
 
     if (needsinterpolation)
     {
-        float ismp[this->_synth->buffersize];
-        memcpy(ismp, smp, this->_synth->bufferbytes);
+        float ismp[SystemSettings::Instance().buffersize];
+        memcpy(ismp, smp, SystemSettings::Instance().bufferbytes);
 
         for (int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, st[i], ipar);
 
-        for (int i = 0; i < this->_synth->buffersize; ++i)
+        for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
-            float x = i / this->_synth->buffersize_f;
+            float x = i / SystemSettings::Instance().buffersize_f;
             smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
         needsinterpolation = false;
     }
 
-    for (int i = 0; i < this->_synth->buffersize; ++i)
+    for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         smp[i] *= outgain;
 }

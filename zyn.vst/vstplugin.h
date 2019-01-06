@@ -10,7 +10,7 @@
 class VstPlugin : public AudioEffectX
 {
 protected:
-    SystemSettings settings;
+    SystemSettings &settings;
     std::map<VstInt32, SynthNote *> playingNotes;
     std::mutex _notesMutex;
     float *_tmpoutr;

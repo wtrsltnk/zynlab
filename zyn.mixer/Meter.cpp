@@ -9,7 +9,6 @@ vuData::vuData()
 {}
 
 Meter::Meter()
-    : _synth(nullptr)
 {
 }
 
@@ -20,9 +19,8 @@ Meter::~Meter()
 
 IMeter::~IMeter() = default;
 
-void Meter::Setup(SystemSettings *synth)
+void Meter::Setup()
 {
-    _synth = synth;
     pthread_mutex_init(&_vumutex, nullptr);
     for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
     {
@@ -87,7 +85,7 @@ void Meter::Tick(const float *outl, const float *outr, Channel *part, float volu
     //Peak computation (for vumeters)
     _vu.outpeakl = 1e-12f;
     _vu.outpeakr = 1e-12f;
-    for (unsigned int i = 0; i < _synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         if (std::fabs(outl[i]) > _vu.outpeakl)
         {
@@ -114,13 +112,13 @@ void Meter::Tick(const float *outl, const float *outr, Channel *part, float volu
     //RMS Peak computation (for vumeters)
     _vu.rmspeakl = 1e-12f;
     _vu.rmspeakr = 1e-12f;
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         _vu.rmspeakl += outl[i] * outl[i];
         _vu.rmspeakr += outr[i] * outr[i];
     }
-    _vu.rmspeakl = std::sqrt(_vu.rmspeakl / _synth->buffersize_f);
-    _vu.rmspeakr = std::sqrt(_vu.rmspeakr / _synth->buffersize_f);
+    _vu.rmspeakl = std::sqrt(_vu.rmspeakl / SystemSettings::Instance().buffersize_f);
+    _vu.rmspeakr = std::sqrt(_vu.rmspeakr / SystemSettings::Instance().buffersize_f);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)

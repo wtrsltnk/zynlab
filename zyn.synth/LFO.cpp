@@ -24,8 +24,7 @@
 #include <cmath>
 #include <zyn.common/Util.h>
 
-LFO::LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_)
-    : _synth(synth_)
+LFO::LFO(LFOParams *lfopars, float basefreq)
 {
     if (lfopars->Pstretch == 0)
         lfopars->Pstretch = 1;
@@ -34,7 +33,7 @@ LFO::LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_)
 
     float lfofreq =
         (powf(2, lfopars->Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
-    incx = std::fabs(lfofreq) * this->_synth->buffersize_f / this->_synth->samplerate_f;
+    incx = std::fabs(lfofreq) * SystemSettings::Instance().buffersize_f / SystemSettings::Instance().samplerate_f;
 
     if (lfopars->Pcontinous == 0)
     {
@@ -86,8 +85,7 @@ LFO::LFO(LFOParams *lfopars, float basefreq, SystemSettings *synth_)
     computenextincrnd(); //twice because I want incrnd & nextincrnd to be random
 }
 
-LFO::~LFO()
-= default;
+LFO::~LFO() = default;
 
 /*
  * LFO out
@@ -154,7 +152,7 @@ float LFO::lfoout()
         }
     }
     else
-        lfodelay -= this->_synth->buffersize_f / this->_synth->samplerate_f;
+        lfodelay -= SystemSettings::Instance().buffersize_f / SystemSettings::Instance().samplerate_f;
     return out;
 }
 

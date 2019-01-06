@@ -27,14 +27,12 @@
 #include <cmath>
 
 Effect::Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
-               FilterParams *filterpars_, unsigned char Ppreset_,
-               SystemSettings *synth_)
+               FilterParams *filterpars_, unsigned char Ppreset_)
     : Ppreset(Ppreset_),
       efxoutl(efxoutl_),
       efxoutr(efxoutr_),
       filterpars(filterpars_),
-      insertion(insertion_),
-      _synth(synth_)
+      insertion(insertion_)
 {}
 
 Effect::~Effect() = default;

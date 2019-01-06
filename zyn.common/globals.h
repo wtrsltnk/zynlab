@@ -239,8 +239,9 @@ enum LegatoMsg
 //temporary include for synth->{samplerate/buffersize} members
 class SystemSettings
 {
-public:
     SystemSettings();
+public:
+    static SystemSettings& Instance();
     virtual ~SystemSettings();
 
     float *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
@@ -372,7 +373,6 @@ public:
     // Audio Output
     virtual void AudioOut(float *outl, float *outr) = 0;
 
-    virtual SystemSettings *GetSettings() = 0;
     virtual class IFFTwrapper *GetFFT() = 0;
 };
 

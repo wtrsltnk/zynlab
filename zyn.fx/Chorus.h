@@ -33,9 +33,9 @@
 class Chorus : public Effect
 {
 public:
-    Chorus(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
-    /**Destructor*/
+    Chorus(bool insertion_, float *efxoutl_, float *efxoutr_);
     virtual ~Chorus();
+
     void out(const Stereo<float *> &input);
     void SetPreset(unsigned char npreset);
     /**

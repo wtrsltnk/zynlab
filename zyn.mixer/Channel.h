@@ -211,7 +211,6 @@ private:
 
     float _oldfreq; //this is used for portamento
     IMixer *_mixer;
-    SystemSettings *_settings;
     Microtonal *_microtonal;
     IFFTwrapper *_fft;
     pthread_mutex_t _instrumentMutex;

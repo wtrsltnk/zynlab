@@ -1,8 +1,8 @@
 #include "vstplugin.h"
+#include <cmath>
 #include <fstream>
 #include <memory>   // For std::unique_ptr
 #include <stdarg.h> // For va_start, etc.
-#include <cmath>
 
 std::string string_format(const std::string fmt_str, ...)
 {
@@ -27,15 +27,15 @@ static std::mutex logMutex;
 
 void write_text_to_log_file(const std::string &text)
 {
-//    std::lock_guard<std::mutex> lock(logMutex);
+    //    std::lock_guard<std::mutex> lock(logMutex);
 
-//    std::ofstream log_file(
-//        "c:\\temp\\log_file.txt", std::ios_base::out | std::ios_base::app);
-//    log_file << text << std::endl;
+    //    std::ofstream log_file(
+    //        "c:\\temp\\log_file.txt", std::ios_base::out | std::ios_base::app);
+    //    log_file << text << std::endl;
 }
 
 VstPlugin::VstPlugin(audioMasterCallback audioMaster, VstInt32 numPrograms, VstInt32 numParams)
-    : AudioEffectX(audioMaster, numPrograms, numParams), _lastGeneratedBufferSize(0), _lastSampleFrames(0)
+    : AudioEffectX(audioMaster, numPrograms, numParams), settings(SystemSettings::Instance()), _lastGeneratedBufferSize(0), _lastSampleFrames(0)
 {
     Config::Current().init();
 

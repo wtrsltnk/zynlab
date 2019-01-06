@@ -36,8 +36,9 @@
 class Phaser : public Effect
 {
 public:
-    Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_);
+    Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_);
     virtual ~Phaser();
+
     void out(const Stereo<float *> &input);
     void SetPreset(unsigned char npreset);
     void ChangeParameter(int npar, unsigned char value);
@@ -47,17 +48,17 @@ public:
 private:
     //Phaser parameters
     EffectLFO lfo;             //Phaser modulator
-    unsigned char Pvolume{};     //Used to set wet/dry mix
-    unsigned char Pdistortion{}; //Model distortion added by FET element
-    unsigned char Pdepth{};      //Depth of phaser sweep
-    unsigned char Pwidth{};      //Phaser width (LFO amplitude)
-    unsigned char Pfb{};         //feedback
-    unsigned char Poffset{};     //Model mismatch between variable resistors
-    unsigned char Pstages{};     //Number of first-order All-Pass stages
-    unsigned char Poutsub{};     //if I wish to subtract the output instead of adding
-    unsigned char Pphase{};
-    unsigned char Phyper{}; //lfo^2 -- converts tri into hyper-sine
-    unsigned char Panalog{};
+    unsigned char Pvolume;     //Used to set wet/dry mix
+    unsigned char Pdistortion; //Model distortion added by FET element
+    unsigned char Pdepth;      //Depth of phaser sweep
+    unsigned char Pwidth;      //Phaser width (LFO amplitude)
+    unsigned char Pfb;         //feedback
+    unsigned char Poffset;     //Model mismatch between variable resistors
+    unsigned char Pstages;     //Number of first-order All-Pass stages
+    unsigned char Poutsub;     //if I wish to subtract the output instead of adding
+    unsigned char Pphase;
+    unsigned char Phyper; //lfo^2 -- converts tri into hyper-sine
+    unsigned char Panalog;
 
     //Control parameters
     void setvolume(unsigned char Pvolume);
@@ -70,21 +71,21 @@ private:
     void setphase(unsigned char Pphase);
 
     //Internal Variables
-    bool barber{}; //Barber pole phasing flag
-    float distortion{}, width{}, offsetpct{};
-    float feedback{}, depth{}, phase{};
+    bool barber; //Barber pole phasing flag
+    float distortion, width, offsetpct;
+    float feedback, depth, phase;
     Stereo<float *> old, xn1, yn1;
     Stereo<float> diff, oldgain, fb;
-    float invperiod{};
-    float offset[12]{};
+    float invperiod;
+    float offset[12];
 
-    float mis{};
-    float Rmin{};   // 3N5457 typical on resistance at Vgs = 0
-    float Rmax{};   // Resistor parallel to FET
-    float Rmx{};    // Rmin/Rmax to avoid division in loop
-    float Rconst{}; // Handle parallel resistor relationship
-    float C{};      // Capacitor
-    float CFs{};    // A constant derived from capacitor and resistor relationships
+    float mis;
+    float Rmin;   // 3N5457 typical on resistance at Vgs = 0
+    float Rmax;   // Resistor parallel to FET
+    float Rmx;    // Rmin/Rmax to avoid division in loop
+    float Rconst; // Handle parallel resistor relationship
+    float C;      // Capacitor
+    float CFs;    // A constant derived from capacitor and resistor relationships
 
     void analog_setup();
     void AnalogPhase(const Stereo<float *> &input);

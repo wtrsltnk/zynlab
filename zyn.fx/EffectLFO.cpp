@@ -25,7 +25,7 @@
 
 #include <cmath>
 
-EffectLFO::EffectLFO(SystemSettings *synth_)
+EffectLFO::EffectLFO()
     : Pfreq(40),
       Prandomness(0),
       PLFOtype(0),
@@ -36,8 +36,7 @@ EffectLFO::EffectLFO(SystemSettings *synth_)
       ampl2(RND),
       ampr1(RND),
       ampr2(RND),
-      lfornd(0.0f),
-      _synth(synth_)
+      lfornd(0.0f)
 {
     updateparams();
 }
@@ -48,7 +47,7 @@ EffectLFO::~EffectLFO() = default;
 void EffectLFO::updateparams()
 {
     float lfofreq = (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f;
-    incx = fabsf(lfofreq) * this->_synth->buffersize_f / this->_synth->samplerate_f;
+    incx = fabsf(lfofreq) * SystemSettings::Instance().buffersize_f / SystemSettings::Instance().samplerate_f;
     if (incx > 0.49999999f)
         incx = 0.499999999f; //Limit the Frequency
 

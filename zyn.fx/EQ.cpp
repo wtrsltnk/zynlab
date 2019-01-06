@@ -26,8 +26,8 @@
 #include <cmath>
 #include <zyn.dsp/AnalogFilter.h>
 
-EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_)
-    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0, synth_)
+EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_)
+    : Effect(insertion_, efxoutl_, efxoutr_, nullptr, 0)
 {
     for (auto &i : filter)
     {
@@ -36,8 +36,8 @@ EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, SystemSettings *synth_
         i.Pgain = 64;
         i.Pq = 64;
         i.Pstages = 0;
-        i.l = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
-        i.r = new AnalogFilter(6, 1000.0f, 1.0f, 0, this->_synth);
+        i.l = new AnalogFilter(6, 1000.0f, 1.0f, 0);
+        i.r = new AnalogFilter(6, 1000.0f, 1.0f, 0);
     }
     //default values
     Pvolume = 50;
@@ -61,7 +61,7 @@ void EQ::Cleanup()
 //Effect output
 void EQ::out(const Stereo<float *> &smp)
 {
-    for (unsigned int i = 0; i < this->_synth->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         efxoutl[i] = smp._left[i] * volume;
         efxoutr[i] = smp._right[i] * volume;

@@ -29,14 +29,8 @@
 
 class FilterParams : public Presets
 {
-protected:
-    SystemSettings *_synth;
-
 public:
-    FilterParams(SystemSettings *synth_,
-                 unsigned char Ptype_,
-                 unsigned char Pfreq,
-                 unsigned char Pq_);
+    FilterParams(unsigned char Ptype_, unsigned char Pfreq, unsigned char Pq_);
     virtual ~FilterParams();
 
     void Serialize(IPresetsSerializer *xml);

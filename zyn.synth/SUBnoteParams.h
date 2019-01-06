@@ -31,11 +31,10 @@
 
 class SUBnoteParameters : public Presets
 {
-    SystemSettings *_settings;
     IFFTwrapper *_fft;
 
 public:
-    SUBnoteParameters(SystemSettings *settings, IFFTwrapper *fft);
+    SUBnoteParameters(IFFTwrapper *fft);
     virtual ~SUBnoteParameters();
 
     void Serialize(IPresetsSerializer *xml);

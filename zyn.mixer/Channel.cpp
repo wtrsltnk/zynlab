@@ -39,13 +39,12 @@ Channel::Channel() {}
 void Channel::Init(IMixer *mixer, Microtonal *microtonal)
 {
     _mixer = mixer;
-    _settings = mixer->GetSettings();
-    ctl.Init(mixer->GetSettings());
+    ctl.Init();
     _microtonal = microtonal;
     _fft = mixer->GetFFT();
     pthread_mutex_init(&_instrumentMutex, nullptr);
-    partoutl = new float[_settings->buffersize];
-    partoutr = new float[_settings->buffersize];
+    partoutl = new float[SystemSettings::Instance().buffersize];
+    partoutr = new float[SystemSettings::Instance().buffersize];
 
     for (auto &n : instruments)
     {
@@ -55,8 +54,8 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
         n.padpars = nullptr;
     }
 
-    instruments[0].adpars = new ADnoteParameters(_mixer->GetSettings(), _mixer->GetFFT());
-    instruments[0].subpars = new SUBnoteParameters(_mixer->GetSettings(), _mixer->GetFFT());
+    instruments[0].adpars = new ADnoteParameters(_mixer->GetFFT());
+    instruments[0].subpars = new SUBnoteParameters(_mixer->GetFFT());
     instruments[0].padpars = new PADnoteParameters(mixer);
 
     //Part's Insertion Effects init
@@ -73,8 +72,8 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
 
     for (int n = 0; n < NUM_CHANNEL_EFX + 1; ++n)
     {
-        partfxinputl[n] = new float[_settings->buffersize];
-        partfxinputr[n] = new float[_settings->buffersize];
+        partfxinputl[n] = new float[SystemSettings::Instance().buffersize];
+        partfxinputr[n] = new float[SystemSettings::Instance().buffersize];
     }
 
     _killallnotes = 0;
@@ -104,8 +103,8 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
 
     Defaults();
 
-    _tmpoutr = new float[_settings->buffersize];
-    _tmpoutl = new float[_settings->buffersize];
+    _tmpoutr = new float[SystemSettings::Instance().buffersize];
+    _tmpoutl = new float[SystemSettings::Instance().buffersize];
 }
 
 void Channel::Lock()
@@ -187,7 +186,7 @@ float Channel::ComputePeak(float volume)
     {
         float *outl = partoutl,
               *outr = partoutr;
-        for (unsigned int i = 0; i < _settings->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             float tmp = fabs(outl[i] + outr[i]);
             if (tmp > peak)
@@ -209,7 +208,7 @@ void Channel::ComputePeakLeftAndRight(float volume, float &peakl, float &peakr)
     {
         float *outl = partoutl,
               *outr = partoutr;
-        for (unsigned int i = 0; i < _settings->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             if (outl[i] > peakl)
             {
@@ -232,10 +231,10 @@ void Channel::Cleanup(bool final_)
     for (unsigned int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
 
-    for (unsigned int i = 0; i < _settings->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        partoutl[i] = final_ ? 0.0f : _settings->denormalkillbuf[i];
-        partoutr[i] = final_ ? 0.0f : _settings->denormalkillbuf[i];
+        partoutl[i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
+        partoutr[i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
     }
 
     ctl.resetall();
@@ -244,10 +243,10 @@ void Channel::Cleanup(bool final_)
 
     for (int n = 0; n < NUM_CHANNEL_EFX + 1; ++n)
     {
-        for (unsigned int i = 0; i < _settings->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
-            partfxinputl[n][i] = final_ ? 0.0f : _settings->denormalkillbuf[i];
-            partfxinputr[n][i] = final_ ? 0.0f : _settings->denormalkillbuf[i];
+            partfxinputl[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
+            partfxinputr[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
         }
     }
 }
@@ -279,8 +278,8 @@ Channel::~Channel()
         delete[] partfxinputl[n];
         delete[] partfxinputr[n];
     }
-    delete []_tmpoutl;
-    delete []_tmpoutr;
+    delete[] _tmpoutl;
+    delete[] _tmpoutr;
 }
 
 /*
@@ -308,7 +307,7 @@ void Channel::NoteOn(unsigned char note,
 
     // MonoMem stuff:
     if (Ppolymode == 0)
-    {                                             // If Poly is off
+    {                                              // If Poly is off
         _monomemnotes.push_back(note);             // Add note to the list.
         _monomem[note].velocity = velocity;        // Store this note's velocity.
         _monomem[note].mkeyshift = masterkeyshift; /* Store masterkeyshift too,
@@ -352,7 +351,7 @@ void Channel::NoteOn(unsigned char note,
             {
                 // At least one other key is held or sustained, and the
                 // previous note was played while in valid legato mode.
-                doinglegato = true;                // So we'll do a legato note.
+                doinglegato = true;                 // So we'll do a legato note.
                 pos = static_cast<int>(_lastpos);   // A legato note uses same pos as previous..
                 posb = static_cast<int>(_lastposb); // .. same goes for posb.
             }
@@ -552,7 +551,7 @@ void Channel::NoteOn(unsigned char note,
                 {
                     // No legato were performed at all, so pretend nothing happened:
                     _monomemnotes.pop_back(); // Remove last note from the list.
-                    lastnote = lastnotecopy; // Set lastnote back to previous value.
+                    lastnote = lastnotecopy;  // Set lastnote back to previous value.
                 }
             }
             return; // Ok, Legato note done, return.
@@ -568,7 +567,6 @@ void Channel::NoteOn(unsigned char note,
             if (instruments[0].Padenabled != 0)
                 _channelNotes[pos].instumentNotes[0].adnote = new ADnote(instruments[0].adpars,
                                                                          &ctl,
-                                                                         _settings,
                                                                          notebasefreq,
                                                                          vel,
                                                                          portamento,
@@ -577,7 +575,6 @@ void Channel::NoteOn(unsigned char note,
             if (instruments[0].Psubenabled != 0)
                 _channelNotes[pos].instumentNotes[0].subnote = new SUBnote(instruments[0].subpars,
                                                                            &ctl,
-                                                                           _settings,
                                                                            notebasefreq,
                                                                            vel,
                                                                            portamento,
@@ -586,7 +583,6 @@ void Channel::NoteOn(unsigned char note,
             if (instruments[0].Ppadenabled != 0)
                 _channelNotes[pos].instumentNotes[0].padnote = new PADnote(instruments[0].padpars,
                                                                            &ctl,
-                                                                           _settings,
                                                                            notebasefreq,
                                                                            vel,
                                                                            portamento,
@@ -602,7 +598,6 @@ void Channel::NoteOn(unsigned char note,
                 if (instruments[0].Padenabled != 0)
                     _channelNotes[posb].instumentNotes[0].adnote = new ADnote(instruments[0].adpars,
                                                                               &ctl,
-                                                                              _settings,
                                                                               notebasefreq,
                                                                               vel,
                                                                               portamento,
@@ -612,7 +607,6 @@ void Channel::NoteOn(unsigned char note,
                     _channelNotes[posb].instumentNotes[0].subnote = new SUBnote(
                         instruments[0].subpars,
                         &ctl,
-                        _settings,
                         notebasefreq,
                         vel,
                         portamento,
@@ -622,7 +616,6 @@ void Channel::NoteOn(unsigned char note,
                     _channelNotes[posb].instumentNotes[0].padnote = new PADnote(
                         instruments[0].padpars,
                         &ctl,
-                        _settings,
                         notebasefreq,
                         vel,
                         portamento,
@@ -650,7 +643,6 @@ void Channel::NoteOn(unsigned char note,
                     _channelNotes[pos].instumentNotes[ci].adnote = new ADnote(
                         item.adpars,
                         &ctl,
-                        _settings,
                         notebasefreq,
                         vel,
                         portamento,
@@ -661,7 +653,6 @@ void Channel::NoteOn(unsigned char note,
                     _channelNotes[pos].instumentNotes[ci].subnote = new SUBnote(
                         item.subpars,
                         &ctl,
-                        _settings,
                         notebasefreq,
                         vel,
                         portamento,
@@ -672,7 +663,6 @@ void Channel::NoteOn(unsigned char note,
                     _channelNotes[pos].instumentNotes[ci].padnote = new PADnote(
                         item.padpars,
                         &ctl,
-                        _settings,
                         notebasefreq,
                         vel,
                         portamento,
@@ -692,7 +682,6 @@ void Channel::NoteOn(unsigned char note,
                         _channelNotes[posb].instumentNotes[ci].adnote = new ADnote(
                             item.adpars,
                             &ctl,
-                            _settings,
                             notebasefreq,
                             vel,
                             portamento,
@@ -702,7 +691,6 @@ void Channel::NoteOn(unsigned char note,
                         _channelNotes[posb].instumentNotes[ci].subnote =
                             new SUBnote(item.subpars,
                                         &ctl,
-                                        _settings,
                                         notebasefreq,
                                         vel,
                                         portamento,
@@ -712,7 +700,6 @@ void Channel::NoteOn(unsigned char note,
                         _channelNotes[posb].instumentNotes[ci].padnote =
                             new PADnote(item.padpars,
                                         &ctl,
-                                        _settings,
                                         notebasefreq,
                                         vel,
                                         portamento,
@@ -914,7 +901,7 @@ void Channel::RelaseSustainedKeys()
     // Let's call MonoMemRenote() on some conditions:
     if ((Ppolymode == 0) && (not _monomemnotes.empty()))
         if (_monomemnotes.back() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
-            MonoMemRenote();                 // To play most recent still held note.
+            MonoMemRenote();                  // To play most recent still held note.
 
     for (unsigned int i = 0; i < POLIPHONY; ++i)
         if (_channelNotes[i].status == KEY_RELASED_AND_SUSTAINED)
@@ -1092,7 +1079,7 @@ void Channel::RunNote(unsigned int k)
                 delete (*note);
                 (*note) = nullptr;
             }
-            for (unsigned int i = 0; i < _settings->buffersize; ++i)
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             { //add the note to part(mix)
                 partfxinputl[sendcurrenttofx][i] += _tmpoutl[i];
                 partfxinputr[sendcurrenttofx][i] += _tmpoutr[i];
@@ -1113,7 +1100,7 @@ void Channel::RunNote(unsigned int k)
 void Channel::ComputeInstrumentSamples()
 {
     for (unsigned nefx = 0; nefx < NUM_CHANNEL_EFX + 1; ++nefx)
-        for (unsigned int i = 0; i < _settings->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             partfxinputl[nefx][i] = 0.0f;
             partfxinputr[nefx][i] = 0.0f;
@@ -1135,20 +1122,20 @@ void Channel::ComputeInstrumentSamples()
         {
             partefx[nefx]->out(partfxinputl[nefx], partfxinputr[nefx]);
             if (Pefxroute[nefx] == 2)
-                for (unsigned int i = 0; i < _settings->buffersize; ++i)
+                for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
                 {
                     partfxinputl[nefx + 1][i] += partefx[nefx]->_effectOutL[i];
                     partfxinputr[nefx + 1][i] += partefx[nefx]->_effectOutR[i];
                 }
         }
         int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_CHANNEL_EFX);
-        for (unsigned int i = 0; i < _settings->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             partfxinputl[routeto][i] += partfxinputl[nefx][i];
             partfxinputr[routeto][i] += partfxinputr[nefx][i];
         }
     }
-    for (unsigned int i = 0; i < _settings->buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         partoutl[i] = partfxinputl[NUM_CHANNEL_EFX][i];
         partoutr[i] = partfxinputr[NUM_CHANNEL_EFX][i];
@@ -1157,9 +1144,9 @@ void Channel::ComputeInstrumentSamples()
     //Kill All Notes if killallnotes!=0
     if (_killallnotes != 0)
     {
-        for (unsigned int i = 0; i < _settings->buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
-            float tmp = (_settings->buffersize_f - i) / _settings->buffersize_f;
+            float tmp = (SystemSettings::Instance().buffersize_f - i) / SystemSettings::Instance().buffersize_f;
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
         }
@@ -1226,9 +1213,9 @@ void Channel::setkititemstatus(int kititem, int Penabled_)
     else
     {
         if (instruments[kititem].adpars == nullptr)
-            instruments[kititem].adpars = new ADnoteParameters(_mixer->GetSettings(), _mixer->GetFFT());
+            instruments[kititem].adpars = new ADnoteParameters(_mixer->GetFFT());
         if (instruments[kititem].subpars == nullptr)
-            instruments[kititem].subpars = new SUBnoteParameters(_mixer->GetSettings(), _mixer->GetFFT());
+            instruments[kititem].subpars = new SUBnoteParameters(_mixer->GetFFT());
         if (instruments[kititem].padpars == nullptr)
             instruments[kititem].padpars = new PADnoteParameters(_mixer);
     }
