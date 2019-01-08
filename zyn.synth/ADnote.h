@@ -77,7 +77,7 @@ private:
     /**Initializes All Parameters*/
     void initparameters();
     /**Deallocate/Cleanup given voice*/
-    void KillVoice(int nvoice);
+    void KillVoice(unsigned int nvoice);
     /**Deallocate Note resources and voice resources*/
     void KillNote();
     /**Get the Voice's base frequency*/

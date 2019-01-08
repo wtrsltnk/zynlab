@@ -34,9 +34,8 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,
                  int portamento_,
                  int midinote,
                  bool besilent)
-    : SynthNote(freq, velocity, portamento_, midinote, besilent), _parameters(parameters)
+    : SynthNote(freq, velocity, portamento_, midinote, besilent), _parameters(parameters), ctl(ctl_)
 {
-    ctl = ctl_;
     NoteEnabled = ON;
     setup(freq, velocity, portamento_, midinote);
 }
