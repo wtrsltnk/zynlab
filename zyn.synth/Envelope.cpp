@@ -28,14 +28,18 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
     int i;
     envpoints = envpars->Penvpoints;
     if (envpoints > MAX_ENVELOPE_POINTS)
+    {
         envpoints = MAX_ENVELOPE_POINTS;
+    }
     envsustain = (envpars->Penvsustain == 0) ? -1 : envpars->Penvsustain;
     forcedrelase = envpars->Pforcedrelease;
     envstretch = powf(440.0f / basefreq, envpars->Penvstretch / 64.0f);
     linearenvelope = envpars->Plinearenvelope;
 
     if (envpars->Pfreemode == 0)
-        envpars->converttofree();
+    {
+        EnvelopeParams::ConvertToFree(envpars);
+    }
 
     float bufferdt = SystemSettings::Instance().buffersize_f / SystemSettings::Instance().samplerate_f;
 

@@ -55,7 +55,7 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
     }
 
     instruments[0].adpars = new ADnoteParameters(_mixer->GetFFT());
-    instruments[0].subpars = new SUBnoteParameters(_mixer->GetFFT());
+    instruments[0].subpars = new SUBnoteParameters();
     instruments[0].padpars = new PADnoteParameters(mixer);
 
     //Part's Insertion Effects init
@@ -1215,7 +1215,7 @@ void Channel::setkititemstatus(int kititem, int Penabled_)
         if (instruments[kititem].adpars == nullptr)
             instruments[kititem].adpars = new ADnoteParameters(_mixer->GetFFT());
         if (instruments[kititem].subpars == nullptr)
-            instruments[kititem].subpars = new SUBnoteParameters(_mixer->GetFFT());
+            instruments[kititem].subpars = new SUBnoteParameters();
         if (instruments[kititem].padpars == nullptr)
             instruments[kititem].padpars = new PADnoteParameters(_mixer);
     }

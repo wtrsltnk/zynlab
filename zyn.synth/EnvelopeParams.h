@@ -33,15 +33,8 @@
 class EnvelopeParams : public WrappedPresets
 {
 public:
-    EnvelopeParams(unsigned char Penvstretch_,
-                   unsigned char Pforcedrelease_);
+    EnvelopeParams(unsigned char envstretch, unsigned char forcedrelease);
     ~EnvelopeParams();
-    void ADSRinit(unsigned char A_dt, unsigned char D_dt, unsigned char S_val, unsigned char R_dt);
-    void ADSRinit_dB(unsigned char A_dt, unsigned char D_dt, unsigned char S_val, unsigned char R_dt);
-    void ASRinit(unsigned char A_val, unsigned char A_dt, unsigned char R_val, unsigned char R_dt);
-    void ADSRinit_filter(unsigned char A_val, unsigned char A_dt, unsigned char D_val, unsigned char D_dt, unsigned char R_dt, unsigned char R_val);
-    void ASRinit_bw(unsigned char A_val, unsigned char A_dt, unsigned char R_val, unsigned char R_dt);
-    void converttofree();
 
     void InitPresets();
 
@@ -69,6 +62,14 @@ public:
     // 3 for ASR parameters (frequency LFO)
     // 4 for ADSR_filter parameters (filter parameters)
     // 5 for ASR_bw parameters (bandwidth parameters)
+
+public:
+    static void ConvertToFree(EnvelopeParams *envelope);
+    static EnvelopeParams *ADSRinit(unsigned char Penvstretch_, unsigned char Pforcedrelease_, unsigned char A_dt, unsigned char D_dt, unsigned char S_val, unsigned char R_dt);
+    static EnvelopeParams *ADSRinit_dB(unsigned char Penvstretch_, unsigned char Pforcedrelease_, unsigned char A_dt, unsigned char D_dt, unsigned char S_val, unsigned char R_dt);
+    static EnvelopeParams *ASRinit(unsigned char Penvstretch_, unsigned char Pforcedrelease_, unsigned char A_val, unsigned char A_dt, unsigned char R_val, unsigned char R_dt);
+    static EnvelopeParams *ADSRinit_filter(unsigned char Penvstretch_, unsigned char Pforcedrelease_, unsigned char A_val, unsigned char A_dt, unsigned char D_val, unsigned char D_dt, unsigned char R_dt, unsigned char R_val);
+    static EnvelopeParams *ASRinit_bw(unsigned char Penvstretch_, unsigned char Pforcedrelease_, unsigned char A_val, unsigned char A_dt, unsigned char R_val, unsigned char R_dt);
 
 private:
     void store2defaults();

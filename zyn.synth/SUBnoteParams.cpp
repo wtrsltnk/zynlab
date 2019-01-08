@@ -23,25 +23,22 @@
 #include "SUBnoteParams.h"
 #include <cmath>
 
-SUBnoteParameters::SUBnoteParameters(IFFTwrapper *fft)
-    : _fft(fft), AmpEnvelope(64, 1)
+SUBnoteParameters::SUBnoteParameters()
 {
     setpresettype("Psubsynth");
-    AmpEnvelope.ADSRinit_dB(0, 40, 127, 25);
-    FreqEnvelope = new EnvelopeParams(64, 0);
-    FreqEnvelope->ASRinit(30, 50, 64, 60);
-    BandWidthEnvelope = new EnvelopeParams(64, 0);
-    BandWidthEnvelope->ASRinit_bw(100, 70, 64, 60);
+    AmpEnvelope = EnvelopeParams::ADSRinit_dB(64, 1, 0, 40, 127, 25);
+    FreqEnvelope = EnvelopeParams::ASRinit(64, 0, 30, 50, 64, 60);
+    BandWidthEnvelope = EnvelopeParams::ASRinit_bw(64, 0, 100, 70, 64, 60);
 
     GlobalFilter = new FilterParams(2, 80, 40);
-    GlobalFilterEnvelope = new EnvelopeParams(0, 1);
-    GlobalFilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
+    GlobalFilterEnvelope = EnvelopeParams::ADSRinit_filter(0, 1, 64, 40, 64, 70, 60, 64);
 
     Defaults();
 }
 
 SUBnoteParameters::~SUBnoteParameters()
 {
+    delete (AmpEnvelope);
     delete (FreqEnvelope);
     delete (BandWidthEnvelope);
     delete (GlobalFilter);
@@ -86,7 +83,7 @@ void SUBnoteParameters::Defaults()
     PGlobalFilterVelocityScale = 64;
     PGlobalFilterVelocityScaleFunction = 64;
 
-    AmpEnvelope.Defaults();
+    AmpEnvelope->Defaults();
     FreqEnvelope->Defaults();
     BandWidthEnvelope->Defaults();
     GlobalFilter->Defaults();
@@ -119,7 +116,7 @@ void SUBnoteParameters::Serialize(IPresetsSerializer *xml)
     xml->addpar("panning", PPanning);
     xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
     xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope.Serialize(xml);
+    AmpEnvelope->Serialize(xml);
     xml->endbranch();
     xml->endbranch();
 
@@ -279,7 +276,7 @@ void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
                                                    PAmpVelocityScaleFunction);
         if (xml->enterbranch("AMPLITUDE_ENVELOPE"))
         {
-            AmpEnvelope.Deserialize(xml);
+            AmpEnvelope->Deserialize(xml);
             xml->exitbranch();
         }
         xml->exitbranch();

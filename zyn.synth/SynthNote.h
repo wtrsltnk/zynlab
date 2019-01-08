@@ -41,7 +41,7 @@ public:
 
     /**Return if note is finished.
          * @return finished=1 unfinished=0*/
-    virtual int finished() const = 0;
+    virtual bool finished() const = 0;
 
     virtual void legatonote(float freq, float velocity,
                             int portamento_, int midinote_,

@@ -45,7 +45,7 @@ public:
                     int midinote, bool externcall);
 
     int noteout(float *outl, float *outr);
-    int finished() const;
+    bool finished() const;
     void relasekey();
 
 private:

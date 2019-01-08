@@ -23,10 +23,11 @@
 #include "EnvelopeParams.h"
 #include <cmath>
 
-EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_, unsigned char Pforcedrelease_)
+EnvelopeParams::EnvelopeParams(unsigned char envstretch, unsigned char forcedrelease)
 {
-    int i;
-
+    Penvstretch = envstretch;
+    Pforcedrelease = forcedrelease;
+    Plinearenvelope = 0;
     PA_dt = 10;
     PD_dt = 10;
     PR_dt = 10;
@@ -34,8 +35,9 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_, unsigned char Pforced
     PD_val = 64;
     PS_val = 64;
     PR_val = 64;
+    Pfreemode = 1;
 
-    for (i = 0; i < MAX_ENVELOPE_POINTS; ++i)
+    for (int i = 0; i < MAX_ENVELOPE_POINTS; ++i)
     {
         Penvdt[i] = 32;
         Penvval[i] = 64;
@@ -44,80 +46,122 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_, unsigned char Pforced
     Penvsustain = 1;
     Penvpoints = 1;
     Envmode = 1;
-    Penvstretch = Penvstretch_;
-    Pforcedrelease = Pforcedrelease_;
-    Pfreemode = 1;
-    Plinearenvelope = 0;
 
     store2defaults();
 }
 
 EnvelopeParams::~EnvelopeParams() = default;
 
+void EnvelopeParams::Defaults()
+{
+    Penvstretch = Denvstretch;
+    Pforcedrelease = Dforcedrelease;
+    Plinearenvelope = Dlinearenvelope;
+    PA_dt = DA_dt;
+    PD_dt = DD_dt;
+    PR_dt = DR_dt;
+    PA_val = DA_val;
+    PD_val = DD_val;
+    PS_val = DS_val;
+    PR_val = DR_val;
+    Pfreemode = 0;
+    EnvelopeParams::ConvertToFree(this);
+}
+
+void EnvelopeParams::store2defaults()
+{
+    Denvstretch = Penvstretch;
+    Dforcedrelease = Pforcedrelease;
+    Dlinearenvelope = Plinearenvelope;
+    DA_dt = PA_dt;
+    DD_dt = PD_dt;
+    DR_dt = PR_dt;
+    DA_val = PA_val;
+    DD_val = PD_val;
+    DS_val = PS_val;
+    DR_val = PR_val;
+}
+
 float EnvelopeParams::getdt(char i)
 {
-    float result = (powf(2.0f, Penvdt[static_cast<int>(i)] / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
-    return result;
+    return (powf(2.0f, Penvdt[static_cast<int>(i)] / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
 }
 
 /*
  * ADSR/ASR... initialisations
  */
-void EnvelopeParams::ADSRinit(
-        unsigned char A_dt,
-        unsigned char D_dt,
-        unsigned char S_val,
-        unsigned char R_dt)
+EnvelopeParams *EnvelopeParams::ADSRinit(
+    unsigned char envstretch,
+    unsigned char forcedrelease,
+    unsigned char A_dt,
+    unsigned char D_dt,
+    unsigned char S_val,
+    unsigned char R_dt)
 {
-    setpresettype("Penvamplitude");
-    Envmode = 1;
-    PA_dt = A_dt;
-    PD_dt = D_dt;
-    PS_val = S_val;
-    PR_dt = R_dt;
-    Pfreemode = 0;
-    converttofree();
+    auto result = new EnvelopeParams(envstretch, forcedrelease);
 
-    store2defaults();
+    result->setpresettype("Penvamplitude");
+    result->Envmode = 1;
+    result->PA_dt = A_dt;
+    result->PD_dt = D_dt;
+    result->PS_val = S_val;
+    result->PR_dt = R_dt;
+    result->Pfreemode = 0;
+    EnvelopeParams::ConvertToFree(result);
+    result->store2defaults();
+
+    return result;
 }
 
-void EnvelopeParams::ADSRinit_dB(
-        unsigned char A_dt,
-        unsigned char D_dt,
-        unsigned char S_val,
-        unsigned char R_dt)
+EnvelopeParams *EnvelopeParams::ADSRinit_dB(
+    unsigned char envstretch,
+    unsigned char forcedrelease,
+    unsigned char A_dt,
+    unsigned char D_dt,
+    unsigned char S_val,
+    unsigned char R_dt)
 {
-    setpresettype("Penvamplitude");
-    Envmode = 2;
-    PA_dt = A_dt;
-    PD_dt = D_dt;
-    PS_val = S_val;
-    PR_dt = R_dt;
-    Pfreemode = 0;
-    converttofree();
+    auto result = new EnvelopeParams(envstretch, forcedrelease);
 
-    store2defaults();
+    result->setpresettype("Penvamplitude");
+    result->Envmode = 2;
+    result->PA_dt = A_dt;
+    result->PD_dt = D_dt;
+    result->PS_val = S_val;
+    result->PR_dt = R_dt;
+    result->Pfreemode = 0;
+    EnvelopeParams::ConvertToFree(result);
+    result->store2defaults();
+
+    return result;
 }
 
-void EnvelopeParams::ASRinit(
-        unsigned char A_val,
-        unsigned char A_dt,
-        unsigned char R_val,
-        unsigned char R_dt)
+EnvelopeParams *EnvelopeParams::ASRinit(
+    unsigned char envstretch,
+    unsigned char forcedrelease,
+    unsigned char A_val,
+    unsigned char A_dt,
+    unsigned char R_val,
+    unsigned char R_dt)
 {
-    setpresettype("Penvfrequency");
-    Envmode = 3;
-    PA_val = A_val;
-    PA_dt = A_dt;
-    PR_val = R_val;
-    PR_dt = R_dt;
-    Pfreemode = 0;
-    converttofree();
+    auto result = new EnvelopeParams(envstretch, forcedrelease);
 
-    store2defaults();
+    result->setpresettype("Penvfrequency");
+    result->Envmode = 3;
+    result->PA_val = A_val;
+    result->PA_dt = A_dt;
+    result->PR_val = R_val;
+    result->PR_dt = R_dt;
+    result->Pfreemode = 0;
+    EnvelopeParams::ConvertToFree(result);
+    result->store2defaults();
+
+    return result;
 }
 
-void EnvelopeParams::ADSRinit_filter(
+EnvelopeParams *EnvelopeParams::ADSRinit_filter(
+    unsigned char envstretch,
+    unsigned char forcedrelease,
     unsigned char A_val,
     unsigned char A_dt,
     unsigned char D_val,
@@ -125,93 +169,103 @@ void EnvelopeParams::ADSRinit_filter(
     unsigned char R_dt,
     unsigned char R_val)
 {
-    setpresettype("Penvfilter");
-    Envmode = 4;
-    PA_val = A_val;
-    PA_dt = A_dt;
-    PD_val = D_val;
-    PD_dt = D_dt;
-    PR_dt = R_dt;
-    PR_val = R_val;
-    Pfreemode = 0;
-    converttofree();
-    store2defaults();
+    auto result = new EnvelopeParams(envstretch, forcedrelease);
+
+    result->setpresettype("Penvfilter");
+    result->Envmode = 4;
+    result->PA_val = A_val;
+    result->PA_dt = A_dt;
+    result->PD_val = D_val;
+    result->PD_dt = D_dt;
+    result->PR_dt = R_dt;
+    result->PR_val = R_val;
+    result->Pfreemode = 0;
+    EnvelopeParams::ConvertToFree(result);
+    result->store2defaults();
+
+    return result;
 }
 
-void EnvelopeParams::ASRinit_bw(
-        unsigned char A_val,
-        unsigned char A_dt,
-        unsigned char R_val,
-        unsigned char R_dt)
+EnvelopeParams *EnvelopeParams::ASRinit_bw(
+    unsigned char envstretch,
+    unsigned char forcedrelease,
+    unsigned char A_val,
+    unsigned char A_dt,
+    unsigned char R_val,
+    unsigned char R_dt)
 {
-    setpresettype("Penvbandwidth");
-    Envmode = 5;
-    PA_val = A_val;
-    PA_dt = A_dt;
-    PR_val = R_val;
-    PR_dt = R_dt;
-    Pfreemode = 0;
-    converttofree();
-    store2defaults();
+    auto result = new EnvelopeParams(envstretch, forcedrelease);
+
+    result->setpresettype("Penvbandwidth");
+    result->Envmode = 5;
+    result->PA_val = A_val;
+    result->PA_dt = A_dt;
+    result->PR_val = R_val;
+    result->PR_dt = R_dt;
+    result->Pfreemode = 0;
+    EnvelopeParams::ConvertToFree(result);
+    result->store2defaults();
+
+    return result;
 }
 
 /*
  * Convert the Envelope to freemode
  */
-void EnvelopeParams::converttofree()
+void EnvelopeParams::ConvertToFree(EnvelopeParams *envelope)
 {
-    switch (Envmode)
+    switch (envelope->Envmode)
     {
         case 1:
-            Penvpoints = 4;
-            Penvsustain = 2;
-            Penvval[0] = 0;
-            Penvdt[1] = PA_dt;
-            Penvval[1] = 127;
-            Penvdt[2] = PD_dt;
-            Penvval[2] = PS_val;
-            Penvdt[3] = PR_dt;
-            Penvval[3] = 0;
+            envelope->Penvpoints = 4;
+            envelope->Penvsustain = 2;
+            envelope->Penvval[0] = 0;
+            envelope->Penvdt[1] = envelope->PA_dt;
+            envelope->Penvval[1] = 127;
+            envelope->Penvdt[2] = envelope->PD_dt;
+            envelope->Penvval[2] = envelope->PS_val;
+            envelope->Penvdt[3] = envelope->PR_dt;
+            envelope->Penvval[3] = 0;
             break;
         case 2:
-            Penvpoints = 4;
-            Penvsustain = 2;
-            Penvval[0] = 0;
-            Penvdt[1] = PA_dt;
-            Penvval[1] = 127;
-            Penvdt[2] = PD_dt;
-            Penvval[2] = PS_val;
-            Penvdt[3] = PR_dt;
-            Penvval[3] = 0;
+            envelope->Penvpoints = 4;
+            envelope->Penvsustain = 2;
+            envelope->Penvval[0] = 0;
+            envelope->Penvdt[1] = envelope->PA_dt;
+            envelope->Penvval[1] = 127;
+            envelope->Penvdt[2] = envelope->PD_dt;
+            envelope->Penvval[2] = envelope->PS_val;
+            envelope->Penvdt[3] = envelope->PR_dt;
+            envelope->Penvval[3] = 0;
             break;
         case 3:
-            Penvpoints = 3;
-            Penvsustain = 1;
-            Penvval[0] = PA_val;
-            Penvdt[1] = PA_dt;
-            Penvval[1] = 64;
-            Penvdt[2] = PR_dt;
-            Penvval[2] = PR_val;
+            envelope->Penvpoints = 3;
+            envelope->Penvsustain = 1;
+            envelope->Penvval[0] = envelope->PA_val;
+            envelope->Penvdt[1] = envelope->PA_dt;
+            envelope->Penvval[1] = 64;
+            envelope->Penvdt[2] = envelope->PR_dt;
+            envelope->Penvval[2] = envelope->PR_val;
             break;
         case 4:
-            Penvpoints = 4;
-            Penvsustain = 2;
-            Penvval[0] = PA_val;
-            Penvdt[1] = PA_dt;
-            Penvval[1] = PD_val;
-            Penvdt[2] = PD_dt;
-            Penvval[2] = 64;
-            Penvdt[3] = PR_dt;
-            Penvval[3] = PR_val;
+            envelope->Penvpoints = 4;
+            envelope->Penvsustain = 2;
+            envelope->Penvval[0] = envelope->PA_val;
+            envelope->Penvdt[1] = envelope->PA_dt;
+            envelope->Penvval[1] = envelope->PD_val;
+            envelope->Penvdt[2] = envelope->PD_dt;
+            envelope->Penvval[2] = 64;
+            envelope->Penvdt[3] = envelope->PR_dt;
+            envelope->Penvval[3] = envelope->PR_val;
             break;
         case 5:
-            Penvpoints = 3;
-            Penvsustain = 1;
-            Penvval[0] = PA_val;
-            Penvdt[1] = PA_dt;
-            Penvval[1] = 64;
-            Penvdt[2] = PR_dt;
-            Penvval[2] = PR_val;
+            envelope->Penvpoints = 3;
+            envelope->Penvsustain = 1;
+            envelope->Penvval[0] = envelope->PA_val;
+            envelope->Penvdt[1] = envelope->PA_dt;
+            envelope->Penvval[1] = 64;
+            envelope->Penvdt[2] = envelope->PR_dt;
+            envelope->Penvval[2] = envelope->PR_val;
             break;
     }
 }
@@ -298,35 +352,7 @@ void EnvelopeParams::Deserialize(IPresetsSerializer *xml)
     }
 
     if (!Pfreemode)
-        converttofree();
-}
-
-void EnvelopeParams::Defaults()
-{
-    Penvstretch = Denvstretch;
-    Pforcedrelease = Dforcedrelease;
-    Plinearenvelope = Dlinearenvelope;
-    PA_dt = DA_dt;
-    PD_dt = DD_dt;
-    PR_dt = DR_dt;
-    PA_val = DA_val;
-    PD_val = DD_val;
-    PS_val = DS_val;
-    PR_val = DR_val;
-    Pfreemode = 0;
-    converttofree();
-}
-
-void EnvelopeParams::store2defaults()
-{
-    Denvstretch = Penvstretch;
-    Dforcedrelease = Pforcedrelease;
-    Dlinearenvelope = Plinearenvelope;
-    DA_dt = PA_dt;
-    DD_dt = PD_dt;
-    DR_dt = PR_dt;
-    DA_val = PA_val;
-    DD_val = PD_val;
-    DS_val = PS_val;
-    DR_val = PR_val;
+    {
+        EnvelopeParams::ConvertToFree(this);
+    }
 }

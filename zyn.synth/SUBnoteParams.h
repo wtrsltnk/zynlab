@@ -31,10 +31,8 @@
 
 class SUBnoteParameters : public Presets
 {
-    IFFTwrapper *_fft;
-
 public:
-    SUBnoteParameters(IFFTwrapper *fft);
+    SUBnoteParameters();
     virtual ~SUBnoteParameters();
 
     void Serialize(IPresetsSerializer *xml);
@@ -49,7 +47,7 @@ public:
     unsigned char PVolume;
     unsigned char PPanning;
     unsigned char PAmpVelocityScaleFunction;
-    EnvelopeParams AmpEnvelope;
+    EnvelopeParams *AmpEnvelope;
 
     //Frequency Parameters
     unsigned short int PDetune;

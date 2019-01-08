@@ -155,7 +155,7 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 
     ImGui::Separator();
 
-    Envelope("Amplitude Envelope", &parameters->AmpEnvelope);
+    Envelope("Amplitude Envelope", parameters->AmpEnvelope);
 }
 
 void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)

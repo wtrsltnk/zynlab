@@ -42,7 +42,7 @@ public:
 
     int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
     void relasekey();
-    int finished() const;
+    bool finished() const;
 
 private:
     void setup(float freq,
@@ -54,7 +54,7 @@ private:
     void initparameters(float freq);
     void KillNote();
 
-    SUBnoteParameters *pars;
+    SUBnoteParameters *_parameters;
 
     //parameters
     int stereo;

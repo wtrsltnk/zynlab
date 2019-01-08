@@ -3,7 +3,6 @@
 
 #include <aeffeditor.h>
 #include <zyn.synth/Controller.h>
-#include <zyn.synth/FFTwrapper.h>
 #include <zyn.synth/SUBnote.h>
 #include <zyn.synth/SUBnoteParams.h>
 #include <zyn.vst/vstcontrol.h>
@@ -29,7 +28,6 @@ public:
 class ZynInstrument : public VstPlugin
 {
     Controller ctl;
-    FFTwrapper *fft;
     VstInt32 currentProgram;
     SUBnoteParameters *parameters;
 

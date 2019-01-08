@@ -1693,12 +1693,9 @@ void ADnote::relasekey()
 /*
  * Check if the note is finished
  */
-int ADnote::finished() const
+bool ADnote::finished() const
 {
-    if (NoteEnabled == ON)
-        return 0;
-
-    return 1;
+    return NoteEnabled == OFF;
 }
 
 void ADnote::Voice::releasekey()

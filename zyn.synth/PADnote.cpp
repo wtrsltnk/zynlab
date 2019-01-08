@@ -415,7 +415,7 @@ int PADnote::noteout(float *outl, float *outr)
     return 1;
 }
 
-int PADnote::finished() const
+bool PADnote::finished() const
 {
     return finished_;
 }

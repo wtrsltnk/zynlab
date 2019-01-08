@@ -34,17 +34,14 @@ PADnoteParameters::PADnoteParameters(IMixer *mixer)
     oscilgen = new OscilGen(mixer->GetFFT(), resonance);
     oscilgen->ADvsPAD = true;
 
-    FreqEnvelope = new EnvelopeParams(0, 0);
-    FreqEnvelope->ASRinit(64, 50, 64, 60);
+    FreqEnvelope = EnvelopeParams::ASRinit(0, 0, 64, 50, 64, 60);
     FreqLfo = new LFOParams(70, 0, 64, 0, 0, 0, 0, 0);
 
-    AmpEnvelope = new EnvelopeParams(64, 1);
-    AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
+    AmpEnvelope = EnvelopeParams::ADSRinit_dB(64, 1, 0, 40, 127, 25);
     AmpLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 1);
 
     GlobalFilter = new FilterParams(2, 94, 40);
-    FilterEnvelope = new EnvelopeParams(0, 1);
-    FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
+    FilterEnvelope = EnvelopeParams::ADSRinit_filter(0, 1, 64, 40, 64, 70, 60, 64);
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
 
     for (auto &i : sample)
@@ -176,7 +173,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
     for (int i = 0; i < size * supersample; ++i)
     {
         bool makezero = false;
-        float x = i * 1.0f / (size * (float)supersample);
+        float x = i * 1.0f / (size * static_cast<float>(supersample));
 
         float origx = x;
 
@@ -300,7 +297,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
             break;
     }
 
-    float result = 1.0f - 2.0f * i / (float)size;
+    float result = 1.0f - 2.0f * i / static_cast<float>(size);
     return result;
 }
 
@@ -310,7 +307,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
  */
 float PADnoteParameters::setPbandwidth(int Pbandwidth)
 {
-    this->Pbandwidth = Pbandwidth;
+    this->Pbandwidth = static_cast<unsigned char>(Pbandwidth);
     float result = powf(Pbandwidth / 1000.0f, 1.1f);
     result = powf(10.0f, result * 4.0f) * 0.25f;
     return result;
@@ -331,14 +328,14 @@ float PADnoteParameters::getNhr(int n)
     switch (Phrpos.type)
     {
         case 1:
-            thresh = (int)(par2 * par2 * 100.0f) + 1;
+            thresh = static_cast<int>(par2 * par2 * 100.0f) + 1;
             if (n < thresh)
                 result = n;
             else
                 result = 1.0f + n0 + (n0 - thresh + 1.0f) * par1 * 8.0f;
             break;
         case 2:
-            thresh = (int)(par2 * par2 * 100.0f) + 1;
+            thresh = static_cast<int>(par2 * par2 * 100.0f) + 1;
             if (n < thresh)
                 result = n;
             else

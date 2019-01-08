@@ -93,7 +93,7 @@ return(nearestpoint);} {}
   Function {draw()} {private
   } {
     code {int ox=x(),oy=y(),lx=w(),ly=h();
-if (env->Pfreemode==0) env->converttofree();
+if (env->Pfreemode==0) EnvelopeParams::ConvertToFree(env);
 int npoints=env->Penvpoints;
 
 if (active_r()) fl_color(FL_BLACK);

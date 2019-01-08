@@ -39,24 +39,23 @@ ADnoteParameters::ADnoteParameters(IFFTwrapper *fft)
     setpresettype("Padsynth");
 
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
+    {
         EnableVoice(nvoice);
+    }
 
     Defaults();
 }
 
 ADnoteGlobalParam::ADnoteGlobalParam()
 {
-    FreqEnvelope = new EnvelopeParams(0, 0);
-    FreqEnvelope->ASRinit(64, 50, 64, 60);
+    FreqEnvelope = EnvelopeParams::ASRinit(0, 0, 64, 50, 64, 60);
     FreqLfo = new LFOParams(70, 0, 64, 0, 0, 0, 0, 0);
 
-    AmpEnvelope = new EnvelopeParams(64, 1);
-    AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
+    AmpEnvelope = EnvelopeParams::ADSRinit_dB(64, 1, 0, 40, 127, 25);
     AmpLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 1);
 
     GlobalFilter = new FilterParams(2, 94, 40);
-    FilterEnvelope = new EnvelopeParams(0, 1);
-    FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
+    FilterEnvelope = EnvelopeParams::ADSRinit_filter(0, 1, 64, 40, 64, 70, 60, 64);
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
     Reson = new Resonance();
 }
@@ -67,7 +66,9 @@ void ADnoteParameters::Defaults()
     GlobalPar.Defaults();
 
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
+    {
         Defaults(nvoice);
+    }
 
     VoicePar[0].Enabled = 1;
 }
@@ -192,23 +193,18 @@ void ADnoteVoiceParam::Enable(IFFTwrapper *fft, Resonance *Reson)
     OscilSmp = new OscilGen(fft, Reson);
     FMSmp = new OscilGen(fft, nullptr);
 
-    AmpEnvelope = new EnvelopeParams(64, 1);
-    AmpEnvelope->ADSRinit_dB(0, 100, 127, 100);
+    AmpEnvelope = EnvelopeParams::ADSRinit_dB(64, 1, 0, 100, 127, 100);
     AmpLfo = new LFOParams(90, 32, 64, 0, 0, 30, 0, 1);
 
-    FreqEnvelope = new EnvelopeParams(0, 0);
-    FreqEnvelope->ASRinit(30, 40, 64, 60);
+    FreqEnvelope = EnvelopeParams::ASRinit(0, 0, 30, 40, 64, 60);
     FreqLfo = new LFOParams(50, 40, 0, 0, 0, 0, 0, 0);
 
     VoiceFilter = new FilterParams(2, 50, 60);
-    FilterEnvelope = new EnvelopeParams(0, 0);
-    FilterEnvelope->ADSRinit_filter(90, 70, 40, 70, 10, 40);
+    FilterEnvelope = EnvelopeParams::ADSRinit_filter(0, 0, 90, 70, 40, 70, 10, 40);
     FilterLfo = new LFOParams(50, 20, 64, 0, 0, 0, 0, 2);
 
-    FMFreqEnvelope = new EnvelopeParams(0, 0);
-    FMFreqEnvelope->ASRinit(20, 90, 40, 80);
-    FMAmpEnvelope = new EnvelopeParams(64, 1);
-    FMAmpEnvelope->ADSRinit(80, 90, 127, 100);
+    FMFreqEnvelope = EnvelopeParams::ASRinit(0, 0, 20, 90, 40, 80);
+    FMAmpEnvelope = EnvelopeParams::ADSRinit(64, 1, 80, 90, 127, 100);
 }
 
 /*

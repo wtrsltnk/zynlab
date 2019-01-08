@@ -1,17 +1,18 @@
 #include "vst.instrument.h"
 
+#include <cmath>
+
 #define NUM_PROGRAMS 2
 #define NUM_PARAMS 0
 
 ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
-    : VstPlugin(audioMaster, NUM_PROGRAMS, NUM_PARAMS), fft(nullptr), currentProgram(0),
+    : VstPlugin(audioMaster, NUM_PROGRAMS, NUM_PARAMS), currentProgram(0),
       parameters(nullptr)
 {
     ctl.Init();
     ctl.defaults();
-    fft = new FFTwrapper(settings.oscilsize);
 
-    parameters = new SUBnoteParameters(fft);
+    parameters = new SUBnoteParameters();
     parameters->Defaults();
 
     setNumInputs(0);
@@ -23,7 +24,6 @@ ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
 ZynInstrument::~ZynInstrument()
 {
     delete parameters;
-    delete fft;
     delete editor;
 }
 

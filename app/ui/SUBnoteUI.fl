@@ -151,7 +151,7 @@ class SUBnoteUI {open : {public PresetsUI_}
         Fl_Group ampenv {
           label {SUBsynth - Amplitude Envelope} open
           xywh {10 65 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(&pars->AmpEnvelope);}
+          code0 {o->init(pars->AmpEnvelope);}
           class EnvelopeUI
         } {}
       }
