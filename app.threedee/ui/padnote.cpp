@@ -5,15 +5,24 @@
 
 char const *const PADeditorID = "PAD editor";
 
-void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
+void AppThreeDee::PADNoteEditor(Channel *channel, int instrumentIndex)
 {
-    if (!_showPADNoteEditor)
+    if (!_showPADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
     {
         return;
     }
 
-    ImGui::Begin(PADeditorID, &_showPADNoteEditor);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+    auto *parameters = channel->instruments[instrumentIndex].padpars;
+
+    if (channel->instruments[instrumentIndex].Ppadenabled == 0)
+    {
+        ImGui::Text("PAD editor is disabled");
+        if (ImGui::Button("Enable PAD synth"))
+        {
+            channel->instruments[instrumentIndex].Ppadenabled = 1;
+        }
+        return;
+    }
 
     if (ImGui::BeginTabBar("PADnoteTab"))
     {
@@ -40,9 +49,6 @@ void AppThreeDee::PADNoteEditor(PADnoteParameters *parameters)
 
         ImGui::EndTabBar();
     }
-
-    ImGui::PopStyleVar();
-    ImGui::End();
 }
 
 void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)

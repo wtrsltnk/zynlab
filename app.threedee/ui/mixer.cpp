@@ -183,9 +183,6 @@ void AppThreeDee::ImGuiMasterTrack()
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
-        auto useLargeMode = availableRegion.y > sliderBaseHeight * largeModeTreshold;
-
-        ImGui::TextCentered(ImVec2(width, 20), "master");
 
         // Output devices
         auto sinks = toCharVector(Nio::GetSinks());
@@ -240,6 +237,7 @@ void AppThreeDee::ImGuiMasterTrack()
                 if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - (_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
                 {
                     _currentSystemEffect = fx;
+                    _showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
                 if (_mixer->sysefx[fx].geteffect() != 0)
@@ -248,6 +246,7 @@ void AppThreeDee::ImGuiMasterTrack()
                     if (ImGui::Button("x", ImVec2(20, 20)))
                     {
                         _currentSystemEffect = fx;
+                        _showSystemEffectsEditor = true;
                         _mixer->sysefx[fx].changeeffect(0);
                     }
                     ImGui::ShowTooltipOnHover("Remove system effect");
@@ -267,7 +266,7 @@ void AppThreeDee::ImGuiMasterTrack()
             _mixer->microtonal.Pglobalfinedetune = fineDetune;
         }
 
-        auto faderHeight = ImGui::GetWindowContentRegionMax().y - ImGui::GetCursorPos().y - io.ItemSpacing.y;
+        auto faderHeight = ImGui::GetWindowContentRegionMax().y - ImGui::GetCursorPos().y - io.ItemSpacing.y - 20;
 
         // Master volume
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
@@ -290,6 +289,8 @@ void AppThreeDee::ImGuiMasterTrack()
             }
         }
         ImGui::ShowTooltipOnHover("Master volume");
+
+        ImGui::TextCentered(ImVec2(width, 20), "master");
     }
     ImGui::EndChild();
 }
@@ -316,19 +317,27 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         ImGui::PushStyleColor(ImGuiCol_Border, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
     }
 
+    std::stringstream trackTooltip;
+    trackTooltip << "[" << instrumentCategoryNames[channel->info.Ptype] << "]";
+    if (channel->Pname[0])
+    {
+        trackTooltip << " " << channel->Pname;
+    }
+    if (channel->info.Pauthor[0])
+    {
+        trackTooltip << " by " << channel->info.Pauthor;
+    }
+    if (channel->info.Pcomments[0])
+    {
+        trackTooltip << "\n---\n"
+                     << channel->info.Pcomments;
+    }
+
     ImGui::BeginChild("Track", trackSize, true);
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
         auto useLargeMode = availableRegion.y > sliderBaseHeight * largeModeTreshold;
-
-        char tmp[32] = {0};
-        sprintf(tmp, "track %d", track + 1);
-        ImGui::TextCentered(ImVec2(width, 20), tmp);
-        if (ImGui::IsItemClicked())
-        {
-            _sequencer.ActiveInstrument(track);
-        }
 
         auto trackEnabled = channel->Penabled == 1;
 
@@ -393,6 +402,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         {
             channel->instruments[0].Padenabled = adEnabled ? 1 : 0;
             _sequencer.ActiveInstrument(track);
+            if (adEnabled)
+            {
+                _showADNoteEditor = true;
+            }
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
         ImGui::SameLine();
@@ -410,6 +423,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         {
             channel->instruments[0].Psubenabled = subEnabled ? 1 : 0;
             _sequencer.ActiveInstrument(track);
+            if (subEnabled)
+            {
+                _showSUBNoteEditor = true;
+            }
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The SUB synth is enabled" : "The AD synth is disabled");
         ImGui::SameLine();
@@ -427,6 +444,10 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         {
             channel->instruments[0].Ppadenabled = padEnabled ? 1 : 0;
             _sequencer.ActiveInstrument(track);
+            if (padEnabled)
+            {
+                _showPADNoteEditor = true;
+            }
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The PAD synth is enabled" : "The AD synth is disabled");
         ImGui::SameLine();
@@ -454,6 +475,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
                 {
                     _currentSystemEffect = fx;
+                    _showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
                 if (ImGui::IsItemClicked())
@@ -504,6 +526,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                     {
                         _currentInsertEffect = fx;
                         _sequencer.ActiveInstrument(track);
+                        _showInsertEffectsEditor = true;
                         ImGui::SetWindowFocus(InsertionFxEditorID);
                     }
                     ImGui::SameLine();
@@ -557,6 +580,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 {
                     _sequencer.ActiveInstrument(track);
                     _currentInstrumentEffect = fx;
+                    _showInstrumentEffectsEditor = true;
                     ImGui::SetWindowFocus(InstrumentFxEditorID);
                 }
                 if (channel->partefx[fx]->geteffect() != 0)
@@ -611,7 +635,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 _openChangeInstrumentType = track;
                 _sequencer.ActiveInstrument(track);
             }
-            ImGui::ShowTooltipOnHover(instrumentCategoryNames[channel->info.Ptype]);
+            ImGui::ShowTooltipOnHover(trackTooltip.str().c_str());
         }
 
         auto panning = channel->Ppanning;
@@ -625,7 +649,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         channel->ComputePeakLeftAndRight(channel->Pvolume, peakl, peakr);
 
         auto start = ImGui::GetCursorPos();
-        auto faderHeight = ImGui::GetWindowContentRegionMax().y - start.y - io.ItemSpacing.y;
+        auto faderHeight = ImGui::GetWindowContentRegionMax().y - start.y - io.ItemSpacing.y - 20;
 
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
         {
@@ -648,6 +672,16 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 _sequencer.ActiveInstrument(track);
             }
             ImGui::ShowTooltipOnHover("Track volume");
+        }
+
+        char tmp[32] = {0};
+        sprintf(tmp, "track %d", track + 1);
+        ImGui::TextCentered(ImVec2(width, 20), tmp);
+        ImGui::ShowTooltipOnHover(trackTooltip.str().c_str());
+
+        if (ImGui::IsItemClicked())
+        {
+            _sequencer.ActiveInstrument(track);
         }
     }
     ImGui::EndChild();

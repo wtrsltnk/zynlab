@@ -32,7 +32,8 @@ static ImVec4 clear_color = ImColor(90, 90, 100);
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
-      _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showPianoRollPatternEditor(false), _showMixer(true),
+      _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showPianoRollPatternEditor(false),
+      _showSystemEffectsEditor(false), _showInsertEffectsEditor(false), _showInstrumentEffectsEditor(false), _showMixer(true),
       _openSelectInstrument(-1), _openChangeInstrumentType(-1),
       _display_w(800), _display_h(600),
       _showSelectedTrack(true), _currentBank(0),
@@ -207,7 +208,7 @@ void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
     {
         ImGui::SameLine();
         ImGui::PushID(patternIndex + trackIndex * 1000);
-        bool isActive = trackIndex == _sequencer.ActiveInstrument() && patternIndex == _sequencer.ActivePattern();
+        bool isActive = (trackIndex == _sequencer.ActiveInstrument() && patternIndex == _sequencer.ActivePattern());
         if (isActive)
         {
             ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -339,21 +340,18 @@ static const float stepWidth = 20.0f;
 
 void AppThreeDee::ImGuiStepPatternEditorWindow()
 {
-    if (!_showPatternEditor)
-    {
-        return;
-    }
+    ImGui::Begin("Pattern editor", &_showPatternEditor);
 
-    if (!_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
+    if (!_showPatternEditor || !_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
     {
         _sequencer.ActivePattern(-1);
+        ImGui::End();
         return;
     }
 
     auto &style = ImGui::GetStyle();
     auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
 
-    ImGui::Begin("Pattern editor", &_showPatternEditor);
     char tmp[256];
     strcpy(tmp, selectedPattern._name.c_str());
     if (ImGui::InputText("pattern name", tmp, 256))
@@ -522,8 +520,8 @@ void AppThreeDee::ImGuiPianoRollPatternEditorWindow()
 
         auto step = mousex - (noteLabelWidth + style.ItemSpacing.x);
         if (ImGui::IsWindowFocused() && mousey >= min.y &&
-                mousey <= (min.y + ImGui::GetTextLineHeight()) && step > 0 &&
-                !selectedPattern.IsStepCovered(static_cast<unsigned char>(i), static_cast<int>(step)))
+            mousey <= (min.y + ImGui::GetTextLineHeight()) && step > 0 &&
+            !selectedPattern.IsStepCovered(static_cast<unsigned char>(i), static_cast<int>(step)))
         {
             min.x = std::floor((noteLabelWidth + style.ItemSpacing.x + step) / stepWidth) * stepWidth;
             ImGui::SetCursorPos(min);
@@ -581,21 +579,21 @@ void AppThreeDee::Render()
     ImGuiChangeInstrumentTypePopup();
 
     auto channel = _mixer->GetChannel(_sequencer.ActiveInstrument());
-    if (channel != nullptr)
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     {
-        if (channel->instruments[0].Padenabled)
-        {
-            ADNoteEditor(channel->instruments[0].adpars);
-        }
-        if (channel->instruments[0].Psubenabled)
-        {
-            SUBNoteEditor(channel->instruments[0].subpars);
-        }
-        if (channel->instruments[0].Ppadenabled)
-        {
-            PADNoteEditor(channel->instruments[0].padpars);
-        }
+        ImGui::Begin(ADeditorID, &_showADNoteEditor);
+        ADNoteEditor(channel, 0);
+        ImGui::End();
+
+        ImGui::Begin(SUBeditorID, &_showSUBNoteEditor);
+        SUBNoteEditor(channel, 0);
+        ImGui::End();
+
+        ImGui::Begin(PADeditorID, &_showPADNoteEditor);
+        PADNoteEditor(channel, 0);
+        ImGui::End();
     }
+    ImGui::PopStyleVar();
 
     ImGuiPlayback();
 

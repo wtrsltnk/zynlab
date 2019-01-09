@@ -58,6 +58,9 @@ private:
     bool _showInstrumentEditor;
     bool _showPatternEditor;
     bool _showPianoRollPatternEditor;
+    bool _showSystemEffectsEditor;
+    bool _showInsertEffectsEditor;
+    bool _showInstrumentEffectsEditor;
     bool _showMixer;
     int _openSelectInstrument;
     int _openChangeInstrumentType;
@@ -110,7 +113,7 @@ private:
 
     // AD note
     bool _showADNoteEditor;
-    void ADNoteEditor(ADnoteParameters *parameters);
+    void ADNoteEditor(Channel *channel, int instrumentIndex);
     void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
     void ADNoteEditorFilter(ADnoteGlobalParam *parameters);
     void ADNoteEditorFrequency(ADnoteGlobalParam *parameters);
@@ -124,7 +127,7 @@ private:
 
     // SUB note
     bool _showSUBNoteEditor;
-    void SUBNoteEditor(SUBnoteParameters *parameters);
+    void SUBNoteEditor(Channel *channel, int instrumentIndex);
     void SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters);
     void SUBNoteEditorAmplitude(SUBnoteParameters *parameters);
     void SUBNoteEditorBandwidth(SUBnoteParameters *parameters);
@@ -134,7 +137,7 @@ private:
 
     // PAD note
     bool _showPADNoteEditor;
-    void PADNoteEditor(PADnoteParameters *parameters);
+    void PADNoteEditor(Channel *channel, int instrumentIndex);
     void PADNoteEditorAmplitude(PADnoteParameters *parameters);
 
     // LFO

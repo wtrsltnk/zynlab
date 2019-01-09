@@ -17,15 +17,24 @@ static char const *overtone_positions[] = {
 
 char const *const SUBeditorID = "SUB editor";
 
-void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
+void AppThreeDee::SUBNoteEditor(Channel *channel, int instrumentIndex)
 {
-    if (!_showSUBNoteEditor)
+    if (!_showSUBNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
     {
         return;
     }
 
-    ImGui::Begin(SUBeditorID, &_showSUBNoteEditor);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+    auto *parameters = channel->instruments[instrumentIndex].subpars;
+
+    if (channel->instruments[instrumentIndex].Psubenabled == 0)
+    {
+        ImGui::Text("SUB editor is disabled");
+        if (ImGui::Button("Enable SUB synth"))
+        {
+            channel->instruments[instrumentIndex].Psubenabled = 1;
+        }
+        return;
+    }
 
     if (ImGui::BeginTabBar("SUBnoteTab"))
     {
@@ -85,9 +94,6 @@ void AppThreeDee::SUBNoteEditor(SUBnoteParameters *parameters)
         }
         ImGui::EndTabBar();
     }
-
-    ImGui::PopStyleVar();
-    ImGui::End();
 }
 
 void AppThreeDee::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)

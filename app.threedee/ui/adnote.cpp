@@ -23,15 +23,24 @@ static char const *detune_types[] = {
 
 char const *const ADeditorID = "AD editor";
 
-void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
+void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
 {
-    if (!_showADNoteEditor)
+    if (!_showADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
     {
         return;
     }
 
-    ImGui::Begin(ADeditorID, &_showADNoteEditor);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+    auto *parameters = channel->instruments[instrumentIndex].adpars;
+
+    if (channel->instruments[instrumentIndex].Padenabled == 0)
+    {
+        ImGui::Text("AD editor is disabled");
+        if (ImGui::Button("Enable AD synth"))
+        {
+            channel->instruments[instrumentIndex].Padenabled = 1;
+        }
+        return;
+    }
 
     if (ImGui::BeginTabBar("ADnoteTab"))
     {
@@ -83,9 +92,6 @@ void AppThreeDee::ADNoteEditor(class ADnoteParameters *parameters)
         }
         ImGui::EndTabBar();
     }
-
-    ImGui::PopStyleVar();
-    ImGui::End();
 }
 
 void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)

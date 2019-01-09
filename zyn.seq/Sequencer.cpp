@@ -245,7 +245,6 @@ void Sequencer::RemoveActivePattern()
     }
 
     tracksOfPatterns[_activeInstrument].erase(_activePattern);
-    _activeInstrument = -1;
     _activePattern = -1;
 }
 

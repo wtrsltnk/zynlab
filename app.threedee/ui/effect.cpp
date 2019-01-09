@@ -149,45 +149,54 @@ static char const *const eqBandTypes[] = {
 
 void AppThreeDee::InsertEffectEditor()
 {
-    if (_currentInsertEffect < 0 || _currentInsertEffect >= NUM_INS_EFX)
+    if (!_showInsertEffectsEditor)
     {
         return;
     }
 
-    ImGui::Begin(InsertionFxEditorID);
-
-    EffectEditor(&_mixer->insefx[_currentInsertEffect]);
-
+    if (ImGui::Begin(InsertionFxEditorID, &_showInsertEffectsEditor))
+    {
+        if (_currentInsertEffect >= 0 && _currentInsertEffect < NUM_INS_EFX)
+        {
+            EffectEditor(&_mixer->insefx[_currentInsertEffect]);
+        }
+    }
     ImGui::End();
 }
 
 void AppThreeDee::SystemEffectEditor()
 {
-    if (_currentSystemEffect < 0 || _currentSystemEffect >= NUM_SYS_EFX)
+    if (!_showSystemEffectsEditor)
     {
         return;
     }
 
-    ImGui::Begin(SystemFxEditorID);
-
-    EffectEditor(&_mixer->sysefx[_currentSystemEffect]);
-
+    if (ImGui::Begin(SystemFxEditorID, &_showSystemEffectsEditor))
+    {
+        if (_currentSystemEffect >= 0 && _currentSystemEffect < NUM_SYS_EFX)
+        {
+            EffectEditor(&_mixer->sysefx[_currentSystemEffect]);
+        }
+    }
     ImGui::End();
 }
 
 void AppThreeDee::InstrumentEffectEditor()
 {
-    if (_currentInstrumentEffect < 0 || _currentInstrumentEffect >= NUM_CHANNEL_EFX)
+    if (!_showInstrumentEffectsEditor)
     {
         return;
     }
 
-    auto channel = _mixer->GetChannel(_sequencer.ActiveInstrument());
+    if (ImGui::Begin(InstrumentFxEditorID, &_showInstrumentEffectsEditor))
+    {
+        auto channel = _mixer->GetChannel(_sequencer.ActiveInstrument());
 
-    ImGui::Begin(InstrumentFxEditorID);
-
-    EffectEditor(channel->partefx[_currentInstrumentEffect]);
-
+        if (_currentInstrumentEffect >= 0 && _currentInstrumentEffect < NUM_CHANNEL_EFX)
+        {
+            EffectEditor(channel->partefx[_currentInstrumentEffect]);
+        }
+    }
     ImGui::End();
 }
 
