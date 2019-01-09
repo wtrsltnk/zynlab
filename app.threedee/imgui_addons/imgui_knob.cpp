@@ -2,6 +2,29 @@
 #include <cmath>
 #include <stdio.h>
 
+void ImGui::UvMeter(char const *label, ImVec2 const &size, int *value, int v_min, int v_max)
+{
+    ImGuiIO &io = ImGui::GetIO();
+    ImGuiStyle &style = ImGui::GetStyle();
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+
+    ImGui::InvisibleButton(label, size);
+
+    float stepHeight = (v_max - v_min + 1) / size.y;
+    auto y = pos.y + size.y;
+    auto hue = 0.4f;
+    auto sat = 0.6f;
+    for (int i = v_min; i <= v_max; i += 5)
+    {
+        hue = 0.4f - (static_cast<float>(i) / static_cast<float>(v_max - v_min)) / 2.0f;
+        sat = (*value < i ? 0.0f : 0.6f);
+        draw_list->AddRectFilled(ImVec2(pos.x, y), ImVec2(pos.x + size.x, y - (stepHeight * 4)), static_cast<ImU32>(ImColor::HSV(hue, sat, 0.6f)));
+        y = pos.y + size.y - (i * stepHeight);
+    }
+}
+
 bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, ImVec2 const &size, char const *tooltip)
 {
     bool showLabel = label[0] != '#' && label[1] != '#' && label[0] != '\0';

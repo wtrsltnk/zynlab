@@ -21,4 +21,6 @@ robocopy "zynaddsubfx-deps/mingw-32bit/bin" zynlab-build/app.threedee *.dll
 
 Also added some UI ideas:
 
+![Screenshot of zyn-studio](screenshots/20190109.png)
+
 ![Screenshot of zyn-studio](screenshots/20181224.png)

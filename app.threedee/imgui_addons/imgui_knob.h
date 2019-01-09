@@ -6,6 +6,8 @@
 
 namespace ImGui {
 
+IMGUI_API void UvMeter(char const *label, ImVec2 const &size, int *value, int v_min, int v_max);
+
 IMGUI_API bool Knob(char const *label, float *p_value,
                     float v_min, float v_max,
                     ImVec2 const &size, char const *tooltip = nullptr);

@@ -341,7 +341,7 @@ void AppThreeDee::ImGuiMasterTrack()
             ImGui::Spacing();
             ImGui::SameLine(0.0f, (width - (60.0f + (4 * io.ItemSpacing.x))) / 2.0f);
 
-            ImGui::VSliderInt("##mastervoll", ImVec2(20, faderHeight), &irmsdbl, 0, static_cast<int>(faderHeight));
+            ImGui::UvMeter("##mastervoll", ImVec2(20, faderHeight), &irmsdbl, 0, static_cast<int>(faderHeight));
             ImGui::SameLine();
 
             ImGui::Spacing();
@@ -355,7 +355,7 @@ void AppThreeDee::ImGuiMasterTrack()
             ImGui::Spacing();
 
             ImGui::SameLine();
-            ImGui::VSliderInt("##mastervolr", ImVec2(20, faderHeight), &irmsdbr, 0, static_cast<int>(faderHeight));
+            ImGui::UvMeter("##mastervolr", ImVec2(20, faderHeight), &irmsdbr, 0, static_cast<int>(faderHeight));
         }
         ImGui::ShowTooltipOnHover("Master volume");
 
@@ -741,13 +741,8 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             int idb = static_cast<int>(db);
 
             ImGui::Spacing();
-            ImGui::SameLine(0.0f, (width - (60.0f + (4 * io.ItemSpacing.x))) / 2.0f);
+            ImGui::SameLine(0.0f, (width - (40.0f + (3 * io.ItemSpacing.x))) / 2.0f);
 
-            ImGui::VSliderInt("##instrument_uvl", ImVec2(20, faderHeight), &idb, 0, static_cast<int>(faderHeight));
-            ImGui::SameLine();
-
-            ImGui::Spacing();
-            ImGui::SameLine();
             int v = static_cast<int>(channel->Pvolume);
             if (ImGui::VSliderInt("##vol", ImVec2(20, faderHeight), &v, 0, 127))
             {
@@ -759,7 +754,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             ImGui::Spacing();
 
             ImGui::SameLine();
-            ImGui::VSliderInt("##instrument_uvr", ImVec2(20, faderHeight), &idb, 0, static_cast<int>(faderHeight));
+            ImGui::UvMeter("##instrument_uvr", ImVec2(20, faderHeight), &idb, 0, static_cast<int>(faderHeight));
         }
 
         char tmp[32] = {0};
