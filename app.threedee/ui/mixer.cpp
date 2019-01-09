@@ -230,40 +230,36 @@ void AppThreeDee::ImGuiMasterTrack()
         ImGui::Separator();
 
         // System effects
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-        if (useLargeMode)
+        if (ImGui::CollapsingHeader("Sys FX"))
         {
-            ImGui::TextCentered(ImVec2(width, 20), "System FX");
-        }
-        for (int fx = 0; fx < NUM_SYS_EFX; fx++)
-        {
-            ImGui::PushID(fx);
-            ImGui::PushStyleColor(ImGuiCol_Button, _mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-            if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - (_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+            for (int fx = 0; fx < NUM_SYS_EFX; fx++)
             {
-                _currentSystemEffect = fx;
-                ImGui::SetWindowFocus(SystemFxEditorID);
-            }
-            if (_mixer->sysefx[fx].geteffect() != 0)
-            {
-                ImGui::SameLine();
-                if (ImGui::Button("x", ImVec2(20, 20)))
+                ImGui::PushID(fx);
+                ImGui::PushStyleColor(ImGuiCol_Button, _mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+                if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - (_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
                 {
                     _currentSystemEffect = fx;
-                    _mixer->sysefx[fx].changeeffect(0);
+                    ImGui::SetWindowFocus(SystemFxEditorID);
                 }
-                ImGui::ShowTooltipOnHover("Remove system effect");
+                if (_mixer->sysefx[fx].geteffect() != 0)
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button("x", ImVec2(20, 20)))
+                    {
+                        _currentSystemEffect = fx;
+                        _mixer->sysefx[fx].changeeffect(0);
+                    }
+                    ImGui::ShowTooltipOnHover("Remove system effect");
+                }
+                ImGui::PopStyleColor(1);
+                ImGui::PopID();
             }
-            ImGui::PopStyleColor(1);
-            ImGui::PopID();
+
+            ImGui::PopStyleVar();
+
+            ImGui::Spacing();
         }
-
-        ImGui::PopStyleVar();
-
-        ImGui::Spacing();
-
-        ImGui::Separator();
-
         // Fine detune
         auto fineDetune = _mixer->microtonal.Pglobalfinedetune;
         if (ImGui::KnobUchar("fine detune", &fineDetune, 0, 127, ImVec2(width, 40), "Global fine detune"))
@@ -366,30 +362,29 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::PopStyleColor(8);
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         // Select midi channel
-        if (useLargeMode)
+        if (ImGui::CollapsingHeader("MIDI channel"))
         {
-            ImGui::TextCentered(ImVec2(width, 20), "MIDI channel");
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+            ImGui::PushItemWidth(width);
+            if (ImGui::DropDown("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
+            {
+                _sequencer.ActiveInstrument(track);
+            }
+
             if (ImGui::IsItemClicked())
             {
                 _sequencer.ActiveInstrument(track);
             }
-        }
-        ImGui::PushItemWidth(width);
-        if (ImGui::DropDown("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
-        {
-            _sequencer.ActiveInstrument(track);
-        }
 
+            ImGui::PopStyleVar();
+
+            ImGui::Spacing();
+        }
         if (ImGui::IsItemClicked())
         {
             _sequencer.ActiveInstrument(track);
         }
-
-        ImGui::PopStyleVar();
-
-        ImGui::Spacing();
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         // AD synth enable/disable + edit button
@@ -447,155 +442,164 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        ImGui::Separator();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-
         // System effect sends
-        if (useLargeMode)
+        if (ImGui::CollapsingHeader("Sys FX sends"))
         {
-            ImGui::TextCentered(ImVec2(width, 20), "Sys FX sends");
-            if (ImGui::IsItemClicked())
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+
+            for (int fx = 0; fx < NUM_SYS_EFX; fx++)
             {
-                _sequencer.ActiveInstrument(track);
+                ImGui::PushID(fx);
+                ImGui::PushStyleColor(ImGuiCol_Button, _mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+                if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
+                {
+                    _currentSystemEffect = fx;
+                    ImGui::SetWindowFocus(SystemFxEditorID);
+                }
+                if (ImGui::IsItemClicked())
+                {
+                    _sequencer.ActiveInstrument(track);
+                }
+
+                ImGui::SameLine();
+
+                char label[64] = {'\0'};
+                sprintf(label, "##send_%d", fx);
+                char tooltip[64] = {'\0'};
+                sprintf(tooltip, "Volume for send to system effect %d", (fx + 1));
+                if (ImGui::KnobUchar(label, &(_mixer->Psysefxvol[fx][track]), 0, 127, ImVec2(20, 20), tooltip))
+                {
+                    _mixer->setPsysefxvol(track, fx, _mixer->Psysefxvol[fx][track]);
+                }
+                if (ImGui::IsItemClicked())
+                {
+                    _sequencer.ActiveInstrument(track);
+                }
+
+                ImGui::PopStyleColor(1);
+                ImGui::PopID();
             }
+
+            ImGui::PopStyleVar(1);
+
+            ImGui::Spacing();
+        }
+        if (ImGui::IsItemClicked())
+        {
+            _sequencer.ActiveInstrument(track);
         }
 
-        for (int fx = 0; fx < NUM_SYS_EFX; fx++)
+        // Insertion effects
+        if (ImGui::CollapsingHeader("Insert FX"))
         {
-            ImGui::PushID(fx);
-            ImGui::PushStyleColor(ImGuiCol_Button, _mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-            if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+
+            int fillCount = mostInsertEffectsPerChannel;
+            for (int fx = 0; fx < NUM_INS_EFX; fx++)
             {
-                _currentSystemEffect = fx;
-                ImGui::SetWindowFocus(SystemFxEditorID);
+                ImGui::PushID(100 + fx);
+                if (_mixer->Pinsparts[fx] == track)
+                {
+                    if (ImGui::Button(effectNames[_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
+                    {
+                        _currentInsertEffect = fx;
+                        _sequencer.ActiveInstrument(track);
+                        ImGui::SetWindowFocus(InsertionFxEditorID);
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("x", ImVec2(20, 20)))
+                    {
+                        RemoveInsertFxFromTrack(fx);
+                        _sequencer.ActiveInstrument(track);
+                    }
+                    ImGui::ShowTooltipOnHover("Remove insert effect from track");
+                    fillCount--;
+                }
+                ImGui::PopID();
             }
-            if (ImGui::IsItemClicked())
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+            for (int i = 0; i < fillCount; i++)
+            {
+                ImGui::PushID(i);
+                ImGui::Button("##empty", ImVec2(width, 20));
+                ImGui::PopID();
+            }
+            ImGui::PopStyleColor(3);
+
+            if (ImGui::Button("+", ImVec2(width, 20)))
+            {
+                AddInsertFx(track);
+                _sequencer.ActiveInstrument(track);
+            }
+            ImGui::ShowTooltipOnHover("Add insert effect to track");
+
+            ImGui::PopStyleVar(1);
+
+            ImGui::Spacing();
+        }
+        if (ImGui::IsItemClicked())
+        {
+            _sequencer.ActiveInstrument(track);
+        }
+
+        // Channel effects
+        if (ImGui::CollapsingHeader("Audio FX"))
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+
+            for (int fx = 0; fx < NUM_CHANNEL_EFX; fx++)
+            {
+                ImGui::PushID(200 + fx);
+                ImGui::PushStyleColor(ImGuiCol_Button, channel->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+                if (ImGui::Button(effectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 20)))
+                {
+                    _sequencer.ActiveInstrument(track);
+                    _currentInstrumentEffect = fx;
+                    ImGui::SetWindowFocus(InstrumentFxEditorID);
+                }
+                if (channel->partefx[fx]->geteffect() != 0)
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button("x", ImVec2(20, 20)))
+                    {
+                        _sequencer.ActiveInstrument(track);
+                        _currentInstrumentEffect = fx;
+                        channel->partefx[fx]->changeeffect(0);
+                    }
+                    ImGui::ShowTooltipOnHover("Remove effect from track");
+                }
+                ImGui::PopStyleColor(1);
+                ImGui::PopID();
+            }
+            ImGui::PopStyleVar(1);
+
+            ImGui::Spacing();
+        }
+        if (ImGui::IsItemClicked())
+        {
+            _sequencer.ActiveInstrument(track);
+        }
+
+        if (ImGui::CollapsingHeader("Velocity"))
+        {
+            if (ImGui::KnobUchar("vel.sns.", &channel->Pvelsns, 0, 127, ImVec2(width / 2, 30), "Velocity Sensing Function"))
             {
                 _sequencer.ActiveInstrument(track);
             }
 
             ImGui::SameLine();
 
-            char label[64] = {'\0'};
-            sprintf(label, "##send_%d", fx);
-            char tooltip[64] = {'\0'};
-            sprintf(tooltip, "Volume for send to system effect %d", (fx + 1));
-            if (ImGui::KnobUchar(label, &(_mixer->Psysefxvol[fx][track]), 0, 127, ImVec2(20, 20), tooltip))
-            {
-                _mixer->setPsysefxvol(track, fx, _mixer->Psysefxvol[fx][track]);
-            }
-            if (ImGui::IsItemClicked())
-            {
-                _sequencer.ActiveInstrument(track);
-            }
-
-            ImGui::PopStyleColor(1);
-            ImGui::PopID();
-        }
-
-        ImGui::PopStyleVar();
-
-        ImGui::Spacing();
-
-        ImGui::Separator();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-
-        // Insertion effects
-        if (useLargeMode)
-        {
-            ImGui::TextCentered(ImVec2(width, 20), "Insert FX");
-            if (ImGui::IsItemClicked())
+            if (ImGui::KnobUchar("vel.ofs.", &channel->Pveloffs, 0, 127, ImVec2(width / 2, 30), "Velocity Offset"))
             {
                 _sequencer.ActiveInstrument(track);
             }
         }
-        int fillCount = mostInsertEffectsPerChannel;
-        for (int fx = 0; fx < NUM_INS_EFX; fx++)
+        if (ImGui::IsItemClicked())
         {
-            ImGui::PushID(100 + fx);
-            if (_mixer->Pinsparts[fx] == track)
-            {
-                if (ImGui::Button(effectNames[_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
-                {
-                    _currentInsertEffect = fx;
-                    _sequencer.ActiveInstrument(track);
-                    ImGui::SetWindowFocus(InsertionFxEditorID);
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("x", ImVec2(20, 20)))
-                {
-                    RemoveInsertFxFromTrack(fx);
-                    _sequencer.ActiveInstrument(track);
-                }
-                ImGui::ShowTooltipOnHover("Remove insert effect from track");
-                fillCount--;
-            }
-            ImGui::PopID();
-        }
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-        for (int i = 0; i < fillCount; i++)
-        {
-            ImGui::PushID(i);
-            ImGui::Button("##empty", ImVec2(width, 20));
-            ImGui::PopID();
-        }
-        ImGui::PopStyleColor(3);
-
-        if (ImGui::Button("+", ImVec2(width, 20)))
-        {
-            AddInsertFx(track);
             _sequencer.ActiveInstrument(track);
         }
-        ImGui::ShowTooltipOnHover("Add insert effect to track");
-
-        ImGui::PopStyleVar();
-
-        ImGui::Spacing();
-
-        ImGui::Separator();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-
-        // Channel effects
-        if (useLargeMode)
-        {
-            ImGui::TextCentered(ImVec2(width, 20), "Audio FX");
-            if (ImGui::IsItemClicked())
-            {
-                _sequencer.ActiveInstrument(track);
-            }
-        }
-        for (int fx = 0; fx < NUM_CHANNEL_EFX; fx++)
-        {
-            ImGui::PushID(200 + fx);
-            ImGui::PushStyleColor(ImGuiCol_Button, channel->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-            if (ImGui::Button(effectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 20)))
-            {
-                _sequencer.ActiveInstrument(track);
-                _currentInstrumentEffect = fx;
-                ImGui::SetWindowFocus(InstrumentFxEditorID);
-            }
-            if (channel->partefx[fx]->geteffect() != 0)
-            {
-                ImGui::SameLine();
-                if (ImGui::Button("x", ImVec2(20, 20)))
-                {
-                    _sequencer.ActiveInstrument(track);
-                    _currentInstrumentEffect = fx;
-                    channel->partefx[fx]->changeeffect(0);
-                }
-                ImGui::ShowTooltipOnHover("Remove effect from track");
-            }
-            ImGui::PopStyleColor(1);
-            ImGui::PopID();
-        }
-        ImGui::PopStyleVar(1);
-
-        ImGui::Spacing();
 
         if (useLargeMode && _iconImagesAreLoaded)
         {
@@ -608,22 +612,6 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 _sequencer.ActiveInstrument(track);
             }
             ImGui::ShowTooltipOnHover(instrumentCategoryNames[channel->info.Ptype]);
-        }
-
-        auto velsns = channel->Pvelsns;
-        if (ImGui::KnobUchar("vel.sns.", &velsns, 0, 127, ImVec2(width / 2, 30), "Velocity Sensing Function"))
-        {
-            channel->Pvelsns = velsns;
-            _sequencer.ActiveInstrument(track);
-        }
-
-        ImGui::SameLine();
-
-        auto velofs = channel->Pveloffs;
-        if (ImGui::KnobUchar("vel.ofs.", &velofs, 0, 127, ImVec2(width / 2, 30), "Velocity Offset"))
-        {
-            channel->Pveloffs = velofs;
-            _sequencer.ActiveInstrument(track);
         }
 
         auto panning = channel->Ppanning;

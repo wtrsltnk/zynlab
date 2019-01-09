@@ -770,8 +770,7 @@ void Channel::PolyphonicAftertouch(unsigned char note,
         {
             /* update velocity */
             // compute the velocity offset
-            float vel =
-                VelF(velocity / 127.0f, Pvelsns) + (Pveloffs - 64.0f) / 64.0f;
+            float vel = VelF(velocity / 127.0f, Pvelsns) + (Pveloffs - 64.0f) / 64.0f;
             vel = (vel < 0.0f) ? 0.0f : vel;
             vel = (vel > 1.0f) ? 1.0f : vel;
 
