@@ -4,6 +4,8 @@
 #include "../imgui_addons/imgui_knob.h"
 #include "../stb_image.h"
 
+#define MIN_DB (-48)
+
 static ImVec2 trackSize = ImVec2(150, 0);
 static float sliderBaseHeight = 150.0f;
 static float const largeModeTreshold = 4.5f;
@@ -259,6 +261,7 @@ void AppThreeDee::ImGuiMasterTrack()
 
             ImGui::Spacing();
         }
+
         // Fine detune
         auto fineDetune = _mixer->microtonal.Pglobalfinedetune;
         if (ImGui::KnobUchar("fine detune", &fineDetune, 0, 127, ImVec2(width, 40), "Global fine detune"))
@@ -279,14 +282,80 @@ void AppThreeDee::ImGuiMasterTrack()
         }
         else
         {
-            ImGui::Spacing();
-            ImGui::SameLine(0.0f, (width - 20) / 2);
+            static float olddbl = 1.0e-12f;
+            static float olddbr = 1.0e-12f;
+            static float oldrmsdbl = 1.0e-12f;
+            static float oldrmsdbr = 1.0e-12f;
 
+            vuData data = _mixer->GetMeter()->GetVuData();
+
+            float dbl = rap2dB(data.outpeakl);
+            float dbr = rap2dB(data.outpeakr);
+            float rmsdbl = rap2dB(data.rmspeakl);
+            float rmsdbr = rap2dB(data.rmspeakr);
+
+            dbl = (MIN_DB - dbl) / MIN_DB;
+            if (dbl < 0.0f)
+                dbl = 0.0f;
+            else if (dbl > 1.0f)
+                dbl = 1.0f;
+
+            dbr = (MIN_DB - dbr) / MIN_DB;
+            if (dbr < 0.0f)
+                dbr = 0.0f;
+            else if (dbr > 1.0f)
+                dbr = 1.0f;
+
+            dbl = dbl * 0.4f + olddbl * 0.6f;
+            dbr = dbr * 0.4f + olddbr * 0.6f;
+
+            olddbl = dbl;
+            olddbr = dbr;
+
+            //compute RMS - start
+            rmsdbl = (MIN_DB - rmsdbl) / MIN_DB;
+            if (rmsdbl < 0.0f)
+                rmsdbl = 0.0f;
+            else if (rmsdbl > 1.0f)
+                rmsdbl = 1.0f;
+
+            rmsdbr = (MIN_DB - rmsdbr) / MIN_DB;
+            if (rmsdbr < 0.0f)
+                rmsdbr = 0.0f;
+            else if (rmsdbr > 1.0f)
+                rmsdbr = 1.0f;
+
+            rmsdbl = rmsdbl * 0.4f + oldrmsdbl * 0.6f;
+            rmsdbr = rmsdbr * 0.4f + oldrmsdbr * 0.6f;
+
+            oldrmsdbl = rmsdbl;
+            oldrmsdbr = rmsdbr;
+
+            rmsdbl *= faderHeight;
+            rmsdbr *= faderHeight;
+
+            int irmsdbl = static_cast<int>(rmsdbl);
+            int irmsdbr = static_cast<int>(rmsdbr);
+            //compute RMS - end
+
+            ImGui::Spacing();
+            ImGui::SameLine(0.0f, (width - (60.0f + (4 * io.ItemSpacing.x))) / 2.0f);
+
+            ImGui::VSliderInt("##mastervoll", ImVec2(20, faderHeight), &irmsdbl, 0, static_cast<int>(faderHeight));
+            ImGui::SameLine();
+
+            ImGui::Spacing();
+            ImGui::SameLine();
             int v = static_cast<int>(_mixer->Pvolume);
             if (ImGui::VSliderInt("##mastervol", ImVec2(20, faderHeight), &v, 0, 127))
             {
                 _mixer->setPvolume(static_cast<unsigned char>(v));
             }
+            ImGui::SameLine();
+            ImGui::Spacing();
+
+            ImGui::SameLine();
+            ImGui::VSliderInt("##mastervolr", ImVec2(20, faderHeight), &irmsdbr, 0, static_cast<int>(faderHeight));
         }
         ImGui::ShowTooltipOnHover("Master volume");
 
@@ -645,9 +714,6 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             _sequencer.ActiveInstrument(track);
         }
 
-        float peakl, peakr;
-        channel->ComputePeakLeftAndRight(channel->Pvolume, peakl, peakr);
-
         auto start = ImGui::GetCursorPos();
         auto faderHeight = ImGui::GetWindowContentRegionMax().y - start.y - io.ItemSpacing.y - 20;
 
@@ -662,9 +728,26 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         }
         else
         {
-            ImGui::Spacing();
-            ImGui::SameLine(0.0f, (width - 20) / 2);
+            float db = rap2dB(_mixer->GetMeter()->GetOutPeak(track));
 
+            db = (MIN_DB - db) / MIN_DB;
+            if (db < 0.0f)
+                db = 0.0f;
+            else if (db > 1.0f)
+                db = 1.0f;
+
+            db *= faderHeight;
+
+            int idb = static_cast<int>(db);
+
+            ImGui::Spacing();
+            ImGui::SameLine(0.0f, (width - (60.0f + (4 * io.ItemSpacing.x))) / 2.0f);
+
+            ImGui::VSliderInt("##instrument_uvl", ImVec2(20, faderHeight), &idb, 0, static_cast<int>(faderHeight));
+            ImGui::SameLine();
+
+            ImGui::Spacing();
+            ImGui::SameLine();
             int v = static_cast<int>(channel->Pvolume);
             if (ImGui::VSliderInt("##vol", ImVec2(20, faderHeight), &v, 0, 127))
             {
@@ -672,6 +755,11 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 _sequencer.ActiveInstrument(track);
             }
             ImGui::ShowTooltipOnHover("Track volume");
+            ImGui::SameLine();
+            ImGui::Spacing();
+
+            ImGui::SameLine();
+            ImGui::VSliderInt("##instrument_uvr", ImVec2(20, faderHeight), &idb, 0, static_cast<int>(faderHeight));
         }
 
         char tmp[32] = {0};
