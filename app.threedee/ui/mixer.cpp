@@ -115,49 +115,51 @@ std::vector<char const *> toCharVector(std::set<std::string> const &strings)
 
 void AppThreeDee::ImGuiMixer()
 {
-    if (_showMixer)
+    if (!_showMixer)
     {
-        ImGui::Begin("Mixer", &_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-
-        int c[NUM_MIXER_CHANNELS] = {0};
-        mostInsertEffectsPerChannel = 0;
-        for (int i = 0; i < NUM_INS_EFX; i++)
-        {
-            if (_mixer->Pinsparts[i] == -1)
-            {
-                continue;
-            }
-            c[_mixer->Pinsparts[i]] = c[_mixer->Pinsparts[i]] + 1;
-            if (c[_mixer->Pinsparts[i]] > mostInsertEffectsPerChannel)
-            {
-                mostInsertEffectsPerChannel = c[_mixer->Pinsparts[i]];
-            }
-        }
-
-        for (int track = 0; track <= NUM_MIXER_CHANNELS; track++)
-        {
-            auto highlightTrack = _sequencer.ActiveInstrument() == track;
-            ImGui::PushID(track);
-            ImGuiTrack(track, highlightTrack);
-            ImGui::SameLine();
-            ImGui::PopID();
-        }
-
-        ImGui::PopStyleVar();
-        ImGui::End();
+        return;
     }
+
+    ImGui::Begin("Mixer", &_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
+
+    int c[NUM_MIXER_CHANNELS] = {0};
+    mostInsertEffectsPerChannel = 0;
+    for (int i = 0; i < NUM_INS_EFX; i++)
+    {
+        if (_mixer->Pinsparts[i] == -1)
+        {
+            continue;
+        }
+        c[_mixer->Pinsparts[i]] = c[_mixer->Pinsparts[i]] + 1;
+        if (c[_mixer->Pinsparts[i]] > mostInsertEffectsPerChannel)
+        {
+            mostInsertEffectsPerChannel = c[_mixer->Pinsparts[i]];
+        }
+    }
+
+    for (int track = 0; track <= NUM_MIXER_CHANNELS; track++)
+    {
+        auto highlightTrack = _sequencer.ActiveInstrument() == track;
+        ImGui::PushID(track);
+        ImGuiTrack(track, highlightTrack);
+        ImGui::SameLine();
+        ImGui::PopID();
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::End();
 }
 
-void AppThreeDee::ImGuiSelectedTrack()
+void AppThreeDee::ImGuiInspector()
 {
-    if (!_showSelectedTrack)
+    if (!_showInspector)
     {
         return;
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    ImGui::Begin("Selected Track", &_showSelectedTrack, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    ImGui::Begin("Inspector", &_showInspector, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     {
         ImGuiMasterTrack();
         ImGui::SameLine();

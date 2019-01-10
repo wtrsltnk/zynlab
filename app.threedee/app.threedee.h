@@ -55,13 +55,16 @@ private:
     std::vector<TrackPattern> _clipboardPatterns;
     unsigned int _iconImages[int(InstrumentCategories::COUNT)];
     bool _iconImagesAreLoaded;
+    std::vector<unsigned int> _toolbarIcons;
+    bool _toolbarIconsAreLoaded;
+    bool _showLibrary;
+    bool _showInspector;
+    bool _showMixer;
+    bool _showEditor;
     bool _showInstrumentEditor;
-    bool _showPatternEditor;
-    bool _showPianoRollPatternEditor;
     bool _showSystemEffectsEditor;
     bool _showInsertEffectsEditor;
     bool _showInstrumentEffectsEditor;
-    bool _showMixer;
     int _openSelectInstrument;
     int _openChangeInstrumentType;
 
@@ -89,13 +92,13 @@ public:
 
 private:
     void LoadInstrumentIcons();
+    void LoadToolbarIcons();
 
     void ImGuiPlayback();
     void ImGuiMasterTrack();
     void ImGuiMixer();
     void ImGuiTrack(int track, bool highlightTrack);
-    bool _showSelectedTrack;
-    void ImGuiSelectedTrack();
+    void ImGuiInspector();
     void ImGuiSequencer();
     void ImGuiStepSequencer(int trackIndex, float trackHeight);
     void ImGuiStepSequencerEventHandling();

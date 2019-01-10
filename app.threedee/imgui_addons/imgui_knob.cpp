@@ -221,6 +221,37 @@ bool ImGui::DropDown(char const *label, unsigned char &value, char const *const 
     return value_changed;
 }
 
+bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_texture_id, const ImVec2 &size)
+{
+    bool valueChange = false;
+
+    const ImGuiStyle &style = ImGui::GetStyle();
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+    float height = size.y + (style.FramePadding.y * 2);
+    float width = size.x + (style.FramePadding.x * 2);
+
+    ImGui::InvisibleButton(str_id, ImVec2(width, height));
+    if (ImGui::IsItemClicked())
+    {
+        *v = !*v;
+        valueChange = true;
+    }
+
+    ImU32 col_tint = ImGui::GetColorU32((*v ? ImGui::GetColorU32(ImGuiCol_Text) : ImGui::GetColorU32(ImGuiCol_ButtonHovered)));
+    ImU32 col_bg = ImGui::GetColorU32(*v ? ImGui::GetColorU32(ImGuiCol_ButtonHovered) : ImGui::GetColorU32(ImGuiCol_Button));
+    if (ImGui::IsItemHovered())
+    {
+        col_bg = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+    }
+
+    draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), GetColorU32(col_bg));
+    draw_list->AddImage(user_texture_id, p, ImVec2(p.x + width, p.y + height), ImVec2(0, 0), ImVec2(1, 1), GetColorU32(col_tint));
+
+    return valueChange;
+}
+
 bool ImGui::TextCentered(ImVec2 const &size, char const *label)
 {
     ImGuiStyle &style = ImGui::GetStyle();

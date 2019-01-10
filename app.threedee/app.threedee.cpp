@@ -7,6 +7,7 @@
 #include "examples/imgui_impl_opengl3.h"
 #include "imgui_addons/imgui_checkbutton.h"
 #include "imgui_addons/imgui_knob.h"
+#include "stb_image.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -32,11 +33,13 @@ static ImVec4 clear_color = ImColor(90, 90, 100);
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _mixer(mixer), _window(window), _stepper(&_sequencer, mixer),
-      _iconImagesAreLoaded(false), _showInstrumentEditor(false), _showPatternEditor(false), _showPianoRollPatternEditor(false),
-      _showSystemEffectsEditor(false), _showInsertEffectsEditor(false), _showInstrumentEffectsEditor(false), _showMixer(true),
+      _iconImagesAreLoaded(false), _toolbarIconsAreLoaded(false),
+      _showLibrary(false), _showInspector(false), _showMixer(true), _showEditor(false),
+      _showInstrumentEditor(false),
+      _showSystemEffectsEditor(false), _showInsertEffectsEditor(false), _showInstrumentEffectsEditor(false),
       _openSelectInstrument(-1), _openChangeInstrumentType(-1),
       _display_w(800), _display_h(600),
-      _showSelectedTrack(true), _currentBank(0),
+      _currentBank(0),
       _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true),
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentInstrumentEffect(-1)
 {
@@ -98,8 +101,69 @@ bool AppThreeDee::Setup()
     _sequencer.ActiveInstrument(0);
 
     LoadInstrumentIcons();
+    LoadToolbarIcons();
 
     return true;
+}
+
+enum class ToolbarTools
+{
+    Library,
+    Inspector,
+    Mixer,
+    Editor,
+    Rewind,
+    FastForward,
+    Stop,
+    Play,
+    Record,
+    COUNT,
+};
+
+static char const *const toolbarIconFileNames[] = {
+    "library.png",
+    "inspector.png",
+    "mixer.png",
+    "editor.png",
+    "rewind.png",
+    "fast-forward.png",
+    "stop.png",
+    "play.png",
+    "record.png",
+};
+
+void AppThreeDee::LoadToolbarIcons()
+{
+    std::string rootDir = "./icons/";
+
+    _toolbarIconsAreLoaded = false;
+
+    _toolbarIcons.reserve(static_cast<size_t>(ToolbarTools::COUNT));
+
+    for (size_t i = 0; i < static_cast<size_t>(ToolbarTools::COUNT); i++)
+    {
+        GLuint my_opengl_texture;
+        glGenTextures(1, &my_opengl_texture);
+
+        auto filename = rootDir + toolbarIconFileNames[i];
+        int x, y, n;
+        unsigned char *data = stbi_load(filename.c_str(), &x, &y, &n, 0);
+        if (data == nullptr)
+        {
+            std::cout << "Failed to load instrument category " << i << " from file " << filename << std::endl;
+            _toolbarIcons[i] = 0;
+            continue;
+        }
+        _toolbarIcons[i] = my_opengl_texture;
+        _toolbarIconsAreLoaded = true;
+
+        glBindTexture(GL_TEXTURE_2D, my_opengl_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, n, x, y, 0, n == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
 }
 
 void AppThreeDee::HitNote(int trackIndex, int note, int velocity, int durationInMs)
@@ -225,7 +289,7 @@ void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
             }
             if (ImGui::IsMouseDoubleClicked(0))
             {
-                _showPatternEditor = true;
+                _showEditor = true;
             }
         }
         else if (_mixer->GetChannel(trackIndex)->Penabled)
@@ -304,7 +368,7 @@ void AppThreeDee::ImGuiStepSequencerEventHandling()
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
     {
-        _showPatternEditor = true;
+        _showEditor = true;
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
     {
@@ -340,9 +404,14 @@ static const float stepWidth = 20.0f;
 
 void AppThreeDee::ImGuiStepPatternEditorWindow()
 {
-    ImGui::Begin("Pattern editor", &_showPatternEditor);
+    if (!_showEditor)
+    {
+        return;
+    }
 
-    if (!_showPatternEditor || !_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
+    ImGui::Begin("Pattern editor", &_showEditor);
+
+    if (!_sequencer.DoesPatternExistAtIndex(_sequencer.ActiveInstrument(), _sequencer.ActivePattern()))
     {
         _sequencer.ActivePattern(-1);
         ImGui::End();
@@ -434,7 +503,7 @@ void AppThreeDee::ImGuiPianoRollSequencer(int trackIndex, float trackHeight)
             }
             if (ImGui::IsMouseDoubleClicked(0))
             {
-                _showPianoRollPatternEditor = true;
+                _showEditor = true;
             }
         }
         else if (_mixer->GetChannel(trackIndex)->Penabled)
@@ -470,7 +539,7 @@ void AppThreeDee::ImGuiPianoRollSequencerEventHandling()
 
 void AppThreeDee::ImGuiPianoRollPatternEditorWindow()
 {
-    if (!_showPianoRollPatternEditor)
+    if (!_showEditor)
     {
         return;
     }
@@ -484,7 +553,7 @@ void AppThreeDee::ImGuiPianoRollPatternEditorWindow()
     auto &style = ImGui::GetStyle();
     auto &selectedPattern = _sequencer.GetPattern(_sequencer.ActiveInstrument(), _sequencer.ActivePattern());
 
-    ImGui::Begin("Piano roll editor", &_showPianoRollPatternEditor);
+    ImGui::Begin("Piano roll editor", &_showEditor);
     char tmp[256];
     strcpy(tmp, selectedPattern._name.c_str());
     if (ImGui::InputText("pattern name", tmp, 256))
@@ -566,10 +635,12 @@ void AppThreeDee::Render()
     ImGui::End();
     ImGui::PopStyleVar(2);
 
+    ImGuiPlayback();
+
     ImGuiSequencer();
     ImGuiStepPatternEditorWindow();
     ImGuiPianoRollPatternEditorWindow();
-    ImGuiSelectedTrack();
+    ImGuiInspector();
     ImGuiMixer();
     InsertEffectEditor();
     SystemEffectEditor();
@@ -594,8 +665,6 @@ void AppThreeDee::Render()
         ImGui::End();
     }
     ImGui::PopStyleVar();
-
-    ImGuiPlayback();
 
     ImGui::Render();
 
@@ -623,40 +692,66 @@ void AppThreeDee::ImGuiPlayback()
 {
     ImGui::Begin("Playback");
     {
-        ImGui::Checkbox("Show Selected Track", &_showSelectedTrack);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
+
+        ImGui::ImageToggleButton("toolbar_library", &_showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Stop"))
+        ImGui::ImageToggleButton("toolbar_inspector", &_showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
+
+        ImGui::SameLine();
+
+        ImGui::ImageToggleButton("toolbar_mixer", &_showMixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
+
+        ImGui::SameLine();
+
+        ImGui::ImageToggleButton("toolbar_editor", &_showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
+
+        ImGui::PopStyleVar();
+
+        ImGui::SameLine();
+
+        ImGui::Spacing();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
+
+        ImGui::SameLine();
+
+        ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Rewind)]), ImVec2(32, 32));
+
+        ImGui::SameLine();
+
+        ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::FastForward)]), ImVec2(32, 32));
+
+        ImGui::SameLine();
+
+        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Stop)]), ImVec2(32, 32)))
         {
             _stepper.Stop();
         }
 
         ImGui::SameLine();
 
-        if (_stepper.IsPlaying())
-        {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-        }
-        else
-        {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_Button]);
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_Text]);
-        }
+        ImGui::SameLine();
 
-        if (ImGui::Button("Play/Pause"))
+        bool isPlaying = _stepper.IsPlaying();
+        if (ImGui::ImageToggleButton("toolbar_play", &isPlaying, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Play)]), ImVec2(32, 32)))
         {
             _stepper.PlayPause();
         }
 
-        ImGui::PopStyleColor(2);
+        ImGui::SameLine();
+
+        ImGui::PopStyleVar();
+
+        ImGui::Spacing();
 
         ImGui::SameLine();
 
-        ImGui::PushItemWidth(200);
         auto bpm = _stepper.Bpm();
-        if (ImGui::SliderInt("##BPM", &bpm, 10, 200, "BPM %d"))
+        ImGui::PushItemWidth(100);
+        if (ImGui::InputInt("##bpm", &bpm))
         {
             _stepper.Bpm(bpm);
         }
