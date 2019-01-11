@@ -118,7 +118,7 @@ public:
     void Cleanup(bool final = false);
 
     //the Channel's instruments
-    Instrument instruments[NUM_CHANNEL_INSTRUMENTS];
+    Instrument Instruments[NUM_CHANNEL_INSTRUMENTS];
 
     //Channel parameters
     void setkeylimit(unsigned char Pkeylimit);

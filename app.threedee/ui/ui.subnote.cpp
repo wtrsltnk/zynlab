@@ -1,6 +1,7 @@
-#include "../app.threedee.h"
+#include "ui.subnote.h"
 
 #include "../imgui_addons/imgui_knob.h"
+#include <zyn.mixer/Mixer.h>
 #include <zyn.synth/SUBnoteParams.h>
 
 static const int overtone_position_count = 8;
@@ -15,24 +16,38 @@ static char const *overtone_positions[] = {
     "Shift",
 };
 
-char const *const SUBeditorID = "SUB editor";
+char const *const SubSynthEditorID = "SUB editor";
 
-void AppThreeDee::SUBNoteEditor(Channel *channel, int instrumentIndex)
+zyn::ui::SubNote::SubNote(AppState *state)
+    : _state(state), _AmplitudeEnvelope("Amplitude Envelope"), _BandwidthEnvelope("Bandwidth Envelope"),
+      _FilterEnvelope("Filter Envelope"), _FrequencyEnvelope("Frequency Envelope")
+{}
+
+zyn::ui::SubNote::~SubNote() = default;
+
+bool zyn::ui::SubNote::Setup() { return true; }
+
+void zyn::ui::SubNote::Render()
 {
-    if (!_state._showSUBNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
+    auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+    ImGui::Begin(SubSynthEditorID, &_state->_showSUBNoteEditor);
+    if (!_state->_showSUBNoteEditor || channel == nullptr || _state->_activeChannelInstrument < 0 || _state->_activeChannelInstrument >= NUM_CHANNEL_INSTRUMENTS)
     {
+        ImGui::End();
         return;
     }
 
-    auto *parameters = channel->instruments[instrumentIndex].subpars;
+    auto *parameters = channel->Instruments[_state->_activeChannelInstrument].subpars;
 
-    if (channel->instruments[instrumentIndex].Psubenabled == 0)
+    if (channel->Instruments[_state->_activeChannelInstrument].Psubenabled == 0)
     {
         ImGui::Text("SUB editor is disabled");
         if (ImGui::Button("Enable SUB synth"))
         {
-            channel->instruments[instrumentIndex].Psubenabled = 1;
+            channel->Instruments[_state->_activeChannelInstrument].Psubenabled = 1;
         }
+        ImGui::End();
         return;
     }
 
@@ -40,7 +55,7 @@ void AppThreeDee::SUBNoteEditor(Channel *channel, int instrumentIndex)
     {
         if (ImGui::BeginTabItem("Global"))
         {
-            if (_state._activeInstrument >= 0)
+            if (_state->_activeChannel >= 0)
             {
                 ImGui::Text("SUBsynth Global Parameters of the Instrument");
 
@@ -94,9 +109,11 @@ void AppThreeDee::SUBNoteEditor(Channel *channel, int instrumentIndex)
         }
         ImGui::EndTabBar();
     }
+    ImGui::End();
+    ImGui::PopStyleVar();
 }
 
-void AppThreeDee::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)
+void zyn::ui::SubNote::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)
 {
     ImGui::BeginChild("Harmonics", ImVec2(), false, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     for (int i = 0; i < MAX_SUB_HARMONICS; i++)
@@ -131,22 +148,22 @@ void AppThreeDee::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)
     ImGui::EndChild();
 }
 
-void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
+void zyn::ui::SubNote::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
-    auto vol = static_cast<float>(parameters->PVolume);
+    auto vol = static_cast<int>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
+    if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
     ImGui::ShowTooltipOnHover("Volume");
 
-    auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+    auto velocityScale = static_cast<int>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
+    if (ImGui::SliderInt("##V.Sns", &velocityScale, 0, 127, "V.Sns %d"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -161,24 +178,24 @@ void AppThreeDee::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 
     ImGui::Separator();
 
-    Envelope("Amplitude Envelope", parameters->AmpEnvelope);
+    _AmplitudeEnvelope.Render(parameters->AmpEnvelope);
 }
 
-void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
+void zyn::ui::SubNote::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
 {
     ImGui::Text("Bandwidth Parameters");
 
-    auto bandwidth = static_cast<float>(parameters->Pbandwidth);
+    auto bandwidth = static_cast<int>(parameters->Pbandwidth);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Bandwidth", &bandwidth, 0, 127, "Bandwidth %.3f"))
+    if (ImGui::SliderInt("##Bandwidth", &bandwidth, 0, 127, "Bandwidth %d"))
     {
         parameters->Pbandwidth = static_cast<unsigned char>(bandwidth);
     }
     ImGui::ShowTooltipOnHover("Bandwidth");
 
-    auto bandwidthScale = static_cast<float>(parameters->Pbwscale);
+    auto bandwidthScale = static_cast<int>(parameters->Pbwscale);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##BandwidthScale", &bandwidthScale, 0, 127, "Scale %.3f"))
+    if (ImGui::SliderInt("##BandwidthScale", &bandwidthScale, 0, 127, "Scale %d"))
     {
         parameters->Pbwscale = static_cast<unsigned char>(bandwidthScale);
     }
@@ -194,17 +211,10 @@ void AppThreeDee::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
 
     ImGui::SameLine();
 
-    if (!envelopeEnabled)
-    {
-        ImGui::Text("Bandwidth Envelope");
-    }
-    else
-    {
-        Envelope("Bandwidth Envelope", parameters->BandWidthEnvelope);
-    }
+    _BandwidthEnvelope.Render(envelopeEnabled ? parameters->BandWidthEnvelope : nullptr);
 }
 
-void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
+void zyn::ui::SubNote::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
 {
     ImGui::Text("Overtone Parameters");
 
@@ -230,7 +240,7 @@ void AppThreeDee::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     }
 }
 
-void AppThreeDee::SUBNoteEditorFilter(SUBnoteParameters *parameters)
+void zyn::ui::SubNote::SUBNoteEditorFilter(SUBnoteParameters *parameters)
 {
     bool filterEnabled = parameters->PGlobalFilterEnabled == 1;
     if (ImGui::Checkbox("Global Filter Parameters", &filterEnabled))
@@ -240,21 +250,21 @@ void AppThreeDee::SUBNoteEditorFilter(SUBnoteParameters *parameters)
 
     if (filterEnabled)
     {
-        FilterParameters(parameters->GlobalFilter);
+        _FilterParameters.Render(parameters->GlobalFilter);
 
         ImGui::Separator();
 
-        Envelope("Filter Envelope", parameters->GlobalFilterEnvelope);
+        _FilterEnvelope.Render(parameters->GlobalFilterEnvelope);
     }
 }
 
-void AppThreeDee::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
+void zyn::ui::SubNote::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
 {
     ImGui::Text("Global Frequency Parameters");
 
-    auto detune = static_cast<float>(parameters->PDetune) - 8192;
+    auto detune = static_cast<int>(parameters->PDetune) - 8192;
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("##Detune", &detune, -35, 35, "Detune %.3f"))
+    if (ImGui::SliderInt("##Detune", &detune, -35, 35, "Detune %d"))
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
     }
@@ -297,12 +307,5 @@ void AppThreeDee::SUBNoteEditorFrequency(SUBnoteParameters *parameters)
 
     ImGui::SameLine();
 
-    if (!envelopeEnabled)
-    {
-        ImGui::Text("Frequency Envelope");
-    }
-    else
-    {
-        Envelope("Frequency Envelope", parameters->FreqEnvelope);
-    }
+    _FrequencyEnvelope.Render(envelopeEnabled ? parameters->FreqEnvelope : nullptr);
 }

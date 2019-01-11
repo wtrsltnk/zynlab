@@ -9,40 +9,47 @@ if(GLFW3_FOUND)
     find_package(GLM REQUIRED)
 
     add_executable(app.threedee
-        glad.c
-        stb_image.cpp
-        stb_image.h
-        main.cpp
         app.threedee.cpp
         app.threedee.h
         appstate.cpp
         appstate.h
-        instrumentcategories.h
-        imgui/imgui.cpp
-        imgui/imgui_draw.cpp
-        imgui/imgui_demo.cpp
-        imgui/imgui_widgets.cpp
-        imgui/examples/imgui_impl_opengl3.cpp
+        glad.c
         imgui/examples/imgui_impl_glfw.cpp
+        imgui/examples/imgui_impl_opengl3.cpp
+        imgui/imgui.cpp
+        imgui/imgui_demo.cpp
+        imgui/imgui_draw.cpp
+        imgui/imgui_widgets.cpp
         imgui_addons/imgui_checkbutton.cpp
         imgui_addons/imgui_checkbutton.h
         imgui_addons/imgui_knob.cpp
         imgui_addons/imgui_knob.h
         imgui_addons/imgui_seq.cpp
         imgui_addons/imgui_seq.h
-        ui/adnote.cpp
-        ui/adnote-voice.cpp
-        ui/effect.cpp
-        ui/envelope.cpp
-        ui/filter.cpp
-        ui/lfo.cpp
+        instrumentcategories.h
+        main.cpp
+        stb_image.cpp
+        stb_image.h
         ui/microtonal.cpp
         ui/oscilgen.cpp
-        ui/padnote.cpp
         ui/resonance.cpp
-        ui/subnote.cpp
-        ui/app.mixer.cpp
-        ui/app.mixer.h
+        ui/ui.adnote.cpp
+        ui/ui.adnote.h
+        ui/ui.adnote.voice.cpp
+        ui/ui.effect.cpp
+        ui/ui.effect.h
+        ui/ui.envelope.cpp
+        ui/ui.envelope.h
+        ui/ui.filter.cpp
+        ui/ui.filter.h
+        ui/ui.lfo.cpp
+        ui/ui.lfo.h
+        ui/ui.mixer.cpp
+        ui/ui.mixer.h
+        ui/ui.padnote.cpp
+        ui/ui.padnote.h
+        ui/ui.subnote.cpp
+        ui/ui.subnote.h
         )
 
     target_include_directories(app.threedee

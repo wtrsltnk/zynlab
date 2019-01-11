@@ -14,9 +14,16 @@ static char const *lfo_types[] = {
     "E2dn",
 };
 
-void AppThreeDee::LFO(char const *label, LFOParams *params)
+zyn::ui::Lfo::Lfo(char const *label) : _label(label) {}
+
+void zyn::ui::Lfo::Render(LFOParams *params)
 {
-    ImGui::Text("%s", label);
+    ImGui::Text("%s", _label);
+
+    if (params == nullptr)
+    {
+        return;
+    }
 
     ImGui::PushItemWidth(100);
     if (ImGui::DropDown("##lfotype", params->PLFOtype, lfo_types, lfo_type_count, "LFO Type"))

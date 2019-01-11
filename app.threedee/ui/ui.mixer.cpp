@@ -1,4 +1,4 @@
-#include "app.mixer.h"
+#include "ui.mixer.h"
 
 #include "../imgui_addons/imgui_checkbutton.h"
 #include "../imgui_addons/imgui_knob.h"
@@ -10,20 +10,20 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
 
-AppMixer::AppMixer(AppState *appstate)
+zyn::ui::Mixer::Mixer(AppState *appstate)
     : _state(appstate), _iconImagesAreLoaded(false)
 {}
 
-AppMixer::~AppMixer() = default;
+zyn::ui::Mixer::~Mixer() = default;
 
-bool AppMixer::Setup()
+bool zyn::ui::Mixer::Setup()
 {
     LoadInstrumentIcons();
 
     return true;
 }
 
-void AppMixer::Render()
+void zyn::ui::Mixer::Render()
 {
     ImGuiInspector();
     ImGuiMixer();
@@ -97,7 +97,7 @@ static char const *instrumentCategoryNames[] = {
     "Sound Effects",        // 16
 };
 
-void AppMixer::LoadInstrumentIcons()
+void zyn::ui::Mixer::LoadInstrumentIcons()
 {
     std::string rootDir = "./icons/Instruments/";
 
@@ -140,7 +140,7 @@ std::vector<char const *> toCharVector(std::set<std::string> const &strings)
     return result;
 }
 
-void AppMixer::ImGuiMixer()
+void zyn::ui::Mixer::ImGuiMixer()
 {
     if (!_state->_showMixer)
     {
@@ -167,7 +167,7 @@ void AppMixer::ImGuiMixer()
 
     for (int track = 0; track <= NUM_MIXER_CHANNELS; track++)
     {
-        auto highlightTrack = _state->_activeInstrument == track;
+        auto highlightTrack = _state->_activeChannel == track;
         ImGui::PushID(track);
         ImGuiTrack(track, highlightTrack);
         ImGui::SameLine();
@@ -178,7 +178,7 @@ void AppMixer::ImGuiMixer()
     ImGui::End();
 }
 
-void AppMixer::ImGuiInspector()
+void zyn::ui::Mixer::ImGuiInspector()
 {
     if (!_state->_showInspector)
     {
@@ -190,7 +190,7 @@ void AppMixer::ImGuiInspector()
     {
         ImGuiMasterTrack();
         ImGui::SameLine();
-        ImGuiTrack(_state->_activeInstrument, false);
+        ImGuiTrack(_state->_activeChannel, false);
     }
     ImGui::End();
     ImGui::PopStyleVar();
@@ -206,7 +206,7 @@ unsigned char indexOf(std::vector<char const *> const &values, std::string const
     return 0;
 }
 
-void AppMixer::ImGuiMasterTrack()
+void zyn::ui::Mixer::ImGuiMasterTrack()
 {
     auto io = ImGui::GetStyle();
 
@@ -265,7 +265,7 @@ void AppMixer::ImGuiMasterTrack()
             {
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(effectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
+                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
                 {
                     _state->_currentSystemEffect = fx;
                     _state->_showSystemEffectsEditor = true;
@@ -393,7 +393,7 @@ void AppMixer::ImGuiMasterTrack()
     ImGui::EndChild();
 }
 
-void AppMixer::ImGuiTrack(int track, bool highlightTrack)
+void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
 {
     if (track < 0 || track >= NUM_MIXER_CHANNELS)
     {
@@ -451,7 +451,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         // Enable/disable channel
         if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
         {
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
             channel->Penabled = trackEnabled ? 1 : 0;
         }
         ImGui::ShowTooltipOnHover(trackEnabled ? "This track is enabled" : "This track is disabled");
@@ -462,8 +462,8 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         auto name = std::string(reinterpret_cast<char *>(channel->Pname));
         if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(width - 20 - io.ItemSpacing.x, 0)))
         {
-            _state->_activeInstrument = track;
-            _state->_openSelectInstrument = track;
+            _state->_activeChannel = track;
+            _state->_showChannelInstrumentSelector = track;
         }
         ImGui::ShowTooltipOnHover("Change instrument preset");
 
@@ -476,12 +476,12 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
             ImGui::PushItemWidth(width);
             if (ImGui::DropDown("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
             {
-                _state->_activeInstrument = track;
+                _state->_activeChannel = track;
             }
 
             if (ImGui::IsItemClicked())
             {
-                _state->_activeInstrument = track;
+                _state->_activeChannel = track;
             }
 
             ImGui::PopStyleVar();
@@ -490,16 +490,16 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         // AD synth enable/disable + edit button
-        auto adEnabled = channel->instruments[0].Padenabled == 1;
+        auto adEnabled = channel->Instruments[0].Padenabled == 1;
         if (ImGui::Checkbox("##adEnabled", &adEnabled))
         {
-            channel->instruments[0].Padenabled = adEnabled ? 1 : 0;
-            _state->_activeInstrument = track;
+            channel->Instruments[0].Padenabled = adEnabled ? 1 : 0;
+            _state->_activeChannel = track;
             if (adEnabled)
             {
                 _state->_showADNoteEditor = true;
@@ -510,17 +510,17 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::Button("AD", ImVec2(width - 21, 19)))
         {
             _state->_showADNoteEditor = true;
-            ImGui::SetWindowFocus(ADeditorID);
-            _state->_activeInstrument = track;
+            ImGui::SetWindowFocus(AdSynthEditorID);
+            _state->_activeChannel = track;
         }
         ImGui::ShowTooltipOnHover("Edit the AD synth");
 
         // SUB synth enable/disable + edit button
-        auto subEnabled = channel->instruments[0].Psubenabled == 1;
+        auto subEnabled = channel->Instruments[0].Psubenabled == 1;
         if (ImGui::Checkbox("##subEnabled", &subEnabled))
         {
-            channel->instruments[0].Psubenabled = subEnabled ? 1 : 0;
-            _state->_activeInstrument = track;
+            channel->Instruments[0].Psubenabled = subEnabled ? 1 : 0;
+            _state->_activeChannel = track;
             if (subEnabled)
             {
                 _state->_showSUBNoteEditor = true;
@@ -531,17 +531,17 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::Button("SUB", ImVec2(width - 21, 19)))
         {
             _state->_showSUBNoteEditor = true;
-            ImGui::SetWindowFocus(SUBeditorID);
-            _state->_activeInstrument = track;
+            ImGui::SetWindowFocus(SubSynthEditorID);
+            _state->_activeChannel = track;
         }
         ImGui::ShowTooltipOnHover("Edit the SUB synth");
 
         // PAD synth enable/disable + edit button
-        auto padEnabled = channel->instruments[0].Ppadenabled == 1;
+        auto padEnabled = channel->Instruments[0].Ppadenabled == 1;
         if (ImGui::Checkbox("##padEnabled", &padEnabled))
         {
-            channel->instruments[0].Ppadenabled = padEnabled ? 1 : 0;
-            _state->_activeInstrument = track;
+            channel->Instruments[0].Ppadenabled = padEnabled ? 1 : 0;
+            _state->_activeChannel = track;
             if (padEnabled)
             {
                 _state->_showPADNoteEditor = true;
@@ -552,8 +552,8 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::Button("PAD", ImVec2(width - 21, 19)))
         {
             _state->_showPADNoteEditor = true;
-            ImGui::SetWindowFocus(PADeditorID);
-            _state->_activeInstrument = track;
+            ImGui::SetWindowFocus(PadSynthEditorID);
+            _state->_activeChannel = track;
         }
         ImGui::ShowTooltipOnHover("Edit the PAD synth");
 
@@ -570,7 +570,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
             {
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(effectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
+                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
                 {
                     _state->_currentSystemEffect = fx;
                     _state->_showSystemEffectsEditor = true;
@@ -578,7 +578,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
                 }
                 if (ImGui::IsItemClicked())
                 {
-                    _state->_activeInstrument = track;
+                    _state->_activeChannel = track;
                 }
 
                 ImGui::SameLine();
@@ -593,7 +593,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
                 }
                 if (ImGui::IsItemClicked())
                 {
-                    _state->_activeInstrument = track;
+                    _state->_activeChannel = track;
                 }
 
                 ImGui::PopStyleColor(1);
@@ -606,7 +606,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
         }
 
         // Insertion effects
@@ -620,10 +620,10 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
                 ImGui::PushID(100 + fx);
                 if (_state->_mixer->Pinsparts[fx] == track)
                 {
-                    if (ImGui::Button(effectNames[_state->_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
+                    if (ImGui::Button(EffectNames[_state->_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
                     {
                         _state->_currentInsertEffect = fx;
-                        _state->_activeInstrument = track;
+                        _state->_activeChannel = track;
                         _state->_showInsertEffectsEditor = true;
                         ImGui::SetWindowFocus(InsertionFxEditorID);
                     }
@@ -631,7 +631,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
                     if (ImGui::Button("x", ImVec2(20, 20)))
                     {
                         RemoveInsertFxFromTrack(fx);
-                        _state->_activeInstrument = track;
+                        _state->_activeChannel = track;
                     }
                     ImGui::ShowTooltipOnHover("Remove insert effect from track");
                     fillCount--;
@@ -652,7 +652,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
             if (ImGui::Button("+", ImVec2(width, 20)))
             {
                 AddInsertFx(track);
-                _state->_activeInstrument = track;
+                _state->_activeChannel = track;
             }
             ImGui::ShowTooltipOnHover("Add insert effect to track");
 
@@ -662,7 +662,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
         }
 
         // Channel effects
@@ -674,20 +674,20 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
             {
                 ImGui::PushID(200 + fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, channel->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(effectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 20)))
+                if (ImGui::Button(EffectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 20)))
                 {
-                    _state->_activeInstrument = track;
-                    _state->_currentInstrumentEffect = fx;
-                    _state->_showInstrumentEffectsEditor = true;
-                    ImGui::SetWindowFocus(InstrumentFxEditorID);
+                    _state->_activeChannel = track;
+                    _state->_currentChannelEffect = fx;
+                    _state->_showChannelEffectsEditor = true;
+                    ImGui::SetWindowFocus(ChannelFxEditorID);
                 }
                 if (channel->partefx[fx]->geteffect() != 0)
                 {
                     ImGui::SameLine();
                     if (ImGui::Button("x", ImVec2(20, 20)))
                     {
-                        _state->_activeInstrument = track;
-                        _state->_currentInstrumentEffect = fx;
+                        _state->_activeChannel = track;
+                        _state->_currentChannelEffect = fx;
                         channel->partefx[fx]->changeeffect(0);
                     }
                     ImGui::ShowTooltipOnHover("Remove effect from track");
@@ -701,26 +701,26 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
         }
 
         if (ImGui::CollapsingHeader("Velocity"))
         {
             if (ImGui::KnobUchar("vel.sns.", &channel->Pvelsns, 0, 127, ImVec2(width / 2, 30), "Velocity Sensing Function"))
             {
-                _state->_activeInstrument = track;
+                _state->_activeChannel = track;
             }
 
             ImGui::SameLine();
 
             if (ImGui::KnobUchar("vel.ofs.", &channel->Pveloffs, 0, 127, ImVec2(width / 2, 30), "Velocity Offset"))
             {
-                _state->_activeInstrument = track;
+                _state->_activeChannel = track;
             }
         }
         if (ImGui::IsItemClicked())
         {
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
         }
 
         if (useLargeMode && _iconImagesAreLoaded)
@@ -730,8 +730,8 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
             ImGui::SameLine(0.0f, (width - 64 - io.ItemSpacing.x) / 2);
             if (ImGui::ImageButton(reinterpret_cast<void *>(_iconImages[channel->info.Ptype]), ImVec2(64, 64)))
             {
-                _state->_openChangeInstrumentType = track;
-                _state->_activeInstrument = track;
+                _state->_showChannelTypeChanger = track;
+                _state->_activeChannel = track;
             }
             ImGui::ShowTooltipOnHover(trackTooltip.str().c_str());
         }
@@ -740,7 +740,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::KnobUchar("panning", &panning, 0, 127, ImVec2(width, 40), "Track panning"))
         {
             channel->setPpanning(panning);
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
         }
 
         auto start = ImGui::GetCursorPos();
@@ -752,7 +752,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
             if (ImGui::KnobUchar("volume", &v, 0, 127, ImVec2(width, 40), "Track volume"))
             {
                 channel->setPvolume(v);
-                _state->_activeInstrument = track;
+                _state->_activeChannel = track;
             }
         }
         else
@@ -776,7 +776,7 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
             if (ImGui::VSliderInt("##vol", ImVec2(20, faderHeight), &v, 0, 127))
             {
                 channel->setPvolume(static_cast<unsigned char>(v));
-                _state->_activeInstrument = track;
+                _state->_activeChannel = track;
             }
             ImGui::ShowTooltipOnHover("Track volume");
             ImGui::SameLine();
@@ -793,13 +793,13 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
 
         if (ImGui::IsItemClicked())
         {
-            _state->_activeInstrument = track;
+            _state->_activeChannel = track;
         }
     }
     ImGui::EndChild();
     if (ImGui::IsItemClicked())
     {
-        _state->_activeInstrument = track;
+        _state->_activeChannel = track;
     }
 
     if (highlightTrack)
@@ -808,9 +808,9 @@ void AppMixer::ImGuiTrack(int track, bool highlightTrack)
     }
 }
 
-void AppMixer::ImGuiSelectInstrumentPopup()
+void zyn::ui::Mixer::ImGuiSelectInstrumentPopup()
 {
-    if (_state->_openSelectInstrument < 0)
+    if (_state->_showChannelInstrumentSelector < 0)
     {
         return;
     }
@@ -825,7 +825,7 @@ void AppMixer::ImGuiSelectInstrumentPopup()
         ImGui::SameLine();
         if (ImGui::Button("Close"))
         {
-            _state->_openSelectInstrument = -1;
+            _state->_showChannelInstrumentSelector = -1;
             ImGui::CloseCurrentPopup();
         }
 
@@ -855,14 +855,14 @@ void AppMixer::ImGuiSelectInstrumentPopup()
 
                 if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
                 {
-                    auto const &instrument = _state->_mixer->GetChannel(_state->_activeInstrument);
+                    auto const &instrument = _state->_mixer->GetChannel(_state->_activeChannel);
                     instrument->Lock();
                     _state->_mixer->GetBankManager()->LoadFromSlot(i, instrument);
                     instrument->Unlock();
                     instrument->ApplyParameters();
                     if (autoClose)
                     {
-                        _state->_openSelectInstrument = -1;
+                        _state->_showChannelInstrumentSelector = -1;
                         ImGui::CloseCurrentPopup();
                     }
                 }
@@ -877,14 +877,14 @@ void AppMixer::ImGuiSelectInstrumentPopup()
     }
 }
 
-void AppMixer::ImGuiChangeInstrumentTypePopup()
+void zyn::ui::Mixer::ImGuiChangeInstrumentTypePopup()
 {
     if (!_iconImagesAreLoaded)
     {
         return;
     }
 
-    if (_state->_openChangeInstrumentType < 0)
+    if (_state->_showChannelTypeChanger < 0)
     {
         return;
     }
@@ -895,7 +895,7 @@ void AppMixer::ImGuiChangeInstrumentTypePopup()
         ImGui::SameLine();
         if (ImGui::Button("Close"))
         {
-            _state->_openChangeInstrumentType = -1;
+            _state->_showChannelTypeChanger = -1;
             ImGui::CloseCurrentPopup();
         }
 
@@ -909,11 +909,11 @@ void AppMixer::ImGuiChangeInstrumentTypePopup()
             }
             if (ImGui::ImageButton(reinterpret_cast<void *>(_iconImages[i]), ImVec2(96, 96)))
             {
-                auto channel = _state->_mixer->GetChannel(_state->_openChangeInstrumentType);
+                auto channel = _state->_mixer->GetChannel(_state->_showChannelTypeChanger);
                 if (channel != nullptr)
                 {
                     channel->info.Ptype = static_cast<unsigned char>(i);
-                    _state->_openChangeInstrumentType = -1;
+                    _state->_showChannelTypeChanger = -1;
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -924,7 +924,7 @@ void AppMixer::ImGuiChangeInstrumentTypePopup()
     }
 }
 
-void AppMixer::AddInsertFx(int track)
+void zyn::ui::Mixer::AddInsertFx(int track)
 {
     for (int i = 0; i < NUM_INS_EFX; i++)
     {
@@ -936,7 +936,7 @@ void AppMixer::AddInsertFx(int track)
     }
 }
 
-void AppMixer::RemoveInsertFxFromTrack(int fx)
+void zyn::ui::Mixer::RemoveInsertFxFromTrack(int fx)
 {
     _state->_mixer->Pinsparts[fx] = -1;
 }

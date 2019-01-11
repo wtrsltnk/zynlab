@@ -9,7 +9,11 @@
 
 #include "../instrumentcategories.h"
 #include "appstate.h"
-#include "ui/app.mixer.h"
+#include "ui/ui.adnote.h"
+#include "ui/ui.effect.h"
+#include "ui/ui.mixer.h"
+#include "ui/ui.padnote.h"
+#include "ui/ui.subnote.h"
 #include <chrono>
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>
@@ -23,7 +27,11 @@ class AppThreeDee
 {
 private:
     AppState _state;
-    AppMixer _appMixer;
+    zyn::ui::AdNote _adNoteUI;
+    zyn::ui::Effect _effectUi;
+    zyn::ui::Mixer _mixerUi;
+    zyn::ui::PadNote _padNoteUi;
+    zyn::ui::SubNote _subNoteUi;
     GLFWwindow *_window;
     Stepper _stepper;
     Sequencer _sequencer;
@@ -63,55 +71,6 @@ private:
     void ImGuiPianoRollPatternEditorWindow();
 
     void HitNote(int trackIndex, int note, int velocity, int durationInMs);
-
-    // AD note
-    void ADNoteEditor(Channel *channel, int instrumentIndex);
-    void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
-    void ADNoteEditorFilter(ADnoteGlobalParam *parameters);
-    void ADNoteEditorFrequency(ADnoteGlobalParam *parameters);
-    void ADNoteVoiceEditor(ADnoteVoiceParam *parameters);
-    void ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters);
-    void ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters);
-    void ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters);
-    void ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters);
-    void ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters);
-    void ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters);
-
-    // SUB note
-    void SUBNoteEditor(Channel *channel, int instrumentIndex);
-    void SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters);
-    void SUBNoteEditorAmplitude(SUBnoteParameters *parameters);
-    void SUBNoteEditorBandwidth(SUBnoteParameters *parameters);
-    void SUBNoteEditorOvertones(SUBnoteParameters *parameters);
-    void SUBNoteEditorFilter(SUBnoteParameters *parameters);
-    void SUBNoteEditorFrequency(SUBnoteParameters *parameters);
-
-    // PAD note
-    void PADNoteEditor(Channel *channel, int instrumentIndex);
-    void PADNoteEditorAmplitude(PADnoteParameters *parameters);
-
-    // LFO
-    void LFO(char const *label, class LFOParams *parameters);
-
-    // Filter
-    void FilterParameters(class FilterParams *parameters);
-
-    // Envelope
-    void Envelope(char const *label, class EnvelopeParams *envelope);
-
-    // Effect
-    void InsertEffectEditor();
-    void SystemEffectEditor();
-    void InstrumentEffectEditor();
-    void EffectEditor(EffectManager *effectManager);
-    void EffectReverbEditor(EffectManager *effectManager);
-    void EffectEchoEditor(EffectManager *effectManager);
-    void EffectChorusEditor(EffectManager *effectManager);
-    void EffectPhaserEditor(EffectManager *effectManager);
-    void EffectAlienWahEditor(EffectManager *effectManager);
-    void EffectDistortionEditor(EffectManager *effectManager);
-    void EffectEQEditor(EffectManager *effectManager);
-    void EffectDynFilterEditor(EffectManager *effectManager);
 };
 
 #endif // _APP_THREE_DEE_H_

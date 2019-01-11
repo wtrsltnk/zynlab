@@ -31,7 +31,9 @@ static char const *stvarf_filter_types[] = {
     "1NF",
 };
 
-void AppThreeDee::FilterParameters(FilterParams *parameters)
+zyn::ui::Filter::Filter() = default;
+
+void zyn::ui::Filter::Render(FilterParams *parameters)
 {
     ImGui::PushItemWidth(100);
     if (ImGui::DropDown("##category", parameters->Pcategory, categories, category_count, "The Category of the Filter (Analog/Formantic/etc.)"))

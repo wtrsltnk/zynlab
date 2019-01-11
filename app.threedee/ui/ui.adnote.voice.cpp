@@ -1,4 +1,4 @@
-#include "../app.threedee.h"
+#include "ui.adnote.h"
 
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/ADnoteParams.h>
@@ -36,7 +36,7 @@ static char const *modulation_types[] = {
     "FM",
 };
 
-void AppThreeDee::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("ADsynth Voice Parameters of the Instrument");
 
@@ -87,13 +87,13 @@ void AppThreeDee::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
     }
 }
 
-void AppThreeDee::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Oscillator Parameters");
 
-    auto phase = static_cast<float>(64 - parameters->Poscilphase);
+    auto phase = static_cast<int>(64 - parameters->Poscilphase);
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("##Phase", &phase, 0, 127, "Phase %.3f"))
+    if (ImGui::SliderInt("##Phase", &phase, 0, 127, "Phase %d"))
     {
         parameters->PVolume = static_cast<unsigned char>(phase);
     }
@@ -103,13 +103,13 @@ void AppThreeDee::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
     ADNoteVoiceEditorOscillatorUnison(parameters);
 }
 
-void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Oscillator Unison Parameters");
 
-    auto frequency_spread = static_cast<float>(parameters->Unison_frequency_spread);
+    auto frequency_spread = static_cast<int>(parameters->Unison_frequency_spread);
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("##Frequency Spread", &frequency_spread, 0, 127, "Frequency Spread %.3f"))
+    if (ImGui::SliderInt("##Frequency Spread", &frequency_spread, 0, 127, "Frequency Spread %d"))
     {
         parameters->Unison_frequency_spread = static_cast<unsigned char>(frequency_spread);
     }
@@ -161,22 +161,22 @@ void AppThreeDee::ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters
     }
 }
 
-void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Amplitude Parameters");
 
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
-    auto vol = static_cast<float>(parameters->PVolume);
+    auto vol = static_cast<int>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
+    if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
     ImGui::ShowTooltipOnHover("Volume");
 
-    auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+    auto velocityScale = static_cast<int>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
+    if (ImGui::SliderInt("##V.Sns", &velocityScale, 0, 127, "V.Sns %d"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -191,35 +191,35 @@ void AppThreeDee::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 
     ImGui::Separator();
 
-    Envelope("Amplitude Envelope", parameters->AmpEnvelope);
+    _AmplitudeEnvelope.Render(parameters->AmpEnvelope);
 
     ImGui::Separator();
 
-    LFO("Amplitude LFO", parameters->AmpLfo);
+    _AmplitudeLfo.Render(parameters->AmpLfo);
 }
 
-void AppThreeDee::ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Filter Parameters");
 
-    FilterParameters(parameters->VoiceFilter);
+    _Filter.Render(parameters->VoiceFilter);
 
     ImGui::Separator();
 
-    Envelope("Filter Envelope", parameters->FilterEnvelope);
+    _FilterEnvelope.Render(parameters->FilterEnvelope);
 
     ImGui::Separator();
 
-    LFO("Filter LFo", parameters->FilterLfo);
+    _FilterLfo.Render(parameters->FilterLfo);
 }
 
-void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Frequency Parameters");
 
-    auto detune = static_cast<float>(parameters->PDetune) - 8192;
+    auto detune = static_cast<int>(parameters->PDetune) - 8192;
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("##Detune", &detune, -35, 35, "Detune %.3f"))
+    if (ImGui::SliderInt("##Detune", &detune, -35, 35, "Detune %d"))
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
     }
@@ -275,14 +275,14 @@ void AppThreeDee::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
 
     ImGui::Separator();
 
-    Envelope("Frequency Envelope", parameters->FreqEnvelope);
+    _FrequencyEnvelope.Render(parameters->FreqEnvelope);
 
     ImGui::Separator();
 
-    LFO("Frequency LFo", parameters->FreqLfo);
+    _FrequencyLfo.Render(parameters->FreqLfo);
 }
 
-void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Modulation Parameters");
 
@@ -309,25 +309,25 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
     if (parameters->PFMEnabled > 0)
     {
-        auto vol = static_cast<float>(parameters->PVolume);
+        auto vol = static_cast<int>(parameters->PVolume);
         ImGui::PushItemWidth(300);
-        if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
+        if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))
         {
             parameters->PVolume = static_cast<unsigned char>(vol);
         }
         ImGui::ShowTooltipOnHover("Volume");
 
-        auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+        auto velocityScale = static_cast<int>(parameters->PAmpVelocityScaleFunction);
         ImGui::PushItemWidth(300);
-        if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
+        if (ImGui::SliderInt("##V.Sns", &velocityScale, 0, 127, "V.Sns %d"))
         {
             parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
         }
         ImGui::ShowTooltipOnHover("Velocity Sensing Function (rightmost to disable)");
 
-        auto detune = static_cast<float>(parameters->PDetune) - 8192;
+        auto detune = static_cast<int>(parameters->PDetune) - 8192;
         ImGui::PushItemWidth(300);
-        if (ImGui::SliderFloat("##Detune", &detune, -35, 35, "Detune %.3f"))
+        if (ImGui::SliderInt("##Detune", &detune, -35, 35, "Detune %d"))
         {
             parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
         }
@@ -356,9 +356,9 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
         }
         ImGui::ShowTooltipOnHover("Detune type");
 
-        auto FMVolumeDamp = static_cast<float>(parameters->PFMVolumeDamp - 64);
+        auto FMVolumeDamp = static_cast<int>(parameters->PFMVolumeDamp - 64);
         ImGui::PushItemWidth(300);
-        if (ImGui::SliderFloat("##F.Damp", &FMVolumeDamp, -64, 63, "F.Damp %.3f"))
+        if (ImGui::SliderInt("##F.Damp", &FMVolumeDamp, -64, 63, "F.Damp %d"))
         {
             parameters->PFMVolumeDamp = static_cast<unsigned char>(FMVolumeDamp) + 64;
         }
@@ -393,10 +393,10 @@ void AppThreeDee::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
         ImGui::Separator();
 
-        Envelope("Modulation Amplitude Envelope", parameters->FMAmpEnvelope);
+        _ModulationAmplitudeEnvelope.Render(parameters->FMAmpEnvelope);
 
         ImGui::Separator();
 
-        Envelope("Modulation Frequency Envelope", parameters->FMFreqEnvelope);
+        _ModulationFrequencyEnvelope.Render(parameters->FMFreqEnvelope);
     }
 }

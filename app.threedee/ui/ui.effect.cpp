@@ -1,16 +1,17 @@
-#include "../app.threedee.h"
+#include "ui.effect.h"
 
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.fx/Alienwah.h>
 #include <zyn.fx/EffectPresets.h>
+#include <zyn.mixer/Mixer.h>
 
 char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";
-char const *const InstrumentFxEditorID = "Instrument effect";
+char const *const ChannelFxEditorID = "Channel effect";
 
-int effectNameCount = 9;
+int EffectNameCount = 9;
 
-char const *const effectNames[] = {
+char const *const EffectNames[] = {
     "No effect",
     "Reverb",
     "Echo",
@@ -147,60 +148,58 @@ static char const *const eqBandTypes[] = {
     "HSh",
 };
 
-void AppThreeDee::InsertEffectEditor()
+zyn::ui::Effect::Effect(AppState *state)
+    : _state(state)
+{}
+
+void zyn::ui::Effect::Render()
 {
-    if (!_state._showInsertEffectsEditor)
+    if (!_state->_showInsertEffectsEditor)
     {
         return;
     }
 
-    if (ImGui::Begin(InsertionFxEditorID, &_state._showInsertEffectsEditor))
+    if (ImGui::Begin(InsertionFxEditorID, &_state->_showInsertEffectsEditor))
     {
-        if (_state._currentInsertEffect >= 0 && _state._currentInsertEffect < NUM_INS_EFX)
+        if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
         {
-            EffectEditor(&_state._mixer->insefx[_state._currentInsertEffect]);
+            EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
+        }
+    }
+    ImGui::End();
+
+    if (!_state->_showSystemEffectsEditor)
+    {
+        return;
+    }
+
+    if (ImGui::Begin(SystemFxEditorID, &_state->_showSystemEffectsEditor))
+    {
+        if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
+        {
+            EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
+        }
+    }
+    ImGui::End();
+
+    if (!_state->_showChannelEffectsEditor)
+    {
+        return;
+    }
+
+    if (ImGui::Begin(ChannelFxEditorID, &_state->_showChannelEffectsEditor))
+    {
+        auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
+
+        if (_state->_currentChannelEffect >= 0 && _state->_currentChannelEffect < NUM_CHANNEL_EFX)
+        {
+            EffectEditor(channel->partefx[_state->_currentChannelEffect]);
         }
     }
     ImGui::End();
 }
 
-void AppThreeDee::SystemEffectEditor()
-{
-    if (!_state._showSystemEffectsEditor)
-    {
-        return;
-    }
-
-    if (ImGui::Begin(SystemFxEditorID, &_state._showSystemEffectsEditor))
-    {
-        if (_state._currentSystemEffect >= 0 && _state._currentSystemEffect < NUM_SYS_EFX)
-        {
-            EffectEditor(&_state._mixer->sysefx[_state._currentSystemEffect]);
-        }
-    }
-    ImGui::End();
-}
-
-void AppThreeDee::InstrumentEffectEditor()
-{
-    if (!_state._showInstrumentEffectsEditor)
-    {
-        return;
-    }
-
-    if (ImGui::Begin(InstrumentFxEditorID, &_state._showInstrumentEffectsEditor))
-    {
-        auto channel = _state._mixer->GetChannel(_state._activeInstrument);
-
-        if (_state._currentInstrumentEffect >= 0 && _state._currentInstrumentEffect < NUM_CHANNEL_EFX)
-        {
-            EffectEditor(channel->partefx[_state._currentInstrumentEffect]);
-        }
-    }
-    ImGui::End();
-}
-
-void BaseEffectEditor(EffectManager *effectManager)
+void VolumeAndPanning(EffectManager *effectManager)
 {
     auto volume = effectManager->geteffectpar(EffectPresets::Volume);
     if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40), "Effect Volume"))
@@ -253,12 +252,12 @@ void LFOEditor(EffectManager *effectManager, char const *label)
     }
 }
 
-void AppThreeDee::EffectEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectEditor(EffectManager *effectManager)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     auto effect = static_cast<unsigned char>(effectManager->geteffect());
     ImGui::PushItemWidth(250);
-    if (ImGui::DropDown("Effect", effect, effectNames, effectNameCount, "Selected Effect"))
+    if (ImGui::DropDown("Effect", effect, EffectNames, EffectNameCount, "Selected Effect"))
     {
         effectManager->changeeffect(effect);
     }
@@ -295,7 +294,7 @@ void AppThreeDee::EffectEditor(EffectManager *effectManager)
     ImGui::PopStyleVar();
 }
 
-void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectReverbEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
@@ -313,7 +312,7 @@ void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
         effectManager->seteffectpar(ReverbPresets::ReverbType, type);
     }
 
-    BaseEffectEditor(effectManager);
+    VolumeAndPanning(effectManager);
 
     ImGui::SameLine();
 
@@ -376,7 +375,7 @@ void AppThreeDee::EffectReverbEditor(EffectManager *effectManager)
     ImGui::SameLine();
 }
 
-void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectEchoEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
@@ -385,7 +384,7 @@ void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
         effectManager->changepreset(preset);
     }
 
-    BaseEffectEditor(effectManager);
+    VolumeAndPanning(effectManager);
 
     ImGui::SameLine();
 
@@ -428,7 +427,7 @@ void AppThreeDee::EffectEchoEditor(EffectManager *effectManager)
     }
 }
 
-void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectChorusEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
@@ -446,7 +445,7 @@ void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Inverts output");
 
-    BaseEffectEditor(effectManager);
+    VolumeAndPanning(effectManager);
 
     ImGui::SameLine();
 
@@ -485,7 +484,7 @@ void AppThreeDee::EffectChorusEditor(EffectManager *effectManager)
     LFOEditor(effectManager, "Chorus LFO");
 }
 
-void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectPhaserEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
@@ -519,7 +518,7 @@ void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Analog");
 
-    BaseEffectEditor(effectManager);
+    VolumeAndPanning(effectManager);
 
     ImGui::SameLine();
 
@@ -558,7 +557,7 @@ void AppThreeDee::EffectPhaserEditor(EffectManager *effectManager)
     LFOEditor(effectManager, "Phaser LFO");
 }
 
-void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectAlienWahEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
@@ -567,7 +566,7 @@ void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
         effectManager->changepreset(preset);
     }
 
-    BaseEffectEditor(effectManager);
+    VolumeAndPanning(effectManager);
 
     ImGui::SameLine();
 
@@ -614,7 +613,7 @@ void AppThreeDee::EffectAlienWahEditor(EffectManager *effectManager)
     LFOEditor(effectManager, "Alien Wah LFO");
 }
 
-void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectDistortionEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
@@ -657,7 +656,7 @@ void AppThreeDee::EffectDistortionEditor(EffectManager *effectManager)
     }
     ImGui::ShowTooltipOnHover("Stereo (0=mono, 1=stereo)");
 
-    BaseEffectEditor(effectManager);
+    VolumeAndPanning(effectManager);
 
     ImGui::SameLine();
 
@@ -713,7 +712,7 @@ float getEQPlotValue(EffectManager *effectManager, int x, int maxX, int maxY)
     return ((dbresp / maxdB + 1.0f) * maxY / 2.0f);
 }
 
-void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectEQEditor(EffectManager *effectManager)
 {
     auto volume = effectManager->geteffectpar(EffectPresets::Volume);
     if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40), "Effect Volume"))
@@ -785,7 +784,7 @@ void AppThreeDee::EffectEQEditor(EffectManager *effectManager)
     }
 }
 
-void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
+void zyn::ui::Effect::EffectDynFilterEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
@@ -794,7 +793,7 @@ void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
         effectManager->changepreset(preset);
     }
 
-    BaseEffectEditor(effectManager);
+    VolumeAndPanning(effectManager);
 
     ImGui::SameLine();
 
@@ -837,5 +836,5 @@ void AppThreeDee::EffectDynFilterEditor(EffectManager *effectManager)
 
     ImGui::Text("Filter");
 
-    FilterParameters(effectManager->_filterpars);
+    _Filter.Render(effectManager->_filterpars);
 }

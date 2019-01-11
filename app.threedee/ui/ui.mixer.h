@@ -1,10 +1,13 @@
-#ifndef APP_MIXER_H
-#define APP_MIXER_H
+#ifndef UI_MIXER_H
+#define UI_MIXER_H
 
-#include "../instrumentcategories.h"
 #include "../appstate.h"
+#include "../instrumentcategories.h"
 
-class AppMixer
+namespace zyn {
+namespace ui {
+
+class Mixer
 {
 private:
     AppState *_state;
@@ -23,8 +26,8 @@ protected:
     void RemoveInsertFxFromTrack(int fx);
 
 public:
-    AppMixer(AppState *appstate);
-    virtual ~AppMixer();
+    Mixer(AppState *appstate);
+    virtual ~Mixer();
 
     bool Setup();
     void Render();
@@ -36,4 +39,7 @@ public:
     void ShowInspector(bool show);
 };
 
-#endif // APP_MIXER_H
+} // namespace ui
+} // namespace zyn
+
+#endif // UI_MIXER_H

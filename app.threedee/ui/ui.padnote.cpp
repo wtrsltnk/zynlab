@@ -1,26 +1,44 @@
-#include "../app.threedee.h"
+#include "ui.padnote.h"
 
 #include "../imgui_addons/imgui_knob.h"
+#include <zyn.mixer/Mixer.h>
 #include <zyn.synth/PADnoteParams.h>
 
-char const *const PADeditorID = "PAD editor";
+char const *const PadSynthEditorID = "PAD editor";
 
-void AppThreeDee::PADNoteEditor(Channel *channel, int instrumentIndex)
+zyn::ui::PadNote::PadNote(AppState *state)
+    : _state(state), _AmplitudeEnvelope("Amplitude Envelope"), _AmplitudeLfo("Amplitude LFO")
+{}
+
+zyn::ui::PadNote::~PadNote() = default;
+
+bool zyn::ui::PadNote::Setup()
 {
-    if (!_state._showPADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
+    return true;
+}
+
+void zyn::ui::PadNote::Render()
+{
+    auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+    ImGui::Begin(PadSynthEditorID, &_state->_showPADNoteEditor);
+    if (!_state->_showPADNoteEditor || channel == nullptr || _state->_activeChannelInstrument < 0 || _state->_activeChannelInstrument >= NUM_CHANNEL_INSTRUMENTS)
     {
+        ImGui::End();
         return;
     }
 
-    auto *parameters = channel->instruments[instrumentIndex].padpars;
+    auto *parameters = channel->Instruments[_state->_activeChannelInstrument].padpars;
 
-    if (channel->instruments[instrumentIndex].Ppadenabled == 0)
+    if (channel->Instruments[_state->_activeChannelInstrument].Ppadenabled == 0)
     {
         ImGui::Text("PAD editor is disabled");
         if (ImGui::Button("Enable PAD synth"))
         {
-            channel->instruments[instrumentIndex].Ppadenabled = 1;
+            channel->Instruments[_state->_activeChannelInstrument].Ppadenabled = 1;
         }
+        ImGui::End();
         return;
     }
 
@@ -49,24 +67,26 @@ void AppThreeDee::PADNoteEditor(Channel *channel, int instrumentIndex)
 
         ImGui::EndTabBar();
     }
+    ImGui::End();
+    ImGui::PopStyleVar();
 }
 
-void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
+void zyn::ui::PadNote::PADNoteEditorAmplitude(PADnoteParameters *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
-    auto vol = static_cast<float>(parameters->PVolume);
+    auto vol = static_cast<int>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
+    if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
     ImGui::ShowTooltipOnHover("Volume");
 
-    auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+    auto velocityScale = static_cast<int>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
+    if (ImGui::SliderInt("##V.Sns", &velocityScale, 0, 127, "V.Sns %d"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -112,9 +132,9 @@ void AppThreeDee::PADNoteEditorAmplitude(PADnoteParameters *parameters)
 
     ImGui::Separator();
 
-    Envelope("Amplitude Envelope", parameters->AmpEnvelope);
+    _AmplitudeEnvelope.Render(parameters->AmpEnvelope);
 
     ImGui::Separator();
 
-    LFO("Amplitude LFO", parameters->AmpLfo);
+    _AmplitudeLfo.Render(parameters->AmpLfo);
 }

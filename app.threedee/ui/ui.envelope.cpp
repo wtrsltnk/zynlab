@@ -1,12 +1,22 @@
+#include "ui.envelope.h"
 #include "../app.threedee.h"
 
 #include "../imgui_addons/imgui_knob.h"
 #include <imgui.h>
 #include <zyn.synth/EnvelopeParams.h>
 
-void AppThreeDee::Envelope(char const *label, EnvelopeParams *envelope)
+zyn::ui::Envelope::Envelope(char const *label)
+    : _label(label)
+{}
+
+void zyn::ui::Envelope::Render(EnvelopeParams *envelope)
 {
-    ImGui::Text("%s", label);
+    ImGui::Text("%s", _label);
+
+    if (envelope == nullptr)
+    {
+        return;
+    }
 
     if (envelope->Envmode >= 3)
     {

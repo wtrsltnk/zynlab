@@ -46,7 +46,7 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
     partoutl = new float[SystemSettings::Instance().buffersize];
     partoutr = new float[SystemSettings::Instance().buffersize];
 
-    for (auto &n : instruments)
+    for (auto &n : Instruments)
     {
         n.Pname = new unsigned char[CHANNEL_MAX_NAME_LEN];
         n.adpars = nullptr;
@@ -54,9 +54,9 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
         n.padpars = nullptr;
     }
 
-    instruments[0].adpars = new ADnoteParameters(_mixer->GetFFT());
-    instruments[0].subpars = new SUBnoteParameters();
-    instruments[0].padpars = new PADnoteParameters(mixer);
+    Instruments[0].adpars = new ADnoteParameters(_mixer->GetFFT());
+    Instruments[0].subpars = new SUBnoteParameters();
+    Instruments[0].padpars = new PADnoteParameters(mixer);
 
     //Part's Insertion Effects init
     for (auto &nefx : partefx)
@@ -154,23 +154,23 @@ void Channel::InstrumentDefaults()
 
     for (int n = 0; n < NUM_CHANNEL_INSTRUMENTS; ++n)
     {
-        instruments[n].Penabled = 0;
-        instruments[n].Pmuted = 0;
-        instruments[n].Pminkey = 0;
-        instruments[n].Pmaxkey = 127;
-        instruments[n].Padenabled = 0;
-        instruments[n].Psubenabled = 0;
-        instruments[n].Ppadenabled = 0;
-        ZEROUNSIGNED(instruments[n].Pname, CHANNEL_MAX_NAME_LEN);
-        instruments[n].Psendtoparteffect = 0;
+        Instruments[n].Penabled = 0;
+        Instruments[n].Pmuted = 0;
+        Instruments[n].Pminkey = 0;
+        Instruments[n].Pmaxkey = 127;
+        Instruments[n].Padenabled = 0;
+        Instruments[n].Psubenabled = 0;
+        Instruments[n].Ppadenabled = 0;
+        ZEROUNSIGNED(Instruments[n].Pname, CHANNEL_MAX_NAME_LEN);
+        Instruments[n].Psendtoparteffect = 0;
         if (n != 0)
             setkititemstatus(n, 0);
     }
-    instruments[0].Penabled = 1;
-    instruments[0].Padenabled = 1;
-    instruments[0].adpars->Defaults();
-    instruments[0].subpars->Defaults();
-    instruments[0].padpars->Defaults();
+    Instruments[0].Penabled = 1;
+    Instruments[0].Padenabled = 1;
+    Instruments[0].adpars->Defaults();
+    Instruments[0].subpars->Defaults();
+    Instruments[0].padpars->Defaults();
 
     for (int nefx = 0; nefx < NUM_CHANNEL_EFX; ++nefx)
     {
@@ -254,7 +254,7 @@ void Channel::Cleanup(bool final_)
 Channel::~Channel()
 {
     Cleanup(true);
-    for (auto &n : instruments)
+    for (auto &n : Instruments)
     {
         if (n.adpars != nullptr)
             delete (n.adpars);
@@ -464,7 +464,7 @@ void Channel::NoteOn(unsigned char note,
             // Do Legato note
             if (Pkitmode == 0)
             { // "normal mode" legato note
-                if ((instruments[0].Padenabled != 0) && (_channelNotes[pos].instumentNotes[0].adnote != nullptr) && (_channelNotes[posb].instumentNotes[0].adnote != nullptr))
+                if ((Instruments[0].Padenabled != 0) && (_channelNotes[pos].instumentNotes[0].adnote != nullptr) && (_channelNotes[posb].instumentNotes[0].adnote != nullptr))
                 {
                     _channelNotes[pos].instumentNotes[0].adnote->legatonote(notebasefreq,
                                                                             vel,
@@ -478,7 +478,7 @@ void Channel::NoteOn(unsigned char note,
                                                                              true);
                 }
 
-                if ((instruments[0].Psubenabled != 0) && (_channelNotes[pos].instumentNotes[0].subnote != nullptr) && (_channelNotes[posb].instumentNotes[0].subnote != nullptr))
+                if ((Instruments[0].Psubenabled != 0) && (_channelNotes[pos].instumentNotes[0].subnote != nullptr) && (_channelNotes[posb].instumentNotes[0].subnote != nullptr))
                 {
                     _channelNotes[pos].instumentNotes[0].subnote->legatonote(
                         notebasefreq, vel, portamento, note, true);
@@ -486,7 +486,7 @@ void Channel::NoteOn(unsigned char note,
                         notebasefreq, vel, portamento, note, true);
                 }
 
-                if ((instruments[0].Ppadenabled != 0) && (_channelNotes[pos].instumentNotes[0].padnote != nullptr) && (_channelNotes[posb].instumentNotes[0].padnote != nullptr))
+                if ((Instruments[0].Ppadenabled != 0) && (_channelNotes[pos].instumentNotes[0].padnote != nullptr) && (_channelNotes[posb].instumentNotes[0].padnote != nullptr))
                 {
                     _channelNotes[pos].instumentNotes[0].padnote->legatonote(
                         notebasefreq, vel, portamento, note, true);
@@ -497,7 +497,7 @@ void Channel::NoteOn(unsigned char note,
             else
             { // "kit mode" legato note
                 int ci = 0;
-                for (auto &item : instruments)
+                for (auto &item : Instruments)
                 {
                     if (item.Pmuted != 0)
                         continue;
@@ -564,69 +564,69 @@ void Channel::NoteOn(unsigned char note,
         if (Pkitmode == 0)
         { //init the notes for the "normal mode"
             _channelNotes[pos].instumentNotes[0].sendtoparteffect = 0;
-            if (instruments[0].Padenabled != 0)
-                _channelNotes[pos].instumentNotes[0].adnote = new ADnote(instruments[0].adpars,
+            if (Instruments[0].Padenabled != 0)
+                _channelNotes[pos].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
                                                                          &ctl,
                                                                          notebasefreq,
                                                                          vel,
                                                                          portamento,
                                                                          note,
                                                                          false);
-            if (instruments[0].Psubenabled != 0)
-                _channelNotes[pos].instumentNotes[0].subnote = new SUBnote(instruments[0].subpars,
+            if (Instruments[0].Psubenabled != 0)
+                _channelNotes[pos].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars,
                                                                            &ctl,
                                                                            notebasefreq,
                                                                            vel,
                                                                            portamento,
                                                                            note,
                                                                            false);
-            if (instruments[0].Ppadenabled != 0)
-                _channelNotes[pos].instumentNotes[0].padnote = new PADnote(instruments[0].padpars,
+            if (Instruments[0].Ppadenabled != 0)
+                _channelNotes[pos].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars,
                                                                            &ctl,
                                                                            notebasefreq,
                                                                            vel,
                                                                            portamento,
                                                                            note,
                                                                            false);
-            if ((instruments[0].Padenabled != 0) || (instruments[0].Psubenabled != 0) || (instruments[0].Ppadenabled != 0))
+            if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Ppadenabled != 0))
                 _channelNotes[pos].itemsplaying++;
 
             // Spawn another note (but silent) if legatomodevalid==true
             if (legatomodevalid)
             {
                 _channelNotes[posb].instumentNotes[0].sendtoparteffect = 0;
-                if (instruments[0].Padenabled != 0)
-                    _channelNotes[posb].instumentNotes[0].adnote = new ADnote(instruments[0].adpars,
+                if (Instruments[0].Padenabled != 0)
+                    _channelNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
                                                                               &ctl,
                                                                               notebasefreq,
                                                                               vel,
                                                                               portamento,
                                                                               note,
                                                                               true); //true for silent.
-                if (instruments[0].Psubenabled != 0)
+                if (Instruments[0].Psubenabled != 0)
                     _channelNotes[posb].instumentNotes[0].subnote = new SUBnote(
-                        instruments[0].subpars,
+                        Instruments[0].subpars,
                         &ctl,
                         notebasefreq,
                         vel,
                         portamento,
                         note,
                         true);
-                if (instruments[0].Ppadenabled != 0)
+                if (Instruments[0].Ppadenabled != 0)
                     _channelNotes[posb].instumentNotes[0].padnote = new PADnote(
-                        instruments[0].padpars,
+                        Instruments[0].padpars,
                         &ctl,
                         notebasefreq,
                         vel,
                         portamento,
                         note,
                         true);
-                if ((instruments[0].Padenabled != 0) || (instruments[0].Psubenabled != 0) || (instruments[0].Ppadenabled != 0))
+                if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Ppadenabled != 0))
                     _channelNotes[posb].itemsplaying++;
             }
         }
         else //init the notes for the "kit mode"
-            for (auto &item : instruments)
+            for (auto &item : Instruments)
             {
                 if (item.Pmuted != 0)
                     continue;
@@ -776,26 +776,26 @@ void Channel::PolyphonicAftertouch(unsigned char note,
 
             if (!Pkitmode)
             { // "normal mode"
-                if (instruments[0].Padenabled && i.instumentNotes[0].adnote)
+                if (Instruments[0].Padenabled && i.instumentNotes[0].adnote)
                     i.instumentNotes[0].adnote->setVelocity(vel);
-                if (instruments[0].Psubenabled && i.instumentNotes[0].subnote)
+                if (Instruments[0].Psubenabled && i.instumentNotes[0].subnote)
                     i.instumentNotes[0].subnote->setVelocity(vel);
-                if (instruments[0].Ppadenabled && i.instumentNotes[0].padnote)
+                if (Instruments[0].Ppadenabled && i.instumentNotes[0].padnote)
                     i.instumentNotes[0].padnote->setVelocity(vel);
             }
             else // "kit mode"
                 for (int item = 0; item < NUM_CHANNEL_INSTRUMENTS; ++item)
                 {
-                    if (instruments[item].Pmuted)
+                    if (Instruments[item].Pmuted)
                         continue;
-                    if ((note < instruments[item].Pminkey) || (note > instruments[item].Pmaxkey))
+                    if ((note < Instruments[item].Pminkey) || (note > Instruments[item].Pmaxkey))
                         continue;
 
-                    if (instruments[item].Padenabled && i.instumentNotes[item].adnote)
+                    if (Instruments[item].Padenabled && i.instumentNotes[item].adnote)
                         i.instumentNotes[item].adnote->setVelocity(vel);
-                    if (instruments[item].Psubenabled && i.instumentNotes[item].subnote)
+                    if (Instruments[item].Psubenabled && i.instumentNotes[item].subnote)
                         i.instumentNotes[item].subnote->setVelocity(vel);
-                    if (instruments[item].Ppadenabled && i.instumentNotes[item].padnote)
+                    if (Instruments[item].Ppadenabled && i.instumentNotes[item].padnote)
                         i.instumentNotes[item].padnote->setVelocity(vel);
                 }
         }
@@ -862,7 +862,7 @@ void Channel::SetController(unsigned int type, int par)
             setPvolume(Pvolume);   //update the volume
             setPpanning(Ppanning); //update the panning
 
-            for (auto &item : instruments)
+            for (auto &item : Instruments)
             {
                 if (item.adpars == nullptr)
                     continue;
@@ -877,7 +877,7 @@ void Channel::SetController(unsigned int type, int par)
             break;
         case C_resonance_center:
             ctl.setresonancecenter(par);
-            for (auto &item : instruments)
+            for (auto &item : Instruments)
             {
                 if (item.adpars == nullptr)
                     continue;
@@ -887,7 +887,7 @@ void Channel::SetController(unsigned int type, int par)
             break;
         case C_resonance_bandwidth:
             ctl.setresonancebw(par);
-            instruments[0].adpars->GlobalPar.Reson->sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
+            Instruments[0].adpars->GlobalPar.Reson->sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
             break;
     }
 }
@@ -1190,33 +1190,33 @@ void Channel::setkititemstatus(int kititem, int Penabled_)
     {
         return; //nonexistent kit item and the first kit item is always enabled
     }
-    instruments[kititem].Penabled = static_cast<unsigned char>(Penabled_);
+    Instruments[kititem].Penabled = static_cast<unsigned char>(Penabled_);
 
     bool resetallnotes = false;
     if (Penabled_ == 0)
     {
-        if (instruments[kititem].adpars != nullptr)
-            delete (instruments[kititem].adpars);
-        if (instruments[kititem].subpars != nullptr)
-            delete (instruments[kititem].subpars);
-        if (instruments[kititem].padpars != nullptr)
+        if (Instruments[kititem].adpars != nullptr)
+            delete (Instruments[kititem].adpars);
+        if (Instruments[kititem].subpars != nullptr)
+            delete (Instruments[kititem].subpars);
+        if (Instruments[kititem].padpars != nullptr)
         {
-            delete (instruments[kititem].padpars);
+            delete (Instruments[kititem].padpars);
             resetallnotes = true;
         }
-        instruments[kititem].adpars = nullptr;
-        instruments[kititem].subpars = nullptr;
-        instruments[kititem].padpars = nullptr;
-        instruments[kititem].Pname[0] = '\0';
+        Instruments[kititem].adpars = nullptr;
+        Instruments[kititem].subpars = nullptr;
+        Instruments[kititem].padpars = nullptr;
+        Instruments[kititem].Pname[0] = '\0';
     }
     else
     {
-        if (instruments[kititem].adpars == nullptr)
-            instruments[kititem].adpars = new ADnoteParameters(_mixer->GetFFT());
-        if (instruments[kititem].subpars == nullptr)
-            instruments[kititem].subpars = new SUBnoteParameters();
-        if (instruments[kititem].padpars == nullptr)
-            instruments[kititem].padpars = new PADnoteParameters(_mixer);
+        if (Instruments[kititem].adpars == nullptr)
+            Instruments[kititem].adpars = new ADnoteParameters(_mixer->GetFFT());
+        if (Instruments[kititem].subpars == nullptr)
+            Instruments[kititem].subpars = new SUBnoteParameters();
+        if (Instruments[kititem].padpars == nullptr)
+            Instruments[kititem].padpars = new PADnoteParameters(_mixer);
     }
 
     if (resetallnotes)
@@ -1244,38 +1244,38 @@ void Channel::SerializeInstrument(IPresetsSerializer *xml)
     for (int i = 0; i < NUM_CHANNEL_INSTRUMENTS; ++i)
     {
         xml->beginbranch("INSTRUMENT_KIT_ITEM", i);
-        xml->addparbool("enabled", instruments[i].Penabled);
-        if (instruments[i].Penabled != 0)
+        xml->addparbool("enabled", Instruments[i].Penabled);
+        if (Instruments[i].Penabled != 0)
         {
-            xml->addparstr("name", reinterpret_cast<char *>(instruments[i].Pname));
+            xml->addparstr("name", reinterpret_cast<char *>(Instruments[i].Pname));
 
-            xml->addparbool("muted", instruments[i].Pmuted);
-            xml->addpar("min_key", instruments[i].Pminkey);
-            xml->addpar("max_key", instruments[i].Pmaxkey);
+            xml->addparbool("muted", Instruments[i].Pmuted);
+            xml->addpar("min_key", Instruments[i].Pminkey);
+            xml->addpar("max_key", Instruments[i].Pmaxkey);
 
-            xml->addpar("send_to_instrument_effect", instruments[i].Psendtoparteffect);
+            xml->addpar("send_to_instrument_effect", Instruments[i].Psendtoparteffect);
 
-            xml->addparbool("add_enabled", instruments[i].Padenabled);
-            if ((instruments[i].Padenabled != 0) && (instruments[i].adpars != nullptr))
+            xml->addparbool("add_enabled", Instruments[i].Padenabled);
+            if ((Instruments[i].Padenabled != 0) && (Instruments[i].adpars != nullptr))
             {
                 xml->beginbranch("ADD_SYNTH_PARAMETERS");
-                instruments[i].adpars->Serialize(xml);
+                Instruments[i].adpars->Serialize(xml);
                 xml->endbranch();
             }
 
-            xml->addparbool("sub_enabled", instruments[i].Psubenabled);
-            if ((instruments[i].Psubenabled != 0) && (instruments[i].subpars != nullptr))
+            xml->addparbool("sub_enabled", Instruments[i].Psubenabled);
+            if ((Instruments[i].Psubenabled != 0) && (Instruments[i].subpars != nullptr))
             {
                 xml->beginbranch("SUB_SYNTH_PARAMETERS");
-                instruments[i].subpars->Serialize(xml);
+                Instruments[i].subpars->Serialize(xml);
                 xml->endbranch();
             }
 
-            xml->addparbool("pad_enabled", instruments[i].Ppadenabled);
-            if ((instruments[i].Ppadenabled != 0) && (instruments[i].padpars != nullptr))
+            xml->addparbool("pad_enabled", Instruments[i].Ppadenabled);
+            if ((Instruments[i].Ppadenabled != 0) && (Instruments[i].padpars != nullptr))
             {
                 xml->beginbranch("PAD_SYNTH_PARAMETERS");
-                instruments[i].padpars->Serialize(xml);
+                Instruments[i].padpars->Serialize(xml);
                 xml->endbranch();
             }
         }
@@ -1365,7 +1365,7 @@ int Channel::loadXMLinstrument(const char *filename)
 
 void Channel::ApplyParameters(bool lockmutex)
 {
-    for (auto &n : instruments)
+    for (auto &n : Instruments)
     {
         if ((n.padpars != nullptr) && (n.Ppadenabled != 0))
         {
@@ -1396,41 +1396,41 @@ void Channel::DeserializeInstrument(IPresetsSerializer *xml)
         {
             if (xml->enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
                 continue;
-            setkititemstatus(i, xml->getparbool("enabled", instruments[i].Penabled));
-            if (instruments[i].Penabled == 0)
+            setkititemstatus(i, xml->getparbool("enabled", Instruments[i].Penabled));
+            if (Instruments[i].Penabled == 0)
             {
                 xml->exitbranch();
                 continue;
             }
 
-            xml->getparstr("name", reinterpret_cast<char *>(instruments[i].Pname), CHANNEL_MAX_NAME_LEN);
+            xml->getparstr("name", reinterpret_cast<char *>(Instruments[i].Pname), CHANNEL_MAX_NAME_LEN);
 
-            instruments[i].Pmuted = static_cast<unsigned char>(xml->getparbool("muted", instruments[i].Pmuted));
-            instruments[i].Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", instruments[i].Pminkey));
-            instruments[i].Pmaxkey = static_cast<unsigned char>(xml->getpar127("max_key", instruments[i].Pmaxkey));
+            Instruments[i].Pmuted = static_cast<unsigned char>(xml->getparbool("muted", Instruments[i].Pmuted));
+            Instruments[i].Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", Instruments[i].Pminkey));
+            Instruments[i].Pmaxkey = static_cast<unsigned char>(xml->getpar127("max_key", Instruments[i].Pmaxkey));
 
-            instruments[i].Psendtoparteffect = static_cast<unsigned char>(xml->getpar127(
+            Instruments[i].Psendtoparteffect = static_cast<unsigned char>(xml->getpar127(
                 "send_to_instrument_effect",
-                instruments[i].Psendtoparteffect));
+                Instruments[i].Psendtoparteffect));
 
-            instruments[i].Padenabled = static_cast<unsigned char>(xml->getparbool("add_enabled", instruments[i].Padenabled));
+            Instruments[i].Padenabled = static_cast<unsigned char>(xml->getparbool("add_enabled", Instruments[i].Padenabled));
             if (xml->enterbranch("ADD_SYNTH_PARAMETERS"))
             {
-                instruments[i].adpars->Deserialize(xml);
+                Instruments[i].adpars->Deserialize(xml);
                 xml->exitbranch();
             }
 
-            instruments[i].Psubenabled = static_cast<unsigned char>(xml->getparbool("sub_enabled", instruments[i].Psubenabled));
+            Instruments[i].Psubenabled = static_cast<unsigned char>(xml->getparbool("sub_enabled", Instruments[i].Psubenabled));
             if (xml->enterbranch("SUB_SYNTH_PARAMETERS"))
             {
-                instruments[i].subpars->Deserialize(xml);
+                Instruments[i].subpars->Deserialize(xml);
                 xml->exitbranch();
             }
 
-            instruments[i].Ppadenabled = static_cast<unsigned char>(xml->getparbool("pad_enabled", instruments[i].Ppadenabled));
+            Instruments[i].Ppadenabled = static_cast<unsigned char>(xml->getparbool("pad_enabled", Instruments[i].Ppadenabled));
             if (xml->enterbranch("PAD_SYNTH_PARAMETERS"))
             {
-                instruments[i].padpars->Deserialize(xml);
+                Instruments[i].padpars->Deserialize(xml);
                 xml->exitbranch();
             }
 

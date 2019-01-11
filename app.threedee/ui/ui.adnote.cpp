@@ -1,6 +1,7 @@
-#include "../app.threedee.h"
+#include "ui.adnote.h"
 
 #include "../imgui_addons/imgui_knob.h"
+#include <zyn.mixer/Mixer.h>
 #include <zyn.synth/ADnoteParams.h>
 
 static char voiceIds[][64]{
@@ -21,24 +22,42 @@ static char const *detune_types[] = {
     "E1200cents",
 };
 
-char const *const ADeditorID = "AD editor";
+char const *const AdSynthEditorID = "AD editor";
 
-void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
+zyn::ui::AdNote::AdNote(AppState *state)
+    : _state(state),
+      _AmplitudeEnvelope("Amplitude Envelope"), _FilterEnvelope("Filter Envelope"), _FrequencyEnvelope("Frequency Envelope"),
+      _ModulationAmplitudeEnvelope("Modulation Amplitude Envelope"), _ModulationFrequencyEnvelope("Modulation Frequency Envelope"),
+      _AmplitudeLfo("Amplitude LFO"), _FilterLfo("Filter LFO"), _FrequencyLfo("Frequency LFO")
+{}
+
+bool zyn::ui::AdNote::Setup()
 {
-    if (!_state._showADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
+    return true;
+}
+
+void zyn::ui::AdNote::Render()
+{
+    auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
+
+    ImGui::Begin(AdSynthEditorID, &_state->_showADNoteEditor);
+    if (!_state->_showADNoteEditor || channel == nullptr || _state->_activeChannelInstrument < 0 || _state->_activeChannelInstrument >= NUM_CHANNEL_INSTRUMENTS)
     {
+        ImGui::End();
         return;
     }
 
-    auto *parameters = channel->instruments[instrumentIndex].adpars;
+    auto *parameters = channel->Instruments[_state->_activeChannelInstrument].adpars;
 
-    if (channel->instruments[instrumentIndex].Padenabled == 0)
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+    if (channel->Instruments[_state->_activeChannelInstrument].Padenabled == 0)
     {
         ImGui::Text("AD editor is disabled");
         if (ImGui::Button("Enable AD synth"))
         {
-            channel->instruments[instrumentIndex].Padenabled = 1;
+            channel->Instruments[_state->_activeChannelInstrument].Padenabled = 1;
         }
+        ImGui::End();
         return;
     }
 
@@ -46,9 +65,9 @@ void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
     {
         if (ImGui::BeginTabItem("Global"))
         {
-            if (_state._activeInstrument >= 0)
+            if (_state->_activeChannel >= 0)
             {
-                ImGui::Text("ADsynth Global Parameters of the Instrument");
+                ImGui::Text("ADsynth Global Parameters of the Channel");
 
                 if (ImGui::BeginTabBar("ADNote"))
                 {
@@ -79,9 +98,9 @@ void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
         }
         for (int i = 0; i < NUM_VOICES; i++)
         {
-            if (_state._activeInstrument >= 0)
+            if (_state->_activeChannel >= 0)
             {
-                auto parameters = &_state._mixer->GetChannel(_state._activeInstrument)->instruments[0].adpars->VoicePar[i];
+                auto parameters = &_state->_mixer->GetChannel(_state->_activeChannel)->Instruments[0].adpars->VoicePar[i];
                 if (ImGui::BeginTabItem(voiceIds[i]))
                 {
                     ADNoteVoiceEditor(parameters);
@@ -92,24 +111,26 @@ void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
         }
         ImGui::EndTabBar();
     }
+    ImGui::End();
+    ImGui::PopStyleVar();
 }
 
-void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
+void zyn::ui::AdNote::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
     ImGui::BeginChild("VolSns", ImVec2(250, 50));
-    auto vol = static_cast<float>(parameters->PVolume);
+    auto vol = static_cast<int>(parameters->PVolume);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##Vol", &vol, 0, 127, "Vol %.3f"))
+    if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))
     {
         parameters->PVolume = static_cast<unsigned char>(vol);
     }
     ImGui::ShowTooltipOnHover("Volume");
 
-    auto velocityScale = static_cast<float>(parameters->PAmpVelocityScaleFunction);
+    auto velocityScale = static_cast<int>(parameters->PAmpVelocityScaleFunction);
     ImGui::PushItemWidth(250);
-    if (ImGui::SliderFloat("##V.Sns", &velocityScale, 0, 127, "V.Sns %.3f"))
+    if (ImGui::SliderInt("##V.Sns", &velocityScale, 0, 127, "V.Sns %d"))
     {
         parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
     }
@@ -164,35 +185,35 @@ void AppThreeDee::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
 
     ImGui::Separator();
 
-    Envelope("Amplitude Envelope", parameters->AmpEnvelope);
+    _AmplitudeEnvelope.Render(parameters->AmpEnvelope);
 
     ImGui::Separator();
 
-    LFO("Amplitude LFO", parameters->AmpLfo);
+    _AmplitudeLfo.Render(parameters->AmpLfo);
 }
 
-void AppThreeDee::ADNoteEditorFilter(ADnoteGlobalParam *parameters)
+void zyn::ui::AdNote::ADNoteEditorFilter(ADnoteGlobalParam *parameters)
 {
     ImGui::Text("Global Filter Parameters");
 
-    FilterParameters(parameters->GlobalFilter);
+    _Filter.Render(parameters->GlobalFilter);
 
     ImGui::Separator();
 
-    Envelope("Filter Envelope", parameters->FilterEnvelope);
+    _FilterEnvelope.Render(parameters->FilterEnvelope);
 
     ImGui::Separator();
 
-    LFO("Filter LFo", parameters->FilterLfo);
+    _FilterLfo.Render(parameters->FilterLfo);
 }
 
-void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
+void zyn::ui::AdNote::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
 {
     ImGui::Text("Global Frequency Parameters");
 
-    auto detune = static_cast<float>(parameters->PDetune) - 8192;
+    auto detune = static_cast<int>(parameters->PDetune) - 8192;
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderFloat("##Detune", &detune, -35, 35, "Detune %.3f"))
+    if (ImGui::SliderInt("##Detune", &detune, -35, 35, "Detune %d"))
     {
         parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
     }
@@ -254,9 +275,9 @@ void AppThreeDee::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
 
     ImGui::Separator();
 
-    Envelope("Frequency Envelope", parameters->FreqEnvelope);
+    _FrequencyEnvelope.Render(parameters->FreqEnvelope);
 
     ImGui::Separator();
 
-    LFO("Frequency LFo", parameters->FreqLfo);
+    _FrequencyLfo.Render(parameters->FreqLfo);
 }
