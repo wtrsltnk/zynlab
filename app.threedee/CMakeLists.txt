@@ -15,6 +15,9 @@ if(GLFW3_FOUND)
         main.cpp
         app.threedee.cpp
         app.threedee.h
+        appstate.cpp
+        appstate.h
+        instrumentcategories.h
         imgui/imgui.cpp
         imgui/imgui_draw.cpp
         imgui/imgui_demo.cpp
@@ -38,7 +41,8 @@ if(GLFW3_FOUND)
         ui/padnote.cpp
         ui/resonance.cpp
         ui/subnote.cpp
-        ui/mixer.cpp
+        ui/app.mixer.cpp
+        ui/app.mixer.h
         )
 
     target_include_directories(app.threedee

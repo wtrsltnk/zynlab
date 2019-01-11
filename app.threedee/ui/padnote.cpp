@@ -7,7 +7,7 @@ char const *const PADeditorID = "PAD editor";
 
 void AppThreeDee::PADNoteEditor(Channel *channel, int instrumentIndex)
 {
-    if (!_showPADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
+    if (!_state._showPADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
     {
         return;
     }

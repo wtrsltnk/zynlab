@@ -19,7 +19,7 @@ char const *const SUBeditorID = "SUB editor";
 
 void AppThreeDee::SUBNoteEditor(Channel *channel, int instrumentIndex)
 {
-    if (!_showSUBNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
+    if (!_state._showSUBNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
     {
         return;
     }
@@ -40,7 +40,7 @@ void AppThreeDee::SUBNoteEditor(Channel *channel, int instrumentIndex)
     {
         if (ImGui::BeginTabItem("Global"))
         {
-            if (_sequencer.ActiveInstrument() >= 0)
+            if (_state._activeInstrument >= 0)
             {
                 ImGui::Text("SUBsynth Global Parameters of the Instrument");
 

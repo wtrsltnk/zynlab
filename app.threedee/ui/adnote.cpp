@@ -25,7 +25,7 @@ char const *const ADeditorID = "AD editor";
 
 void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
 {
-    if (!_showADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
+    if (!_state._showADNoteEditor || channel == nullptr || instrumentIndex < 0 || instrumentIndex >= NUM_CHANNEL_INSTRUMENTS)
     {
         return;
     }
@@ -46,7 +46,7 @@ void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
     {
         if (ImGui::BeginTabItem("Global"))
         {
-            if (_sequencer.ActiveInstrument() >= 0)
+            if (_state._activeInstrument >= 0)
             {
                 ImGui::Text("ADsynth Global Parameters of the Instrument");
 
@@ -79,9 +79,9 @@ void AppThreeDee::ADNoteEditor(Channel *channel, int instrumentIndex)
         }
         for (int i = 0; i < NUM_VOICES; i++)
         {
-            if (_sequencer.ActiveInstrument() >= 0)
+            if (_state._activeInstrument >= 0)
             {
-                auto parameters = &_mixer->GetChannel(_sequencer.ActiveInstrument())->instruments[0].adpars->VoicePar[i];
+                auto parameters = &_state._mixer->GetChannel(_state._activeInstrument)->instruments[0].adpars->VoicePar[i];
                 if (ImGui::BeginTabItem(voiceIds[i]))
                 {
                     ADNoteVoiceEditor(parameters);

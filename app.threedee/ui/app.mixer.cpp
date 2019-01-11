@@ -1,8 +1,35 @@
-#include "../app.threedee.h"
+#include "app.mixer.h"
 
 #include "../imgui_addons/imgui_checkbutton.h"
 #include "../imgui_addons/imgui_knob.h"
 #include "../stb_image.h"
+#include <glad/glad.h>
+#include <iostream>
+#include <set>
+#include <zyn.common/globals.h>
+#include <zyn.mixer/Mixer.h>
+#include <zyn.nio/Nio.h>
+
+AppMixer::AppMixer(AppState *appstate)
+    : _state(appstate), _iconImagesAreLoaded(false)
+{}
+
+AppMixer::~AppMixer() = default;
+
+bool AppMixer::Setup()
+{
+    LoadInstrumentIcons();
+
+    return true;
+}
+
+void AppMixer::Render()
+{
+    ImGuiInspector();
+    ImGuiMixer();
+    ImGuiSelectInstrumentPopup();
+    ImGuiChangeInstrumentTypePopup();
+}
 
 #define MIN_DB (-48)
 
@@ -70,7 +97,7 @@ static char const *instrumentCategoryNames[] = {
     "Sound Effects",        // 16
 };
 
-void AppThreeDee::LoadInstrumentIcons()
+void AppMixer::LoadInstrumentIcons()
 {
     std::string rootDir = "./icons/Instruments/";
 
@@ -113,34 +140,34 @@ std::vector<char const *> toCharVector(std::set<std::string> const &strings)
     return result;
 }
 
-void AppThreeDee::ImGuiMixer()
+void AppMixer::ImGuiMixer()
 {
-    if (!_showMixer)
+    if (!_state->_showMixer)
     {
         return;
     }
 
-    ImGui::Begin("Mixer", &_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    ImGui::Begin("Mixer", &_state->_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
 
     int c[NUM_MIXER_CHANNELS] = {0};
     mostInsertEffectsPerChannel = 0;
     for (int i = 0; i < NUM_INS_EFX; i++)
     {
-        if (_mixer->Pinsparts[i] == -1)
+        if (_state->_mixer->Pinsparts[i] == -1)
         {
             continue;
         }
-        c[_mixer->Pinsparts[i]] = c[_mixer->Pinsparts[i]] + 1;
-        if (c[_mixer->Pinsparts[i]] > mostInsertEffectsPerChannel)
+        c[_state->_mixer->Pinsparts[i]] = c[_state->_mixer->Pinsparts[i]] + 1;
+        if (c[_state->_mixer->Pinsparts[i]] > mostInsertEffectsPerChannel)
         {
-            mostInsertEffectsPerChannel = c[_mixer->Pinsparts[i]];
+            mostInsertEffectsPerChannel = c[_state->_mixer->Pinsparts[i]];
         }
     }
 
     for (int track = 0; track <= NUM_MIXER_CHANNELS; track++)
     {
-        auto highlightTrack = _sequencer.ActiveInstrument() == track;
+        auto highlightTrack = _state->_activeInstrument == track;
         ImGui::PushID(track);
         ImGuiTrack(track, highlightTrack);
         ImGui::SameLine();
@@ -151,19 +178,19 @@ void AppThreeDee::ImGuiMixer()
     ImGui::End();
 }
 
-void AppThreeDee::ImGuiInspector()
+void AppMixer::ImGuiInspector()
 {
-    if (!_showInspector)
+    if (!_state->_showInspector)
     {
         return;
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    ImGui::Begin("Inspector", &_showInspector, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    ImGui::Begin("Inspector", &_state->_showInspector, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     {
         ImGuiMasterTrack();
         ImGui::SameLine();
-        ImGuiTrack(_sequencer.ActiveInstrument(), false);
+        ImGuiTrack(_state->_activeInstrument, false);
     }
     ImGui::End();
     ImGui::PopStyleVar();
@@ -179,7 +206,7 @@ unsigned char indexOf(std::vector<char const *> const &values, std::string const
     return 0;
 }
 
-void AppThreeDee::ImGuiMasterTrack()
+void AppMixer::ImGuiMasterTrack()
 {
     auto io = ImGui::GetStyle();
 
@@ -209,18 +236,18 @@ void AppThreeDee::ImGuiMasterTrack()
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 2));
 
         // Enable/disable NRPN
-        auto nrpn = _mixer->ctl.NRPN.receive == 1;
+        auto nrpn = _state->_mixer->ctl.NRPN.receive == 1;
         if (ImGui::Checkbox("NRPN", &nrpn))
         {
-            _mixer->ctl.NRPN.receive = nrpn ? 1 : 0;
+            _state->_mixer->ctl.NRPN.receive = nrpn ? 1 : 0;
         }
         ImGui::ShowTooltipOnHover("Receive NRPNs");
 
         // Enable/disable Portamento
-        auto portamento = _mixer->ctl.portamento.portamento == 1;
+        auto portamento = _state->_mixer->ctl.portamento.portamento == 1;
         if (ImGui::Checkbox("Portamento", &portamento))
         {
-            _mixer->ctl.portamento.portamento = portamento ? 1 : 0;
+            _state->_mixer->ctl.portamento.portamento = portamento ? 1 : 0;
         }
         ImGui::ShowTooltipOnHover("Enable/Disable the portamento");
 
@@ -237,21 +264,21 @@ void AppThreeDee::ImGuiMasterTrack()
             for (int fx = 0; fx < NUM_SYS_EFX; fx++)
             {
                 ImGui::PushID(fx);
-                ImGui::PushStyleColor(ImGuiCol_Button, _mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - (_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
+                ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+                if (ImGui::Button(effectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
                 {
-                    _currentSystemEffect = fx;
-                    _showSystemEffectsEditor = true;
+                    _state->_currentSystemEffect = fx;
+                    _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
-                if (_mixer->sysefx[fx].geteffect() != 0)
+                if (_state->_mixer->sysefx[fx].geteffect() != 0)
                 {
                     ImGui::SameLine();
                     if (ImGui::Button("x", ImVec2(20, 20)))
                     {
-                        _currentSystemEffect = fx;
-                        _showSystemEffectsEditor = true;
-                        _mixer->sysefx[fx].changeeffect(0);
+                        _state->_currentSystemEffect = fx;
+                        _state->_showSystemEffectsEditor = true;
+                        _state->_mixer->sysefx[fx].changeeffect(0);
                     }
                     ImGui::ShowTooltipOnHover("Remove system effect");
                 }
@@ -265,10 +292,10 @@ void AppThreeDee::ImGuiMasterTrack()
         }
 
         // Fine detune
-        auto fineDetune = _mixer->microtonal.Pglobalfinedetune;
+        auto fineDetune = _state->_mixer->microtonal.Pglobalfinedetune;
         if (ImGui::KnobUchar("fine detune", &fineDetune, 0, 127, ImVec2(width, 40), "Global fine detune"))
         {
-            _mixer->microtonal.Pglobalfinedetune = fineDetune;
+            _state->_mixer->microtonal.Pglobalfinedetune = fineDetune;
         }
 
         auto faderHeight = ImGui::GetWindowContentRegionMax().y - ImGui::GetCursorPos().y - io.ItemSpacing.y - 20;
@@ -276,10 +303,10 @@ void AppThreeDee::ImGuiMasterTrack()
         // Master volume
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
         {
-            auto v = _mixer->Pvolume;
+            auto v = _state->_mixer->Pvolume;
             if (ImGui::KnobUchar("volume", &v, 0, 127, ImVec2(width, 40), "Master Volume"))
             {
-                _mixer->setPvolume(v);
+                _state->_mixer->setPvolume(v);
             }
         }
         else
@@ -289,7 +316,7 @@ void AppThreeDee::ImGuiMasterTrack()
             static float oldrmsdbl = 1.0e-12f;
             static float oldrmsdbr = 1.0e-12f;
 
-            vuData data = _mixer->GetMeter()->GetVuData();
+            vuData data = _state->_mixer->GetMeter()->GetVuData();
 
             float dbl = rap2dB(data.outpeakl);
             float dbr = rap2dB(data.outpeakr);
@@ -348,10 +375,10 @@ void AppThreeDee::ImGuiMasterTrack()
 
             ImGui::Spacing();
             ImGui::SameLine();
-            int v = static_cast<int>(_mixer->Pvolume);
+            int v = static_cast<int>(_state->_mixer->Pvolume);
             if (ImGui::VSliderInt("##mastervol", ImVec2(20, faderHeight), &v, 0, 127))
             {
-                _mixer->setPvolume(static_cast<unsigned char>(v));
+                _state->_mixer->setPvolume(static_cast<unsigned char>(v));
             }
             ImGui::SameLine();
             ImGui::Spacing();
@@ -366,14 +393,14 @@ void AppThreeDee::ImGuiMasterTrack()
     ImGui::EndChild();
 }
 
-void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
+void AppMixer::ImGuiTrack(int track, bool highlightTrack)
 {
     if (track < 0 || track >= NUM_MIXER_CHANNELS)
     {
         return;
     }
 
-    auto channel = _mixer->GetChannel(track);
+    auto channel = _state->_mixer->GetChannel(track);
 
     if (channel == nullptr)
     {
@@ -424,7 +451,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         // Enable/disable channel
         if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
         {
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
             channel->Penabled = trackEnabled ? 1 : 0;
         }
         ImGui::ShowTooltipOnHover(trackEnabled ? "This track is enabled" : "This track is disabled");
@@ -435,8 +462,8 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         auto name = std::string(reinterpret_cast<char *>(channel->Pname));
         if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(width - 20 - io.ItemSpacing.x, 0)))
         {
-            _sequencer.ActiveInstrument(track);
-            _openSelectInstrument = track;
+            _state->_activeInstrument = track;
+            _state->_openSelectInstrument = track;
         }
         ImGui::ShowTooltipOnHover("Change instrument preset");
 
@@ -449,12 +476,12 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             ImGui::PushItemWidth(width);
             if (ImGui::DropDown("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
             {
-                _sequencer.ActiveInstrument(track);
+                _state->_activeInstrument = track;
             }
 
             if (ImGui::IsItemClicked())
             {
-                _sequencer.ActiveInstrument(track);
+                _state->_activeInstrument = track;
             }
 
             ImGui::PopStyleVar();
@@ -463,7 +490,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
@@ -472,19 +499,19 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::Checkbox("##adEnabled", &adEnabled))
         {
             channel->instruments[0].Padenabled = adEnabled ? 1 : 0;
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
             if (adEnabled)
             {
-                _showADNoteEditor = true;
+                _state->_showADNoteEditor = true;
             }
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
         ImGui::SameLine();
         if (ImGui::Button("AD", ImVec2(width - 21, 19)))
         {
-            _showADNoteEditor = true;
+            _state->_showADNoteEditor = true;
             ImGui::SetWindowFocus(ADeditorID);
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
         ImGui::ShowTooltipOnHover("Edit the AD synth");
 
@@ -493,19 +520,19 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::Checkbox("##subEnabled", &subEnabled))
         {
             channel->instruments[0].Psubenabled = subEnabled ? 1 : 0;
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
             if (subEnabled)
             {
-                _showSUBNoteEditor = true;
+                _state->_showSUBNoteEditor = true;
             }
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The SUB synth is enabled" : "The AD synth is disabled");
         ImGui::SameLine();
         if (ImGui::Button("SUB", ImVec2(width - 21, 19)))
         {
-            _showSUBNoteEditor = true;
+            _state->_showSUBNoteEditor = true;
             ImGui::SetWindowFocus(SUBeditorID);
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
         ImGui::ShowTooltipOnHover("Edit the SUB synth");
 
@@ -514,19 +541,19 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::Checkbox("##padEnabled", &padEnabled))
         {
             channel->instruments[0].Ppadenabled = padEnabled ? 1 : 0;
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
             if (padEnabled)
             {
-                _showPADNoteEditor = true;
+                _state->_showPADNoteEditor = true;
             }
         }
         ImGui::ShowTooltipOnHover(adEnabled ? "The PAD synth is enabled" : "The AD synth is disabled");
         ImGui::SameLine();
         if (ImGui::Button("PAD", ImVec2(width - 21, 19)))
         {
-            _showPADNoteEditor = true;
+            _state->_showPADNoteEditor = true;
             ImGui::SetWindowFocus(PADeditorID);
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
         ImGui::ShowTooltipOnHover("Edit the PAD synth");
 
@@ -542,16 +569,16 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             for (int fx = 0; fx < NUM_SYS_EFX; fx++)
             {
                 ImGui::PushID(fx);
-                ImGui::PushStyleColor(ImGuiCol_Button, _mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(effectNames[_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
+                ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+                if (ImGui::Button(effectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
                 {
-                    _currentSystemEffect = fx;
-                    _showSystemEffectsEditor = true;
+                    _state->_currentSystemEffect = fx;
+                    _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
                 if (ImGui::IsItemClicked())
                 {
-                    _sequencer.ActiveInstrument(track);
+                    _state->_activeInstrument = track;
                 }
 
                 ImGui::SameLine();
@@ -560,13 +587,13 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 sprintf(label, "##send_%d", fx);
                 char tooltip[64] = {'\0'};
                 sprintf(tooltip, "Volume for send to system effect %d", (fx + 1));
-                if (ImGui::KnobUchar(label, &(_mixer->Psysefxvol[fx][track]), 0, 127, ImVec2(20, 20), tooltip))
+                if (ImGui::KnobUchar(label, &(_state->_mixer->Psysefxvol[fx][track]), 0, 127, ImVec2(20, 20), tooltip))
                 {
-                    _mixer->setPsysefxvol(track, fx, _mixer->Psysefxvol[fx][track]);
+                    _state->_mixer->setPsysefxvol(track, fx, _state->_mixer->Psysefxvol[fx][track]);
                 }
                 if (ImGui::IsItemClicked())
                 {
-                    _sequencer.ActiveInstrument(track);
+                    _state->_activeInstrument = track;
                 }
 
                 ImGui::PopStyleColor(1);
@@ -579,7 +606,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
 
         // Insertion effects
@@ -591,20 +618,20 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             for (int fx = 0; fx < NUM_INS_EFX; fx++)
             {
                 ImGui::PushID(100 + fx);
-                if (_mixer->Pinsparts[fx] == track)
+                if (_state->_mixer->Pinsparts[fx] == track)
                 {
-                    if (ImGui::Button(effectNames[_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
+                    if (ImGui::Button(effectNames[_state->_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
                     {
-                        _currentInsertEffect = fx;
-                        _sequencer.ActiveInstrument(track);
-                        _showInsertEffectsEditor = true;
+                        _state->_currentInsertEffect = fx;
+                        _state->_activeInstrument = track;
+                        _state->_showInsertEffectsEditor = true;
                         ImGui::SetWindowFocus(InsertionFxEditorID);
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("x", ImVec2(20, 20)))
                     {
                         RemoveInsertFxFromTrack(fx);
-                        _sequencer.ActiveInstrument(track);
+                        _state->_activeInstrument = track;
                     }
                     ImGui::ShowTooltipOnHover("Remove insert effect from track");
                     fillCount--;
@@ -625,7 +652,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             if (ImGui::Button("+", ImVec2(width, 20)))
             {
                 AddInsertFx(track);
-                _sequencer.ActiveInstrument(track);
+                _state->_activeInstrument = track;
             }
             ImGui::ShowTooltipOnHover("Add insert effect to track");
 
@@ -635,7 +662,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
 
         // Channel effects
@@ -649,9 +676,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                 ImGui::PushStyleColor(ImGuiCol_Button, channel->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
                 if (ImGui::Button(effectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 20)))
                 {
-                    _sequencer.ActiveInstrument(track);
-                    _currentInstrumentEffect = fx;
-                    _showInstrumentEffectsEditor = true;
+                    _state->_activeInstrument = track;
+                    _state->_currentInstrumentEffect = fx;
+                    _state->_showInstrumentEffectsEditor = true;
                     ImGui::SetWindowFocus(InstrumentFxEditorID);
                 }
                 if (channel->partefx[fx]->geteffect() != 0)
@@ -659,8 +686,8 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
                     ImGui::SameLine();
                     if (ImGui::Button("x", ImVec2(20, 20)))
                     {
-                        _sequencer.ActiveInstrument(track);
-                        _currentInstrumentEffect = fx;
+                        _state->_activeInstrument = track;
+                        _state->_currentInstrumentEffect = fx;
                         channel->partefx[fx]->changeeffect(0);
                     }
                     ImGui::ShowTooltipOnHover("Remove effect from track");
@@ -674,26 +701,26 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         }
         if (ImGui::IsItemClicked())
         {
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
 
         if (ImGui::CollapsingHeader("Velocity"))
         {
             if (ImGui::KnobUchar("vel.sns.", &channel->Pvelsns, 0, 127, ImVec2(width / 2, 30), "Velocity Sensing Function"))
             {
-                _sequencer.ActiveInstrument(track);
+                _state->_activeInstrument = track;
             }
 
             ImGui::SameLine();
 
             if (ImGui::KnobUchar("vel.ofs.", &channel->Pveloffs, 0, 127, ImVec2(width / 2, 30), "Velocity Offset"))
             {
-                _sequencer.ActiveInstrument(track);
+                _state->_activeInstrument = track;
             }
         }
         if (ImGui::IsItemClicked())
         {
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
 
         if (useLargeMode && _iconImagesAreLoaded)
@@ -703,8 +730,8 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             ImGui::SameLine(0.0f, (width - 64 - io.ItemSpacing.x) / 2);
             if (ImGui::ImageButton(reinterpret_cast<void *>(_iconImages[channel->info.Ptype]), ImVec2(64, 64)))
             {
-                _openChangeInstrumentType = track;
-                _sequencer.ActiveInstrument(track);
+                _state->_openChangeInstrumentType = track;
+                _state->_activeInstrument = track;
             }
             ImGui::ShowTooltipOnHover(trackTooltip.str().c_str());
         }
@@ -713,7 +740,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::KnobUchar("panning", &panning, 0, 127, ImVec2(width, 40), "Track panning"))
         {
             channel->setPpanning(panning);
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
 
         auto start = ImGui::GetCursorPos();
@@ -725,12 +752,12 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             if (ImGui::KnobUchar("volume", &v, 0, 127, ImVec2(width, 40), "Track volume"))
             {
                 channel->setPvolume(v);
-                _sequencer.ActiveInstrument(track);
+                _state->_activeInstrument = track;
             }
         }
         else
         {
-            float db = rap2dB(_mixer->GetMeter()->GetOutPeak(track));
+            float db = rap2dB(_state->_mixer->GetMeter()->GetOutPeak(track));
 
             db = (MIN_DB - db) / MIN_DB;
             if (db < 0.0f)
@@ -749,7 +776,7 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
             if (ImGui::VSliderInt("##vol", ImVec2(20, faderHeight), &v, 0, 127))
             {
                 channel->setPvolume(static_cast<unsigned char>(v));
-                _sequencer.ActiveInstrument(track);
+                _state->_activeInstrument = track;
             }
             ImGui::ShowTooltipOnHover("Track volume");
             ImGui::SameLine();
@@ -766,13 +793,13 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
 
         if (ImGui::IsItemClicked())
         {
-            _sequencer.ActiveInstrument(track);
+            _state->_activeInstrument = track;
         }
     }
     ImGui::EndChild();
     if (ImGui::IsItemClicked())
     {
-        _sequencer.ActiveInstrument(track);
+        _state->_activeInstrument = track;
     }
 
     if (highlightTrack)
@@ -781,9 +808,9 @@ void AppThreeDee::ImGuiTrack(int track, bool highlightTrack)
     }
 }
 
-void AppThreeDee::ImGuiSelectInstrumentPopup()
+void AppMixer::ImGuiSelectInstrumentPopup()
 {
-    if (_openSelectInstrument < 0)
+    if (_state->_openSelectInstrument < 0)
     {
         return;
     }
@@ -798,44 +825,44 @@ void AppThreeDee::ImGuiSelectInstrumentPopup()
         ImGui::SameLine();
         if (ImGui::Button("Close"))
         {
-            _openSelectInstrument = -1;
+            _state->_openSelectInstrument = -1;
             ImGui::CloseCurrentPopup();
         }
 
         ImGui::Columns(2);
         ImGui::SetColumnWidth(0, 200);
         ImGui::SetColumnWidth(1, 700);
-        auto count = _mixer->GetBankManager()->GetBankCount();
-        auto const &bankNames = _mixer->GetBankManager()->GetBankNames();
+        auto count = _state->_mixer->GetBankManager()->GetBankCount();
+        auto const &bankNames = _state->_mixer->GetBankManager()->GetBankNames();
         for (int i = 0; i < count; i++)
         {
-            bool selected = _currentBank == i;
+            bool selected = _state->_currentBank == i;
             if (ImGui::Selectable(bankNames[static_cast<size_t>(i)], &selected))
             {
-                _currentBank = i;
-                _mixer->GetBankManager()->LoadBank(_currentBank);
+                _state->_currentBank = i;
+                _state->_mixer->GetBankManager()->LoadBank(_state->_currentBank);
             }
         }
         ImGui::NextColumn();
 
         ImGui::BeginChild("banks", ImVec2(0, -20));
         ImGui::Columns(5);
-        if (_currentBank >= 0)
+        if (_state->_currentBank >= 0)
         {
             for (unsigned int i = 0; i < BANK_SIZE; i++)
             {
-                auto instrumentName = _mixer->GetBankManager()->GetName(i);
+                auto instrumentName = _state->_mixer->GetBankManager()->GetName(i);
 
                 if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
                 {
-                    auto const &instrument = _mixer->GetChannel(_sequencer.ActiveInstrument());
+                    auto const &instrument = _state->_mixer->GetChannel(_state->_activeInstrument);
                     instrument->Lock();
-                    _mixer->GetBankManager()->LoadFromSlot(i, instrument);
+                    _state->_mixer->GetBankManager()->LoadFromSlot(i, instrument);
                     instrument->Unlock();
                     instrument->ApplyParameters();
                     if (autoClose)
                     {
-                        _openSelectInstrument = -1;
+                        _state->_openSelectInstrument = -1;
                         ImGui::CloseCurrentPopup();
                     }
                 }
@@ -850,14 +877,14 @@ void AppThreeDee::ImGuiSelectInstrumentPopup()
     }
 }
 
-void AppThreeDee::ImGuiChangeInstrumentTypePopup()
+void AppMixer::ImGuiChangeInstrumentTypePopup()
 {
     if (!_iconImagesAreLoaded)
     {
         return;
     }
 
-    if (_openChangeInstrumentType < 0)
+    if (_state->_openChangeInstrumentType < 0)
     {
         return;
     }
@@ -868,7 +895,7 @@ void AppThreeDee::ImGuiChangeInstrumentTypePopup()
         ImGui::SameLine();
         if (ImGui::Button("Close"))
         {
-            _openChangeInstrumentType = -1;
+            _state->_openChangeInstrumentType = -1;
             ImGui::CloseCurrentPopup();
         }
 
@@ -882,11 +909,11 @@ void AppThreeDee::ImGuiChangeInstrumentTypePopup()
             }
             if (ImGui::ImageButton(reinterpret_cast<void *>(_iconImages[i]), ImVec2(96, 96)))
             {
-                auto channel = _mixer->GetChannel(_openChangeInstrumentType);
+                auto channel = _state->_mixer->GetChannel(_state->_openChangeInstrumentType);
                 if (channel != nullptr)
                 {
                     channel->info.Ptype = static_cast<unsigned char>(i);
-                    _openChangeInstrumentType = -1;
+                    _state->_openChangeInstrumentType = -1;
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -897,19 +924,19 @@ void AppThreeDee::ImGuiChangeInstrumentTypePopup()
     }
 }
 
-void AppThreeDee::AddInsertFx(int track)
+void AppMixer::AddInsertFx(int track)
 {
     for (int i = 0; i < NUM_INS_EFX; i++)
     {
-        if (_mixer->Pinsparts[i] == -1)
+        if (_state->_mixer->Pinsparts[i] == -1)
         {
-            _mixer->Pinsparts[i] = static_cast<short>(track);
+            _state->_mixer->Pinsparts[i] = static_cast<short>(track);
             return;
         }
     }
 }
 
-void AppThreeDee::RemoveInsertFxFromTrack(int fx)
+void AppMixer::RemoveInsertFxFromTrack(int fx)
 {
-    _mixer->Pinsparts[fx] = -1;
+    _state->_mixer->Pinsparts[fx] = -1;
 }

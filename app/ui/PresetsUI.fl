@@ -154,7 +154,7 @@ presetname->cut(0,presetname->maximum_size());
 if (but) p->copy(NULL);
    else {
         rescan();
-	copytypetext->label(&p->type[1]);
+    copytypetext->label(&p->_type[1]);
 	copywin->show();
    };} {}
   }
@@ -170,7 +170,7 @@ if (but) {
 	pui->refresh();
 } else {
         rescan();
-	pastetypetext->label(&p->type[1]);
+    pastetypetext->label(&p->_type[1]);
 	if (p->checkclipboardtype()) pastebutton->activate();
 		else pastebutton->deactivate();
 	this->p_is_PresetArray = false;

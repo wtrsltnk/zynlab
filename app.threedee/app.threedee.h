@@ -7,6 +7,9 @@
 
 #include <imgui.h>
 
+#include "../instrumentcategories.h"
+#include "appstate.h"
+#include "ui/app.mixer.h"
 #include <chrono>
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>
@@ -16,60 +19,17 @@
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
 
-extern char const *const ADeditorID;
-extern char const *const SUBeditorID;
-extern char const *const PADeditorID;
-extern char const *const InsertionFxEditorID;
-extern char const *const SystemFxEditorID;
-extern char const *const InstrumentFxEditorID;
-
-enum class InstrumentCategories
-{
-    Unknown,
-    Piano,
-    Chromatic_Percussion,
-    Organ,
-    Guitar,
-    Bass,
-    Solo_Strings,
-    Ensemble,
-    Brass,
-    Reed,
-    Pipe,
-    Synth_Lead,
-    Synth_Pad,
-    Synth_Effects,
-    Ethnic,
-    Percussive,
-    Sound_Effects,
-    COUNT,
-};
-
 class AppThreeDee
 {
 private:
-    Mixer *_mixer;
+    AppState _state;
+    AppMixer _appMixer;
     GLFWwindow *_window;
     Stepper _stepper;
     Sequencer _sequencer;
     std::vector<TrackPattern> _clipboardPatterns;
-    unsigned int _iconImages[int(InstrumentCategories::COUNT)];
-    bool _iconImagesAreLoaded;
     std::vector<unsigned int> _toolbarIcons;
     bool _toolbarIconsAreLoaded;
-    bool _showLibrary;
-    bool _showInspector;
-    bool _showMixer;
-    bool _showEditor;
-    bool _showInstrumentEditor;
-    bool _showSystemEffectsEditor;
-    bool _showInsertEffectsEditor;
-    bool _showInstrumentEffectsEditor;
-    int _openSelectInstrument;
-    int _openChangeInstrumentType;
-
-    static char const *const effectNames[];
-    static int effectNameCount;
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -91,14 +51,9 @@ public:
     void Cleanup();
 
 private:
-    void LoadInstrumentIcons();
     void LoadToolbarIcons();
 
     void ImGuiPlayback();
-    void ImGuiMasterTrack();
-    void ImGuiMixer();
-    void ImGuiTrack(int track, bool highlightTrack);
-    void ImGuiInspector();
     void ImGuiSequencer();
     void ImGuiStepSequencer(int trackIndex, float trackHeight);
     void ImGuiStepSequencerEventHandling();
@@ -106,16 +61,10 @@ private:
     void ImGuiPianoRollSequencer(int trackIndex, float trackHeight);
     void ImGuiPianoRollSequencerEventHandling();
     void ImGuiPianoRollPatternEditorWindow();
-    void ImGuiSelectInstrumentPopup();
-    void ImGuiChangeInstrumentTypePopup();
-    int _currentBank;
 
     void HitNote(int trackIndex, int note, int velocity, int durationInMs);
-    void AddInsertFx(int track);
-    void RemoveInsertFxFromTrack(int fx);
 
     // AD note
-    bool _showADNoteEditor;
     void ADNoteEditor(Channel *channel, int instrumentIndex);
     void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
     void ADNoteEditorFilter(ADnoteGlobalParam *parameters);
@@ -129,7 +78,6 @@ private:
     void ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters);
 
     // SUB note
-    bool _showSUBNoteEditor;
     void SUBNoteEditor(Channel *channel, int instrumentIndex);
     void SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters);
     void SUBNoteEditorAmplitude(SUBnoteParameters *parameters);
@@ -139,7 +87,6 @@ private:
     void SUBNoteEditorFrequency(SUBnoteParameters *parameters);
 
     // PAD note
-    bool _showPADNoteEditor;
     void PADNoteEditor(Channel *channel, int instrumentIndex);
     void PADNoteEditorAmplitude(PADnoteParameters *parameters);
 
@@ -153,9 +100,6 @@ private:
     void Envelope(char const *label, class EnvelopeParams *envelope);
 
     // Effect
-    int _currentInsertEffect;
-    int _currentSystemEffect;
-    int _currentInstrumentEffect;
     void InsertEffectEditor();
     void SystemEffectEditor();
     void InstrumentEffectEditor();

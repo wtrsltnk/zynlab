@@ -208,8 +208,6 @@ void Sequencer::AddPattern(int trackIndex, int patternIndex, char const *label)
 {
     static int n = std::rand() % 255;
     float hue = n * 0.05f;
-    _activeInstrument = trackIndex;
-    _activePattern = patternIndex;
     tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, TrackPattern(label, hue)));
     n = (n + std::rand()) % 255;
 }
@@ -231,24 +229,21 @@ TrackPattern &Sequencer::GetPattern(int trackIndex, int patternIndex)
 
 void Sequencer::SetPattern(int trackIndex, int patternIndex, TrackPattern const &pattern)
 {
-    _activeInstrument = trackIndex;
-    _activePattern = patternIndex;
     tracksOfPatterns[trackIndex].erase(patternIndex);
     tracksOfPatterns[trackIndex].insert(std::make_pair(patternIndex, pattern));
 }
 
-void Sequencer::RemoveActivePattern()
+void Sequencer::RemoveActivePattern(int instrument, int pattern)
 {
-    if (_activeInstrument < 0 || _activePattern < 0)
+    if (instrument < 0 || pattern < 0)
     {
         return;
     }
 
-    tracksOfPatterns[_activeInstrument].erase(_activePattern);
-    _activePattern = -1;
+    tracksOfPatterns[instrument].erase(pattern);
 }
 
-void Sequencer::MovePatternLeftIfPossible()
+void Sequencer::MovePatternLeftIfPossible(int _activeInstrument, int _activePattern)
 {
     auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
@@ -275,7 +270,7 @@ void Sequencer::MovePatternLeftIfPossible()
     }
 }
 
-void Sequencer::MovePatternLeftForced()
+void Sequencer::MovePatternLeftForced(int _activeInstrument, int _activePattern)
 {
     auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
@@ -303,7 +298,7 @@ void Sequencer::MovePatternLeftForced()
     _activePattern = _activePattern - 1;
 }
 
-void Sequencer::SwitchPatternLeft()
+void Sequencer::SwitchPatternLeft(int _activeInstrument, int _activePattern)
 {
     auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
@@ -336,7 +331,7 @@ void Sequencer::SwitchPatternLeft()
     _activePattern = newKey;
 }
 
-void Sequencer::MovePatternRightIfPossible()
+void Sequencer::MovePatternRightIfPossible(int _activeInstrument, int _activePattern)
 {
     auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
@@ -359,7 +354,7 @@ void Sequencer::MovePatternRightIfPossible()
     }
 }
 
-void Sequencer::MovePatternRightForced()
+void Sequencer::MovePatternRightForced(int _activeInstrument, int _activePattern)
 {
     auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
@@ -382,7 +377,7 @@ void Sequencer::MovePatternRightForced()
     _activePattern = _activePattern + 1;
 }
 
-void Sequencer::SwitchPatternRight()
+void Sequencer::SwitchPatternRight(int _activeInstrument, int _activePattern)
 {
     auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
 
@@ -409,7 +404,7 @@ void Sequencer::SwitchPatternRight()
     _activePattern = newKey;
 }
 
-void Sequencer::SelectFirstPatternInTrack()
+void Sequencer::SelectFirstPatternInTrack(int _activeInstrument, int _activePattern)
 {
     if (_activeInstrument < 0)
     {
@@ -419,7 +414,7 @@ void Sequencer::SelectFirstPatternInTrack()
     _activePattern = tracksOfPatterns[_activeInstrument].begin()->first;
 }
 
-void Sequencer::SelectLastPatternInTrack()
+void Sequencer::SelectLastPatternInTrack(int _activeInstrument, int _activePattern)
 {
     if (_activeInstrument < 0)
     {
@@ -429,7 +424,7 @@ void Sequencer::SelectLastPatternInTrack()
     _activePattern = tracksOfPatterns[_activeInstrument].rbegin()->first;
 }
 
-void Sequencer::SelectPreviousPattern()
+void Sequencer::SelectPreviousPattern(int _activeInstrument, int _activePattern)
 {
     if (_activeInstrument < 0)
     {
@@ -453,7 +448,7 @@ void Sequencer::SelectPreviousPattern()
     }
 }
 
-void Sequencer::SelectNextPattern()
+void Sequencer::SelectNextPattern(int _activeInstrument, int _activePattern)
 {
     if (_activeInstrument < 0)
     {
@@ -503,24 +498,4 @@ int Sequencer::PatternStepCount(int trackIndex, int patternIndex)
     }
 
     return maxSize;
-}
-
-int Sequencer::ActiveInstrument() const
-{
-    return _activeInstrument;
-}
-
-void Sequencer::ActiveInstrument(int newActiveInstrument)
-{
-    _activeInstrument = newActiveInstrument;
-}
-
-int Sequencer::ActivePattern() const
-{
-    return _activePattern;
-}
-
-void Sequencer::ActivePattern(int newActivePattern)
-{
-    _activePattern = newActivePattern;
 }

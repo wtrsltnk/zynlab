@@ -89,8 +89,6 @@ public:
 class Sequencer : public ISteppable
 {
     std::map<int, TrackPattern> tracksOfPatterns[NUM_MIXER_CHANNELS];
-    int _activeInstrument;
-    int _activePattern;
 
 public:
     Sequencer();
@@ -101,25 +99,20 @@ public:
     bool DoesPatternExistAtIndex(int trackIndex, int patternIndex);
     TrackPattern &GetPattern(int trackIndex, int patternIndex);
     void SetPattern(int trackIndex, int patternIndex, TrackPattern const &pattern);
-    void RemoveActivePattern();
-    void MovePatternLeftIfPossible();
-    void MovePatternLeftForced();
-    void SwitchPatternLeft();
-    void MovePatternRightIfPossible();
-    void MovePatternRightForced();
-    void SwitchPatternRight();
+    void RemoveActivePattern(int instrument, int pattern);
+    void MovePatternLeftIfPossible(int instrument, int pattern);
+    void MovePatternLeftForced(int instrument, int pattern);
+    void SwitchPatternLeft(int instrument, int pattern);
+    void MovePatternRightIfPossible(int instrument, int pattern);
+    void MovePatternRightForced(int instrument, int pattern);
+    void SwitchPatternRight(int instrument, int pattern);
     void SwitchPatterns(int firstKey, int secondKey);
-    void SelectFirstPatternInTrack();
-    void SelectLastPatternInTrack();
-    void SelectPreviousPattern();
-    void SelectNextPattern();
+    void SelectFirstPatternInTrack(int instrument, int pattern);
+    void SelectLastPatternInTrack(int instrument, int pattern);
+    void SelectPreviousPattern(int instrument, int pattern);
+    void SelectNextPattern(int instrument, int pattern);
     int LastPatternIndex(int trackIndex);
     int PatternStepCount(int trackIndex, int patternIndex);
-
-    int ActiveInstrument() const;
-    void ActiveInstrument(int newActiveInstrument);
-    int ActivePattern() const;
-    void ActivePattern(int newActivePattern);
 
     // IStepper implementation
     virtual std::vector<Note> GetNote(unsigned char trackIndex, int patternIndex, int stepIndex);

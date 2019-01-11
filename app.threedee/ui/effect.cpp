@@ -8,9 +8,9 @@ char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";
 char const *const InstrumentFxEditorID = "Instrument effect";
 
-int AppThreeDee::effectNameCount = 9;
+int effectNameCount = 9;
 
-char const *const AppThreeDee::effectNames[] = {
+char const *const effectNames[] = {
     "No effect",
     "Reverb",
     "Echo",
@@ -149,16 +149,16 @@ static char const *const eqBandTypes[] = {
 
 void AppThreeDee::InsertEffectEditor()
 {
-    if (!_showInsertEffectsEditor)
+    if (!_state._showInsertEffectsEditor)
     {
         return;
     }
 
-    if (ImGui::Begin(InsertionFxEditorID, &_showInsertEffectsEditor))
+    if (ImGui::Begin(InsertionFxEditorID, &_state._showInsertEffectsEditor))
     {
-        if (_currentInsertEffect >= 0 && _currentInsertEffect < NUM_INS_EFX)
+        if (_state._currentInsertEffect >= 0 && _state._currentInsertEffect < NUM_INS_EFX)
         {
-            EffectEditor(&_mixer->insefx[_currentInsertEffect]);
+            EffectEditor(&_state._mixer->insefx[_state._currentInsertEffect]);
         }
     }
     ImGui::End();
@@ -166,16 +166,16 @@ void AppThreeDee::InsertEffectEditor()
 
 void AppThreeDee::SystemEffectEditor()
 {
-    if (!_showSystemEffectsEditor)
+    if (!_state._showSystemEffectsEditor)
     {
         return;
     }
 
-    if (ImGui::Begin(SystemFxEditorID, &_showSystemEffectsEditor))
+    if (ImGui::Begin(SystemFxEditorID, &_state._showSystemEffectsEditor))
     {
-        if (_currentSystemEffect >= 0 && _currentSystemEffect < NUM_SYS_EFX)
+        if (_state._currentSystemEffect >= 0 && _state._currentSystemEffect < NUM_SYS_EFX)
         {
-            EffectEditor(&_mixer->sysefx[_currentSystemEffect]);
+            EffectEditor(&_state._mixer->sysefx[_state._currentSystemEffect]);
         }
     }
     ImGui::End();
@@ -183,18 +183,18 @@ void AppThreeDee::SystemEffectEditor()
 
 void AppThreeDee::InstrumentEffectEditor()
 {
-    if (!_showInstrumentEffectsEditor)
+    if (!_state._showInstrumentEffectsEditor)
     {
         return;
     }
 
-    if (ImGui::Begin(InstrumentFxEditorID, &_showInstrumentEffectsEditor))
+    if (ImGui::Begin(InstrumentFxEditorID, &_state._showInstrumentEffectsEditor))
     {
-        auto channel = _mixer->GetChannel(_sequencer.ActiveInstrument());
+        auto channel = _state._mixer->GetChannel(_state._activeInstrument);
 
-        if (_currentInstrumentEffect >= 0 && _currentInstrumentEffect < NUM_CHANNEL_EFX)
+        if (_state._currentInstrumentEffect >= 0 && _state._currentInstrumentEffect < NUM_CHANNEL_EFX)
         {
-            EffectEditor(channel->partefx[_currentInstrumentEffect]);
+            EffectEditor(channel->partefx[_state._currentInstrumentEffect]);
         }
     }
     ImGui::End();
