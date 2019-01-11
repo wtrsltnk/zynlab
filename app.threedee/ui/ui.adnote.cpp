@@ -49,7 +49,6 @@ void zyn::ui::AdNote::Render()
 
     auto *parameters = channel->Instruments[_state->_activeChannelInstrument].adpars;
 
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     if (channel->Instruments[_state->_activeChannelInstrument].Padenabled == 0)
     {
         ImGui::Text("AD editor is disabled");
@@ -112,7 +111,6 @@ void zyn::ui::AdNote::Render()
         ImGui::EndTabBar();
     }
     ImGui::End();
-    ImGui::PopStyleVar();
 }
 
 void zyn::ui::AdNote::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)

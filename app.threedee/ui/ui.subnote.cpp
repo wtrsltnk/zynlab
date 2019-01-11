@@ -30,7 +30,6 @@ bool zyn::ui::SubNote::Setup() { return true; }
 void zyn::ui::SubNote::Render()
 {
     auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     ImGui::Begin(SubSynthEditorID, &_state->_showSUBNoteEditor);
     if (!_state->_showSUBNoteEditor || channel == nullptr || _state->_activeChannelInstrument < 0 || _state->_activeChannelInstrument >= NUM_CHANNEL_INSTRUMENTS)
     {
@@ -110,7 +109,6 @@ void zyn::ui::SubNote::Render()
         ImGui::EndTabBar();
     }
     ImGui::End();
-    ImGui::PopStyleVar();
 }
 
 void zyn::ui::SubNote::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)

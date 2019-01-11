@@ -21,7 +21,6 @@ void zyn::ui::PadNote::Render()
 {
     auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     ImGui::Begin(PadSynthEditorID, &_state->_showPADNoteEditor);
     if (!_state->_showPADNoteEditor || channel == nullptr || _state->_activeChannelInstrument < 0 || _state->_activeChannelInstrument >= NUM_CHANNEL_INSTRUMENTS)
     {
@@ -68,7 +67,6 @@ void zyn::ui::PadNote::Render()
         ImGui::EndTabBar();
     }
     ImGui::End();
-    ImGui::PopStyleVar();
 }
 
 void zyn::ui::PadNote::PADNoteEditorAmplitude(PADnoteParameters *parameters)

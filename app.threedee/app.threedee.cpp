@@ -641,9 +641,11 @@ void AppThreeDee::Render()
     ImGuiStepPatternEditorWindow();
     ImGuiPianoRollPatternEditorWindow();
 
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     _adNoteUI.Render();
     _subNoteUi.Render();
     _padNoteUi.Render();
+    ImGui::PopStyleVar();
 
     ImGui::Render();
 
