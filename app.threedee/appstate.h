@@ -7,6 +7,7 @@ extern char const *const PadSynthEditorID;
 extern char const *const InsertionFxEditorID;
 extern char const *const SystemFxEditorID;
 extern char const *const ChannelFxEditorID;
+extern char const *const LibraryID;
 extern char const *const EffectNames[];
 extern int EffectNameCount;
 extern const char *NoteNames[];

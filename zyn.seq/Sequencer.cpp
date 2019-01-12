@@ -243,11 +243,11 @@ void Sequencer::RemoveActivePattern(int instrument, int pattern)
     tracksOfPatterns[instrument].erase(pattern);
 }
 
-void Sequencer::MovePatternLeftIfPossible(int _activeInstrument, int _activePattern)
+void Sequencer::MovePatternLeftIfPossible(int instrument, int pattern)
 {
-    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+    auto ap = tracksOfPatterns[instrument].find(pattern);
 
-    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    if (instrument < 0 || pattern < 0 || ap == tracksOfPatterns[instrument].end())
     {
         return;
     }
@@ -262,47 +262,47 @@ void Sequencer::MovePatternLeftIfPossible(int _activeInstrument, int _activePatt
     auto currentValue = ap->second;
     auto newKey = currentKey - 1;
 
-    if (tracksOfPatterns[_activeInstrument].find(newKey) == tracksOfPatterns[_activeInstrument].end())
+    if (tracksOfPatterns[instrument].find(newKey) == tracksOfPatterns[instrument].end())
     {
-        tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
-        tracksOfPatterns[_activeInstrument].erase(currentKey);
-        _activePattern = newKey;
+        tracksOfPatterns[instrument].insert(std::make_pair(newKey, currentValue));
+        tracksOfPatterns[instrument].erase(currentKey);
+        pattern = newKey;
     }
 }
 
-void Sequencer::MovePatternLeftForced(int _activeInstrument, int _activePattern)
+void Sequencer::MovePatternLeftForced(int instrument, int pattern)
 {
-    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+    auto ap = tracksOfPatterns[instrument].find(pattern);
 
-    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    if (instrument < 0 || pattern < 0 || ap == tracksOfPatterns[instrument].end())
     {
         return;
     }
 
-    if (tracksOfPatterns[_activeInstrument].begin()->first == 0)
+    if (tracksOfPatterns[instrument].begin()->first == 0)
     {
         return;
     }
 
-    for (int i = tracksOfPatterns[_activeInstrument].begin()->first; i <= ap->first; i++)
+    for (int i = tracksOfPatterns[instrument].begin()->first; i <= ap->first; i++)
     {
-        auto itr = tracksOfPatterns[_activeInstrument].find(i);
-        if (itr == tracksOfPatterns[_activeInstrument].end())
+        auto itr = tracksOfPatterns[instrument].find(i);
+        if (itr == tracksOfPatterns[instrument].end())
         {
             continue;
         }
-        tracksOfPatterns[_activeInstrument].insert(std::make_pair(i - 1, itr->second));
-        tracksOfPatterns[_activeInstrument].erase(i);
+        tracksOfPatterns[instrument].insert(std::make_pair(i - 1, itr->second));
+        tracksOfPatterns[instrument].erase(i);
     }
 
-    _activePattern = _activePattern - 1;
+    pattern = pattern - 1;
 }
 
-void Sequencer::SwitchPatternLeft(int _activeInstrument, int _activePattern)
+void Sequencer::SwitchPatternLeft(int instrument, int pattern)
 {
-    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+    auto ap = tracksOfPatterns[instrument].find(pattern);
 
-    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    if (instrument < 0 || pattern < 0 || ap == tracksOfPatterns[instrument].end())
     {
         return;
     }
@@ -319,23 +319,23 @@ void Sequencer::SwitchPatternLeft(int _activeInstrument, int _activePattern)
 
     tracksOfPatterns->erase(currentKey);
 
-    if (tracksOfPatterns[_activeInstrument].find(newKey) != tracksOfPatterns[_activeInstrument].end())
+    if (tracksOfPatterns[instrument].find(newKey) != tracksOfPatterns[instrument].end())
     {
-        auto tmpValue = tracksOfPatterns[_activeInstrument].find(newKey)->second;
-        tracksOfPatterns[_activeInstrument].erase(newKey);
-        tracksOfPatterns[_activeInstrument].insert(std::make_pair(currentKey, tmpValue));
+        auto tmpValue = tracksOfPatterns[instrument].find(newKey)->second;
+        tracksOfPatterns[instrument].erase(newKey);
+        tracksOfPatterns[instrument].insert(std::make_pair(currentKey, tmpValue));
     }
 
-    tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
+    tracksOfPatterns[instrument].insert(std::make_pair(newKey, currentValue));
 
-    _activePattern = newKey;
+    pattern = newKey;
 }
 
-void Sequencer::MovePatternRightIfPossible(int _activeInstrument, int _activePattern)
+void Sequencer::MovePatternRightIfPossible(int instrument, int pattern)
 {
-    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+    auto ap = tracksOfPatterns[instrument].find(pattern);
 
-    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    if (instrument < 0 || pattern < 0 || ap == tracksOfPatterns[instrument].end())
     {
         return;
     }
@@ -346,42 +346,42 @@ void Sequencer::MovePatternRightIfPossible(int _activeInstrument, int _activePat
 
     ap++;
     auto nextKey = ap->first;
-    if (ap == tracksOfPatterns[_activeInstrument].end() || newKey < nextKey)
+    if (ap == tracksOfPatterns[instrument].end() || newKey < nextKey)
     {
-        tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
-        tracksOfPatterns[_activeInstrument].erase(currentKey);
-        _activePattern = newKey;
+        tracksOfPatterns[instrument].insert(std::make_pair(newKey, currentValue));
+        tracksOfPatterns[instrument].erase(currentKey);
+        pattern = newKey;
     }
 }
 
-void Sequencer::MovePatternRightForced(int _activeInstrument, int _activePattern)
+void Sequencer::MovePatternRightForced(int instrument, int pattern)
 {
-    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+    auto ap = tracksOfPatterns[instrument].find(pattern);
 
-    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    if (instrument < 0 || pattern < 0 || ap == tracksOfPatterns[instrument].end())
     {
         return;
     }
 
-    for (int i = tracksOfPatterns[_activeInstrument].rbegin()->first; i >= ap->first; i--)
+    for (int i = tracksOfPatterns[instrument].rbegin()->first; i >= ap->first; i--)
     {
-        auto itr = tracksOfPatterns[_activeInstrument].find(i);
-        if (itr == tracksOfPatterns[_activeInstrument].end())
+        auto itr = tracksOfPatterns[instrument].find(i);
+        if (itr == tracksOfPatterns[instrument].end())
         {
             continue;
         }
-        tracksOfPatterns[_activeInstrument].insert(std::make_pair(i + 1, itr->second));
-        tracksOfPatterns[_activeInstrument].erase(i);
+        tracksOfPatterns[instrument].insert(std::make_pair(i + 1, itr->second));
+        tracksOfPatterns[instrument].erase(i);
     }
 
-    _activePattern = _activePattern + 1;
+    pattern = pattern + 1;
 }
 
-void Sequencer::SwitchPatternRight(int _activeInstrument, int _activePattern)
+void Sequencer::SwitchPatternRight(int instrument, int pattern)
 {
-    auto ap = tracksOfPatterns[_activeInstrument].find(_activePattern);
+    auto ap = tracksOfPatterns[instrument].find(pattern);
 
-    if (_activeInstrument < 0 || _activePattern < 0 || ap == tracksOfPatterns[_activeInstrument].end())
+    if (instrument < 0 || pattern < 0 || ap == tracksOfPatterns[instrument].end())
     {
         return;
     }
@@ -392,81 +392,81 @@ void Sequencer::SwitchPatternRight(int _activeInstrument, int _activePattern)
 
     tracksOfPatterns->erase(currentKey);
 
-    if (tracksOfPatterns[_activeInstrument].find(newKey) != tracksOfPatterns[_activeInstrument].end())
+    if (tracksOfPatterns[instrument].find(newKey) != tracksOfPatterns[instrument].end())
     {
-        auto tmpValue = tracksOfPatterns[_activeInstrument].find(newKey)->second;
-        tracksOfPatterns[_activeInstrument].erase(newKey);
-        tracksOfPatterns[_activeInstrument].insert(std::make_pair(currentKey, tmpValue));
+        auto tmpValue = tracksOfPatterns[instrument].find(newKey)->second;
+        tracksOfPatterns[instrument].erase(newKey);
+        tracksOfPatterns[instrument].insert(std::make_pair(currentKey, tmpValue));
     }
 
-    tracksOfPatterns[_activeInstrument].insert(std::make_pair(newKey, currentValue));
+    tracksOfPatterns[instrument].insert(std::make_pair(newKey, currentValue));
 
-    _activePattern = newKey;
+    pattern = newKey;
 }
 
-void Sequencer::SelectFirstPatternInTrack(int _activeInstrument, int _activePattern)
+void Sequencer::SelectFirstPatternInTrack(int instrument, int pattern)
 {
-    if (_activeInstrument < 0)
+    if (instrument < 0)
     {
         return;
     }
 
-    _activePattern = tracksOfPatterns[_activeInstrument].begin()->first;
+    pattern = tracksOfPatterns[instrument].begin()->first;
 }
 
-void Sequencer::SelectLastPatternInTrack(int _activeInstrument, int _activePattern)
+void Sequencer::SelectLastPatternInTrack(int instrument, int pattern)
 {
-    if (_activeInstrument < 0)
+    if (instrument < 0)
     {
         return;
     }
 
-    _activePattern = tracksOfPatterns[_activeInstrument].rbegin()->first;
+    pattern = tracksOfPatterns[instrument].rbegin()->first;
 }
 
-void Sequencer::SelectPreviousPattern(int _activeInstrument, int _activePattern)
+void Sequencer::SelectPreviousPattern(int instrument, int pattern)
 {
-    if (_activeInstrument < 0)
+    if (instrument < 0)
     {
         return;
     }
 
-    if (_activePattern <= 0)
+    if (pattern <= 0)
     {
         return;
     }
 
-    int newIndex = _activePattern - 1;
+    int newIndex = pattern - 1;
     while (newIndex >= 0)
     {
-        if (DoesPatternExistAtIndex(_activeInstrument, newIndex))
+        if (DoesPatternExistAtIndex(instrument, newIndex))
         {
-            _activePattern = newIndex;
+            pattern = newIndex;
             break;
         }
         newIndex--;
     }
 }
 
-void Sequencer::SelectNextPattern(int _activeInstrument, int _activePattern)
+void Sequencer::SelectNextPattern(int instrument, int pattern)
 {
-    if (_activeInstrument < 0)
+    if (instrument < 0)
     {
         return;
     }
 
-    auto lastIndex = LastPatternIndex(_activeInstrument);
-    if (_activePattern == lastIndex)
+    auto lastIndex = LastPatternIndex(instrument);
+    if (pattern == lastIndex)
     {
         return;
     }
 
-    int newIndex = _activePattern + 1;
+    int newIndex = pattern + 1;
     while (newIndex <= lastIndex)
     {
-        if (DoesPatternExistAtIndex(_activeInstrument, newIndex))
+        if (DoesPatternExistAtIndex(instrument, newIndex))
         {
-            _activePattern = newIndex;
+            pattern = newIndex;
             break;
         }
         newIndex++;

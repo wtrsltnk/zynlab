@@ -11,6 +11,7 @@
 #include "appstate.h"
 #include "ui/ui.adnote.h"
 #include "ui/ui.effect.h"
+#include "ui/ui.library.h"
 #include "ui/ui.mixer.h"
 #include "ui/ui.padnote.h"
 #include "ui/ui.subnote.h"
@@ -29,9 +30,11 @@ private:
     AppState _state;
     zyn::ui::AdNote _adNoteUI;
     zyn::ui::Effect _effectUi;
+    zyn::ui::Library _libraryUi;
     zyn::ui::Mixer _mixerUi;
     zyn::ui::PadNote _padNoteUi;
     zyn::ui::SubNote _subNoteUi;
+
     GLFWwindow *_window;
     Stepper _stepper;
     Sequencer _sequencer;

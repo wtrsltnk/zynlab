@@ -152,6 +152,11 @@ zyn::ui::Effect::Effect(AppState *state)
     : _state(state)
 {}
 
+bool zyn::ui::Effect::Setup()
+{
+    return true;
+}
+
 void zyn::ui::Effect::Render()
 {
     if (!_state->_showInsertEffectsEditor)

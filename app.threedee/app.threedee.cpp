@@ -38,7 +38,8 @@ static const float rowHeight = 20.0f;
 static const float stepWidth = 20.0f;
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
-    : _state(mixer), _adNoteUI(&_state), _effectUi(&_state), _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state),
+    : _state(mixer), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
+      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state),
       _window(window), _stepper(&_sequencer, mixer),
       _toolbarIconsAreLoaded(false),
       _display_w(800), _display_h(600)
@@ -101,10 +102,82 @@ bool AppThreeDee::Setup()
     _state._activeChannel = 0;
 
     _mixerUi.Setup();
+    _libraryUi.Setup();
+    _adNoteUI.Setup();
+    _subNoteUi.Setup();
+    _padNoteUi.Setup();
+    _effectUi.Setup();
 
     LoadToolbarIcons();
 
     return true;
+}
+
+void AppThreeDee::Tick()
+{
+    _stepper.Tick();
+}
+
+void AppThreeDee::Render()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    ImGuiIO &io = ImGui::GetIO();
+
+    ImGuiViewport *viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::Begin("TestDockspace", nullptr, window_flags);
+    {
+        ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    }
+    ImGui::End();
+    ImGui::PopStyleVar(2);
+
+    ImGuiPlayback();
+
+    _mixerUi.Render();
+    _effectUi.Render();
+    _libraryUi.Render();
+
+    ImGuiSequencer();
+    ImGuiStepPatternEditorWindow();
+    ImGuiPianoRollPatternEditorWindow();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+    _adNoteUI.Render();
+    _subNoteUi.Render();
+    _padNoteUi.Render();
+    ImGui::PopStyleVar();
+
+    ImGui::Render();
+
+    // Update and Render additional Platform Windows
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
+
+    int display_w, display_h;
+    glfwMakeContextCurrent(_window);
+    glfwGetFramebufferSize(_window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void AppThreeDee::onKeyAction(int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/)
+{
 }
 
 enum class ToolbarTools
@@ -601,72 +674,6 @@ void AppThreeDee::ImGuiPianoRollPatternEditorWindow()
     ImGui::EndChild();
 
     ImGui::End();
-}
-
-void AppThreeDee::Tick()
-{
-    _stepper.Tick();
-}
-
-void AppThreeDee::Render()
-{
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    ImGuiIO &io = ImGui::GetIO();
-
-    ImGuiViewport *viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->Pos);
-    ImGui::SetNextWindowSize(viewport->Size);
-    ImGui::SetNextWindowViewport(viewport->ID);
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGui::Begin("TestDockspace", nullptr, window_flags);
-    {
-        ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-    }
-    ImGui::End();
-    ImGui::PopStyleVar(2);
-
-    ImGuiPlayback();
-
-    _mixerUi.Render();
-    _effectUi.Render();
-
-    ImGuiSequencer();
-    ImGuiStepPatternEditorWindow();
-    ImGuiPianoRollPatternEditorWindow();
-
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
-    _adNoteUI.Render();
-    _subNoteUi.Render();
-    _padNoteUi.Render();
-    ImGui::PopStyleVar();
-
-    ImGui::Render();
-
-    // Update and Render additional Platform Windows
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-    }
-
-    int display_w, display_h;
-    glfwMakeContextCurrent(_window);
-    glfwGetFramebufferSize(_window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void AppThreeDee::onKeyAction(int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/)
-{
 }
 
 void AppThreeDee::ImGuiPlayback()

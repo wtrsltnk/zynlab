@@ -44,6 +44,8 @@ if(GLFW3_FOUND)
         ui/ui.filter.h
         ui/ui.lfo.cpp
         ui/ui.lfo.h
+        ui/ui.library.cpp
+        ui/ui.library.h
         ui/ui.mixer.cpp
         ui/ui.mixer.h
         ui/ui.padnote.cpp

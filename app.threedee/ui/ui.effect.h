@@ -28,6 +28,7 @@ private:
 public:
     Effect(AppState *state);
 
+    bool Setup();
     void Render();
 };
 
