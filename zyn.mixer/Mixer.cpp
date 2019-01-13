@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <tuple>
@@ -40,16 +41,10 @@ using namespace std;
 static std::chrono::milliseconds::rep _lastSequencerTimeInMs;
 
 Mixer::Mixer()
-{
-}
+{}
 
 Mixer::~Mixer()
 {
-    delete[] _bufl;
-    delete[] _bufr;
-
-    delete _fft;
-
     pthread_mutex_destroy(&_mutex);
 }
 void Mixer::Setup(IBankManager *bankManager)
@@ -58,16 +53,16 @@ void Mixer::Setup(IBankManager *bankManager)
     meter.Setup();
     ctl.Init();
 
+    _bufl = std::unique_ptr<float>(new float[this->BufferSize()]);
+    _bufr = std::unique_ptr<float>(new float[this->BufferSize()]);
     swaplr = false;
     _off = 0;
     _smps = 0;
-    _bufl = new float[this->BufferSize()];
-    _bufr = new float[this->BufferSize()];
 
     _lastSequencerTimeInMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     pthread_mutex_init(&_mutex, nullptr);
-    _fft = new FFTwrapper(SystemSettings::Instance().oscilsize);
+    _fft = std::unique_ptr<IFFTwrapper>(new FFTwrapper(SystemSettings::Instance().oscilsize));
 
     shutup = 0;
 
@@ -609,7 +604,7 @@ void Mixer::AudioOut(float *outl, float *outr)
 
 IFFTwrapper *Mixer::GetFFT()
 {
-    return _fft;
+    return _fft.get();
 }
 
 int Mixer::GetChannelCount() const

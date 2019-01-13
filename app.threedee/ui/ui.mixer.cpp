@@ -27,7 +27,6 @@ void zyn::ui::Mixer::Render()
 {
     ImGuiInspector();
     ImGuiMixer();
-    ImGuiSelectInstrumentPopup();
     ImGuiChangeInstrumentTypePopup();
 }
 
@@ -467,7 +466,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
         if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(width - 20 - io.ItemSpacing.x, 0)))
         {
             _state->_activeChannel = track;
-            _state->_showChannelInstrumentSelector = track;
+            _state->_showLibrary = true;
         }
         ImGui::ShowTooltipOnHover("Change instrument preset");
 
@@ -803,75 +802,6 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
     if (highlightTrack)
     {
         ImGui::PopStyleColor();
-    }
-}
-
-void zyn::ui::Mixer::ImGuiSelectInstrumentPopup()
-{
-    if (_state->_showChannelInstrumentSelector < 0)
-    {
-        return;
-    }
-
-    ImGui::SetNextWindowSize(ImVec2(900, 850));
-    if (ImGui::Begin("Select Instrument"))
-    {
-        static bool autoClose = false;
-        ImGui::SameLine();
-        ImGui::Checkbox("Auto close", &autoClose);
-
-        ImGui::SameLine();
-        if (ImGui::Button("Close"))
-        {
-            _state->_showChannelInstrumentSelector = -1;
-            ImGui::CloseCurrentPopup();
-        }
-
-        ImGui::Columns(2);
-        ImGui::SetColumnWidth(0, 200);
-        ImGui::SetColumnWidth(1, 700);
-        auto count = _state->_mixer->GetBankManager()->GetBankCount();
-        auto const &bankNames = _state->_mixer->GetBankManager()->GetBankNames();
-        for (int i = 0; i < count; i++)
-        {
-            bool selected = _state->_currentBank == i;
-            if (ImGui::Selectable(bankNames[static_cast<size_t>(i)], &selected))
-            {
-                _state->_currentBank = i;
-                _state->_mixer->GetBankManager()->LoadBank(_state->_currentBank);
-            }
-        }
-        ImGui::NextColumn();
-
-        ImGui::BeginChild("banks", ImVec2(0, -20));
-        ImGui::Columns(5);
-        if (_state->_currentBank >= 0)
-        {
-            for (unsigned int i = 0; i < BANK_SIZE; i++)
-            {
-                auto instrumentName = _state->_mixer->GetBankManager()->GetName(i);
-
-                if (ImGui::Button(instrumentName.c_str(), ImVec2(120, 20)))
-                {
-                    auto const &instrument = _state->_mixer->GetChannel(_state->_activeChannel);
-                    instrument->Lock();
-                    _state->_mixer->GetBankManager()->LoadFromSlot(i, instrument);
-                    instrument->Unlock();
-                    instrument->ApplyParameters();
-                    if (autoClose)
-                    {
-                        _state->_showChannelInstrumentSelector = -1;
-                        ImGui::CloseCurrentPopup();
-                    }
-                }
-                if ((i + 1) % 32 == 0)
-                {
-                    ImGui::NextColumn();
-                }
-            }
-        }
-        ImGui::EndChild();
-        ImGui::End();
     }
 }
 

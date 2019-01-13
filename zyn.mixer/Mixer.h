@@ -28,6 +28,7 @@
 #include "Meter.h"
 #include "Microtonal.h"
 #include <chrono>
+#include <memory>
 #include <pthread.h>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IPresetsSerializer.h>
@@ -136,7 +137,7 @@ private:
     Channel _channels[NUM_MIXER_CHANNELS];
     pthread_mutex_t _mutex;
     IBankManager *_bankManager;
-    IFFTwrapper *_fft;
+    std::unique_ptr<IFFTwrapper> _fft;
 
     float _volume;
     float _sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];
@@ -144,8 +145,8 @@ private:
     int _keyshift;
 
     //information relevent to generating plugin audio samples
-    float *_bufl;
-    float *_bufr;
+    std::unique_ptr<float> _bufl;
+    std::unique_ptr<float> _bufr;
     off_t _off;
     size_t _smps;
 };

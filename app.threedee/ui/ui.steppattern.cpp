@@ -5,6 +5,8 @@
 #include "../imgui_addons/imgui_checkbutton.h"
 #include <zyn.mixer/Mixer.h>
 
+char const *const StepPatternEditorID = "Pattern editor";
+
 zyn::ui::StepPattern::StepPattern(AppState *state)
     : _state(state)
 {}
@@ -41,6 +43,7 @@ void zyn::ui::StepPattern::Render(int trackIndex, int trackHeight)
             if (ImGui::IsMouseDoubleClicked(0))
             {
                 _state->_showEditor = true;
+                ImGui::SetWindowFocus(StepPatternEditorID);
             }
         }
         else if (_state->_mixer->GetChannel(trackIndex)->Penabled)
@@ -80,7 +83,7 @@ void zyn::ui::StepPattern::ImGuiStepPatternEditorWindow()
         return;
     }
 
-    ImGui::Begin("Pattern editor");
+    ImGui::Begin(StepPatternEditorID);
 
     if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeChannel, _state->_activePattern))
     {
@@ -199,6 +202,7 @@ void zyn::ui::StepPattern::EventHandling()
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
     {
         _state->_showEditor = true;
+        ImGui::SetWindowFocus(StepPatternEditorID);
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
     {

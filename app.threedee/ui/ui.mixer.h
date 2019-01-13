@@ -20,7 +20,6 @@ protected:
     void ImGuiMixer();
     void ImGuiTrack(int track, bool highlightTrack);
     void ImGuiInspector();
-    void ImGuiSelectInstrumentPopup();
     void ImGuiChangeInstrumentTypePopup();
     void AddInsertFx(int track);
     void RemoveInsertFxFromTrack(int fx);

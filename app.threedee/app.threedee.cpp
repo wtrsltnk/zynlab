@@ -154,13 +154,16 @@ void AppThreeDee::Render()
     ImGuiPlayback();
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
-    _adNoteUI.Render();
     _effectUi.Render();
     _libraryUi.Render();
     _mixerUi.Render();
-    _padNoteUi.Render();
     _sequencerUi.Render();
-    _subNoteUi.Render();
+    if (_state._showSmartControls)
+    {
+        _adNoteUI.Render();
+        _padNoteUi.Render();
+        _subNoteUi.Render();
+    }
     ImGui::PopStyleVar();
 
     ImGui::Render();
@@ -189,6 +192,7 @@ enum class ToolbarTools
 {
     Library,
     Inspector,
+    SmartControls,
     Mixer,
     Editor,
     Rewind,
@@ -202,6 +206,7 @@ enum class ToolbarTools
 static char const *const toolbarIconFileNames[] = {
     "library.png",
     "inspector.png",
+    "smart-controls.png",
     "mixer.png",
     "editor.png",
     "rewind.png",
@@ -256,6 +261,10 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_inspector", &_state._showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
+
+        ImGui::SameLine();
+
+        ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
 
         ImGui::SameLine();
 
