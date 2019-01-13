@@ -165,6 +165,9 @@ void zyn::ui::Mixer::ImGuiMixer()
         }
     }
 
+    ImGuiMasterTrack();
+    ImGui::SameLine();
+
     for (int track = 0; track <= NUM_MIXER_CHANNELS; track++)
     {
         auto highlightTrack = _state->_activeChannel == track;
@@ -209,6 +212,7 @@ unsigned char indexOf(std::vector<char const *> const &values, std::string const
 void zyn::ui::Mixer::ImGuiMasterTrack()
 {
     auto io = ImGui::GetStyle();
+    auto lineHeight = ImGui::GetTextLineHeightWithSpacing();
 
     ImGui::BeginChild("Master Track", trackSize, true);
     {
@@ -255,8 +259,6 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
 
         ImGui::Spacing();
 
-        ImGui::Separator();
-
         // System effects
         if (ImGui::CollapsingHeader("Sys FX"))
         {
@@ -265,7 +267,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
             {
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : 22), 20)))
+                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : lineHeight), lineHeight)))
                 {
                     _state->_currentSystemEffect = fx;
                     _state->_showSystemEffectsEditor = true;
@@ -274,7 +276,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                 if (_state->_mixer->sysefx[fx].geteffect() != 0)
                 {
                     ImGui::SameLine();
-                    if (ImGui::Button("x", ImVec2(20, 20)))
+                    if (ImGui::Button("x", ImVec2(lineHeight, lineHeight)))
                     {
                         _state->_currentSystemEffect = fx;
                         _state->_showSystemEffectsEditor = true;
@@ -435,6 +437,8 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
+        auto lineHeight = ImGui::GetTextLineHeight();
+
         auto useLargeMode = availableRegion.y > sliderBaseHeight * largeModeTreshold;
 
         auto trackEnabled = channel->Penabled == 1;
@@ -470,96 +474,90 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
         ImGui::PopStyleColor(8);
 
         // Select midi channel
-        if (ImGui::CollapsingHeader("MIDI channel"))
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+        ImGui::PushItemWidth(width);
+        if (ImGui::DropDown("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
         {
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-            ImGui::PushItemWidth(width);
-            if (ImGui::DropDown("##KeyboardChannel", channel->Prcvchn, channels, NUM_MIXER_CHANNELS, "Midi channel"))
-            {
-                _state->_activeChannel = track;
-            }
-
-            if (ImGui::IsItemClicked())
-            {
-                _state->_activeChannel = track;
-            }
-
-            ImGui::PopStyleVar();
-
-            ImGui::Spacing();
+            _state->_activeChannel = track;
         }
         if (ImGui::IsItemClicked())
         {
             _state->_activeChannel = track;
         }
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-        // AD synth enable/disable + edit button
-        auto adEnabled = channel->Instruments[0].Padenabled == 1;
-        if (ImGui::Checkbox("##adEnabled", &adEnabled))
-        {
-            channel->Instruments[0].Padenabled = adEnabled ? 1 : 0;
-            _state->_activeChannel = track;
-            if (adEnabled)
-            {
-                _state->_showADNoteEditor = true;
-            }
-        }
-        ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
-        ImGui::SameLine();
-        if (ImGui::Button("AD", ImVec2(width - 21, 19)))
-        {
-            _state->_showADNoteEditor = true;
-            ImGui::SetWindowFocus(AdSynthEditorID);
-            _state->_activeChannel = track;
-        }
-        ImGui::ShowTooltipOnHover("Edit the AD synth");
-
-        // SUB synth enable/disable + edit button
-        auto subEnabled = channel->Instruments[0].Psubenabled == 1;
-        if (ImGui::Checkbox("##subEnabled", &subEnabled))
-        {
-            channel->Instruments[0].Psubenabled = subEnabled ? 1 : 0;
-            _state->_activeChannel = track;
-            if (subEnabled)
-            {
-                _state->_showSUBNoteEditor = true;
-            }
-        }
-        ImGui::ShowTooltipOnHover(adEnabled ? "The SUB synth is enabled" : "The AD synth is disabled");
-        ImGui::SameLine();
-        if (ImGui::Button("SUB", ImVec2(width - 21, 19)))
-        {
-            _state->_showSUBNoteEditor = true;
-            ImGui::SetWindowFocus(SubSynthEditorID);
-            _state->_activeChannel = track;
-        }
-        ImGui::ShowTooltipOnHover("Edit the SUB synth");
-
-        // PAD synth enable/disable + edit button
-        auto padEnabled = channel->Instruments[0].Ppadenabled == 1;
-        if (ImGui::Checkbox("##padEnabled", &padEnabled))
-        {
-            channel->Instruments[0].Ppadenabled = padEnabled ? 1 : 0;
-            _state->_activeChannel = track;
-            if (padEnabled)
-            {
-                _state->_showPADNoteEditor = true;
-            }
-        }
-        ImGui::ShowTooltipOnHover(adEnabled ? "The PAD synth is enabled" : "The AD synth is disabled");
-        ImGui::SameLine();
-        if (ImGui::Button("PAD", ImVec2(width - 21, 19)))
-        {
-            _state->_showPADNoteEditor = true;
-            ImGui::SetWindowFocus(PadSynthEditorID);
-            _state->_activeChannel = track;
-        }
-        ImGui::ShowTooltipOnHover("Edit the PAD synth");
-
         ImGui::PopStyleVar();
 
         ImGui::Spacing();
+
+        if (ImGui::CollapsingHeader("Settings"))
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
+            // AD synth enable/disable + edit button
+            auto adEnabled = channel->Instruments[0].Padenabled == 1;
+            if (ImGui::Checkbox("##adEnabled", &adEnabled))
+            {
+                channel->Instruments[0].Padenabled = adEnabled ? 1 : 0;
+                _state->_activeChannel = track;
+                if (adEnabled)
+                {
+                    _state->_showADNoteEditor = true;
+                }
+            }
+            ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
+            ImGui::SameLine();
+            if (ImGui::Button("AD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
+            {
+                _state->_showADNoteEditor = true;
+                ImGui::SetWindowFocus(AdSynthEditorID);
+                _state->_activeChannel = track;
+            }
+            ImGui::ShowTooltipOnHover("Edit the AD synth");
+
+            // SUB synth enable/disable + edit button
+            auto subEnabled = channel->Instruments[0].Psubenabled == 1;
+            if (ImGui::Checkbox("##subEnabled", &subEnabled))
+            {
+                channel->Instruments[0].Psubenabled = subEnabled ? 1 : 0;
+                _state->_activeChannel = track;
+                if (subEnabled)
+                {
+                    _state->_showSUBNoteEditor = true;
+                }
+            }
+            ImGui::ShowTooltipOnHover(adEnabled ? "The SUB synth is enabled" : "The AD synth is disabled");
+            ImGui::SameLine();
+            if (ImGui::Button("SUB", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
+            {
+                _state->_showSUBNoteEditor = true;
+                ImGui::SetWindowFocus(SubSynthEditorID);
+                _state->_activeChannel = track;
+            }
+            ImGui::ShowTooltipOnHover("Edit the SUB synth");
+
+            // PAD synth enable/disable + edit button
+            auto padEnabled = channel->Instruments[0].Ppadenabled == 1;
+            if (ImGui::Checkbox("##padEnabled", &padEnabled))
+            {
+                channel->Instruments[0].Ppadenabled = padEnabled ? 1 : 0;
+                _state->_activeChannel = track;
+                if (padEnabled)
+                {
+                    _state->_showPADNoteEditor = true;
+                }
+            }
+            ImGui::ShowTooltipOnHover(adEnabled ? "The PAD synth is enabled" : "The AD synth is disabled");
+            ImGui::SameLine();
+            if (ImGui::Button("PAD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
+            {
+                _state->_showPADNoteEditor = true;
+                ImGui::SetWindowFocus(PadSynthEditorID);
+                _state->_activeChannel = track;
+            }
+            ImGui::ShowTooltipOnHover("Edit the PAD synth");
+            ImGui::PopStyleVar();
+
+            ImGui::Spacing();
+        }
 
         // System effect sends
         if (ImGui::CollapsingHeader("Sys FX sends"))
@@ -570,7 +568,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
             {
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - 21, 20)))
+                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - lineHeight - 1, 0)))
                 {
                     _state->_currentSystemEffect = fx;
                     _state->_showSystemEffectsEditor = true;
@@ -587,7 +585,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
                 sprintf(label, "##send_%d", fx);
                 char tooltip[64] = {'\0'};
                 sprintf(tooltip, "Volume for send to system effect %d", (fx + 1));
-                if (ImGui::KnobUchar(label, &(_state->_mixer->Psysefxvol[fx][track]), 0, 127, ImVec2(20, 20), tooltip))
+                if (ImGui::KnobUchar(label, &(_state->_mixer->Psysefxvol[fx][track]), 0, 127, ImVec2(lineHeight, lineHeight), tooltip))
                 {
                     _state->_mixer->setPsysefxvol(track, fx, _state->_mixer->Psysefxvol[fx][track]);
                 }
@@ -620,7 +618,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
                 ImGui::PushID(100 + fx);
                 if (_state->_mixer->Pinsparts[fx] == track)
                 {
-                    if (ImGui::Button(EffectNames[_state->_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 20)))
+                    if (ImGui::Button(EffectNames[_state->_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 0)))
                     {
                         _state->_currentInsertEffect = fx;
                         _state->_activeChannel = track;
@@ -628,7 +626,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
                         ImGui::SetWindowFocus(InsertionFxEditorID);
                     }
                     ImGui::SameLine();
-                    if (ImGui::Button("x", ImVec2(20, 20)))
+                    if (ImGui::Button("x", ImVec2(20, 0)))
                     {
                         RemoveInsertFxFromTrack(fx);
                         _state->_activeChannel = track;
@@ -644,12 +642,12 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
             for (int i = 0; i < fillCount; i++)
             {
                 ImGui::PushID(i);
-                ImGui::Button("##empty", ImVec2(width, 20));
+                ImGui::Button("##empty", ImVec2(width, 0));
                 ImGui::PopID();
             }
             ImGui::PopStyleColor(3);
 
-            if (ImGui::Button("+", ImVec2(width, 20)))
+            if (ImGui::Button("+", ImVec2(width, 0)))
             {
                 AddInsertFx(track);
                 _state->_activeChannel = track;
@@ -674,7 +672,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
             {
                 ImGui::PushID(200 + fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, channel->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-                if (ImGui::Button(EffectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 20)))
+                if (ImGui::Button(EffectNames[channel->partefx[fx]->geteffect()], ImVec2(width - (channel->partefx[fx]->geteffect() == 0 ? 0 : 22), 0)))
                 {
                     _state->_activeChannel = track;
                     _state->_currentChannelEffect = fx;
@@ -684,7 +682,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
                 if (channel->partefx[fx]->geteffect() != 0)
                 {
                     ImGui::SameLine();
-                    if (ImGui::Button("x", ImVec2(20, 20)))
+                    if (ImGui::Button("x", ImVec2(20, 0)))
                     {
                         _state->_activeChannel = track;
                         _state->_currentChannelEffect = fx;

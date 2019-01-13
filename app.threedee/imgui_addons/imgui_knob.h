@@ -16,9 +16,9 @@ IMGUI_API bool KnobUchar(char const *label, unsigned char *p_value,
                          unsigned char v_min, unsigned char v_max,
                          ImVec2 const &size, char const *tooltip = nullptr);
 
-IMGUI_API bool DropDown(char const *label,  unsigned char &value, char const *const names[], int nameCount, char const *tooltip = nullptr);
+IMGUI_API bool DropDown(char const *label, unsigned char &value, char const *const names[], int nameCount, char const *tooltip = nullptr);
 
-IMGUI_API bool ImageToggleButton(const char* str_id, bool* v, ImTextureID user_texture_id, const ImVec2& size);
+IMGUI_API bool ImageToggleButton(const char *str_id, bool *v, ImTextureID user_texture_id, const ImVec2 &size);
 
 IMGUI_API bool TextCentered(ImVec2 const &size, char const *label);
 

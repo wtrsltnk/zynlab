@@ -14,13 +14,13 @@
 #include "ui/ui.library.h"
 #include "ui/ui.mixer.h"
 #include "ui/ui.padnote.h"
+#include "ui/ui.sequencer.h"
 #include "ui/ui.subnote.h"
 #include <chrono>
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
-#include <zyn.seq/Sequencer.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
 
@@ -33,12 +33,11 @@ private:
     zyn::ui::Library _libraryUi;
     zyn::ui::Mixer _mixerUi;
     zyn::ui::PadNote _padNoteUi;
+    zyn::ui::Sequencer _sequencerUi;
     zyn::ui::SubNote _subNoteUi;
 
     GLFWwindow *_window;
     Stepper _stepper;
-    Sequencer _sequencer;
-    std::vector<TrackPattern> _clipboardPatterns;
     std::vector<unsigned int> _toolbarIcons;
     bool _toolbarIconsAreLoaded;
 
@@ -65,15 +64,7 @@ private:
     void LoadToolbarIcons();
 
     void ImGuiPlayback();
-    void ImGuiSequencer();
-    void ImGuiStepSequencer(int trackIndex, float trackHeight);
-    void ImGuiStepSequencerEventHandling();
-    void ImGuiStepPatternEditorWindow();
-    void ImGuiPianoRollSequencer(int trackIndex, float trackHeight);
-    void ImGuiPianoRollSequencerEventHandling();
-    void ImGuiPianoRollPatternEditorWindow();
 
-    void HitNote(int trackIndex, int note, int velocity, int durationInMs);
 };
 
 #endif // _APP_THREE_DEE_H_

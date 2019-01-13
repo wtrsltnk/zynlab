@@ -165,7 +165,7 @@ void zyn::ui::AdNote::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Amplitude Parameters");
 
-    ImGui::BeginChild("VolSns", ImVec2(250, 50));
+    ImGui::BeginChild("VolSns", ImVec2(250, ImGui::GetStyle().ItemSpacing.y * 3 + ImGui::GetTextLineHeight() * 2));
     auto vol = static_cast<int>(parameters->PVolume);
     ImGui::PushItemWidth(250);
     if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))

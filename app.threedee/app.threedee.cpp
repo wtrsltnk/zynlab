@@ -33,14 +33,10 @@ int NoteNameCount = 12;
 
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
-static const float noteLabelWidth = 50.0f;
-static const float rowHeight = 20.0f;
-static const float stepWidth = 20.0f;
-
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
     : _state(mixer), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
-      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state),
-      _window(window), _stepper(&_sequencer, mixer),
+      _mixerUi(&_state), _padNoteUi(&_state), _sequencerUi(&_state), _subNoteUi(&_state),
+      _window(window), _stepper(&_state._sequencer, mixer),
       _toolbarIconsAreLoaded(false),
       _display_w(800), _display_h(600)
 {
@@ -95,6 +91,18 @@ bool AppThreeDee::Setup()
 
     ImGui::StyleColorsClassic();
 
+    io.Fonts->Clear();
+    ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+    if (font != nullptr)
+    {
+        io.FontDefault = font;
+    }
+    else
+    {
+        io.Fonts->AddFontDefault();
+    }
+    io.Fonts->Build();
+
     _state._mixer->GetBankManager()->RescanForBanks();
     _state._mixer->GetBankManager()->LoadBank(_state._currentBank);
 
@@ -107,6 +115,7 @@ bool AppThreeDee::Setup()
     _subNoteUi.Setup();
     _padNoteUi.Setup();
     _effectUi.Setup();
+    _sequencerUi.Setup();
 
     LoadToolbarIcons();
 
@@ -144,18 +153,14 @@ void AppThreeDee::Render()
 
     ImGuiPlayback();
 
-    _mixerUi.Render();
-    _effectUi.Render();
-    _libraryUi.Render();
-
-    ImGuiSequencer();
-    ImGuiStepPatternEditorWindow();
-    ImGuiPianoRollPatternEditorWindow();
-
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     _adNoteUI.Render();
-    _subNoteUi.Render();
+    _effectUi.Render();
+    _libraryUi.Render();
+    _mixerUi.Render();
     _padNoteUi.Render();
+    _sequencerUi.Render();
+    _subNoteUi.Render();
     ImGui::PopStyleVar();
 
     ImGui::Render();
@@ -238,442 +243,6 @@ void AppThreeDee::LoadToolbarIcons()
 
         stbi_image_free(data);
     }
-}
-
-void AppThreeDee::HitNote(int trackIndex, int note, int velocity, int durationInMs)
-{
-    _stepper.HitNote(static_cast<unsigned char>(trackIndex),
-                     static_cast<unsigned char>(note),
-                     static_cast<unsigned char>(velocity),
-                     durationInMs);
-}
-
-void AppThreeDee::ImGuiSequencer()
-{
-    ImGui::Begin("Sequencer");
-    {
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
-
-        static int trackHeight = 30;
-        ImGui::BeginChild("scrolling", ImVec2(0, -30), false, ImGuiWindowFlags_HorizontalScrollbar);
-        for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
-        {
-            ImGui::PushID(trackIndex * 1100);
-            auto trackEnabled = _state._mixer->GetChannel(trackIndex)->Penabled == 1;
-            if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
-            {
-                _state._mixer->GetChannel(trackIndex)->Penabled = trackEnabled ? 1 : 0;
-            }
-            ImGui::SameLine();
-
-            float hue = trackIndex * 0.05f;
-            char trackLabel[32] = {'\0'};
-            sprintf(trackLabel, "%02d", trackIndex + 1);
-            bool highLight = trackIndex == _state._activeChannel;
-            if (highLight)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
-            }
-            if (ImGui::Button(trackLabel, ImVec2(trackHeight, trackHeight)))
-            {
-                _state._activeChannel = trackIndex;
-            }
-            if (highLight)
-            {
-                ImGui::PopStyleColor();
-            }
-            ImGui::PopID();
-
-            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
-
-            //if (_state._mixer->GetChannel(trackIndex)->Pkitmode != 0)
-            {
-                ImGuiStepSequencer(trackIndex, trackHeight);
-            }
-            //else
-            {
-                //ImGuiPianoRollSequencer(trackIndex, trackHeight);
-            }
-
-            ImGui::PopStyleColor(3);
-        }
-        float scroll_y = ImGui::GetScrollY();
-        ImGui::EndChild();
-
-        ImGui::PopStyleVar(2);
-
-        float scroll_x_delta = 0.0f;
-        ImGui::SmallButton("<<");
-        if (ImGui::IsItemActive()) scroll_x_delta = -ImGui::GetIO().DeltaTime * 1000.0f;
-        ImGui::SameLine();
-        ImGui::Text("Scroll from code");
-        ImGui::SameLine();
-        ImGui::SmallButton(">>");
-        if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f;
-        if (scroll_x_delta != 0.0f)
-        {
-            ImGui::BeginChild("scrolling");
-            ImGui::SetScrollX(ImGui::GetScrollX() + scroll_x_delta);
-            ImGui::End();
-        }
-
-        ImGui::BeginChild("info");
-        ImGui::SetScrollY(scroll_y);
-        ImGui::EndChild();
-
-        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
-        {
-            //if (_state._activeInstrument() >= 0 && _state._mixer->GetChannel(_state._activeInstrument())->Pkitmode != 0)
-            {
-                ImGuiStepSequencerEventHandling();
-            }
-            //else
-            {
-                //ImGuiPianoRollSequencerEventHandling();
-            }
-        }
-    }
-    ImGui::End();
-}
-
-void AppThreeDee::ImGuiStepSequencer(int trackIndex, float trackHeight)
-{
-    auto lastIndex = _sequencer.LastPatternIndex(trackIndex);
-    for (int patternIndex = 0; patternIndex <= lastIndex; patternIndex++)
-    {
-        ImGui::SameLine();
-        ImGui::PushID(patternIndex + trackIndex * 1000);
-        bool isActive = (trackIndex == _state._activeChannel && patternIndex == _state._activePattern);
-        if (isActive)
-        {
-            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-        }
-
-        if (_sequencer.DoesPatternExistAtIndex(trackIndex, patternIndex))
-        {
-            auto &pattern = _sequencer.GetPattern(trackIndex, patternIndex);
-            if (ImGui::Button(pattern._name.c_str(), ImVec2(120.0f, trackHeight)))
-            {
-                _state._activeChannel = trackIndex;
-                _state._activePattern = patternIndex;
-            }
-            if (ImGui::IsMouseDoubleClicked(0))
-            {
-                _state._showEditor = true;
-            }
-        }
-        else if (_state._mixer->GetChannel(trackIndex)->Penabled)
-        {
-            if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-            {
-                _sequencer.AddPattern(trackIndex, patternIndex, "");
-            }
-        }
-        if (isActive)
-        {
-            ImGui::PopStyleColor(1);
-            ImGui::PopStyleVar(1);
-        }
-
-        ImGui::PopID();
-    }
-
-    if (_state._mixer->GetChannel(trackIndex)->Penabled)
-    {
-        ImGui::SameLine();
-        ImGui::PushID((100 + trackIndex) * 2010);
-        if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-        {
-            _sequencer.AddPattern(trackIndex, lastIndex + 1, "");
-        }
-        ImGui::PopID();
-    }
-}
-
-void AppThreeDee::ImGuiStepSequencerEventHandling()
-{
-    ImGuiIO &io = ImGui::GetIO();
-
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
-    {
-        _sequencer.RemoveActivePattern(_state._activeChannel, _state._activePattern);
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
-    {
-        if (io.KeyShift && !io.KeyCtrl)
-        {
-            _sequencer.MovePatternLeftForced(_state._activeChannel, _state._activePattern);
-        }
-        else if (!io.KeyShift && io.KeyCtrl)
-        {
-            _sequencer.SwitchPatternLeft(_state._activeChannel, _state._activePattern);
-        }
-        else
-        {
-            _sequencer.MovePatternLeftIfPossible(_state._activeChannel, _state._activePattern);
-        }
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
-    {
-        if (io.KeyShift && !io.KeyCtrl)
-        {
-            _sequencer.MovePatternRightForced(_state._activeChannel, _state._activePattern);
-        }
-        else if (!io.KeyShift && io.KeyCtrl)
-        {
-            _sequencer.SwitchPatternRight(_state._activeChannel, _state._activePattern);
-        }
-        else
-        {
-            _sequencer.MovePatternRightIfPossible(_state._activeChannel, _state._activePattern);
-        }
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Home)))
-    {
-        _sequencer.SelectFirstPatternInTrack(_state._activeChannel, _state._activePattern);
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_End)))
-    {
-        _sequencer.SelectLastPatternInTrack(_state._activeChannel, _state._activePattern);
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
-    {
-        _state._showEditor = true;
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
-    {
-        if (io.KeyShift)
-        {
-            _sequencer.SelectPreviousPattern(_state._activeChannel, _state._activePattern);
-        }
-        else
-        {
-            _sequencer.SelectNextPattern(_state._activeChannel, _state._activePattern);
-        }
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && io.KeyCtrl)
-    {
-        if (_sequencer.DoesPatternExistAtIndex(_state._activeChannel, _state._activePattern))
-        {
-            auto pattern = _sequencer.GetPattern(_state._activeChannel, _state._activePattern);
-            _clipboardPatterns.push_back(pattern);
-        }
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && io.KeyCtrl)
-    {
-        if (!_clipboardPatterns.empty() && _sequencer.DoesPatternExistAtIndex(_state._activeChannel, _state._activePattern))
-        {
-            _sequencer.SetPattern(_state._activeChannel, _state._activePattern, _clipboardPatterns.back());
-        }
-    }
-}
-
-void AppThreeDee::ImGuiStepPatternEditorWindow()
-{
-    if (!_state._showEditor)
-    {
-        return;
-    }
-
-    ImGui::Begin("Pattern editor", &_state._showEditor);
-
-    if (!_sequencer.DoesPatternExistAtIndex(_state._activeChannel, _state._activePattern))
-    {
-        _state._activePattern = -1;
-        ImGui::End();
-        return;
-    }
-
-    auto &style = ImGui::GetStyle();
-    auto &selectedPattern = _sequencer.GetPattern(_state._activeChannel, _state._activePattern);
-
-    char tmp[256];
-    strcpy(tmp, selectedPattern._name.c_str());
-    if (ImGui::InputText("pattern name", tmp, 256))
-    {
-        selectedPattern._name = tmp;
-    }
-
-    ImGui::BeginChild("Notes");
-    auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
-    auto itemWidth = (width / 16) - (style.ItemSpacing.x);
-    for (int i = 0; i < 88; i++)
-    {
-        if (i % NoteNameCount == 0)
-        {
-            ImGui::Separator();
-        }
-        ImGui::PushID(i);
-        if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, rowHeight)))
-        {
-            HitNote(_state._activeChannel, i, 200, 200);
-        }
-        for (int j = 0; j < 16; j++)
-        {
-            ImGui::SameLine();
-            ImGui::PushID(j);
-            auto found = selectedPattern._notes.find(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
-            bool s = found != selectedPattern._notes.end();
-            if (j % 4 == 0)
-            {
-                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_FrameBg]);
-            }
-            if (ImGui::CheckButton("##note", &s, ImVec2(itemWidth, rowHeight)))
-            {
-                if (!s)
-                {
-                    selectedPattern._notes.erase(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
-                }
-                else
-                {
-                    selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
-                }
-                HitNote(_state._activeChannel, i, 200, 200);
-            }
-            ImGui::PopStyleColor();
-            ImGui::PopID();
-        }
-        ImGui::PopID();
-    }
-    ImGui::EndChild();
-    ImGui::End();
-}
-
-void AppThreeDee::ImGuiPianoRollSequencer(int trackIndex, float trackHeight)
-{
-    auto lastIndex = _sequencer.LastPatternIndex(trackIndex);
-    for (int patternIndex = 0; patternIndex <= lastIndex; patternIndex++)
-    {
-        auto count = _sequencer.PatternStepCount(trackIndex, patternIndex);
-
-        ImGui::SameLine();
-        ImGui::PushID(patternIndex + trackIndex * 1000);
-        bool isActive = trackIndex == _state._activeChannel && patternIndex == _state._activePattern;
-        if (isActive)
-        {
-            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-        }
-
-        if (_sequencer.DoesPatternExistAtIndex(trackIndex, patternIndex))
-        {
-            auto &pattern = _sequencer.GetPattern(trackIndex, patternIndex);
-            if (ImGui::Button(pattern._name.c_str(), ImVec2(((count - 1) / 16 + 1) * 120.0f, trackHeight)))
-            {
-                _state._activeChannel = trackIndex;
-                _state._activePattern = patternIndex;
-            }
-            if (ImGui::IsMouseDoubleClicked(0))
-            {
-                _state._showEditor = true;
-            }
-        }
-        else if (_state._mixer->GetChannel(trackIndex)->Penabled)
-        {
-            if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-            {
-                _sequencer.AddPattern(trackIndex, patternIndex, "");
-            }
-        }
-        if (isActive)
-        {
-            ImGui::PopStyleColor(1);
-            ImGui::PopStyleVar(1);
-        }
-
-        ImGui::PopID();
-    }
-    if (_state._mixer->GetChannel(trackIndex)->Penabled)
-    {
-        ImGui::SameLine();
-        ImGui::PushID((100 + trackIndex) * 2010);
-        if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
-        {
-            _sequencer.AddPattern(trackIndex, lastIndex + 1, "");
-        }
-        ImGui::PopID();
-    }
-}
-
-void AppThreeDee::ImGuiPianoRollSequencerEventHandling()
-{
-}
-
-void AppThreeDee::ImGuiPianoRollPatternEditorWindow()
-{
-    if (!_state._showEditor)
-    {
-        return;
-    }
-
-    if (!_sequencer.DoesPatternExistAtIndex(_state._activeChannel, _state._activePattern))
-    {
-        _state._activePattern = -1;
-        return;
-    }
-
-    auto &style = ImGui::GetStyle();
-    auto &selectedPattern = _sequencer.GetPattern(_state._activeChannel, _state._activePattern);
-
-    ImGui::Begin("Piano roll editor", &_state._showEditor);
-    char tmp[256];
-    strcpy(tmp, selectedPattern._name.c_str());
-    if (ImGui::InputText("pattern name", tmp, 256))
-    {
-        selectedPattern._name = tmp;
-    }
-
-    ImGui::BeginChild("Notes");
-    for (int i = 0; i < 88; i++)
-    {
-        auto mousey = ImGui::GetMousePos().y - ImGui::GetWindowPos().y + ImGui::GetScrollY();
-        auto mousex = ImGui::GetMousePos().x - ImGui::GetWindowPos().x + ImGui::GetScrollX();
-
-        if (i % NoteNameCount == 0)
-        {
-            ImGui::Separator();
-        }
-        ImGui::PushID(i);
-
-        auto min = ImGui::GetCursorPos();
-        if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, rowHeight)))
-        {
-            HitNote(_state._activeChannel, i, 200, 200);
-        }
-
-        for (auto &note : selectedPattern._notes)
-        {
-            if (note._note != i) continue;
-
-            ImGui::SetCursorPos(ImVec2(noteLabelWidth + style.ItemSpacing.x + note._step * stepWidth, min.y));
-            ImGui::Button("", ImVec2(note._length * stepWidth, rowHeight));
-        }
-
-        auto step = mousex - (noteLabelWidth + style.ItemSpacing.x);
-        if (ImGui::IsWindowFocused() && mousey >= min.y &&
-            mousey <= (min.y + ImGui::GetTextLineHeight()) && step > 0 &&
-            !selectedPattern.IsStepCovered(static_cast<unsigned char>(i), static_cast<int>(step)))
-        {
-            min.x = std::floor((noteLabelWidth + style.ItemSpacing.x + step) / stepWidth) * stepWidth;
-            ImGui::SetCursorPos(min);
-            if (ImGui::Button("+", ImVec2(stepWidth, rowHeight)))
-            {
-                selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<int>((step / stepWidth)), 0.4f));
-            }
-        }
-        ImGui::PopID();
-    }
-    ImGui::EndChild();
-
-    ImGui::End();
 }
 
 void AppThreeDee::ImGuiPlayback()

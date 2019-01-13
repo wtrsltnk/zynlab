@@ -14,6 +14,11 @@ bool ImGui::CheckButton(const char *label, bool *p_value, ImVec2 const &size)
         result = true;
     }
 
+    if (!ImGui::IsItemActive() && !ImGui::IsItemHovered() && !*p_value)
+    {
+        return result;
+    }
+
     auto color = ImGui::GetColorU32(ImGuiCol_FrameBg);
     if (ImGui::IsItemActive() || *p_value)
     {

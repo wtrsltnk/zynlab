@@ -159,49 +159,43 @@ bool zyn::ui::Effect::Setup()
 
 void zyn::ui::Effect::Render()
 {
-    if (!_state->_showInsertEffectsEditor)
+    if (_state->_showInsertEffectsEditor)
     {
-        return;
-    }
-
-    if (ImGui::Begin(InsertionFxEditorID, &_state->_showInsertEffectsEditor))
-    {
-        if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
+        if (ImGui::Begin(InsertionFxEditorID, &_state->_showInsertEffectsEditor))
         {
-            EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
+            if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
+            {
+                EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
+            }
         }
-    }
-    ImGui::End();
-
-    if (!_state->_showSystemEffectsEditor)
-    {
-        return;
+        ImGui::End();
     }
 
-    if (ImGui::Begin(SystemFxEditorID, &_state->_showSystemEffectsEditor))
+    if (_state->_showSystemEffectsEditor)
     {
-        if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
+        if (ImGui::Begin(SystemFxEditorID, &_state->_showSystemEffectsEditor))
         {
-            EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
+            if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
+            {
+                EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
+            }
         }
-    }
-    ImGui::End();
-
-    if (!_state->_showChannelEffectsEditor)
-    {
-        return;
+        ImGui::End();
     }
 
-    if (ImGui::Begin(ChannelFxEditorID, &_state->_showChannelEffectsEditor))
+    if (_state->_showChannelEffectsEditor)
     {
-        auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
-
-        if (_state->_currentChannelEffect >= 0 && _state->_currentChannelEffect < NUM_CHANNEL_EFX)
+        if (ImGui::Begin(ChannelFxEditorID, &_state->_showChannelEffectsEditor))
         {
-            EffectEditor(channel->partefx[_state->_currentChannelEffect]);
+            auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
+
+            if (_state->_currentChannelEffect >= 0 && _state->_currentChannelEffect < NUM_CHANNEL_EFX)
+            {
+                EffectEditor(channel->partefx[_state->_currentChannelEffect]);
+            }
         }
+        ImGui::End();
     }
-    ImGui::End();
 }
 
 void VolumeAndPanning(EffectManager *effectManager)
