@@ -34,7 +34,7 @@ int NoteNameCount = 12;
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
-    : _state(mixer), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
+    : _state(mixer, &_stepper), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
       _mixerUi(&_state), _padNoteUi(&_state), _sequencerUi(&_state), _subNoteUi(&_state),
       _window(window), _stepper(&_state._sequencer, mixer),
       _toolbarIconsAreLoaded(false),

@@ -102,12 +102,10 @@ void zyn::ui::StepPattern::ImGuiStepPatternEditorWindow()
         selectedPattern._name = tmp;
     }
 
-    //    static const float rowHeight = 20.0f;
-
     ImGui::BeginChild("Notes");
     auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
     auto itemWidth = (width / 16) - (style.ItemSpacing.x);
-    for (int i = 88 - 1; i >= 0; i--)
+    for (int i = 0; i < 88; i++)
     {
         if (i % NoteNameCount == 0)
         {
@@ -116,14 +114,14 @@ void zyn::ui::StepPattern::ImGuiStepPatternEditorWindow()
         ImGui::PushID(i);
         if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, ImGui::GetTextLineHeightWithSpacing())))
         {
-            _state->_mixer->HitNote(_state->_activeChannel, i, 200, 200);
+            _state->_stepper->HitNote(_state->_activeChannel, i, 200, 200);
         }
         for (int j = 0; j < 16; j++)
         {
             ImGui::SameLine();
             ImGui::PushID(j);
             auto found = selectedPattern._notes.find(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
-            bool s = found != selectedPattern._notes.end();
+            bool s = (found != selectedPattern._notes.end());
             if (j % 4 == 0)
             {
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -142,7 +140,7 @@ void zyn::ui::StepPattern::ImGuiStepPatternEditorWindow()
                 {
                     selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
                 }
-                _state->_mixer->HitNote(_state->_activeChannel, i, 200, 200);
+                _state->_stepper->HitNote(_state->_activeChannel, i, 200, 200);
             }
             ImGui::PopStyleColor();
             ImGui::PopID();

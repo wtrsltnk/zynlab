@@ -115,7 +115,7 @@ void zyn::ui::PianoRoll::ImGuiPianoRollPatternEditorWindow()
         auto min = ImGui::GetCursorPos();
         if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, ImGui::GetTextLineHeightWithSpacing())))
         {
-            _state->_mixer->HitNote(_state->_activeChannel, i, 200, 200);
+            _state->_stepper->HitNote(_state->_activeChannel, i, 200, 200);
         }
 
         for (auto &note : selectedPattern._notes)

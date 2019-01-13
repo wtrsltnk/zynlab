@@ -81,7 +81,6 @@ public:
     //Midi IN
     virtual void NoteOn(unsigned char chan, unsigned char note, unsigned char velocity);
     virtual void NoteOff(unsigned char chan, unsigned char note);
-    virtual void HitNote(unsigned char chan, unsigned char note, unsigned char velocity, int durationInMs);
     virtual void PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity);
     virtual void SetController(unsigned char chan, int type, int par);
     virtual void SetProgram(unsigned char chan, unsigned int pgm);
@@ -132,8 +131,6 @@ public:
     void Defaults();
 
 private:
-    int _activeNotes[NUM_MIXER_CHANNELS][POLIPHONY];
-    void UpdateActiveNotes();
     Channel _channels[NUM_MIXER_CHANNELS];
     pthread_mutex_t _mutex;
     IBankManager *_bankManager;

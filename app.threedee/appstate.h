@@ -21,10 +21,11 @@ extern const float stepWidth;
 class AppState
 {
 public:
-    AppState(class Mixer *mixer);
+    AppState(class Mixer *mixer, class Stepper *stepper);
     virtual ~AppState();
 
     class Mixer *_mixer;
+    class Stepper *_stepper;
     bool _showLibrary;
     bool _showEditor;
     bool _showInspector;

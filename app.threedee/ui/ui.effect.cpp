@@ -159,6 +159,11 @@ bool zyn::ui::Effect::Setup()
 
 void zyn::ui::Effect::Render()
 {
+    if (!_state->_showSmartControls)
+    {
+        return;
+    }
+
     if (_state->_showInsertEffectsEditor)
     {
         if (ImGui::Begin(InsertionFxEditorID, &_state->_showInsertEffectsEditor))

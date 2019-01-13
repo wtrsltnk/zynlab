@@ -38,8 +38,6 @@
 
 using namespace std;
 
-static std::chrono::milliseconds::rep _lastSequencerTimeInMs;
-
 Mixer::Mixer()
 {}
 
@@ -58,8 +56,6 @@ void Mixer::Setup(IBankManager *bankManager)
     swaplr = false;
     _off = 0;
     _smps = 0;
-
-    _lastSequencerTimeInMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     pthread_mutex_init(&_mutex, nullptr);
     _fft = std::unique_ptr<IFFTwrapper>(new FFTwrapper(SystemSettings::Instance().oscilsize));
@@ -84,15 +80,6 @@ void Mixer::Setup(IBankManager *bankManager)
     }
 
     Defaults();
-
-    for (unsigned char channelIndex = 0; channelIndex < NUM_MIXER_CHANNELS; channelIndex++)
-    {
-        for (unsigned char note = 0; note < POLIPHONY; note++)
-        {
-            std::cout << "setting to 0 " << __LINE__ << std::endl;
-            _activeNotes[channelIndex][note] = 0;
-        }
-    }
 }
 
 IBankManager *Mixer::GetBankManager()
@@ -209,64 +196,6 @@ void Mixer::NoteOff(unsigned char chan, unsigned char note)
         {
             npart.NoteOff(note);
         }
-    }
-}
-
-static unsigned char lastChan = 0;
-static unsigned char lastNote = 0;
-
-void Mixer::HitNote(unsigned char chan, unsigned char note, unsigned char velocity, int durationInMs)
-{
-    if (!velocity)
-    {
-        return;
-    }
-
-    Lock();
-    std::cout << "setting to _activeNotes[" << int(chan) << "][" << int(note) << "] to " << durationInMs << " @ " << __LINE__ << std::endl;
-    _activeNotes[chan][note] = durationInMs;
-    std::cout << "_activeNotes[" << int(chan) << "][" << int(note) << "] == " << _activeNotes[chan][note] << std::endl;
-    Unlock();
-
-    lastChan = chan;
-    lastNote = note;
-
-    NoteOn(chan, note, velocity);
-}
-
-void Mixer::UpdateActiveNotes()
-{
-    std::chrono::milliseconds::rep currentTime =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
-            .count();
-
-    auto deltaTime = currentTime - _lastSequencerTimeInMs;
-    _lastSequencerTimeInMs = currentTime;
-
-    std::cout << " -> _activeNotes[" << int(lastChan) << "][" << int(lastNote) << "] == " << _activeNotes[lastChan][lastNote] << std::endl;
-
-    std::vector<std::tuple<unsigned char, unsigned char>> notesToEnd;
-    for (int chan = 0; chan < NUM_MIXER_CHANNELS; chan++)
-    {
-        for (int note = 0; note < POLIPHONY; note++)
-        {
-            int duration = _activeNotes[chan][note];
-            if (duration <= 0)
-            {
-                continue;
-            }
-
-            std::cout << " -> _activeNotes[" << int(chan) << "][" << int(note) << "] == " << duration << std::endl;
-            if (_activeNotes[chan][note] <= 0)
-            {
-                notesToEnd.push_back(std::make_tuple(chan, note));
-            }
-        }
-    }
-
-    for (auto &t : notesToEnd)
-    {
-        NoteOff(std::get<0>(t), std::get<1>(t));
     }
 }
 
@@ -416,8 +345,6 @@ void Mixer::AudioOut(float *outl, float *outr)
     {
         swap(outl, outr);
     }
-
-    UpdateActiveNotes();
 
     //clean up the output samples (should not be needed?)
     memset(outl, 0, this->BufferSizeInBytes());
