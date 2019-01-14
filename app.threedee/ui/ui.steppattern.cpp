@@ -81,7 +81,7 @@ void zyn::ui::StepPattern::RenderStepPatternEditorWindow()
         return;
     }
 
-    ImGui::Begin(StepPatternEditorID);
+    ImGui::Begin(StepPatternEditorID, &_state->_showEditor);
 
     if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeChannel, _state->_activePattern))
     {
