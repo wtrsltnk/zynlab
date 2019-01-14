@@ -12,7 +12,6 @@ private:
     AppState *_state;
 
     void ImGuiStepSequencer(int trackIndex, float trackHeight);
-    void ImGuiStepPatternEditorWindow();
 
 public:
     StepPattern(AppState *state);
@@ -20,6 +19,7 @@ public:
 
     bool Setup();
     void Render(int trackIndex, int trackHeight);
+    void RenderStepPatternEditorWindow();
     void EventHandling();
 };
 

@@ -110,6 +110,7 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
         {
             case MidiEventTypes::M_NOTE:
             {
+                std::cout << ev << std::endl;
                 if (ev.value)
                 {
                     this->_audioGenerator->NoteOn(

@@ -72,11 +72,9 @@ void zyn::ui::StepPattern::Render(int trackIndex, int trackHeight)
         }
         ImGui::PopID();
     }
-
-    ImGuiStepPatternEditorWindow();
 }
 
-void zyn::ui::StepPattern::ImGuiStepPatternEditorWindow()
+void zyn::ui::StepPattern::RenderStepPatternEditorWindow()
 {
     if (!_state->_showEditor)
     {
@@ -102,15 +100,14 @@ void zyn::ui::StepPattern::ImGuiStepPatternEditorWindow()
         selectedPattern._name = tmp;
     }
 
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 5));
     ImGui::BeginChild("Notes");
     auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
     auto itemWidth = (width / 16) - (style.ItemSpacing.x);
-    for (int i = 0; i < 88; i++)
+
+    // Start from B7 and go down to C1 (http://www.inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies)
+    for (int i = 107; i >= 24; i--)
     {
-        if (i % NoteNameCount == 0)
-        {
-            ImGui::Separator();
-        }
         ImGui::PushID(i);
         if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, ImGui::GetTextLineHeightWithSpacing())))
         {
@@ -146,8 +143,14 @@ void zyn::ui::StepPattern::ImGuiStepPatternEditorWindow()
             ImGui::PopID();
         }
         ImGui::PopID();
+
+        if (i % NoteNameCount == 0)
+        {
+            ImGui::Separator();
+        }
     }
     ImGui::EndChild();
+    ImGui::PopStyleVar();
     ImGui::End();
 }
 

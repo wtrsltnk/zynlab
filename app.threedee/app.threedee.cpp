@@ -15,9 +15,6 @@
 #include <map>
 
 const char *NoteNames[] = {
-    "A",
-    "A#",
-    "B",
     "C",
     "C#",
     "D",
@@ -27,6 +24,9 @@ const char *NoteNames[] = {
     "F#",
     "G",
     "G#",
+    "A",
+    "A#",
+    "B",
 };
 
 int NoteNameCount = 12;
@@ -89,7 +89,7 @@ bool AppThreeDee::Setup()
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    ImGui::StyleColorsClassic();
+    ImGui::StyleColorsDark();
 
     io.Fonts->Clear();
     ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);

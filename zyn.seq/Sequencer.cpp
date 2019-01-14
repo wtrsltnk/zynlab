@@ -108,10 +108,10 @@ void Stepper::Tick()
     }
 }
 
-void Stepper::HitNote(unsigned char chan, unsigned char note, unsigned char velocity, int durationInMs)
+void Stepper::HitNote(int chan, int note, unsigned char velocity, int durationInMs)
 {
     _activeNotes[chan][note] = durationInMs;
-    _mixer->NoteOn(chan, note, velocity);
+    _mixer->NoteOn(static_cast<unsigned char>(chan), static_cast<unsigned char>(note), velocity);
 }
 
 int Stepper::Bpm() const

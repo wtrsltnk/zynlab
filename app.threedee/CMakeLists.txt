@@ -16,6 +16,7 @@ if(GLFW3_FOUND)
         glad.c
         imgui/examples/imgui_impl_glfw.cpp
         imgui/examples/imgui_impl_opengl3.cpp
+        imgui/imconfig.h
         imgui/imgui.cpp
         imgui/imgui_demo.cpp
         imgui/imgui_draw.cpp

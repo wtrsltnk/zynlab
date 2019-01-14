@@ -76,7 +76,7 @@ public:
 
     void Setup();
     virtual void Tick();
-    void HitNote(unsigned char chan, unsigned char note, unsigned char velocity, int durationInMs);
+    void HitNote(int chan, int note, unsigned char velocity, int durationInMs);
 
     bool IsPlaying();
     void Stop();

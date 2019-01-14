@@ -103,6 +103,8 @@ void zyn::ui::Sequencer::Render()
             _stepPatternUi.EventHandling();
 //            _pianoRollUi.EventHandling();
         }
+
+        _stepPatternUi.RenderStepPatternEditorWindow();
     }
     ImGui::End();
 }
