@@ -27,6 +27,7 @@ if(GLFW3_FOUND)
         imgui_addons/imgui_knob.h
         imgui_addons/imgui_seq.cpp
         imgui_addons/imgui_seq.h
+        imgui_addons/imgui_Timeline.h
         instrumentcategories.h
         main.cpp
         stb_image.cpp

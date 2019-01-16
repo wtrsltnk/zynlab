@@ -174,17 +174,33 @@ void AppThreeDee::Render()
     }
     ImGui::PopStyleVar();
 
+    unsigned int maxvalue = 50;
+    for (int c = 0; c < 88; c++)
+    {
+        for (size_t i = 0; i < valuesOfValues[c].size(); i++)
+        {
+            if (valuesOfValues[c][i].values[1] + 10 > maxvalue)
+                maxvalue = static_cast<unsigned int>(std::ceil(valuesOfValues[c][i].values[1] / 10) * 10 + 10);
+        }
+    }
+    const float elapsedTime = static_cast<float>((static_cast<unsigned>(ImGui::GetTime() * 1000)) % (maxvalue * 1000)) / 1000.f;
+
+    static struct timelineEvent *selectedEvent = nullptr;
     ImGui::Begin("timeline window");
-    if (ImGui::BeginTimelines("MyTimeline", 50.f, NUM_MIXER_CHANNELS + 2, 88)) // label, max_value, num_visible_rows, opt_exact_num_rows (for item culling)
+    if (ImGui::BeginTimelines("MyTimeline", maxvalue, 0, 88))
     {
         for (int c = 0; c < 88; c++)
         {
             char id[32];
             sprintf(id, "%d", 107 - c);
             ImGui::TimelineStart(id, false);
-            for (size_t i = 0; i < valuesOfValues[c].size(); i += 2)
+            for (size_t i = 0; i < valuesOfValues[c].size(); i++)
             {
-                ImGui::TimelineEvent(valuesOfValues[c][i].values);
+                bool selected = (&(valuesOfValues[c][i]) == selectedEvent);
+                if (ImGui::TimelineEvent(valuesOfValues[c][i].values, &selected))
+                {
+                    selectedEvent = &(valuesOfValues[c][i]);
+                }
             }
             float new_values[2];
             if (ImGui::TimelineEnd(new_values))
@@ -194,11 +210,11 @@ void AppThreeDee::Render()
                     std::fmax(new_values[0], new_values[1])};
 
                 valuesOfValues[c].push_back(e);
+                selectedEvent = &(valuesOfValues[c].back());
             }
         }
     }
-    const float elapsedTime = static_cast<float>((static_cast<unsigned>(ImGui::GetTime() * 1000)) % 50000) / 1000.f; // So that it's always in [0,50]
-    ImGui::EndTimelines(5, elapsedTime);                                                                             // num_vertical_grid_lines, current_time (optional), timeline_running_color (optional)
+    ImGui::EndTimelines(maxvalue / 10, elapsedTime);
 
     ImGui::End();
 
