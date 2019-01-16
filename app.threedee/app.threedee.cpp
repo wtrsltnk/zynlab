@@ -133,7 +133,8 @@ struct timelineEvent
     float values[2];
 };
 
-static std::vector<struct timelineEvent> values{{20.f, 40.f}, {15.f, 22.5f}};
+static std::vector<struct timelineEvent> valuesOfValues[88];
+
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -173,34 +174,33 @@ void AppThreeDee::Render()
     }
     ImGui::PopStyleVar();
 
-    if (ImGui::BeginTimelines("MyTimeline", 50.f, 4, 6)) // label, max_value, num_visible_rows, opt_exact_num_rows (for item culling)
+    ImGui::Begin("timeline window");
+    if (ImGui::BeginTimelines("MyTimeline", 50.f, NUM_MIXER_CHANNELS + 2, 88)) // label, max_value, num_visible_rows, opt_exact_num_rows (for item culling)
     {
-        static float events[12] = {10.f, 20.f, 0.5f, 30.f, 40.f, 50.f, 20.f, 40.f, 15.f, 22.5f, 35.f, 45.f};
-        if (ImGui::TimelineEvent("Event1", &events[0]))
-        { /*events[0] and/or events[1] modified*/
-        }
-        ImGui::TimelineEvent("Event2", &events[2]);
-        ImGui::TimelineEvent("Event3", &events[4], true); // Event3 can only be shifted
-        ImGui::TimelineStart("Event4");
-        for (size_t i = 0; i < values.size(); i += 2)
+        for (int c = 0; c < 88; c++)
         {
-            ImGui::TimelineEvent(values[i].values);
-        }
-        float new_values[2];
-        if (ImGui::TimelineEnd(new_values))
-        {
-            timelineEvent e{
-                std::fmin(new_values[0], new_values[1]),
-                std::fmax(new_values[0], new_values[1])
-            };
+            char id[32];
+            sprintf(id, "%d", 107 - c);
+            ImGui::TimelineStart(id, false);
+            for (size_t i = 0; i < valuesOfValues[c].size(); i += 2)
+            {
+                ImGui::TimelineEvent(valuesOfValues[c][i].values);
+            }
+            float new_values[2];
+            if (ImGui::TimelineEnd(new_values))
+            {
+                timelineEvent e{
+                    std::fmin(new_values[0], new_values[1]),
+                    std::fmax(new_values[0], new_values[1])};
 
-            values.push_back(e);
+                valuesOfValues[c].push_back(e);
+            }
         }
-        //        ImGui::TimelineEvent("Event5", &events[8]);
-        ImGui::TimelineEvent("Event6", &events[10]);
     }
     const float elapsedTime = static_cast<float>((static_cast<unsigned>(ImGui::GetTime() * 1000)) % 50000) / 1000.f; // So that it's always in [0,50]
     ImGui::EndTimelines(5, elapsedTime);                                                                             // num_vertical_grid_lines, current_time (optional), timeline_running_color (optional)
+
+    ImGui::End();
 
     ImGui::Render();
 

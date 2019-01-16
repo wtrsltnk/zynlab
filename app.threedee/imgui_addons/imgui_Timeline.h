@@ -26,7 +26,7 @@ IMGUI_API bool TimelineEvent(const char *str_id, float *values, bool keep_range_
 IMGUI_API void TimelineStart(const char *str_id, bool keep_range_constant = false);
 IMGUI_API bool TimelineEvent(float *values);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
-IMGUI_API void EndTimelines(int num_vertical_grid_lines = 5.f, float current_time = 0.f, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
+IMGUI_API void EndTimelines(int num_vertical_grid_lines = 5, float current_time = 0.f, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
 } // namespace ImGui
 
 namespace ImGui {
@@ -41,7 +41,6 @@ static bool s_keep_range_constant = false;
 static ImVec2 s_cursor_pos;
 static const float TIMELINE_RADIUS = 6;
 static int s_event_counter = 0;
-static float *s_lastval = nullptr;
 static bool s_is_event_hovered = false;
 static float s_start_new_value = 0.0f;
 
@@ -54,11 +53,17 @@ bool BeginTimelines(const char *str_id, float max_value, int num_visible_rows, i
 
     if (num_visible_rows <= 0) num_visible_rows = 5;
     const float row_height = ImGui::GetTextLineHeightWithSpacing();
-    const bool rv = BeginChild(str_id, ImVec2(0, num_visible_rows >= 0 ? (row_height * num_visible_rows) : -1.f), false);
+    auto contentHeight = row_height * num_visible_rows;
+    ImGui::SetNextWindowContentSize(ImVec2(1700, row_height * opt_exact_num_rows));
+    const bool rv = ImGui::BeginChild(str_id, ImVec2(0, contentHeight), false, ImGuiWindowFlags_HorizontalScrollbar);
     ImGui::PushStyleColor(ImGuiCol_Column, GImGui->Style.Colors[ImGuiCol_Border]);
     ImGui::Columns(2, str_id);
+    ImGui::SetColumnWidth(0, 100);
     const float contentRegionWidth = ImGui::GetWindowContentRegionWidth();
-    if (ImGui::GetColumnOffset(1) >= contentRegionWidth * 0.48f) ImGui::SetColumnOffset(1, contentRegionWidth * 0.15f);
+    if (ImGui::GetColumnOffset(1) >= contentRegionWidth * 0.48f)
+    {
+        ImGui::SetColumnOffset(1, contentRegionWidth * 0.15f);
+    }
     s_max_timeline_value = max_value >= 0 ? max_value : (contentRegionWidth * 0.85f);
     if (opt_exact_num_rows > 0)
     {
@@ -90,13 +95,12 @@ void TimelineStart(const char *str_id, bool keep_range_constant)
     s_keep_range_constant = keep_range_constant;
     ImGuiWindow *win = GetCurrentWindow();
     const float columnOffset = ImGui::GetColumnOffset(1);
-    s_cursor_pos = ImVec2(GetWindowContentRegionMin().x + win->Pos.x + columnOffset - TIMELINE_RADIUS, win->DC.CursorPos.y);
+    s_cursor_pos = ImVec2(GetWindowContentRegionMin().x + win->Pos.x + columnOffset - TIMELINE_RADIUS + GetScrollX(), win->DC.CursorPos.y);
 
     ImGui::Text("%s", str_id);
     ImGui::NextColumn();
 
     s_event_counter = 0;
-    s_lastval = nullptr;
     s_is_event_hovered = false;
 }
 
@@ -117,7 +121,6 @@ bool TimelineEnd(float *new_values)
     SetCursorScreenPos(s_cursor_pos);
     if (InvisibleButton(s_str_id, ImVec2(GetWindowContentRegionWidth(), GetTextLineHeight())) && new_values != nullptr)
     {
-        std::cout << s_start_new_value << " => " << end_new_value << std::endl;
         new_values[0] = s_start_new_value;
         new_values[1] = end_new_value;
         result = true;
@@ -161,6 +164,7 @@ bool TimelineEvent(float *values)
     bool hovered = false;
     bool allhovered = false;
     bool active = false;
+    float newValues[2]{values[0], values[1]};
 
     const float columnWidth = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
 
@@ -179,8 +183,8 @@ bool TimelineEvent(float *values)
     if ((IsItemActive() && isMouseDraggingZero) || mustMoveBothEnds)
     {
         const float deltaX = GetIO().MouseDelta.x / columnWidth * s_max_timeline_value;
-        values[0] += deltaX;
-        values[1] += deltaX;
+        newValues[0] += deltaX;
+        newValues[1] += deltaX;
         changed = hovered = allhovered = true;
     }
     else if (IsItemHovered())
@@ -216,7 +220,7 @@ bool TimelineEvent(float *values)
         if (active && isMouseDraggingZero)
         {
             if (!s_keep_range_constant)
-                values[i] += GetIO().MouseDelta.x / columnWidth * s_max_timeline_value;
+                newValues[i] += GetIO().MouseDelta.x / columnWidth * s_max_timeline_value;
             else
                 mustMoveBothEnds = true;
             changed = hovered = true;
@@ -226,6 +230,9 @@ bool TimelineEvent(float *values)
                                      pos + ImVec2(TIMELINE_RADIUS, TIMELINE_RADIUS),
                                      IsItemActive() || IsItemHovered() || allhovered ? active_color : inactive_color);
     }
+
+    values[0] = newValues[0];
+    values[1] = newValues[1];
 
     if (values[0] > values[1])
     {
@@ -243,8 +250,7 @@ bool TimelineEvent(float *values)
         values[1] -= values[0];
         values[0] = 0;
     }
-    s_lastval = values + 1;
-    values += 2;
+
     PopID();
     if (hovered)
     {
@@ -279,7 +285,7 @@ void EndTimelines(int num_vertical_grid_lines, float current_time, ImU32 timelin
     for (int i = 1; i <= num_vertical_grid_lines; ++i)
     {
         ImVec2 a = GetWindowContentRegionMin() + win->Pos;
-        a.x += i * horizontal_interval + columnOffset;
+        a.x += i * horizontal_interval + columnOffset + GetScrollX();
         win->DrawList->AddLine(a, ImVec2(a.x, startY), line_color);
     }
 
@@ -287,7 +293,7 @@ void EndTimelines(int num_vertical_grid_lines, float current_time, ImU32 timelin
     if (current_time > 0.f && current_time < s_max_timeline_value)
     {
         ImVec2 a = GetWindowContentRegionMin() + win->Pos;
-        a.x += columnWidth * (current_time / s_max_timeline_value) + columnOffset;
+        a.x += columnWidth * (current_time / s_max_timeline_value) + columnOffset + GetScrollX();
         win->DrawList->AddLine(a, ImVec2(a.x, startY), moving_line_color);
     }
 
