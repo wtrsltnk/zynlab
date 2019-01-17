@@ -192,7 +192,7 @@ void AppThreeDee::Render()
         for (int c = 0; c < 88; c++)
         {
             char id[32];
-            sprintf(id, "%d", 107 - c);
+            sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
             ImGui::TimelineStart(id, false);
             for (size_t i = 0; i < valuesOfValues[c].size(); i++)
             {

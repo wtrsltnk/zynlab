@@ -66,7 +66,7 @@ bool BeginTimelines(const char *str_id, float max_value, int num_visible_rows, i
     const bool rv = ImGui::BeginChild(str_id, ImVec2(0, contentHeight), false, ImGuiWindowFlags_HorizontalScrollbar);
     ImGui::PushStyleColor(ImGuiCol_Column, GImGui->Style.Colors[ImGuiCol_Border]);
     ImGui::Columns(2, str_id);
-    ImGui::SetColumnWidth(0, 100);
+    ImGui::SetColumnWidth(0, 60);
     const float contentRegionWidth = ImGui::GetWindowContentRegionWidth();
     if (ImGui::GetColumnOffset(1) >= contentRegionWidth * 0.48f)
     {
@@ -252,7 +252,7 @@ bool TimelineEvent(float *values, bool *selected)
         PopID();
         win->DrawList->AddRectFilled(pos - ImVec2(TIMELINE_RADIUS, TIMELINE_RADIUS),
                                      pos + ImVec2(TIMELINE_RADIUS, TIMELINE_RADIUS),
-                                     IsItemActive() || IsItemHovered() || allhovered ? selected != nullptr && *selected ? selected_active_color : active_color : selected != nullptr && *selected ? selected_color : inactive_color);
+                                     IsItemActive() || IsItemHovered() || allhovered ? selected != nullptr && *selected ? selected_color * active_color : active_color : selected != nullptr && *selected ? selected_color : inactive_color);
     }
 
     values[0] = newValues[0];
