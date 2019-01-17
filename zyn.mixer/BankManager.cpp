@@ -417,7 +417,6 @@ void BankManager::SwapSlot(unsigned int n1, unsigned int n2)
 /*
  * Re-scan for directories containing instrument banks
  */
-
 void BankManager::RescanForBanks()
 {
     //remove old banks
@@ -430,6 +429,11 @@ void BankManager::RescanForBanks()
         {
             ScanRootDirectory(i);
         }
+    }
+
+    if (banks.empty())
+    {
+        return;
     }
 
     //sort the banks
