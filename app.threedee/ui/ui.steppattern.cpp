@@ -66,7 +66,7 @@ void zyn::ui::StepPattern::Render(int trackIndex, int trackHeight)
     {
         ImGui::SameLine();
         ImGui::PushID((100 + trackIndex) * 2010);
-        if (ImGui::Button("+", ImVec2(120.0f, 0)))
+        if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
         {
             _state->_sequencer.AddPattern(trackIndex, lastIndex + 1, "");
         }

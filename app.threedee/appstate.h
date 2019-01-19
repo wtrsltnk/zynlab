@@ -15,8 +15,17 @@ extern char const *const EffectNames[];
 extern int EffectNameCount;
 extern const char *NoteNames[];
 extern int NoteNameCount;
+extern const char *ChannelPatternTypeNames[];
 extern const float noteLabelWidth;
 extern const float stepWidth;
+
+enum class ChannelPatternTypes
+{
+    Step,
+    Clip,
+    Arpeggiator,
+    Count,
+};
 
 class AppState
 {
@@ -45,8 +54,10 @@ public:
     int _activeChannel;
     int _activeChannelInstrument;
     int _activePattern;
+    int _sequencerChannelHeight;
     Sequencer _sequencer;
     std::vector<TrackPattern> _clipboardPatterns;
+    ChannelPatternTypes _channelPatternType[NUM_MIXER_CHANNELS];
 };
 
 #endif // APPSTATE_H

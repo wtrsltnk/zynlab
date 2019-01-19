@@ -432,13 +432,14 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
                      << channel->info.Pcomments;
     }
 
-    ImGui::BeginChild("Track", trackSize, true);
+    ImGui::BeginChild("MixerChannel", trackSize, true);
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
         auto lineHeight = ImGui::GetTextLineHeight();
 
         auto useLargeMode = availableRegion.y > sliderBaseHeight * largeModeTreshold;
+        auto noCollapsingHeader = availableRegion.y > sliderBaseHeight * largeModeTreshold + 11 * lineHeight;
 
         auto trackEnabled = channel->Penabled == 1;
 
@@ -452,7 +453,7 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
 
         // Enable/disable channel
-        if (ImGui::Checkbox("##trackEnabled", &trackEnabled))
+        if (ImGui::Checkbox("##MixerChannelEnabled", &trackEnabled))
         {
             _state->_activeChannel = track;
             channel->Penabled = trackEnabled ? 1 : 0;
@@ -488,8 +489,10 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
 
         ImGui::Spacing();
 
-        if (ImGui::CollapsingHeader("Settings"))
+        if (noCollapsingHeader || ImGui::CollapsingHeader("Settings"))
         {
+            if (noCollapsingHeader) ImGui::Text("Settings");
+
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
             // AD synth enable/disable + edit button
             auto adEnabled = channel->Instruments[0].Padenabled == 1;
@@ -559,8 +562,10 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
         }
 
         // System effect sends
-        if (ImGui::CollapsingHeader("Sys FX sends"))
+        if (noCollapsingHeader || ImGui::CollapsingHeader("Sys FX sends"))
         {
+            if (noCollapsingHeader)ImGui::Text("Sys FX sends");
+
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
             for (int fx = 0; fx < NUM_SYS_EFX; fx++)
@@ -569,13 +574,10 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
                 if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - lineHeight - 1, 0)))
                 {
+                    _state->_activeChannel = track;
                     _state->_currentSystemEffect = fx;
                     _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
-                }
-                if (ImGui::IsItemClicked())
-                {
-                    _state->_activeChannel = track;
                 }
 
                 ImGui::SameLine();
@@ -607,8 +609,10 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
         }
 
         // Insertion effects
-        if (ImGui::CollapsingHeader("Insert FX"))
+        if (noCollapsingHeader || ImGui::CollapsingHeader("Insert FX"))
         {
+            if (noCollapsingHeader)ImGui::Text("Insert FX");
+
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
             int fillCount = mostInsertEffectsPerChannel;
@@ -663,8 +667,10 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
         }
 
         // Channel effects
-        if (ImGui::CollapsingHeader("Audio FX"))
+        if (noCollapsingHeader || ImGui::CollapsingHeader("Audio FX"))
         {
+            if (noCollapsingHeader)ImGui::Text("Audio FX");
+
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
             for (int fx = 0; fx < NUM_CHANNEL_EFX; fx++)
@@ -794,10 +800,6 @@ void zyn::ui::Mixer::ImGuiTrack(int track, bool highlightTrack)
         }
     }
     ImGui::EndChild();
-    if (ImGui::IsItemClicked())
-    {
-        _state->_activeChannel = track;
-    }
 
     if (highlightTrack)
     {
