@@ -286,12 +286,31 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
             {
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+
+                if (ImGui::BeginPopupContextItem("Master System Effect Selection"))
+                {
+                    for (int i = 0; i < EffectNameCount; i++)
+                    {
+                        if (ImGui::Selectable(EffectNames[i]))
+                        {
+                            _state->_mixer->sysefx[fx].changeeffect(i);
+                            _state->_currentSystemEffect = fx;
+                            _state->_showSystemEffectsEditor = true;
+                            ImGui::SetWindowFocus(SystemFxEditorID);
+                        }
+                    }
+                    ImGui::PushItemWidth(-1);
+                    ImGui::PopItemWidth();
+                    ImGui::EndPopup();
+                }
                 if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : lineHeight), lineHeight)))
                 {
                     _state->_currentSystemEffect = fx;
                     _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
+                ImGui::OpenPopupOnItemClick("Master System Effect Selection", 1);
+
                 if (_state->_mixer->sysefx[fx].geteffect() != 0)
                 {
                     ImGui::SameLine();
