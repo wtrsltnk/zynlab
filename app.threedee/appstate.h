@@ -40,6 +40,7 @@ public:
     bool _showInspector;
     bool _showMixer;
     bool _showSmartControls;
+    bool _showQuickHelp;
     bool _showSystemEffectsEditor;
     bool _showInsertEffectsEditor;
     bool _showChannelEffectsEditor;
@@ -54,7 +55,8 @@ public:
     int _activeChannel;
     int _activeChannelInstrument;
     int _activePattern;
-    int _sequencerChannelHeight;
+    int _sequencerVerticalZoom;
+    int _sequencerHorizontalZoom;
     Sequencer _sequencer;
     std::vector<TrackPattern> _clipboardPatterns;
     ChannelPatternTypes _channelPatternType[NUM_MIXER_CHANNELS];

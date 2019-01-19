@@ -247,6 +247,7 @@ enum class ToolbarTools
     SmartControls,
     Mixer,
     Editor,
+    QuickHelp,
     Rewind,
     FastForward,
     Stop,
@@ -261,6 +262,7 @@ static char const *const toolbarIconFileNames[] = {
     "smart-controls.png",
     "mixer.png",
     "editor.png",
+    "quick-help.png",
     "rewind.png",
     "fast-forward.png",
     "stop.png",
@@ -313,6 +315,10 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_inspector", &_state._showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
+
+        ImGui::SameLine();
+
+        ImGui::ImageToggleButton("toolbar_quick_help", &_state._showQuickHelp, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::QuickHelp)]), ImVec2(32, 32));
 
         ImGui::SameLine();
 

@@ -43,6 +43,16 @@ void zyn::ui::Sequencer::Render()
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f,5.0f));
 
+        ImGui::PushItemWidth(100);
+        ImGui::SliderInt("##Vertical zoom", &_state->_sequencerVerticalZoom, 40, 200);
+        ImGui::ShowTooltipOnHover("Vertical zoom");
+
+        ImGui::SameLine();
+
+        ImGui::PushItemWidth(100);
+        ImGui::SliderInt("##Horizontal zoom", &_state->_sequencerHorizontalZoom, 40, 200);
+        ImGui::ShowTooltipOnHover("Horizontal zoom");
+
         ImGui::BeginChild("scrolling", ImVec2(0, -100.0f), false, ImGuiWindowFlags_HorizontalScrollbar);
         for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
         {
@@ -62,7 +72,7 @@ void zyn::ui::Sequencer::Render()
             {
                 ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
             }
-            if (ImGui::Button(trackLabel, ImVec2(60.0f, _state->_sequencerChannelHeight)))
+            if (ImGui::Button(trackLabel, ImVec2(60.0f, _state->_sequencerVerticalZoom)))
             {
                 _state->_activeChannel = trackIndex;
             }
@@ -85,7 +95,7 @@ void zyn::ui::Sequencer::Render()
                 }
                 case ChannelPatternTypes::Step:
                 {
-                    _stepPatternUi.Render(trackIndex, _state->_sequencerChannelHeight);
+                    _stepPatternUi.Render(trackIndex, _state->_sequencerVerticalZoom);
                     break;
                 }
                 case ChannelPatternTypes::Arpeggiator:
@@ -115,10 +125,6 @@ void zyn::ui::Sequencer::Render()
         {
             _state->_channelPatternType[_state->_activeChannel] = static_cast<ChannelPatternTypes>(channelPatternType);
         }
-
-        ImGui::SameLine();
-
-        ImGui::SliderInt("Channel height", &_state->_sequencerChannelHeight, 40, 200);
 
         float scroll_x_delta = 0.0f;
         ImGui::SmallButton("<<");
