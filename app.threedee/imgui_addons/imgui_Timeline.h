@@ -22,7 +22,6 @@ namespace ImGui {
  * Add different types of TimelineEvent (e.g. multiple ranges in a single line, dot-like markers, etc.)
 */
 IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int num_visible_rows = 5, int opt_exact_num_rows = 0); // last arg, when !=0, enables item culling
-IMGUI_API bool TimelineEvent(const char *str_id, float *values, bool keep_range_constant = false);
 IMGUI_API void TimelineStart(const char *str_id, bool keep_range_constant = false);
 IMGUI_API bool TimelineEvent(float *values, bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
@@ -82,15 +81,6 @@ bool BeginTimelines(const char *str_id, float max_value, int num_visible_rows, i
     }
 
     return rv;
-}
-
-bool TimelineEvent(const char *str_id, float *values, bool keep_range_constant)
-{
-    TimelineStart(str_id, keep_range_constant);
-    auto result = TimelineEvent(values);
-    TimelineEnd();
-
-    return result;
 }
 
 void TimelineStart(const char *str_id, bool keep_range_constant)
@@ -215,6 +205,7 @@ bool TimelineEvent(float *values, bool *selected)
     {
         hovered = allhovered = true;
     }
+    if (IsItemActive()) changed = true;
     PopID();
 
     win->DrawList->AddRectFilled(start, end, IsItemActive() || IsItemHovered() ? selected != nullptr && *selected ? selected_active_color : active_color : selected != nullptr && *selected ? selected_color : inactive_color);
@@ -249,6 +240,7 @@ bool TimelineEvent(float *values, bool *selected)
                 mustMoveBothEnds = true;
             changed = hovered = true;
         }
+        if (active) changed = true;
         PopID();
         win->DrawList->AddRectFilled(pos - ImVec2(TIMELINE_RADIUS, TIMELINE_RADIUS),
                                      pos + ImVec2(TIMELINE_RADIUS, TIMELINE_RADIUS),
