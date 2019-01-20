@@ -5,7 +5,7 @@
 #include "ui.envelope.h"
 #include "ui.filter.h"
 #include "ui.lfo.h"
-#include <zyn.mixer/Channel.h>
+#include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
 
 namespace zyn {
@@ -26,7 +26,6 @@ private:
     Filter _Filter;
 
     // AD note
-    void ADNoteEditor(Channel *channel, int instrumentIndex);
     void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
     void ADNoteEditorFilter(ADnoteGlobalParam *parameters);
     void ADNoteEditorFrequency(ADnoteGlobalParam *parameters);

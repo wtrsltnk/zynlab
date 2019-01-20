@@ -113,12 +113,12 @@ PresetsSerializer::PresetsSerializer()
 
     //save zynaddsubfx specifications
     beginbranch("BASE_PARAMETERS");
-    addpar("max_midi_parts", NUM_MIXER_CHANNELS);
-    addpar("max_kit_items_per_instrument", NUM_CHANNEL_INSTRUMENTS);
+    addpar("max_midi_parts", NUM_MIXER_TRACKS);
+    addpar("max_kit_items_per_instrument", NUM_TRACK_INSTRUMENTS);
 
     addpar("max_system_effects", NUM_SYS_EFX);
     addpar("max_insertion_effects", NUM_INS_EFX);
-    addpar("max_instrument_effects", NUM_CHANNEL_EFX);
+    addpar("max_instrument_effects", NUM_TRACK_EFX);
 
     addpar("max_addsynth_voices", NUM_VOICES);
     endbranch();

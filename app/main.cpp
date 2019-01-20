@@ -35,7 +35,7 @@
 
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>
-#include <zyn.mixer/Channel.h>
+#include <zyn.mixer/Track.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.synth/FFTwrapper.h>
 
@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
 
     if (!loadinstrument.empty())
     {
-        int tmp = mixer.GetChannel(0)->loadXMLinstrument(loadinstrument.c_str());
+        int tmp = mixer.GetTrack(0)->loadXMLinstrument(loadinstrument.c_str());
         if (tmp < 0)
         {
             std::cerr << "ERROR: Could not load instrument file "
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mixer.GetChannel(0)->ApplyParameters();
+            mixer.GetTrack(0)->ApplyParameters();
             cout << "Instrument file loaded." << std::endl;
         }
     }

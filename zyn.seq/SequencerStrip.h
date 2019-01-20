@@ -9,7 +9,7 @@ class SequencerStrip
 public:
     SequencerStrip();
 
-    int _targetMixerChannel;
+    int _targetMixerTrack;
     std::map<int, SequencerStep> _steps;
 };
 

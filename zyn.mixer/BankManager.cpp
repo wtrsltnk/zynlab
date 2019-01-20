@@ -24,7 +24,7 @@
 
 #include "BankManager.h"
 
-#include "Channel.h"
+#include "Track.h"
 #include <algorithm>
 #include <dirent.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ void BankManager::ClearSlot(unsigned int ninstrument)
 /*
  * Save the instrument to a slot
  */
-void BankManager::SaveToSlot(unsigned int ninstrument, Channel *instrument)
+void BankManager::SaveToSlot(unsigned int ninstrument, Track *instrument)
 {
     ClearSlot(ninstrument);
 
@@ -189,7 +189,7 @@ void BankManager::SaveToSlot(unsigned int ninstrument, Channel *instrument)
 /*
  * Loads the instrument from the bank
  */
-void BankManager::LoadFromSlot(unsigned int ninstrument, Channel *instrument)
+void BankManager::LoadFromSlot(unsigned int ninstrument, Track *instrument)
 {
     if (EmptySlot(ninstrument))
     {

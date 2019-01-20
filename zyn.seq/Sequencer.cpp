@@ -73,7 +73,7 @@ void Stepper::Tick()
     auto deltaTime = currentTime - _lastSequencerTimeInMs;
     _lastSequencerTimeInMs = currentTime;
 
-    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
     {
         for (int note = 0; note < maxNotes; note++)
         {
@@ -151,7 +151,7 @@ void Stepper::Step(int step)
     auto patternIndex = step / 16;
     auto stepIndex = step % 16;
 
-    for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
     {
         auto notes = _steppable->GetNote(trackIndex, patternIndex, stepIndex);
         for (auto note : notes)
@@ -188,7 +188,7 @@ Sequencer::~Sequencer() = default;
 int Sequencer::CountSongLengthInSteps()
 {
     int maxStep = 0;
-    for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
     {
         auto &pattern = tracksOfPatterns[trackIndex];
         if (pattern.empty())
@@ -214,7 +214,7 @@ void Sequencer::AddPattern(int trackIndex, int patternIndex, char const *label)
 
 bool Sequencer::DoesPatternExistAtIndex(int trackIndex, int patternIndex)
 {
-    if (trackIndex < 0 || trackIndex >= NUM_MIXER_CHANNELS)
+    if (trackIndex < 0 || trackIndex >= NUM_MIXER_TRACKS)
     {
         return false;
     }

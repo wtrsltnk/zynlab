@@ -20,7 +20,7 @@
 
 */
 
-#include "Channel.h"
+#include "Track.h"
 
 #include "Microtonal.h"
 #include <zyn.common/PresetsSerializer.h>
@@ -34,9 +34,9 @@
 #include <zyn.synth/SUBnoteParams.h>
 #include <zyn.synth/ifftwrapper.h>
 
-Channel::Channel() {}
+Track::Track() {}
 
-void Channel::Init(IMixer *mixer, Microtonal *microtonal)
+void Track::Init(IMixer *mixer, Microtonal *microtonal)
 {
     _mixer = mixer;
     ctl.Init();
@@ -48,7 +48,7 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
 
     for (auto &n : Instruments)
     {
-        n.Pname = new unsigned char[CHANNEL_MAX_NAME_LEN];
+        n.Pname = new unsigned char[TRACK_MAX_NAME_LEN];
         n.adpars = nullptr;
         n.subpars = nullptr;
         n.padpars = nullptr;
@@ -70,7 +70,7 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
         nefx = false;
     }
 
-    for (int n = 0; n < NUM_CHANNEL_EFX + 1; ++n)
+    for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
     {
         partfxinputl[n] = new float[SystemSettings::Instance().buffersize];
         partfxinputr[n] = new float[SystemSettings::Instance().buffersize];
@@ -79,7 +79,7 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
     _killallnotes = 0;
     _oldfreq = -1.0f;
 
-    for (auto &i : _channelNotes)
+    for (auto &i : _trackNotes)
     {
         i.status = KEY_OFF;
         i.note = -1;
@@ -94,7 +94,7 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
     }
     Cleanup();
 
-    Pname = new unsigned char[CHANNEL_MAX_NAME_LEN];
+    Pname = new unsigned char[TRACK_MAX_NAME_LEN];
 
     oldvolumel = oldvolumer = 0.5f;
     lastnote = -1;
@@ -107,22 +107,22 @@ void Channel::Init(IMixer *mixer, Microtonal *microtonal)
     _tmpoutl = new float[SystemSettings::Instance().buffersize];
 }
 
-void Channel::Lock()
+void Track::Lock()
 {
     pthread_mutex_lock(&_instrumentMutex);
 }
 
-bool Channel::TryLock()
+bool Track::TryLock()
 {
     return pthread_mutex_trylock(&_instrumentMutex);
 }
 
-void Channel::Unlock()
+void Track::Unlock()
 {
     pthread_mutex_unlock(&_instrumentMutex);
 }
 
-void Channel::Defaults()
+void Track::Defaults()
 {
     Penabled = 0;
     Pminkey = 0;
@@ -141,9 +141,9 @@ void Channel::Defaults()
     ctl.defaults();
 }
 
-void Channel::InstrumentDefaults()
+void Track::InstrumentDefaults()
 {
-    ZEROUNSIGNED(Pname, CHANNEL_MAX_NAME_LEN);
+    ZEROUNSIGNED(Pname, TRACK_MAX_NAME_LEN);
 
     info.Ptype = 0;
     ZEROUNSIGNED(info.Pauthor, MAX_INFO_TEXT_SIZE + 1);
@@ -152,7 +152,7 @@ void Channel::InstrumentDefaults()
     Pkitmode = 0;
     Pdrummode = 0;
 
-    for (int n = 0; n < NUM_CHANNEL_INSTRUMENTS; ++n)
+    for (int n = 0; n < NUM_TRACK_INSTRUMENTS; ++n)
     {
         Instruments[n].Penabled = 0;
         Instruments[n].Pmuted = 0;
@@ -161,7 +161,7 @@ void Channel::InstrumentDefaults()
         Instruments[n].Padenabled = 0;
         Instruments[n].Psubenabled = 0;
         Instruments[n].Ppadenabled = 0;
-        ZEROUNSIGNED(Instruments[n].Pname, CHANNEL_MAX_NAME_LEN);
+        ZEROUNSIGNED(Instruments[n].Pname, TRACK_MAX_NAME_LEN);
         Instruments[n].Psendtoparteffect = 0;
         if (n != 0)
             setkititemstatus(n, 0);
@@ -172,14 +172,14 @@ void Channel::InstrumentDefaults()
     Instruments[0].subpars->Defaults();
     Instruments[0].padpars->Defaults();
 
-    for (int nefx = 0; nefx < NUM_CHANNEL_EFX; ++nefx)
+    for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
         partefx[nefx]->Defaults();
         Pefxroute[nefx] = 0; //route to next effect
     }
 }
 
-float Channel::ComputePeak(float volume)
+float Track::ComputePeak(float volume)
 {
     auto peak = 1.0e-12f;
     if (Penabled != 0)
@@ -200,7 +200,7 @@ float Channel::ComputePeak(float volume)
     return peak;
 }
 
-void Channel::ComputePeakLeftAndRight(float volume, float &peakl, float &peakr)
+void Track::ComputePeakLeftAndRight(float volume, float &peakl, float &peakr)
 {
     peakl = 1.0e-12f;
     peakr = 1.0e-12f;
@@ -226,7 +226,7 @@ void Channel::ComputePeakLeftAndRight(float volume, float &peakl, float &peakr)
 /*
  * Cleanup the part
  */
-void Channel::Cleanup(bool final_)
+void Track::Cleanup(bool final_)
 {
     for (unsigned int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
@@ -241,7 +241,7 @@ void Channel::Cleanup(bool final_)
     for (auto &nefx : partefx)
         nefx->cleanup();
 
-    for (int n = 0; n < NUM_CHANNEL_EFX + 1; ++n)
+    for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
     {
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
@@ -251,7 +251,7 @@ void Channel::Cleanup(bool final_)
     }
 }
 
-Channel::~Channel()
+Track::~Track()
 {
     Cleanup(true);
     for (auto &n : Instruments)
@@ -273,7 +273,7 @@ Channel::~Channel()
     delete[] partoutr;
     for (auto &nefx : partefx)
         delete nefx;
-    for (int n = 0; n < NUM_CHANNEL_EFX + 1; ++n)
+    for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
     {
         delete[] partfxinputl[n];
         delete[] partfxinputr[n];
@@ -285,7 +285,7 @@ Channel::~Channel()
 /*
  * Note On Messages
  */
-void Channel::NoteOn(unsigned char note,
+void Track::NoteOn(unsigned char note,
                      unsigned char velocity,
                      int masterkeyshift)
 {
@@ -312,7 +312,7 @@ void Channel::NoteOn(unsigned char note,
         _monomem[note].velocity = velocity;        // Store this note's velocity.
         _monomem[note].mkeyshift = masterkeyshift; /* Store masterkeyshift too,
                          I'm not sure why though... */
-        if ((_channelNotes[_lastpos].status != KEY_PLAYING) && (_channelNotes[_lastpos].status != KEY_RELASED_AND_SUSTAINED))
+        if ((_trackNotes[_lastpos].status != KEY_PLAYING) && (_trackNotes[_lastpos].status != KEY_RELASED_AND_SUSTAINED))
             ismonofirstnote = true; // No other keys are held or sustained.
     }
     else
@@ -327,7 +327,7 @@ void Channel::NoteOn(unsigned char note,
     pos = -1;
     for (i = 0; i < POLIPHONY; ++i)
     {
-        if (_channelNotes[i].status == KEY_OFF)
+        if (_trackNotes[i].status == KEY_OFF)
         {
             pos = static_cast<int>(i);
             break;
@@ -359,13 +359,13 @@ void Channel::NoteOn(unsigned char note,
             {
                 // Legato mode is valid, but this is only a first note.
                 for (i = 0; i < POLIPHONY; ++i)
-                    if ((_channelNotes[i].status == KEY_PLAYING) || (_channelNotes[i].status == KEY_RELASED_AND_SUSTAINED))
+                    if ((_trackNotes[i].status == KEY_PLAYING) || (_trackNotes[i].status == KEY_RELASED_AND_SUSTAINED))
                         RelaseNotePos(i);
 
                 // Set posb
                 posb = (pos + 1) % POLIPHONY; //We really want it (if the following fails)
                 for (i = 0; i < POLIPHONY; ++i)
-                    if ((_channelNotes[i].status == KEY_OFF) && (pos != static_cast<int>(i)))
+                    if ((_trackNotes[i].status == KEY_OFF) && (pos != static_cast<int>(i)))
                     {
                         posb = static_cast<int>(i);
                         break;
@@ -380,7 +380,7 @@ void Channel::NoteOn(unsigned char note,
         //if the mode is 'mono' turn off all other notes
         for (i = 0; i < POLIPHONY; ++i)
         {
-            if (_channelNotes[i].status == KEY_PLAYING)
+            if (_trackNotes[i].status == KEY_PLAYING)
                 RelaseNotePos(i);
         }
         RelaseSustainedKeys();
@@ -397,12 +397,12 @@ void Channel::NoteOn(unsigned char note,
     else
     {
         //start the note
-        _channelNotes[pos].status = KEY_PLAYING;
-        _channelNotes[pos].note = note;
+        _trackNotes[pos].status = KEY_PLAYING;
+        _trackNotes[pos].note = note;
         if (legatomodevalid)
         {
-            _channelNotes[posb].status = KEY_PLAYING;
-            _channelNotes[posb].note = note;
+            _trackNotes[posb].status = KEY_PLAYING;
+            _trackNotes[posb].note = note;
         }
 
         //this computes the velocity sensing of the part
@@ -464,33 +464,33 @@ void Channel::NoteOn(unsigned char note,
             // Do Legato note
             if (Pkitmode == 0)
             { // "normal mode" legato note
-                if ((Instruments[0].Padenabled != 0) && (_channelNotes[pos].instumentNotes[0].adnote != nullptr) && (_channelNotes[posb].instumentNotes[0].adnote != nullptr))
+                if ((Instruments[0].Padenabled != 0) && (_trackNotes[pos].instumentNotes[0].adnote != nullptr) && (_trackNotes[posb].instumentNotes[0].adnote != nullptr))
                 {
-                    _channelNotes[pos].instumentNotes[0].adnote->legatonote(notebasefreq,
+                    _trackNotes[pos].instumentNotes[0].adnote->legatonote(notebasefreq,
                                                                             vel,
                                                                             portamento,
                                                                             note,
                                                                             true); //'true' is to tell it it's being called from here.
-                    _channelNotes[posb].instumentNotes[0].adnote->legatonote(notebasefreq,
+                    _trackNotes[posb].instumentNotes[0].adnote->legatonote(notebasefreq,
                                                                              vel,
                                                                              portamento,
                                                                              note,
                                                                              true);
                 }
 
-                if ((Instruments[0].Psubenabled != 0) && (_channelNotes[pos].instumentNotes[0].subnote != nullptr) && (_channelNotes[posb].instumentNotes[0].subnote != nullptr))
+                if ((Instruments[0].Psubenabled != 0) && (_trackNotes[pos].instumentNotes[0].subnote != nullptr) && (_trackNotes[posb].instumentNotes[0].subnote != nullptr))
                 {
-                    _channelNotes[pos].instumentNotes[0].subnote->legatonote(
+                    _trackNotes[pos].instumentNotes[0].subnote->legatonote(
                         notebasefreq, vel, portamento, note, true);
-                    _channelNotes[posb].instumentNotes[0].subnote->legatonote(
+                    _trackNotes[posb].instumentNotes[0].subnote->legatonote(
                         notebasefreq, vel, portamento, note, true);
                 }
 
-                if ((Instruments[0].Ppadenabled != 0) && (_channelNotes[pos].instumentNotes[0].padnote != nullptr) && (_channelNotes[posb].instumentNotes[0].padnote != nullptr))
+                if ((Instruments[0].Ppadenabled != 0) && (_trackNotes[pos].instumentNotes[0].padnote != nullptr) && (_trackNotes[posb].instumentNotes[0].padnote != nullptr))
                 {
-                    _channelNotes[pos].instumentNotes[0].padnote->legatonote(
+                    _trackNotes[pos].instumentNotes[0].padnote->legatonote(
                         notebasefreq, vel, portamento, note, true);
-                    _channelNotes[posb].instumentNotes[0].padnote->legatonote(
+                    _trackNotes[posb].instumentNotes[0].padnote->legatonote(
                         notebasefreq, vel, portamento, note, true);
                 }
             }
@@ -507,36 +507,36 @@ void Channel::NoteOn(unsigned char note,
                     if ((lastnotecopy < item.Pminkey) || (lastnotecopy > item.Pmaxkey))
                         continue; // We will not perform legato across 2 key regions.
 
-                    _channelNotes[pos].instumentNotes[ci].sendtoparteffect =
+                    _trackNotes[pos].instumentNotes[ci].sendtoparteffect =
                         (item.Psendtoparteffect <
-                                 NUM_CHANNEL_EFX
+                                 NUM_TRACK_EFX
                              ? item.Psendtoparteffect
-                             : NUM_CHANNEL_EFX); //if this parameter is 127 for "unprocessed"
-                    _channelNotes[posb].instumentNotes[ci].sendtoparteffect =
+                             : NUM_TRACK_EFX); //if this parameter is 127 for "unprocessed"
+                    _trackNotes[posb].instumentNotes[ci].sendtoparteffect =
                         (item.Psendtoparteffect <
-                                 NUM_CHANNEL_EFX
+                                 NUM_TRACK_EFX
                              ? item.Psendtoparteffect
-                             : NUM_CHANNEL_EFX);
+                             : NUM_TRACK_EFX);
 
-                    if ((item.Padenabled != 0) && (item.adpars != nullptr) && (_channelNotes[pos].instumentNotes[ci].adnote != nullptr) && (_channelNotes[posb].instumentNotes[ci].adnote != nullptr))
+                    if ((item.Padenabled != 0) && (item.adpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].adnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].adnote != nullptr))
                     {
-                        _channelNotes[pos].instumentNotes[ci].adnote->legatonote(
+                        _trackNotes[pos].instumentNotes[ci].adnote->legatonote(
                             notebasefreq, vel, portamento, note, true);
-                        _channelNotes[posb].instumentNotes[ci].adnote->legatonote(
+                        _trackNotes[posb].instumentNotes[ci].adnote->legatonote(
                             notebasefreq, vel, portamento, note, true);
                     }
-                    if ((item.Psubenabled != 0) && (item.subpars != nullptr) && (_channelNotes[pos].instumentNotes[ci].subnote != nullptr) && (_channelNotes[posb].instumentNotes[ci].subnote != nullptr))
+                    if ((item.Psubenabled != 0) && (item.subpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].subnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].subnote != nullptr))
                     {
-                        _channelNotes[pos].instumentNotes[ci].subnote->legatonote(
+                        _trackNotes[pos].instumentNotes[ci].subnote->legatonote(
                             notebasefreq, vel, portamento, note, true);
-                        _channelNotes[posb].instumentNotes[ci].subnote->legatonote(
+                        _trackNotes[posb].instumentNotes[ci].subnote->legatonote(
                             notebasefreq, vel, portamento, note, true);
                     }
-                    if ((item.Ppadenabled != 0) && (item.padpars != nullptr) && (_channelNotes[pos].instumentNotes[ci].padnote != nullptr) && (_channelNotes[posb].instumentNotes[ci].padnote != nullptr))
+                    if ((item.Ppadenabled != 0) && (item.padpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].padnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].padnote != nullptr))
                     {
-                        _channelNotes[pos].instumentNotes[ci].padnote->legatonote(
+                        _trackNotes[pos].instumentNotes[ci].padnote->legatonote(
                             notebasefreq, vel, portamento, note, true);
-                        _channelNotes[posb].instumentNotes[ci].padnote->legatonote(
+                        _trackNotes[posb].instumentNotes[ci].padnote->legatonote(
                             notebasefreq, vel, portamento, note, true);
                     }
 
@@ -557,15 +557,15 @@ void Channel::NoteOn(unsigned char note,
             return; // Ok, Legato note done, return.
         }
 
-        _channelNotes[pos].itemsplaying = 0;
+        _trackNotes[pos].itemsplaying = 0;
         if (legatomodevalid)
-            _channelNotes[posb].itemsplaying = 0;
+            _trackNotes[posb].itemsplaying = 0;
 
         if (Pkitmode == 0)
         { //init the notes for the "normal mode"
-            _channelNotes[pos].instumentNotes[0].sendtoparteffect = 0;
+            _trackNotes[pos].instumentNotes[0].sendtoparteffect = 0;
             if (Instruments[0].Padenabled != 0)
-                _channelNotes[pos].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
+                _trackNotes[pos].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
                                                                          &ctl,
                                                                          notebasefreq,
                                                                          vel,
@@ -573,7 +573,7 @@ void Channel::NoteOn(unsigned char note,
                                                                          note,
                                                                          false);
             if (Instruments[0].Psubenabled != 0)
-                _channelNotes[pos].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars,
+                _trackNotes[pos].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars,
                                                                            &ctl,
                                                                            notebasefreq,
                                                                            vel,
@@ -581,7 +581,7 @@ void Channel::NoteOn(unsigned char note,
                                                                            note,
                                                                            false);
             if (Instruments[0].Ppadenabled != 0)
-                _channelNotes[pos].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars,
+                _trackNotes[pos].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars,
                                                                            &ctl,
                                                                            notebasefreq,
                                                                            vel,
@@ -589,14 +589,14 @@ void Channel::NoteOn(unsigned char note,
                                                                            note,
                                                                            false);
             if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Ppadenabled != 0))
-                _channelNotes[pos].itemsplaying++;
+                _trackNotes[pos].itemsplaying++;
 
             // Spawn another note (but silent) if legatomodevalid==true
             if (legatomodevalid)
             {
-                _channelNotes[posb].instumentNotes[0].sendtoparteffect = 0;
+                _trackNotes[posb].instumentNotes[0].sendtoparteffect = 0;
                 if (Instruments[0].Padenabled != 0)
-                    _channelNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
+                    _trackNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
                                                                               &ctl,
                                                                               notebasefreq,
                                                                               vel,
@@ -604,7 +604,7 @@ void Channel::NoteOn(unsigned char note,
                                                                               note,
                                                                               true); //true for silent.
                 if (Instruments[0].Psubenabled != 0)
-                    _channelNotes[posb].instumentNotes[0].subnote = new SUBnote(
+                    _trackNotes[posb].instumentNotes[0].subnote = new SUBnote(
                         Instruments[0].subpars,
                         &ctl,
                         notebasefreq,
@@ -613,7 +613,7 @@ void Channel::NoteOn(unsigned char note,
                         note,
                         true);
                 if (Instruments[0].Ppadenabled != 0)
-                    _channelNotes[posb].instumentNotes[0].padnote = new PADnote(
+                    _trackNotes[posb].instumentNotes[0].padnote = new PADnote(
                         Instruments[0].padpars,
                         &ctl,
                         notebasefreq,
@@ -622,7 +622,7 @@ void Channel::NoteOn(unsigned char note,
                         note,
                         true);
                 if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Ppadenabled != 0))
-                    _channelNotes[posb].itemsplaying++;
+                    _trackNotes[posb].itemsplaying++;
             }
         }
         else //init the notes for the "kit mode"
@@ -633,14 +633,14 @@ void Channel::NoteOn(unsigned char note,
                 if ((note < item.Pminkey) || (note > item.Pmaxkey))
                     continue;
 
-                int ci = _channelNotes[pos].itemsplaying; //ci=current item
+                int ci = _trackNotes[pos].itemsplaying; //ci=current item
 
                 //if this parameter is 127 for "unprocessed"
-                _channelNotes[pos].instumentNotes[ci].sendtoparteffect =
-                    (item.Psendtoparteffect < NUM_CHANNEL_EFX ? item.Psendtoparteffect : NUM_CHANNEL_EFX);
+                _trackNotes[pos].instumentNotes[ci].sendtoparteffect =
+                    (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
 
                 if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
-                    _channelNotes[pos].instumentNotes[ci].adnote = new ADnote(
+                    _trackNotes[pos].instumentNotes[ci].adnote = new ADnote(
                         item.adpars,
                         &ctl,
                         notebasefreq,
@@ -650,7 +650,7 @@ void Channel::NoteOn(unsigned char note,
                         false);
 
                 if ((item.subpars != nullptr) && ((item.Psubenabled) != 0))
-                    _channelNotes[pos].instumentNotes[ci].subnote = new SUBnote(
+                    _trackNotes[pos].instumentNotes[ci].subnote = new SUBnote(
                         item.subpars,
                         &ctl,
                         notebasefreq,
@@ -660,7 +660,7 @@ void Channel::NoteOn(unsigned char note,
                         false);
 
                 if ((item.padpars != nullptr) && ((item.Ppadenabled) != 0))
-                    _channelNotes[pos].instumentNotes[ci].padnote = new PADnote(
+                    _trackNotes[pos].instumentNotes[ci].padnote = new PADnote(
                         item.padpars,
                         &ctl,
                         notebasefreq,
@@ -672,14 +672,14 @@ void Channel::NoteOn(unsigned char note,
                 // Spawn another note (but silent) if legatomodevalid==true
                 if (legatomodevalid)
                 {
-                    _channelNotes[posb].instumentNotes[ci].sendtoparteffect =
+                    _trackNotes[posb].instumentNotes[ci].sendtoparteffect =
                         (item.Psendtoparteffect <
-                                 NUM_CHANNEL_EFX
+                                 NUM_TRACK_EFX
                              ? item.Psendtoparteffect
-                             : NUM_CHANNEL_EFX); //if this parameter is 127 for "unprocessed"
+                             : NUM_TRACK_EFX); //if this parameter is 127 for "unprocessed"
 
                     if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
-                        _channelNotes[posb].instumentNotes[ci].adnote = new ADnote(
+                        _trackNotes[posb].instumentNotes[ci].adnote = new ADnote(
                             item.adpars,
                             &ctl,
                             notebasefreq,
@@ -688,7 +688,7 @@ void Channel::NoteOn(unsigned char note,
                             note,
                             true); //true for silent.
                     if ((item.subpars != nullptr) && ((item.Psubenabled) != 0))
-                        _channelNotes[posb].instumentNotes[ci].subnote =
+                        _trackNotes[posb].instumentNotes[ci].subnote =
                             new SUBnote(item.subpars,
                                         &ctl,
                                         notebasefreq,
@@ -697,7 +697,7 @@ void Channel::NoteOn(unsigned char note,
                                         note,
                                         true);
                     if ((item.padpars != nullptr) && ((item.Ppadenabled) != 0))
-                        _channelNotes[posb].instumentNotes[ci].padnote =
+                        _trackNotes[posb].instumentNotes[ci].padnote =
                             new PADnote(item.padpars,
                                         &ctl,
                                         notebasefreq,
@@ -707,12 +707,12 @@ void Channel::NoteOn(unsigned char note,
                                         true);
 
                     if ((item.adpars != nullptr) || (item.subpars != nullptr))
-                        _channelNotes[posb].itemsplaying++;
+                        _trackNotes[posb].itemsplaying++;
                 }
 
                 if ((item.adpars != nullptr) || (item.subpars != nullptr))
                 {
-                    _channelNotes[pos].itemsplaying++;
+                    _trackNotes[pos].itemsplaying++;
                     if (((item.Padenabled != 0) || (item.Psubenabled != 0) || (item.Ppadenabled != 0)) && (Pkitmode == 2))
                         break;
                 }
@@ -726,7 +726,7 @@ void Channel::NoteOn(unsigned char note,
 /*
  * Note Off Messages
  */
-void Channel::NoteOff(unsigned char note) //relase the key
+void Track::NoteOff(unsigned char note) //relase the key
 {
     int i;
 
@@ -735,7 +735,7 @@ void Channel::NoteOff(unsigned char note) //relase the key
         _monomemnotes.remove(note);
 
     for (i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
-        if ((_channelNotes[i].status == KEY_PLAYING) && (_channelNotes[i].note == note))
+        if ((_trackNotes[i].status == KEY_PLAYING) && (_trackNotes[i].note == note))
         {
             if (ctl.sustain.sustain == 0)
             { //the sustain pedal is not pushed
@@ -746,11 +746,11 @@ void Channel::NoteOff(unsigned char note) //relase the key
                 /// break;
             }
             else //the sustain pedal is pushed
-                _channelNotes[i].status = KEY_RELASED_AND_SUSTAINED;
+                _trackNotes[i].status = KEY_RELASED_AND_SUSTAINED;
         }
 }
 
-void Channel::PolyphonicAftertouch(unsigned char note,
+void Track::PolyphonicAftertouch(unsigned char note,
                                    unsigned char velocity,
                                    int masterkeyshift)
 {
@@ -765,7 +765,7 @@ void Channel::PolyphonicAftertouch(unsigned char note,
 
         _monomem[note].velocity = velocity; // Store this note's velocity.
 
-    for (auto &i : _channelNotes)
+    for (auto &i : _trackNotes)
         if ((i.note == note) && (i.status == KEY_PLAYING))
         {
             /* update velocity */
@@ -784,7 +784,7 @@ void Channel::PolyphonicAftertouch(unsigned char note,
                     i.instumentNotes[0].padnote->setVelocity(vel);
             }
             else // "kit mode"
-                for (int item = 0; item < NUM_CHANNEL_INSTRUMENTS; ++item)
+                for (int item = 0; item < NUM_TRACK_INSTRUMENTS; ++item)
                 {
                     if (Instruments[item].Pmuted)
                         continue;
@@ -804,7 +804,7 @@ void Channel::PolyphonicAftertouch(unsigned char note,
 /*
  * Controllers
  */
-void Channel::SetController(unsigned int type, int par)
+void Track::SetController(unsigned int type, int par)
 {
     switch (type)
     {
@@ -895,7 +895,7 @@ void Channel::SetController(unsigned int type, int par)
  * Relase the sustained keys
  */
 
-void Channel::RelaseSustainedKeys()
+void Track::RelaseSustainedKeys()
 {
     // Let's call MonoMemRenote() on some conditions:
     if ((Ppolymode == 0) && (not _monomemnotes.empty()))
@@ -903,7 +903,7 @@ void Channel::RelaseSustainedKeys()
             MonoMemRenote();                  // To play most recent still held note.
 
     for (unsigned int i = 0; i < POLIPHONY; ++i)
-        if (_channelNotes[i].status == KEY_RELASED_AND_SUSTAINED)
+        if (_trackNotes[i].status == KEY_RELASED_AND_SUSTAINED)
             RelaseNotePos(i);
 }
 
@@ -911,16 +911,16 @@ void Channel::RelaseSustainedKeys()
  * Relase all keys
  */
 
-void Channel::RelaseAllKeys()
+void Track::RelaseAllKeys()
 {
     for (unsigned int i = 0; i < POLIPHONY; ++i)
-        if ((_channelNotes[i].status != KEY_RELASED) && (_channelNotes[i].status != KEY_OFF)) //thanks to Frank Neumann
+        if ((_trackNotes[i].status != KEY_RELASED) && (_trackNotes[i].status != KEY_OFF)) //thanks to Frank Neumann
             RelaseNotePos(i);
 }
 
 // Call NoteOn(...) with the most recent still held key as new note
 // (Made for Mono/Legato).
-void Channel::MonoMemRenote()
+void Track::MonoMemRenote()
 {
     unsigned char mmrtempnote = _monomemnotes.back(); // Last list element.
     _monomemnotes.pop_back();                         // We remove it, will be added again in NoteOn(...).
@@ -934,9 +934,9 @@ void Channel::MonoMemRenote()
 /*
  * Release note at position
  */
-void Channel::RelaseNotePos(unsigned int pos)
+void Track::RelaseNotePos(unsigned int pos)
 {
-    for (auto &j : _channelNotes[pos].instumentNotes)
+    for (auto &j : _trackNotes[pos].instumentNotes)
     {
         if (j.adnote != nullptr)
             if (j.adnote)
@@ -950,20 +950,20 @@ void Channel::RelaseNotePos(unsigned int pos)
             if (j.padnote)
                 j.padnote->relasekey();
     }
-    _channelNotes[pos].status = KEY_RELASED;
+    _trackNotes[pos].status = KEY_RELASED;
 }
 
 /*
  * Kill note at position
  */
-void Channel::KillNotePos(unsigned int pos)
+void Track::KillNotePos(unsigned int pos)
 {
-    _channelNotes[pos].status = KEY_OFF;
-    _channelNotes[pos].note = -1;
-    _channelNotes[pos].time = 0;
-    _channelNotes[pos].itemsplaying = 0;
+    _trackNotes[pos].status = KEY_OFF;
+    _trackNotes[pos].note = -1;
+    _trackNotes[pos].time = 0;
+    _trackNotes[pos].itemsplaying = 0;
 
-    for (auto &j : _channelNotes[pos].instumentNotes)
+    for (auto &j : _trackNotes[pos].instumentNotes)
     {
         if (j.adnote != nullptr)
         {
@@ -991,7 +991,7 @@ void Channel::KillNotePos(unsigned int pos)
 /*
  * Set Part's key limit
  */
-void Channel::setkeylimit(unsigned char Pkeylimit)
+void Track::setkeylimit(unsigned char Pkeylimit)
 {
     this->Pkeylimit = Pkeylimit;
     int keylimit = Pkeylimit;
@@ -1004,7 +1004,7 @@ void Channel::setkeylimit(unsigned char Pkeylimit)
     if (Ppolymode != 0)
     {
         int notecount = 0;
-        for (auto &i : _channelNotes)
+        for (auto &i : _trackNotes)
         {
             if ((i.status == KEY_PLAYING) || (i.status == KEY_RELASED_AND_SUSTAINED))
             {
@@ -1017,9 +1017,9 @@ void Channel::setkeylimit(unsigned char Pkeylimit)
             for (int i = 0; i < POLIPHONY; ++i)
             {
                 int maxtime = 0;
-                if (((_channelNotes[i].status == KEY_PLAYING) || (_channelNotes[i].status == KEY_RELASED_AND_SUSTAINED)) && (_channelNotes[i].time > maxtime))
+                if (((_trackNotes[i].status == KEY_PLAYING) || (_trackNotes[i].status == KEY_RELASED_AND_SUSTAINED)) && (_trackNotes[i].time > maxtime))
                 {
-                    maxtime = _channelNotes[i].time;
+                    maxtime = _trackNotes[i].time;
                     oldestnotepos = i;
                 }
             }
@@ -1034,18 +1034,18 @@ void Channel::setkeylimit(unsigned char Pkeylimit)
 /*
  * Prepare all notes to be turned off
  */
-void Channel::AllNotesOff()
+void Track::AllNotesOff()
 {
     _killallnotes = 1;
 }
 
-void Channel::RunNote(unsigned int k)
+void Track::RunNote(unsigned int k)
 {
     unsigned noteplay = 0;
 
-    for (int item = 0; item < _channelNotes[k].itemsplaying; ++item)
+    for (int item = 0; item < _trackNotes[k].itemsplaying; ++item)
     {
-        int sendcurrenttofx = _channelNotes[k].instumentNotes[item].sendtoparteffect;
+        int sendcurrenttofx = _trackNotes[k].instumentNotes[item].sendtoparteffect;
 
         for (unsigned type = 0; type < 3; ++type)
         {
@@ -1053,15 +1053,15 @@ void Channel::RunNote(unsigned int k)
             SynthNote **note = nullptr;
             if (type == 0)
             {
-                note = &_channelNotes[k].instumentNotes[item].adnote;
+                note = &_trackNotes[k].instumentNotes[item].adnote;
             }
             else if (type == 1)
             {
-                note = &_channelNotes[k].instumentNotes[item].subnote;
+                note = &_trackNotes[k].instumentNotes[item].subnote;
             }
             else if (type == 2)
             {
-                note = &_channelNotes[k].instumentNotes[item].padnote;
+                note = &_trackNotes[k].instumentNotes[item].padnote;
             }
 
             //Process if it exists
@@ -1096,9 +1096,9 @@ void Channel::RunNote(unsigned int k)
 /*
  * Compute Part samples and store them in the partoutl[] and partoutr[]
  */
-void Channel::ComputeInstrumentSamples()
+void Track::ComputeInstrumentSamples()
 {
-    for (unsigned nefx = 0; nefx < NUM_CHANNEL_EFX + 1; ++nefx)
+    for (unsigned nefx = 0; nefx < NUM_TRACK_EFX + 1; ++nefx)
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             partfxinputl[nefx][i] = 0.0f;
@@ -1107,15 +1107,15 @@ void Channel::ComputeInstrumentSamples()
 
     for (unsigned k = 0; k < POLIPHONY; ++k)
     {
-        if (_channelNotes[k].status == KEY_OFF)
+        if (_trackNotes[k].status == KEY_OFF)
             continue;
-        _channelNotes[k].time++;
+        _trackNotes[k].time++;
         //get the sampledata of the note and kill it if it's finished
         RunNote(k);
     }
 
     //Apply part's effects and mix them
-    for (int nefx = 0; nefx < NUM_CHANNEL_EFX; ++nefx)
+    for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
         if (!Pefxbypass[nefx])
         {
@@ -1127,7 +1127,7 @@ void Channel::ComputeInstrumentSamples()
                     partfxinputr[nefx + 1][i] += partefx[nefx]->_effectOutR[i];
                 }
         }
-        int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_CHANNEL_EFX);
+        int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_TRACK_EFX);
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             partfxinputl[routeto][i] += partfxinputl[nefx][i];
@@ -1136,8 +1136,8 @@ void Channel::ComputeInstrumentSamples()
     }
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        partoutl[i] = partfxinputl[NUM_CHANNEL_EFX][i];
-        partoutr[i] = partfxinputr[NUM_CHANNEL_EFX][i];
+        partoutl[i] = partfxinputl[NUM_TRACK_EFX][i];
+        partoutr[i] = partfxinputr[NUM_TRACK_EFX][i];
     }
 
     //Kill All Notes if killallnotes!=0
@@ -1161,13 +1161,13 @@ void Channel::ComputeInstrumentSamples()
 /*
  * Parameter control
  */
-void Channel::setPvolume(unsigned char Pvolume_)
+void Track::setPvolume(unsigned char Pvolume_)
 {
     Pvolume = Pvolume_;
     volume = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;
 }
 
-void Channel::setPpanning(unsigned char Ppanning_)
+void Track::setPpanning(unsigned char Ppanning_)
 {
     Ppanning = Ppanning_;
     panning = Ppanning / 127.0f + ctl.panning.pan;
@@ -1184,9 +1184,9 @@ void Channel::setPpanning(unsigned char Ppanning_)
 /*
  * Enable or disable a kit item
  */
-void Channel::setkititemstatus(int kititem, int Penabled_)
+void Track::setkititemstatus(int kititem, int Penabled_)
 {
-    if ((kititem == 0) || (kititem >= NUM_CHANNEL_INSTRUMENTS))
+    if ((kititem == 0) || (kititem >= NUM_TRACK_INSTRUMENTS))
     {
         return; //nonexistent kit item and the first kit item is always enabled
     }
@@ -1228,7 +1228,7 @@ void Channel::setkititemstatus(int kititem, int Penabled_)
     }
 }
 
-void Channel::SerializeInstrument(IPresetsSerializer *xml)
+void Track::SerializeInstrument(IPresetsSerializer *xml)
 {
     xml->beginbranch("INFO");
     xml->addparstr("name", reinterpret_cast<char *>(Pname));
@@ -1241,7 +1241,7 @@ void Channel::SerializeInstrument(IPresetsSerializer *xml)
     xml->addpar("kit_mode", Pkitmode);
     xml->addparbool("drum_mode", Pdrummode);
 
-    for (int i = 0; i < NUM_CHANNEL_INSTRUMENTS; ++i)
+    for (int i = 0; i < NUM_TRACK_INSTRUMENTS; ++i)
     {
         xml->beginbranch("INSTRUMENT_KIT_ITEM", i);
         xml->addparbool("enabled", Instruments[i].Penabled);
@@ -1284,7 +1284,7 @@ void Channel::SerializeInstrument(IPresetsSerializer *xml)
     xml->endbranch();
 
     xml->beginbranch("INSTRUMENT_EFFECTS");
-    for (int nefx = 0; nefx < NUM_CHANNEL_EFX; ++nefx)
+    for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
         xml->beginbranch("INSTRUMENT_EFFECT", nefx);
         xml->beginbranch("EFFECT");
@@ -1299,7 +1299,7 @@ void Channel::SerializeInstrument(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void Channel::Serialize(IPresetsSerializer *xml)
+void Track::Serialize(IPresetsSerializer *xml)
 {
     //parameters
     xml->addparbool("enabled", Penabled);
@@ -1333,7 +1333,7 @@ void Channel::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-int Channel::saveXML(const char *filename)
+int Track::saveXML(const char *filename)
 {
     PresetsSerializer xml;
 
@@ -1344,7 +1344,7 @@ int Channel::saveXML(const char *filename)
     return xml.saveXMLfile(filename);
 }
 
-int Channel::loadXMLinstrument(const char *filename)
+int Track::loadXMLinstrument(const char *filename)
 {
     PresetsSerializer xml;
     if (xml.loadXMLfile(filename) < 0)
@@ -1363,7 +1363,7 @@ int Channel::loadXMLinstrument(const char *filename)
     return 0;
 }
 
-void Channel::ApplyParameters(bool lockmutex)
+void Track::ApplyParameters(bool lockmutex)
 {
     for (auto &n : Instruments)
     {
@@ -1374,11 +1374,11 @@ void Channel::ApplyParameters(bool lockmutex)
     }
 }
 
-void Channel::DeserializeInstrument(IPresetsSerializer *xml)
+void Track::DeserializeInstrument(IPresetsSerializer *xml)
 {
     if (xml->enterbranch("INFO"))
     {
-        xml->getparstr("name", reinterpret_cast<char *>(Pname), CHANNEL_MAX_NAME_LEN);
+        xml->getparstr("name", reinterpret_cast<char *>(Pname), TRACK_MAX_NAME_LEN);
         xml->getparstr("author", reinterpret_cast<char *>(info.Pauthor), MAX_INFO_TEXT_SIZE);
         xml->getparstr("comments", reinterpret_cast<char *>(info.Pcomments), MAX_INFO_TEXT_SIZE);
         info.Ptype = static_cast<unsigned char>(xml->getpar("type", info.Ptype, 0, 16));
@@ -1392,7 +1392,7 @@ void Channel::DeserializeInstrument(IPresetsSerializer *xml)
         Pdrummode = static_cast<unsigned char>(xml->getparbool("drum_mode", Pdrummode));
 
         setkititemstatus(0, 0);
-        for (int i = 0; i < NUM_CHANNEL_INSTRUMENTS; ++i)
+        for (int i = 0; i < NUM_TRACK_INSTRUMENTS; ++i)
         {
             if (xml->enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
                 continue;
@@ -1403,7 +1403,7 @@ void Channel::DeserializeInstrument(IPresetsSerializer *xml)
                 continue;
             }
 
-            xml->getparstr("name", reinterpret_cast<char *>(Instruments[i].Pname), CHANNEL_MAX_NAME_LEN);
+            xml->getparstr("name", reinterpret_cast<char *>(Instruments[i].Pname), TRACK_MAX_NAME_LEN);
 
             Instruments[i].Pmuted = static_cast<unsigned char>(xml->getparbool("muted", Instruments[i].Pmuted));
             Instruments[i].Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", Instruments[i].Pminkey));
@@ -1442,7 +1442,7 @@ void Channel::DeserializeInstrument(IPresetsSerializer *xml)
 
     if (xml->enterbranch("INSTRUMENT_EFFECTS"))
     {
-        for (int nefx = 0; nefx < NUM_CHANNEL_EFX; ++nefx)
+        for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
         {
             if (xml->enterbranch("INSTRUMENT_EFFECT", nefx) == 0)
                 continue;
@@ -1452,7 +1452,7 @@ void Channel::DeserializeInstrument(IPresetsSerializer *xml)
                 xml->exitbranch();
             }
 
-            Pefxroute[nefx] = static_cast<unsigned char>(xml->getpar("route", Pefxroute[nefx], 0, NUM_CHANNEL_EFX));
+            Pefxroute[nefx] = static_cast<unsigned char>(xml->getpar("route", Pefxroute[nefx], 0, NUM_TRACK_EFX));
             partefx[nefx]->setdryonly(Pefxroute[nefx] == 2);
             Pefxbypass[nefx] = xml->getparbool("bypass", Pefxbypass[nefx]);
             xml->exitbranch();
@@ -1461,7 +1461,7 @@ void Channel::DeserializeInstrument(IPresetsSerializer *xml)
     }
 }
 
-void Channel::Deserialize(IPresetsSerializer *xml)
+void Track::Deserialize(IPresetsSerializer *xml)
 {
     Penabled = static_cast<unsigned char>(xml->getparbool("enabled", Penabled));
 

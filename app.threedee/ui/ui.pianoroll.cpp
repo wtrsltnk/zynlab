@@ -29,14 +29,14 @@ void zyn::ui::PianoRoll::ImGuiPianoRollPatternEditorWindow()
         return;
     }
 
-    if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeChannel, _state->_activePattern))
+    if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeTrack, _state->_activePattern))
     {
         _state->_activePattern = -1;
         return;
     }
 
     auto &style = ImGui::GetStyle();
-    auto &selectedPattern = _state->_sequencer.GetPattern(_state->_activeChannel, _state->_activePattern);
+    auto &selectedPattern = _state->_sequencer.GetPattern(_state->_activeTrack, _state->_activePattern);
 
     ImGui::Begin("Piano roll editor");
     char tmp[256];

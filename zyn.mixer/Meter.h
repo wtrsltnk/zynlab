@@ -12,7 +12,7 @@ public:
 
     void Setup();
 
-    void Tick(const float *outl, const float *outr, class Channel *part, float volume);
+    void Tick(const float *outl, const float *outr, class Track *part, float volume);
 
     virtual void SetFakePeak(int instrument, unsigned char velocity);
     virtual unsigned char GetFakePeak(int instrument);
@@ -26,8 +26,8 @@ public:
 private:
     vuData _vu;
 
-    float _vuoutpeakpart[NUM_MIXER_CHANNELS];
-    unsigned char _fakepeakpart[NUM_MIXER_CHANNELS];
+    float _vuoutpeakpart[NUM_MIXER_TRACKS];
+    unsigned char _fakepeakpart[NUM_MIXER_TRACKS];
 
     pthread_mutex_t _vumutex;
 };

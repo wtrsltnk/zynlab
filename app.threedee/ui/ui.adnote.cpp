@@ -38,23 +38,23 @@ bool zyn::ui::AdNote::Setup()
 
 void zyn::ui::AdNote::Render()
 {
-    auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
+    auto track = _state->_mixer->GetTrack(_state->_activeTrack);
 
     ImGui::Begin(AdSynthEditorID, &_state->_showADNoteEditor);
-    if (!_state->_showADNoteEditor || channel == nullptr || _state->_activeChannelInstrument < 0 || _state->_activeChannelInstrument >= NUM_CHANNEL_INSTRUMENTS)
+    if (!_state->_showADNoteEditor || track == nullptr || _state->_activeTrackInstrument < 0 || _state->_activeTrackInstrument >= NUM_TRACK_INSTRUMENTS)
     {
         ImGui::End();
         return;
     }
 
-    auto *parameters = channel->Instruments[_state->_activeChannelInstrument].adpars;
+    auto *parameters = track->Instruments[_state->_activeTrackInstrument].adpars;
 
-    if (channel->Instruments[_state->_activeChannelInstrument].Padenabled == 0)
+    if (track->Instruments[_state->_activeTrackInstrument].Padenabled == 0)
     {
         ImGui::Text("AD editor is disabled");
         if (ImGui::Button("Enable AD synth"))
         {
-            channel->Instruments[_state->_activeChannelInstrument].Padenabled = 1;
+            track->Instruments[_state->_activeTrackInstrument].Padenabled = 1;
         }
         ImGui::End();
         return;
@@ -64,9 +64,9 @@ void zyn::ui::AdNote::Render()
     {
         if (ImGui::BeginTabItem("Global"))
         {
-            if (_state->_activeChannel >= 0)
+            if (_state->_activeTrack >= 0)
             {
-                ImGui::Text("ADsynth Global Parameters of the Channel");
+                ImGui::Text("ADsynth Global Parameters of the Track");
 
                 if (ImGui::BeginTabBar("ADNote"))
                 {
@@ -97,9 +97,9 @@ void zyn::ui::AdNote::Render()
         }
         for (int i = 0; i < NUM_VOICES; i++)
         {
-            if (_state->_activeChannel >= 0)
+            if (_state->_activeTrack >= 0)
             {
-                auto parameters = &_state->_mixer->GetChannel(_state->_activeChannel)->Instruments[0].adpars->VoicePar[i];
+                auto parameters = &_state->_mixer->GetTrack(_state->_activeTrack)->Instruments[0].adpars->VoicePar[i];
                 if (ImGui::BeginTabItem(voiceIds[i]))
                 {
                     ADNoteVoiceEditor(parameters);

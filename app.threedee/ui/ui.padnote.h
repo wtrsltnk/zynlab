@@ -4,7 +4,7 @@
 #include "../appstate.h"
 #include "ui.envelope.h"
 #include "ui.lfo.h"
-#include <zyn.mixer/Channel.h>
+#include <zyn.mixer/Track.h>
 #include <zyn.synth/PADnoteParams.h>
 
 namespace zyn {
@@ -18,7 +18,6 @@ private:
     Lfo _AmplitudeLfo;
 
     // PAD note
-    void PADNoteEditor(Channel *channel, int instrumentIndex);
     void PADNoteEditorAmplitude(PADnoteParameters *parameters);
 
 public:

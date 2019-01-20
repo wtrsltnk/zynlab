@@ -24,7 +24,7 @@
 #ifndef MIXER_H
 #define MIXER_H
 
-#include "Channel.h"
+#include "Track.h"
 #include "Meter.h"
 #include "Microtonal.h"
 #include <chrono>
@@ -95,14 +95,14 @@ public:
 
     void partonoff(int npart, int what);
 
-    virtual int GetChannelCount() const;
-    virtual Channel *GetChannel(int index);
-    virtual void EnableChannel(int index, bool enabled);
+    virtual int GetTrackCount() const;
+    virtual Track *GetTrack(int index);
+    virtual void EnableTrack(int index, bool enabled);
 
     //parameters
     unsigned char Pvolume;
     unsigned char Pkeyshift;
-    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];
+    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
 
     //parameters control
@@ -131,13 +131,13 @@ public:
     void Defaults();
 
 private:
-    Channel _channels[NUM_MIXER_CHANNELS];
+    Track _tracks[NUM_MIXER_TRACKS];
     pthread_mutex_t _mutex;
     IBankManager *_bankManager;
     std::unique_ptr<IFFTwrapper> _fft;
 
     float _volume;
-    float _sysefxvol[NUM_SYS_EFX][NUM_MIXER_CHANNELS];
+    float _sysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     float _sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
     int _keyshift;
 

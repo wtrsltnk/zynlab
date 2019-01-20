@@ -25,7 +25,7 @@ void zyn::ui::StepPattern::Render(int trackIndex, int trackHeight)
     {
         ImGui::SameLine();
         ImGui::PushID(patternIndex + trackIndex * 1000);
-        bool isActive = (trackIndex == _state->_activeChannel && patternIndex == _state->_activePattern);
+        bool isActive = (trackIndex == _state->_activeTrack && patternIndex == _state->_activePattern);
         if (isActive)
         {
             ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -37,7 +37,7 @@ void zyn::ui::StepPattern::Render(int trackIndex, int trackHeight)
             auto &pattern = _state->_sequencer.GetPattern(trackIndex, patternIndex);
             if (ImGui::Button(pattern._name.c_str(), ImVec2(120.0f, trackHeight)))
             {
-                _state->_activeChannel = trackIndex;
+                _state->_activeTrack = trackIndex;
                 _state->_activePattern = patternIndex;
             }
             if (ImGui::IsMouseDoubleClicked(0))
@@ -46,7 +46,7 @@ void zyn::ui::StepPattern::Render(int trackIndex, int trackHeight)
                 ImGui::SetWindowFocus(StepPatternEditorID);
             }
         }
-        else if (_state->_mixer->GetChannel(trackIndex)->Penabled)
+        else if (_state->_mixer->GetTrack(trackIndex)->Penabled)
         {
             if (ImGui::Button("+", ImVec2(120.0f, trackHeight)))
             {
@@ -62,7 +62,7 @@ void zyn::ui::StepPattern::Render(int trackIndex, int trackHeight)
         ImGui::PopID();
     }
 
-    if (_state->_mixer->GetChannel(trackIndex)->Penabled)
+    if (_state->_mixer->GetTrack(trackIndex)->Penabled)
     {
         ImGui::SameLine();
         ImGui::PushID((100 + trackIndex) * 2010);
@@ -83,7 +83,7 @@ void zyn::ui::StepPattern::RenderStepPatternEditorWindow()
 
     ImGui::Begin(StepPatternEditorID, &_state->_showEditor);
 
-    if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeChannel, _state->_activePattern))
+    if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeTrack, _state->_activePattern))
     {
         _state->_activePattern = -1;
         ImGui::End();
@@ -91,7 +91,7 @@ void zyn::ui::StepPattern::RenderStepPatternEditorWindow()
     }
 
     auto &style = ImGui::GetStyle();
-    auto &selectedPattern = _state->_sequencer.GetPattern(_state->_activeChannel, _state->_activePattern);
+    auto &selectedPattern = _state->_sequencer.GetPattern(_state->_activeTrack, _state->_activePattern);
 
     char tmp[256];
     strcpy(tmp, selectedPattern._name.c_str());
@@ -111,7 +111,7 @@ void zyn::ui::StepPattern::RenderStepPatternEditorWindow()
         ImGui::PushID(i);
         if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, ImGui::GetTextLineHeightWithSpacing())))
         {
-            _state->_stepper->HitNote(_state->_activeChannel, i, 200, 200);
+            _state->_stepper->HitNote(_state->_activeTrack, i, 200, 200);
         }
         for (int j = 0; j < 16; j++)
         {
@@ -137,7 +137,7 @@ void zyn::ui::StepPattern::RenderStepPatternEditorWindow()
                 {
                     selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
                 }
-                _state->_stepper->HitNote(_state->_activeChannel, i, 200, 200);
+                _state->_stepper->HitNote(_state->_activeTrack, i, 200, 200);
             }
             ImGui::PopStyleColor();
             ImGui::PopID();
@@ -160,45 +160,45 @@ void zyn::ui::StepPattern::EventHandling()
 
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
     {
-        _state->_sequencer.RemoveActivePattern(_state->_activeChannel, _state->_activePattern);
+        _state->_sequencer.RemoveActivePattern(_state->_activeTrack, _state->_activePattern);
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
     {
         if (io.KeyShift && !io.KeyCtrl)
         {
-            _state->_sequencer.MovePatternLeftForced(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.MovePatternLeftForced(_state->_activeTrack, _state->_activePattern);
         }
         else if (!io.KeyShift && io.KeyCtrl)
         {
-            _state->_sequencer.SwitchPatternLeft(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.SwitchPatternLeft(_state->_activeTrack, _state->_activePattern);
         }
         else
         {
-            _state->_sequencer.MovePatternLeftIfPossible(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.MovePatternLeftIfPossible(_state->_activeTrack, _state->_activePattern);
         }
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
     {
         if (io.KeyShift && !io.KeyCtrl)
         {
-            _state->_sequencer.MovePatternRightForced(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.MovePatternRightForced(_state->_activeTrack, _state->_activePattern);
         }
         else if (!io.KeyShift && io.KeyCtrl)
         {
-            _state->_sequencer.SwitchPatternRight(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.SwitchPatternRight(_state->_activeTrack, _state->_activePattern);
         }
         else
         {
-            _state->_sequencer.MovePatternRightIfPossible(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.MovePatternRightIfPossible(_state->_activeTrack, _state->_activePattern);
         }
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Home)))
     {
-        _state->_sequencer.SelectFirstPatternInTrack(_state->_activeChannel, _state->_activePattern);
+        _state->_sequencer.SelectFirstPatternInTrack(_state->_activeTrack, _state->_activePattern);
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_End)))
     {
-        _state->_sequencer.SelectLastPatternInTrack(_state->_activeChannel, _state->_activePattern);
+        _state->_sequencer.SelectLastPatternInTrack(_state->_activeTrack, _state->_activePattern);
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
     {
@@ -209,26 +209,26 @@ void zyn::ui::StepPattern::EventHandling()
     {
         if (io.KeyShift)
         {
-            _state->_sequencer.SelectPreviousPattern(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.SelectPreviousPattern(_state->_activeTrack, _state->_activePattern);
         }
         else
         {
-            _state->_sequencer.SelectNextPattern(_state->_activeChannel, _state->_activePattern);
+            _state->_sequencer.SelectNextPattern(_state->_activeTrack, _state->_activePattern);
         }
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && io.KeyCtrl)
     {
-        if (_state->_sequencer.DoesPatternExistAtIndex(_state->_activeChannel, _state->_activePattern))
+        if (_state->_sequencer.DoesPatternExistAtIndex(_state->_activeTrack, _state->_activePattern))
         {
-            auto pattern = _state->_sequencer.GetPattern(_state->_activeChannel, _state->_activePattern);
+            auto pattern = _state->_sequencer.GetPattern(_state->_activeTrack, _state->_activePattern);
             _state->_clipboardPatterns.push_back(pattern);
         }
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && io.KeyCtrl)
     {
-        if (!_state->_clipboardPatterns.empty() && _state->_sequencer.DoesPatternExistAtIndex(_state->_activeChannel, _state->_activePattern))
+        if (!_state->_clipboardPatterns.empty() && _state->_sequencer.DoesPatternExistAtIndex(_state->_activeTrack, _state->_activePattern))
         {
-            _state->_sequencer.SetPattern(_state->_activeChannel, _state->_activePattern, _state->_clipboardPatterns.back());
+            _state->_sequencer.SetPattern(_state->_activeTrack, _state->_activePattern, _state->_clipboardPatterns.back());
         }
     }
 }

@@ -5,7 +5,7 @@
 #include <imgui.h>
 #include <zyn.mixer/Mixer.h>
 
-const char *ChannelPatternTypeNames[]{
+const char *TrackPatternTypeNames[]{
     "Step",
     "Clip",
     "Arpeggiator"};
@@ -54,27 +54,27 @@ void zyn::ui::Sequencer::Render()
         ImGui::ShowTooltipOnHover("Horizontal zoom");
 
         ImGui::BeginChild("scrolling", ImVec2(0, -100.0f), false, ImGuiWindowFlags_HorizontalScrollbar);
-        for (int trackIndex = 0; trackIndex < NUM_MIXER_CHANNELS; trackIndex++)
+        for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
         {
             ImGui::PushID(trackIndex * 1100);
-            auto trackEnabled = _state->_mixer->GetChannel(trackIndex)->Penabled == 1;
-            if (ImGui::Checkbox("##SequencerChannelEnabled", &trackEnabled))
+            auto trackEnabled = _state->_mixer->GetTrack(trackIndex)->Penabled == 1;
+            if (ImGui::Checkbox("##SequencerTrackEnabled", &trackEnabled))
             {
-                _state->_mixer->GetChannel(trackIndex)->Penabled = trackEnabled ? 1 : 0;
+                _state->_mixer->GetTrack(trackIndex)->Penabled = trackEnabled ? 1 : 0;
             }
             ImGui::SameLine();
 
             float hue = trackIndex * 0.05f;
             char trackLabel[32] = {'\0'};
             sprintf(trackLabel, "%02d", trackIndex + 1);
-            bool highLight = (trackIndex == _state->_activeChannel);
+            bool highLight = (trackIndex == _state->_activeTrack);
             if (highLight)
             {
                 ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue, 0.6f, 0.6f)));
             }
             if (ImGui::Button(trackLabel, ImVec2(60.0f, _state->_sequencerVerticalZoom)))
             {
-                _state->_activeChannel = trackIndex;
+                _state->_activeTrack = trackIndex;
             }
             if (highLight)
             {
@@ -86,19 +86,19 @@ void zyn::ui::Sequencer::Render()
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue, 0.7f, 0.7f)));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
 
-            switch (_state->_channelPatternType[trackIndex])
+            switch (_state->_trackPatternType[trackIndex])
             {
-                case ChannelPatternTypes::Clip:
+                case TrackPatternTypes::Clip:
                 {
                     //_pianoRollUi.Render(trackIndex, 0);
                     break;
                 }
-                case ChannelPatternTypes::Step:
+                case TrackPatternTypes::Step:
                 {
                     _stepPatternUi.Render(trackIndex, _state->_sequencerVerticalZoom);
                     break;
                 }
-                case ChannelPatternTypes::Arpeggiator:
+                case TrackPatternTypes::Arpeggiator:
                 {
                     break;
                 }
@@ -115,15 +115,15 @@ void zyn::ui::Sequencer::Render()
 
         ImGui::PopStyleVar(2);
 
-        ImGui::Text("Channel %02d", _state->_activeChannel+1);
+        ImGui::Text("Track %02d", _state->_activeTrack+1);
 
         ImGui::SameLine();
 
         ImGui::PushItemWidth(100);
-        unsigned char channelPatternType = static_cast<unsigned char>(_state->_channelPatternType[_state->_activeChannel]);
-        if (ImGui::DropDown("##channel-pattern-type", channelPatternType, ChannelPatternTypeNames, int(ChannelPatternTypes::Count), "Pattern type"))
+        unsigned char trackPatternType = static_cast<unsigned char>(_state->_trackPatternType[_state->_activeTrack]);
+        if (ImGui::DropDown("##track-pattern-type", trackPatternType, TrackPatternTypeNames, int(TrackPatternTypes::Count), "Pattern type"))
         {
-            _state->_channelPatternType[_state->_activeChannel] = static_cast<ChannelPatternTypes>(channelPatternType);
+            _state->_trackPatternType[_state->_activeTrack] = static_cast<TrackPatternTypes>(trackPatternType);
         }
 
         float scroll_x_delta = 0.0f;
@@ -147,19 +147,19 @@ void zyn::ui::Sequencer::Render()
 
         if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         {
-            switch (_state->_channelPatternType[_state->_activeChannel])
+            switch (_state->_trackPatternType[_state->_activeTrack])
             {
-                case ChannelPatternTypes::Clip:
+                case TrackPatternTypes::Clip:
                 {
                     //            _pianoRollUi.EventHandling();
                     break;
                 }
-                case ChannelPatternTypes::Step:
+                case TrackPatternTypes::Step:
                 {
                     _stepPatternUi.EventHandling();
                     break;
                 }
-                case ChannelPatternTypes::Arpeggiator:
+                case TrackPatternTypes::Arpeggiator:
                 {
                     break;
                 }

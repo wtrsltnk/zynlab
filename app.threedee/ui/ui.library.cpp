@@ -18,7 +18,7 @@ bool zyn::ui::Library::Setup()
 
 void zyn::ui::Library::Render()
 {
-    if (!_state->_showLibrary || _state->_activeChannel < 0)
+    if (!_state->_showLibrary || _state->_activeTrack < 0)
     {
         return;
     }
@@ -69,7 +69,7 @@ void zyn::ui::Library::Render()
 
                     if (ImGui::Selectable(instrumentName.c_str(), false))
                     {
-                        auto const &instrument = _state->_mixer->GetChannel(_state->_activeChannel);
+                        auto const &instrument = _state->_mixer->GetTrack(_state->_activeTrack);
                         instrument->Lock();
                         _state->_mixer->GetBankManager()->LoadFromSlot(i, instrument);
                         instrument->Unlock();

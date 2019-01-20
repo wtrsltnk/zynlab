@@ -1,6 +1,6 @@
 #include "app.threedee.h"
 
-#include <zyn.mixer/Channel.h>
+#include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
 
 #include "examples/imgui_impl_glfw.h"
@@ -108,7 +108,7 @@ bool AppThreeDee::Setup()
     _state._mixer->GetBankManager()->LoadBank(_state._currentBank);
 
     _stepper.Setup();
-    _state._activeChannel = 0;
+    _state._activeTrack = 0;
 
     _mixerUi.Setup();
     _libraryUi.Setup();

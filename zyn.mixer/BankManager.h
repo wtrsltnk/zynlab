@@ -47,9 +47,9 @@ public:
     /**Empties out the selected slot*/
     virtual void ClearSlot(unsigned int ninstrument);
     /**Saves the given Part to slot*/
-    virtual void SaveToSlot(unsigned int ninstrument, class Channel *part);
+    virtual void SaveToSlot(unsigned int ninstrument, class Track *part);
     /**Loads the given slot into a Part*/
-    virtual void LoadFromSlot(unsigned int ninstrument, class Channel *part);
+    virtual void LoadFromSlot(unsigned int ninstrument, class Track *part);
     /**Swaps Slots*/
     virtual void SwapSlot(unsigned int n1, unsigned int n2);
 

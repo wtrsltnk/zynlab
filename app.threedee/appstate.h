@@ -8,18 +8,18 @@ extern char const *const SubSynthEditorID;
 extern char const *const PadSynthEditorID;
 extern char const *const InsertionFxEditorID;
 extern char const *const SystemFxEditorID;
-extern char const *const ChannelFxEditorID;
+extern char const *const TrackFxEditorID;
 extern char const *const LibraryID;
 extern char const *const StepPatternEditorID;
 extern char const *const EffectNames[];
 extern int EffectNameCount;
 extern const char *NoteNames[];
 extern int NoteNameCount;
-extern const char *ChannelPatternTypeNames[];
+extern const char *TrackPatternTypeNames[];
 extern const float noteLabelWidth;
 extern const float stepWidth;
 
-enum class ChannelPatternTypes
+enum class TrackPatternTypes
 {
     Step,
     Clip,
@@ -43,23 +43,23 @@ public:
     bool _showQuickHelp;
     bool _showSystemEffectsEditor;
     bool _showInsertEffectsEditor;
-    bool _showChannelEffectsEditor;
+    bool _showTrackEffectsEditor;
     bool _showADNoteEditor;
     bool _showSUBNoteEditor;
     bool _showPADNoteEditor;
-    int _showChannelTypeChanger;
+    int _showTrackTypeChanger;
     int _currentInsertEffect;
     int _currentSystemEffect;
-    int _currentChannelEffect;
+    int _currentTrackEffect;
     int _currentBank;
-    int _activeChannel;
-    int _activeChannelInstrument;
+    int _activeTrack;
+    int _activeTrackInstrument;
     int _activePattern;
     int _sequencerVerticalZoom;
     int _sequencerHorizontalZoom;
     Sequencer _sequencer;
     std::vector<TrackPattern> _clipboardPatterns;
-    ChannelPatternTypes _channelPatternType[NUM_MIXER_CHANNELS];
+    TrackPatternTypes _trackPatternType[NUM_MIXER_TRACKS];
 };
 
 #endif // APPSTATE_H

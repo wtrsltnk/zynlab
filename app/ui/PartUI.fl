@@ -41,7 +41,7 @@ decl {\#include "zyn.common/Config.h"} {public local
 decl {\#include "zyn.common/globals.h"} {public
 }
 
-decl {\#include "zyn.mixer/Channel.h"} {public local
+decl {\#include "zyn.mixer/Track.h"} {public local
 }
 
 class PartSysEffSend {open : {public Fl_Group}
@@ -155,7 +155,7 @@ maxkcounter->do_callback();}
         Fl_Button labelbutton {
           label {Bass Drum}
           callback {const char *tmp=fl_input("Kit item name:",(const char *)part->Instruments[n].Pname);
-if (tmp!=NULL) snprintf((char *)part->Instruments[n].Pname,CHANNEL_MAX_NAME_LEN,"%s",tmp);}
+if (tmp!=NULL) snprintf((char *)part->Instruments[n].Pname,TRACK_MAX_NAME_LEN,"%s",tmp);}
           xywh {90 0 130 15} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 20
           code0 {o->label((char *)part->Instruments[n].Pname);}
         }
@@ -179,7 +179,7 @@ if (part->Instruments[n].Psubenabled!=0) subeditbutton->activate();
           callback {if (o->value()!=0) part->Instruments[n].Psendtoparteffect=(int)o->value()-1;
     else part->Instruments[n].Psendtoparteffect=127;} open
           xywh {615 0 45 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
-          code0 {o->add("OFF");char nrstr[10]; for(int i=0;i<NUM_CHANNEL_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};}
+          code0 {o->add("OFF");char nrstr[10]; for(int i=0;i<NUM_TRACK_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};}
           code1 {o->value(part->Instruments[n].Psendtoparteffect+1);if (part->Instruments[n].Psendtoparteffect==127) o->value(0);}
         } {}
         Fl_Button padeditbutton {
@@ -255,7 +255,7 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
 } else o->value(1);}
     }
   }
-  Function {init(Channel *part_,int n_,Mixer *master_,class PartUI *partui_)} {} {
+  Function {init(Track *part_,int n_,Mixer *master_,class PartUI *partui_)} {} {
     code {part=part_;
 n=n_;
 partui=partui_;
@@ -268,7 +268,7 @@ end();} {}
     code {partkititem->hide();
 //delete(partkititem);} {}
   }
-  decl {Channel *part;} {private local
+  decl {Track *part;} {private local
   }
   decl {int n;} {private local
   }
@@ -320,13 +320,13 @@ class PartUI {open : {public Fl_Group}
           label {Grand Piano}
           callback {int event=Fl::event_button();
 if (event==FL_RIGHT_MOUSE){
-   const char *tmp=fl_input("Channel name:",(const char *)part->Pname);
-   if (tmp!=NULL) snprintf((char *)part->Pname,CHANNEL_MAX_NAME_LEN,"%s",tmp);
+   const char *tmp=fl_input("Track name:",(const char *)part->Pname);
+   if (tmp!=NULL) snprintf((char *)part->Pname,TRACK_MAX_NAME_LEN,"%s",tmp);
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
 };}
-          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the channel information} xywh {5 103 200 20} box UP_FRAME down_box DOWN_FRAME labelfont 1 labelsize 11 align 84
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the track information} xywh {5 103 200 20} box UP_FRAME down_box DOWN_FRAME labelfont 1 labelsize 11 align 84
           code0 {o->label((char *)part->Pname);}
         }
         Fl_Check_Button {} {
@@ -385,7 +385,7 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
           code0 {o->value(part->ctl.portamento.portamento);}
         }
         Fl_Button {} {
-          label {Edit channel}
+          label {Edit track}
           callback {instrumenteditwindow->show();}
           xywh {5 70 200 30} color 52 labelfont 1 labelsize 13
         }
@@ -657,7 +657,7 @@ bypasseff->value(part->Pefxbypass[ninseff]);
 
 sendtochoice->value(x);}
         xywh {5 110 80 20} type Simple labelfont 1 align 6 minimum 1 maximum 127 step 1 textfont 1
-        code0 {o->bounds(1,NUM_CHANNEL_EFX);}
+        code0 {o->bounds(1,NUM_TRACK_EFX);}
         code1 {o->value(ninseff+1);}
       }
       Fl_Choice insefftype {
@@ -763,7 +763,7 @@ master->Unlock();}
       }
     }
     Fl_Window instrumentkitlist {
-      label {Channel instruments}
+      label {Track instruments}
       xywh {586 486 670 370} type Double box NO_BOX hide
     } {
       Fl_Button {} {
@@ -777,7 +777,7 @@ master->Unlock();}
       } {
         Fl_Pack {} {
           xywh {0 20 670 320}
-          code0 {for (int i=0;i<NUM_CHANNEL_INSTRUMENTS;i++){partkititem[i]=new PartKitItem(0,0,670,20,"");partkititem[i]->init(part,i,master,this);}}
+          code0 {for (int i=0;i<NUM_TRACK_INSTRUMENTS;i++){partkititem[i]=new PartKitItem(0,0,670,20,"");partkititem[i]->init(part,i,master,this);}}
         } {}
       }
       Fl_Box {} {
@@ -844,7 +844,7 @@ if (part->Pkitmode==0) {
       }
     }
     Fl_Window instrumenteditwindow {
-      label {Channel Edit}
+      label {Track Edit}
       xywh {893 275 395 360} type Double box NO_BOX hide
     } {
       Fl_Group {} {
@@ -1029,7 +1029,7 @@ subnoteui=NULL;
 padnoteui=NULL;
 lastkititem=-1;} {}
   }
-  Function {init(Channel *part_,Mixer *master_,int npart_,BankUI *bankui_)} {open
+  Function {init(Track *part_,Mixer *master_,int npart_,BankUI *bankui_)} {open
   } {
     code {bankui=bankui_;
 part=part_;
@@ -1077,7 +1077,7 @@ if (kititem!=lastkititem){
     adnoteui=NULL;subnoteui=NULL;padnoteui=NULL;
     lastkititem=kititem;
 
-    if (kititem>=NUM_CHANNEL_INSTRUMENTS) return;//bad kit item
+    if (kititem>=NUM_TRACK_INSTRUMENTS) return;//bad kit item
     if (kititem<0) return;
 
     if (part->Instruments[kititem].adpars!=NULL)
@@ -1117,7 +1117,7 @@ delete(instrumentkitlist);
 instrumenteditwindow->hide();
 delete(instrumenteditwindow);} {}
   }
-  decl {Channel *part;} {private local
+  decl {Track *part;} {private local
   }
   decl {Mixer *master;} {private local
   }
@@ -1137,6 +1137,6 @@ delete(instrumenteditwindow);} {}
   }
   decl {int lastkititem;} {private local
   }
-  decl {PartKitItem *partkititem[NUM_CHANNEL_INSTRUMENTS];} {private local
+  decl {PartKitItem *partkititem[NUM_TRACK_INSTRUMENTS];} {private local
   }
 }

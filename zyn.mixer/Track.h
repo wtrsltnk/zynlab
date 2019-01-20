@@ -20,8 +20,8 @@
 
 */
 
-#ifndef CHANNEL_H
-#define CHANNEL_H
+#ifndef TRACK_H
+#define TRACK_H
 
 #define MAX_INFO_TEXT_SIZE 1000
 
@@ -48,7 +48,7 @@ enum NoteStatus
     KEY_RELASED
 };
 
-struct ChannelNotes
+struct TrackNotes
 {
     NoteStatus status;
     int note; //if there is no note playing, the "note"=-1
@@ -59,11 +59,11 @@ struct ChannelNotes
         SynthNote *subnote;
         SynthNote *padnote;
         int sendtoparteffect;
-    } instumentNotes[NUM_CHANNEL_INSTRUMENTS];
+    } instumentNotes[NUM_TRACK_INSTRUMENTS];
     int time;
 };
 
-//the Channel's instrument
+//the Track's instrument
 class Instrument
 {
 public:
@@ -76,16 +76,16 @@ public:
     PADnoteParameters *padpars;
 };
 
-/** Channel implementation*/
-class Channel
+/** Track implementation*/
+class Track
 {
     float *_tmpoutr;
     float *_tmpoutl;
 public:
     /**Constructor*/
-    Channel();
+    Track();
     /**Destructor*/
-    virtual ~Channel();
+    virtual ~Track();
 
     /**Ìnit()
          * @param fft_ Pointer to the mixer
@@ -106,7 +106,7 @@ public:
     void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
     void RelaseAllKeys();       //this is called on AllNotesOff controller
 
-    void ComputeInstrumentSamples(); // compute channel output
+    void ComputeInstrumentSamples(); // compute Track output
 
     //saves the instrument settings to a XML file
     //returns 0 for ok or <0 if there is an error
@@ -117,29 +117,29 @@ public:
 
     void Cleanup(bool final = false);
 
-    //the Channel's instruments
-    Instrument Instruments[NUM_CHANNEL_INSTRUMENTS];
+    //the Track's instruments
+    Instrument Instruments[NUM_TRACK_INSTRUMENTS];
 
-    //Channel parameters
+    // Track parameters
     void setkeylimit(unsigned char Pkeylimit);
     void setkititemstatus(int kititem, int Penabled_);
 
-    unsigned char Penabled; /**<if the Channel is enabled*/
-    unsigned char Pvolume;  /**<Channel volume*/
-    unsigned char Pminkey;  /**<the minimum key that the Channel receives noteon messages*/
-    unsigned char Pmaxkey;  //the maximum key that the Channel receives noteon messages
+    unsigned char Penabled; /**<if the Track is enabled*/
+    unsigned char Pvolume;  /**<Track volume*/
+    unsigned char Pminkey;  /**<the minimum key that the Track receives noteon messages*/
+    unsigned char Pmaxkey;  //the maximum key that the Track receives noteon messages
     void setPvolume(unsigned char Pvolume);
-    unsigned char Pkeyshift; //Channel keyshift
+    unsigned char Pkeyshift; //Track keyshift
     unsigned char Prcvchn;   //from what midi channel it receive commnads
-    unsigned char Ppanning;  //Channel panning
+    unsigned char Ppanning;  //Track panning
     void setPpanning(unsigned char Ppanning);
     unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
     unsigned char Pveloffs;  //velocity offset
-    unsigned char Pnoteon;   //if the Channel receives NoteOn messages
+    unsigned char Pnoteon;   //if the Track receives NoteOn messages
     unsigned char Pkitmode;  //if the kitmode is enabled
     unsigned char Pdrummode; //if all keys are mapped and the system is 12tET (used for drums)
 
-    unsigned char Ppolymode;   //Channel mode - 0=monophonic , 1=polyphonic
+    unsigned char Ppolymode;   //Track mode - 0=monophonic , 1=polyphonic
     unsigned char Plegatomode; // 0=normal, 1=legato
     unsigned char Pkeylimit;   //how many keys are alowed to be played same time (0=off), the older will be relased
 
@@ -164,11 +164,11 @@ public:
     void ComputePeakLeftAndRight(float volume, float &peakl, float &peakr);
 
 public:
-    float *partoutl; //Left channel output of the Channel
-    float *partoutr; //Right channel output of the Channel
+    float *partoutl; //Left channel output of the Track
+    float *partoutr; //Right channel output of the Track
 
-    float *partfxinputl[NUM_CHANNEL_EFX + 1]; //Left and right signal that pass thru part effects;
-    float *partfxinputr[NUM_CHANNEL_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
+    float *partfxinputl[NUM_TRACK_EFX + 1]; //Left and right signal that pass thru part effects;
+    float *partfxinputr[NUM_TRACK_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
     float volume;
     float oldvolumel;
@@ -177,9 +177,9 @@ public:
 
     Controller ctl;
 
-    EffectManager *partefx[NUM_CHANNEL_EFX];  //insertion part effects (they are part of the instrument)
-    unsigned char Pefxroute[NUM_CHANNEL_EFX]; //how the effect's output is routed(to next effect/to out)
-    bool Pefxbypass[NUM_CHANNEL_EFX];         //if the effects are bypassed
+    EffectManager *partefx[NUM_TRACK_EFX];  //insertion part effects (they are part of the instrument)
+    unsigned char Pefxroute[NUM_TRACK_EFX]; //how the effect's output is routed(to next effect/to out)
+    bool Pefxbypass[NUM_TRACK_EFX];         //if the effects are bypassed
 
     int lastnote;
 
@@ -207,7 +207,7 @@ private:
            store the velocity and masterkeyshift values of a given note (the list only store note values).
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-    ChannelNotes _channelNotes[POLIPHONY];
+    TrackNotes _trackNotes[POLIPHONY];
 
     float _oldfreq; //this is used for portamento
     IMixer *_mixer;
@@ -216,4 +216,4 @@ private:
     pthread_mutex_t _instrumentMutex;
 };
 
-#endif // CHANNEL_H
+#endif // TRACK_H

@@ -7,7 +7,7 @@
 
 char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";
-char const *const ChannelFxEditorID = "Channel effect";
+char const *const TrackFxEditorID = "Track effect";
 
 int EffectNameCount = 9;
 
@@ -188,15 +188,15 @@ void zyn::ui::Effect::Render()
         ImGui::End();
     }
 
-    if (_state->_showChannelEffectsEditor)
+    if (_state->_showTrackEffectsEditor)
     {
-        if (ImGui::Begin(ChannelFxEditorID, &_state->_showChannelEffectsEditor))
+        if (ImGui::Begin(TrackFxEditorID, &_state->_showTrackEffectsEditor))
         {
-            auto channel = _state->_mixer->GetChannel(_state->_activeChannel);
+            auto track = _state->_mixer->GetTrack(_state->_activeTrack);
 
-            if (_state->_currentChannelEffect >= 0 && _state->_currentChannelEffect < NUM_CHANNEL_EFX)
+            if (_state->_currentTrackEffect >= 0 && _state->_currentTrackEffect < NUM_TRACK_EFX)
             {
-                EffectEditor(channel->partefx[_state->_currentChannelEffect]);
+                EffectEditor(track->partefx[_state->_currentTrackEffect]);
             }
         }
         ImGui::End();

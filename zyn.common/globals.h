@@ -45,9 +45,9 @@
 #define PAD_MAX_SAMPLES 64
 
 /*
- * Number of parts
+ * Number of tracks
  */
-#define NUM_MIXER_CHANNELS 16
+#define NUM_MIXER_TRACKS 16
 
 /*
  * Number of Midi channes
@@ -77,12 +77,12 @@
 /*
  * Number of channel's insertion effects
  */
-#define NUM_CHANNEL_EFX 3
+#define NUM_TRACK_EFX 3
 
 /*
  * Maximum number of the instrument on a channel
  */
-#define NUM_CHANNEL_INSTRUMENTS 16
+#define NUM_TRACK_INSTRUMENTS 16
 
 /*
  * How is applied the velocity sensing
@@ -92,7 +92,7 @@
 /*
  * The maximum length of channel's name
  */
-#define CHANNEL_MAX_NAME_LEN 30
+#define TRACK_MAX_NAME_LEN 30
 
 /*
  * The maximum number of bands of the equaliser
@@ -287,7 +287,7 @@ public:
 //entries in a bank
 #define BANK_SIZE 160
 
-class Channel;
+class Track;
 
 class IBankManager
 {
@@ -315,8 +315,8 @@ public:
 
     virtual bool EmptySlot(unsigned int ninstrument) = 0;
     virtual void ClearSlot(unsigned int ninstrument) = 0;
-    virtual void LoadFromSlot(unsigned int ninstrument, Channel *part) = 0;
-    virtual void SaveToSlot(unsigned int ninstrument, Channel *part) = 0;
+    virtual void LoadFromSlot(unsigned int ninstrument, Track *part) = 0;
+    virtual void SaveToSlot(unsigned int ninstrument, Track *part) = 0;
     virtual void SwapSlot(unsigned int n1, unsigned int n2) = 0;
 
     virtual std::string const &GetBankFileTitle() = 0;
@@ -352,9 +352,9 @@ public:
     virtual IMeter *GetMeter() = 0;
 
     // Instruments
-    virtual int GetChannelCount() const = 0;
-    virtual Channel *GetChannel(int index) = 0;
-    virtual void EnableChannel(int index, bool enabled) = 0;
+    virtual int GetTrackCount() const = 0;
+    virtual Track *GetTrack(int index) = 0;
+    virtual void EnableTrack(int index, bool enabled) = 0;
 
     // Effects
     virtual unsigned char GetSystemEffectSend(int from, int to) = 0;

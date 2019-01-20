@@ -55,7 +55,7 @@ void TipWin::showValue(float f)
 {
     //convert the value to a string
     char tmp[10];
-    snprintf(tmp, 9, "%.2f", f);
+    snprintf(tmp, 9, "%.2f", static_cast<double>(f));
     tip = tmp;
 
     textmode = false;
@@ -101,7 +101,7 @@ const char *TipWin::getStr() const
 //static int numobj = 0;
 
 WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
-    : Fl_Dial(x, y, w, h, label), oldvalue(0.0f), pos(false), textset(false)
+    : Fl_Dial(x, y, w, h, label), oldvalue(0.0), pos(false), textset(false)
 {
     //cout << "[" << label << "] There are now " << ++numobj << endl;
     Fl_Group *save = Fl_Group::current();
@@ -132,7 +132,7 @@ int WidgetPDial::handle(int event)
             getPos();
             my = -(Fl::event_y() - y() - h() / 2);
 
-            dragsize = 200.0f;
+            dragsize = 200.0;
             if (Fl::event_state(FL_BUTTON1) == 0)
                 dragsize *= 10;
 
@@ -147,7 +147,7 @@ int WidgetPDial::handle(int event)
                 return 1;
             my = -Fl::event_dy();
 
-            dragsize = 200.0f;
+            dragsize = 200.0;
             if (Fl::event_state(FL_CTRL) != 0)
                 dragsize *= 10;
 
@@ -172,7 +172,6 @@ int WidgetPDial::handle(int event)
             if (this->when() == 0)
                 do_callback();
             return 1;
-            break;
     }
     return 0;
     //#endif
@@ -226,7 +225,7 @@ void WidgetPDial::draw()
     fl_push_matrix();
 
     fl_translate(cx + rad / 2, cy + rad / 2);
-    fl_rotate(a - 90.0f);
+    fl_rotate(a - 90.0);
 
     fl_translate(rad / 2, 0);
 

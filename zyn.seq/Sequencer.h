@@ -66,7 +66,7 @@ protected:
     std::chrono::milliseconds::rep _stepTimeInMs;
     int _bpm;
     int _currentStep;
-    std::chrono::milliseconds::rep _activeNotes[NUM_MIXER_CHANNELS][maxNotes];
+    std::chrono::milliseconds::rep _activeNotes[NUM_MIXER_TRACKS][maxNotes];
 
     void Step(int step);
 
@@ -88,7 +88,7 @@ public:
 
 class Sequencer : public ISteppable
 {
-    std::map<int, TrackPattern> tracksOfPatterns[NUM_MIXER_CHANNELS];
+    std::map<int, TrackPattern> tracksOfPatterns[NUM_MIXER_TRACKS];
 
 public:
     Sequencer();

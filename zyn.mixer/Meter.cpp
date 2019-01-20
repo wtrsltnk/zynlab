@@ -1,6 +1,6 @@
 #include "Meter.h"
 
-#include "Channel.h"
+#include "Track.h"
 #include <cmath>
 
 vuData::vuData()
@@ -22,7 +22,7 @@ IMeter::~IMeter() = default;
 void Meter::Setup()
 {
     pthread_mutex_init(&_vumutex, nullptr);
-    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
     {
         _vuoutpeakpart[npart] = 1e-9f;
         _fakepeakpart[npart] = 0;
@@ -75,7 +75,7 @@ float Meter::GetOutPeak(int instrument)
     return db;
 }
 
-void Meter::Tick(const float *outl, const float *outr, Channel *part, float volume)
+void Meter::Tick(const float *outl, const float *outr, Track *part, float volume)
 {
     if (pthread_mutex_trylock(&_vumutex))
     {
@@ -121,7 +121,7 @@ void Meter::Tick(const float *outl, const float *outr, Channel *part, float volu
     _vu.rmspeakr = std::sqrt(_vu.rmspeakr / SystemSettings::Instance().buffersize_f);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
-    for (int npart = 0; npart < NUM_MIXER_CHANNELS; ++npart)
+    for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
     {
         _vuoutpeakpart[npart] = part[npart].ComputePeak(volume);
         if (!part[npart].Penabled && _fakepeakpart[npart] > 1)

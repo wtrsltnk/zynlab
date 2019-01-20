@@ -18,7 +18,7 @@ protected:
     void LoadInstrumentIcons();
     void ImGuiMasterTrack();
     void ImGuiMixer();
-    void ImGuiTrack(int track, bool highlightTrack);
+    void ImGuiTrack(int trackIndex, bool highlightTrack);
     void ImGuiInspector();
     void ImGuiChangeInstrumentTypePopup();
     void AddInsertFx(int track);

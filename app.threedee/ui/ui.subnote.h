@@ -4,7 +4,7 @@
 #include "../appstate.h"
 #include "ui.envelope.h"
 #include "ui.filter.h"
-#include <zyn.mixer/Channel.h>
+#include <zyn.mixer/Track.h>
 #include <zyn.synth/SUBnoteParams.h>
 
 namespace zyn {
