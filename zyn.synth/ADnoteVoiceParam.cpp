@@ -136,71 +136,77 @@ void ADnoteVoiceParam::Serialize(IPresetsSerializer *xml, bool fmoscilused)
     xml->endbranch();
 
     xml->beginbranch("AMPLITUDE_PARAMETERS");
-    xml->addpar("panning", PPanning);
-    xml->addpar("volume", PVolume);
-    xml->addparbool("volume_minus", PVolumeminus);
-    xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
+    {
+        xml->addpar("panning", PPanning);
+        xml->addpar("volume", PVolume);
+        xml->addparbool("volume_minus", PVolumeminus);
+        xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
 
-    xml->addparbool("amp_envelope_enabled", PAmpEnvelopeEnabled);
-    if ((PAmpEnvelopeEnabled != 0) || (!xml->minimal))
-    {
-        xml->beginbranch("AMPLITUDE_ENVELOPE");
-        AmpEnvelope->Serialize(xml);
-        xml->endbranch();
-    }
-    xml->addparbool("amp_lfo_enabled", PAmpLfoEnabled);
-    if ((PAmpLfoEnabled != 0) || (!xml->minimal))
-    {
-        xml->beginbranch("AMPLITUDE_LFO");
-        AmpLfo->Serialize(xml);
-        xml->endbranch();
+        xml->addparbool("amp_envelope_enabled", PAmpEnvelopeEnabled);
+        if ((PAmpEnvelopeEnabled != 0) || (!xml->minimal))
+        {
+            xml->beginbranch("AMPLITUDE_ENVELOPE");
+            AmpEnvelope->Serialize(xml);
+            xml->endbranch();
+        }
+        xml->addparbool("amp_lfo_enabled", PAmpLfoEnabled);
+        if ((PAmpLfoEnabled != 0) || (!xml->minimal))
+        {
+            xml->beginbranch("AMPLITUDE_LFO");
+            AmpLfo->Serialize(xml);
+            xml->endbranch();
+        }
     }
     xml->endbranch();
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
-    xml->addparbool("fixed_freq", Pfixedfreq);
-    xml->addpar("fixed_freq_et", PfixedfreqET);
-    xml->addpar("detune", PDetune);
-    xml->addpar("coarse_detune", PCoarseDetune);
-    xml->addpar("detune_type", PDetuneType);
+    {
+        xml->addparbool("fixed_freq", Pfixedfreq);
+        xml->addpar("fixed_freq_et", PfixedfreqET);
+        xml->addpar("detune", PDetune);
+        xml->addpar("coarse_detune", PCoarseDetune);
+        xml->addpar("detune_type", PDetuneType);
 
-    xml->addparbool("freq_envelope_enabled", PFreqEnvelopeEnabled);
-    if ((PFreqEnvelopeEnabled != 0) || (!xml->minimal))
-    {
-        xml->beginbranch("FREQUENCY_ENVELOPE");
-        FreqEnvelope->Serialize(xml);
-        xml->endbranch();
-    }
-    xml->addparbool("freq_lfo_enabled", PFreqLfoEnabled);
-    if ((PFreqLfoEnabled != 0) || (!xml->minimal))
-    {
-        xml->beginbranch("FREQUENCY_LFO");
-        FreqLfo->Serialize(xml);
-        xml->endbranch();
+        xml->addparbool("freq_envelope_enabled", PFreqEnvelopeEnabled);
+        if ((PFreqEnvelopeEnabled != 0) || (!xml->minimal))
+        {
+            xml->beginbranch("FREQUENCY_ENVELOPE");
+            FreqEnvelope->Serialize(xml);
+            xml->endbranch();
+        }
+        xml->addparbool("freq_lfo_enabled", PFreqLfoEnabled);
+        if ((PFreqLfoEnabled != 0) || (!xml->minimal))
+        {
+            xml->beginbranch("FREQUENCY_LFO");
+            FreqLfo->Serialize(xml);
+            xml->endbranch();
+        }
     }
     xml->endbranch();
 
     if ((PFilterEnabled != 0) || (!xml->minimal))
     {
         xml->beginbranch("FILTER_PARAMETERS");
-        xml->beginbranch("FILTER");
-        VoiceFilter->Serialize(xml);
-        xml->endbranch();
-
-        xml->addparbool("filter_envelope_enabled", PFilterEnvelopeEnabled);
-        if ((PFilterEnvelopeEnabled != 0) || (!xml->minimal))
         {
-            xml->beginbranch("FILTER_ENVELOPE");
-            FilterEnvelope->Serialize(xml);
+            xml->beginbranch("FILTER");
+            VoiceFilter->Serialize(xml);
             xml->endbranch();
-        }
 
-        xml->addparbool("filter_lfo_enabled", PFilterLfoEnabled);
-        if ((PFilterLfoEnabled != 0) || (!xml->minimal))
-        {
-            xml->beginbranch("FILTER_LFO");
-            FilterLfo->Serialize(xml);
-            xml->endbranch();
+            xml->addparbool("filter_envelope_enabled", PFilterEnvelopeEnabled);
+            if ((PFilterEnvelopeEnabled != 0) || (!xml->minimal))
+            {
+                xml->beginbranch("FILTER_ENVELOPE");
+                FilterEnvelope->Serialize(xml);
+                xml->endbranch();
+            }
+
+            xml->addparbool("filter_lfo_enabled", PFilterLfoEnabled);
+            if ((PFilterLfoEnabled != 0) || (!xml->minimal))
+            {
+                xml->beginbranch("FILTER_LFO");
+                FilterLfo->Serialize(xml);
+                xml->endbranch();
+            }
         }
         xml->endbranch();
     }
@@ -208,37 +214,40 @@ void ADnoteVoiceParam::Serialize(IPresetsSerializer *xml, bool fmoscilused)
     if ((PFMEnabled != 0) || fmoscilused || (!xml->minimal))
     {
         xml->beginbranch("FM_PARAMETERS");
-        xml->addpar("input_voice", PFMVoice);
-
-        xml->addpar("volume", PFMVolume);
-        xml->addpar("volume_damp", PFMVolumeDamp);
-        xml->addpar("velocity_sensing", PFMVelocityScaleFunction);
-
-        xml->addparbool("amp_envelope_enabled", PFMAmpEnvelopeEnabled);
-        if ((PFMAmpEnvelopeEnabled != 0) || (!xml->minimal))
         {
-            xml->beginbranch("AMPLITUDE_ENVELOPE");
-            FMAmpEnvelope->Serialize(xml);
+            xml->addpar("input_voice", PFMVoice);
+
+            xml->addpar("volume", PFMVolume);
+            xml->addpar("volume_damp", PFMVolumeDamp);
+            xml->addpar("velocity_sensing", PFMVelocityScaleFunction);
+
+            xml->addparbool("amp_envelope_enabled", PFMAmpEnvelopeEnabled);
+            if ((PFMAmpEnvelopeEnabled != 0) || (!xml->minimal))
+            {
+                xml->beginbranch("AMPLITUDE_ENVELOPE");
+                FMAmpEnvelope->Serialize(xml);
+                xml->endbranch();
+            }
+            xml->beginbranch("MODULATOR");
+            {
+                xml->addpar("detune", PFMDetune);
+                xml->addpar("coarse_detune", PFMCoarseDetune);
+                xml->addpar("detune_type", PFMDetuneType);
+
+                xml->addparbool("freq_envelope_enabled", PFMFreqEnvelopeEnabled);
+                if ((PFMFreqEnvelopeEnabled != 0) || (!xml->minimal))
+                {
+                    xml->beginbranch("FREQUENCY_ENVELOPE");
+                    FMFreqEnvelope->Serialize(xml);
+                    xml->endbranch();
+                }
+
+                xml->beginbranch("OSCIL");
+                FMSmp->Serialize(xml);
+                xml->endbranch();
+            }
             xml->endbranch();
         }
-        xml->beginbranch("MODULATOR");
-        xml->addpar("detune", PFMDetune);
-        xml->addpar("coarse_detune", PFMCoarseDetune);
-        xml->addpar("detune_type", PFMDetuneType);
-
-        xml->addparbool("freq_envelope_enabled", PFMFreqEnvelopeEnabled);
-        if ((PFMFreqEnvelopeEnabled != 0) || (!xml->minimal))
-        {
-            xml->beginbranch("FREQUENCY_ENVELOPE");
-            FMFreqEnvelope->Serialize(xml);
-            xml->endbranch();
-        }
-
-        xml->beginbranch("OSCIL");
-        FMSmp->Serialize(xml);
-        xml->endbranch();
-
-        xml->endbranch();
         xml->endbranch();
     }
 }

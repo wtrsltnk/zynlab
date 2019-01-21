@@ -63,56 +63,62 @@ void ADnoteGlobalParam::Serialize(IPresetsSerializer *xml)
     xml->addparbool("stereo", PStereo);
 
     xml->beginbranch("AMPLITUDE_PARAMETERS");
-    xml->addpar("volume", PVolume);
-    xml->addpar("panning", PPanning);
-    xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
-    xml->addpar("punch_strength", PPunchStrength);
-    xml->addpar("punch_time", PPunchTime);
-    xml->addpar("punch_stretch", PPunchStretch);
-    xml->addpar("punch_velocity_sensing", PPunchVelocitySensing);
-    xml->addpar("harmonic_randomness_grouping", Hrandgrouping);
+    {
+        xml->addpar("volume", PVolume);
+        xml->addpar("panning", PPanning);
+        xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
+        xml->addpar("punch_strength", PPunchStrength);
+        xml->addpar("punch_time", PPunchTime);
+        xml->addpar("punch_stretch", PPunchStretch);
+        xml->addpar("punch_velocity_sensing", PPunchVelocitySensing);
+        xml->addpar("harmonic_randomness_grouping", Hrandgrouping);
 
-    xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("AMPLITUDE_ENVELOPE");
+        AmpEnvelope->Serialize(xml);
+        xml->endbranch();
 
-    xml->beginbranch("AMPLITUDE_LFO");
-    AmpLfo->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("AMPLITUDE_LFO");
+        AmpLfo->Serialize(xml);
+        xml->endbranch();
+    }
     xml->endbranch();
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
-    xml->addpar("detune", PDetune);
+    {
+        xml->addpar("detune", PDetune);
 
-    xml->addpar("coarse_detune", PCoarseDetune);
-    xml->addpar("detune_type", PDetuneType);
+        xml->addpar("coarse_detune", PCoarseDetune);
+        xml->addpar("detune_type", PDetuneType);
 
-    xml->addpar("bandwidth", PBandwidth);
+        xml->addpar("bandwidth", PBandwidth);
 
-    xml->beginbranch("FREQUENCY_ENVELOPE");
-    FreqEnvelope->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FREQUENCY_ENVELOPE");
+        FreqEnvelope->Serialize(xml);
+        xml->endbranch();
 
-    xml->beginbranch("FREQUENCY_LFO");
-    FreqLfo->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FREQUENCY_LFO");
+        FreqLfo->Serialize(xml);
+        xml->endbranch();
+    }
     xml->endbranch();
 
     xml->beginbranch("FILTER_PARAMETERS");
-    xml->addpar("velocity_sensing_amplitude", PFilterVelocityScale);
-    xml->addpar("velocity_sensing", PFilterVelocityScaleFunction);
+    {
+        xml->addpar("velocity_sensing_amplitude", PFilterVelocityScale);
+        xml->addpar("velocity_sensing", PFilterVelocityScaleFunction);
 
-    xml->beginbranch("FILTER");
-    GlobalFilter->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FILTER");
+        GlobalFilter->Serialize(xml);
+        xml->endbranch();
 
-    xml->beginbranch("FILTER_ENVELOPE");
-    FilterEnvelope->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FILTER_ENVELOPE");
+        FilterEnvelope->Serialize(xml);
+        xml->endbranch();
 
-    xml->beginbranch("FILTER_LFO");
-    FilterLfo->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FILTER_LFO");
+        FilterLfo->Serialize(xml);
+        xml->endbranch();
+    }
     xml->endbranch();
 
     xml->beginbranch("RESONANCE");

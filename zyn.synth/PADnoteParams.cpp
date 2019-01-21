@@ -707,92 +707,121 @@ void PADnoteParameters::Serialize(IPresetsSerializer *xml)
     xml->addpar("bandwidth_scale", Pbwscale);
 
     xml->beginbranch("HARMONIC_PROFILE");
-    xml->addpar("base_type", Php.base.type);
-    xml->addpar("base_par1", Php.base.par1);
-    xml->addpar("frequency_multiplier", Php.freqmult);
-    xml->addpar("modulator_par1", Php.modulator.par1);
-    xml->addpar("modulator_frequency", Php.modulator.freq);
-    xml->addpar("width", Php.width);
-    xml->addpar("amplitude_multiplier_type", Php.amp.type);
-    xml->addpar("amplitude_multiplier_mode", Php.amp.mode);
-    xml->addpar("amplitude_multiplier_par1", Php.amp.par1);
-    xml->addpar("amplitude_multiplier_par2", Php.amp.par2);
-    xml->addparbool("autoscale", Php.autoscale);
-    xml->addpar("one_half", Php.onehalf);
+    {
+        xml->addpar("base_type", Php.base.type);
+        xml->addpar("base_par1", Php.base.par1);
+        xml->addpar("frequency_multiplier", Php.freqmult);
+        xml->addpar("modulator_par1", Php.modulator.par1);
+        xml->addpar("modulator_frequency", Php.modulator.freq);
+        xml->addpar("width", Php.width);
+        xml->addpar("amplitude_multiplier_type", Php.amp.type);
+        xml->addpar("amplitude_multiplier_mode", Php.amp.mode);
+        xml->addpar("amplitude_multiplier_par1", Php.amp.par1);
+        xml->addpar("amplitude_multiplier_par2", Php.amp.par2);
+        xml->addparbool("autoscale", Php.autoscale);
+        xml->addpar("one_half", Php.onehalf);
+    }
     xml->endbranch();
 
     xml->beginbranch("OSCIL");
-    oscilgen->Serialize(xml);
+    {
+        oscilgen->Serialize(xml);
+    }
     xml->endbranch();
 
     xml->beginbranch("RESONANCE");
-    resonance->Serialize(xml);
+    {
+        resonance->Serialize(xml);
+    }
     xml->endbranch();
 
     xml->beginbranch("HARMONIC_POSITION");
-    xml->addpar("type", Phrpos.type);
-    xml->addpar("parameter1", Phrpos.par1);
-    xml->addpar("parameter2", Phrpos.par2);
-    xml->addpar("parameter3", Phrpos.par3);
+    {
+        xml->addpar("type", Phrpos.type);
+        xml->addpar("parameter1", Phrpos.par1);
+        xml->addpar("parameter2", Phrpos.par2);
+        xml->addpar("parameter3", Phrpos.par3);
+    }
     xml->endbranch();
 
     xml->beginbranch("SAMPLE_QUALITY");
-    xml->addpar("samplesize", Pquality.samplesize);
-    xml->addpar("basenote", Pquality.basenote);
-    xml->addpar("octaves", Pquality.oct);
-    xml->addpar("samples_per_octave", Pquality.smpoct);
+    {
+        xml->addpar("samplesize", Pquality.samplesize);
+        xml->addpar("basenote", Pquality.basenote);
+        xml->addpar("octaves", Pquality.oct);
+        xml->addpar("samples_per_octave", Pquality.smpoct);
+    }
     xml->endbranch();
 
     xml->beginbranch("AMPLITUDE_PARAMETERS");
-    xml->addpar("volume", PVolume);
-    xml->addpar("panning", PPanning);
-    xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
-    xml->addpar("punch_strength", PPunchStrength);
-    xml->addpar("punch_time", PPunchTime);
-    xml->addpar("punch_stretch", PPunchStretch);
-    xml->addpar("punch_velocity_sensing", PPunchVelocitySensing);
+    {
+        xml->addpar("volume", PVolume);
+        xml->addpar("panning", PPanning);
+        xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
+        xml->addpar("punch_strength", PPunchStrength);
+        xml->addpar("punch_time", PPunchTime);
+        xml->addpar("punch_stretch", PPunchStretch);
+        xml->addpar("punch_velocity_sensing", PPunchVelocitySensing);
 
-    xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("AMPLITUDE_ENVELOPE");
+        {
+            AmpEnvelope->Serialize(xml);
+        }
+        xml->endbranch();
 
-    xml->beginbranch("AMPLITUDE_LFO");
-    AmpLfo->Serialize(xml);
-    xml->endbranch();
-
+        xml->beginbranch("AMPLITUDE_LFO");
+        {
+            AmpLfo->Serialize(xml);
+        }
+        xml->endbranch();
+    }
     xml->endbranch();
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
-    xml->addpar("fixed_freq", Pfixedfreq);
-    xml->addpar("fixed_freq_et", PfixedfreqET);
-    xml->addpar("detune", PDetune);
-    xml->addpar("coarse_detune", PCoarseDetune);
-    xml->addpar("detune_type", PDetuneType);
+    {
+        xml->addpar("fixed_freq", Pfixedfreq);
+        xml->addpar("fixed_freq_et", PfixedfreqET);
+        xml->addpar("detune", PDetune);
+        xml->addpar("coarse_detune", PCoarseDetune);
+        xml->addpar("detune_type", PDetuneType);
 
-    xml->beginbranch("FREQUENCY_ENVELOPE");
-    FreqEnvelope->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FREQUENCY_ENVELOPE");
+        {
+            FreqEnvelope->Serialize(xml);
+        }
+        xml->endbranch();
 
-    xml->beginbranch("FREQUENCY_LFO");
-    FreqLfo->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FREQUENCY_LFO");
+        {
+            FreqLfo->Serialize(xml);
+        }
+        xml->endbranch();
+    }
     xml->endbranch();
 
     xml->beginbranch("FILTER_PARAMETERS");
-    xml->addpar("velocity_sensing_amplitude", PFilterVelocityScale);
-    xml->addpar("velocity_sensing", PFilterVelocityScaleFunction);
+    {
+        xml->addpar("velocity_sensing_amplitude", PFilterVelocityScale);
+        xml->addpar("velocity_sensing", PFilterVelocityScaleFunction);
 
-    xml->beginbranch("FILTER");
-    GlobalFilter->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FILTER");
+        {
+            GlobalFilter->Serialize(xml);
+        }
+        xml->endbranch();
 
-    xml->beginbranch("FILTER_ENVELOPE");
-    FilterEnvelope->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FILTER_ENVELOPE");
+        {
+            FilterEnvelope->Serialize(xml);
+        }
+        xml->endbranch();
 
-    xml->beginbranch("FILTER_LFO");
-    FilterLfo->Serialize(xml);
-    xml->endbranch();
+        xml->beginbranch("FILTER_LFO");
+        {
+            FilterLfo->Serialize(xml);
+        }
+        xml->endbranch();
+    }
     xml->endbranch();
 }
 

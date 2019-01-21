@@ -111,138 +111,79 @@ void SUBnoteParameters::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 
     xml->beginbranch("AMPLITUDE_PARAMETERS");
-    xml->addparbool("stereo", Pstereo);
-    xml->addpar("volume", PVolume);
-    xml->addpar("panning", PPanning);
-    xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
-    xml->beginbranch("AMPLITUDE_ENVELOPE");
-    AmpEnvelope->Serialize(xml);
-    xml->endbranch();
+    {
+        xml->addparbool("stereo", Pstereo);
+        xml->addpar("volume", PVolume);
+        xml->addpar("panning", PPanning);
+        xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
+        xml->beginbranch("AMPLITUDE_ENVELOPE");
+        {
+            AmpEnvelope->Serialize(xml);
+        }
+        xml->endbranch();
+    }
     xml->endbranch();
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
-    xml->addparbool("fixed_freq", Pfixedfreq);
-    xml->addpar("fixed_freq_et", PfixedfreqET);
-
-    xml->addpar("detune", PDetune);
-    xml->addpar("coarse_detune", PCoarseDetune);
-    xml->addpar("overtone_spread_type", POvertoneSpread.type);
-    xml->addpar("overtone_spread_par1", POvertoneSpread.par1);
-    xml->addpar("overtone_spread_par2", POvertoneSpread.par2);
-    xml->addpar("overtone_spread_par3", POvertoneSpread.par3);
-    xml->addpar("detune_type", PDetuneType);
-
-    xml->addpar("bandwidth", Pbandwidth);
-    xml->addpar("bandwidth_scale", Pbwscale);
-
-    xml->addparbool("freq_envelope_enabled", PFreqEnvelopeEnabled);
-    if ((PFreqEnvelopeEnabled != 0) || (!xml->minimal))
     {
-        xml->beginbranch("FREQUENCY_ENVELOPE");
-        FreqEnvelope->Serialize(xml);
-        xml->endbranch();
-    }
+        xml->addparbool("fixed_freq", Pfixedfreq);
+        xml->addpar("fixed_freq_et", PfixedfreqET);
 
-    xml->addparbool("band_width_envelope_enabled", PBandWidthEnvelopeEnabled);
-    if ((PBandWidthEnvelopeEnabled != 0) || (!xml->minimal))
-    {
-        xml->beginbranch("BANDWIDTH_ENVELOPE");
-        BandWidthEnvelope->Serialize(xml);
-        xml->endbranch();
+        xml->addpar("detune", PDetune);
+        xml->addpar("coarse_detune", PCoarseDetune);
+        xml->addpar("overtone_spread_type", POvertoneSpread.type);
+        xml->addpar("overtone_spread_par1", POvertoneSpread.par1);
+        xml->addpar("overtone_spread_par2", POvertoneSpread.par2);
+        xml->addpar("overtone_spread_par3", POvertoneSpread.par3);
+        xml->addpar("detune_type", PDetuneType);
+
+        xml->addpar("bandwidth", Pbandwidth);
+        xml->addpar("bandwidth_scale", Pbwscale);
+
+        xml->addparbool("freq_envelope_enabled", PFreqEnvelopeEnabled);
+        if ((PFreqEnvelopeEnabled != 0) || (!xml->minimal))
+        {
+            xml->beginbranch("FREQUENCY_ENVELOPE");
+            {
+                FreqEnvelope->Serialize(xml);
+            }
+            xml->endbranch();
+        }
+
+        xml->addparbool("band_width_envelope_enabled", PBandWidthEnvelopeEnabled);
+        if ((PBandWidthEnvelopeEnabled != 0) || (!xml->minimal))
+        {
+            xml->beginbranch("BANDWIDTH_ENVELOPE");
+            {
+                BandWidthEnvelope->Serialize(xml);
+            }
+            xml->endbranch();
+        }
     }
     xml->endbranch();
 
     xml->beginbranch("FILTER_PARAMETERS");
-    xml->addparbool("enabled", PGlobalFilterEnabled);
-    if ((PGlobalFilterEnabled != 0) || (!xml->minimal))
     {
-        xml->beginbranch("FILTER");
-        GlobalFilter->Serialize(xml);
-        xml->endbranch();
+        xml->addparbool("enabled", PGlobalFilterEnabled);
+        if ((PGlobalFilterEnabled != 0) || (!xml->minimal))
+        {
+            xml->beginbranch("FILTER");
+            {
+                GlobalFilter->Serialize(xml);
+            }
+            xml->endbranch();
 
-        xml->addpar("filter_velocity_sensing", PGlobalFilterVelocityScaleFunction);
-        xml->addpar("filter_velocity_sensing_amplitude", PGlobalFilterVelocityScale);
+            xml->addpar("filter_velocity_sensing", PGlobalFilterVelocityScaleFunction);
+            xml->addpar("filter_velocity_sensing_amplitude", PGlobalFilterVelocityScale);
 
-        xml->beginbranch("FILTER_ENVELOPE");
-        GlobalFilterEnvelope->Serialize(xml);
-        xml->endbranch();
+            xml->beginbranch("FILTER_ENVELOPE");
+            {
+                GlobalFilterEnvelope->Serialize(xml);
+            }
+            xml->endbranch();
+        }
     }
     xml->endbranch();
-}
-
-void SUBnoteParameters::updateFrequencyMultipliers()
-{
-    float par1 = POvertoneSpread.par1 / 255.0f;
-    float par1pow = powf(10.0f, -(1.0f - POvertoneSpread.par1 / 255.0f) * 3.0f);
-    float par2 = POvertoneSpread.par2 / 255.0f;
-    float par3 = 1.0f - POvertoneSpread.par3 / 255.0f;
-    float result;
-    float tmp = 0.0f;
-    int thresh = 0;
-
-    for (int n = 0; n < MAX_SUB_HARMONICS; ++n)
-    {
-        float n1 = n + 1.0f;
-        switch (POvertoneSpread.type)
-        {
-            case 1:
-            {
-                thresh = static_cast<int>(100.0f * par2 * par2) + 1;
-                if (n1 < thresh)
-                    result = n1;
-                else
-                    result = n1 + 8.0f * (n1 - thresh) * par1pow;
-                break;
-            }
-            case 2:
-            {
-                thresh = static_cast<int>(100.0f * par2 * par2) + 1;
-                if (n1 < thresh)
-                    result = n1;
-                else
-                    result = n1 + 0.9f * (thresh - n1) * par1pow;
-                break;
-            }
-            case 3:
-            {
-                tmp = par1pow * 100.0f + 1.0f;
-                result = powf(n / tmp, 1.0f - 0.8f * par2) * tmp + 1.0f;
-                break;
-            }
-            case 4:
-            {
-                result = n * (1.0f - par1pow) +
-                         powf(0.1f * n, 3.0f * par2 + 1.0f) *
-                             10.0f * par1pow +
-                         1.0f;
-                break;
-            }
-            case 5:
-            {
-                result = n1 + 2.0f * sinf(n * par2 * par2 * PI * 0.999f) *
-                                  std::sqrt(par1pow);
-                break;
-            }
-            case 6:
-            {
-                tmp = powf(2.0f * par2, 2.0f) + 0.1f;
-                result = n * powf(par1 * powf(0.8f * n, tmp) + 1.0f, tmp) +
-                         1.0f;
-                break;
-            }
-            case 7:
-            {
-                result = (n1 + par1) / (par1 + 1);
-                break;
-            }
-            default:
-            {
-                result = n1;
-            }
-        }
-        float iresult = std::floor(result + 0.5f);
-        POvertoneFreqMult[n] = iresult + par3 * (result - iresult);
-    }
 }
 
 void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
@@ -334,5 +275,80 @@ void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
         }
 
         xml->exitbranch();
+    }
+}
+
+void SUBnoteParameters::updateFrequencyMultipliers()
+{
+    float par1 = POvertoneSpread.par1 / 255.0f;
+    float par1pow = powf(10.0f, -(1.0f - POvertoneSpread.par1 / 255.0f) * 3.0f);
+    float par2 = POvertoneSpread.par2 / 255.0f;
+    float par3 = 1.0f - POvertoneSpread.par3 / 255.0f;
+    float result;
+    float tmp = 0.0f;
+    int thresh = 0;
+
+    for (int n = 0; n < MAX_SUB_HARMONICS; ++n)
+    {
+        float n1 = n + 1.0f;
+        switch (POvertoneSpread.type)
+        {
+            case 1:
+            {
+                thresh = static_cast<int>(100.0f * par2 * par2) + 1;
+                if (n1 < thresh)
+                    result = n1;
+                else
+                    result = n1 + 8.0f * (n1 - thresh) * par1pow;
+                break;
+            }
+            case 2:
+            {
+                thresh = static_cast<int>(100.0f * par2 * par2) + 1;
+                if (n1 < thresh)
+                    result = n1;
+                else
+                    result = n1 + 0.9f * (thresh - n1) * par1pow;
+                break;
+            }
+            case 3:
+            {
+                tmp = par1pow * 100.0f + 1.0f;
+                result = powf(n / tmp, 1.0f - 0.8f * par2) * tmp + 1.0f;
+                break;
+            }
+            case 4:
+            {
+                result = n * (1.0f - par1pow) +
+                         powf(0.1f * n, 3.0f * par2 + 1.0f) *
+                             10.0f * par1pow +
+                         1.0f;
+                break;
+            }
+            case 5:
+            {
+                result = n1 + 2.0f * sinf(n * par2 * par2 * PI * 0.999f) *
+                                  std::sqrt(par1pow);
+                break;
+            }
+            case 6:
+            {
+                tmp = powf(2.0f * par2, 2.0f) + 0.1f;
+                result = n * powf(par1 * powf(0.8f * n, tmp) + 1.0f, tmp) +
+                         1.0f;
+                break;
+            }
+            case 7:
+            {
+                result = (n1 + par1) / (par1 + 1);
+                break;
+            }
+            default:
+            {
+                result = n1;
+            }
+        }
+        float iresult = std::floor(result + 0.5f);
+        POvertoneFreqMult[n] = iresult + par3 * (result - iresult);
     }
 }
