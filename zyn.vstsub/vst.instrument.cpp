@@ -10,7 +10,7 @@ ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
       parameters(nullptr)
 {
     ctl.Init();
-    ctl.defaults();
+    ctl.Defaults();
 
     parameters = new SUBnoteParameters();
     parameters->Defaults();

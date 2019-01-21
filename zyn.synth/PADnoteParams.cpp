@@ -154,19 +154,17 @@ void PADnoteParameters::deletesamples()
 float PADnoteParameters::getprofile(float *smp, int size)
 {
     for (int i = 0; i < size; ++i)
+    {
         smp[i] = 0.0f;
+    }
+
     const int supersample = 16;
     float basepar = powf(2.0f, (1.0f - Php.base.par1 / 127.0f) * 12.0f);
-    float freqmult = std::floor(powf(2.0f,
-                                     Php.freqmult / 127.0f * 5.0f) +
-                                0.000001f);
+    float freqmult = std::floor(powf(2.0f, Php.freqmult / 127.0f * 5.0f) + 0.000001f);
 
-    float modfreq = std::floor(powf(2.0f,
-                                    Php.modulator.freq / 127.0f * 5.0f) +
-                               0.000001f);
+    float modfreq = std::floor(powf(2.0f, Php.modulator.freq / 127.0f * 5.0f) + 0.000001f);
     float modpar1 = powf(Php.modulator.par1 / 127.0f, 4.0f) * 5.0f / std::sqrt(modfreq);
-    float amppar1 =
-        powf(2.0f, powf(Php.amp.par1 / 127.0f, 2.0f) * 10.0f) - 0.999f;
+    float amppar1 = powf(2.0f, powf(Php.amp.par1 / 127.0f, 2.0f) * 10.0f) - 0.999f;
     float amppar2 = (1.0f - Php.amp.par2 / 127.0f) * 0.998f + 0.001f;
     float width = powf(150.0f / (Php.width + 22.0f), 2.0f);
 
@@ -386,30 +384,33 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
     for (int i = 0; i < size; ++i)
         spectrum[i] = 0.0f;
 
-    float harmonics[SystemSettings::Instance().oscilsize / 2];
-    for (int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
-        harmonics[i] = 0.0f;
+    std::unique_ptr<float> harmonics(new float[SystemSettings::Instance().oscilsize / 2]);
+    for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+    {
+        harmonics.get()[i] = 0.0f;
+    }
+
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
-    oscilgen->get(harmonics, basefreq, false);
+    oscilgen->get(harmonics.get(), basefreq, false);
 
     //normalize
     float max = 0.0f;
-    for (int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
-        if (harmonics[i] > max)
-            max = harmonics[i];
+    for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+        if (harmonics.get()[i] > max)
+            max = harmonics.get()[i];
     if (max < 0.000001f)
         max = 1;
-    for (int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
-        harmonics[i] /= max;
+    for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+        harmonics.get()[i] /= max;
 
-    for (int nh = 1; nh < SystemSettings::Instance().oscilsize / 2; ++nh)
+    for (unsigned int nh = 1; nh < SystemSettings::Instance().oscilsize / 2; ++nh)
     { //for each harmonic
         float realfreq = getNhr(nh) * basefreq;
         if (realfreq > SystemSettings::Instance().samplerate_f * 0.49999f)
             break;
         if (realfreq < 20.0f)
             break;
-        if (harmonics[nh - 1] < 1e-4)
+        if (harmonics.get()[nh - 1] < 1e-4f)
             continue;
 
         //compute the bandwidth of each harmonic
@@ -445,20 +446,19 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                 break;
         }
         bw = bw * powf(realfreq / basefreq, power);
-        int ibw = (int)((bw / (SystemSettings::Instance().samplerate_f * 0.5f) * size)) + 1;
+        int ibw = static_cast<int>((bw / (SystemSettings::Instance().samplerate_f * 0.5f) * size)) + 1;
 
-        float amp = harmonics[nh - 1];
+        float amp = harmonics.get()[nh - 1];
         if (resonance->Penabled)
             amp *= resonance->getfreqresponse(realfreq);
 
         if (ibw > profilesize)
         { //if the bandwidth is larger than the profilesize
-            float rap = std::sqrt((float)profilesize / (float)ibw);
-            int cfreq =
-                (int)(realfreq / (SystemSettings::Instance().samplerate_f * 0.5f) * size) - ibw / 2;
+            float rap = std::sqrt(float(profilesize) / float(ibw));
+            int cfreq = int(realfreq / (SystemSettings::Instance().samplerate_f * 0.5f) * size) - ibw / 2;
             for (int i = 0; i < ibw; ++i)
             {
-                auto src = (int)(i * rap * rap);
+                auto src = int(i * rap * rap);
                 int spfreq = i + cfreq;
                 if (spfreq < 0)
                     continue;
@@ -469,14 +469,14 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
         }
         else
         { //if the bandwidth is smaller than the profilesize
-            float rap = std::sqrt((float)ibw / (float)profilesize);
+            float rap = std::sqrt(float(ibw) / float(profilesize));
             float ibasefreq = realfreq / (SystemSettings::Instance().samplerate_f * 0.5f) * size;
             for (int i = 0; i < profilesize; ++i)
             {
-                float idfreq = i / (float)profilesize - 0.5f;
+                float idfreq = i / float(profilesize) - 0.5f;
                 idfreq *= ibw;
-                auto spfreq = (int)(idfreq + ibasefreq);
-                float fspfreq = fmodf((float)idfreq + ibasefreq, 1.0f);
+                auto spfreq = int(idfreq + ibasefreq);
+                float fspfreq = fmodf(float(idfreq + ibasefreq), 1.0f);
                 if (spfreq <= 0)
                     continue;
                 if (spfreq >= size - 1)
@@ -491,28 +491,26 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
 /*
  * Generates the long spectrum for non-Bandwidth modes (only amplitudes are generated; phases will be random)
  */
-void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
-                                                    int size,
-                                                    float basefreq)
+void PADnoteParameters::generatespectrum_otherModes(float *spectrum, int size, float basefreq)
 {
     for (int i = 0; i < size; ++i)
         spectrum[i] = 0.0f;
 
-    float harmonics[SystemSettings::Instance().oscilsize / 2];
+    std::unique_ptr<float> harmonics(new float[SystemSettings::Instance().oscilsize / 2]);
     for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
-        harmonics[i] = 0.0f;
+        harmonics.get()[i] = 0.0f;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
-    oscilgen->get(harmonics, basefreq, false);
+    oscilgen->get(harmonics.get(), basefreq, false);
 
     //normalize
     float max = 0.0f;
     for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
-        if (harmonics[i] > max)
-            max = harmonics[i];
+        if (harmonics.get()[i] > max)
+            max = harmonics.get()[i];
     if (max < 0.000001f)
         max = 1;
     for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
-        harmonics[i] /= max;
+        harmonics.get()[i] /= max;
 
     for (unsigned int nh = 1; nh < SystemSettings::Instance().oscilsize / 2; ++nh)
     { //for each harmonic
@@ -526,19 +524,20 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
             break;
         //	if (harmonics[nh-1]<1e-4) continue;
 
-        float amp = harmonics[nh - 1];
+        float amp = harmonics.get()[nh - 1];
         if (resonance->Penabled)
             amp *= resonance->getfreqresponse(realfreq);
-        auto cfreq = (int)(realfreq / (SystemSettings::Instance().samplerate_f * 0.5f) * size);
+        auto cfreq = int(realfreq / (SystemSettings::Instance().samplerate_f * 0.5f) * size);
 
-        spectrum[cfreq] = amp + 1e-9;
+        spectrum[cfreq] = amp + 1e-9f;
     }
 
     if (Pmode != 1)
     {
         int old = 0;
         for (int k = 1; k < size; ++k)
-            if ((spectrum[k] > 1e-10) || (k == (size - 1)))
+        {
+            if ((spectrum[k] > 1e-10f) || (k == (size - 1)))
             {
                 int delta = k - old;
                 float val1 = spectrum[old];
@@ -551,6 +550,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                 }
                 old = k;
             }
+        }
     }
 }
 
@@ -559,13 +559,13 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
  */
 void PADnoteParameters::applyparameters(bool lockmutex)
 {
-    const int samplesize = (((int)1) << (Pquality.samplesize + 14));
+    const int samplesize = ((int(1)) << (Pquality.samplesize + 14));
     int spectrumsize = samplesize / 2;
-    auto *spectrum = new float[spectrumsize];
+    std::unique_ptr<float> spectrum(new float[spectrumsize]);
     int profilesize = 512;
-    float profile[profilesize];
+    std::unique_ptr<float> profile(new float[profilesize]);
 
-    float bwadjust = getprofile(profile, profilesize);
+    float bwadjust = getprofile(profile.get(), profilesize);
     //    for (int i=0;i<profilesize;i++) profile[i]*=profile[i];
     float basefreq = 65.406f * powf(2.0f, Pquality.basenote / 2);
     if (Pquality.basenote % 2 == 1)
@@ -586,25 +586,25 @@ void PADnoteParameters::applyparameters(bool lockmutex)
 
     //prepare a BIG FFT stuff
     auto localFft = FFTwrapper(samplesize);
-    auto *fftfreqs = new fft_t[samplesize / 2];
+    std::unique_ptr<fft_t> fftfreqs(new fft_t[samplesize / 2]);
 
-    float adj[samplemax]; //this is used to compute frequency relation to the base frequency
+    std::unique_ptr<float> adj(new float[samplemax]); //this is used to compute frequency relation to the base frequency
     for (int nsample = 0; nsample < samplemax; ++nsample)
-        adj[nsample] = (Pquality.oct + 1.0f) * (float)nsample / samplemax;
+        adj.get()[nsample] = (Pquality.oct + 1.0f) * float(nsample) / samplemax;
     for (int nsample = 0; nsample < samplemax; ++nsample)
     {
-        float tmp = adj[nsample] - adj[samplemax - 1] * 0.5f;
+        float tmp = adj.get()[nsample] - adj.get()[samplemax - 1] * 0.5f;
         float basefreqadjust = powf(2.0f, tmp);
 
         if (Pmode == 0)
-            generatespectrum_bandwidthMode(spectrum,
+            generatespectrum_bandwidthMode(spectrum.get(),
                                            spectrumsize,
                                            basefreq * basefreqadjust,
-                                           profile,
+                                           profile.get(),
                                            profilesize,
                                            bwadjust);
         else
-            generatespectrum_otherModes(spectrum, spectrumsize,
+            generatespectrum_otherModes(spectrum.get(), spectrumsize,
                                         basefreq * basefreqadjust);
 
         const int extra_samples = 5; //the last samples contains the first samples (used for linear/cubic interpolation)
@@ -612,8 +612,10 @@ void PADnoteParameters::applyparameters(bool lockmutex)
 
         newsample.smp[0] = 0.0f;
         for (int i = 1; i < spectrumsize; ++i) //randomize the phases
-            fftfreqs[i] = std::polar(spectrum[i], (float)RND * 6.29f);
-        localFft.freqs2smps(fftfreqs, newsample.smp); //that's all; here is the only ifft for the whole sample; no windows are used ;-)
+        {
+            fftfreqs.get()[i] = std::polar(spectrum.get()[i], float(RND) * 6.29f);
+        }
+        localFft.freqs2smps(fftfreqs.get(), newsample.smp); //that's all; here is the only ifft for the whole sample; no windows are used ;-)
 
         //normalize(rms)
         float rms = 0.0f;
@@ -649,21 +651,24 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         }
         newsample.smp = nullptr;
     }
-    delete[] fftfreqs;
-    delete[] spectrum;
 
     //delete the additional samples that might exists and are not useful
     if (lockmutex)
     {
         _mixer->Lock();
         for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
+        {
             deletesample(i);
+        }
         _mixer->Unlock();
     }
     else
+    {
         for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
+        {
             deletesample(i);
-    ;
+        }
+    }
 }
 
 void PADnoteParameters::export2wav(std::string basefilename)
@@ -684,7 +689,9 @@ void PADnoteParameters::export2wav(std::string basefilename)
             int nsmps = sample[k].size;
             auto *smps = new short int[nsmps];
             for (int i = 0; i < nsmps; ++i)
-                smps[i] = (short int)(sample[k].smp[i] * 32767.0f);
+            {
+                smps[i] = static_cast<short int>(sample[k].smp[i] * 32767.0f);
+            }
             wav.writeMonoSamples(nsmps, smps);
         }
     }
@@ -800,21 +807,14 @@ void PADnoteParameters::Deserialize(IPresetsSerializer *xml)
     {
         Php.base.type = xml->getpar127("base_type", Php.base.type);
         Php.base.par1 = xml->getpar127("base_par1", Php.base.par1);
-        Php.freqmult = xml->getpar127("frequency_multiplier",
-                                      Php.freqmult);
-        Php.modulator.par1 = xml->getpar127("modulator_par1",
-                                            Php.modulator.par1);
-        Php.modulator.freq = xml->getpar127("modulator_frequency",
-                                            Php.modulator.freq);
+        Php.freqmult = xml->getpar127("frequency_multiplier", Php.freqmult);
+        Php.modulator.par1 = xml->getpar127("modulator_par1", Php.modulator.par1);
+        Php.modulator.freq = xml->getpar127("modulator_frequency", Php.modulator.freq);
         Php.width = xml->getpar127("width", Php.width);
-        Php.amp.type = xml->getpar127("amplitude_multiplier_type",
-                                      Php.amp.type);
-        Php.amp.mode = xml->getpar127("amplitude_multiplier_mode",
-                                      Php.amp.mode);
-        Php.amp.par1 = xml->getpar127("amplitude_multiplier_par1",
-                                      Php.amp.par1);
-        Php.amp.par2 = xml->getpar127("amplitude_multiplier_par2",
-                                      Php.amp.par2);
+        Php.amp.type = xml->getpar127("amplitude_multiplier_type", Php.amp.type);
+        Php.amp.mode = xml->getpar127("amplitude_multiplier_mode", Php.amp.mode);
+        Php.amp.par1 = xml->getpar127("amplitude_multiplier_par1", Php.amp.par1);
+        Php.amp.par2 = xml->getpar127("amplitude_multiplier_par2", Php.amp.par2);
         Php.autoscale = xml->getparbool("autoscale", Php.autoscale);
         Php.onehalf = xml->getpar127("one_half", Php.onehalf);
         xml->exitbranch();
@@ -846,8 +846,7 @@ void PADnoteParameters::Deserialize(IPresetsSerializer *xml)
         Pquality.samplesize = xml->getpar127("samplesize", Pquality.samplesize);
         Pquality.basenote = xml->getpar127("basenote", Pquality.basenote);
         Pquality.oct = xml->getpar127("octaves", Pquality.oct);
-        Pquality.smpoct = xml->getpar127("samples_per_octave",
-                                         Pquality.smpoct);
+        Pquality.smpoct = xml->getpar127("samples_per_octave", Pquality.smpoct);
         xml->exitbranch();
     }
 
@@ -855,13 +854,11 @@ void PADnoteParameters::Deserialize(IPresetsSerializer *xml)
     {
         PVolume = xml->getpar127("volume", PVolume);
         PPanning = xml->getpar127("panning", PPanning);
-        PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing",
-                                                   PAmpVelocityScaleFunction);
+        PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing", PAmpVelocityScaleFunction);
         PPunchStrength = xml->getpar127("punch_strength", PPunchStrength);
         PPunchTime = xml->getpar127("punch_time", PPunchTime);
         PPunchStretch = xml->getpar127("punch_stretch", PPunchStretch);
-        PPunchVelocitySensing = xml->getpar127("punch_velocity_sensing",
-                                               PPunchVelocitySensing);
+        PPunchVelocitySensing = xml->getpar127("punch_velocity_sensing", PPunchVelocitySensing);
 
         xml->enterbranch("AMPLITUDE_ENVELOPE");
         AmpEnvelope->Deserialize(xml);
@@ -894,11 +891,8 @@ void PADnoteParameters::Deserialize(IPresetsSerializer *xml)
 
     if (xml->enterbranch("FILTER_PARAMETERS"))
     {
-        PFilterVelocityScale = xml->getpar127("velocity_sensing_amplitude",
-                                              PFilterVelocityScale);
-        PFilterVelocityScaleFunction = xml->getpar127(
-            "velocity_sensing",
-            PFilterVelocityScaleFunction);
+        PFilterVelocityScale = xml->getpar127("velocity_sensing_amplitude", PFilterVelocityScale);
+        PFilterVelocityScaleFunction = xml->getpar127("velocity_sensing", PFilterVelocityScaleFunction);
 
         xml->enterbranch("FILTER");
         GlobalFilter->Deserialize(xml);

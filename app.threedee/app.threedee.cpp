@@ -174,49 +174,93 @@ void AppThreeDee::Render()
     }
     ImGui::PopStyleVar();
 
-    unsigned int maxvalue = 50;
-    for (int c = 0; c < 88; c++)
+    // Timeline tests
     {
-        for (size_t i = 0; i < valuesOfValues[c].size(); i++)
-        {
-            if (valuesOfValues[c][i].values[1] + 10 > maxvalue)
-                maxvalue = static_cast<unsigned int>(std::ceil(valuesOfValues[c][i].values[1] / 10) * 10 + 10);
-        }
-    }
-    const float elapsedTime = static_cast<float>((static_cast<unsigned>(ImGui::GetTime() * 1000)) % (maxvalue * 1000)) / 1000.f;
-
-    static struct timelineEvent *selectedEvent = nullptr;
-    ImGui::Begin("timeline window");
-    if (ImGui::BeginTimelines("MyTimeline", maxvalue, 0, 88))
-    {
+        ImGui::Begin("Pianoroll editor");
+        unsigned int maxvalue = 50;
         for (int c = 0; c < 88; c++)
         {
-            char id[32];
-            sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
-            ImGui::TimelineStart(id, false);
             for (size_t i = 0; i < valuesOfValues[c].size(); i++)
             {
-                bool selected = (&(valuesOfValues[c][i]) == selectedEvent);
-                if (ImGui::TimelineEvent(valuesOfValues[c][i].values, &selected))
-                {
-                    selectedEvent = &(valuesOfValues[c][i]);
-                }
-            }
-            float new_values[2];
-            if (ImGui::TimelineEnd(new_values))
-            {
-                timelineEvent e{
-                    std::fmin(new_values[0], new_values[1]),
-                    std::fmax(new_values[0], new_values[1])};
-
-                valuesOfValues[c].push_back(e);
-                selectedEvent = &(valuesOfValues[c].back());
+                if (valuesOfValues[c][i].values[1] + 10 > maxvalue)
+                    maxvalue = static_cast<unsigned int>(std::ceil(valuesOfValues[c][i].values[1] / 10) * 10 + 10);
             }
         }
-    }
-    ImGui::EndTimelines(maxvalue / 10, elapsedTime);
+        const float elapsedTime = static_cast<float>((static_cast<unsigned>(ImGui::GetTime() * 1000)) % (maxvalue * 1000)) / 1000.f;
 
-    ImGui::End();
+        static struct timelineEvent *selectedEvent = nullptr;
+        if (ImGui::BeginTimelines("MyTimeline", maxvalue, 0, 88))
+        {
+            for (int c = 0; c < 88; c++)
+            {
+                char id[32];
+                sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
+                ImGui::TimelineStart(id, false);
+                for (size_t i = 0; i < valuesOfValues[c].size(); i++)
+                {
+                    bool selected = (&(valuesOfValues[c][i]) == selectedEvent);
+                    if (ImGui::TimelineEvent(valuesOfValues[c][i].values, &selected))
+                    {
+                        selectedEvent = &(valuesOfValues[c][i]);
+                    }
+                }
+                float new_values[2];
+                if (ImGui::TimelineEnd(new_values))
+                {
+                    timelineEvent e{
+                        std::fmin(new_values[0], new_values[1]),
+                        std::fmax(new_values[0], new_values[1])};
+
+                    valuesOfValues[c].push_back(e);
+                    selectedEvent = &(valuesOfValues[c].back());
+                }
+            }
+        }
+        ImGui::EndTimelines(maxvalue / 10, elapsedTime);
+
+        ImGui::End();
+
+        ImGui::Begin("Sequencer timeline editor");
+        unsigned int maxvalueSequencer = 16 * 4;
+        std::map<int, std::vector<timelineEvent>> seqValues;
+        for (int c = 0; c < NUM_MIXER_TRACKS; c++)
+        {
+            seqValues.insert(std::make_pair(c, std::vector<timelineEvent>()));
+
+            for (int a = 0; a < _state._sequencer.LastPatternIndex(c)+1; a++)
+            {
+                if (!_state._sequencer.DoesPatternExistAtIndex(c, a))
+                {
+                    continue;
+                }
+                timelineEvent e{float(a * 16), float(a * 16 + 16)};
+                seqValues[c].push_back(e);
+            }
+        }
+        const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(ImGui::GetTime() * 1000)) % (maxvalueSequencer * 1000)) / 1000.f;
+
+        if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 0, NUM_MIXER_TRACKS))
+        {
+            for (int c = 0; c < NUM_MIXER_TRACKS; c++)
+            {
+                char id[32];
+                sprintf(id, "Track %d", c);
+                ImGui::TimelineStart(id, false);
+                for (size_t i = 0; i < seqValues[c].size(); i++)
+                {
+                    bool selected = false;
+                    if (ImGui::TimelineEvent(seqValues[c][i].values, &selected))
+                    {
+                    }
+                }
+                float new_values[2];
+                ImGui::TimelineEnd(new_values);
+            }
+        }
+        ImGui::EndTimelines(maxvalueSequencer / 10, elapsedTimeSequencer);
+
+        ImGui::End();
+    }
 
     ImGui::Render();
 

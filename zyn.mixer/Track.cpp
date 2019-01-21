@@ -138,7 +138,7 @@ void Track::Defaults()
     Pveloffs = 64;
     Pkeylimit = 15;
     InstrumentDefaults();
-    ctl.defaults();
+    ctl.Defaults();
 }
 
 void Track::InstrumentDefaults()

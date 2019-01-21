@@ -29,11 +29,11 @@ Controller::~Controller() = default;
 
 void Controller::Init()
 {
-    defaults();
+    Defaults();
     resetall();
 }
 
-void Controller::defaults()
+void Controller::Defaults()
 {
     setpitchwheelbendrange(200); //2 halftones
     expression.receive = 1;

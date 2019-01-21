@@ -25,35 +25,41 @@
 
 int LFOParams::time;
 
-LFOParams::LFOParams(unsigned char Pfreq_,
-                     unsigned char Pintensity_,
-                     unsigned char Pstartphase_,
-                     unsigned char PLFOtype_,
-                     unsigned char Prandomness_,
-                     unsigned char Pdelay_,
-                     unsigned char Pcontinous_,
-                     unsigned char fel_)
+LFOParams::LFOParams(unsigned char freq,
+                     unsigned char intensity,
+                     unsigned char startphase,
+                     unsigned char LFOtype,
+                     unsigned char randomness,
+                     unsigned char delay,
+                     unsigned char continous,
+                     unsigned char fel)
 {
-    switch (fel_)
+    switch (fel)
     {
         case 0:
+        {
             setpresettype("Plfofrequency");
             break;
+        }
         case 1:
+        {
             setpresettype("Plfoamplitude");
             break;
+        }
         case 2:
+        {
             setpresettype("Plfofilter");
             break;
+        }
     }
-    Dfreq = Pfreq_;
-    Dintensity = Pintensity_;
-    Dstartphase = Pstartphase_;
-    DLFOtype = PLFOtype_;
-    Drandomness = Prandomness_;
-    Ddelay = Pdelay_;
-    Dcontinous = Pcontinous_;
-    fel = fel_;
+    Dfreq = freq;
+    Dintensity = intensity;
+    Dstartphase = startphase;
+    DLFOtype = LFOtype;
+    Drandomness = randomness;
+    Ddelay = delay;
+    Dcontinous = continous;
+    Pkind = fel;
     time = 0;
 
     Defaults();

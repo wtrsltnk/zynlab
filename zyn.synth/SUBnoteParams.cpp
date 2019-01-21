@@ -160,10 +160,8 @@ void SUBnoteParameters::Serialize(IPresetsSerializer *xml)
         GlobalFilter->Serialize(xml);
         xml->endbranch();
 
-        xml->addpar("filter_velocity_sensing",
-                    PGlobalFilterVelocityScaleFunction);
-        xml->addpar("filter_velocity_sensing_amplitude",
-                    PGlobalFilterVelocityScale);
+        xml->addpar("filter_velocity_sensing", PGlobalFilterVelocityScaleFunction);
+        xml->addpar("filter_velocity_sensing_amplitude", PGlobalFilterVelocityScale);
 
         xml->beginbranch("FILTER_ENVELOPE");
         GlobalFilterEnvelope->Serialize(xml);
@@ -259,7 +257,9 @@ void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
         for (int i = 0; i < MAX_SUB_HARMONICS; ++i)
         {
             if (xml->enterbranch("HARMONIC", i) == 0)
+            {
                 continue;
+            }
             Phmag[i] = xml->getpar127("mag", Phmag[i]);
             Phrelbw[i] = xml->getpar127("relbw", Phrelbw[i]);
             xml->exitbranch();
@@ -272,8 +272,7 @@ void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
         Pstereo = xml->getparbool("stereo", Pstereo);
         PVolume = xml->getpar127("volume", PVolume);
         PPanning = xml->getpar127("panning", PPanning);
-        PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing",
-                                                   PAmpVelocityScaleFunction);
+        PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing", PAmpVelocityScaleFunction);
         if (xml->enterbranch("AMPLITUDE_ENVELOPE"))
         {
             AmpEnvelope->Deserialize(xml);
@@ -289,14 +288,10 @@ void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
 
         PDetune = xml->getpar("detune", PDetune, 0, 16383);
         PCoarseDetune = xml->getpar("coarse_detune", PCoarseDetune, 0, 16383);
-        POvertoneSpread.type =
-            xml->getpar127("overtone_spread_type", POvertoneSpread.type);
-        POvertoneSpread.par1 =
-            xml->getpar("overtone_spread_par1", POvertoneSpread.par1, 0, 255);
-        POvertoneSpread.par2 =
-            xml->getpar("overtone_spread_par2", POvertoneSpread.par2, 0, 255);
-        POvertoneSpread.par3 =
-            xml->getpar("overtone_spread_par3", POvertoneSpread.par3, 0, 255);
+        POvertoneSpread.type = xml->getpar127("overtone_spread_type", POvertoneSpread.type);
+        POvertoneSpread.par1 = xml->getpar("overtone_spread_par1", POvertoneSpread.par1, 0, 255);
+        POvertoneSpread.par2 = xml->getpar("overtone_spread_par2", POvertoneSpread.par2, 0, 255);
+        POvertoneSpread.par3 = xml->getpar("overtone_spread_par3", POvertoneSpread.par3, 0, 255);
         updateFrequencyMultipliers();
         PDetuneType = xml->getpar127("detune_type", PDetuneType);
 
@@ -329,12 +324,8 @@ void SUBnoteParameters::Deserialize(IPresetsSerializer *xml)
             xml->exitbranch();
         }
 
-        PGlobalFilterVelocityScaleFunction = xml->getpar127(
-            "filter_velocity_sensing",
-            PGlobalFilterVelocityScaleFunction);
-        PGlobalFilterVelocityScale = xml->getpar127(
-            "filter_velocity_sensing_amplitude",
-            PGlobalFilterVelocityScale);
+        PGlobalFilterVelocityScaleFunction = xml->getpar127("filter_velocity_sensing", PGlobalFilterVelocityScaleFunction);
+        PGlobalFilterVelocityScale = xml->getpar127("filter_velocity_sensing_amplitude", PGlobalFilterVelocityScale);
 
         if (xml->enterbranch("FILTER_ENVELOPE"))
         {

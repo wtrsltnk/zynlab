@@ -27,20 +27,25 @@
 LFO::LFO(LFOParams *lfopars, float basefreq)
 {
     if (lfopars->Pstretch == 0)
+    {
         lfopars->Pstretch = 1;
-    float lfostretch = powf(basefreq / 440.0f,
-                            (lfopars->Pstretch - 64.0f) / 63.0f); //max 2x/octave
+    }
 
-    float lfofreq =
-        (powf(2, lfopars->Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
+    float lfostretch = powf(basefreq / 440.0f, (lfopars->Pstretch - 64.0f) / 63.0f); //max 2x/octave
+
+    float lfofreq = (powf(2, lfopars->Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
     incx = std::fabs(lfofreq) * SystemSettings::Instance().buffersize_f / SystemSettings::Instance().samplerate_f;
 
     if (lfopars->Pcontinous == 0)
     {
         if (lfopars->Pstartphase == 0)
+        {
             x = RND;
+        }
         else
+        {
             x = std::fmod((lfopars->Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
+        }
     }
     else
     {
@@ -50,29 +55,41 @@ LFO::LFO(LFOParams *lfopars, float basefreq)
 
     //Limit the Frequency(or else...)
     if (incx > 0.49999999f)
+    {
         incx = 0.499999999f;
+    }
 
     lfornd = lfopars->Prandomness / 127.0f;
     if (lfornd < 0.0f)
+    {
         lfornd = 0.0f;
+    }
     else if (lfornd > 1.0f)
+    {
         lfornd = 1.0f;
+    }
 
     //    lfofreqrnd=powf(lfopars->Pfreqrand/127.0f,2.0f)*2.0f*4.0f;
     lfofreqrnd = powf(lfopars->Pfreqrand / 127.0f, 2.0f) * 4.0f;
 
-    switch (lfopars->fel)
+    switch (lfopars->Pkind)
     {
         case 1:
+        {
             lfointensity = lfopars->Pintensity / 127.0f;
             break;
+        }
         case 2:
+        {
             lfointensity = lfopars->Pintensity / 127.0f * 4.0f;
             break; //in octave
+        }
         default:
+        {
             lfointensity = powf(2, lfopars->Pintensity / 127.0f * 11.0f) - 1.0f; //in centi
             x -= 0.25f;                                                          //chance the starting phase
             break;
+        }
     }
 
     amp1 = (1 - lfornd) + lfornd * RND;
@@ -126,20 +143,31 @@ float LFO::lfoout()
     }
 
     if ((lfotype == 0) || (lfotype == 1))
+    {
         out *= lfointensity * (amp1 + x * (amp2 - amp1));
+    }
     else
+    {
         out *= lfointensity * amp2;
+    }
+
     if (lfodelay < 0.00001f)
     {
         if (freqrndenabled == 0)
+        {
             x += incx;
+        }
         else
         {
             float tmp = (incrnd * (1.0f - x) + nextincrnd * x);
             if (tmp > 1.0f)
+            {
                 tmp = 1.0f;
+            }
             else if (tmp < 0.0f)
+            {
                 tmp = 0.0f;
+            }
             x += incx * tmp;
         }
         if (x >= 1)
@@ -152,7 +180,10 @@ float LFO::lfoout()
         }
     }
     else
+    {
         lfodelay -= SystemSettings::Instance().buffersize_f / SystemSettings::Instance().samplerate_f;
+    }
+
     return out;
 }
 
@@ -161,19 +192,27 @@ float LFO::lfoout()
  */
 float LFO::amplfoout()
 {
-    float out;
-    out = 1.0f - lfointensity + lfoout();
+    float out = 1.0f - lfointensity + lfoout();
+
     if (out < -1.0f)
+    {
         out = -1.0f;
+    }
     else if (out > 1.0f)
+    {
         out = 1.0f;
+    }
+
     return out;
 }
 
 void LFO::computenextincrnd()
 {
     if (freqrndenabled == 0)
+    {
         return;
+    }
+
     incrnd = nextincrnd;
     nextincrnd = powf(0.5f, lfofreqrnd) + RND * (powf(2.0f, lfofreqrnd) - 1.0f);
 }

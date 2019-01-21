@@ -38,7 +38,7 @@ public:
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
-    void defaults();
+    void Defaults();
 
     //Controllers functions
     void setpitchwheel(int value);

@@ -30,14 +30,14 @@
 class LFOParams : public WrappedPresets
 {
 public:
-    LFOParams(unsigned char Pfreq_,
-              unsigned char Pintensity_,
-              unsigned char Pstartphase_,
-              unsigned char PLFOtype_,
-              unsigned char Prandomness_,
-              unsigned char Pdelay_,
-              unsigned char Pcontinous,
-              unsigned char fel_);
+    LFOParams(unsigned char freq,
+              unsigned char intensity,
+              unsigned char startphase,
+              unsigned char LFOtype,
+              unsigned char randomness,
+              unsigned char delay,
+              unsigned char continous,
+              unsigned char fel);
     virtual ~LFOParams();
 
     void InitPresets();
@@ -57,7 +57,7 @@ public:
     unsigned char Pcontinous;  /**<1 if LFO is continous*/
     unsigned char Pstretch;    /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
 
-    int fel;         //what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
+    int Pkind;         //what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
     static int time; //is used by Pcontinous parameter
 private:
     /* Default parameters */

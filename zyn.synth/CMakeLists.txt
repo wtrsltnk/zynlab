@@ -7,8 +7,12 @@ find_package(FFTW REQUIRED)
 add_library(zyn.synth STATIC
     ADnote.cpp
     ADnote.h
+    ADnoteGlobalParam.cpp
+    ADnoteGlobalParam.h
     ADnoteParams.cpp
     ADnoteParams.h
+    ADnoteVoiceParam.cpp
+    ADnoteVoiceParam.h
     Controller.cpp
     Controller.h
     Envelope.cpp

@@ -49,7 +49,7 @@ private:
     float lfornd, lfofreqrnd;
     float lfodelay;
     /**\todo see if an enum would be better here*/
-    char lfotype;
+    unsigned char lfotype;
     int freqrndenabled;
 
     void computenextincrnd();
