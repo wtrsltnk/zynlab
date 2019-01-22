@@ -29,7 +29,7 @@ add_subdirectory("zyn.nio")
 add_subdirectory("zyn.seq")
 add_subdirectory("zyn.synth")
 add_subdirectory("app")
-#add_subdirectory("app.imgui")
+add_subdirectory("app.imgui")
 add_subdirectory("app.threedee")
 add_subdirectory("app.tiny")
 

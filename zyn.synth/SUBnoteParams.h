@@ -29,12 +29,14 @@
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
 
-class SUBnoteParameters : public Presets
+class SUBnoteParameters : public WrappedPresets
 {
 public:
     SUBnoteParameters();
     virtual ~SUBnoteParameters();
 
+    void InitPresets();
+    
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
     void Defaults();

@@ -4,11 +4,13 @@
 #include <iterator>
 #include <string>
 #include <zyn.common/PresetsSerializer.h>
+#include <zyn.dsp/FilterParams.h>
 #include <zyn.synth/EnvelopeParams.h>
 #include <zyn.synth/LFOParams.h>
 #include <zyn.synth/Resonance.h>
+#include <zyn.synth/SUBnoteParams.h>
 
-TEST_CASE("EnvelopeParams Presets", "[zyn.common]")
+TEST_CASE("EnvelopeParams Presets", "[zyn.synth]")
 {
     auto sut = EnvelopeParams('\0', '\0');
     sut.Defaults();
@@ -26,7 +28,7 @@ TEST_CASE("EnvelopeParams Presets", "[zyn.common]")
     REQUIRE(presetsA == presetsB);
 }
 
-TEST_CASE("EnvelopeParams Presets Deserialization", "[zyn.common]")
+TEST_CASE("EnvelopeParams Presets Deserialization", "[zyn.synth]")
 {
     auto sut = EnvelopeParams('\0', '\0');
     sut.Defaults();
@@ -74,7 +76,7 @@ TEST_CASE("EnvelopeParams Presets Deserialization", "[zyn.common]")
     REQUIRE(sut.Penvval[3] == 1);
 }
 
-TEST_CASE("LFOParams Presets", "[zyn.common]")
+TEST_CASE("LFOParams Presets", "[zyn.synth]")
 {
     auto sut = LFOParams(70, 0, 64, 0, 0, 0, 0, 0);
     sut.Defaults();
@@ -91,12 +93,46 @@ TEST_CASE("LFOParams Presets", "[zyn.common]")
     REQUIRE(presetsA == presetsB);
 }
 
-TEST_CASE("Resonance Presets", "[zyn.common]")
+TEST_CASE("Resonance Presets", "[zyn.synth]")
 {
     auto sut = Resonance();
     sut.Defaults();
     sut.InitPresets();
     sut.Penabled = 1;
+
+    auto serializerA = PresetsSerializer();
+    sut.Serialize(&serializerA);
+    auto presetsA = std::string(serializerA.getXMLdata());
+
+    auto serializerB = PresetsSerializer();
+    sut.WritePresetsToBlob(&serializerB);
+    auto presetsB = std::string(serializerB.getXMLdata());
+
+    REQUIRE(presetsA == presetsB);
+}
+
+TEST_CASE("Filter Presets", "[zyn.dsp]")
+{
+    auto sut = FilterParams(0, 64, 64);
+    sut.Defaults();
+    sut.InitPresets();
+
+    auto serializerA = PresetsSerializer();
+    sut.Serialize(&serializerA);
+    auto presetsA = std::string(serializerA.getXMLdata());
+
+    auto serializerB = PresetsSerializer();
+    sut.WritePresetsToBlob(&serializerB);
+    auto presetsB = std::string(serializerB.getXMLdata());
+
+    REQUIRE(presetsA == presetsB);
+}
+
+TEST_CASE("SUB Synth Presets", "[zyn.synth]")
+{
+    auto sut = SUBnoteParameters();
+    sut.Defaults();
+    sut.InitPresets();
 
     auto serializerA = PresetsSerializer();
     sut.Serialize(&serializerA);

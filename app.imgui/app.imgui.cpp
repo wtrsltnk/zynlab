@@ -1,7 +1,10 @@
 #include "app.imgui.h"
 
-#include "imgui.h"
-#include "imgui_impl_glfw_gl3.h"
+#undef IMGUI_IMPL_OPENGL_LOADER_GL3W
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD 1
+#include <imgui.h>
+#include "examples/imgui_impl_glfw.h"
+#include "examples/imgui_impl_opengl3.cpp"
 
 #include "font-icons.h"
 #include <zyn.mixer/Track.h>
@@ -80,6 +83,33 @@ void AppThreeDee::onResize(int width, int height)
 
 bool AppThreeDee::SetUp()
 {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+    io.ConfigDockingWithShift = false;
+
+    ImGui_ImplGlfw_InitForOpenGL(_window, true);
+    ImGui_ImplOpenGL3_Init("#version 130");
+
+    ImGui::StyleColorsDark();
+    ImGui::GetStyle().TabRounding = 2.0f;
+    ImGui::GetStyle().FrameRounding = 2.0f;
+
+    io.Fonts->Clear();
+    ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+    if (font != nullptr)
+    {
+        io.FontDefault = font;
+    }
+    else
+    {
+        io.Fonts->AddFontDefault();
+    }
+    io.Fonts->Build();
+
     return true;
 }
 
@@ -228,7 +258,10 @@ void AppThreeDee::Render(double dt)
         timePast = speed;
     }
 
-    ImGui_ImplGlfwGL3_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    ImGuiIO &io = ImGui::GetIO();
 
     // 1. Show a simple window.
     // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
@@ -342,13 +375,22 @@ void AppThreeDee::Render(double dt)
         ImGui::End();
     }
 
-    // Rendering
+    ImGui::Render();
+
+    // Update and Render additional Platform Windows
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
+
     int display_w, display_h;
-    glfwGetFramebufferSize(_window, &_display_w, &_display_h);
-    glViewport(0, 0, _display_w, _display_h);
+    glfwMakeContextCurrent(_window);
+    glfwGetFramebufferSize(_window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
-    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void AppThreeDee::CleanUp()

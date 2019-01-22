@@ -1,11 +1,10 @@
-
-#define GLEXTL_IMPLEMENTATION
-#include <GL/glextl.h>
-#include <GLFW/glfw3.h>
-
-#include "imgui_impl_glfw_gl3.h"
-
 #include "app.imgui.h"
+
+#include <imgui.h>
+
+#undef IMGUI_IMPL_OPENGL_LOADER_GL3W
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD 1
+#include "examples/imgui_impl_opengl3.h"
 
 using namespace std;
 
@@ -25,7 +24,7 @@ void sigterm_exit(int /*sig*/)
  */
 void initprogram()
 {
-    auto synth = SystemSettings::Instance();
+    auto &synth = SystemSettings::Instance();
     Config::Current().init();
 
     /* Get the settings from the Config*/
@@ -78,6 +77,7 @@ int main(int /*argc*/, char * /*argv*/ [])
         return -1;
 
     Nio::SelectSink("PA");
+    Nio::SelectSource("RT");
 
     Config::Current().init();
 
@@ -93,16 +93,13 @@ int main(int /*argc*/, char * /*argv*/ [])
 
     AppThreeDee app(window, mixer);
 
-    // Setup ImGui binding
-    ImGui_ImplGlfwGL3_Init(window, true);
-
     glfwSetKeyCallback(window, AppThreeDee::KeyActionCallback);
     //    glfwSetFramebufferSizeCallback(window, AppThreeDee::ResizeCallback);
 
     glfwSetWindowSizeCallback(window, AppThreeDee::ResizeCallback);
     glfwMakeContextCurrent(window);
 
-    glExtLoadAll((PFNGLGETPROC *)glfwGetProcAddress);
+    gladLoadGL();
 
     AppThreeDee::ResizeCallback(window, 800, 600);
 

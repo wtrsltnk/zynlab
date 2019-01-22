@@ -277,7 +277,15 @@ void Preset::WriteToBlob(IPresetsSerializer *xml)
         }
         case PresetTypes::Container:
         {
-            xml->beginbranch(Name(), Id());
+            if (Id() != -1)
+            {
+                xml->beginbranch(Name(), Id());
+            }
+            else
+            {
+                xml->beginbranch(Name());
+            }
+            
             for (auto &preset : _presets)
             {
                 preset.WriteToBlob(xml);

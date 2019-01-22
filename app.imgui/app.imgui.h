@@ -1,8 +1,11 @@
 #ifndef _APP_THREE_DEE_H_
 #define _APP_THREE_DEE_H_
 
-#include <GL/glextl.h>
+#include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
+
+#include <imgui.h>
 
 #include <zyn.common/Util.h>
 #include <zyn.mixer/BankManager.h>

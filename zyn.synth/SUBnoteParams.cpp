@@ -90,6 +90,76 @@ void SUBnoteParameters::Defaults()
     GlobalFilterEnvelope->Defaults();
 }
 
+void SUBnoteParameters::InitPresets()
+{
+    AddPreset("num_stages", &Pnumstages);
+    AddPreset("harmonic_mag_type", &Phmagtype);
+    AddPreset("start", &Pstart);
+
+    Preset harmonics("HARMONICS");
+    for (int i = 0; i < MAX_SUB_HARMONICS; ++i)
+    {
+        Preset harmonic("HARMONIC", i);
+        harmonic.AddPreset("mag", &Phmag[i]);
+        harmonic.AddPreset("relbw", &Phrelbw[i]);
+        harmonics.AddContainer(harmonic);
+    }
+    AddContainer(harmonics);
+
+    Preset amplitudeParameters("AMPLITUDE_PARAMETERS");
+    {
+        amplitudeParameters.AddPresetAsBool("stereo", &Pstereo);
+        amplitudeParameters.AddPreset("volume", &PVolume);
+        amplitudeParameters.AddPreset("panning", &PPanning);
+        amplitudeParameters.AddPreset("velocity_sensing", &PAmpVelocityScaleFunction);
+        AmpEnvelope->InitPresets();
+        amplitudeParameters.AddContainer(Preset("AMPLITUDE_ENVELOPE", *AmpEnvelope));
+    }
+    AddContainer(amplitudeParameters);
+
+    Preset frequencyParameters("FREQUENCY_PARAMETERS");
+    {
+        frequencyParameters.AddPresetAsBool("fixed_freq", &Pfixedfreq);
+        frequencyParameters.AddPreset("fixed_freq_et", &PfixedfreqET);
+
+        frequencyParameters.AddPreset("detune", &PDetune);
+        frequencyParameters.AddPreset("coarse_detune", &PCoarseDetune);
+        frequencyParameters.AddPreset("overtone_spread_type", &POvertoneSpread.type);
+        frequencyParameters.AddPreset("overtone_spread_par1", &POvertoneSpread.par1);
+        frequencyParameters.AddPreset("overtone_spread_par2", &POvertoneSpread.par2);
+        frequencyParameters.AddPreset("overtone_spread_par3", &POvertoneSpread.par3);
+        frequencyParameters.AddPreset("detune_type", &PDetuneType);
+
+        frequencyParameters.AddPreset("bandwidth", &Pbandwidth);
+        frequencyParameters.AddPreset("bandwidth_scale", &Pbwscale);
+
+        frequencyParameters.AddPresetAsBool("freq_envelope_enabled", &PFreqEnvelopeEnabled);
+        FreqEnvelope->InitPresets();
+        frequencyParameters.AddContainer(Preset("FREQUENCY_ENVELOPE", *FreqEnvelope));
+
+        frequencyParameters.AddPresetAsBool("band_width_envelope_enabled", &PBandWidthEnvelopeEnabled);
+        BandWidthEnvelope->InitPresets();
+        frequencyParameters.AddContainer(Preset("BANDWIDTH_ENVELOPE", *BandWidthEnvelope));
+    }
+    AddContainer(frequencyParameters);
+
+    Preset filterParameters("FILTER_PARAMETERS");
+    {
+        filterParameters.AddPresetAsBool("enabled", &PGlobalFilterEnabled);
+
+        GlobalFilter->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER", *GlobalFilter));
+
+        filterParameters.AddPreset("filter_velocity_sensing", &PGlobalFilterVelocityScaleFunction);
+        filterParameters.AddPreset("filter_velocity_sensing_amplitude", &PGlobalFilterVelocityScale);
+
+        GlobalFilterEnvelope->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER_ENVELOPE", *GlobalFilterEnvelope));
+
+    }
+    AddContainer(filterParameters);
+}
+
 void SUBnoteParameters::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("num_stages", Pnumstages);

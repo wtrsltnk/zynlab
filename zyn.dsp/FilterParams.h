@@ -27,17 +27,17 @@
 #include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 
-class FilterParams : public Presets
+class FilterParams : public WrappedPresets
 {
 public:
     FilterParams(unsigned char Ptype_, unsigned char Pfreq, unsigned char Pq_);
     virtual ~FilterParams();
 
+    void InitPresets();
+    
+    void Defaults();
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
-    void Defaults();
-    void SerializeSection(IPresetsSerializer *xml, int n);
-    void DeserializeSection(IPresetsSerializer *xml, int n);
 
     void getfromFilterParams(FilterParams *pars);
 
@@ -90,8 +90,6 @@ public:
     bool changed;
 
 private:
-    void Defaults(int n);
-
     //stored default parameters
     unsigned char Dtype;
     unsigned char Dfreq;

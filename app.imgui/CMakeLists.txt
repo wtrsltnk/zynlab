@@ -8,28 +8,19 @@ if(GLFW3_FOUND)
     find_package(OpenGL REQUIRED)
     find_package(GLM REQUIRED)
 
-    set(app_imgui_SRCS
+    add_executable(app.imgui
         main.cpp
         app.imgui.cpp
-        ImSequencer.cpp
-        )
-
-    set(app_imgui_HDRS
         app.imgui.h
+        ImSequencer.cpp
         ImSequencer.h
-        )
-
-    set(app_imgui_imgui_SRCS
+        glad.c
         imgui/imgui.cpp
         imgui/imgui_draw.cpp
         imgui/imgui_demo.cpp
-        imgui_impl_glfw_gl3.cpp
-        )
-
-    add_executable(app.imgui
-        ${app_imgui_SRCS}
-        ${app_imgui_HDRS}
-        ${app_imgui_imgui_SRCS}
+        imgui/imgui_widgets.cpp
+        imgui/examples/imgui_impl_glfw.cpp
+        #imgui/examples/imgui_impl_opengl3.cpp
         )
 
     target_include_directories(app.imgui
@@ -37,6 +28,7 @@ if(GLFW3_FOUND)
             ${CMAKE_SOURCE_DIR}
             ${GLFW3_INCLUDE_DIR}
             ${GLM_DIR}
+            include
             imgui
         )
 

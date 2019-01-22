@@ -51,8 +51,14 @@ void FilterParams::Defaults()
     Pnumformants = 3;
     Pformantslowness = 64;
     for (int j = 0; j < FF_MAX_VOWELS; ++j)
-        Defaults(j);
-    ;
+    {
+        for (auto & formant : Pvowels[j].formants)
+        {
+            formant.freq = int(RND * 127.0f); //some random freqs
+            formant.q = 64;
+            formant.amp = 127;
+        }
+    }
 
     Psequencesize = 3;
     for (int i = 0; i < FF_MAX_SEQUENCE; ++i)
@@ -65,14 +71,153 @@ void FilterParams::Defaults()
     Pvowelclearness = 64;
 }
 
-void FilterParams::Defaults(int n)
+void FilterParams::InitPresets()
 {
-    int j = n;
-    for (auto & formant : Pvowels[j].formants)
+    //filter parameters
+    AddPreset("category", &Pcategory);
+    AddPreset("type", &Ptype);
+    AddPreset("freq", &Pfreq);
+    AddPreset("q", &Pq);
+    AddPreset("stages", &Pstages);
+    AddPreset("freq_track", &Pfreqtrack);
+    AddPreset("gain", &Pgain);
+
+    //formant filter parameters
+    Preset formantFilter("FORMANT_FILTER");
+    formantFilter.AddPreset("num_formants", &Pnumformants);
+    formantFilter.AddPreset("formant_slowness", &Pformantslowness);
+    formantFilter.AddPreset("vowel_clearness", &Pvowelclearness);
+    formantFilter.AddPreset("center_freq", &Pcenterfreq);
+    formantFilter.AddPreset("octaves_freq", &Poctavesfreq);
+    for (int nvowel = 0; nvowel < FF_MAX_VOWELS; ++nvowel)
     {
-        formant.freq = (int)(RND * 127.0f); //some random freqs
-        formant.q = 64;
-        formant.amp = 127;
+        Preset vowel("VOWEL", nvowel);
+        for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
+        {
+            Preset format("FORMANT", nformant);
+            format.AddPreset("freq", &Pvowels[nvowel].formants[nformant].freq);
+            format.AddPreset("amp", &Pvowels[nvowel].formants[nformant].amp);
+            format.AddPreset("q", &Pvowels[nvowel].formants[nformant].q);
+            vowel.AddContainer(format);
+        }
+        formantFilter.AddContainer(vowel);
+    }
+    formantFilter.AddPreset("sequence_size", &Psequencesize);
+    formantFilter.AddPreset("sequence_stretch", &Psequencestretch);
+    formantFilter.AddPresetAsBool("sequence_reversed", &Psequencereversed);
+    for (int nseq = 0; nseq < FF_MAX_SEQUENCE; ++nseq)
+    {
+        Preset pos("SEQUENCE_POS", nseq);
+        pos.AddPreset("vowel_id", &Psequence[nseq].nvowel);
+        formantFilter.AddContainer(pos);
+    }
+    AddContainer(formantFilter);
+}
+
+void FilterParams::Serialize(IPresetsSerializer *xml)
+{
+    //filter parameters
+    xml->addpar("category", Pcategory);
+    xml->addpar("type", Ptype);
+    xml->addpar("freq", Pfreq);
+    xml->addpar("q", Pq);
+    xml->addpar("stages", Pstages);
+    xml->addpar("freq_track", Pfreqtrack);
+    xml->addpar("gain", Pgain);
+
+    //formant filter parameters
+    if ((Pcategory == 1) || (!xml->minimal))
+    {
+        xml->beginbranch("FORMANT_FILTER");
+        xml->addpar("num_formants", Pnumformants);
+        xml->addpar("formant_slowness", Pformantslowness);
+        xml->addpar("vowel_clearness", Pvowelclearness);
+        xml->addpar("center_freq", Pcenterfreq);
+        xml->addpar("octaves_freq", Poctavesfreq);
+        for (int nvowel = 0; nvowel < FF_MAX_VOWELS; ++nvowel)
+        {
+            xml->beginbranch("VOWEL", nvowel);
+            for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
+            {
+                xml->beginbranch("FORMANT", nformant);
+                xml->addpar("freq", Pvowels[nvowel].formants[nformant].freq);
+                xml->addpar("amp", Pvowels[nvowel].formants[nformant].amp);
+                xml->addpar("q", Pvowels[nvowel].formants[nformant].q);
+                xml->endbranch();
+            }
+            xml->endbranch();
+        }
+        xml->addpar("sequence_size", Psequencesize);
+        xml->addpar("sequence_stretch", Psequencestretch);
+        xml->addparbool("sequence_reversed", Psequencereversed);
+        for (int nseq = 0; nseq < FF_MAX_SEQUENCE; ++nseq)
+        {
+            xml->beginbranch("SEQUENCE_POS", nseq);
+            xml->addpar("vowel_id", Psequence[nseq].nvowel);
+            xml->endbranch();
+        }
+        xml->endbranch();
+    }
+}
+
+void FilterParams::Deserialize(IPresetsSerializer *xml)
+{
+    //filter parameters
+    Pcategory = xml->getpar127("category", Pcategory);
+    Ptype = xml->getpar127("type", Ptype);
+    Pfreq = xml->getpar127("freq", Pfreq);
+    Pq = xml->getpar127("q", Pq);
+    Pstages = xml->getpar127("stages", Pstages);
+    Pfreqtrack = xml->getpar127("freq_track", Pfreqtrack);
+    Pgain = xml->getpar127("gain", Pgain);
+
+    //formant filter parameters
+    if (xml->enterbranch("FORMANT_FILTER"))
+    {
+        Pnumformants = xml->getpar127("num_formants", Pnumformants);
+        Pformantslowness = xml->getpar127("formant_slowness", Pformantslowness);
+        Pvowelclearness = xml->getpar127("vowel_clearness", Pvowelclearness);
+        Pcenterfreq = xml->getpar127("center_freq", Pcenterfreq);
+        Poctavesfreq = xml->getpar127("octaves_freq", Poctavesfreq);
+
+        for (int nvowel = 0; nvowel < FF_MAX_VOWELS; ++nvowel)
+        {
+            if (xml->enterbranch("VOWEL", nvowel) == 0)
+            {
+                continue;
+            }
+
+            for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
+            {
+                if (xml->enterbranch("FORMANT", nformant) == 0)
+                    continue;
+                Pvowels[nvowel].formants[nformant].freq = xml->getpar127(
+                    "freq",
+                    Pvowels[nvowel].formants[nformant].freq);
+                Pvowels[nvowel].formants[nformant].amp = xml->getpar127(
+                    "amp",
+                    Pvowels[nvowel].formants[nformant].amp);
+                Pvowels[nvowel].formants[nformant].q =
+                    xml->getpar127("q", Pvowels[nvowel].formants[nformant].q);
+                xml->exitbranch();
+            }
+            xml->exitbranch();
+        }
+        Psequencesize = xml->getpar127("sequence_size", Psequencesize);
+        Psequencestretch = xml->getpar127("sequence_stretch", Psequencestretch);
+        Psequencereversed = xml->getparbool("sequence_reversed",
+                                            Psequencereversed);
+        for (int nseq = 0; nseq < FF_MAX_SEQUENCE; ++nseq)
+        {
+            if (xml->enterbranch("SEQUENCE_POS", nseq) == 0)
+                continue;
+            Psequence[nseq].nvowel = xml->getpar("vowel_id",
+                                                 Psequence[nseq].nvowel,
+                                                 0,
+                                                 FF_MAX_VOWELS - 1);
+            xml->exitbranch();
+        }
+        xml->exitbranch();
     }
 }
 
@@ -275,120 +420,4 @@ float FilterParams::getformantq(unsigned char q)
     //temp
     float result = powf(25.0f, (q - 32.0f) / 64.0f);
     return result;
-}
-
-void FilterParams::SerializeSection(IPresetsSerializer *xml, int n)
-{
-    int nvowel = n;
-    for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
-    {
-        xml->beginbranch("FORMANT", nformant);
-        xml->addpar("freq", Pvowels[nvowel].formants[nformant].freq);
-        xml->addpar("amp", Pvowels[nvowel].formants[nformant].amp);
-        xml->addpar("q", Pvowels[nvowel].formants[nformant].q);
-        xml->endbranch();
-    }
-}
-
-void FilterParams::Serialize(IPresetsSerializer *xml)
-{
-    //filter parameters
-    xml->addpar("category", Pcategory);
-    xml->addpar("type", Ptype);
-    xml->addpar("freq", Pfreq);
-    xml->addpar("q", Pq);
-    xml->addpar("stages", Pstages);
-    xml->addpar("freq_track", Pfreqtrack);
-    xml->addpar("gain", Pgain);
-
-    //formant filter parameters
-    if ((Pcategory == 1) || (!xml->minimal))
-    {
-        xml->beginbranch("FORMANT_FILTER");
-        xml->addpar("num_formants", Pnumformants);
-        xml->addpar("formant_slowness", Pformantslowness);
-        xml->addpar("vowel_clearness", Pvowelclearness);
-        xml->addpar("center_freq", Pcenterfreq);
-        xml->addpar("octaves_freq", Poctavesfreq);
-        for (int nvowel = 0; nvowel < FF_MAX_VOWELS; ++nvowel)
-        {
-            xml->beginbranch("VOWEL", nvowel);
-            SerializeSection(xml, nvowel);
-            xml->endbranch();
-        }
-        xml->addpar("sequence_size", Psequencesize);
-        xml->addpar("sequence_stretch", Psequencestretch);
-        xml->addparbool("sequence_reversed", Psequencereversed);
-        for (int nseq = 0; nseq < FF_MAX_SEQUENCE; ++nseq)
-        {
-            xml->beginbranch("SEQUENCE_POS", nseq);
-            xml->addpar("vowel_id", Psequence[nseq].nvowel);
-            xml->endbranch();
-        }
-        xml->endbranch();
-    }
-}
-
-void FilterParams::DeserializeSection(IPresetsSerializer *xml, int n)
-{
-    int nvowel = n;
-    for (int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant)
-    {
-        if (xml->enterbranch("FORMANT", nformant) == 0)
-            continue;
-        Pvowels[nvowel].formants[nformant].freq = xml->getpar127(
-            "freq",
-            Pvowels[nvowel].formants[nformant].freq);
-        Pvowels[nvowel].formants[nformant].amp = xml->getpar127(
-            "amp",
-            Pvowels[nvowel].formants[nformant].amp);
-        Pvowels[nvowel].formants[nformant].q =
-            xml->getpar127("q", Pvowels[nvowel].formants[nformant].q);
-        xml->exitbranch();
-    }
-}
-
-void FilterParams::Deserialize(IPresetsSerializer *xml)
-{
-    //filter parameters
-    Pcategory = xml->getpar127("category", Pcategory);
-    Ptype = xml->getpar127("type", Ptype);
-    Pfreq = xml->getpar127("freq", Pfreq);
-    Pq = xml->getpar127("q", Pq);
-    Pstages = xml->getpar127("stages", Pstages);
-    Pfreqtrack = xml->getpar127("freq_track", Pfreqtrack);
-    Pgain = xml->getpar127("gain", Pgain);
-
-    //formant filter parameters
-    if (xml->enterbranch("FORMANT_FILTER"))
-    {
-        Pnumformants = xml->getpar127("num_formants", Pnumformants);
-        Pformantslowness = xml->getpar127("formant_slowness", Pformantslowness);
-        Pvowelclearness = xml->getpar127("vowel_clearness", Pvowelclearness);
-        Pcenterfreq = xml->getpar127("center_freq", Pcenterfreq);
-        Poctavesfreq = xml->getpar127("octaves_freq", Poctavesfreq);
-
-        for (int nvowel = 0; nvowel < FF_MAX_VOWELS; ++nvowel)
-        {
-            if (xml->enterbranch("VOWEL", nvowel) == 0)
-                continue;
-            DeserializeSection(xml, nvowel);
-            xml->exitbranch();
-        }
-        Psequencesize = xml->getpar127("sequence_size", Psequencesize);
-        Psequencestretch = xml->getpar127("sequence_stretch", Psequencestretch);
-        Psequencereversed = xml->getparbool("sequence_reversed",
-                                            Psequencereversed);
-        for (int nseq = 0; nseq < FF_MAX_SEQUENCE; ++nseq)
-        {
-            if (xml->enterbranch("SEQUENCE_POS", nseq) == 0)
-                continue;
-            Psequence[nseq].nvowel = xml->getpar("vowel_id",
-                                                 Psequence[nseq].nvowel,
-                                                 0,
-                                                 FF_MAX_VOWELS - 1);
-            xml->exitbranch();
-        }
-        xml->exitbranch();
-    }
 }
