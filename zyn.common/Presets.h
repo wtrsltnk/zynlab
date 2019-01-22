@@ -31,8 +31,10 @@
 
 enum class PresetTypes
 {
+    String,
     UnsignedChar,
     UnsignedShort,
+    UnsignedInt,
     Short,
     Float,
     Boolean,
@@ -48,18 +50,23 @@ protected:
     union {
         unsigned char *uchar_v;
         unsigned short int *ushort_v;
+        unsigned int *uint_v;
         short int *short_v;
         float *float_v;
+        char *string_v;
     } valueReference;
     union {
         unsigned char uchar_min;
         unsigned short int ushort_min;
+        unsigned int uint_min;
         short int short_min;
         float float_min;
     } _rangeMin;
     union {
+        int string_max;
         unsigned char uchar_max;
         unsigned short int ushort_max;
+        unsigned int uint_max;
         short int short_max;
         float float_max;
     } _rangeMax;
@@ -67,13 +74,16 @@ protected:
 
     void WriteToBlob(IPresetsSerializer *xml);
     void ReadFromBlob(IPresetsSerializer *xml);
+
 public:
     Preset(Preset const &preset);
     Preset(std::string const &name);
     Preset(std::string const &name, int id);
     Preset(std::string const &name, Preset const &preset);
+    Preset(std::string const &name, char *value, int max);
     Preset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
+    Preset(std::string const &name, unsigned int *value, unsigned int min = 0, unsigned int max = 4294967295);
     Preset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
     Preset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
     virtual ~Preset();
@@ -83,19 +93,25 @@ public:
     int Id() const;
     void Id(int id);
 
+    operator char *const() const;
     operator unsigned char() const;
     operator unsigned short int() const;
+    operator unsigned int() const;
     operator short int() const;
     operator float() const;
 
+    void set(char *v);
     void set(unsigned char v);
     void set(unsigned short int v);
+    void set(unsigned int v);
     void set(short int v);
     void set(float v);
 
     Preset &AddPreset(Preset const &preset);
+    Preset &AddPreset(std::string const &name, char *value, int max);
     Preset &AddPreset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset &AddPreset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
+    Preset &AddPreset(std::string const &name, unsigned int *value, unsigned int min = 0, unsigned int max = 4294967295);
     Preset &AddPreset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
     Preset &AddPreset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
     Preset &AddPresetAsBool(std::string const &name, unsigned char *value);
@@ -115,8 +131,8 @@ public:
     Presets();
     virtual ~Presets();
 
-    virtual void copy(const char *name); /**<if name==NULL, the clipboard is used*/
-    virtual void paste(unsigned int npreset);     //npreset==0 for clipboard
+    virtual void copy(const char *name);      /**<if name==NULL, the clipboard is used*/
+    virtual void paste(unsigned int npreset); //npreset==0 for clipboard
     virtual bool checkclipboardtype();
     void deletepreset(unsigned int npreset);
 

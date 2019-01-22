@@ -9,6 +9,7 @@
 #include <zyn.synth/LFOParams.h>
 #include <zyn.synth/Resonance.h>
 #include <zyn.synth/SUBnoteParams.h>
+#include <zyn.mixer/Microtonal.h>
 
 TEST_CASE("EnvelopeParams Presets", "[zyn.synth]")
 {
@@ -135,10 +136,32 @@ TEST_CASE("SUB Synth Presets", "[zyn.synth]")
     sut.InitPresets();
 
     auto serializerA = PresetsSerializer();
+    serializerA.minimal = false;
     sut.Serialize(&serializerA);
     auto presetsA = std::string(serializerA.getXMLdata());
 
     auto serializerB = PresetsSerializer();
+    serializerB.minimal = false;
+    sut.WritePresetsToBlob(&serializerB);
+    auto presetsB = std::string(serializerB.getXMLdata());
+
+    REQUIRE(presetsA == presetsB);
+}
+
+TEST_CASE("Microtonal Presets", "[zyn.mixer]")
+{
+    auto sut = Microtonal();
+    sut.Defaults();
+    sut.InitPresets();
+    sut.Penabled = 1;
+
+    auto serializerA = PresetsSerializer();
+    serializerA.minimal = false;
+    sut.Serialize(&serializerA);
+    auto presetsA = std::string(serializerA.getXMLdata());
+
+    auto serializerB = PresetsSerializer();
+    serializerB.minimal = false;
     sut.WritePresetsToBlob(&serializerB);
     auto presetsB = std::string(serializerB.getXMLdata());
 

@@ -75,7 +75,7 @@ void Microtonal::Defaults()
 }
 
 Microtonal::~Microtonal()
-{ }
+{}
 
 /*
  * Get the size of the octave
@@ -690,7 +690,64 @@ int Microtonal::loadkbm(const char *filename)
     return 0;
 }
 
-void Microtonal::Serialize(IPresetsSerializer *xml) const
+void Microtonal::InitPresets()
+{
+    AddPreset("name", Pname, MICROTONAL_MAX_NAME_LEN);
+    AddPreset("comment", Pcomment, MICROTONAL_MAX_NAME_LEN);
+
+    AddPresetAsBool("invert_up_down", &Pinvertupdown);
+    AddPreset("invert_up_down_center", &Pinvertupdowncenter);
+
+    AddPresetAsBool("enabled", &Penabled);
+    AddPreset("global_fine_detune", &Pglobalfinedetune);
+
+    AddPreset("a_note", &PAnote);
+    AddPreset("a_freq", &PAfreq);
+
+    Preset scale("SCALE");
+    {
+        scale.AddPreset("scale_shift", &Pscaleshift);
+        scale.AddPreset("first_key", &Pfirstkey);
+        scale.AddPreset("last_key", &Plastkey);
+        scale.AddPreset("middle_note", &Pmiddlenote);
+
+        Preset octaveBranch("OCTAVE");
+        {
+            octaveBranch.AddPreset("octave_size", &octavesize);
+            for (int i = 0; i < octavesize; ++i)
+            {
+                Preset degree("DEGREE", i);
+                if (octave[i].type == 1)
+                {
+                    degree.AddPreset("cents", &octave[i].tuning);
+                }
+                if (octave[i].type == 2)
+                {
+                    degree.AddPreset("numerator", &octave[i].x1);
+                    degree.AddPreset("denominator", &octave[i].x2);
+                }
+                octaveBranch.AddContainer(degree);
+            }
+            scale.AddContainer(octaveBranch);
+        }
+
+        Preset keyboardMapping("KEYBOARD_MAPPING");
+        {
+            keyboardMapping.AddPreset("map_size", &Pmapsize);
+            keyboardMapping.AddPreset("mapping_enabled", &Pmappingenabled);
+            for (int i = 0; i < Pmapsize; ++i)
+            {
+                Preset keymap("KEYMAP", i);
+                keymap.AddPreset("degree", &Pmapping[i]);
+                keyboardMapping.AddContainer(keymap);
+            }
+            scale.AddContainer(keyboardMapping);
+        }
+        AddContainer(scale);
+    }
+}
+
+void Microtonal::Serialize(IPresetsSerializer *xml)
 {
     xml->addparstr("name", (char *)Pname);
     xml->addparstr("comment", (char *)Pcomment);
@@ -791,8 +848,8 @@ void Microtonal::Deserialize(IPresetsSerializer *xml)
                     octave[i].type = 1;
                     //populate fields for display
                     float x = logf(octave[i].tuning) / LOG_2 * 1200.0f;
-                    octave[i].x1 = (int)std::floor(x);
-                    octave[i].x2 = (int)(floor(fmodf(x, 1.0f) * 1e6));
+                    octave[i].x1 = static_cast<unsigned int>(std::floor(x));
+                    octave[i].x2 = static_cast<unsigned int>(std::floor(std::fmod(x, 1.0) * 1e6));
                 }
 
                 xml->exitbranch();
@@ -819,7 +876,7 @@ void Microtonal::Deserialize(IPresetsSerializer *xml)
     }
 }
 
-int Microtonal::saveXML(const char *filename) const
+int Microtonal::saveXML(const char *filename)
 {
     PresetsSerializer xml;
 

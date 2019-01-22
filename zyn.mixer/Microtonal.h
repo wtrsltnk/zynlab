@@ -23,7 +23,7 @@
 #ifndef MICROTONAL_H
 #define MICROTONAL_H
 
-#include <zyn.common/IPresetsSerializer.h>
+#include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 
 #define MAX_OCTAVE_SIZE 128
@@ -32,7 +32,7 @@
 #include <stdio.h>
 
 /**Tuning settings and microtonal capabilities*/
-class Microtonal
+class Microtonal : public WrappedPresets
 {
 public:
     /**Constructor*/
@@ -95,16 +95,18 @@ public: //Parameters
     void texttomapping(const char *text);
 
     /**Name of Microtonal tuning*/
-    unsigned char Pname[MICROTONAL_MAX_NAME_LEN];
+    char Pname[MICROTONAL_MAX_NAME_LEN];
     /**Comment about the tuning*/
-    unsigned char Pcomment[MICROTONAL_MAX_NAME_LEN];
+    char Pcomment[MICROTONAL_MAX_NAME_LEN];
 
 public: // Serialization
-    void Serialize(IPresetsSerializer *xml) const;
+    void InitPresets();
+
+    void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
     void Defaults();
 
-    int saveXML(const char *filename) const;
+    int saveXML(const char *filename);
     int loadXML(const char *filename);
 
     //simple operators primarily for debug

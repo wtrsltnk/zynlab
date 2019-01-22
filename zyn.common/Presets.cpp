@@ -136,6 +136,12 @@ Preset::Preset(Preset const &preset)
       _rangeMin(preset._rangeMin), _rangeMax(preset._rangeMax),
       _presets(preset._presets)
 {}
+Preset::Preset(std::string const &name, char *value, int max)
+    : _name(name), _type(PresetTypes::String), _id(-1)
+{
+    valueReference.string_v = value;
+    _rangeMax.string_max = max;
+}
 Preset::Preset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
     : _name(name), _type(PresetTypes::UnsignedChar), _id(-1)
 {
@@ -153,6 +159,13 @@ Preset::Preset(std::string const &name, unsigned short int *value, unsigned shor
     valueReference.ushort_v = value;
     _rangeMin.ushort_min = min;
     _rangeMax.ushort_max = max;
+}
+Preset::Preset(std::string const &name, unsigned int *value, unsigned int min, unsigned int max)
+    : _name(name), _type(PresetTypes::UnsignedInt), _id(-1)
+{
+    valueReference.uint_v = value;
+    _rangeMin.uint_min = min;
+    _rangeMax.uint_max = max;
 }
 Preset::Preset(std::string const &name, short int *value, short int min, short int max)
     : _name(name), _type(PresetTypes::Short), _id(-1)
@@ -178,13 +191,17 @@ int Preset::Id() const { return _id; }
 
 void Preset::Id(int id) { _id = id; }
 
+Preset::operator char *const() const { return valueReference.string_v; }
 Preset::operator unsigned char() const { return *valueReference.uchar_v; }
 Preset::operator unsigned short int() const { return *valueReference.ushort_v; }
+Preset::operator unsigned int() const { return *valueReference.uint_v; }
 Preset::operator short int() const { return *valueReference.short_v; }
 Preset::operator float() const { return *valueReference.float_v; }
 
+void Preset::set(char *const v) { strcpy(valueReference.string_v, v); }
 void Preset::set(unsigned char v) { *valueReference.uchar_v = v; }
 void Preset::set(unsigned short int v) { *valueReference.ushort_v = v; }
+void Preset::set(unsigned int v) { *valueReference.uint_v = v; }
 void Preset::set(short int v) { *valueReference.short_v = v; }
 void Preset::set(float v) { *valueReference.float_v = v; }
 
@@ -193,12 +210,22 @@ Preset &Preset::AddPreset(Preset const &preset)
     _presets.push_back(Preset(preset));
     return *this;
 }
+Preset &Preset::AddPreset(std::string const &name, char *value, int max)
+{
+    _presets.push_back(Preset(name, value, max));
+    return *this;
+}
 Preset &Preset::AddPreset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
 {
     _presets.push_back(Preset(name, value, min, max));
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, unsigned short int *value, unsigned short int min, unsigned short int max)
+{
+    _presets.push_back(Preset(name, value, min, max));
+    return *this;
+}
+Preset &Preset::AddPreset(std::string const &name, unsigned int *value, unsigned int min, unsigned int max)
 {
     _presets.push_back(Preset(name, value, min, max));
     return *this;
@@ -245,6 +272,12 @@ void Preset::WriteToBlob(IPresetsSerializer *xml)
 {
     switch (Type())
     {
+        case PresetTypes::String:
+        {
+            if (valueReference.string_v == nullptr) break;
+            xml->addparstr(Name(), valueReference.string_v);
+            break;
+        }
         case PresetTypes::UnsignedChar:
         {
             if (valueReference.uchar_v == nullptr) break;
@@ -255,6 +288,12 @@ void Preset::WriteToBlob(IPresetsSerializer *xml)
         {
             if (valueReference.ushort_v == nullptr) break;
             xml->addpar(Name(), *(valueReference.ushort_v));
+            break;
+        }
+        case PresetTypes::UnsignedInt:
+        {
+            if (valueReference.uint_v == nullptr) break;
+            xml->addparunsigned(Name(), *(valueReference.uint_v));
             break;
         }
         case PresetTypes::Short:
@@ -285,7 +324,7 @@ void Preset::WriteToBlob(IPresetsSerializer *xml)
             {
                 xml->beginbranch(Name());
             }
-            
+
             for (auto &preset : _presets)
             {
                 preset.WriteToBlob(xml);
@@ -300,6 +339,12 @@ void Preset::ReadFromBlob(IPresetsSerializer *xml)
 {
     switch (Type())
     {
+        case PresetTypes::String:
+        {
+            if (valueReference.string_v == nullptr) break;
+            xml->getparstr(Name(), valueReference.string_v, _rangeMax.string_max);
+            break;
+        }
         case PresetTypes::UnsignedChar:
         {
             if (valueReference.uchar_v == nullptr) break;
@@ -310,6 +355,12 @@ void Preset::ReadFromBlob(IPresetsSerializer *xml)
         {
             if (valueReference.ushort_v == nullptr) break;
             *(valueReference.ushort_v) = static_cast<unsigned short int>(xml->getpar(Name(), static_cast<unsigned short int>(*(valueReference.ushort_v)), 0, 16383));
+            break;
+        }
+        case PresetTypes::UnsignedInt:
+        {
+            if (valueReference.uint_v == nullptr) break;
+            *(valueReference.uint_v) = static_cast<unsigned int>(xml->getparunsigned(Name(), static_cast<unsigned int>(*(valueReference.uint_v)), 0, 4294967294));
             break;
         }
         case PresetTypes::Short:
