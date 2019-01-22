@@ -8,7 +8,6 @@
 
 class Example : public IAudioGenerator
 {
-    SystemSettings synth;
     FFTwrapper fft;
     Resonance res;
     OscilGen oscil;
@@ -37,7 +36,7 @@ public:
 };
 
 Example::Example()
-    : fft(synth.oscilsize), oscil(&fft, &res, &synth), samples(new float[synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES])
+    : fft(SystemSettings::Instance().oscilsize), oscil(&fft, &res), samples(new float[SystemSettings::Instance().oscilsize + OSCIL_SMP_EXTRA_SAMPLES])
 {
     oscil.Defaults();
 }
@@ -45,7 +44,7 @@ Example::Example()
 void Example::AudioOut(float *outl, float *outr)
 {
     oscil.get(outl, 100);
-    memcpy(outr, outr, synth.bufferbytes);
+    memcpy(outr, outr, SystemSettings::Instance().bufferbytes);
 }
 
 int main(int /*argc*/, char * /*argv*/ [])

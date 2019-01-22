@@ -31,7 +31,7 @@ add_subdirectory("zyn.synth")
 add_subdirectory("app")
 #add_subdirectory("app.imgui")
 add_subdirectory("app.threedee")
-#add_subdirectory("app.tiny")
+add_subdirectory("app.tiny")
 
 if(BUILD_TESTS)
     add_subdirectory("tests")

@@ -4,7 +4,7 @@
 #include "imgui_impl_glfw_gl3.h"
 
 #include "font-icons.h"
-#include <zyn.mixer/Instrument.h>
+#include <zyn.mixer/Track.h>
 #include <algorithm>
 
 #define MAX_VERTEX_BUFFER (512 * 1024)
@@ -266,10 +266,10 @@ void AppThreeDee::Render(double dt)
             ImGui::BeginChild(label);
 
             sprintf(label, "LEVEL %d", i);
-            unsigned char vol = _mixer->GetChannel(i)->Pvolume;
+            unsigned char vol = _mixer->GetTrack(i)->Pvolume;
             if (MyKnobUchar(label, &vol, 0, 128))
             {
-                _mixer->GetChannel(i)->Pvolume = vol;
+                _mixer->GetTrack(i)->Pvolume = vol;
             }
 
             if (i < 5 || i == 8 || i == 11 || i == 12 || i == 13)
@@ -282,10 +282,10 @@ void AppThreeDee::Render(double dt)
                 {
                     sprintf(label, "TUNING %d", i);
                 }
-                unsigned char vol = _mixer->GetChannel(i)->Pvolume;
+                unsigned char vol = _mixer->GetTrack(i)->Pvolume;
                 if (MyKnobUchar(label, &vol, 0, 128))
                 {
-                    _mixer->GetChannel(i)->Pvolume = vol;
+                    _mixer->GetTrack(i)->Pvolume = vol;
                 }
             }
             if (i < 2 || i == 8 || i == 9)
@@ -298,10 +298,10 @@ void AppThreeDee::Render(double dt)
                 {
                     sprintf(label, "DECAY %d", i);
                 }
-                unsigned char vol = _mixer->GetChannel(i)->Pvolume;
+                unsigned char vol = _mixer->GetTrack(i)->Pvolume;
                 if (MyKnobUchar(label, &vol, 0, 128))
                 {
-                    _mixer->GetChannel(i)->Pvolume = vol;
+                    _mixer->GetTrack(i)->Pvolume = vol;
                 }
             }
 

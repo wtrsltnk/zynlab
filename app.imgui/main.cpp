@@ -25,27 +25,28 @@ void sigterm_exit(int /*sig*/)
  */
 void initprogram()
 {
-    auto synth = new SystemSettings;
+    auto synth = SystemSettings::Instance();
     Config::Current().init();
 
     /* Get the settings from the Config*/
-    synth->samplerate = Config::Current().cfg.SampleRate;
-    synth->buffersize = Config::Current().cfg.SoundBufferSize;
-    synth->oscilsize = Config::Current().cfg.OscilSize;
+    synth.samplerate = Config::Current().cfg.SampleRate;
+    synth.buffersize = Config::Current().cfg.SoundBufferSize;
+    synth.oscilsize = Config::Current().cfg.OscilSize;
 
-    synth->alias();
+    synth.alias();
 
     cerr.precision(1);
     cerr << std::fixed;
-    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
-    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t\t" << synth->buffersize_f * 1000.0f / synth->samplerate_f << " ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
+    cerr << "\nSample Rate = \t\t" << synth.samplerate << endl;
+    cerr << "Sound Buffer Size = \t" << synth.buffersize << " samples" << endl;
+    cerr << "Internal latency = \t\t" << synth.buffersize_f * 1000.0f / synth.samplerate_f << " ms" << endl;
+    cerr << "ADsynth Oscil.Size = \t" << synth.oscilsize << " samples" << endl;
 
-    mixer = new Mixer(synth, &banks);
+    mixer = new Mixer();
+    mixer->Setup(&banks);
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
-    Nio::preferedSampleRate(synth->samplerate);
+    Nio::preferedSampleRate(synth.samplerate);
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
@@ -62,7 +63,6 @@ int exitprogram()
 
     Nio::Stop();
 
-    delete mixer->_synth;
     delete mixer;
     FFT_cleanup();
 
