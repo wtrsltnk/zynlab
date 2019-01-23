@@ -25,7 +25,7 @@
 
 #include <fftw3.h>
 
-#include "ifftwrapper.h"
+#include <zyn.common/IFFTwrapper.h>
 
 /**A wrapper for the FFTW library (Fast Fourier Transforms)*/
 class FFTwrapper : public IFFTwrapper

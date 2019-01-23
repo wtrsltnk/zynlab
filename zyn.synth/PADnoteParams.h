@@ -24,11 +24,11 @@
 #define PAD_NOTE_PARAMETERS_H
 
 #include "EnvelopeParams.h"
-#include "ifftwrapper.h"
 #include "LFOParams.h"
 #include "OscilGen.h"
 #include "Resonance.h"
 
+#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Util.h>

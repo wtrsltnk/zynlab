@@ -31,12 +31,12 @@
 #include <memory>
 #include <pthread.h>
 #include <zyn.common/IAudioGenerator.h>
+#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Stereo.h>
 #include <zyn.common/globals.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/Controller.h>
-#include <zyn.synth/ifftwrapper.h>
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */

@@ -24,7 +24,7 @@
 #define OSCIL_GEN_H
 
 #include "Resonance.h"
-#include "ifftwrapper.h"
+#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>

@@ -25,8 +25,8 @@
 #include "LFOParams.h"
 #include "OscilGen.h"
 #include "Resonance.h"
-#include "ifftwrapper.h"
 #include <cmath>
+#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.dsp/FilterParams.h>
 

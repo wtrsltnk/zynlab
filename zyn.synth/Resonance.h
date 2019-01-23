@@ -23,7 +23,7 @@
 #ifndef RESONANCE_H
 #define RESONANCE_H
 
-#include "ifftwrapper.h"
+#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Util.h>
