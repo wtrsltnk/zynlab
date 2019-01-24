@@ -132,7 +132,13 @@ void PianoRollEditor(AppState &_state)
 {
     if (ImGui::Begin("Pianoroll editor"))
     {
-        if (_state._activeTrack < 0 || _state._activeTrack >= NUM_MIXER_TRACKS || _state._activePattern < 0 || !_state._sequencer.DoesPatternExistAtIndex(_state._activeTrack, _state._activePattern))
+        if (_state._activeTrack < 0 || _state._activeTrack >= NUM_MIXER_TRACKS)
+        {
+            ImGui::End();
+            return;
+        }
+
+        if (_state._activePattern < 0 || !_state._sequencer.DoesPatternExistAtIndex(_state._activeTrack, _state._activePattern))
         {
             ImGui::End();
             return;
