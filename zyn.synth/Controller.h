@@ -23,11 +23,11 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include <zyn.common/IPresetsSerializer.h>
+#include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 
 /**(Midi) Controllers implementation*/
-class Controller
+class Controller : public WrappedPresets
 {
 public:
     Controller();
@@ -35,6 +35,8 @@ public:
 
     void Init();
     void resetall();
+
+    void InitPresets();
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);

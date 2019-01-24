@@ -7,6 +7,7 @@ add_library(zyn.common STATIC
     Config.h
     IAudioGenerator.cpp
     IAudioGenerator.h
+    IFFTwrapper.h
     IPresetsSerializer.cpp
     IPresetsSerializer.h
     Presets.cpp

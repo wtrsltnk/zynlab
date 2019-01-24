@@ -847,9 +847,8 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
     if (needPrepare())
         prepare();
 
-    auto outpos =
-        (int)((RND * 2.0f - 1.0f) * SystemSettings::Instance().oscilsize_f * (Prand - 64.0f) / 64.0f);
-    outpos = (outpos + 2 * SystemSettings::Instance().oscilsize) % SystemSettings::Instance().oscilsize;
+    auto outpos = int((RND * 2.0f - 1.0f) * SystemSettings::Instance().oscilsize_f * (Prand - 64.0f) / 64.0f);
+    outpos = (outpos + 2 * int(SystemSettings::Instance().oscilsize)) % int(SystemSettings::Instance().oscilsize);
 
     clearAll(outoscilFFTfreqs);
 
@@ -864,13 +863,16 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
         unsigned int realnyquist = nyquist;
 
         if (Padaptiveharmonics != 0)
+        {
             nyquist = SystemSettings::Instance().oscilsize / 2;
+        }
         for (unsigned int i = 1; i < nyquist - 1; ++i)
+        {
             outoscilFFTfreqs[i] = oscilFFTfreqs[i];
+        }
 
         adaptiveharmonic(outoscilFFTfreqs, freqHz);
-        adaptiveharmonicpostprocess(&outoscilFFTfreqs[1],
-                                    SystemSettings::Instance().oscilsize / 2 - 1);
+        adaptiveharmonicpostprocess(&outoscilFFTfreqs[1], SystemSettings::Instance().oscilsize / 2 - 1);
 
         nyquist = realnyquist;
     }
@@ -888,9 +890,10 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
     if ((Prand > 64) && (freqHz >= 0.0f) && (!ADvsPAD))
     {
         const float rnd = PI * powf((Prand - 64.0f) / 64.0f, 2.0f);
-        for (int i = 1; i < nyquist - 1; ++i) //to Nyquist only for AntiAliasing
-            outoscilFFTfreqs[i] *=
-                std::polar<fftw_real>(1.0f, (float)(rnd * i * RND));
+        for (unsigned int i = 1; i < nyquist - 1; ++i) //to Nyquist only for AntiAliasing
+        {
+            outoscilFFTfreqs[i] *= std::polar<fftw_real>(1.0, float(rnd * i * RND));
+        }
     }
 
     //Harmonic Amplitude Randomness
@@ -920,23 +923,26 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
     }
 
     if ((freqHz > 0.1f) && (resonance != 0))
+    {
         res->applyres(nyquist - 1, outoscilFFTfreqs, freqHz);
+    }
 
     rmsNormalize(outoscilFFTfreqs);
 
     if ((ADvsPAD) && (freqHz > 0.1f)) //in this case the smps will contain the freqs
-        for (int i = 1; i < SystemSettings::Instance().oscilsize / 2; ++i)
+        for (unsigned int i = 1; i < SystemSettings::Instance().oscilsize / 2; ++i)
             smps[i - 1] = abs(outoscilFFTfreqs, i);
     else
     {
         fft->freqs2smps(outoscilFFTfreqs, smps);
-        for (int i = 0; i < SystemSettings::Instance().oscilsize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize; ++i)
             smps[i] *= 0.25f; //correct the amplitude
     }
 
     if (Prand < 64)
+    {
         return outpos;
-
+    }
     return 0;
 }
 
@@ -999,6 +1005,77 @@ void OscilGen::getcurrentbasefunction(float *smps)
         getbasefunction(smps); //the sine case
 }
 
+void OscilGen::InitPresets()
+{
+    _presets.clear();
+
+    AddPreset("harmonic_mag_type", &Phmagtype);
+
+    AddPreset("base_function", &Pcurrentbasefunc);
+    AddPreset("base_function_par", &Pbasefuncpar);
+    AddPreset("base_function_modulation", &Pbasefuncmodulation);
+    AddPreset("base_function_modulation_par1", &Pbasefuncmodulationpar1);
+    AddPreset("base_function_modulation_par2", &Pbasefuncmodulationpar2);
+    AddPreset("base_function_modulation_par3", &Pbasefuncmodulationpar3);
+
+    AddPreset("modulation", &Pmodulation);
+    AddPreset("modulation_par1", &Pmodulationpar1);
+    AddPreset("modulation_par2", &Pmodulationpar2);
+    AddPreset("modulation_par3", &Pmodulationpar3);
+
+    AddPreset("wave_shaping", &Pwaveshaping);
+    AddPreset("wave_shaping_function", &Pwaveshapingfunction);
+
+    AddPreset("filter_type", &Pfiltertype);
+    AddPreset("filter_par1", &Pfilterpar1);
+    AddPreset("filter_par2", &Pfilterpar2);
+    AddPreset("filter_before_wave_shaping", &Pfilterbeforews);
+
+    AddPreset("spectrum_adjust_type", &Psatype);
+    AddPreset("spectrum_adjust_par", &Psapar);
+
+    AddPreset("rand", &Prand);
+    AddPreset("amp_rand_type", &Pamprandtype);
+    AddPreset("amp_rand_power", &Pamprandpower);
+
+    AddPreset("harmonic_shift", &Pharmonicshift);
+    AddPresetAsBool("harmonic_shift_first", &Pharmonicshiftfirst);
+
+    AddPreset("adaptive_harmonics", &Padaptiveharmonics);
+    AddPreset("adaptive_harmonics_base_frequency", &Padaptiveharmonicsbasefreq);
+    AddPreset("adaptive_harmonics_power", &Padaptiveharmonicspower);
+
+    Preset harmonics("HARMONICS");
+    for (int n = 0; n < MAX_AD_HARMONICS; ++n)
+    {
+        Preset harmonic("HARMONIC", n + 1);
+        harmonic.AddPreset("mag", &Phmag[n]);
+        harmonic.AddPreset("phase", &Phphase[n]);
+        harmonics.AddContainer(harmonic);
+    }
+    AddContainer(harmonics);
+
+    //    if (Pcurrentbasefunc == 127)
+    //    {
+    //        normalize(basefuncFFTfreqs);
+
+    //        xml->beginbranch("BASE_FUNCTION");
+    //        for (unsigned int i = 1; i < SystemSettings::Instance().oscilsize / 2; ++i)
+    //        {
+    //            double xc = basefuncFFTfreqs[i].real();
+    //            double xs = basefuncFFTfreqs[i].imag();
+    //            if ((std::fabs(xs) > 0.00001) && (std::fabs(xc) > 0.00001))
+    //            {
+    //                xml->beginbranch("BF_HARMONIC", static_cast<int>(i));
+    //                AddPresetreal("cos", static_cast<float>(xc));
+    //                AddPresetreal("sin", static_cast<float>(xs));
+    //                xml->endbranch();
+    //            }
+    //        }
+    //        xml->endbranch();
+    //    }
+}
+
 void OscilGen::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("harmonic_mag_type", Phmagtype);
@@ -1040,8 +1117,11 @@ void OscilGen::Serialize(IPresetsSerializer *xml)
     xml->beginbranch("HARMONICS");
     for (int n = 0; n < MAX_AD_HARMONICS; ++n)
     {
-        if ((Phmag[n] == 64) && (Phphase[n] == 64))
+        if ((Phmag[n] == 64) && (Phphase[n] == 64) && xml->minimal)
+        {
             continue;
+        }
+
         xml->beginbranch("HARMONIC", n + 1);
         xml->addpar("mag", Phmag[n]);
         xml->addpar("phase", Phphase[n]);

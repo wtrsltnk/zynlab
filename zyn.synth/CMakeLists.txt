@@ -7,8 +7,6 @@ find_package(FFTW REQUIRED)
 add_library(zyn.synth STATIC
     ADnote.cpp
     ADnote.h
-    ADnoteGlobalParam.cpp
-    ADnoteGlobalParam.h
     ADnoteParams.cpp
     ADnoteParams.h
     ADnoteVoiceParam.cpp
@@ -21,7 +19,6 @@ add_library(zyn.synth STATIC
     EnvelopeParams.h
     FFTWrapper.cpp
     FFTWrapper.h
-    IFFTWrapper.h
     LFO.cpp
     LFO.h
     LFOParams.cpp

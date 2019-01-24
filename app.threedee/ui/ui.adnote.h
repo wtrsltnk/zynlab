@@ -26,9 +26,9 @@ private:
     Filter _Filter;
 
     // AD note
-    void ADNoteEditorAmplitude(ADnoteGlobalParam *parameters);
-    void ADNoteEditorFilter(ADnoteGlobalParam *parameters);
-    void ADNoteEditorFrequency(ADnoteGlobalParam *parameters);
+    void ADNoteEditorAmplitude(ADnoteParameters *parameters);
+    void ADNoteEditorFilter(ADnoteParameters *parameters);
+    void ADNoteEditorFrequency(ADnoteParameters *parameters);
     void ADNoteVoiceEditor(ADnoteVoiceParam *parameters);
     void ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters);
     void ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters);

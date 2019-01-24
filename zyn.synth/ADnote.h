@@ -126,7 +126,7 @@ private:
     struct Global
     {
         void kill();
-        void initparameters(const ADnoteGlobalParam &param,
+        void initparameters(const ADnoteParameters &param,
                             float basefreq, float velocity,
                             bool stereo);
         /******************************************

@@ -96,7 +96,7 @@ class ADvoicelistitem {open : {public Fl_Group}
           code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) {osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,master);}}
         } {}
         Fl_Value_Output detunevalueoutput {
-          callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
+          callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
           xywh {265 5 45 20} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
           code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
         }
@@ -254,9 +254,9 @@ fmdetunevalueoutput->do_callback();}
               }
               Fl_Value_Output fmdetunevalueoutput {
                 label Detune
-                callback {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
+                callback {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
                 xywh {540 245 45 18} labelsize 8 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 8
-                code0 {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
+                code0 {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
                 code1 {//o->value(getdetune(pars->VoicePar[nvoice].PFMDetuneType,0,pars->VoicePar[nvoice].PFMDetune));}
               }
               Fl_Choice {} {
@@ -475,9 +475,9 @@ detunevalueoutput->do_callback();}
             }
             Fl_Value_Output detunevalueoutput {
               label Detune
-              callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
+              callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
               xywh {10 287 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
-              code0 {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
+              code0 {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
             }
             Fl_Check_Button {} {
               label 440Hz
@@ -844,59 +844,59 @@ class ADnoteUI {open : {public PresetsUI_}
         Fl_Group freqenv {
           label {ADSynth Global - Frequency Envelope} open
           xywh {10 320 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->GlobalPar.FreqEnvelope);}
+          code0 {o->init(pars->FreqEnvelope);}
           class EnvelopeUI
         } {}
         Fl_Counter octave {
           label Octave
           callback {int k=(int) o->value();
 if (k<0) k+=16;
-pars->GlobalPar.PCoarseDetune = k*1024+
-   pars->GlobalPar.PCoarseDetune%1024;}
+pars->PCoarseDetune = k*1024+
+   pars->PCoarseDetune%1024;}
           tooltip Octave xywh {455 300 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 11
-          code0 {int k=pars->GlobalPar.PCoarseDetune/1024;if (k>=8) k-=16;}
+          code0 {int k=pars->PCoarseDetune/1024;if (k>=8) k-=16;}
           code2 {o->value(k);}
         }
         Fl_Counter coarsedet {
           label {Coarse det.}
           callback {int k=(int) o->value();
 if (k<0) k+=1024;
-pars->GlobalPar.PCoarseDetune = k+
-   (pars->GlobalPar.PCoarseDetune/1024)*1024;}
+pars->PCoarseDetune = k+
+   (pars->PCoarseDetune/1024)*1024;}
           tooltip {Coarse Detune} xywh {460 370 60 20} type Simple labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 11
-          code0 {int k=pars->GlobalPar.PCoarseDetune%1024;if (k>=512) k-=1024;}
+          code0 {int k=pars->PCoarseDetune%1024;if (k>=512) k-=1024;}
           code2 {o->value(k);}
           code3 {o->lstep(10);}
         }
         Fl_Group freqlfo {
           label {Frequency LFO     } open
           xywh {220 320 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(pars->GlobalPar.FreqLfo);}
+          code0 {o->init(pars->FreqLfo);}
           class LFOUI
         } {}
         Fl_Slider freq {
-          callback {pars->GlobalPar.PDetune=(int)o->value()+8192;
+          callback {pars->PDetune=(int)o->value()+8192;
 detunevalueoutput->do_callback();}
           tooltip {Fine Detune (cents)} xywh {60 300 385 15} type {Horz Knob} box NO_BOX minimum -8192 maximum 8191 step 1
-          code0 {o->value(pars->GlobalPar.PDetune-8192);}
+          code0 {o->value(pars->PDetune-8192);}
         }
         Fl_Value_Output detunevalueoutput {
           label Detune
-          callback {o->value(getdetune(pars->GlobalPar.PDetuneType,0,pars->GlobalPar.PDetune));}
+          callback {o->value(getdetune(pars->PDetuneType,0,pars->PDetune));}
           xywh {12 300 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
-          code0 {o->value(getdetune(pars->GlobalPar.PDetuneType,0,pars->GlobalPar.PDetune));}
+          code0 {o->value(getdetune(pars->PDetuneType,0,pars->PDetune));}
         }
         Fl_Choice detunetype {
           label {Detune Type}
-          callback {pars->GlobalPar.PDetuneType=(int) o->value()+1;
+          callback {pars->PDetuneType=(int) o->value()+1;
 detunevalueoutput->do_callback();} open
           xywh {455 340 75 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
           code0 {o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
-          code1 {o->value(pars->GlobalPar.PDetuneType-1);}
+          code1 {o->value(pars->PDetuneType-1);}
         } {}
         Fl_Dial {} {
           label relBW
-          callback {pars->GlobalPar.PBandwidth=(int) o->value();
+          callback {pars->PBandwidth=(int) o->value();
 
 pars->getBandwidthDetuneMultiplier();
 
@@ -904,7 +904,7 @@ for (int i=0;i<NUM_VOICES;i++){
   voicelistitem[i]->refreshlist();
 };}
           tooltip {Bandwidth - how the relative fine detune of the voice are changed} xywh {505 295 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PBandwidth);}
+          code0 {o->value(pars->PBandwidth);}
           class WidgetPDial
         }
       }
@@ -914,68 +914,68 @@ for (int i=0;i<NUM_VOICES;i++){
       } {
         Fl_Value_Slider volume {
           label Vol
-          callback {pars->GlobalPar.PVolume=(int)o->value();}
+          callback {pars->PVolume=(int)o->value();}
           tooltip Volume xywh {10 30 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PVolume);}
+          code0 {o->value(pars->PVolume);}
         }
         Fl_Value_Slider vsns {
           label {V.Sns}
-          callback {pars->GlobalPar.PAmpVelocityScaleFunction=(int) o->value();} selected
+          callback {pars->PAmpVelocityScaleFunction=(int) o->value();} selected
           tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 50 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PAmpVelocityScaleFunction);}
+          code0 {o->value(pars->PAmpVelocityScaleFunction);}
         }
         Fl_Dial pan {
           label Pan
-          callback {pars->GlobalPar.PPanning=(int) o->value();}
+          callback {pars->PPanning=(int) o->value();}
           tooltip {Panning (leftmost is Random)} xywh {210 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PPanning);}
+          code0 {o->value(pars->PPanning);}
           class WidgetPDial
         }
         Fl_Dial pstr {
           label {P.Str.}
-          callback {pars->GlobalPar.PPunchStrength=(int) o->value();}
+          callback {pars->PPunchStrength=(int) o->value();}
           tooltip {Punch Strength} xywh {125 237 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PPunchStrength);}
+          code0 {o->value(pars->PPunchStrength);}
           class WidgetPDial
         }
         Fl_Dial pt {
           label {P.t.}
-          callback {pars->GlobalPar.PPunchTime=(int) o->value();}
+          callback {pars->PPunchTime=(int) o->value();}
           tooltip {Punch Time (duration)} xywh {155 237 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PPunchTime);}
+          code0 {o->value(pars->PPunchTime);}
           class WidgetPDial
         }
         Fl_Dial pstc {
           label {P.Stc.}
-          callback {pars->GlobalPar.PPunchStretch=(int) o->value();}
+          callback {pars->PPunchStretch=(int) o->value();}
           tooltip {Punch Stretch} xywh {185 237 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PPunchStretch);}
+          code0 {o->value(pars->PPunchStretch);}
           class WidgetPDial
         }
         Fl_Dial pvel {
           label {P.Vel.}
-          callback {pars->GlobalPar.PPunchVelocitySensing=(int) o->value();}
+          callback {pars->PPunchVelocitySensing=(int) o->value();}
           tooltip {Punch Velocity Sensing} xywh {215 237 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-          code0 {o->value(pars->GlobalPar.PPunchVelocitySensing);}
+          code0 {o->value(pars->PPunchVelocitySensing);}
           class WidgetPDial
         }
         Fl_Group ampenv {
           label {ADSynth Global - Amplitude Envelope} open
           xywh {10 75 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->GlobalPar.AmpEnvelope);}
+          code0 {o->init(pars->AmpEnvelope);}
           class EnvelopeUI
         } {}
         Fl_Group amplfo {
           label {Amplitude LFO          } open
           xywh {10 150 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(pars->GlobalPar.AmpLfo);}
+          code0 {o->init(pars->AmpLfo);}
           class LFOUI
         } {}
         Fl_Check_Button rndgrp {
           label {Rnd Grp}
-          callback {pars->GlobalPar.Hrandgrouping=(int) o->value();}
+          callback {pars->Hrandgrouping=(int) o->value();}
           tooltip {How the Harmonic Amplitude is applied to voices that use the same oscillator} xywh {70 235 40 25} down_box DOWN_BOX labelsize 10 align 148
-          code0 {o->value(pars->GlobalPar.Hrandgrouping);}
+          code0 {o->value(pars->Hrandgrouping);}
         }
       }
       Fl_Group {} {
@@ -985,27 +985,27 @@ for (int i=0;i<NUM_VOICES;i++){
         Fl_Group filterenv {
           label {ADSynth Global - Filter Envelope} open
           xywh {255 118 275 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->GlobalPar.FilterEnvelope);}
+          code0 {o->init(pars->FilterEnvelope);}
           class EnvelopeUI
         } {}
         Fl_Group filterlfo {
           label {Filter LFO} open
           xywh {255 195 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(pars->GlobalPar.FilterLfo);}
+          code0 {o->init(pars->FilterLfo);}
           class LFOUI
         } {}
         Fl_Group filterui {
           label {ADsynth Global - Filter} open
           xywh {255 35 275 75} box FLAT_BOX color 50 align 144
-          code0 {o->init(pars->GlobalPar.GlobalFilter,&pars->GlobalPar.PFilterVelocityScale,&pars->GlobalPar.PFilterVelocityScaleFunction);}
+          code0 {o->init(pars->GlobalFilter,&pars->PFilterVelocityScale,&pars->PFilterVelocityScaleFunction);}
           class FilterUI
         } {}
       }
       Fl_Check_Button stereo {
         label Stereo
-        callback {pars->GlobalPar.PStereo=(int) o->value();}
+        callback {pars->PStereo=(int) o->value();}
         xywh {5 230 65 35} down_box DOWN_BOX labelsize 11
-        code0 {o->value(pars->GlobalPar.PStereo);}
+        code0 {o->value(pars->PStereo);}
       }
       Fl_Button {} {
         label {Show Voice List}
@@ -1129,7 +1129,7 @@ ADnoteVoice->redraw();}
     code {pars=parameters;
 master=master_;
 nvoice=0;
-resui=new ResonanceUI(pars->GlobalPar.Reson);
+resui=new ResonanceUI(pars->Reson);
 make_window();} {}
   }
   Function {~ADnoteUI()} {} {
@@ -1142,26 +1142,26 @@ delete(ADnoteVoice);
 delete(resui);} {}
   }
   Function {refresh()} {} {
-    code {volume->value(pars->GlobalPar.PVolume);
-vsns->value(pars->GlobalPar.PAmpVelocityScaleFunction);
-pan->value(pars->GlobalPar.PPanning);
+    code {volume->value(pars->PVolume);
+vsns->value(pars->PAmpVelocityScaleFunction);
+pan->value(pars->PPanning);
 
-stereo->value(pars->GlobalPar.PStereo);
-rndgrp->value(pars->GlobalPar.Hrandgrouping);
+stereo->value(pars->PStereo);
+rndgrp->value(pars->Hrandgrouping);
 
-pstr->value(pars->GlobalPar.PPunchStrength);
-pt->value(pars->GlobalPar.PPunchTime);
-pstc->value(pars->GlobalPar.PPunchStretch);
-pvel->value(pars->GlobalPar.PPunchVelocitySensing);
+pstr->value(pars->PPunchStrength);
+pt->value(pars->PPunchTime);
+pstc->value(pars->PPunchStretch);
+pvel->value(pars->PPunchVelocitySensing);
 
-detunevalueoutput->value(getdetune(pars->GlobalPar.PDetuneType,0,pars->GlobalPar.PDetune));
-freq->value(pars->GlobalPar.PDetune-8192);
+detunevalueoutput->value(getdetune(pars->PDetuneType,0,pars->PDetune));
+freq->value(pars->PDetune-8192);
 
-int k=pars->GlobalPar.PCoarseDetune/1024;if (k>=8) k-=16;
+int k=pars->PCoarseDetune/1024;if (k>=8) k-=16;
 octave->value(k);
 
-detunetype->value(pars->GlobalPar.PDetuneType-1);
-k=pars->GlobalPar.PCoarseDetune%1024;if (k>=512) k-=1024;
+detunetype->value(pars->PDetuneType-1);
+k=pars->PCoarseDetune%1024;if (k>=512) k-=1024;
 coarsedet->value(k);
 amplfo->refresh();
 freqlfo->refresh();

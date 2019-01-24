@@ -35,6 +35,7 @@ enum class PresetTypes
     UnsignedChar,
     UnsignedShort,
     UnsignedInt,
+    Int,
     Short,
     Float,
     Boolean,
@@ -51,6 +52,7 @@ protected:
         unsigned char *uchar_v;
         unsigned short int *ushort_v;
         unsigned int *uint_v;
+        int *int_v;
         short int *short_v;
         float *float_v;
         char *string_v;
@@ -59,6 +61,7 @@ protected:
         unsigned char uchar_min;
         unsigned short int ushort_min;
         unsigned int uint_min;
+        int int_min;
         short int short_min;
         float float_min;
     } _rangeMin;
@@ -67,6 +70,7 @@ protected:
         unsigned char uchar_max;
         unsigned short int ushort_max;
         unsigned int uint_max;
+        int int_max;
         short int short_max;
         float float_max;
     } _rangeMax;
@@ -79,11 +83,13 @@ public:
     Preset(Preset const &preset);
     Preset(std::string const &name);
     Preset(std::string const &name, int id);
-    Preset(std::string const &name, Preset const &preset);
+    Preset(std::string const &name, Preset const &container);
+    Preset(std::string const &name, int id, Preset const &container);
     Preset(std::string const &name, char *value, int max);
     Preset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
     Preset(std::string const &name, unsigned int *value, unsigned int min = 0, unsigned int max = 4294967295);
+    Preset(std::string const &name, int *value, int min = -2147483648, int max = 2147483647);
     Preset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
     Preset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
     virtual ~Preset();
@@ -97,6 +103,7 @@ public:
     operator unsigned char() const;
     operator unsigned short int() const;
     operator unsigned int() const;
+    operator int() const;
     operator short int() const;
     operator float() const;
 
@@ -104,6 +111,7 @@ public:
     void set(unsigned char v);
     void set(unsigned short int v);
     void set(unsigned int v);
+    void set(int v);
     void set(short int v);
     void set(float v);
 
@@ -112,6 +120,7 @@ public:
     Preset &AddPreset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset &AddPreset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
     Preset &AddPreset(std::string const &name, unsigned int *value, unsigned int min = 0, unsigned int max = 4294967295);
+    Preset &AddPreset(std::string const &name, int *value, int min = -2147483648, int max = 2147483647);
     Preset &AddPreset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
     Preset &AddPreset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
     Preset &AddPresetAsBool(std::string const &name, unsigned char *value);

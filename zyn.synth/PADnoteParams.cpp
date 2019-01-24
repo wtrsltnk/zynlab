@@ -25,13 +25,12 @@
 #include <cmath>
 #include <zyn.common/WavFile.h>
 
-PADnoteParameters::PADnoteParameters(IMixer *mixer)
-    : _mixer(mixer)
+PADnoteParameters::PADnoteParameters(IFFTwrapper *fft)
 {
     setpresettype("Ppadsynth");
 
     resonance = new Resonance();
-    oscilgen = new OscilGen(mixer->GetFFT(), resonance);
+    oscilgen = new OscilGen(fft, resonance);
     oscilgen->ADvsPAD = true;
 
     FreqEnvelope = EnvelopeParams::ASRinit(0, 0, 64, 50, 64, 60);
@@ -45,7 +44,9 @@ PADnoteParameters::PADnoteParameters(IMixer *mixer)
     FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
 
     for (auto &i : sample)
+    {
         i.smp = nullptr;
+    }
     newsample.smp = nullptr;
 
     Defaults();
@@ -68,6 +69,7 @@ PADnoteParameters::~PADnoteParameters()
 
 void PADnoteParameters::Defaults()
 {
+    Ppadsynth_used = 1;
     Pmode = 0;
     Php.base.type = 0;
     Php.base.par1 = 80;
@@ -557,7 +559,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum, int size, f
 /*
  * Applies the parameters (i.e. computes all the samples, based on parameters);
  */
-void PADnoteParameters::applyparameters(bool lockmutex)
+void PADnoteParameters::applyparameters(IMixer *mixer)
 {
     const int samplesize = ((int(1)) << (Pquality.samplesize + 14));
     int spectrumsize = samplesize / 2;
@@ -633,14 +635,14 @@ void PADnoteParameters::applyparameters(bool lockmutex)
             newsample.smp[i + samplesize] = newsample.smp[i];
 
         //replace the current sample with the new computed sample
-        if (lockmutex)
+        if (mixer != nullptr)
         {
-            _mixer->Lock();
+            mixer->Lock();
             deletesample(nsample);
             sample[nsample].smp = newsample.smp;
             sample[nsample].size = samplesize;
             sample[nsample].basefreq = basefreq * basefreqadjust;
-            _mixer->Unlock();
+            mixer->Unlock();
         }
         else
         {
@@ -653,14 +655,14 @@ void PADnoteParameters::applyparameters(bool lockmutex)
     }
 
     //delete the additional samples that might exists and are not useful
-    if (lockmutex)
+    if (mixer != nullptr)
     {
-        _mixer->Lock();
+        mixer->Lock();
         for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
         {
             deletesample(i);
         }
-        _mixer->Unlock();
+        mixer->Unlock();
     }
     else
     {
@@ -671,9 +673,9 @@ void PADnoteParameters::applyparameters(bool lockmutex)
     }
 }
 
-void PADnoteParameters::export2wav(std::string basefilename)
+void PADnoteParameters::export2wav(std::string basefilename, IMixer *mixer)
 {
-    applyparameters(true);
+    applyparameters(mixer);
     basefilename += "_PADsynth_";
     for (int k = 0; k < PAD_MAX_SAMPLES; ++k)
     {
@@ -695,6 +697,109 @@ void PADnoteParameters::export2wav(std::string basefilename)
             wav.writeMonoSamples(nsmps, smps);
         }
     }
+}
+
+void PADnoteParameters::InitPresets()
+{
+    _presets.clear();
+
+    // TODO find a way to save the <INFORAMTION><par_bool name="PADsynth_used" value="yes" /></INFORMATION>
+
+    AddPresetAsBool("stereo", &PStereo);
+    AddPreset("mode", &Pmode);
+    AddPreset("bandwidth", &Pbandwidth);
+    AddPreset("bandwidth_scale", &Pbwscale);
+
+    Preset harmonicProfile("HARMONIC_PROFILE");
+    {
+        harmonicProfile.AddPreset("base_type", &Php.base.type);
+        harmonicProfile.AddPreset("base_par1", &Php.base.par1);
+        harmonicProfile.AddPreset("frequency_multiplier", &Php.freqmult);
+        harmonicProfile.AddPreset("modulator_par1", &Php.modulator.par1);
+        harmonicProfile.AddPreset("modulator_frequency", &Php.modulator.freq);
+        harmonicProfile.AddPreset("width", &Php.width);
+        harmonicProfile.AddPreset("amplitude_multiplier_type", &Php.amp.type);
+        harmonicProfile.AddPreset("amplitude_multiplier_mode", &Php.amp.mode);
+        harmonicProfile.AddPreset("amplitude_multiplier_par1", &Php.amp.par1);
+        harmonicProfile.AddPreset("amplitude_multiplier_par2", &Php.amp.par2);
+        harmonicProfile.AddPresetAsBool("autoscale", &Php.autoscale);
+        harmonicProfile.AddPreset("one_half", &Php.onehalf);
+    }
+    AddContainer(harmonicProfile);
+
+    oscilgen->InitPresets();
+    AddContainer(Preset("OSCIL", *oscilgen));
+
+    resonance->InitPresets();
+    AddContainer(Preset("RESONANCE", *resonance));
+
+    Preset harmonicPosition("HARMONIC_POSITION");
+    {
+        harmonicPosition.AddPreset("type", &Phrpos.type);
+        harmonicPosition.AddPreset("parameter1", &Phrpos.par1);
+        harmonicPosition.AddPreset("parameter2", &Phrpos.par2);
+        harmonicPosition.AddPreset("parameter3", &Phrpos.par3);
+    }
+    AddContainer(harmonicPosition);
+
+    Preset sampleQuality("SAMPLE_QUALITY");
+    {
+        sampleQuality.AddPreset("samplesize", &Pquality.samplesize);
+        sampleQuality.AddPreset("basenote", &Pquality.basenote);
+        sampleQuality.AddPreset("octaves", &Pquality.oct);
+        sampleQuality.AddPreset("samples_per_octave", &Pquality.smpoct);
+    }
+    AddContainer(sampleQuality);
+
+    Preset amplitudeParameters("AMPLITUDE_PARAMETERS");
+    {
+        amplitudeParameters.AddPreset("volume", &PVolume);
+        amplitudeParameters.AddPreset("panning", &PPanning);
+        amplitudeParameters.AddPreset("velocity_sensing", &PAmpVelocityScaleFunction);
+        amplitudeParameters.AddPreset("punch_strength", &PPunchStrength);
+        amplitudeParameters.AddPreset("punch_time", &PPunchTime);
+        amplitudeParameters.AddPreset("punch_stretch", &PPunchStretch);
+        amplitudeParameters.AddPreset("punch_velocity_sensing", &PPunchVelocitySensing);
+
+        AmpEnvelope->InitPresets();
+        amplitudeParameters.AddContainer(Preset("AMPLITUDE_ENVELOPE", *AmpEnvelope));
+
+        AmpLfo->InitPresets();
+        amplitudeParameters.AddContainer(Preset("AMPLITUDE_LFO", *AmpLfo));
+    }
+    AddContainer(amplitudeParameters);
+
+    Preset frequencyParameters("FREQUENCY_PARAMETERS");
+    {
+        frequencyParameters.AddPreset("fixed_freq", &Pfixedfreq);
+        frequencyParameters.AddPreset("fixed_freq_et", &PfixedfreqET);
+        frequencyParameters.AddPreset("detune", &PDetune);
+        frequencyParameters.AddPreset("coarse_detune", &PCoarseDetune);
+        frequencyParameters.AddPreset("detune_type", &PDetuneType);
+
+        FreqEnvelope->InitPresets();
+        frequencyParameters.AddContainer(Preset("FREQUENCY_ENVELOPE", *FreqEnvelope));
+
+        FreqLfo->InitPresets();
+        frequencyParameters.AddContainer(Preset("FREQUENCY_LFO", *FreqLfo));
+    }
+    AddContainer(frequencyParameters);
+
+    Preset filterParameters("FILTER_PARAMETERS");
+    {
+        filterParameters.AddPreset("velocity_sensing_amplitude", &PFilterVelocityScale);
+        filterParameters.AddPreset("velocity_sensing", &PFilterVelocityScaleFunction);
+
+        GlobalFilter->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER", *GlobalFilter));
+
+        FilterEnvelope->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER_ENVELOPE", *FilterEnvelope));
+
+        FilterLfo->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER_LFO", *FilterLfo));
+    }
+    AddContainer(filterParameters);
 }
 
 void PADnoteParameters::Serialize(IPresetsSerializer *xml)

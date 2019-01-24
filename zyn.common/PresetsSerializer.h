@@ -221,8 +221,6 @@ public:
      */
     float getparreal(const std::string &name, float defaultpar, float min, float max) const;
 
-    bool minimal; /**<false if all parameters will be stored (used only for clipboard)*/
-
     /**
      * Sets the current tree's PAD Synth usage
      */

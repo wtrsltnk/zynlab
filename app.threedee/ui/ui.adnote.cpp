@@ -72,21 +72,21 @@ void zyn::ui::AdNote::Render()
                 {
                     if (ImGui::BeginTabItem("Amplitude"))
                     {
-                        ADNoteEditorAmplitude(&parameters->GlobalPar);
+                        ADNoteEditorAmplitude(parameters);
 
                         ImGui::EndTabItem();
                     }
 
                     if (ImGui::BeginTabItem("Filter"))
                     {
-                        ADNoteEditorFilter(&parameters->GlobalPar);
+                        ADNoteEditorFilter(parameters);
 
                         ImGui::EndTabItem();
                     }
 
                     if (ImGui::BeginTabItem("Frequency"))
                     {
-                        ADNoteEditorFrequency(&parameters->GlobalPar);
+                        ADNoteEditorFrequency(parameters);
 
                         ImGui::EndTabItem();
                     }
@@ -113,7 +113,7 @@ void zyn::ui::AdNote::Render()
     ImGui::End();
 }
 
-void zyn::ui::AdNote::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
+void zyn::ui::AdNote::ADNoteEditorAmplitude(ADnoteParameters *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
@@ -190,7 +190,7 @@ void zyn::ui::AdNote::ADNoteEditorAmplitude(ADnoteGlobalParam *parameters)
     _AmplitudeLfo.Render(parameters->AmpLfo);
 }
 
-void zyn::ui::AdNote::ADNoteEditorFilter(ADnoteGlobalParam *parameters)
+void zyn::ui::AdNote::ADNoteEditorFilter(ADnoteParameters *parameters)
 {
     ImGui::Text("Global Filter Parameters");
 
@@ -205,7 +205,7 @@ void zyn::ui::AdNote::ADNoteEditorFilter(ADnoteGlobalParam *parameters)
     _FilterLfo.Render(parameters->FilterLfo);
 }
 
-void zyn::ui::AdNote::ADNoteEditorFrequency(ADnoteGlobalParam *parameters)
+void zyn::ui::AdNote::ADNoteEditorFrequency(ADnoteParameters *parameters)
 {
     ImGui::Text("Global Frequency Parameters");
 

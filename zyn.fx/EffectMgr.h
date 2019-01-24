@@ -33,13 +33,15 @@ class FilterParams;
 class IPresetsSerializer;
 
 /**Effect manager, an interface betwen the program and effects*/
-class EffectManager : public Presets
+class EffectManager : public WrappedPresets
 {
 public:
     EffectManager();
     virtual ~EffectManager();
 
     void Init(IMixer *mixer, const bool _insertion);
+
+    void InitPresets();
 
     void Serialize(IPresetsSerializer *xml);
     void Defaults();

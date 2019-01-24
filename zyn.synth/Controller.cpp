@@ -336,6 +336,35 @@ void Controller::setparameternumber(unsigned int type, int value)
     }
 }
 
+void Controller::InitPresets()
+{
+    AddPreset("pitchwheel_bendrange", &pitchwheel.bendrange);
+
+    AddPresetAsBool("expression_receive", &expression.receive);
+    AddPreset("panning_depth", &panning.depth);
+    AddPreset("filter_cutoff_depth", &filtercutoff.depth);
+    AddPreset("filter_q_depth", &filterq.depth);
+    AddPreset("bandwidth_depth", &bandwidth.depth);
+    AddPreset("mod_wheel_depth", &modwheel.depth);
+    AddPresetAsBool("mod_wheel_exponential", &modwheel.exponential);
+    AddPresetAsBool("fm_amp_receive", &fmamp.receive);
+    AddPresetAsBool("volume_receive", &volume.receive);
+    AddPresetAsBool("sustain_receive", &sustain.receive);
+
+    AddPresetAsBool("portamento_receive", &portamento.receive);
+    AddPreset("portamento_time", &portamento.time);
+    AddPreset("portamento_pitchthresh", &portamento.pitchthresh);
+    AddPreset("portamento_pitchthreshtype", &portamento.pitchthreshtype);
+    AddPreset("portamento_portamento", &portamento.portamento);
+    AddPreset("portamento_updowntimestretch", &portamento.updowntimestretch);
+    AddPreset("portamento_proportional", &portamento.proportional);
+    AddPreset("portamento_proprate", &portamento.propRate);
+    AddPreset("portamento_propdepth", &portamento.propDepth);
+
+    AddPreset("resonance_center_depth", &resonancecenter.depth);
+    AddPreset("resonance_bandwidth_depth", &resonancebandwidth.depth);
+}
+
 void Controller::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("pitchwheel_bendrange", pitchwheel.bendrange);

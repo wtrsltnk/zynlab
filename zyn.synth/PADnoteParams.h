@@ -38,13 +38,13 @@
 #include <pthread.h>
 #include <string>
 
-class PADnoteParameters : public Presets
+class PADnoteParameters : public WrappedPresets
 {
-    IMixer *_mixer;
-
 public:
-    PADnoteParameters(IMixer *mixer);
+    PADnoteParameters(IFFTwrapper *fft);
     virtual ~PADnoteParameters();
+
+    void InitPresets();
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
@@ -54,6 +54,7 @@ public:
     float getprofile(float *smp, int size);
 
     //parameters
+    unsigned char Ppadsynth_used;
 
     //the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
     //the harmonic profile is used only on mode 0
@@ -82,7 +83,7 @@ public:
             unsigned char par1;
             unsigned char par2;
         } amp;
-        bool autoscale;        //if the scale of the harmonic profile is computed automaticaly
+        unsigned char autoscale;        //if the scale of the harmonic profile is computed automaticaly
         unsigned char onehalf; //what part of the base function is used to make the distribution
     } Php;
 
@@ -150,8 +151,8 @@ public:
     float setPbandwidth(int Pbandwidth); //returns the BandWidth in cents
     float getNhr(int n);                 //gets the n-th overtone position relatively to N harmonic
 
-    void applyparameters(bool lockmutex);
-    void export2wav(std::string basefilename);
+    void applyparameters(IMixer *mixer);
+    void export2wav(std::string basefilename, IMixer *mixer);
 
     OscilGen *oscilgen;
     Resonance *resonance;

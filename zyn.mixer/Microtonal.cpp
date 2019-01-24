@@ -692,6 +692,8 @@ int Microtonal::loadkbm(const char *filename)
 
 void Microtonal::InitPresets()
 {
+    _presets.clear();
+
     AddPreset("name", Pname, MICROTONAL_MAX_NAME_LEN);
     AddPreset("comment", Pcomment, MICROTONAL_MAX_NAME_LEN);
 

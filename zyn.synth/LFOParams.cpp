@@ -82,6 +82,8 @@ void LFOParams::Defaults()
 
 void LFOParams::InitPresets()
 {
+    _presets.clear();
+
     AddPreset("freq", &Pfreq);
     AddPreset("intensity", &Pintensity);
     AddPreset("start_phase", &Pstartphase);

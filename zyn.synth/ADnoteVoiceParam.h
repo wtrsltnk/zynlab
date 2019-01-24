@@ -10,10 +10,15 @@
 /***********************************************************/
 /*                    VOICE PARAMETERS                     */
 /***********************************************************/
-struct ADnoteVoiceParam
+class ADnoteVoiceParam : public WrappedPresets
 {
+public:
+    void InitPresets();
+
     void Deserialize(IPresetsSerializer *xml, unsigned nvoice);
     void Serialize(IPresetsSerializer *xml, bool fmoscilused);
+    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(IPresetsSerializer *xml);
     void Defaults();
 
     void Enable(IFFTwrapper *fft, Resonance *Reson);

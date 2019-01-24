@@ -238,6 +238,8 @@ void Resonance::sendcontroller(MidiControllers ctl, float par)
 
 void Resonance::InitPresets()
 {
+    _presets.clear();
+
     AddPresetAsBool("enabled", &Penabled);
 
     AddPreset("max_db", &PmaxdB);

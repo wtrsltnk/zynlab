@@ -92,6 +92,8 @@ void SUBnoteParameters::Defaults()
 
 void SUBnoteParameters::InitPresets()
 {
+    _presets.clear();
+
     AddPreset("num_stages", &Pnumstages);
     AddPreset("harmonic_mag_type", &Phmagtype);
     AddPreset("start", &Pstart);
@@ -155,7 +157,6 @@ void SUBnoteParameters::InitPresets()
 
         GlobalFilterEnvelope->InitPresets();
         filterParameters.AddContainer(Preset("FILTER_ENVELOPE", *GlobalFilterEnvelope));
-
     }
     AddContainer(filterParameters);
 }

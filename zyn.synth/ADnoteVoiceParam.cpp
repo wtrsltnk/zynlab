@@ -17,6 +17,8 @@ void ADnoteVoiceParam::Enable(IFFTwrapper *fft, Resonance *Reson)
 
     FMFreqEnvelope = EnvelopeParams::ASRinit(0, 0, 20, 90, 40, 80);
     FMAmpEnvelope = EnvelopeParams::ADSRinit(64, 1, 80, 90, 127, 100);
+
+    InitPresets();
 }
 
 void ADnoteVoiceParam::Disable()
@@ -104,6 +106,123 @@ void ADnoteVoiceParam::Defaults()
     FMFreqEnvelope->Defaults();
     FMAmpEnvelope->Defaults();
 }
+
+void ADnoteVoiceParam::InitPresets()
+{
+    _presets.clear();
+
+    AddPresetAsBool("enabled", &Enabled);
+
+    AddPreset("type", &Type);
+
+    AddPreset("unison_size", &Unison_size);
+    AddPreset("unison_frequency_spread", &Unison_frequency_spread);
+    AddPreset("unison_stereo_spread", &Unison_stereo_spread);
+    AddPreset("unison_vibratto", &Unison_vibratto);
+    AddPreset("unison_vibratto_speed", &Unison_vibratto_speed);
+    AddPreset("unison_invert_phase", &Unison_invert_phase);
+    AddPreset("unison_phase_randomness", &Unison_phase_randomness);
+
+    AddPreset("delay", &PDelay);
+    AddPresetAsBool("resonance", &Presonance);
+
+    AddPreset("ext_oscil", &Pextoscil);
+    AddPreset("ext_fm_oscil", &PextFMoscil);
+
+    AddPreset("oscil_phase", &Poscilphase);
+    AddPreset("oscil_fm_phase", &PFMoscilphase);
+
+    AddPresetAsBool("filter_enabled", &PFilterEnabled);
+    AddPresetAsBool("filter_bypass", &Pfilterbypass);
+
+    AddPreset("fm_enabled", &PFMEnabled);
+
+    OscilSmp->InitPresets();
+    AddContainer(Preset("OSCIL", *OscilSmp));
+
+    Preset amplitudeParameters("AMPLITUDE_PARAMETERS");
+    {
+        amplitudeParameters.AddPreset("panning", &PPanning);
+        amplitudeParameters.AddPreset("volume", &PVolume);
+        amplitudeParameters.AddPresetAsBool("volume_minus", &PVolumeminus);
+        amplitudeParameters.AddPreset("velocity_sensing", &PAmpVelocityScaleFunction);
+
+        amplitudeParameters.AddPresetAsBool("amp_envelope_enabled", &PAmpEnvelopeEnabled);
+        AmpEnvelope->InitPresets();
+        amplitudeParameters.AddContainer(Preset("AMPLITUDE_ENVELOPE", *AmpEnvelope));
+
+        amplitudeParameters.AddPresetAsBool("amp_lfo_enabled", &PAmpLfoEnabled);
+        AmpLfo->InitPresets();
+        amplitudeParameters.AddContainer(Preset("AMPLITUDE_LFO", *AmpLfo));
+    }
+    AddContainer(amplitudeParameters);
+
+    Preset frequencyParameters("FREQUENCY_PARAMETERS");
+    {
+        frequencyParameters.AddPresetAsBool("fixed_freq", &Pfixedfreq);
+        frequencyParameters.AddPreset("fixed_freq_et", &PfixedfreqET);
+        frequencyParameters.AddPreset("detune", &PDetune);
+        frequencyParameters.AddPreset("coarse_detune", &PCoarseDetune);
+        frequencyParameters.AddPreset("detune_type", &PDetuneType);
+
+        frequencyParameters.AddPresetAsBool("freq_envelope_enabled", &PFreqEnvelopeEnabled);
+        FreqEnvelope->InitPresets();
+        frequencyParameters.AddContainer(Preset("FREQUENCY_ENVELOPE", *FreqEnvelope));
+
+        frequencyParameters.AddPresetAsBool("freq_lfo_enabled", &PFreqLfoEnabled);
+        FreqLfo->InitPresets();
+        frequencyParameters.AddContainer(Preset("FREQUENCY_LFO", *FreqLfo));
+    }
+    AddContainer(frequencyParameters);
+
+    Preset filterParameters("FILTER_PARAMETERS");
+    {
+        VoiceFilter->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER", *VoiceFilter));
+
+        filterParameters.AddPresetAsBool("filter_envelope_enabled", &PFilterEnvelopeEnabled);
+        FilterEnvelope->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER_ENVELOPE", *FilterEnvelope));
+
+        filterParameters.AddPresetAsBool("filter_lfo_enabled", &PFilterLfoEnabled);
+        FilterLfo->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER_LFO", *FilterLfo));
+    }
+    AddContainer(filterParameters);
+
+    Preset fmParameters("FM_PARAMETERS");
+    {
+        fmParameters.AddPreset("input_voice", &PFMVoice);
+
+        fmParameters.AddPreset("volume", &PFMVolume);
+        fmParameters.AddPreset("volume_damp", &PFMVolumeDamp);
+        fmParameters.AddPreset("velocity_sensing", &PFMVelocityScaleFunction);
+
+        fmParameters.AddPresetAsBool("amp_envelope_enabled", &PFMAmpEnvelopeEnabled);
+        FMAmpEnvelope->InitPresets();
+        fmParameters.AddContainer(Preset("AMPLITUDE_ENVELOPE", *FMAmpEnvelope));
+
+        Preset modulator("MODULATOR");
+        {
+            modulator.AddPreset("detune", &PFMDetune);
+            modulator.AddPreset("coarse_detune", &PFMCoarseDetune);
+            modulator.AddPreset("detune_type", &PFMDetuneType);
+
+            modulator.AddPresetAsBool("freq_envelope_enabled", &PFMFreqEnvelopeEnabled);
+            FMFreqEnvelope->InitPresets();
+            modulator.AddContainer(Preset("FREQUENCY_ENVELOPE", *FMFreqEnvelope));
+
+            FMSmp->InitPresets();
+            modulator.AddContainer(Preset("OSCIL", *FMSmp));
+        }
+        fmParameters.AddContainer(modulator);
+    }
+    AddContainer(fmParameters);
+}
+
+void ADnoteVoiceParam::Serialize(IPresetsSerializer *xml) {}
+
+void ADnoteVoiceParam::Deserialize(IPresetsSerializer *xml) {}
 
 void ADnoteVoiceParam::Serialize(IPresetsSerializer *xml, bool fmoscilused)
 {

@@ -94,7 +94,7 @@ PresetsSerializer::PresetsSerializer()
     version.Minor = 4;
     version.Revision = 4;
 
-    minimal = true;
+    minimal = false;
 
     node = tree = mxmlNewElement(nullptr, R"(?xml version="1.0f" encoding="UTF-8"?)");
 

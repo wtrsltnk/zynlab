@@ -73,6 +73,8 @@ void FilterParams::Defaults()
 
 void FilterParams::InitPresets()
 {
+    _presets.clear();
+
     //filter parameters
     AddPreset("category", &Pcategory);
     AddPreset("type", &Ptype);

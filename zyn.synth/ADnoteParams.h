@@ -23,7 +23,6 @@
 #ifndef AD_NOTE_PARAMETERS_H
 #define AD_NOTE_PARAMETERS_H
 
-#include "ADnoteGlobalParam.h"
 #include "ADnoteVoiceParam.h"
 #include <zyn.common/Presets.h>
 #include <zyn.common/Util.h>
@@ -47,7 +46,7 @@ enum FMTYPE
 };
 extern int ADnote_unison_sizes[];
 
-class ADnoteParameters : public Presets
+class ADnoteParameters : public WrappedPresets
 {
     IFFTwrapper *_fft;
 
@@ -55,12 +54,73 @@ public:
     ADnoteParameters(IFFTwrapper *fft);
     virtual ~ADnoteParameters();
 
-    ADnoteGlobalParam GlobalPar;
-    ADnoteVoiceParam VoicePar[NUM_VOICES];
+    void InitPresets();
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
     void Defaults();
+
+    /* The instrument type  - MONO/STEREO
+    If the mode is MONO, the panning of voices are not used
+    Stereo=1, Mono=0. */
+    unsigned char PStereo;
+
+    /******************************************
+    *     FREQUENCY GLOBAL PARAMETERS        *
+    ******************************************/
+    unsigned short int PDetune;       //fine detune
+    unsigned short int PCoarseDetune; //coarse detune+octave
+    unsigned char PDetuneType;        //detune type
+
+    unsigned char PBandwidth; //how much the relative fine detunes of the voices are changed
+
+    EnvelopeParams *FreqEnvelope; //Frequency Envelope
+
+    LFOParams *FreqLfo; //Frequency LFO
+
+    /********************************************
+    *     AMPLITUDE GLOBAL PARAMETERS          *
+    ********************************************/
+
+    /* Panning -  0 - random
+              1 - left
+             64 - center
+            127 - right */
+    unsigned char PPanning;
+
+    unsigned char PVolume;
+
+    unsigned char PAmpVelocityScaleFunction;
+
+    EnvelopeParams *AmpEnvelope;
+
+    LFOParams *AmpLfo;
+
+    unsigned char PPunchStrength, PPunchTime, PPunchStretch,
+        PPunchVelocitySensing;
+
+    /******************************************
+    *        FILTER GLOBAL PARAMETERS        *
+    ******************************************/
+    FilterParams *GlobalFilter;
+
+    // filter velocity sensing
+    unsigned char PFilterVelocityScale;
+
+    // filter velocity sensing
+    unsigned char PFilterVelocityScaleFunction;
+
+    EnvelopeParams *FilterEnvelope;
+
+    LFOParams *FilterLfo;
+
+    // RESONANCE
+    Resonance *Reson;
+
+    //how the randomness is applied to the harmonics on more voices using the same oscillator
+    unsigned char Hrandgrouping;
+
+    ADnoteVoiceParam VoicePar[NUM_VOICES];
 
     float getBandwidthDetuneMultiplier();
     float getUnisonFrequencySpreadCents(int nvoice);

@@ -272,6 +272,8 @@ void EnvelopeParams::ConvertToFree(EnvelopeParams *envelope)
 
 void EnvelopeParams::InitPresets()
 {
+    _presets.clear();
+
     AddPresetAsBool("free_mode", &Pfreemode);
     AddPreset("env_points", &Penvpoints);
     AddPreset("env_sustain", &Penvsustain);

@@ -56,7 +56,7 @@ void Track::Init(IMixer *mixer, Microtonal *microtonal)
 
     Instruments[0].adpars = new ADnoteParameters(_mixer->GetFFT());
     Instruments[0].subpars = new SUBnoteParameters();
-    Instruments[0].padpars = new PADnoteParameters(mixer);
+    Instruments[0].padpars = new PADnoteParameters(mixer->GetFFT());
 
     //Part's Insertion Effects init
     for (auto &nefx : partefx)
@@ -286,8 +286,8 @@ Track::~Track()
  * Note On Messages
  */
 void Track::NoteOn(unsigned char note,
-                     unsigned char velocity,
-                     int masterkeyshift)
+                   unsigned char velocity,
+                   int masterkeyshift)
 {
     unsigned int i;
     int pos;
@@ -467,15 +467,15 @@ void Track::NoteOn(unsigned char note,
                 if ((Instruments[0].Padenabled != 0) && (_trackNotes[pos].instumentNotes[0].adnote != nullptr) && (_trackNotes[posb].instumentNotes[0].adnote != nullptr))
                 {
                     _trackNotes[pos].instumentNotes[0].adnote->legatonote(notebasefreq,
-                                                                            vel,
-                                                                            portamento,
-                                                                            note,
-                                                                            true); //'true' is to tell it it's being called from here.
+                                                                          vel,
+                                                                          portamento,
+                                                                          note,
+                                                                          true); //'true' is to tell it it's being called from here.
                     _trackNotes[posb].instumentNotes[0].adnote->legatonote(notebasefreq,
-                                                                             vel,
-                                                                             portamento,
-                                                                             note,
-                                                                             true);
+                                                                           vel,
+                                                                           portamento,
+                                                                           note,
+                                                                           true);
                 }
 
                 if ((Instruments[0].Psubenabled != 0) && (_trackNotes[pos].instumentNotes[0].subnote != nullptr) && (_trackNotes[posb].instumentNotes[0].subnote != nullptr))
@@ -566,28 +566,28 @@ void Track::NoteOn(unsigned char note,
             _trackNotes[pos].instumentNotes[0].sendtoparteffect = 0;
             if (Instruments[0].Padenabled != 0)
                 _trackNotes[pos].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
+                                                                       &ctl,
+                                                                       notebasefreq,
+                                                                       vel,
+                                                                       portamento,
+                                                                       note,
+                                                                       false);
+            if (Instruments[0].Psubenabled != 0)
+                _trackNotes[pos].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars,
                                                                          &ctl,
                                                                          notebasefreq,
                                                                          vel,
                                                                          portamento,
                                                                          note,
                                                                          false);
-            if (Instruments[0].Psubenabled != 0)
-                _trackNotes[pos].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars,
-                                                                           &ctl,
-                                                                           notebasefreq,
-                                                                           vel,
-                                                                           portamento,
-                                                                           note,
-                                                                           false);
             if (Instruments[0].Ppadenabled != 0)
                 _trackNotes[pos].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars,
-                                                                           &ctl,
-                                                                           notebasefreq,
-                                                                           vel,
-                                                                           portamento,
-                                                                           note,
-                                                                           false);
+                                                                         &ctl,
+                                                                         notebasefreq,
+                                                                         vel,
+                                                                         portamento,
+                                                                         note,
+                                                                         false);
             if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Ppadenabled != 0))
                 _trackNotes[pos].itemsplaying++;
 
@@ -597,12 +597,12 @@ void Track::NoteOn(unsigned char note,
                 _trackNotes[posb].instumentNotes[0].sendtoparteffect = 0;
                 if (Instruments[0].Padenabled != 0)
                     _trackNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars,
-                                                                              &ctl,
-                                                                              notebasefreq,
-                                                                              vel,
-                                                                              portamento,
-                                                                              note,
-                                                                              true); //true for silent.
+                                                                            &ctl,
+                                                                            notebasefreq,
+                                                                            vel,
+                                                                            portamento,
+                                                                            note,
+                                                                            true); //true for silent.
                 if (Instruments[0].Psubenabled != 0)
                     _trackNotes[posb].instumentNotes[0].subnote = new SUBnote(
                         Instruments[0].subpars,
@@ -751,8 +751,8 @@ void Track::NoteOff(unsigned char note) //relase the key
 }
 
 void Track::PolyphonicAftertouch(unsigned char note,
-                                   unsigned char velocity,
-                                   int masterkeyshift)
+                                 unsigned char velocity,
+                                 int masterkeyshift)
 {
     (void)masterkeyshift;
     if (!Pnoteon || (note < Pminkey) || (note > Pmaxkey))
@@ -866,9 +866,9 @@ void Track::SetController(unsigned int type, int par)
             {
                 if (item.adpars == nullptr)
                     continue;
-                item.adpars->GlobalPar.Reson->sendcontroller(C_resonance_center, 1.0f);
+                item.adpars->Reson->sendcontroller(C_resonance_center, 1.0f);
 
-                item.adpars->GlobalPar.Reson->sendcontroller(C_resonance_bandwidth, 1.0f);
+                item.adpars->Reson->sendcontroller(C_resonance_bandwidth, 1.0f);
             }
             //more update to add here if I add controllers
             break;
@@ -881,13 +881,13 @@ void Track::SetController(unsigned int type, int par)
             {
                 if (item.adpars == nullptr)
                     continue;
-                item.adpars->GlobalPar.Reson->sendcontroller(C_resonance_center,
-                                                             ctl.resonancecenter.relcenter);
+                item.adpars->Reson->sendcontroller(C_resonance_center,
+                                                   ctl.resonancecenter.relcenter);
             }
             break;
         case C_resonance_bandwidth:
             ctl.setresonancebw(par);
-            Instruments[0].adpars->GlobalPar.Reson->sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
+            Instruments[0].adpars->Reson->sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
             break;
     }
 }
@@ -1216,7 +1216,7 @@ void Track::setkititemstatus(int kititem, int Penabled_)
         if (Instruments[kititem].subpars == nullptr)
             Instruments[kititem].subpars = new SUBnoteParameters();
         if (Instruments[kititem].padpars == nullptr)
-            Instruments[kititem].padpars = new PADnoteParameters(_mixer);
+            Instruments[kititem].padpars = new PADnoteParameters(_mixer->GetFFT());
     }
 
     if (resetallnotes)
@@ -1369,7 +1369,7 @@ void Track::ApplyParameters(bool lockmutex)
     {
         if ((n.padpars != nullptr) && (n.Ppadenabled != 0))
         {
-            n.padpars->applyparameters(lockmutex);
+            n.padpars->applyparameters(lockmutex ? _mixer : nullptr);
         }
     }
 }

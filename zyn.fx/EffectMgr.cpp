@@ -302,6 +302,13 @@ void EffectManager::setdryonly(bool value)
     _dryonly = value;
 }
 
+void EffectManager::InitPresets()
+{
+    AddPreset("type", &_effectType);
+
+    // TODO finish this
+}
+
 void EffectManager::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("type", geteffect());
