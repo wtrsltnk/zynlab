@@ -6,6 +6,8 @@
 #include <zyn.common/PresetsSerializer.h>
 #include <zyn.dsp/FilterParams.h>
 #include <zyn.mixer/Microtonal.h>
+#include <zyn.mixer/Mixer.h>
+#include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/EnvelopeParams.h>
 #include <zyn.synth/FFTwrapper.h>
@@ -64,12 +66,6 @@ TEST_CASE("Presets")
 
     SECTION("SUB Synth Presets", "[zyn.synth]")
     {
-        PresetsSerializer serializerA;
-        serializerA.minimal = false;
-
-        PresetsSerializer serializerB;
-        serializerB.minimal = false;
-
         auto sut = SUBnoteParameters();
         sut.Defaults();
         sut.InitPresets();
@@ -244,6 +240,29 @@ TEST_CASE("Presets")
         sut.Defaults();
         sut.InitPresets();
         sut.Pcurrentbasefunc = 0;
+
+        SECTION("Serialization should work")
+        {
+            sut.Serialize(&serializerA);
+
+            sut.WritePresetsToBlob(&serializerB);
+
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
+        }
+    }
+
+    SECTION("Track Presets", "[zyn.mixer]")
+    {
+        Mixer mixer;
+        mixer.Setup(nullptr);
+        
+        Microtonal micro;
+        micro.Defaults();
+        
+        auto sut = Track();
+        sut.Init(&mixer, &micro);
+        sut.Defaults();
+        sut.InitPresets();
 
         SECTION("Serialization should work")
         {

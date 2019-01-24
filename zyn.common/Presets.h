@@ -117,6 +117,7 @@ public:
 
     Preset &AddPreset(Preset const &preset);
     Preset &AddPreset(std::string const &name, char *value, int max);
+    Preset &AddPresetAsString(std::string const &name, unsigned char *value, int max);
     Preset &AddPreset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset &AddPreset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
     Preset &AddPreset(std::string const &name, unsigned int *value, unsigned int min = 0, unsigned int max = 4294967295);

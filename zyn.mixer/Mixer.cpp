@@ -44,6 +44,7 @@ Mixer::~Mixer()
 {
     pthread_mutex_destroy(&_mutex);
 }
+
 void Mixer::Setup(IBankManager *bankManager)
 {
     _bankManager = bankManager;

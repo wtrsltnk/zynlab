@@ -77,7 +77,7 @@ public:
 };
 
 /** Track implementation*/
-class Track
+class Track : public WrappedPresets
 {
     float *_tmpoutr;
     float *_tmpoutl;
@@ -152,6 +152,8 @@ public:
     } info;
 
 public:
+    void InitPresets();
+
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
     void Defaults();
@@ -179,7 +181,7 @@ public:
 
     EffectManager *partefx[NUM_TRACK_EFX];  //insertion part effects (they are part of the instrument)
     unsigned char Pefxroute[NUM_TRACK_EFX]; //how the effect's output is routed(to next effect/to out)
-    bool Pefxbypass[NUM_TRACK_EFX];         //if the effects are bypassed
+    unsigned char Pefxbypass[NUM_TRACK_EFX];         //if the effects are bypassed
 
     int lastnote;
 

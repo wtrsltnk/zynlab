@@ -1299,6 +1299,64 @@ void Track::SerializeInstrument(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
+void Track::InitPresets()
+{
+    Preset infoPreset("INFO");
+    infoPreset.AddPresetAsString("name", Pname, MAX_INFO_TEXT_SIZE);
+    infoPreset.AddPresetAsString("author", info.Pauthor, MAX_INFO_TEXT_SIZE);
+    infoPreset.AddPresetAsString("comments", info.Pcomments, MAX_INFO_TEXT_SIZE);
+    infoPreset.AddPreset("type", &info.Ptype);
+    AddContainer(infoPreset);
+
+    Preset instrumentKit("INSTRUMENT_KIT");
+    instrumentKit.AddPreset("kit_mode", &Pkitmode);
+    instrumentKit.AddPresetAsBool("drum_mode", &Pdrummode);
+
+    for (int i = 0; i < NUM_TRACK_INSTRUMENTS; ++i)
+    {
+        Preset instrumentKitItem("INSTRUMENT_KIT_ITEM", i);
+        instrumentKitItem.AddPresetAsBool("enabled", &Instruments[i].Penabled);
+        
+        instrumentKitItem.AddPresetAsString("name", Instruments[i].Pname, MAX_INFO_TEXT_SIZE);
+
+        instrumentKitItem.AddPresetAsBool("muted", &Instruments[i].Pmuted);
+        instrumentKitItem.AddPreset("min_key", &Instruments[i].Pminkey);
+        instrumentKitItem.AddPreset("max_key", &Instruments[i].Pmaxkey);
+
+        instrumentKitItem.AddPreset("send_to_instrument_effect", &Instruments[i].Psendtoparteffect);
+
+        instrumentKitItem.AddPresetAsBool("add_enabled", &(Instruments[i].Padenabled));
+        Instruments[i].adpars->InitPresets();
+        instrumentKitItem.AddContainer(Preset("ADD_SYNTH_PARAMETERS", *Instruments[i].adpars));
+
+        instrumentKitItem.AddPresetAsBool("sub_enabled", &(Instruments[i].Psubenabled));
+        Instruments[i].subpars->InitPresets();
+        instrumentKitItem.AddContainer(Preset("SUB_SYNTH_PARAMETERS", *Instruments[i].subpars));
+
+        instrumentKitItem.AddPresetAsBool("pad_enabled", &(Instruments[i].Ppadenabled));
+        Instruments[i].padpars->InitPresets();
+        instrumentKitItem.AddContainer(Preset("PAD_SYNTH_PARAMETERS", *Instruments[i].padpars));
+            
+        instrumentKit.AddContainer(instrumentKitItem);
+    }
+    AddContainer(instrumentKit);
+
+    Preset instrumentEffects("INSTRUMENT_EFFECTS");
+    for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
+    {
+        Preset instrumentEffect("INSTRUMENT_EFFECT", nefx);
+        {
+          partefx[nefx]->InitPresets();
+          instrumentEffect.AddContainer(Preset("EFFECT", *partefx[nefx]));
+
+          instrumentEffect.AddPreset("route", &Pefxroute[nefx]);
+          instrumentEffect.AddPresetAsBool("bypass", &Pefxbypass[nefx]);
+        }
+        instrumentEffects.AddContainer(instrumentEffect);
+    }
+    AddContainer(instrumentEffects);
+}
+
 void Track::Serialize(IPresetsSerializer *xml)
 {
     //parameters

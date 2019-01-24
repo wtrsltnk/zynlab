@@ -230,6 +230,11 @@ Preset &Preset::AddPreset(std::string const &name, char *value, int max)
     _presets.push_back(Preset(name, value, max));
     return *this;
 }
+Preset &Preset::AddPresetAsString(std::string const &name, unsigned char *value, int max)
+{
+    _presets.push_back(Preset(name, (char*)value, max));
+    return *this;
+}
 Preset &Preset::AddPreset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
 {
     _presets.push_back(Preset(name, value, min, max));
