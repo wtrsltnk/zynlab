@@ -239,11 +239,15 @@ bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_text
         valueChange = true;
     }
 
-    ImU32 col_tint = ImGui::GetColorU32((*v ? ImGui::GetColorU32(ImGuiCol_Text) : ImGui::GetColorU32(ImGuiCol_ButtonHovered)));
-    ImU32 col_bg = ImGui::GetColorU32(*v ? ImGui::GetColorU32(ImGuiCol_ButtonHovered) : ImGui::GetColorU32(ImGuiCol_Button));
+    ImU32 col_tint = ImGui::GetColorU32((*v ? ImGui::GetColorU32(ImGuiCol_Text) : ImGui::GetColorU32(ImGuiCol_Border)));
+    ImU32 col_bg = ImGui::GetColorU32(ImGui::GetColorU32(ImGuiCol_Button));
     if (ImGui::IsItemHovered())
     {
         col_bg = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+    }
+    if (ImGui::IsItemActive())
+    {
+        col_bg = ImGui::GetColorU32(ImGuiCol_ButtonActive);
     }
 
     draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), GetColorU32(col_bg));

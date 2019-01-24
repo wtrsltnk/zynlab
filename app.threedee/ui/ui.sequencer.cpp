@@ -38,10 +38,10 @@ void zyn::ui::Sequencer::Render()
         return;
     }
 
-    ImGui::Begin("Sequencer");
+    if (ImGui::Begin("Sequencer", &_state->_showEditor))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f,5.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f, 5.0f));
 
         ImGui::PushItemWidth(100);
         ImGui::SliderInt("##Vertical zoom", &_state->_sequencerVerticalZoom, 40, 200);
@@ -91,6 +91,7 @@ void zyn::ui::Sequencer::Render()
                 case TrackPatternTypes::Clip:
                 {
                     //_pianoRollUi.Render(trackIndex, 0);
+                    _stepPatternUi.Render(trackIndex, _state->_sequencerVerticalZoom);
                     break;
                 }
                 case TrackPatternTypes::Step:
@@ -115,7 +116,7 @@ void zyn::ui::Sequencer::Render()
 
         ImGui::PopStyleVar(2);
 
-        ImGui::Text("Track %02d", _state->_activeTrack+1);
+        ImGui::Text("Track %02d", _state->_activeTrack + 1);
 
         ImGui::SameLine();
 
@@ -151,7 +152,7 @@ void zyn::ui::Sequencer::Render()
             {
                 case TrackPatternTypes::Clip:
                 {
-                    //            _pianoRollUi.EventHandling();
+                    // _pianoRollUi.EventHandling();
                     break;
                 }
                 case TrackPatternTypes::Step:
@@ -169,8 +170,27 @@ void zyn::ui::Sequencer::Render()
                 }
             }
         }
-
-        _stepPatternUi.RenderStepPatternEditorWindow();
     }
     ImGui::End();
+
+    switch (_state->_trackPatternType[_state->_activeTrack])
+    {
+        case TrackPatternTypes::Clip:
+        {
+            break;
+        }
+        case TrackPatternTypes::Step:
+        {
+            _stepPatternUi.RenderStepPatternEditorWindow();
+            break;
+        }
+        case TrackPatternTypes::Arpeggiator:
+        {
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
 }

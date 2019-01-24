@@ -6,6 +6,11 @@
 #include <map>
 #include <zyn.common/globals.h>
 
+struct timelineEvent
+{
+    float values[2];
+};
+
 class TrackPatternNote
 {
 public:
@@ -27,6 +32,7 @@ public:
     std::string _name;
     float _hue;
     std::set<TrackPatternNote> _notes;
+    std::vector<struct timelineEvent> valuesOfValues[88];
 
     bool IsStepCovered(unsigned char note, int step);
 };
@@ -84,6 +90,7 @@ public:
 
     int Bpm() const;
     void Bpm(int bpm);
+    std::chrono::milliseconds::rep _totalTimeInMs;
 };
 
 class Sequencer : public ISteppable

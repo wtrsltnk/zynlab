@@ -154,6 +154,10 @@ bool TimelineEnd(float *new_values)
                                     TIMELINE_RADIUS);
 
         win->DrawList->AddRectFilled(start, end, active_color);
+
+        ImGui::BeginTooltip();
+        ImGui::Text("%.3f", end_new_value);
+        ImGui::EndTooltip();
     }
 
     SetCursorScreenPos(nextPos);

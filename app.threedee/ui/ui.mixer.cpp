@@ -146,37 +146,39 @@ void zyn::ui::Mixer::ImGuiMixer()
         return;
     }
 
-    ImGui::Begin("Mixer", &_state->_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-
-    int c[NUM_MIXER_TRACKS] = {0};
-    mostInsertEffectsPerTrack = 0;
-    for (int i = 0; i < NUM_INS_EFX; i++)
+    if (ImGui::Begin("Mixer", &_state->_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
     {
-        if (_state->_mixer->Pinsparts[i] == -1)
-        {
-            continue;
-        }
-        c[_state->_mixer->Pinsparts[i]] = c[_state->_mixer->Pinsparts[i]] + 1;
-        if (c[_state->_mixer->Pinsparts[i]] > mostInsertEffectsPerTrack)
-        {
-            mostInsertEffectsPerTrack = c[_state->_mixer->Pinsparts[i]];
-        }
-    }
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
 
-    ImGuiMasterTrack();
-    ImGui::SameLine();
+        int c[NUM_MIXER_TRACKS] = {0};
+        mostInsertEffectsPerTrack = 0;
+        for (int i = 0; i < NUM_INS_EFX; i++)
+        {
+            if (_state->_mixer->Pinsparts[i] == -1)
+            {
+                continue;
+            }
+            c[_state->_mixer->Pinsparts[i]] = c[_state->_mixer->Pinsparts[i]] + 1;
+            if (c[_state->_mixer->Pinsparts[i]] > mostInsertEffectsPerTrack)
+            {
+                mostInsertEffectsPerTrack = c[_state->_mixer->Pinsparts[i]];
+            }
+        }
 
-    for (int track = 0; track <= NUM_MIXER_TRACKS; track++)
-    {
-        auto highlightTrack = _state->_activeTrack == track;
-        ImGui::PushID(track);
-        ImGuiTrack(track, highlightTrack);
+        ImGuiMasterTrack();
         ImGui::SameLine();
-        ImGui::PopID();
-    }
 
-    ImGui::PopStyleVar();
+        for (int track = 0; track <= NUM_MIXER_TRACKS; track++)
+        {
+            auto highlightTrack = _state->_activeTrack == track;
+            ImGui::PushID(track);
+            ImGuiTrack(track, highlightTrack);
+            ImGui::SameLine();
+            ImGui::PopID();
+        }
+
+        ImGui::PopStyleVar();
+    }
     ImGui::End();
 }
 
@@ -202,6 +204,17 @@ void zyn::ui::Mixer::ImGuiInspector()
 
         if (ImGui::CollapsingHeader("Track"))
         {
+            ImGui::PushItemWidth(100);
+            auto trackType = static_cast<unsigned char>(_state->_trackPatternType[_state->_activeTrack]);
+            if (ImGui::DropDown("##TrackType", trackType, TrackPatternTypeNames, int(TrackPatternTypes::Count), "The type of track"))
+            {
+                _state->_trackPatternType[_state->_activeTrack] = static_cast<TrackPatternTypes>(trackType);
+            }
+
+            ImGui::SameLine();
+
+            ImGui::Text("Type of pattern editor for this track");
+
             ImGui::TextWrapped("Etiam vitae condimentum justo. Duis et orci diam. Morbi rhoncus finibus augue, eget auctor eros aliquet rhoncus. Etiam felis enim, fringilla tincidunt pulvinar nec, lacinia non nibh. In eget dui porttitor, commodo odio in, interdum neque. Quisque neque neque, finibus non gravida ac, porttitor non odio. Proin magna urna, finibus vitae erat id, pulvinar elementum sapien. Morbi luctus, ex at commodo mattis, libero enim vestibulum lectus, non ornare justo tellus non mi. Nulla dictum arcu eros, sed posuere purus ultricies vitae. ");
         }
 
@@ -289,13 +302,13 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
-                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : lineHeight), lineHeight)))
+                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : lineHeight), 0)))
                 {
                     _state->_currentSystemEffect = fx;
                     _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
-                ImGui::OpenPopupOnItemClick("MasterSystemEffectSelection", 1);
+                ImGui::OpenPopupOnItemClick("MasterSystemEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("MasterSystemEffectSelection"))
                 {
                     for (int i = 0; i < EffectNameCount; i++)
@@ -316,7 +329,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                 if (_state->_mixer->sysefx[fx].geteffect() != 0)
                 {
                     ImGui::SameLine();
-                    if (ImGui::Button("x", ImVec2(lineHeight, lineHeight)))
+                    if (ImGui::Button("x", ImVec2(lineHeight, 0)))
                     {
                         _state->_currentSystemEffect = fx;
                         _state->_showSystemEffectsEditor = true;
@@ -626,7 +639,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
-                ImGui::OpenPopupOnItemClick("SystemEffectSelection", 1);
+                ImGui::OpenPopupOnItemClick("SystemEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("SystemEffectSelection"))
                 {
                     for (int i = 0; i < EffectNameCount; i++)
@@ -693,7 +706,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                         _state->_showInsertEffectsEditor = true;
                         ImGui::SetWindowFocus(InsertionFxEditorID);
                     }
-                    ImGui::OpenPopupOnItemClick("InsertEffectSelection", 1);
+                    ImGui::OpenPopupOnItemClick("InsertEffectSelection", 0);
                     if (ImGui::BeginPopupContextItem("InsertEffectSelection"))
                     {
                         for (int i = 0; i < EffectNameCount; i++)
@@ -770,7 +783,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     _state->_showTrackEffectsEditor = true;
                     ImGui::SetWindowFocus(TrackFxEditorID);
                 }
-                ImGui::OpenPopupOnItemClick("TrackEffectSelection", 1);
+                ImGui::OpenPopupOnItemClick("TrackEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("TrackEffectSelection"))
                 {
                     for (int i = 0; i < EffectNameCount; i++)

@@ -58,7 +58,7 @@ std::chrono::milliseconds::rep calculateStepTime(int bpm)
 void Stepper::Setup()
 {
     _lastSequencerTimeInMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    _playerTimeInMs = 0;
+    _playerTimeInMs = _totalTimeInMs = 0;
     _currentStep = 0;
     _bpm = 120;
     _stepTimeInMs = calculateStepTime(_bpm);
@@ -95,6 +95,7 @@ void Stepper::Tick()
     }
 
     _playerTimeInMs += deltaTime;
+    _totalTimeInMs += deltaTime;
 
     if (_playerTimeInMs > _stepTimeInMs)
     {
@@ -105,6 +106,21 @@ void Stepper::Tick()
         }
         Step(_currentStep);
         _playerTimeInMs -= _stepTimeInMs;
+    }
+}
+
+void Stepper::Step(int step)
+{
+    auto patternIndex = step / 16;
+    auto stepIndex = step % 16;
+
+    for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+    {
+        auto notes = _steppable->GetNote(trackIndex, patternIndex, stepIndex);
+        for (auto note : notes)
+        {
+            HitNote(trackIndex, note._note, note._velocity, static_cast<int>(note._length * 1000.0f));
+        }
     }
 }
 
@@ -133,7 +149,7 @@ bool Stepper::IsPlaying()
 void Stepper::Stop()
 {
     isPlaying = false;
-    _playerTimeInMs = 0;
+    _playerTimeInMs = _totalTimeInMs = 0;
 }
 
 void Stepper::PlayPause()
@@ -143,21 +159,6 @@ void Stepper::PlayPause()
     if (isPlaying)
     {
         Step(_currentStep);
-    }
-}
-
-void Stepper::Step(int step)
-{
-    auto patternIndex = step / 16;
-    auto stepIndex = step % 16;
-
-    for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
-    {
-        auto notes = _steppable->GetNote(trackIndex, patternIndex, stepIndex);
-        for (auto note : notes)
-        {
-            HitNote(trackIndex, note._note, note._velocity, static_cast<int>(note._length * 1000.0f));
-        }
     }
 }
 

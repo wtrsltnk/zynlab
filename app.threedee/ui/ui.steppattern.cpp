@@ -81,76 +81,77 @@ void zyn::ui::StepPattern::RenderStepPatternEditorWindow()
         return;
     }
 
-    ImGui::Begin(StepPatternEditorID, &_state->_showEditor);
-
-    if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeTrack, _state->_activePattern))
+    if (ImGui::Begin(StepPatternEditorID, &_state->_showEditor))
     {
-        _state->_activePattern = -1;
-        ImGui::End();
-        return;
-    }
-
-    auto &style = ImGui::GetStyle();
-    auto &selectedPattern = _state->_sequencer.GetPattern(_state->_activeTrack, _state->_activePattern);
-
-    char tmp[256];
-    strcpy(tmp, selectedPattern._name.c_str());
-    if (ImGui::InputText("pattern name", tmp, 256))
-    {
-        selectedPattern._name = tmp;
-    }
-
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 5));
-    ImGui::BeginChild("Notes");
-    auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
-    auto itemWidth = (width / 16) - (style.ItemSpacing.x);
-
-    // Start from B7 and go down to C1 (http://www.inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies)
-    for (int i = 107; i >= 24; i--)
-    {
-        ImGui::PushID(i);
-        if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, ImGui::GetTextLineHeightWithSpacing())))
+        if (!_state->_sequencer.DoesPatternExistAtIndex(_state->_activeTrack, _state->_activePattern))
         {
-            _state->_stepper->HitNote(_state->_activeTrack, i, 200, 200);
+            _state->_activePattern = -1;
+            ImGui::End();
+            return;
         }
-        for (int j = 0; j < 16; j++)
+
+        auto &style = ImGui::GetStyle();
+        auto &selectedPattern = _state->_sequencer.GetPattern(_state->_activeTrack, _state->_activePattern);
+
+        char tmp[256];
+        strcpy(tmp, selectedPattern._name.c_str());
+        if (ImGui::InputText("pattern name", tmp, 256))
         {
-            ImGui::SameLine();
-            ImGui::PushID(j);
-            auto found = selectedPattern._notes.find(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
-            bool s = (found != selectedPattern._notes.end());
-            if (j % 4 == 0)
+            selectedPattern._name = tmp;
+        }
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 5));
+        ImGui::BeginChild("Notes");
+        auto width = ImGui::GetWindowWidth() - noteLabelWidth - (style.ItemSpacing.x * 2) - style.ScrollbarSize;
+        auto itemWidth = (width / 16) - (style.ItemSpacing.x);
+
+        // Start from B7 and go down to C1 (http://www.inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies)
+        for (int i = 107; i >= 24; i--)
+        {
+            ImGui::PushID(i);
+            if (ImGui::Button(NoteNames[i % NoteNameCount], ImVec2(noteLabelWidth, ImGui::GetTextLineHeightWithSpacing())))
             {
-                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                _state->_stepper->HitNote(_state->_activeTrack, i, 200, 200);
             }
-            else
+            for (int j = 0; j < 16; j++)
             {
-                ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_FrameBg]);
-            }
-            if (ImGui::CheckButton("##note", &s, ImVec2(itemWidth, ImGui::GetTextLineHeightWithSpacing())))
-            {
-                if (!s)
+                ImGui::SameLine();
+                ImGui::PushID(j);
+                auto found = selectedPattern._notes.find(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+                bool s = (found != selectedPattern._notes.end());
+                if (j % 4 == 0)
                 {
-                    selectedPattern._notes.erase(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+                    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
                 }
                 else
                 {
-                    selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+                    ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_FrameBg]);
                 }
-                _state->_stepper->HitNote(_state->_activeTrack, i, 200, 200);
+                if (ImGui::CheckButton("##note", &s, ImVec2(itemWidth, ImGui::GetTextLineHeightWithSpacing())))
+                {
+                    if (!s)
+                    {
+                        selectedPattern._notes.erase(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+                    }
+                    else
+                    {
+                        selectedPattern._notes.insert(TrackPatternNote(static_cast<unsigned char>(i), static_cast<unsigned char>(j), 0.2f));
+                    }
+                    _state->_stepper->HitNote(_state->_activeTrack, i, 200, 200);
+                }
+                ImGui::PopStyleColor();
+                ImGui::PopID();
             }
-            ImGui::PopStyleColor();
             ImGui::PopID();
-        }
-        ImGui::PopID();
 
-        if (i % NoteNameCount == 0)
-        {
-            ImGui::Separator();
+            if (i % NoteNameCount == 0)
+            {
+                ImGui::Separator();
+            }
         }
+        ImGui::EndChild();
+        ImGui::PopStyleVar();
     }
-    ImGui::EndChild();
-    ImGui::PopStyleVar();
     ImGui::End();
 }
 
