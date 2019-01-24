@@ -704,6 +704,62 @@ int Mixer::loadXML(const char *filename)
     return 0;
 }
 
+void Mixer::InitPresets()
+{
+    AddPreset("volume", &Pvolume);
+    AddPreset("key_shift", &Pkeyshift);
+    AddPresetAsBool("nrpn_receive", &ctl.NRPN.receive);
+
+    microtonal.InitPresets();
+    AddContainer(Preset("MICROTONAL", microtonal));
+
+    for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
+    {
+        _tracks[npart].InitPresets();
+        AddContainer(Preset("PART", npart, _tracks[npart]));
+    }
+
+    Preset systemEffects("SYSTEM_EFFECTS");
+    for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
+    {
+        Preset systemEffect("SYSTEM_EFFECT", nefx);
+        
+        sysefx[nefx].InitPresets();
+        systemEffect.AddContainer(Preset("EFFECT", sysefx[nefx]));
+
+        for (int pefx = 0; pefx < NUM_MIXER_TRACKS; ++pefx)
+        {
+            Preset volume("VOLUME", pefx);
+            volume.AddPreset("vol", &Psysefxvol[nefx][pefx]);
+            systemEffect.AddContainer(volume);
+        }
+
+        for (int tonefx = nefx + 1; tonefx < NUM_SYS_EFX; ++tonefx)
+        {
+            Preset sendTo("SENDTO", tonefx);
+            sendTo.AddPreset("send_vol", &Psysefxsend[nefx][tonefx]);
+            systemEffect.AddContainer(sendTo);
+        }
+
+        systemEffects.AddContainer(systemEffect);
+    }
+    AddContainer(systemEffects);
+
+    Preset insertionEffects("INSERTION_EFFECTS");
+    for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
+    {
+        Preset insertionEffect("INSERTION_EFFECT", nefx);
+        {
+          insertionEffect.AddPreset("part", &Pinsparts[nefx]);
+
+          insefx[nefx].InitPresets();
+          insertionEffect.AddContainer(Preset("EFFECT", insefx[nefx]));
+        }
+        insertionEffects.AddContainer(insertionEffect);
+    }
+    AddContainer(insertionEffects);
+}
+
 void Mixer::Serialize(IPresetsSerializer *xml)
 {
     xml->addpar("volume", Pvolume);

@@ -49,14 +49,10 @@ void Track::Init(IMixer *mixer, Microtonal *microtonal)
     for (auto &n : Instruments)
     {
         n.Pname = new unsigned char[TRACK_MAX_NAME_LEN];
-        n.adpars = nullptr;
-        n.subpars = nullptr;
-        n.padpars = nullptr;
+        n.adpars = new ADnoteParameters(_mixer->GetFFT());
+        n.subpars = new SUBnoteParameters();
+        n.padpars = new PADnoteParameters(mixer->GetFFT());
     }
-
-    Instruments[0].adpars = new ADnoteParameters(_mixer->GetFFT());
-    Instruments[0].subpars = new SUBnoteParameters();
-    Instruments[0].padpars = new PADnoteParameters(mixer->GetFFT());
 
     //Part's Insertion Effects init
     for (auto &nefx : partefx)
@@ -1195,29 +1191,13 @@ void Track::setkititemstatus(int kititem, int Penabled_)
     bool resetallnotes = false;
     if (Penabled_ == 0)
     {
-        if (Instruments[kititem].adpars != nullptr)
-            delete (Instruments[kititem].adpars);
-        if (Instruments[kititem].subpars != nullptr)
-            delete (Instruments[kititem].subpars);
-        if (Instruments[kititem].padpars != nullptr)
-        {
-            delete (Instruments[kititem].padpars);
-            resetallnotes = true;
-        }
-        Instruments[kititem].adpars = nullptr;
-        Instruments[kititem].subpars = nullptr;
-        Instruments[kititem].padpars = nullptr;
+        resetallnotes = true;
         Instruments[kititem].Pname[0] = '\0';
     }
-    else
-    {
-        if (Instruments[kititem].adpars == nullptr)
-            Instruments[kititem].adpars = new ADnoteParameters(_mixer->GetFFT());
-        if (Instruments[kititem].subpars == nullptr)
-            Instruments[kititem].subpars = new SUBnoteParameters();
-        if (Instruments[kititem].padpars == nullptr)
-            Instruments[kititem].padpars = new PADnoteParameters(_mixer->GetFFT());
-    }
+    
+    Instruments[kititem].adpars->Defaults();
+    Instruments[kititem].subpars->Defaults();
+    Instruments[kititem].padpars->Defaults();
 
     if (resetallnotes)
     {

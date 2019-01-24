@@ -338,7 +338,7 @@ void Controller::setparameternumber(unsigned int type, int value)
 
 void Controller::InitPresets()
 {
-    AddPreset("pitchwheel_bendrange", &pitchwheel.bendrange);
+    AddPreset("pitchwheel_bendrange", &pitchwheel.bendrange, -6400, 6400);
 
     AddPresetAsBool("expression_receive", &expression.receive);
     AddPreset("panning_depth", &panning.depth);

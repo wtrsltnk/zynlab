@@ -32,7 +32,7 @@
 #include <pthread.h>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IFFTwrapper.h>
-#include <zyn.common/IPresetsSerializer.h>
+#include <zyn.common/Presets.h>
 #include <zyn.common/Stereo.h>
 #include <zyn.common/globals.h>
 #include <zyn.fx/EffectMgr.h>
@@ -40,7 +40,7 @@
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
-class Mixer : public IMixer, public IAudioGenerator
+class Mixer : public IMixer, public IAudioGenerator, public WrappedPresets
 {
 public:
     /** Constructor TODO make private*/
@@ -126,6 +126,8 @@ public:
     //other objects
     Microtonal microtonal;
 
+    void InitPresets();
+    
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
     void Defaults();

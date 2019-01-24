@@ -9,6 +9,7 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
+#include <zyn.synth/Controller.h>
 #include <zyn.synth/EnvelopeParams.h>
 #include <zyn.synth/FFTwrapper.h>
 #include <zyn.synth/LFOParams.h>
@@ -36,12 +37,10 @@ TEST_CASE("Presets")
         SECTION("Serialization should work")
         {
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
 
-            REQUIRE(presetsA == presetsB);
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
 
@@ -54,13 +53,11 @@ TEST_CASE("Presets")
         SECTION("Serialization should work")
         {
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
 
             // TODO We skip this assert as long there is no solution for the ugly 'setPadSynth()' method
-            // REQUIRE(presetsA == presetsB);
+            // REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
 
@@ -73,12 +70,34 @@ TEST_CASE("Presets")
         SECTION("Serialization should work")
         {
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
 
-            REQUIRE(presetsA == presetsB);
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
+        }
+    }
+
+    SECTION("Track Presets", "[zyn.mixer]")
+    {
+        Mixer mixer;
+        mixer.Setup(nullptr);
+        
+        Microtonal micro;
+        micro.Defaults();
+        
+        auto sut = Track();
+        sut.Init(&mixer, &micro);
+        sut.Defaults();
+        sut.InitPresets();
+
+        SECTION("Serialization should work")
+        {
+            sut.Serialize(&serializerA);
+
+            sut.WritePresetsToBlob(&serializerB);
+
+            // TODO We skip this assert as long there is no solution for the ugly 'setPadSynth()' method
+            // REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
 
@@ -93,12 +112,10 @@ TEST_CASE("Presets")
             sut.Pforcedrelease = 1;
 
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
 
-            REQUIRE(presetsA == presetsB);
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
 
         SECTION("Deserialization should work")
@@ -160,12 +177,10 @@ TEST_CASE("Presets")
         SECTION("Serialization should work")
         {
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
 
-            REQUIRE(presetsA == presetsB);
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
 
@@ -184,12 +199,10 @@ TEST_CASE("Presets")
         SECTION("Serialization should work")
         {
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
 
-            REQUIRE(presetsA == presetsB);
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
 
@@ -202,12 +215,10 @@ TEST_CASE("Presets")
         SECTION("Serialization should work")
         {
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
-
-            REQUIRE(presetsA == presetsB);
+            
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
 
@@ -221,12 +232,10 @@ TEST_CASE("Presets")
         SECTION("Serialization should work")
         {
             sut.Serialize(&serializerA);
-            auto presetsA = std::string(serializerA.getXMLdata());
 
             sut.WritePresetsToBlob(&serializerB);
-            auto presetsB = std::string(serializerB.getXMLdata());
 
-            REQUIRE(presetsA == presetsB);
+            REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
 
@@ -251,16 +260,9 @@ TEST_CASE("Presets")
         }
     }
 
-    SECTION("Track Presets", "[zyn.mixer]")
+    SECTION("Controller Presets", "[zyn.synth]")
     {
-        Mixer mixer;
-        mixer.Setup(nullptr);
-        
-        Microtonal micro;
-        micro.Defaults();
-        
-        auto sut = Track();
-        sut.Init(&mixer, &micro);
+        auto sut = Controller();
         sut.Defaults();
         sut.InitPresets();
 
