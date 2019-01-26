@@ -461,7 +461,7 @@ class MasterUI {open
 \#else
 0
 \#endif
- || fl_choice("Exit and leave the unsaved data?","No","Yes",nullptr))) {
+ || fl_choice("Exit and leave the unsaved data?","No","Yes","Cancel"))) {
     Config::Current().save();
     *exitprogram=1;
 };} open selected
@@ -523,7 +523,7 @@ filename=fl_filename_setext(filename,".xsz");
 result=fileexists(filename);
 if (result) {
     result=0;
-   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",nullptr)) return;
+   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes","Cancel")) return;
        
 };
 
@@ -565,7 +565,7 @@ updatepanel();}
         } {
           MenuItem {} {
             label {&Clear Instrument...}
-            callback {if (fl_choice("Clear instrument's parameters ?","No","Yes",nullptr)){
+            callback {if (fl_choice("Clear instrument's parameters ?","No","Yes","Cancel")){
 //       int npart=(int)npartcounter->value()-1;
        master->Lock();
        master->GetTrack(npart)->InstrumentDefaults();
@@ -614,7 +614,7 @@ filename=fl_filename_setext(filename,".xiz");
 int result=fileexists(filename);
 if (result) {
     result=0;
-   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",nullptr)) return;
+   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes","Cancel")) return;
        
 };
 
@@ -645,7 +645,7 @@ updatepanel();}
         } {
           MenuItem {} {
             label {Switch User Interface Mode}
-            callback {if (fl_choice("Switch the User Interface to Beginner mode ?","No","Yes",nullptr)){
+            callback {if (fl_choice("Switch the User Interface to Beginner mode ?","No","Yes","Cancel")){
 	masterwindow->hide();
 	refresh_master_ui();
 	simplemasterwindow->show();
@@ -1031,7 +1031,7 @@ updatepanel();}
     Fl_Window simplemasterwindow {
       label ZynAddSubFX
       callback {\#ifndef PLUGINVERSION
-if (fl_choice("Exit and leave the unsaved data?","No","Yes",nullptr))
+if (fl_choice("Exit and leave the unsaved data?","No","Yes","Cancel"))
 \#endif
 {
     Config::Current().save();
@@ -1118,7 +1118,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
         } {
           MenuItem {} {
             label {Switch User Interface Mode}
-            callback {if (fl_choice("Switch the User Interface to Advanced mode ?","No","Yes",nullptr)){
+            callback {if (fl_choice("Switch the User Interface to Advanced mode ?","No","Yes","Cancel")){
 	simplemasterwindow->hide();
 	refresh_master_ui();
 	masterwindow->show();
@@ -1664,7 +1664,7 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
        updatepanel();} {}
   }
   Function {do_new_master()} {} {
-    code {if (fl_choice("Clear *ALL* the parameters ?","No","Yes",nullptr)){
+    code {if (fl_choice("Clear *ALL* the parameters ?","No","Yes","Cancel")){
          do_new_master_unconditional();
          }} {}
   }
@@ -1708,14 +1708,14 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a 
 char *tmp;
   int result=0;
   if (file == nullptr) {
-    tmp=fl_file_chooser("Save:","({*.xmz})",nullptr,0);
+    tmp=fl_file_chooser("Save:","({*.xmz})","empty.xmz",0);
     if (tmp==nullptr) return;
     tmp=fl_filename_setext(tmp,".xmz");
     filename=tmp;
     result=fileexists(tmp);
     if (result) {
       result=0;
-      if (!fl_choice("The file exists. Overwrite it?","No","Yes",nullptr)) return;
+      if (!fl_choice("The file exists. Overwrite it?","No","Yes","Cancel")) return;
       
     }
   }
