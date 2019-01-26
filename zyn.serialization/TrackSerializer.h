@@ -30,12 +30,12 @@ class TrackSerializer
 {
     Track *_parameters;
 
-    void SerializeInstrument(IPresetsSerializer *xml);
-    void DeserializeInstrument(IPresetsSerializer *xml);
-
 public:
     TrackSerializer(Track *parameters);
     virtual ~TrackSerializer();
+
+    void SerializeInstrument(IPresetsSerializer *xml);
+    void DeserializeInstrument(IPresetsSerializer *xml);
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);

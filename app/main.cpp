@@ -34,9 +34,11 @@
 #include <thread>
 
 #include <zyn.common/Util.h>
-#include <zyn.mixer/BankManager.h>
-#include <zyn.mixer/Track.h>
 #include <zyn.mixer/Mixer.h>
+#include <zyn.mixer/Track.h>
+#include <zyn.serialization/BankManager.h>
+#include <zyn.serialization/SaveToFileSerializer.h>
+#include <zyn.serialization/TrackSerializer.h>
 #include <zyn.synth/FFTwrapper.h>
 
 //Nio System
@@ -51,7 +53,6 @@ static MasterUI *ui;
 
 static BankManager banks;
 static Mixer mixer;
-static Sequencer *seq;
 
 static unsigned int swaplr = 0; //1 for left-right swapping
 
@@ -320,12 +321,13 @@ int main(int argc, char *argv[])
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-    mixer.Setup(&banks);
+    mixer.Setup();
     mixer.swaplr = swaplr;
 
+    SaveToFileSerializer serializer;
     if (!loadfile.empty())
     {
-        int tmp = mixer.loadXML(loadfile.c_str());
+        int tmp = serializer.LoadMixer(&mixer, loadfile);
         if (tmp < 0)
         {
             std::cerr << "ERROR: Could not load master file " << loadfile
@@ -341,7 +343,7 @@ int main(int argc, char *argv[])
 
     if (!loadinstrument.empty())
     {
-        int tmp = mixer.GetTrack(0)->loadXMLinstrument(loadinstrument.c_str());
+        int tmp = serializer.LoadTrack(mixer.GetTrack(0), loadinstrument);
         if (tmp < 0)
         {
             std::cerr << "ERROR: Could not load instrument file "
@@ -370,7 +372,7 @@ int main(int argc, char *argv[])
 
 #ifdef ENABLE_FLTKGUI
 
-    ui = new MasterUI(&mixer, seq, &Pexitprogram);
+    ui = new MasterUI(&mixer, &banks, &serializer, &Pexitprogram);
 
     if (!noui)
     {

@@ -47,9 +47,6 @@ decl {\#include "MicrotonalUI.h"} {public local
 decl {\#include "PresetsUI.h"} {public local
 } 
 
-decl {\#include "SequencerUI.h"} {public local
-} 
-
 decl {\#include "NioUI.h"} {public global
 } 
 
@@ -59,10 +56,10 @@ decl {\#include "zyn.common/globals.h"} {public local
 decl {\#include "zyn.mixer/Track.h"} {public local
 } 
 
-decl {\#include "zyn.seq/Sequencer.h"} {public global
-} 
+decl {\#include <zyn.serialization/SaveToFileSerializer.h>} {public global
+}
 
-decl {\#include "zyn.common/Util.h"} {public local
+decl {\#include <zyn.common/Util.h>} {public local
 } 
 
 decl {\#include "common.H"} {public local
@@ -594,7 +591,7 @@ master->Lock();
   master->GetTrack(npart)->InstrumentDefaults();
 
   //load the instr. parameters
-  int result=master->GetTrack(npart)->loadXMLinstrument(filename);
+  int result = serializer->LoadTrack(master->GetTrack(npart), filename);
 
 master->Unlock();
 master->GetTrack(npart)->ApplyParameters();
@@ -623,7 +620,7 @@ if (result) {
 
 
 master->Lock();
-result=master->GetTrack(npart)->saveXML(filename);
+result=serializer->SaveTrack(master->GetTrack(npart), filename);
 master->Unlock();
 
 if (result<0) fl_alert("Error: Could not save the file.");
@@ -1098,7 +1095,7 @@ master->Lock();
   master->GetTrack(npart)->InstrumentDefaults();
 
   //load the instr. parameters
-  int result=master->GetTrack(npart)->loadXMLinstrument(filename);
+  int result=serializer->LoadTrack(master->GetTrack(npart), filename);
 
 master->Unlock();
 master->GetTrack(npart)->ApplyParameters();
@@ -1582,8 +1579,9 @@ masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
 simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
-  Function {MasterUI(Mixer *master_,Sequencer* seq_,int *exitprogram_)} {} {
+  Function {MasterUI(Mixer *master_,IBankManager *banks, SaveToFileSerializer *serializer_,int *exitprogram_)} {} {
     code {master=master_;
+serializer=serializer_;
 exitprogram=exitprogram_;
 ninseff=0;
 nsyseff=0;
@@ -1595,7 +1593,7 @@ for (int i=0;i<NUM_SYS_EFX;i++)
 
 microtonalui=new MicrotonalUI(&master->microtonal);
 virkeyboard=new VirKeyboard(master);
-bankui=new BankUI(master,&npart);
+bankui=new BankUI(master,banks,&npart);
 configui=new ConfigUI();
 
 make_window();
@@ -1677,7 +1675,7 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
     master->Defaults();
     
     //load the data
-    int result=master->loadXML(filename);
+    int result=serializer->LoadMixer(master, filename);
     
     master->applyparameters(false);
     master->Unlock();
@@ -1727,7 +1725,7 @@ char *tmp;
 
 
 master->Lock();
-result=master->saveXML(filename);
+result=serializer->SaveMixer(master, filename);
 master->Unlock();
 
 if (result<0) fl_alert("Error: Could not save the file.");
@@ -1771,11 +1769,11 @@ bankui->hide();} {}
   }
   decl {Mixer *master;} {private local
   }
+  decl {SaveToFileSerializer *serializer;} {private local
+  }
   decl {MicrotonalUI *microtonalui;} {private local
   }
   decl {BankUI *bankui;} {private local
-  }
-  decl {SequencerUI* sequi;} {private local
   }
   decl {int ninseff,npart;} {private local
   }

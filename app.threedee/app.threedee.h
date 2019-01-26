@@ -18,7 +18,7 @@
 #include "ui/ui.subnote.h"
 #include <chrono>
 #include <zyn.common/Util.h>
-#include <zyn.mixer/BankManager.h>
+#include <zyn.serialization/BankManager.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
 #include <zyn.synth/ADnoteParams.h>
@@ -52,7 +52,7 @@ protected:
     void onResize(int width, int height);
 
 public:
-    AppThreeDee(GLFWwindow *window, Mixer *mixer);
+    AppThreeDee(GLFWwindow *window, Mixer *mixer, IBankManager *banks);
     virtual ~AppThreeDee();
 
     bool Setup();

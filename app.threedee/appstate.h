@@ -30,11 +30,12 @@ enum class TrackPatternTypes
 class AppState
 {
 public:
-    AppState(class Mixer *mixer, class Stepper *stepper);
+    AppState(class Mixer *mixer, class Stepper *stepper, class IBankManager *banks);
     virtual ~AppState();
 
     class Mixer *_mixer;
     class Stepper *_stepper;
+    class IBankManager *_banks;
     bool _showLibrary;
     bool _showEditor;
     bool _showInspector;

@@ -27,6 +27,8 @@
 #include <vector>
 #include <zyn.common/globals.h>
 
+class Track;
+
 /**The instrument Bank*/
 class BankManager : public IBankManager
 {
@@ -47,9 +49,9 @@ public:
     /**Empties out the selected slot*/
     virtual void ClearSlot(unsigned int ninstrument);
     /**Saves the given Part to slot*/
-    virtual void SaveToSlot(unsigned int ninstrument, class Track *part);
+    virtual void SaveToSlot(unsigned int ninstrument, Track *track);
     /**Loads the given slot into a Part*/
-    virtual void LoadFromSlot(unsigned int ninstrument, class Track *part);
+    virtual void LoadFromSlot(unsigned int ninstrument, Track *track);
     /**Swaps Slots*/
     virtual void SwapSlot(unsigned int n1, unsigned int n2);
 
@@ -57,7 +59,7 @@ public:
     virtual int NewBank(std::string const &newbankdirname);
     virtual int GetBankCount();
     virtual std::vector<char const *> const &GetBankNames();
-    virtual InstrumentBank  &GetBank(int index);
+    virtual InstrumentBank &GetBank(int index);
 
     virtual std::string const &GetBankFileTitle();
 

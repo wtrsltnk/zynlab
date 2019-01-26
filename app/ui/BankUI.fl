@@ -29,9 +29,6 @@ decl {\#include "zyn.mixer/Track.h"} {public local
 decl {\#include "zyn.common/globals.h"} {public local
 } 
 
-decl {\#include "zyn.mixer/Mixer.h"} {public
-}
-
 decl {\#include "zyn.common/Config.h"} {public local
 } 
 
@@ -242,11 +239,11 @@ refreshmainwindow();}
       }
     }
   }
-  Function {BankUI(Mixer *master_,int *npart_)} {} {
+  Function {BankUI(IMixer *master_, IBankManager *bank_,int *npart_)} {} {
     code {fnc=&BankProcess_::process;
 master=master_;
 npart=npart_;
-bank=master_->GetBankManager();
+bank=bank_;
 what=0;
 nselected=-1;
 make_window();
@@ -378,7 +375,7 @@ if (beginnerui) modeselect->hide();
   }
   decl {int mode,*npart,nselected;} {private local
   }
-  decl {Mixer *master;} {private local
+  decl {IMixer *master;} {private local
   }
   decl {void (BankProcess_::* fnc)(void);} {private local
   }

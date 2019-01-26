@@ -31,6 +31,8 @@
 
 class OscilGen : public WrappedPresets
 {
+    friend class OscilGenSerializer;
+
 public:
     OscilGen(IFFTwrapper *fft_, Resonance *res_);
     virtual ~OscilGen();
@@ -94,7 +96,7 @@ public:
 
     unsigned char Pamprandpower, Pamprandtype; //amplitude randomness
     int Pharmonicshift;                        //how the harmonics are shifted
-    unsigned char Pharmonicshiftfirst;                   //if the harmonic shift is done before waveshaping and filter
+    unsigned char Pharmonicshiftfirst;         //if the harmonic shift is done before waveshaping and filter
 
     unsigned char Padaptiveharmonics;         //the adaptive harmonics status (off=0,on=1,etc..)
     unsigned char Padaptiveharmonicsbasefreq; //the base frequency of the adaptive harmonic (30..3000Hz)

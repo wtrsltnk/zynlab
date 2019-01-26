@@ -7,6 +7,8 @@ add_library(zyn.serialization STATIC
     ADnoteParamsSerializer.h
     ADnoteVoiceParamSerializer.cpp
     ADnoteVoiceParamSerializer.h
+    BankManager.cpp
+    BankManager.h
     ControllerSerializer.cpp
     ControllerSerializer.h
     EffectMgrSerializer.cpp
@@ -29,6 +31,8 @@ add_library(zyn.serialization STATIC
     ResonanceSerializer.h
     SUBnoteParamsSerializer.cpp
     SUBnoteParamsSerializer.h
+    SaveToFileSerializer.cpp
+    SaveToFileSerializer.h
     TrackSerializer.cpp
     TrackSerializer.h
     )

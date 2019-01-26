@@ -32,6 +32,7 @@ target_link_libraries(tests
     zyn.synth
     zyn.fx
     zyn.dsp
+    zyn.serialization
     zyn.common
     )
 

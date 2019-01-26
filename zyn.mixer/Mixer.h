@@ -50,25 +50,17 @@ public:
     /** Destructor*/
     virtual ~Mixer();
 
-    void Setup(IBankManager *bank_);
+    void Setup();
 
-    virtual IBankManager *GetBankManager();
     virtual IMeter *GetMeter();
 
-    /**Saves all settings to a XML file
-         * @return 0 for ok or <0 if there is an error*/
-    int saveXML(const char *filename);
-
-    /**loads all settings from a XML file
-         * @return 0 for ok or -1 if there is an error*/
-    int loadXML(const char *filename);
     void applyparameters(bool lockmutex = true);
 
-    /**get all data to a newly allocated array (used for VST)
-         * @return the datasize*/
-    int getalldata(char **data);
-    /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
-    void putalldata(char *data, int size);
+//    /**get all data to a newly allocated array (used for VST)
+//         * @return the datasize*/
+//    int getalldata(char **data);
+//    /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
+//    void putalldata(char *data, int size);
 
     // Synth settings
     virtual unsigned int SampleRate() const;
@@ -130,14 +122,11 @@ public:
 
     void InitPresets();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
     void Defaults();
 
 private:
     Track _tracks[NUM_MIXER_TRACKS];
     pthread_mutex_t _mutex;
-    IBankManager *_bankManager;
     std::unique_ptr<IFFTwrapper> _fft;
 
     float _volume;

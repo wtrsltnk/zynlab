@@ -315,8 +315,8 @@ public:
 
     virtual bool EmptySlot(unsigned int ninstrument) = 0;
     virtual void ClearSlot(unsigned int ninstrument) = 0;
-    virtual void LoadFromSlot(unsigned int ninstrument, Track *part) = 0;
-    virtual void SaveToSlot(unsigned int ninstrument, Track *part) = 0;
+    virtual void LoadFromSlot(unsigned int ninstrument, Track *track) = 0;
+    virtual void SaveToSlot(unsigned int ninstrument, Track *track) = 0;
     virtual void SwapSlot(unsigned int n1, unsigned int n2) = 0;
 
     virtual std::string const &GetBankFileTitle() = 0;
@@ -348,7 +348,6 @@ class IMixer
 public:
     virtual ~IMixer();
 
-    virtual IBankManager *GetBankManager() = 0;
     virtual IMeter *GetMeter() = 0;
 
     // Instruments

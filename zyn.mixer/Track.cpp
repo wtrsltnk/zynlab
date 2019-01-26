@@ -1194,7 +1194,7 @@ void Track::setkititemstatus(int kititem, int Penabled_)
         resetallnotes = true;
         Instruments[kititem].Pname[0] = '\0';
     }
-    
+
     Instruments[kititem].adpars->Defaults();
     Instruments[kititem].subpars->Defaults();
     Instruments[kititem].padpars->Defaults();
@@ -1206,77 +1206,6 @@ void Track::setkititemstatus(int kititem, int Penabled_)
             KillNotePos(k);
         }
     }
-}
-
-void Track::SerializeInstrument(IPresetsSerializer *xml)
-{
-    xml->beginbranch("INFO");
-    xml->addparstr("name", reinterpret_cast<char *>(Pname));
-    xml->addparstr("author", reinterpret_cast<char *>(info.Pauthor));
-    xml->addparstr("comments", reinterpret_cast<char *>(info.Pcomments));
-    xml->addpar("type", info.Ptype);
-    xml->endbranch();
-
-    xml->beginbranch("INSTRUMENT_KIT");
-    xml->addpar("kit_mode", Pkitmode);
-    xml->addparbool("drum_mode", Pdrummode);
-
-    for (int i = 0; i < NUM_TRACK_INSTRUMENTS; ++i)
-    {
-        xml->beginbranch("INSTRUMENT_KIT_ITEM", i);
-        xml->addparbool("enabled", Instruments[i].Penabled);
-        if (Instruments[i].Penabled != 0)
-        {
-            xml->addparstr("name", reinterpret_cast<char *>(Instruments[i].Pname));
-
-            xml->addparbool("muted", Instruments[i].Pmuted);
-            xml->addpar("min_key", Instruments[i].Pminkey);
-            xml->addpar("max_key", Instruments[i].Pmaxkey);
-
-            xml->addpar("send_to_instrument_effect", Instruments[i].Psendtoparteffect);
-
-            xml->addparbool("add_enabled", Instruments[i].Padenabled);
-            if ((Instruments[i].Padenabled != 0) && (Instruments[i].adpars != nullptr))
-            {
-                xml->beginbranch("ADD_SYNTH_PARAMETERS");
-                Instruments[i].adpars->Serialize(xml);
-                xml->endbranch();
-            }
-
-            xml->addparbool("sub_enabled", Instruments[i].Psubenabled);
-            if ((Instruments[i].Psubenabled != 0) && (Instruments[i].subpars != nullptr))
-            {
-                xml->beginbranch("SUB_SYNTH_PARAMETERS");
-                Instruments[i].subpars->Serialize(xml);
-                xml->endbranch();
-            }
-
-            xml->addparbool("pad_enabled", Instruments[i].Ppadenabled);
-            if ((Instruments[i].Ppadenabled != 0) && (Instruments[i].padpars != nullptr))
-            {
-                xml->beginbranch("PAD_SYNTH_PARAMETERS");
-                Instruments[i].padpars->Serialize(xml);
-                xml->endbranch();
-            }
-        }
-        xml->endbranch();
-    }
-    xml->endbranch();
-
-    xml->beginbranch("INSTRUMENT_EFFECTS");
-    for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
-    {
-        xml->beginbranch("INSTRUMENT_EFFECT", nefx);
-        xml->beginbranch("EFFECT");
-        partefx[nefx]->Serialize(xml);
-        xml->endbranch();
-
-        xml->addpar("route", Pefxroute[nefx]);
-        partefx[nefx]->setdryonly(Pefxroute[nefx] == 2);
-        xml->addparbool("bypass", Pefxbypass[nefx]);
-        xml->endbranch();
-    }
-    xml->endbranch();
 }
 
 void Track::InitPresets()
@@ -1296,7 +1225,7 @@ void Track::InitPresets()
     {
         Preset instrumentKitItem("INSTRUMENT_KIT_ITEM", i);
         instrumentKitItem.AddPresetAsBool("enabled", &Instruments[i].Penabled);
-        
+
         instrumentKitItem.AddPresetAsString("name", Instruments[i].Pname, MAX_INFO_TEXT_SIZE);
 
         instrumentKitItem.AddPresetAsBool("muted", &Instruments[i].Pmuted);
@@ -1316,7 +1245,7 @@ void Track::InitPresets()
         instrumentKitItem.AddPresetAsBool("pad_enabled", &(Instruments[i].Ppadenabled));
         Instruments[i].padpars->InitPresets();
         instrumentKitItem.AddContainer(Preset("PAD_SYNTH_PARAMETERS", *Instruments[i].padpars));
-            
+
         instrumentKit.AddContainer(instrumentKitItem);
     }
     AddContainer(instrumentKit);
@@ -1326,79 +1255,15 @@ void Track::InitPresets()
     {
         Preset instrumentEffect("INSTRUMENT_EFFECT", nefx);
         {
-          partefx[nefx]->InitPresets();
-          instrumentEffect.AddContainer(Preset("EFFECT", *partefx[nefx]));
+            partefx[nefx]->InitPresets();
+            instrumentEffect.AddContainer(Preset("EFFECT", *partefx[nefx]));
 
-          instrumentEffect.AddPreset("route", &Pefxroute[nefx]);
-          instrumentEffect.AddPresetAsBool("bypass", &Pefxbypass[nefx]);
+            instrumentEffect.AddPreset("route", &Pefxroute[nefx]);
+            instrumentEffect.AddPresetAsBool("bypass", &Pefxbypass[nefx]);
         }
         instrumentEffects.AddContainer(instrumentEffect);
     }
     AddContainer(instrumentEffects);
-}
-
-void Track::Serialize(IPresetsSerializer *xml)
-{
-    //parameters
-    xml->addparbool("enabled", Penabled);
-    if ((Penabled == 0) && (xml->minimal))
-    {
-        return;
-    }
-
-    xml->addpar("volume", Pvolume);
-    xml->addpar("panning", Ppanning);
-
-    xml->addpar("min_key", Pminkey);
-    xml->addpar("max_key", Pmaxkey);
-    xml->addpar("key_shift", Pkeyshift);
-    xml->addpar("rcv_chn", Prcvchn);
-
-    xml->addpar("velocity_sensing", Pvelsns);
-    xml->addpar("velocity_offset", Pveloffs);
-
-    xml->addparbool("note_on", Pnoteon);
-    xml->addparbool("poly_mode", Ppolymode);
-    xml->addpar("legato_mode", Plegatomode);
-    xml->addpar("key_limit", Pkeylimit);
-
-    xml->beginbranch("INSTRUMENT");
-    SerializeInstrument(xml);
-    xml->endbranch();
-
-    xml->beginbranch("CONTROLLER");
-    ctl.Serialize(xml);
-    xml->endbranch();
-}
-
-int Track::saveXML(const char *filename)
-{
-    PresetsSerializer xml;
-
-    xml.beginbranch("INSTRUMENT");
-    SerializeInstrument(&xml);
-    xml.endbranch();
-
-    return xml.saveXMLfile(filename);
-}
-
-int Track::loadXMLinstrument(const char *filename)
-{
-    PresetsSerializer xml;
-    if (xml.loadXMLfile(filename) < 0)
-    {
-        return -1;
-    }
-
-    if (xml.enterbranch("INSTRUMENT") == 0)
-    {
-        return -10;
-    }
-
-    DeserializeInstrument(&xml);
-    xml.exitbranch();
-
-    return 0;
 }
 
 void Track::ApplyParameters(bool lockmutex)
@@ -1409,129 +1274,5 @@ void Track::ApplyParameters(bool lockmutex)
         {
             n.padpars->applyparameters(lockmutex ? _mixer : nullptr);
         }
-    }
-}
-
-void Track::DeserializeInstrument(IPresetsSerializer *xml)
-{
-    if (xml->enterbranch("INFO"))
-    {
-        xml->getparstr("name", reinterpret_cast<char *>(Pname), TRACK_MAX_NAME_LEN);
-        xml->getparstr("author", reinterpret_cast<char *>(info.Pauthor), MAX_INFO_TEXT_SIZE);
-        xml->getparstr("comments", reinterpret_cast<char *>(info.Pcomments), MAX_INFO_TEXT_SIZE);
-        info.Ptype = static_cast<unsigned char>(xml->getpar("type", info.Ptype, 0, 16));
-
-        xml->exitbranch();
-    }
-
-    if (xml->enterbranch("INSTRUMENT_KIT"))
-    {
-        Pkitmode = static_cast<unsigned char>(xml->getpar127("kit_mode", Pkitmode));
-        Pdrummode = static_cast<unsigned char>(xml->getparbool("drum_mode", Pdrummode));
-
-        setkititemstatus(0, 0);
-        for (int i = 0; i < NUM_TRACK_INSTRUMENTS; ++i)
-        {
-            if (xml->enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
-                continue;
-            setkititemstatus(i, xml->getparbool("enabled", Instruments[i].Penabled));
-            if (Instruments[i].Penabled == 0)
-            {
-                xml->exitbranch();
-                continue;
-            }
-
-            xml->getparstr("name", reinterpret_cast<char *>(Instruments[i].Pname), TRACK_MAX_NAME_LEN);
-
-            Instruments[i].Pmuted = static_cast<unsigned char>(xml->getparbool("muted", Instruments[i].Pmuted));
-            Instruments[i].Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", Instruments[i].Pminkey));
-            Instruments[i].Pmaxkey = static_cast<unsigned char>(xml->getpar127("max_key", Instruments[i].Pmaxkey));
-
-            Instruments[i].Psendtoparteffect = static_cast<unsigned char>(xml->getpar127(
-                "send_to_instrument_effect",
-                Instruments[i].Psendtoparteffect));
-
-            Instruments[i].Padenabled = static_cast<unsigned char>(xml->getparbool("add_enabled", Instruments[i].Padenabled));
-            if (xml->enterbranch("ADD_SYNTH_PARAMETERS"))
-            {
-                Instruments[i].adpars->Deserialize(xml);
-                xml->exitbranch();
-            }
-
-            Instruments[i].Psubenabled = static_cast<unsigned char>(xml->getparbool("sub_enabled", Instruments[i].Psubenabled));
-            if (xml->enterbranch("SUB_SYNTH_PARAMETERS"))
-            {
-                Instruments[i].subpars->Deserialize(xml);
-                xml->exitbranch();
-            }
-
-            Instruments[i].Ppadenabled = static_cast<unsigned char>(xml->getparbool("pad_enabled", Instruments[i].Ppadenabled));
-            if (xml->enterbranch("PAD_SYNTH_PARAMETERS"))
-            {
-                Instruments[i].padpars->Deserialize(xml);
-                xml->exitbranch();
-            }
-
-            xml->exitbranch();
-        }
-
-        xml->exitbranch();
-    }
-
-    if (xml->enterbranch("INSTRUMENT_EFFECTS"))
-    {
-        for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
-        {
-            if (xml->enterbranch("INSTRUMENT_EFFECT", nefx) == 0)
-                continue;
-            if (xml->enterbranch("EFFECT"))
-            {
-                partefx[nefx]->Deserialize(xml);
-                xml->exitbranch();
-            }
-
-            Pefxroute[nefx] = static_cast<unsigned char>(xml->getpar("route", Pefxroute[nefx], 0, NUM_TRACK_EFX));
-            partefx[nefx]->setdryonly(Pefxroute[nefx] == 2);
-            Pefxbypass[nefx] = xml->getparbool("bypass", Pefxbypass[nefx]);
-            xml->exitbranch();
-        }
-        xml->exitbranch();
-    }
-}
-
-void Track::Deserialize(IPresetsSerializer *xml)
-{
-    Penabled = static_cast<unsigned char>(xml->getparbool("enabled", Penabled));
-
-    setPvolume(static_cast<unsigned char>(xml->getpar127("volume", Pvolume)));
-    setPpanning(static_cast<unsigned char>(xml->getpar127("panning", Ppanning)));
-
-    Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", Pminkey));
-    Pmaxkey = static_cast<unsigned char>(xml->getpar127("max_key", Pmaxkey));
-    Pkeyshift = static_cast<unsigned char>(xml->getpar127("key_shift", Pkeyshift));
-    Prcvchn = static_cast<unsigned char>(xml->getpar127("rcv_chn", Prcvchn));
-
-    Pvelsns = static_cast<unsigned char>(xml->getpar127("velocity_sensing", Pvelsns));
-    Pveloffs = static_cast<unsigned char>(xml->getpar127("velocity_offset", Pveloffs));
-
-    Pnoteon = static_cast<unsigned char>(xml->getparbool("note_on", Pnoteon));
-    Ppolymode = static_cast<unsigned char>(xml->getparbool("poly_mode", Ppolymode));
-    Plegatomode = static_cast<unsigned char>(xml->getparbool("legato_mode", Plegatomode)); //older versions
-    if (!Plegatomode)
-    {
-        Plegatomode = static_cast<unsigned char>(xml->getpar127("legato_mode", Plegatomode));
-    }
-    Pkeylimit = static_cast<unsigned char>(xml->getpar127("key_limit", Pkeylimit));
-
-    if (xml->enterbranch("INSTRUMENT"))
-    {
-        DeserializeInstrument(xml);
-        xml->exitbranch();
-    }
-
-    if (xml->enterbranch("CONTROLLER"))
-    {
-        ctl.Deserialize(xml);
-        xml->exitbranch();
     }
 }

@@ -82,6 +82,7 @@ if(GLFW3_FOUND)
         zyn.fx
         zyn.dsp
         zyn.seq
+        zyn.serialization
         zyn.common
         )
 

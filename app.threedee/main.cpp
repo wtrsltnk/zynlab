@@ -37,7 +37,7 @@ void initprogram()
     std::cerr << "ADsynth Oscil.Size = \t" << SystemSettings::Instance().oscilsize << " samples" << std::endl;
 
     mixer = new Mixer();
-    mixer->Setup(&bankManager);
+    mixer->Setup();
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
@@ -90,7 +90,7 @@ int main(int /*argc*/, char * /*argv*/ [])
         return -1;
     }
 
-    AppThreeDee app(window, mixer);
+    AppThreeDee app(window, mixer, &bankManager);
 
     glfwSetWindowSizeCallback(window, AppThreeDee::ResizeCallback);
     glfwMakeContextCurrent(window);

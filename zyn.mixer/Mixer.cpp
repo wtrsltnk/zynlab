@@ -45,9 +45,8 @@ Mixer::~Mixer()
     pthread_mutex_destroy(&_mutex);
 }
 
-void Mixer::Setup(IBankManager *bankManager)
+void Mixer::Setup()
 {
-    _bankManager = bankManager;
     meter.Setup();
     ctl.Init();
 
@@ -80,11 +79,6 @@ void Mixer::Setup(IBankManager *bankManager)
     }
 
     Defaults();
-}
-
-IBankManager *Mixer::GetBankManager()
-{
-    return _bankManager;
 }
 
 IMeter *Mixer::GetMeter()
@@ -257,7 +251,8 @@ void Mixer::SetController(unsigned char chan, int type, int par)
     }
     else if (type == C_bankselectmsb)
     {
-        _bankManager->LoadBank(par);
+        // TODO reinstate this MIDI command
+        // _bankManager->LoadBank(par);
     }
     else
     {                                 //other controllers
@@ -294,7 +289,8 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
     {
         if (chan == npart.Prcvchn)
         {
-            _bankManager->LoadFromSlot(pgm, &npart);
+            // TODO reinstate this MIDI command
+            // _bankManager->LoadFromSlot(pgm, &npart);
 
             //Hack to get pad note parameters to update
             //this is not real time safe and makes assumptions about the calling
@@ -637,72 +633,42 @@ void Mixer::applyparameters(bool lockmutex)
     }
 }
 
-int Mixer::getalldata(char **data)
-{
-    PresetsSerializer xml;
+//int Mixer::getalldata(char **data)
+//{
+//    PresetsSerializer xml;
 
-    xml.beginbranch("MASTER");
+//    xml.beginbranch("MASTER");
 
-    Lock();
-    Serialize(&xml);
-    Unlock();
+//    Lock();
+//    MixerSerializer(this).Serialize(&xml);
+//    Unlock();
 
-    xml.endbranch();
+//    xml.endbranch();
 
-    *data = xml.getXMLdata();
+//    *data = xml.getXMLdata();
 
-    return static_cast<int>(strlen(*data) + 1);
-}
+//    return static_cast<int>(strlen(*data) + 1);
+//}
 
-void Mixer::putalldata(char *data, int /*size*/)
-{
-    PresetsSerializer xml;
-    if (!xml.putXMLdata(data))
-    {
-        return;
-    }
+//void Mixer::putalldata(char *data, int /*size*/)
+//{
+//    PresetsSerializer xml;
+//    if (!xml.putXMLdata(data))
+//    {
+//        return;
+//    }
 
-    if (xml.enterbranch("MASTER") == 0)
-    {
-        return;
-    }
+//    if (xml.enterbranch("MASTER") == 0)
+//    {
+//        return;
+//    }
 
-    Lock();
-    Deserialize(&xml);
-    Unlock();
+//    Lock();
+//    Deserialize(&xml);
+//    Unlock();
 
-    xml.exitbranch();
-}
-
-int Mixer::saveXML(const char *filename)
-{
-    PresetsSerializer xml;
-
-    xml.beginbranch("MASTER");
-    Serialize(&xml);
-    xml.endbranch();
-
-    return xml.saveXMLfile(filename);
-}
-
-int Mixer::loadXML(const char *filename)
-{
-    PresetsSerializer xml;
-    if (xml.loadXMLfile(filename) < 0)
-    {
-        return -1;
-    }
-
-    if (xml.enterbranch("MASTER") == 0)
-    {
-        return -10;
-    }
-
-    Deserialize(&xml);
-    xml.exitbranch();
-
-    return 0;
-}
+//    xml.exitbranch();
+//}
 
 void Mixer::InitPresets()
 {
@@ -758,145 +724,4 @@ void Mixer::InitPresets()
         insertionEffects.AddContainer(insertionEffect);
     }
     AddContainer(insertionEffects);
-}
-
-void Mixer::Serialize(IPresetsSerializer *xml)
-{
-    xml->addpar("volume", Pvolume);
-    xml->addpar("key_shift", Pkeyshift);
-    xml->addparbool("nrpn_receive", ctl.NRPN.receive);
-
-    xml->beginbranch("MICROTONAL");
-    microtonal.Serialize(xml);
-    xml->endbranch();
-
-    for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
-    {
-        xml->beginbranch("PART", npart);
-        _tracks[npart].Serialize(xml);
-        xml->endbranch();
-    }
-
-    xml->beginbranch("SYSTEM_EFFECTS");
-    for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-    {
-        xml->beginbranch("SYSTEM_EFFECT", nefx);
-        xml->beginbranch("EFFECT");
-        sysefx[nefx].Serialize(xml);
-        xml->endbranch();
-
-        for (int pefx = 0; pefx < NUM_MIXER_TRACKS; ++pefx)
-        {
-            xml->beginbranch("VOLUME", pefx);
-            xml->addpar("vol", Psysefxvol[nefx][pefx]);
-            xml->endbranch();
-        }
-
-        for (int tonefx = nefx + 1; tonefx < NUM_SYS_EFX; ++tonefx)
-        {
-            xml->beginbranch("SENDTO", tonefx);
-            xml->addpar("send_vol", Psysefxsend[nefx][tonefx]);
-            xml->endbranch();
-        }
-
-        xml->endbranch();
-    }
-    xml->endbranch();
-
-    xml->beginbranch("INSERTION_EFFECTS");
-    for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-    {
-        xml->beginbranch("INSERTION_EFFECT", nefx);
-        xml->addpar("part", Pinsparts[nefx]);
-
-        xml->beginbranch("EFFECT");
-        insefx[nefx].Serialize(xml);
-        xml->endbranch();
-        xml->endbranch();
-    }
-
-    xml->endbranch();
-}
-
-void Mixer::Deserialize(IPresetsSerializer *xml)
-{
-    setPvolume(static_cast<unsigned char>(xml->getpar127("volume", Pvolume)));
-    setPkeyshift(static_cast<unsigned char>(xml->getpar127("key_shift", Pkeyshift)));
-    ctl.NRPN.receive = static_cast<unsigned char>(xml->getparbool("nrpn_receive", ctl.NRPN.receive));
-
-    _tracks[0].Penabled = 0;
-    for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
-    {
-        if (xml->enterbranch("PART", npart) == 0)
-        {
-            continue;
-        }
-        _tracks[npart].Deserialize(xml);
-        xml->exitbranch();
-    }
-
-    if (xml->enterbranch("MICROTONAL"))
-    {
-        microtonal.Deserialize(xml);
-        xml->exitbranch();
-    }
-
-    sysefx[0].changeeffect(0);
-    if (xml->enterbranch("SYSTEM_EFFECTS"))
-    {
-        for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-        {
-            if (xml->enterbranch("SYSTEM_EFFECT", nefx) == 0)
-            {
-                continue;
-            }
-            if (xml->enterbranch("EFFECT"))
-            {
-                sysefx[nefx].Deserialize(xml);
-                xml->exitbranch();
-            }
-
-            for (int partefx = 0; partefx < NUM_MIXER_TRACKS; ++partefx)
-            {
-                if (xml->enterbranch("VOLUME", partefx) == 0)
-                {
-                    continue;
-                }
-                setPsysefxvol(partefx, nefx, static_cast<unsigned char>(xml->getpar127("vol", Psysefxvol[partefx][nefx])));
-                xml->exitbranch();
-            }
-
-            for (int tonefx = nefx + 1; tonefx < NUM_SYS_EFX; ++tonefx)
-            {
-                if (xml->enterbranch("SENDTO", tonefx) == 0)
-                {
-                    continue;
-                }
-                SetSystemEffectSend(nefx, tonefx, static_cast<unsigned char>(xml->getpar127("send_vol", Psysefxsend[nefx][tonefx])));
-                xml->exitbranch();
-            }
-            xml->exitbranch();
-        }
-        xml->exitbranch();
-    }
-
-    if (xml->enterbranch("INSERTION_EFFECTS"))
-    {
-        for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-        {
-            if (xml->enterbranch("INSERTION_EFFECT", nefx) == 0)
-            {
-                continue;
-            }
-            Pinsparts[nefx] = static_cast<short>(xml->getpar("part", Pinsparts[nefx], -2, NUM_MIXER_TRACKS));
-            if (xml->enterbranch("EFFECT"))
-            {
-                insefx[nefx].Deserialize(xml);
-                xml->exitbranch();
-            }
-            xml->exitbranch();
-        }
-
-        xml->exitbranch();
-    }
 }

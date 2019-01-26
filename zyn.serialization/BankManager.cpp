@@ -24,7 +24,7 @@
 
 #include "BankManager.h"
 
-#include "Track.h"
+#include "SaveToFileSerializer.h"
 #include <algorithm>
 #include <dirent.h>
 #include <fcntl.h>
@@ -36,6 +36,7 @@
 #include <zyn.common/Config.h>
 #include <zyn.common/PresetsSerializer.h>
 #include <zyn.common/Util.h>
+#include <zyn.mixer/Track.h>
 
 #define INSTRUMENT_EXTENSION ".xiz"
 
@@ -156,7 +157,7 @@ void BankManager::ClearSlot(unsigned int ninstrument)
 /*
  * Save the instrument to a slot
  */
-void BankManager::SaveToSlot(unsigned int ninstrument, Track *instrument)
+void BankManager::SaveToSlot(unsigned int ninstrument, Track *track)
 {
     ClearSlot(ninstrument);
 
@@ -164,11 +165,7 @@ void BankManager::SaveToSlot(unsigned int ninstrument, Track *instrument)
     char tmpfilename[maxfilename + 20];
     ZERO(tmpfilename, maxfilename + 20);
 
-    snprintf(tmpfilename,
-             maxfilename,
-             "%4d-%s",
-             ninstrument + 1,
-             reinterpret_cast<char *>(instrument->Pname));
+    snprintf(tmpfilename, maxfilename, "%4d-%s", ninstrument + 1, track->Pname);
 
     //add the zeroes at the start of filename
     for (int i = 0; i < 4; ++i)
@@ -182,24 +179,26 @@ void BankManager::SaveToSlot(unsigned int ninstrument, Track *instrument)
     std::string filename = _dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
     remove(filename.c_str());
-    instrument->saveXML(filename.c_str());
-    AddToBank(ninstrument, legalizeFilename(tmpfilename) + ".xiz", reinterpret_cast<char *>(instrument->Pname));
+
+    SaveToFileSerializer().SaveTrack(track, filename);
+
+    AddToBank(ninstrument, legalizeFilename(tmpfilename) + ".xiz", reinterpret_cast<char *>(track->Pname));
 }
 
 /*
  * Loads the instrument from the bank
  */
-void BankManager::LoadFromSlot(unsigned int ninstrument, Track *instrument)
+void BankManager::LoadFromSlot(unsigned int ninstrument, Track *track)
 {
     if (EmptySlot(ninstrument))
     {
         return;
     }
 
-    instrument->AllNotesOff();
-    instrument->InstrumentDefaults();
+    track->AllNotesOff();
+    track->InstrumentDefaults();
 
-    instrument->loadXMLinstrument(_instrumentsInCurrentBank[ninstrument].filename.c_str());
+    SaveToFileSerializer().LoadTrack(track, _instrumentsInCurrentBank[ninstrument].filename);
 }
 
 /*
@@ -402,7 +401,7 @@ void BankManager::SwapSlot(unsigned int n1, unsigned int n2)
         _instrumentsInCurrentBank[n1] = ins_t();
     }
     else
-    {                                     //if both slots are used
+    {                                                                                 //if both slots are used
         if (_instrumentsInCurrentBank[n1].name == _instrumentsInCurrentBank[n2].name) //change the name of the second instrument if the name are equal
         {
             _instrumentsInCurrentBank[n2].name += "2";

@@ -35,7 +35,7 @@ class IPresetsSerializer;
 /**Effect manager, an interface betwen the program and effects*/
 class EffectManager : public WrappedPresets
 {
-    friend class EffectManagerSerlializer;
+    friend class EffectManagerSerializer;
 
 public:
     EffectManager();

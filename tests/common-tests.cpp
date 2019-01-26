@@ -8,6 +8,17 @@
 #include <zyn.mixer/Microtonal.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.mixer/Track.h>
+#include <zyn.serialization/ADnoteParamsSerializer.h>
+#include <zyn.serialization/ControllerSerializer.h>
+#include <zyn.serialization/EnvelopeParamsSerializer.h>
+#include <zyn.serialization/FilterParamsSerializer.h>
+#include <zyn.serialization/LFOParamsSerializer.h>
+#include <zyn.serialization/MicrotonalSerializer.h>
+#include <zyn.serialization/OscilGenSerializer.h>
+#include <zyn.serialization/PADnoteParamsSerializer.h>
+#include <zyn.serialization/ResonanceSerializer.h>
+#include <zyn.serialization/SUBnoteParamsSerializer.h>
+#include <zyn.serialization/TrackSerializer.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/Controller.h>
 #include <zyn.synth/EnvelopeParams.h>
@@ -36,7 +47,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            ADnoteParametersSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -52,7 +63,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            PADnoteParametersSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -69,7 +80,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            SUBnoteParametersSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -80,11 +91,11 @@ TEST_CASE("Presets")
     SECTION("Track Presets", "[zyn.mixer]")
     {
         Mixer mixer;
-        mixer.Setup(nullptr);
-        
+        mixer.Setup();
+
         Microtonal micro;
         micro.Defaults();
-        
+
         auto sut = Track();
         sut.Init(&mixer, &micro);
         sut.Defaults();
@@ -92,7 +103,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            TrackSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -111,7 +122,7 @@ TEST_CASE("Presets")
         {
             sut.Pforcedrelease = 1;
 
-            sut.Serialize(&serializerA);
+            EnvelopeParamsSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -176,7 +187,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            LFOParamsSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -198,7 +209,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            ResonanceSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -214,10 +225,10 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            FilterParamsSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
-            
+
             REQUIRE(std::string(serializerA.getXMLdata()) == std::string(serializerB.getXMLdata()));
         }
     }
@@ -231,7 +242,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            MicrotonalSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -252,7 +263,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            OscilGenSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 
@@ -268,7 +279,7 @@ TEST_CASE("Presets")
 
         SECTION("Serialization should work")
         {
-            sut.Serialize(&serializerA);
+            ControllerSerializer(&sut).Serialize(&serializerA);
 
             sut.WritePresetsToBlob(&serializerB);
 

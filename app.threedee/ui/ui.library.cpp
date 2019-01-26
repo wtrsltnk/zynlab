@@ -34,8 +34,8 @@ void zyn::ui::Library::Render()
 
         ImGui::Text("Banks");
 
-        auto count = _state->_mixer->GetBankManager()->GetBankCount();
-        auto const &bankNames = _state->_mixer->GetBankManager()->GetBankNames();
+        auto count = _state->_banks->GetBankCount();
+        auto const &bankNames = _state->_banks->GetBankNames();
         if (ImGui::ListBoxHeader("##Banks", ImVec2(200, -ImGui::GetTextLineHeightWithSpacing())))
         {
             for (int i = 0; i < count; i++)
@@ -44,7 +44,7 @@ void zyn::ui::Library::Render()
                 if (ImGui::Selectable(bankNames[static_cast<size_t>(i)], &selected))
                 {
                     _state->_currentBank = i;
-                    _state->_mixer->GetBankManager()->LoadBank(_state->_currentBank);
+                    _state->_banks->LoadBank(_state->_currentBank);
                 }
             }
             ImGui::ListBoxFooter();
@@ -60,18 +60,18 @@ void zyn::ui::Library::Render()
             {
                 for (unsigned int i = 0; i < BANK_SIZE; i++)
                 {
-                    if (_state->_mixer->GetBankManager()->EmptySlot(i))
+                    if (_state->_banks->EmptySlot(i))
                     {
                         continue;
                     }
 
-                    auto instrumentName = _state->_mixer->GetBankManager()->GetName(i);
+                    auto instrumentName = _state->_banks->GetName(i);
 
                     if (ImGui::Selectable(instrumentName.c_str(), false))
                     {
                         auto const &instrument = _state->_mixer->GetTrack(_state->_activeTrack);
                         instrument->Lock();
-                        _state->_mixer->GetBankManager()->LoadFromSlot(i, instrument);
+                        _state->_banks->LoadFromSlot(i, instrument);
                         instrument->Unlock();
                         instrument->ApplyParameters();
                     }

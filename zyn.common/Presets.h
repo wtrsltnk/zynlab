@@ -153,8 +153,6 @@ public:
 protected:
     void setpresettype(const char *_type);
 
-    virtual void Serialize(IPresetsSerializer *xml) = 0;
-    virtual void Deserialize(IPresetsSerializer *xml) = 0;
     virtual void Defaults() = 0;
 };
 

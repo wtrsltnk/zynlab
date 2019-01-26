@@ -95,6 +95,7 @@ target_link_libraries(app
     zyn.dsp
     zyn.common
     zyn.seq
+    zyn.serialization
     zyn.fltkui
     )
 

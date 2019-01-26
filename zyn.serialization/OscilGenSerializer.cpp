@@ -28,6 +28,8 @@ OscilGenSerializer::OscilGenSerializer(OscilGen *parameters)
 
 OscilGenSerializer::~OscilGenSerializer() = default;
 
+namespace Serialization {
+
 inline void clearDC(fft_t *freqs)
 {
     freqs[0] = fft_t(0.0, 0.0);
@@ -77,68 +79,70 @@ inline void normalize(float *smps, size_t N)
         smps[i] /= max;
 }
 
-void OscilGen::Serialize(IPresetsSerializer *xml)
+} // namespace Serialization
+
+void OscilGenSerializer::Serialize(IPresetsSerializer *xml)
 {
-    xml->addpar("harmonic_mag_type", Phmagtype);
+    xml->addpar("harmonic_mag_type", _parameters->Phmagtype);
 
-    xml->addpar("base_function", Pcurrentbasefunc);
-    xml->addpar("base_function_par", Pbasefuncpar);
-    xml->addpar("base_function_modulation", Pbasefuncmodulation);
-    xml->addpar("base_function_modulation_par1", Pbasefuncmodulationpar1);
-    xml->addpar("base_function_modulation_par2", Pbasefuncmodulationpar2);
-    xml->addpar("base_function_modulation_par3", Pbasefuncmodulationpar3);
+    xml->addpar("base_function", _parameters->Pcurrentbasefunc);
+    xml->addpar("base_function_par", _parameters->Pbasefuncpar);
+    xml->addpar("base_function_modulation", _parameters->Pbasefuncmodulation);
+    xml->addpar("base_function_modulation_par1", _parameters->Pbasefuncmodulationpar1);
+    xml->addpar("base_function_modulation_par2", _parameters->Pbasefuncmodulationpar2);
+    xml->addpar("base_function_modulation_par3", _parameters->Pbasefuncmodulationpar3);
 
-    xml->addpar("modulation", Pmodulation);
-    xml->addpar("modulation_par1", Pmodulationpar1);
-    xml->addpar("modulation_par2", Pmodulationpar2);
-    xml->addpar("modulation_par3", Pmodulationpar3);
+    xml->addpar("modulation", _parameters->Pmodulation);
+    xml->addpar("modulation_par1", _parameters->Pmodulationpar1);
+    xml->addpar("modulation_par2", _parameters->Pmodulationpar2);
+    xml->addpar("modulation_par3", _parameters->Pmodulationpar3);
 
-    xml->addpar("wave_shaping", Pwaveshaping);
-    xml->addpar("wave_shaping_function", Pwaveshapingfunction);
+    xml->addpar("wave_shaping", _parameters->Pwaveshaping);
+    xml->addpar("wave_shaping_function", _parameters->Pwaveshapingfunction);
 
-    xml->addpar("filter_type", Pfiltertype);
-    xml->addpar("filter_par1", Pfilterpar1);
-    xml->addpar("filter_par2", Pfilterpar2);
-    xml->addpar("filter_before_wave_shaping", Pfilterbeforews);
+    xml->addpar("filter_type", _parameters->Pfiltertype);
+    xml->addpar("filter_par1", _parameters->Pfilterpar1);
+    xml->addpar("filter_par2", _parameters->Pfilterpar2);
+    xml->addpar("filter_before_wave_shaping", _parameters->Pfilterbeforews);
 
-    xml->addpar("spectrum_adjust_type", Psatype);
-    xml->addpar("spectrum_adjust_par", Psapar);
+    xml->addpar("spectrum_adjust_type", _parameters->Psatype);
+    xml->addpar("spectrum_adjust_par", _parameters->Psapar);
 
-    xml->addpar("rand", Prand);
-    xml->addpar("amp_rand_type", Pamprandtype);
-    xml->addpar("amp_rand_power", Pamprandpower);
+    xml->addpar("rand", _parameters->Prand);
+    xml->addpar("amp_rand_type", _parameters->Pamprandtype);
+    xml->addpar("amp_rand_power", _parameters->Pamprandpower);
 
-    xml->addpar("harmonic_shift", Pharmonicshift);
-    xml->addparbool("harmonic_shift_first", Pharmonicshiftfirst);
+    xml->addpar("harmonic_shift", _parameters->Pharmonicshift);
+    xml->addparbool("harmonic_shift_first", _parameters->Pharmonicshiftfirst);
 
-    xml->addpar("adaptive_harmonics", Padaptiveharmonics);
-    xml->addpar("adaptive_harmonics_base_frequency", Padaptiveharmonicsbasefreq);
-    xml->addpar("adaptive_harmonics_power", Padaptiveharmonicspower);
+    xml->addpar("adaptive_harmonics", _parameters->Padaptiveharmonics);
+    xml->addpar("adaptive_harmonics_base_frequency", _parameters->Padaptiveharmonicsbasefreq);
+    xml->addpar("adaptive_harmonics_power", _parameters->Padaptiveharmonicspower);
 
     xml->beginbranch("HARMONICS");
     for (int n = 0; n < MAX_AD_HARMONICS; ++n)
     {
-        if ((Phmag[n] == 64) && (Phphase[n] == 64) && xml->minimal)
+        if ((_parameters->Phmag[n] == 64) && (_parameters->Phphase[n] == 64) && xml->minimal)
         {
             continue;
         }
 
         xml->beginbranch("HARMONIC", n + 1);
-        xml->addpar("mag", Phmag[n]);
-        xml->addpar("phase", Phphase[n]);
+        xml->addpar("mag", _parameters->Phmag[n]);
+        xml->addpar("phase", _parameters->Phphase[n]);
         xml->endbranch();
     }
     xml->endbranch();
 
-    if (Pcurrentbasefunc == 127)
+    if (_parameters->Pcurrentbasefunc == 127)
     {
-        normalize(basefuncFFTfreqs);
+        Serialization::normalize(_parameters->basefuncFFTfreqs);
 
         xml->beginbranch("BASE_FUNCTION");
         for (unsigned int i = 1; i < SystemSettings::Instance().oscilsize / 2; ++i)
         {
-            double xc = basefuncFFTfreqs[i].real();
-            double xs = basefuncFFTfreqs[i].imag();
+            double xc = _parameters->basefuncFFTfreqs[i].real();
+            double xs = _parameters->basefuncFFTfreqs[i].imag();
             if ((std::fabs(xs) > 0.00001) && (std::fabs(xc) > 0.00001))
             {
                 xml->beginbranch("BF_HARMONIC", static_cast<int>(i));
@@ -151,99 +155,80 @@ void OscilGen::Serialize(IPresetsSerializer *xml)
     }
 }
 
-void OscilGen::Deserialize(IPresetsSerializer *xml)
+void OscilGenSerializer::Deserialize(IPresetsSerializer *xml)
 {
-    Phmagtype = xml->getpar127("harmonic_mag_type", Phmagtype);
+    _parameters->Phmagtype = xml->getpar127("harmonic_mag_type", _parameters->Phmagtype);
 
-    Pcurrentbasefunc = xml->getpar127("base_function", Pcurrentbasefunc);
-    Pbasefuncpar = xml->getpar127("base_function_par", Pbasefuncpar);
+    _parameters->Pcurrentbasefunc = xml->getpar127("base_function", _parameters->Pcurrentbasefunc);
+    _parameters->Pbasefuncpar = xml->getpar127("base_function_par", _parameters->Pbasefuncpar);
 
-    Pbasefuncmodulation = xml->getpar127("base_function_modulation",
-                                         Pbasefuncmodulation);
-    Pbasefuncmodulationpar1 = xml->getpar127("base_function_modulation_par1",
-                                             Pbasefuncmodulationpar1);
-    Pbasefuncmodulationpar2 = xml->getpar127("base_function_modulation_par2",
-                                             Pbasefuncmodulationpar2);
-    Pbasefuncmodulationpar3 = xml->getpar127("base_function_modulation_par3",
-                                             Pbasefuncmodulationpar3);
+    _parameters->Pbasefuncmodulation = xml->getpar127("base_function_modulation", _parameters->Pbasefuncmodulation);
+    _parameters->Pbasefuncmodulationpar1 = xml->getpar127("base_function_modulation_par1", _parameters->Pbasefuncmodulationpar1);
+    _parameters->Pbasefuncmodulationpar2 = xml->getpar127("base_function_modulation_par2", _parameters->Pbasefuncmodulationpar2);
+    _parameters->Pbasefuncmodulationpar3 = xml->getpar127("base_function_modulation_par3", _parameters->Pbasefuncmodulationpar3);
 
-    Pmodulation = xml->getpar127("modulation", Pmodulation);
-    Pmodulationpar1 = xml->getpar127("modulation_par1",
-                                     Pmodulationpar1);
-    Pmodulationpar2 = xml->getpar127("modulation_par2",
-                                     Pmodulationpar2);
-    Pmodulationpar3 = xml->getpar127("modulation_par3",
-                                     Pmodulationpar3);
+    _parameters->Pmodulation = xml->getpar127("modulation", _parameters->Pmodulation);
+    _parameters->Pmodulationpar1 = xml->getpar127("modulation_par1", _parameters->Pmodulationpar1);
+    _parameters->Pmodulationpar2 = xml->getpar127("modulation_par2", _parameters->Pmodulationpar2);
+    _parameters->Pmodulationpar3 = xml->getpar127("modulation_par3", _parameters->Pmodulationpar3);
 
-    Pwaveshaping = xml->getpar127("wave_shaping", Pwaveshaping);
-    Pwaveshapingfunction = xml->getpar127("wave_shaping_function",
-                                          Pwaveshapingfunction);
+    _parameters->Pwaveshaping = xml->getpar127("wave_shaping", _parameters->Pwaveshaping);
+    _parameters->Pwaveshapingfunction = xml->getpar127("wave_shaping_function", _parameters->Pwaveshapingfunction);
 
-    Pfiltertype = xml->getpar127("filter_type", Pfiltertype);
-    Pfilterpar1 = xml->getpar127("filter_par1", Pfilterpar1);
-    Pfilterpar2 = xml->getpar127("filter_par2", Pfilterpar2);
-    Pfilterbeforews = xml->getpar127("filter_before_wave_shaping",
-                                     Pfilterbeforews);
+    _parameters->Pfiltertype = xml->getpar127("filter_type", _parameters->Pfiltertype);
+    _parameters->Pfilterpar1 = xml->getpar127("filter_par1", _parameters->Pfilterpar1);
+    _parameters->Pfilterpar2 = xml->getpar127("filter_par2", _parameters->Pfilterpar2);
+    _parameters->Pfilterbeforews = xml->getpar127("filter_before_wave_shaping", _parameters->Pfilterbeforews);
 
-    Psatype = xml->getpar127("spectrum_adjust_type", Psatype);
-    Psapar = xml->getpar127("spectrum_adjust_par", Psapar);
+    _parameters->Psatype = xml->getpar127("spectrum_adjust_type", _parameters->Psatype);
+    _parameters->Psapar = xml->getpar127("spectrum_adjust_par", _parameters->Psapar);
 
-    Prand = xml->getpar127("rand", Prand);
-    Pamprandtype = xml->getpar127("amp_rand_type", Pamprandtype);
-    Pamprandpower = xml->getpar127("amp_rand_power", Pamprandpower);
+    _parameters->Prand = xml->getpar127("rand", _parameters->Prand);
+    _parameters->Pamprandtype = xml->getpar127("amp_rand_type", _parameters->Pamprandtype);
+    _parameters->Pamprandpower = xml->getpar127("amp_rand_power", _parameters->Pamprandpower);
 
-    Pharmonicshift = xml->getpar("harmonic_shift",
-                                 Pharmonicshift,
-                                 -64,
-                                 64);
-    Pharmonicshiftfirst = xml->getparbool("harmonic_shift_first",
-                                          Pharmonicshiftfirst);
+    _parameters->Pharmonicshift = xml->getpar("harmonic_shift", _parameters->Pharmonicshift, -64, 64);
+    _parameters->Pharmonicshiftfirst = xml->getparbool("harmonic_shift_first", _parameters->Pharmonicshiftfirst);
 
-    Padaptiveharmonics = xml->getpar("adaptive_harmonics",
-                                     Padaptiveharmonics,
-                                     0,
-                                     127);
-    Padaptiveharmonicsbasefreq = xml->getpar(
-        "adaptive_harmonics_base_frequency",
-        Padaptiveharmonicsbasefreq,
-        0,
-        255);
-    Padaptiveharmonicspower = xml->getpar("adaptive_harmonics_power",
-                                          Padaptiveharmonicspower,
-                                          0,
-                                          200);
+    _parameters->Padaptiveharmonics = xml->getpar("adaptive_harmonics", _parameters->Padaptiveharmonics, 0, 127);
+    _parameters->Padaptiveharmonicsbasefreq = xml->getpar("adaptive_harmonics_base_frequency", _parameters->Padaptiveharmonicsbasefreq, 0, 255);
+    _parameters->Padaptiveharmonicspower = xml->getpar("adaptive_harmonics_power", _parameters->Padaptiveharmonicspower, 0, 200);
 
     if (xml->enterbranch("HARMONICS"))
     {
-        Phmag[0] = 64;
-        Phphase[0] = 64;
+        _parameters->Phmag[0] = 64;
+        _parameters->Phphase[0] = 64;
         for (int n = 0; n < MAX_AD_HARMONICS; ++n)
         {
             if (xml->enterbranch("HARMONIC", n + 1) == 0)
+            {
                 continue;
-            Phmag[n] = xml->getpar127("mag", 64);
-            Phphase[n] = xml->getpar127("phase", 64);
+            }
+            _parameters->Phmag[n] = xml->getpar127("mag", 64);
+            _parameters->Phphase[n] = xml->getpar127("phase", 64);
             xml->exitbranch();
         }
         xml->exitbranch();
     }
 
-    if (Pcurrentbasefunc != 0)
-        changebasefunction();
+    if (_parameters->Pcurrentbasefunc != 0)
+    {
+        _parameters->changebasefunction();
+    }
 
     if (xml->enterbranch("BASE_FUNCTION"))
     {
-        for (int i = 1; i < SystemSettings::Instance().oscilsize / 2; ++i)
+        for (unsigned int i = 1; i < SystemSettings::Instance().oscilsize / 2; ++i)
+        {
             if (xml->enterbranch("BF_HARMONIC", i))
             {
-                basefuncFFTfreqs[i] =
-                    std::complex<float>(xml->getparreal("cos", 0.0f),
-                                        xml->getparreal("sin", 0.0f));
+                _parameters->basefuncFFTfreqs[i] = std::complex<float>(xml->getparreal("cos", 0.0f), xml->getparreal("sin", 0.0f));
                 xml->exitbranch();
             }
+        }
         xml->exitbranch();
 
-        clearDC(basefuncFFTfreqs);
-        normalize(basefuncFFTfreqs);
+        Serialization::clearDC(_parameters->basefuncFFTfreqs);
+        Serialization::normalize(_parameters->basefuncFFTfreqs);
     }
 }

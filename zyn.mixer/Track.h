@@ -108,11 +108,6 @@ public:
 
     void ComputeInstrumentSamples(); // compute Track output
 
-    //saves the instrument settings to a XML file
-    //returns 0 for ok or <0 if there is an error
-    int saveXML(const char *filename);
-    int loadXMLinstrument(const char *filename);
-
     void ApplyParameters(bool lockmutex = true);
 
     void Cleanup(bool final = false);
@@ -154,12 +149,7 @@ public:
 public:
     void InitPresets();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
     void Defaults();
-
-    void SerializeInstrument(IPresetsSerializer *xml);
-    void DeserializeInstrument(IPresetsSerializer *xml);
     void InstrumentDefaults();
 
     float ComputePeak(float volume);

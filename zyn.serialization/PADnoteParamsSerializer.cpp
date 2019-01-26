@@ -22,87 +22,93 @@
 
 #include "PADnoteParamsSerializer.h"
 
+#include "EnvelopeParamsSerializer.h"
+#include "FilterParamsSerializer.h"
+#include "LFOParamsSerializer.h"
+#include "OscilGenSerializer.h"
+#include "ResonanceSerializer.h"
+
 PADnoteParametersSerializer::PADnoteParametersSerializer(PADnoteParameters *parameters)
     : _parameters(parameters)
 {}
 
 PADnoteParametersSerializer::~PADnoteParametersSerializer() = default;
 
-void PADnoteParameters::Serialize(IPresetsSerializer *xml)
+void PADnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
 {
     xml->setPadSynth(true);
 
-    xml->addparbool("stereo", PStereo);
-    xml->addpar("mode", Pmode);
-    xml->addpar("bandwidth", Pbandwidth);
-    xml->addpar("bandwidth_scale", Pbwscale);
+    xml->addparbool("stereo", _parameters->PStereo);
+    xml->addpar("mode", _parameters->Pmode);
+    xml->addpar("bandwidth", _parameters->Pbandwidth);
+    xml->addpar("bandwidth_scale", _parameters->Pbwscale);
 
     xml->beginbranch("HARMONIC_PROFILE");
     {
-        xml->addpar("base_type", Php.base.type);
-        xml->addpar("base_par1", Php.base.par1);
-        xml->addpar("frequency_multiplier", Php.freqmult);
-        xml->addpar("modulator_par1", Php.modulator.par1);
-        xml->addpar("modulator_frequency", Php.modulator.freq);
-        xml->addpar("width", Php.width);
-        xml->addpar("amplitude_multiplier_type", Php.amp.type);
-        xml->addpar("amplitude_multiplier_mode", Php.amp.mode);
-        xml->addpar("amplitude_multiplier_par1", Php.amp.par1);
-        xml->addpar("amplitude_multiplier_par2", Php.amp.par2);
-        xml->addparbool("autoscale", Php.autoscale);
-        xml->addpar("one_half", Php.onehalf);
+        xml->addpar("base_type", _parameters->Php.base.type);
+        xml->addpar("base_par1", _parameters->Php.base.par1);
+        xml->addpar("frequency_multiplier", _parameters->Php.freqmult);
+        xml->addpar("modulator_par1", _parameters->Php.modulator.par1);
+        xml->addpar("modulator_frequency", _parameters->Php.modulator.freq);
+        xml->addpar("width", _parameters->Php.width);
+        xml->addpar("amplitude_multiplier_type", _parameters->Php.amp.type);
+        xml->addpar("amplitude_multiplier_mode", _parameters->Php.amp.mode);
+        xml->addpar("amplitude_multiplier_par1", _parameters->Php.amp.par1);
+        xml->addpar("amplitude_multiplier_par2", _parameters->Php.amp.par2);
+        xml->addparbool("autoscale", _parameters->Php.autoscale);
+        xml->addpar("one_half", _parameters->Php.onehalf);
     }
     xml->endbranch();
 
     xml->beginbranch("OSCIL");
     {
-        oscilgen->Serialize(xml);
+        OscilGenSerializer(_parameters->oscilgen).Serialize(xml);
     }
     xml->endbranch();
 
     xml->beginbranch("RESONANCE");
     {
-        resonance->Serialize(xml);
+        ResonanceSerializer(_parameters->resonance).Serialize(xml);
     }
     xml->endbranch();
 
     xml->beginbranch("HARMONIC_POSITION");
     {
-        xml->addpar("type", Phrpos.type);
-        xml->addpar("parameter1", Phrpos.par1);
-        xml->addpar("parameter2", Phrpos.par2);
-        xml->addpar("parameter3", Phrpos.par3);
+        xml->addpar("type", _parameters->Phrpos.type);
+        xml->addpar("parameter1", _parameters->Phrpos.par1);
+        xml->addpar("parameter2", _parameters->Phrpos.par2);
+        xml->addpar("parameter3", _parameters->Phrpos.par3);
     }
     xml->endbranch();
 
     xml->beginbranch("SAMPLE_QUALITY");
     {
-        xml->addpar("samplesize", Pquality.samplesize);
-        xml->addpar("basenote", Pquality.basenote);
-        xml->addpar("octaves", Pquality.oct);
-        xml->addpar("samples_per_octave", Pquality.smpoct);
+        xml->addpar("samplesize", _parameters->Pquality.samplesize);
+        xml->addpar("basenote", _parameters->Pquality.basenote);
+        xml->addpar("octaves", _parameters->Pquality.oct);
+        xml->addpar("samples_per_octave", _parameters->Pquality.smpoct);
     }
     xml->endbranch();
 
     xml->beginbranch("AMPLITUDE_PARAMETERS");
     {
-        xml->addpar("volume", PVolume);
-        xml->addpar("panning", PPanning);
-        xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
-        xml->addpar("punch_strength", PPunchStrength);
-        xml->addpar("punch_time", PPunchTime);
-        xml->addpar("punch_stretch", PPunchStretch);
-        xml->addpar("punch_velocity_sensing", PPunchVelocitySensing);
+        xml->addpar("volume", _parameters->PVolume);
+        xml->addpar("panning", _parameters->PPanning);
+        xml->addpar("velocity_sensing", _parameters->PAmpVelocityScaleFunction);
+        xml->addpar("punch_strength", _parameters->PPunchStrength);
+        xml->addpar("punch_time", _parameters->PPunchTime);
+        xml->addpar("punch_stretch", _parameters->PPunchStretch);
+        xml->addpar("punch_velocity_sensing", _parameters->PPunchVelocitySensing);
 
         xml->beginbranch("AMPLITUDE_ENVELOPE");
         {
-            AmpEnvelope->Serialize(xml);
+            EnvelopeParamsSerializer(_parameters->AmpEnvelope).Serialize(xml);
         }
         xml->endbranch();
 
         xml->beginbranch("AMPLITUDE_LFO");
         {
-            AmpLfo->Serialize(xml);
+            LFOParamsSerializer(_parameters->AmpLfo).Serialize(xml);
         }
         xml->endbranch();
     }
@@ -110,21 +116,21 @@ void PADnoteParameters::Serialize(IPresetsSerializer *xml)
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
     {
-        xml->addpar("fixed_freq", Pfixedfreq);
-        xml->addpar("fixed_freq_et", PfixedfreqET);
-        xml->addpar("detune", PDetune);
-        xml->addpar("coarse_detune", PCoarseDetune);
-        xml->addpar("detune_type", PDetuneType);
+        xml->addpar("fixed_freq", _parameters->Pfixedfreq);
+        xml->addpar("fixed_freq_et", _parameters->PfixedfreqET);
+        xml->addpar("detune", _parameters->PDetune);
+        xml->addpar("coarse_detune", _parameters->PCoarseDetune);
+        xml->addpar("detune_type", _parameters->PDetuneType);
 
         xml->beginbranch("FREQUENCY_ENVELOPE");
         {
-            FreqEnvelope->Serialize(xml);
+            EnvelopeParamsSerializer(_parameters->FreqEnvelope).Serialize(xml);
         }
         xml->endbranch();
 
         xml->beginbranch("FREQUENCY_LFO");
         {
-            FreqLfo->Serialize(xml);
+            LFOParamsSerializer(_parameters->FreqLfo).Serialize(xml);
         }
         xml->endbranch();
     }
@@ -132,100 +138,100 @@ void PADnoteParameters::Serialize(IPresetsSerializer *xml)
 
     xml->beginbranch("FILTER_PARAMETERS");
     {
-        xml->addpar("velocity_sensing_amplitude", PFilterVelocityScale);
-        xml->addpar("velocity_sensing", PFilterVelocityScaleFunction);
+        xml->addpar("velocity_sensing_amplitude", _parameters->PFilterVelocityScale);
+        xml->addpar("velocity_sensing", _parameters->PFilterVelocityScaleFunction);
 
         xml->beginbranch("FILTER");
         {
-            GlobalFilter->Serialize(xml);
+            FilterParamsSerializer(_parameters->GlobalFilter).Serialize(xml);
         }
         xml->endbranch();
 
         xml->beginbranch("FILTER_ENVELOPE");
         {
-            FilterEnvelope->Serialize(xml);
+            EnvelopeParamsSerializer(_parameters->FilterEnvelope).Serialize(xml);
         }
         xml->endbranch();
 
         xml->beginbranch("FILTER_LFO");
         {
-            FilterLfo->Serialize(xml);
+            LFOParamsSerializer(_parameters->FilterLfo).Serialize(xml);
         }
         xml->endbranch();
     }
     xml->endbranch();
 }
 
-void PADnoteParameters::Deserialize(IPresetsSerializer *xml)
+void PADnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
 {
-    PStereo = xml->getparbool("stereo", PStereo);
-    Pmode = xml->getpar127("mode", 0);
-    Pbandwidth = xml->getpar("bandwidth", Pbandwidth, 0, 1000);
-    Pbwscale = xml->getpar127("bandwidth_scale", Pbwscale);
+    _parameters->PStereo = xml->getparbool("stereo", _parameters->PStereo);
+    _parameters->Pmode = xml->getpar127("mode", 0);
+    _parameters->Pbandwidth = xml->getpar("bandwidth", _parameters->Pbandwidth, 0, 1000);
+    _parameters->Pbwscale = xml->getpar127("bandwidth_scale", _parameters->Pbwscale);
 
     if (xml->enterbranch("HARMONIC_PROFILE"))
     {
-        Php.base.type = xml->getpar127("base_type", Php.base.type);
-        Php.base.par1 = xml->getpar127("base_par1", Php.base.par1);
-        Php.freqmult = xml->getpar127("frequency_multiplier", Php.freqmult);
-        Php.modulator.par1 = xml->getpar127("modulator_par1", Php.modulator.par1);
-        Php.modulator.freq = xml->getpar127("modulator_frequency", Php.modulator.freq);
-        Php.width = xml->getpar127("width", Php.width);
-        Php.amp.type = xml->getpar127("amplitude_multiplier_type", Php.amp.type);
-        Php.amp.mode = xml->getpar127("amplitude_multiplier_mode", Php.amp.mode);
-        Php.amp.par1 = xml->getpar127("amplitude_multiplier_par1", Php.amp.par1);
-        Php.amp.par2 = xml->getpar127("amplitude_multiplier_par2", Php.amp.par2);
-        Php.autoscale = xml->getparbool("autoscale", Php.autoscale);
-        Php.onehalf = xml->getpar127("one_half", Php.onehalf);
+        _parameters->Php.base.type = xml->getpar127("base_type", _parameters->Php.base.type);
+        _parameters->Php.base.par1 = xml->getpar127("base_par1", _parameters->Php.base.par1);
+        _parameters->Php.freqmult = xml->getpar127("frequency_multiplier", _parameters->Php.freqmult);
+        _parameters->Php.modulator.par1 = xml->getpar127("modulator_par1", _parameters->Php.modulator.par1);
+        _parameters->Php.modulator.freq = xml->getpar127("modulator_frequency", _parameters->Php.modulator.freq);
+        _parameters->Php.width = xml->getpar127("width", _parameters->Php.width);
+        _parameters->Php.amp.type = xml->getpar127("amplitude_multiplier_type", _parameters->Php.amp.type);
+        _parameters->Php.amp.mode = xml->getpar127("amplitude_multiplier_mode", _parameters->Php.amp.mode);
+        _parameters->Php.amp.par1 = xml->getpar127("amplitude_multiplier_par1", _parameters->Php.amp.par1);
+        _parameters->Php.amp.par2 = xml->getpar127("amplitude_multiplier_par2", _parameters->Php.amp.par2);
+        _parameters->Php.autoscale = xml->getparbool("autoscale", _parameters->Php.autoscale);
+        _parameters->Php.onehalf = xml->getpar127("one_half", _parameters->Php.onehalf);
         xml->exitbranch();
     }
 
     if (xml->enterbranch("OSCIL"))
     {
-        oscilgen->Deserialize(xml);
+        OscilGenSerializer(_parameters->oscilgen).Deserialize(xml);
         xml->exitbranch();
     }
 
     if (xml->enterbranch("RESONANCE"))
     {
-        resonance->Deserialize(xml);
+        ResonanceSerializer(_parameters->resonance).Deserialize(xml);
         xml->exitbranch();
     }
 
     if (xml->enterbranch("HARMONIC_POSITION"))
     {
-        Phrpos.type = xml->getpar127("type", Phrpos.type);
-        Phrpos.par1 = xml->getpar("parameter1", Phrpos.par1, 0, 255);
-        Phrpos.par2 = xml->getpar("parameter2", Phrpos.par2, 0, 255);
-        Phrpos.par3 = xml->getpar("parameter3", Phrpos.par3, 0, 255);
+        _parameters->Phrpos.type = xml->getpar127("type", _parameters->Phrpos.type);
+        _parameters->Phrpos.par1 = xml->getpar("parameter1", _parameters->Phrpos.par1, 0, 255);
+        _parameters->Phrpos.par2 = xml->getpar("parameter2", _parameters->Phrpos.par2, 0, 255);
+        _parameters->Phrpos.par3 = xml->getpar("parameter3", _parameters->Phrpos.par3, 0, 255);
         xml->exitbranch();
     }
 
     if (xml->enterbranch("SAMPLE_QUALITY"))
     {
-        Pquality.samplesize = xml->getpar127("samplesize", Pquality.samplesize);
-        Pquality.basenote = xml->getpar127("basenote", Pquality.basenote);
-        Pquality.oct = xml->getpar127("octaves", Pquality.oct);
-        Pquality.smpoct = xml->getpar127("samples_per_octave", Pquality.smpoct);
+        _parameters->Pquality.samplesize = xml->getpar127("samplesize", _parameters->Pquality.samplesize);
+        _parameters->Pquality.basenote = xml->getpar127("basenote", _parameters->Pquality.basenote);
+        _parameters->Pquality.oct = xml->getpar127("octaves", _parameters->Pquality.oct);
+        _parameters->Pquality.smpoct = xml->getpar127("samples_per_octave", _parameters->Pquality.smpoct);
         xml->exitbranch();
     }
 
     if (xml->enterbranch("AMPLITUDE_PARAMETERS"))
     {
-        PVolume = xml->getpar127("volume", PVolume);
-        PPanning = xml->getpar127("panning", PPanning);
-        PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing", PAmpVelocityScaleFunction);
-        PPunchStrength = xml->getpar127("punch_strength", PPunchStrength);
-        PPunchTime = xml->getpar127("punch_time", PPunchTime);
-        PPunchStretch = xml->getpar127("punch_stretch", PPunchStretch);
-        PPunchVelocitySensing = xml->getpar127("punch_velocity_sensing", PPunchVelocitySensing);
+        _parameters->PVolume = xml->getpar127("volume", _parameters->PVolume);
+        _parameters->PPanning = xml->getpar127("panning", _parameters->PPanning);
+        _parameters->PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing", _parameters->PAmpVelocityScaleFunction);
+        _parameters->PPunchStrength = xml->getpar127("punch_strength", _parameters->PPunchStrength);
+        _parameters->PPunchTime = xml->getpar127("punch_time", _parameters->PPunchTime);
+        _parameters->PPunchStretch = xml->getpar127("punch_stretch", _parameters->PPunchStretch);
+        _parameters->PPunchVelocitySensing = xml->getpar127("punch_velocity_sensing", _parameters->PPunchVelocitySensing);
 
         xml->enterbranch("AMPLITUDE_ENVELOPE");
-        AmpEnvelope->Deserialize(xml);
+        EnvelopeParamsSerializer(_parameters->AmpEnvelope).Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("AMPLITUDE_LFO");
-        AmpLfo->Deserialize(xml);
+        LFOParamsSerializer(_parameters->AmpLfo).Deserialize(xml);
         xml->exitbranch();
 
         xml->exitbranch();
@@ -233,37 +239,37 @@ void PADnoteParameters::Deserialize(IPresetsSerializer *xml)
 
     if (xml->enterbranch("FREQUENCY_PARAMETERS"))
     {
-        Pfixedfreq = xml->getpar127("fixed_freq", Pfixedfreq);
-        PfixedfreqET = xml->getpar127("fixed_freq_et", PfixedfreqET);
-        PDetune = xml->getpar("detune", PDetune, 0, 16383);
-        PCoarseDetune = xml->getpar("coarse_detune", PCoarseDetune, 0, 16383);
-        PDetuneType = xml->getpar127("detune_type", PDetuneType);
+        _parameters->Pfixedfreq = xml->getpar127("fixed_freq", _parameters->Pfixedfreq);
+        _parameters->PfixedfreqET = xml->getpar127("fixed_freq_et", _parameters->PfixedfreqET);
+        _parameters->PDetune = xml->getpar("detune", _parameters->PDetune, 0, 16383);
+        _parameters->PCoarseDetune = xml->getpar("coarse_detune", _parameters->PCoarseDetune, 0, 16383);
+        _parameters->PDetuneType = xml->getpar127("detune_type", _parameters->PDetuneType);
 
         xml->enterbranch("FREQUENCY_ENVELOPE");
-        FreqEnvelope->Deserialize(xml);
+        EnvelopeParamsSerializer(_parameters->FreqEnvelope).Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FREQUENCY_LFO");
-        FreqLfo->Deserialize(xml);
+        LFOParamsSerializer(_parameters->FreqLfo).Deserialize(xml);
         xml->exitbranch();
         xml->exitbranch();
     }
 
     if (xml->enterbranch("FILTER_PARAMETERS"))
     {
-        PFilterVelocityScale = xml->getpar127("velocity_sensing_amplitude", PFilterVelocityScale);
-        PFilterVelocityScaleFunction = xml->getpar127("velocity_sensing", PFilterVelocityScaleFunction);
+        _parameters->PFilterVelocityScale = xml->getpar127("velocity_sensing_amplitude", _parameters->PFilterVelocityScale);
+        _parameters->PFilterVelocityScaleFunction = xml->getpar127("velocity_sensing", _parameters->PFilterVelocityScaleFunction);
 
         xml->enterbranch("FILTER");
-        GlobalFilter->Deserialize(xml);
+        FilterParamsSerializer(_parameters->GlobalFilter).Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FILTER_ENVELOPE");
-        FilterEnvelope->Deserialize(xml);
+        EnvelopeParamsSerializer(_parameters->FilterEnvelope).Deserialize(xml);
         xml->exitbranch();
 
         xml->enterbranch("FILTER_LFO");
-        FilterLfo->Deserialize(xml);
+        LFOParamsSerializer(_parameters->FilterLfo).Deserialize(xml);
         xml->exitbranch();
         xml->exitbranch();
     }

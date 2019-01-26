@@ -42,7 +42,7 @@ void initprogram()
     cerr << "ADsynth Oscil.Size = \t" << synth.oscilsize << " samples" << endl;
 
     mixer = new Mixer();
-    mixer->Setup(&banks);
+    mixer->Setup();
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth.samplerate);

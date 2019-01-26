@@ -54,7 +54,8 @@ void Presets::copy(const char *name)
     }
 
     xml.beginbranch(type);
-    Serialize(&xml);
+    // TODO reattach this
+    // Serialize(&xml);
     xml.endbranch();
 
     if (name == nullptr)
@@ -102,7 +103,8 @@ void Presets::paste(unsigned int npreset)
     }
 
     Defaults();
-    Deserialize(&xml);
+    // TODO reattach this
+    // Deserialize(&xml);
 
     xml.exitbranch();
 }

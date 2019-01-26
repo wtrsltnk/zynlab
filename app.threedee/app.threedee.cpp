@@ -34,8 +34,8 @@ int NoteNameCount = 12;
 
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
-AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer)
-    : _state(mixer, &_stepper), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
+AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, IBankManager *banks)
+    : _state(mixer, &_stepper, banks), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
       _mixerUi(&_state), _padNoteUi(&_state), _sequencerUi(&_state), _subNoteUi(&_state),
       _window(window), _stepper(&_state._sequencer, mixer),
       _toolbarIconsAreLoaded(false),
@@ -104,8 +104,8 @@ bool AppThreeDee::Setup()
     }
     io.Fonts->Build();
 
-    _state._mixer->GetBankManager()->RescanForBanks();
-    _state._mixer->GetBankManager()->LoadBank(_state._currentBank);
+    _state._banks->RescanForBanks();
+    _state._banks->LoadBank(_state._currentBank);
 
     _stepper.Setup();
     _state._activeTrack = 0;
