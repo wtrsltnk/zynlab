@@ -7,8 +7,11 @@ add_executable(app
     )
 
 add_library(zyn.fltkui
+    ui/common.H
     ui/NioUI.cpp
+    ui/NioUI.H
     ui/WidgetPDial.cpp
+    ui/WidgetPDial.h
     )
 
 if(FltkGui)
