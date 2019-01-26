@@ -34,6 +34,8 @@
 /**Tuning settings and microtonal capabilities*/
 class Microtonal : public WrappedPresets
 {
+    friend class MicrotonalSerializer;
+
 public:
     /**Constructor*/
     Microtonal();

@@ -24,9 +24,9 @@
 #ifndef MIXER_H
 #define MIXER_H
 
-#include "Track.h"
 #include "Meter.h"
 #include "Microtonal.h"
+#include "Track.h"
 #include <chrono>
 #include <memory>
 #include <pthread.h>
@@ -42,6 +42,8 @@
  *  process them with system/insertion effects and mix them */
 class Mixer : public IMixer, public IAudioGenerator, public WrappedPresets
 {
+    friend class MixerSerializer;
+
 public:
     /** Constructor TODO make private*/
     Mixer();
@@ -127,7 +129,7 @@ public:
     Microtonal microtonal;
 
     void InitPresets();
-    
+
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
     void Defaults();
