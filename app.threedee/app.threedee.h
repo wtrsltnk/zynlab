@@ -40,6 +40,7 @@ private:
     Stepper _stepper;
     std::vector<unsigned int> _toolbarIcons;
     bool _toolbarIconsAreLoaded;
+    std::chrono::milliseconds::rep _lastSequencerTimeInMs;
 
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);

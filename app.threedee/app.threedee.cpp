@@ -120,27 +120,66 @@ bool AppThreeDee::Setup()
 
     LoadToolbarIcons();
 
+    _state._playTime = 0.0f;
+
     return true;
 }
 
 void AppThreeDee::Tick()
 {
     _stepper.Tick();
+
+    std::chrono::milliseconds::rep currentTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+
+    auto deltaTime = currentTime - _lastSequencerTimeInMs;
+    _lastSequencerTimeInMs = currentTime;
+
+    if (_state._stepper->IsPlaying())
+    {
+        auto prevPlayTime = (_state._playTime / 1000.0f);
+        _state._playTime += deltaTime;
+        auto currentPlayTime = (_state._playTime / 1000.0f);
+
+        for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+        {
+            auto *track = _state._mixer->GetTrack(trackIndex);
+            if (!track->Penabled)
+            {
+                continue;
+            }
+            for (auto &region : _state.regionsByTrack[trackIndex])
+            {
+                if (region.startAndEnd[0] < prevPlayTime && region.startAndEnd[1] < prevPlayTime)
+                {
+                    continue;
+                }
+                if (region.startAndEnd[0] > currentPlayTime && region.startAndEnd[1] > currentPlayTime)
+                {
+                    continue;
+                }
+
+                for (unsigned char noteIndex = 0; noteIndex < NUM_MIDI_NOTES; noteIndex++)
+                {
+                    for (auto &event : region.eventsByNote[noteIndex])
+                    {
+                        auto start = (region.startAndEnd[0] + event.values[0]);
+                        auto end = (region.startAndEnd[0] + event.values[1]);
+                        if (start >= prevPlayTime && start < currentPlayTime)
+                        {
+                            _state._mixer->NoteOn(trackIndex, noteIndex, 100);
+                        }
+                        if (end >= prevPlayTime && end < currentPlayTime)
+                        {
+                            _state._mixer->NoteOff(trackIndex, noteIndex);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
-
-struct timelineEvent
-{
-    float values[2];
-};
-
-class TrackRegion
-{
-public:
-    float startAndEnd[2];
-    std::vector<struct timelineEvent> eventsByNote[88];
-};
-
-static std::vector<TrackRegion> regionsByTrack[NUM_MIXER_TRACKS];
 
 void PianoRollEditor(AppState &_state)
 {
@@ -152,7 +191,7 @@ void PianoRollEditor(AppState &_state)
             return;
         }
 
-        auto &trackRegions = regionsByTrack[_state._activeTrack];
+        auto &trackRegions = _state.regionsByTrack[_state._activeTrack];
 
         if (_state._activePattern < 0 || _state._activePattern >= trackRegions.size() || trackRegions.empty())
         {
@@ -160,7 +199,7 @@ void PianoRollEditor(AppState &_state)
             return;
         }
 
-        auto &region = regionsByTrack[_state._activeTrack][_state._activePattern];
+        auto &region = trackRegions[_state._activePattern];
         unsigned int maxvalue = static_cast<unsigned int>(region.startAndEnd[1] - region.startAndEnd[0]);
 
         if (maxvalue < 10)
@@ -168,12 +207,12 @@ void PianoRollEditor(AppState &_state)
             maxvalue = 10;
         }
 
-        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._stepper->_totalTimeInMs)) % (maxvalue * 1000)) / 1000.f;
+        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime)) % (maxvalue * 1000)) / 1000.f;
 
         static struct timelineEvent *selectedEvent = nullptr;
         if (ImGui::BeginTimelines("MyTimeline", maxvalue, 0, 88))
         {
-            for (int c = 0; c < 88; c++)
+            for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
             {
                 char id[32];
                 sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
@@ -208,13 +247,13 @@ void RegionEditor(AppState &_state)
     if (ImGui::Begin("Region editor"))
     {
         int maxvalueSequencer = 50;
-        const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._stepper->_totalTimeInMs)) % (maxvalueSequencer * 1000)) / 1000.f;
+        const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
 
         if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 0, NUM_MIXER_TRACKS))
         {
             for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
             {
-                auto &regions = regionsByTrack[trackIndex];
+                auto &regions = _state.regionsByTrack[trackIndex];
                 char id[32];
                 sprintf(id, "Track %d", trackIndex);
                 ImGui::TimelineStart(id, false);
@@ -241,16 +280,24 @@ void RegionEditor(AppState &_state)
                 if (ImGui::TimelineEnd(newRegion.startAndEnd))
                 {
                     _state._activeTrack = trackIndex;
-                    _state._activePattern = int(regionsByTrack[trackIndex].size());
+                    _state._activePattern = int(_state.regionsByTrack[trackIndex].size());
 
                     if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.5f)
                     {
-                        regionsByTrack[trackIndex].push_back(newRegion);
+                        _state.regionsByTrack[trackIndex].push_back(newRegion);
                     }
                 }
             }
         }
         ImGui::EndTimelines(maxvalueSequencer / 10, elapsedTimeSequencer);
+
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+        {
+            if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
+            {
+                _state.regionsByTrack[_state._activeTrack].erase(_state.regionsByTrack[_state._activeTrack].begin() + _state._activePattern);
+            }
+        }
     }
     ImGui::End();
 }
@@ -421,7 +468,11 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Rewind)]), ImVec2(32, 32));
+        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Rewind)]), ImVec2(32, 32)))
+        {
+            _state._playTime = 0;
+            _state._mixer->ShutUp();
+        }
 
         ImGui::SameLine();
 
@@ -431,6 +482,8 @@ void AppThreeDee::ImGuiPlayback()
 
         if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Stop)]), ImVec2(32, 32)))
         {
+            _state._playTime = 0;
+            _state._mixer->ShutUp();
             _stepper.Stop();
         }
 

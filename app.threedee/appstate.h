@@ -27,6 +27,20 @@ enum class TrackPatternTypes
     Count,
 };
 
+struct timelineEvent
+{
+    float values[2];
+};
+
+#define NUM_MIDI_NOTES 88
+
+class TrackRegion
+{
+public:
+    float startAndEnd[2];
+    std::vector<struct timelineEvent> eventsByNote[NUM_MIDI_NOTES];
+};
+
 class AppState
 {
 public:
@@ -61,6 +75,9 @@ public:
     Sequencer _sequencer;
     std::vector<TrackPattern> _clipboardPatterns;
     TrackPatternTypes _trackPatternType[NUM_MIXER_TRACKS];
+
+    std::chrono::milliseconds::rep _playTime;
+    std::vector<TrackRegion> regionsByTrack[NUM_MIXER_TRACKS];
 };
 
 #endif // APPSTATE_H
