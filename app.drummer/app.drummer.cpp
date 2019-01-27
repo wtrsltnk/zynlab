@@ -121,67 +121,6 @@ void AppDrummer::Tick()
     _stepper.Tick();
 }
 
-void PianoRollEditor(AppState &_state)
-{
-    if (ImGui::Begin("Pianoroll editor"))
-    {
-        if (_state._activeTrack < 0 || _state._activeTrack >= NUM_MIXER_TRACKS)
-        {
-            ImGui::End();
-            return;
-        }
-
-        if (_state._activePattern < 0 || !_state._sequencer.DoesPatternExistAtIndex(_state._activeTrack, _state._activePattern))
-        {
-            ImGui::End();
-            return;
-        }
-
-        auto &region = _state._sequencer.GetPattern(_state._activeTrack, _state._activePattern);
-        unsigned int maxvalue = 50;
-        for (int c = 0; c < 88; c++)
-        {
-            for (size_t i = 0; i < region.valuesOfValues[c].size(); i++)
-            {
-                if (region.valuesOfValues[c][i].values[1] + 10 > maxvalue)
-                    maxvalue = static_cast<unsigned int>(std::ceil(region.valuesOfValues[c][i].values[1] / 10) * 10 + 10);
-            }
-        }
-        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._stepper->_totalTimeInMs)) % (maxvalue * 1000)) / 1000.f;
-
-        static struct timelineEvent *selectedEvent = nullptr;
-        if (ImGui::BeginTimelines("MyTimeline", maxvalue, 0, 88))
-        {
-            for (int c = 0; c < 88; c++)
-            {
-                char id[32];
-                sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
-                ImGui::TimelineStart(id, false);
-                for (size_t i = 0; i < region.valuesOfValues[c].size(); i++)
-                {
-                    bool selected = (&(region.valuesOfValues[c][i]) == selectedEvent);
-                    if (ImGui::TimelineEvent(region.valuesOfValues[c][i].values, &selected))
-                    {
-                        selectedEvent = &(region.valuesOfValues[c][i]);
-                    }
-                }
-                float new_values[2];
-                if (ImGui::TimelineEnd(new_values))
-                {
-                    timelineEvent e{
-                        std::fmin(new_values[0], new_values[1]),
-                        std::fmax(new_values[0], new_values[1])};
-
-                    region.valuesOfValues[c].push_back(e);
-                    selectedEvent = &(region.valuesOfValues[c].back());
-                }
-            }
-        }
-        ImGui::EndTimelines(maxvalue / 10, elapsedTime);
-    }
-    ImGui::End();
-}
-
 void AppDrummer::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();

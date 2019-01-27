@@ -4,7 +4,7 @@ const float noteLabelWidth = 50.0f;
 const float stepWidth = 20.0f;
 
 AppState::AppState(class Mixer *mixer, class Stepper *stepper, class IBankManager *banks)
-    : _mixer(mixer), _stepper(stepper), _banks(banks), _showLibrary(false), _showEditor(false), _showInspector(false),
+    : _mixer(mixer), _stepper(stepper), _banks(banks), _showLibrary(false), _showEditor(false), _showInspector(true),
       _showMixer(true), _showSmartControls(true), _showQuickHelp(false),
       _showSystemEffectsEditor(true), _showInsertEffectsEditor(true), _showTrackEffectsEditor(true),
       _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true),

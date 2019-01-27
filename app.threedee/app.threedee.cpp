@@ -128,6 +128,20 @@ void AppThreeDee::Tick()
     _stepper.Tick();
 }
 
+struct timelineEvent
+{
+    float values[2];
+};
+
+class TrackRegion
+{
+public:
+    float startAndEnd[2];
+    std::vector<struct timelineEvent> eventsByNote[88];
+};
+
+static std::vector<TrackRegion> regionsByTrack[NUM_MIXER_TRACKS];
+
 void PianoRollEditor(AppState &_state)
 {
     if (ImGui::Begin("Pianoroll editor"))
@@ -138,22 +152,22 @@ void PianoRollEditor(AppState &_state)
             return;
         }
 
-        if (_state._activePattern < 0 || !_state._sequencer.DoesPatternExistAtIndex(_state._activeTrack, _state._activePattern))
+        auto &trackRegions = regionsByTrack[_state._activeTrack];
+
+        if (_state._activePattern < 0 || _state._activePattern >= trackRegions.size() || trackRegions.empty())
         {
             ImGui::End();
             return;
         }
 
-        auto &region = _state._sequencer.GetPattern(_state._activeTrack, _state._activePattern);
-        unsigned int maxvalue = 50;
-        for (int c = 0; c < 88; c++)
+        auto &region = regionsByTrack[_state._activeTrack][_state._activePattern];
+        unsigned int maxvalue = static_cast<unsigned int>(region.startAndEnd[1] - region.startAndEnd[0]);
+
+        if (maxvalue < 10)
         {
-            for (size_t i = 0; i < region.valuesOfValues[c].size(); i++)
-            {
-                if (region.valuesOfValues[c][i].values[1] + 10 > maxvalue)
-                    maxvalue = static_cast<unsigned int>(std::ceil(region.valuesOfValues[c][i].values[1] / 10) * 10 + 10);
-            }
+            maxvalue = 10;
         }
+
         const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._stepper->_totalTimeInMs)) % (maxvalue * 1000)) / 1000.f;
 
         static struct timelineEvent *selectedEvent = nullptr;
@@ -164,12 +178,12 @@ void PianoRollEditor(AppState &_state)
                 char id[32];
                 sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
                 ImGui::TimelineStart(id, false);
-                for (size_t i = 0; i < region.valuesOfValues[c].size(); i++)
+                for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
                 {
-                    bool selected = (&(region.valuesOfValues[c][i]) == selectedEvent);
-                    if (ImGui::TimelineEvent(region.valuesOfValues[c][i].values, &selected))
+                    bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
+                    if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, &selected))
                     {
-                        selectedEvent = &(region.valuesOfValues[c][i]);
+                        selectedEvent = &(region.eventsByNote[c][i]);
                     }
                 }
                 float new_values[2];
@@ -179,12 +193,60 @@ void PianoRollEditor(AppState &_state)
                         std::fmin(new_values[0], new_values[1]),
                         std::fmax(new_values[0], new_values[1])};
 
-                    region.valuesOfValues[c].push_back(e);
-                    selectedEvent = &(region.valuesOfValues[c].back());
+                    region.eventsByNote[c].push_back(e);
+                    selectedEvent = &(region.eventsByNote[c].back());
                 }
             }
         }
         ImGui::EndTimelines(maxvalue / 10, elapsedTime);
+    }
+    ImGui::End();
+}
+
+void RegionEditor(AppState &_state)
+{
+    if (ImGui::Begin("Region editor"))
+    {
+        int maxvalueSequencer = 50;
+        const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._stepper->_totalTimeInMs)) % (maxvalueSequencer * 1000)) / 1000.f;
+
+        if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 0, NUM_MIXER_TRACKS))
+        {
+            for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+            {
+                auto &regions = regionsByTrack[trackIndex];
+                char id[32];
+                sprintf(id, "Track %d", trackIndex);
+                ImGui::TimelineStart(id, false);
+                if (ImGui::IsItemClicked())
+                {
+                    _state._activeTrack = trackIndex;
+                }
+
+                for (size_t i = 0; i < regions.size(); i++)
+                {
+                    bool selected = (trackIndex == _state._activeTrack && int(i) == _state._activePattern);
+                    if (ImGui::TimelineEvent(regions[i].startAndEnd, &selected))
+                    {
+                        _state._activeTrack = trackIndex;
+                        _state._activePattern = int(i);
+                    }
+                }
+
+                TrackRegion newRegion;
+                if (ImGui::TimelineEnd(newRegion.startAndEnd))
+                {
+                    _state._activeTrack = trackIndex;
+                    _state._activePattern = int(regionsByTrack[trackIndex].size());
+
+                    if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.2f)
+                    {
+                        regionsByTrack[trackIndex].push_back(newRegion);
+                    }
+                }
+            }
+        }
+        ImGui::EndTimelines(maxvalueSequencer / 10, elapsedTimeSequencer);
     }
     ImGui::End();
 }
@@ -219,7 +281,7 @@ void AppThreeDee::Render()
     _effectUi.Render();
     _libraryUi.Render();
     _mixerUi.Render();
-    _sequencerUi.Render();
+
     if (_state._showSmartControls)
     {
         _adNoteUI.Render();
@@ -228,62 +290,8 @@ void AppThreeDee::Render()
     }
     ImGui::PopStyleVar();
 
-    // Timeline tests
-    {
-        if (_state._trackPatternType[_state._activeTrack] == TrackPatternTypes::Clip)
-        {
-            PianoRollEditor(_state);
-        }
-        if (ImGui::Begin("Sequencer timeline editor"))
-        {
-            unsigned int maxvalueSequencer = 16 * 4;
-            std::map<int, std::vector<timelineEvent>> seqValues;
-            for (int c = 0; c < NUM_MIXER_TRACKS; c++)
-            {
-                if (_state._trackPatternType[c] == TrackPatternTypes::Step)
-                {
-                    seqValues.insert(std::make_pair(c, std::vector<timelineEvent>()));
-
-                    for (int a = 0; a < _state._sequencer.LastPatternIndex(c) + 1; a++)
-                    {
-                        if (!_state._sequencer.DoesPatternExistAtIndex(c, a))
-                        {
-                            continue;
-                        }
-                        timelineEvent e{float(a * 16), float(a * 16 + 16)};
-                        seqValues[c].push_back(e);
-                    }
-                }
-            }
-            const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._stepper->_totalTimeInMs)) % (maxvalueSequencer * 1000)) / 1000.f;
-
-            if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 0, NUM_MIXER_TRACKS))
-            {
-                for (int c = 0; c < NUM_MIXER_TRACKS; c++)
-                {
-                    char id[32];
-                    sprintf(id, "Track %d", c);
-                    ImGui::TimelineStart(id, false);
-
-                    if (_state._trackPatternType[c] == TrackPatternTypes::Step)
-                    {
-                        for (size_t i = 0; i < seqValues[c].size(); i++)
-                        {
-                            bool selected = false;
-                            if (ImGui::TimelineEvent(seqValues[c][i].values, &selected))
-                            {
-                            }
-                        }
-                    }
-
-                    float new_values[2];
-                    ImGui::TimelineEnd(new_values);
-                }
-            }
-            ImGui::EndTimelines(maxvalueSequencer / 10, elapsedTimeSequencer);
-        }
-        ImGui::End();
-    }
+    PianoRollEditor(_state);
+    RegionEditor(_state);
 
     ImGui::Render();
 

@@ -22,6 +22,7 @@ namespace ImGui {
  * Add different types of TimelineEvent (e.g. multiple ranges in a single line, dot-like markers, etc.)
 */
 IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int num_visible_rows = 5, int opt_exact_num_rows = 0); // last arg, when !=0, enables item culling
+IMGUI_API void EmptyTimeline(const char *str_id);
 IMGUI_API void TimelineStart(const char *str_id, bool keep_range_constant = false);
 IMGUI_API bool TimelineEvent(float *values, bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
@@ -61,7 +62,7 @@ bool BeginTimelines(const char *str_id, float max_value, int num_visible_rows, i
     }
 
     auto contentHeight = row_height * num_visible_rows;
-    ImGui::SetNextWindowContentSize(ImVec2(max_value * 20, row_height * opt_exact_num_rows));
+    ImGui::SetNextWindowContentSize(ImVec2(50 + max_value * 20, row_height * opt_exact_num_rows));
     const bool rv = ImGui::BeginChild(str_id, ImVec2(0, contentHeight), false, ImGuiWindowFlags_HorizontalScrollbar);
     ImGui::PushStyleColor(ImGuiCol_Column, GImGui->Style.Colors[ImGuiCol_Border]);
     ImGui::Columns(2, str_id);
@@ -83,6 +84,21 @@ bool BeginTimelines(const char *str_id, float max_value, int num_visible_rows, i
     return rv;
 }
 
+void EmptyTimeline(const char *str_id)
+{
+    ++s_timeline_display_index;
+
+    if (s_timeline_num_rows > 0 &&
+        (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end)) return; // item culling
+
+    s_str_id = str_id;
+
+    ImGui::TextDisabled("%s", str_id);
+    ImGui::NextColumn();
+
+    ImGui::NextColumn();
+}
+
 void TimelineStart(const char *str_id, bool keep_range_constant)
 {
     ++s_timeline_display_index;
@@ -102,7 +118,7 @@ void TimelineStart(const char *str_id, bool keep_range_constant)
     if (s_timeline_display_index % 2)
     {
         const ImU32 active_color = ColorConvertFloat4ToU32(color);
-        auto num_vertical_grid_lines = s_max_value / 10;
+        auto num_vertical_grid_lines = std::max(1, s_max_value / 10);
         const float columnWidth = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
         const float horizontal_interval = columnWidth / num_vertical_grid_lines;
         ImVec2 end = s_cursor_pos;
