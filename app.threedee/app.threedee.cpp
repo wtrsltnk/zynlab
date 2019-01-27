@@ -230,6 +230,10 @@ void RegionEditor(AppState &_state)
                     {
                         _state._activeTrack = trackIndex;
                         _state._activePattern = int(i);
+                        if (std::fabs(regions[i].startAndEnd[0] - regions[i].startAndEnd[1]) < 0.5f)
+                        {
+                            regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 0.5f;
+                        }
                     }
                 }
 
@@ -239,7 +243,7 @@ void RegionEditor(AppState &_state)
                     _state._activeTrack = trackIndex;
                     _state._activePattern = int(regionsByTrack[trackIndex].size());
 
-                    if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.2f)
+                    if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.5f)
                     {
                         regionsByTrack[trackIndex].push_back(newRegion);
                     }
