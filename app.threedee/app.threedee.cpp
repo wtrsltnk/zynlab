@@ -207,10 +207,15 @@ void PianoRollEditor(AppState &_state)
             maxvalue = 10;
         }
 
-        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime)) % (maxvalue * 1000)) / 1000.f;
+        static int horizontalZoom = 50.0f;
+
+        ImGui::PushItemWidth(100);
+        ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 10, 100, "zoom %d");
+
+        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
 
         static struct timelineEvent *selectedEvent = nullptr;
-        if (ImGui::BeginTimelines("MyTimeline", maxvalue, 0, 88))
+        if (ImGui::BeginTimelines("MyTimeline", maxvalue, horizontalZoom, 0, 88))
         {
             for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
             {
@@ -272,7 +277,7 @@ void RegionEditor(AppState &_state)
         int maxvalueSequencer = 50;
         const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
 
-        if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 0, NUM_MIXER_TRACKS))
+        if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 50.0f, 0, NUM_MIXER_TRACKS))
         {
             for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
             {
