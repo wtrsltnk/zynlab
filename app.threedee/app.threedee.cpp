@@ -207,10 +207,16 @@ void PianoRollEditor(AppState &_state)
             maxvalue = 10;
         }
 
-        static int horizontalZoom = 50.0f;
+        static int horizontalZoom = 50;
+        static int verticalZoom = 50;
 
-        ImGui::PushItemWidth(100);
-        ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 10, 100, "zoom %d");
+        ImGui::Text("Zoom");
+        ImGui::SameLine();
+        ImGui::PushItemWidth(120);
+        ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 10, 100, "horizontal %d");
+        ImGui::SameLine();
+        ImGui::PushItemWidth(120);
+        ImGui::SliderInt("##verticalZoom", &verticalZoom, 10, 100, "vertical %d");
 
         const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
 
