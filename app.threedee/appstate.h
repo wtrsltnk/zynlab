@@ -30,6 +30,8 @@ enum class TrackPatternTypes
 struct timelineEvent
 {
     float values[2];
+    unsigned char note;
+    unsigned char velocity;
 };
 
 #define NUM_MIDI_NOTES 88

@@ -229,8 +229,10 @@ void PianoRollEditor(AppState &_state)
                 if (ImGui::TimelineEnd(new_values))
                 {
                     timelineEvent e{
-                        std::fmin(new_values[0], new_values[1]),
-                        std::fmax(new_values[0], new_values[1])};
+                        {std::fmin(new_values[0], new_values[1]),
+                         std::fmax(new_values[0], new_values[1])},
+                        static_cast<unsigned char>(c),
+                        100};
 
                     region.eventsByNote[c].push_back(e);
                     selectedEvent = &(region.eventsByNote[c].back());
@@ -238,6 +240,27 @@ void PianoRollEditor(AppState &_state)
             }
         }
         ImGui::EndTimelines(maxvalue / 10, elapsedTime);
+
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)) && selectedEvent != nullptr)
+        {
+            if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
+            {
+                auto &trackRegions = _state.regionsByTrack[_state._activeTrack];
+                if (_state._activePattern >= 0 && _state._activePattern < trackRegions.size())
+                {
+                    auto &events = trackRegions[_state._activePattern].eventsByNote[selectedEvent->note];
+                    auto itr = events.begin();
+                    while (&(*itr) != selectedEvent && itr != events.end())
+                    {
+                        itr++;
+                    }
+                    if (itr != events.end())
+                    {
+                        events.erase(itr);
+                    }
+                }
+            }
+        }
     }
     ImGui::End();
 }
