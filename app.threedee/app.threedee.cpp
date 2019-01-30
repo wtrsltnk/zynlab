@@ -92,6 +92,16 @@ bool AppThreeDee::Setup()
     ImGui::GetStyle().TabRounding = 2.0f;
     ImGui::GetStyle().FrameRounding = 2.0f;
 
+    ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_TabUnfocusedActive] = ImGui::GetStyle().Colors[ImGuiCol_TabActive];
+    ImGui::GetStyle().Colors[ImGuiCol_TabUnfocused] = ImGui::GetStyle().Colors[ImGuiCol_Tab];
+    ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_Separator] = ImVec4(0.24f, 0.24f, 0.27f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_ResizeGrip] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
+
     io.Fonts->Clear();
     ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
     if (font != nullptr)
@@ -208,6 +218,79 @@ void PianoRollEditor(AppState &_state)
         }
 
         static int horizontalZoom = 50;
+
+        ImGui::Text("Zoom");
+        ImGui::SameLine();
+        ImGui::PushItemWidth(120);
+        ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 10, 100, "horizontal %d");
+
+        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
+
+        if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
+        {
+            static struct timelineEvent *selectedEvent = nullptr;
+            if (ImGui::BeginTimelines("MyTimeline", maxvalue, horizontalZoom, 0, 88))
+            {
+                for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
+                {
+                    char id[32];
+                    sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
+                    ImGui::TimelineStart(id, false);
+                    for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
+                    {
+                        bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
+                        if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, &selected))
+                        {
+                            selectedEvent = &(region.eventsByNote[c][i]);
+                        }
+                    }
+                    float new_values[2];
+                    if (ImGui::TimelineEnd(new_values))
+                    {
+                        timelineEvent e{
+                            {std::fmin(new_values[0], new_values[1]),
+                             std::fmax(new_values[0], new_values[1])},
+                            static_cast<unsigned char>(c),
+                            100};
+
+                        region.eventsByNote[c].push_back(e);
+                        selectedEvent = &(region.eventsByNote[c].back());
+                    }
+                }
+            }
+            ImGui::EndTimelines(maxvalue / 10, elapsedTime);
+
+            if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)) && selectedEvent != nullptr)
+            {
+                if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
+                {
+                    auto &trackRegions = _state.regionsByTrack[_state._activeTrack];
+                    if (_state._activePattern >= 0 && _state._activePattern < trackRegions.size())
+                    {
+                        auto &events = trackRegions[_state._activePattern].eventsByNote[selectedEvent->note];
+                        auto itr = events.begin();
+                        while (&(*itr) != selectedEvent && itr != events.end())
+                        {
+                            itr++;
+                        }
+                        if (itr != events.end())
+                        {
+                            events.erase(itr);
+                        }
+                    }
+                }
+            }
+        }
+        ImGui::EndChild();
+    }
+    ImGui::End();
+}
+
+void RegionEditor(AppState &_state)
+{
+    if (ImGui::Begin("Region editor"))
+    {
+        static int horizontalZoom = 50;
         static int verticalZoom = 50;
 
         ImGui::Text("Zoom");
@@ -218,120 +301,62 @@ void PianoRollEditor(AppState &_state)
         ImGui::PushItemWidth(120);
         ImGui::SliderInt("##verticalZoom", &verticalZoom, 10, 100, "vertical %d");
 
-        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
-
-        static struct timelineEvent *selectedEvent = nullptr;
-        if (ImGui::BeginTimelines("MyTimeline", maxvalue, horizontalZoom, 0, 88))
-        {
-            for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
-            {
-                char id[32];
-                sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
-                ImGui::TimelineStart(id, false);
-                for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
-                {
-                    bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
-                    if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, &selected))
-                    {
-                        selectedEvent = &(region.eventsByNote[c][i]);
-                    }
-                }
-                float new_values[2];
-                if (ImGui::TimelineEnd(new_values))
-                {
-                    timelineEvent e{
-                        {std::fmin(new_values[0], new_values[1]),
-                         std::fmax(new_values[0], new_values[1])},
-                        static_cast<unsigned char>(c),
-                        100};
-
-                    region.eventsByNote[c].push_back(e);
-                    selectedEvent = &(region.eventsByNote[c].back());
-                }
-            }
-        }
-        ImGui::EndTimelines(maxvalue / 10, elapsedTime);
-
-        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)) && selectedEvent != nullptr)
-        {
-            if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
-            {
-                auto &trackRegions = _state.regionsByTrack[_state._activeTrack];
-                if (_state._activePattern >= 0 && _state._activePattern < trackRegions.size())
-                {
-                    auto &events = trackRegions[_state._activePattern].eventsByNote[selectedEvent->note];
-                    auto itr = events.begin();
-                    while (&(*itr) != selectedEvent && itr != events.end())
-                    {
-                        itr++;
-                    }
-                    if (itr != events.end())
-                    {
-                        events.erase(itr);
-                    }
-                }
-            }
-        }
-    }
-    ImGui::End();
-}
-
-void RegionEditor(AppState &_state)
-{
-    if (ImGui::Begin("Region editor"))
-    {
         int maxvalueSequencer = 50;
         const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
 
-        if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 50.0f, 0, NUM_MIXER_TRACKS))
+        if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
-            for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+            if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 50.0f, 0, NUM_MIXER_TRACKS))
             {
-                auto &regions = _state.regionsByTrack[trackIndex];
-                char id[32];
-                sprintf(id, "Track %d", trackIndex);
-                ImGui::TimelineStart(id, false);
-                if (ImGui::IsItemClicked())
+                for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
-                    _state._activeTrack = trackIndex;
-                }
-
-                for (size_t i = 0; i < regions.size(); i++)
-                {
-                    bool selected = (trackIndex == _state._activeTrack && int(i) == _state._activePattern);
-                    if (ImGui::TimelineEvent(regions[i].startAndEnd, &selected))
+                    auto &regions = _state.regionsByTrack[trackIndex];
+                    char id[32];
+                    sprintf(id, "Track %d", trackIndex);
+                    ImGui::TimelineStart(id, false);
+                    if (ImGui::IsItemClicked())
                     {
                         _state._activeTrack = trackIndex;
-                        _state._activePattern = int(i);
-                        if (std::fabs(regions[i].startAndEnd[0] - regions[i].startAndEnd[1]) < 0.5f)
+                    }
+
+                    for (size_t i = 0; i < regions.size(); i++)
+                    {
+                        bool selected = (trackIndex == _state._activeTrack && int(i) == _state._activePattern);
+                        if (ImGui::TimelineEvent(regions[i].startAndEnd, &selected))
                         {
-                            regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 0.5f;
+                            _state._activeTrack = trackIndex;
+                            _state._activePattern = int(i);
+                            if (std::fabs(regions[i].startAndEnd[0] - regions[i].startAndEnd[1]) < 0.5f)
+                            {
+                                regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 0.5f;
+                            }
+                        }
+                    }
+
+                    TrackRegion newRegion;
+                    if (ImGui::TimelineEnd(newRegion.startAndEnd))
+                    {
+                        _state._activeTrack = trackIndex;
+                        _state._activePattern = int(_state.regionsByTrack[trackIndex].size());
+
+                        if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.5f)
+                        {
+                            _state.regionsByTrack[trackIndex].push_back(newRegion);
                         }
                     }
                 }
+            }
+            ImGui::EndTimelines(maxvalueSequencer / 10, elapsedTimeSequencer);
 
-                TrackRegion newRegion;
-                if (ImGui::TimelineEnd(newRegion.startAndEnd))
+            if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+            {
+                if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
                 {
-                    _state._activeTrack = trackIndex;
-                    _state._activePattern = int(_state.regionsByTrack[trackIndex].size());
-
-                    if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.5f)
-                    {
-                        _state.regionsByTrack[trackIndex].push_back(newRegion);
-                    }
+                    _state.regionsByTrack[_state._activeTrack].erase(_state.regionsByTrack[_state._activeTrack].begin() + _state._activePattern);
                 }
             }
         }
-        ImGui::EndTimelines(maxvalueSequencer / 10, elapsedTimeSequencer);
-
-        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
-        {
-            if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
-            {
-                _state.regionsByTrack[_state._activeTrack].erase(_state.regionsByTrack[_state._activeTrack].begin() + _state._activePattern);
-            }
-        }
+        ImGui::EndChild();
     }
     ImGui::End();
 }
@@ -347,7 +372,7 @@ void AppThreeDee::Render()
     ImGui::SetNextWindowPos(viewport->Pos);
     ImGui::SetNextWindowSize(viewport->Size);
     ImGui::SetNextWindowViewport(viewport->ID);
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    ImGuiWindowFlags window_flags =  ImGuiWindowFlags_NoDocking;
     window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
     window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);

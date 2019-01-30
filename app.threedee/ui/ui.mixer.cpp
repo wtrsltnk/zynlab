@@ -190,7 +190,7 @@ void zyn::ui::Mixer::ImGuiInspector()
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    ImGui::Begin("Inspector", &_state->_showInspector, ImVec2(trackSize.x * 2, 0), -1.0f, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    ImGui::Begin("Inspector", &_state->_showInspector, ImVec2(trackSize.x * 2, 0), -1.0f);
     {
         if (_state->_showQuickHelp && ImGui::CollapsingHeader("Quick help"))
         {
@@ -246,7 +246,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
     auto availableRegion = ImGui::GetContentRegionAvail();
     auto useLargeMode = availableRegion.y > sliderBaseHeight * largeModeTreshold;
 
-    ImGui::BeginChild("Master Track", trackSize, true);
+    ImGui::BeginChild("Master Track", trackSize);
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
@@ -353,7 +353,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
             _state->_mixer->microtonal.Pglobalfinedetune = fineDetune;
         }
 
-        auto faderHeight = ImGui::GetWindowContentRegionMax().y - ImGui::GetCursorPos().y - io.ItemSpacing.y - 20;
+        auto faderHeight = ImGui::GetWindowContentRegionMax().y - ImGui::GetCursorPos().y - io.ItemSpacing.y - 30;
 
         // Master volume
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
@@ -465,10 +465,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
     auto io = ImGui::GetStyle();
 
     auto hue = trackIndex * 0.05f;
-    if (highlightTrack)
-    {
-        ImGui::PushStyleColor(ImGuiCol_Border, static_cast<ImVec4>(ImColor::HSV(hue, 0.8f, 0.8f)));
-    }
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1, 1, 1, highlightTrack ? 0.05f : 0.01f));
 
     std::stringstream trackTooltip;
     trackTooltip << "[" << instrumentCategoryNames[track->info.Ptype] << "]";
@@ -486,7 +483,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                      << track->info.Pcomments;
     }
 
-    ImGui::BeginChild("MixerTrack", trackSize, true);
+    if (ImGui::BeginChild("MixerTrack", trackSize))
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
@@ -863,9 +860,13 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
             track->setPpanning(panning);
             _state->_activeTrack = trackIndex;
         }
+        if (ImGui::IsItemClicked())
+        {
+            _state->_activeTrack = trackIndex;
+        }
 
         auto start = ImGui::GetCursorPos();
-        auto faderHeight = ImGui::GetWindowContentRegionMax().y - start.y - io.ItemSpacing.y - 20;
+        auto faderHeight = ImGui::GetWindowContentRegionMax().y - start.y - io.ItemSpacing.y - 30;
 
         if (faderHeight < (40 + ImGui::GetTextLineHeight()))
         {
@@ -911,18 +912,14 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         sprintf(tmp, "track %d", trackIndex + 1);
         ImGui::TextCentered(ImVec2(width, 20), tmp);
         ImGui::ShowTooltipOnHover(trackTooltip.str().c_str());
-
-        if (ImGui::IsItemClicked())
-        {
-            _state->_activeTrack = trackIndex;
-        }
     }
     ImGui::EndChild();
-
-    if (highlightTrack)
+    if (ImGui::IsItemClicked())
     {
-        ImGui::PopStyleColor();
+        _state->_activeTrack = trackIndex;
     }
+
+    ImGui::PopStyleColor(1);
 }
 
 void zyn::ui::Mixer::ImGuiChangeInstrumentTypePopup()
