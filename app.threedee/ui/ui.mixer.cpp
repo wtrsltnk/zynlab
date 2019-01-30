@@ -526,7 +526,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
 
         if (useLargeMode)
         {
-            ImGui::Text("Midi channel");
+            ImGui::TextCentered(ImVec2(width, lineHeight), "Midi channel");
         }
 
         // Select midi channel
@@ -547,7 +547,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
 
         if (noCollapsingHeader || ImGui::CollapsingHeader("Settings"))
         {
-            if (noCollapsingHeader) ImGui::Text("Settings");
+            if (noCollapsingHeader) ImGui::TextCentered(ImVec2(width, lineHeight), "Settings");
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
             // AD synth enable/disable + edit button
@@ -620,7 +620,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         // System effect sends
         if (noCollapsingHeader || ImGui::CollapsingHeader("Sys FX sends"))
         {
-            if (noCollapsingHeader) ImGui::Text("Sys FX sends");
+            if (noCollapsingHeader) ImGui::TextCentered(ImVec2(width, lineHeight), "Sys FX sends");
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
@@ -686,7 +686,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         // Insertion effects
         if (noCollapsingHeader || ImGui::CollapsingHeader("Insert FX"))
         {
-            if (noCollapsingHeader) ImGui::Text("Insert FX");
+            if (noCollapsingHeader) ImGui::TextCentered(ImVec2(width, lineHeight), "Insert FX");
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
@@ -764,7 +764,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         // Track effects
         if (noCollapsingHeader || ImGui::CollapsingHeader("Audio FX"))
         {
-            if (noCollapsingHeader) ImGui::Text("Audio FX");
+            if (noCollapsingHeader) ImGui::TextCentered(ImVec2(width, lineHeight), "Audio FX");
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 
@@ -910,7 +910,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
 
         char tmp[32] = {0};
         sprintf(tmp, "track %d", trackIndex + 1);
-        ImGui::TextCentered(ImVec2(width, 20), tmp);
+        ImGui::TextCentered(ImVec2(width, lineHeight), tmp);
         ImGui::ShowTooltipOnHover(trackTooltip.str().c_str());
     }
     ImGui::EndChild();
