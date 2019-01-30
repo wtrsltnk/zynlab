@@ -17,8 +17,6 @@ void ADnoteVoiceParam::Enable(IFFTwrapper *fft, Resonance *Reson)
 
     FMFreqEnvelope = EnvelopeParams::ASRinit(0, 0, 20, 90, 40, 80);
     FMAmpEnvelope = EnvelopeParams::ADSRinit(64, 1, 80, 90, 127, 100);
-
-    InitPresets();
 }
 
 void ADnoteVoiceParam::Disable()
