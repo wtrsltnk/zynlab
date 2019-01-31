@@ -229,7 +229,7 @@ void PianoRollEditor(AppState &_state)
         if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
         {
             static struct timelineEvent *selectedEvent = nullptr;
-            if (ImGui::BeginTimelines("MyTimeline", maxvalue, horizontalZoom, 0, 88))
+            if (ImGui::BeginTimelines("MyTimeline", maxvalue, 20, horizontalZoom, 88))
             {
                 for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
                 {
@@ -299,14 +299,14 @@ void RegionEditor(AppState &_state)
         ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 10, 100, "horizontal %d");
         ImGui::SameLine();
         ImGui::PushItemWidth(120);
-        ImGui::SliderInt("##verticalZoom", &verticalZoom, 10, 100, "vertical %d");
+        ImGui::SliderInt("##verticalZoom", &verticalZoom, 30, 100, "vertical %d");
 
         int maxvalueSequencer = 50;
         const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
 
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
-            if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, 50.0f, 0, NUM_MIXER_TRACKS))
+            if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS))
             {
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
@@ -372,7 +372,7 @@ void AppThreeDee::Render()
     ImGui::SetNextWindowPos(viewport->Pos);
     ImGui::SetNextWindowSize(viewport->Size);
     ImGui::SetNextWindowViewport(viewport->ID);
-    ImGuiWindowFlags window_flags =  ImGuiWindowFlags_NoDocking;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
     window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
     window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);

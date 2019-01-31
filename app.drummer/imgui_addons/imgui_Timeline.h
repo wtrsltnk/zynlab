@@ -21,7 +21,7 @@ namespace ImGui {
  * Add zooming with CTRL+MouseWheel, and a horizontal scrollbar
  * Add different types of TimelineEvent (e.g. multiple ranges in a single line, dot-like markers, etc.)
 */
-IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int num_visible_rows = 5, int opt_exact_num_rows = 0); // last arg, when !=0, enables item culling
+IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int row_height = 30, int num_visible_rows = 5, int opt_exact_num_rows = 0); // last arg, when !=0, enables item culling
 IMGUI_API void TimelineStart(const char *str_id, bool keep_range_constant = false);
 IMGUI_API bool TimelineEvent(float *values, bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
@@ -43,18 +43,19 @@ static int s_event_counter = 0;
 static bool s_is_event_hovered = false;
 static float s_start_new_value = 0.0f;
 static int s_max_value = 50;
+static int s_row_height;
 
 static ImVec4 color = ImVec4(0.26f, 0.59f, 0.98f, 0.10f);
 
-bool BeginTimelines(const char *str_id, float max_value, int num_visible_rows, int opt_exact_num_rows)
+bool BeginTimelines(const char *str_id, float max_value, int row_height, int num_visible_rows, int opt_exact_num_rows)
 {
     // reset global variables
     s_max_timeline_value = 0.f;
     s_timeline_num_rows = s_timeline_display_start = s_timeline_display_end = 0;
     s_timeline_display_index = -1;
     s_max_value = static_cast<int>(max_value);
+    s_row_height = row_height;
 
-    const float row_height = ImGui::GetTextLineHeightWithSpacing();
     if (num_visible_rows <= 0)
     {
         num_visible_rows = static_cast<int>((GetWindowContentRegionMax().y) / row_height) - 3;
