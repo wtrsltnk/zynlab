@@ -152,7 +152,7 @@ void AppThreeDee::Tick()
         _state._playTime += deltaTime;
         auto currentPlayTime = (_state._playTime / 1000.0f);
 
-        for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+        for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
         {
             auto *track = _state._mixer->GetTrack(trackIndex);
             if (!track->Penabled)
@@ -203,19 +203,14 @@ void PianoRollEditor(AppState &_state)
 
         auto &trackRegions = _state.regionsByTrack[_state._activeTrack];
 
-        if (_state._activePattern < 0 || _state._activePattern >= trackRegions.size() || trackRegions.empty())
+        if (_state._activePattern < 0 || size_t(_state._activePattern) >= trackRegions.size() || trackRegions.empty())
         {
             ImGui::End();
             return;
         }
 
-        auto &region = trackRegions[_state._activePattern];
+        auto &region = trackRegions[size_t(_state._activePattern)];
         unsigned int maxvalue = static_cast<unsigned int>(region.startAndEnd[1] - region.startAndEnd[0]);
-
-        if (maxvalue < 10)
-        {
-            maxvalue = 10;
-        }
 
         static int horizontalZoom = 50;
 
@@ -228,6 +223,7 @@ void PianoRollEditor(AppState &_state)
 
         if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
         {
+            bool regionIsModified = false;
             static struct timelineEvent *selectedEvent = nullptr;
             if (ImGui::BeginTimelines("MyTimeline", maxvalue, 20, horizontalZoom, 88))
             {
@@ -239,14 +235,20 @@ void PianoRollEditor(AppState &_state)
                     for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
                     {
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
-                        if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, &selected))
+                        if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, &selected))
                         {
+                            if (region.eventsByNote[c][i].values[0] + 0.5f > region.eventsByNote[c][i].values[1])
+                            {
+                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + 0.5f;
+                            }
+                            regionIsModified = true;
                             selectedEvent = &(region.eventsByNote[c][i]);
                         }
                     }
                     float new_values[2];
                     if (ImGui::TimelineEnd(new_values))
                     {
+                        regionIsModified = true;
                         timelineEvent e{
                             {std::fmin(new_values[0], new_values[1]),
                              std::fmax(new_values[0], new_values[1])},
@@ -260,14 +262,19 @@ void PianoRollEditor(AppState &_state)
             }
             ImGui::EndTimelines(maxvalue / 10, elapsedTime);
 
+            if (regionIsModified)
+            {
+                region.UpdatePreviewImage();
+            }
+
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)) && selectedEvent != nullptr)
             {
                 if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
                 {
                     auto &trackRegions = _state.regionsByTrack[_state._activeTrack];
-                    if (_state._activePattern >= 0 && _state._activePattern < trackRegions.size())
+                    if (_state._activePattern >= 0 && size_t(_state._activePattern) < trackRegions.size())
                     {
-                        auto &events = trackRegions[_state._activePattern].eventsByNote[selectedEvent->note];
+                        auto &events = trackRegions[size_t(_state._activePattern)].eventsByNote[selectedEvent->note];
                         auto itr = events.begin();
                         while (&(*itr) != selectedEvent && itr != events.end())
                         {
@@ -302,7 +309,7 @@ void RegionEditor(AppState &_state)
         ImGui::SliderInt("##verticalZoom", &verticalZoom, 30, 100, "vertical %d");
 
         int maxvalueSequencer = 50;
-        const float elapsedTimeSequencer = static_cast<float>((static_cast<unsigned>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
+        const float elapsedTimeSequencer = static_cast<float>((static_cast<int>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
 
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
@@ -322,7 +329,7 @@ void RegionEditor(AppState &_state)
                     for (size_t i = 0; i < regions.size(); i++)
                     {
                         bool selected = (trackIndex == _state._activeTrack && int(i) == _state._activePattern);
-                        if (ImGui::TimelineEvent(regions[i].startAndEnd, &selected))
+                        if (ImGui::TimelineEvent(regions[i].startAndEnd, regions[i].previewImage, &selected))
                         {
                             _state._activeTrack = trackIndex;
                             _state._activePattern = int(i);
@@ -330,6 +337,7 @@ void RegionEditor(AppState &_state)
                             {
                                 regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 0.5f;
                             }
+                            regions[i].UpdatePreviewImage();
                         }
                     }
 
@@ -341,6 +349,7 @@ void RegionEditor(AppState &_state)
 
                         if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.5f)
                         {
+                            newRegion.UpdatePreviewImage();
                             _state.regionsByTrack[trackIndex].push_back(newRegion);
                         }
                     }

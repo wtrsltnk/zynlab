@@ -24,7 +24,7 @@ namespace ImGui {
 IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
 IMGUI_API void TimelineStart(const char *str_id, bool keep_range_constant = false);
-IMGUI_API bool TimelineEvent(float *values, bool *selected = nullptr);
+IMGUI_API bool TimelineEvent(float *values, unsigned int image = 0, bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
 IMGUI_API void EndTimelines(int num_vertical_grid_lines = 5, float current_time = 0.f, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
 } // namespace ImGui
@@ -181,7 +181,7 @@ bool TimelineEnd(float *new_values)
     return result;
 }
 
-bool TimelineEvent(float *values, bool *selected)
+bool TimelineEvent(float *values, unsigned int image, bool *selected)
 {
     if (s_timeline_num_rows > 0 &&
         (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end)) return false; // item culling
@@ -191,7 +191,6 @@ bool TimelineEvent(float *values, bool *selected)
     const ImU32 active_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
     const ImU32 line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
     const ImU32 selected_color = ColorConvertFloat4ToU32(ImVec4(0.6f, 0.0f, 0.0f, 0.6f));
-    const ImU32 selected_active_color = ColorConvertFloat4ToU32(ImVec4(1.0f, 0.0f, 0.0f, 0.6f));
     bool changed = false;
     bool hovered = false;
     bool allhovered = false;
@@ -227,11 +226,19 @@ bool TimelineEvent(float *values, bool *selected)
 
     auto color = inactive_color;
     if (selected != nullptr && *selected)
+    {
         color = selected_color;
+    }
     if (IsItemActive() || IsItemHovered() || allhovered)
+    {
         color = active_color;
+    }
 
     win->DrawList->AddRectFilled(start, end, color);
+    if (image > 0)
+    {
+        win->DrawList->AddImage(reinterpret_cast<ImTextureID>(image), start, end);
+    }
 
     for (int i = 0; i < 2; ++i)
     {

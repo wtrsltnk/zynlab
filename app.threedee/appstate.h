@@ -39,6 +39,13 @@ struct timelineEvent
 class TrackRegion
 {
 public:
+    TrackRegion();
+    virtual ~TrackRegion();
+
+    void CleanupPreviewImage();
+    void UpdatePreviewImage();
+
+    unsigned int previewImage;
     float startAndEnd[2];
     std::vector<struct timelineEvent> eventsByNote[NUM_MIDI_NOTES];
 };
