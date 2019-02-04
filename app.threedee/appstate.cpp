@@ -38,17 +38,21 @@ void TrackRegion::CleanupPreviewImage()
         glDeleteTextures(1, &previewImage);
     }
 }
+struct colour
+{
+    unsigned char r, g, b;
+};
 
-void setPixel(unsigned char *buffer, int x, int y, int w, int h)
+void setPixel(colour *buffer, int x, int y, int w, int h)
 {
     if (x < 0) x = 0;
     if (x >= w) x = w - 1;
     if (y < 0) y = 0;
     if (y >= h) y = h - 1;
 
-    buffer[(y * (w * 3)) + (x * 3)] = 0;
-    buffer[(y * (w * 3)) + (x * 3) + 1] = 0;
-    buffer[(y * (w * 3)) + (x * 3) + 2] = 255;
+    buffer[(y * w) + x].r = 155;
+    buffer[(y * w) + x].g = 155;
+    buffer[(y * w) + x].b = 155;
 }
 
 void TrackRegion::UpdatePreviewImage()
@@ -64,6 +68,8 @@ void TrackRegion::UpdatePreviewImage()
         }
     }
 
+    minNote -= 1;
+
     if (maxNote < minNote)
     {
         CleanupPreviewImage();
@@ -78,36 +84,37 @@ void TrackRegion::UpdatePreviewImage()
     auto width = startAndEnd[1] - startAndEnd[0];
     auto height = maxNote - minNote + 1;
 
-    size_t size = size_t(128 * 128 * 3);
-    auto buffer = new unsigned char[size];
-    memset(buffer, 255, size);
+    auto imageHeight = 8;
+    while (imageHeight < height)
+        imageHeight += 8;
+
+    size_t size = size_t(128 * imageHeight);
+    auto buffer = new colour[size];
+    memset(buffer, 255, size * sizeof(colour));
 
     for (int i = 0; i <= height; i++)
     {
         if (eventsByNote[i + minNote].empty()) continue;
 
-        int y = std::abs(124 - int(i * (124 / height)));
+        int y = std::abs((imageHeight - 1) - int(float(i) * (float(imageHeight - 1) / float(height))));
         for (auto &n : eventsByNote[i + minNote])
         {
-            int xFrom = (n.values[0] / width) * 124;
-            std::cout << "xFrom = (" << n.values[0] << " / " << width << ") * 124" << std::endl;
-            int xTo = (n.values[1] / width) * 124;
-            std::cout << "xTo = (" << n.values[1] << " / " << width << ") * 124" << std::endl;
-            std::cout << xFrom << "->" << xTo << std::endl;
+            int xFrom = int(float(n.values[0] / width) * 128.0f);
+            int xTo = int(float(n.values[1] / width) * 128.0f);
             for (int j = xFrom; j < xTo; j++)
             {
-                setPixel(buffer, j, y, 128, 128);
+                setPixel(buffer, j, y, 128, imageHeight);
             }
         }
     }
 
     glBindTexture(GL_TEXTURE_2D, previewImage);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 
-    stbi_write_png("c:\\temp\\previewImage.png", 128, 128, 3, buffer, 0);
+    stbi_write_png("c:\\temp\\previewImage.png", 128, imageHeight, 3, buffer, 0);
     delete[] buffer;
 }

@@ -219,7 +219,7 @@ void PianoRollEditor(AppState &_state)
         ImGui::PushItemWidth(120);
         ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 10, 100, "horizontal %d");
 
-        const float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
+        float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
 
         if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
         {
@@ -232,10 +232,14 @@ void PianoRollEditor(AppState &_state)
                     char id[32];
                     sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
                     ImGui::TimelineStart(id, false);
+                    if (ImGui::IsItemClicked())
+                    {
+                        _state._stepper->HitNote(_state._activeTrack, c, 100, 200);
+                    }
                     for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
                     {
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
-                        if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, &selected))
+                        if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)) & selected))
                         {
                             if (region.eventsByNote[c][i].values[0] + 0.5f > region.eventsByNote[c][i].values[1])
                             {
@@ -260,7 +264,7 @@ void PianoRollEditor(AppState &_state)
                     }
                 }
             }
-            ImGui::EndTimelines(maxvalue / 10, elapsedTime);
+            ImGui::EndTimelines(&elapsedTime);
 
             if (regionIsModified)
             {
@@ -309,7 +313,7 @@ void RegionEditor(AppState &_state)
         ImGui::SliderInt("##verticalZoom", &verticalZoom, 30, 100, "vertical %d");
 
         int maxvalueSequencer = 50;
-        const float elapsedTimeSequencer = static_cast<float>((static_cast<int>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
+        float elapsedTimeSequencer = static_cast<float>((static_cast<int>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
 
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
@@ -317,6 +321,9 @@ void RegionEditor(AppState &_state)
             {
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
+                    auto hue = trackIndex * 0.05f;
+                    auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
+
                     auto &regions = _state.regionsByTrack[trackIndex];
                     char id[32];
                     sprintf(id, "Track %d", trackIndex);
@@ -329,7 +336,7 @@ void RegionEditor(AppState &_state)
                     for (size_t i = 0; i < regions.size(); i++)
                     {
                         bool selected = (trackIndex == _state._activeTrack && int(i) == _state._activePattern);
-                        if (ImGui::TimelineEvent(regions[i].startAndEnd, regions[i].previewImage, &selected))
+                        if (ImGui::TimelineEvent(regions[i].startAndEnd, regions[i].previewImage, tintColor, &selected))
                         {
                             _state._activeTrack = trackIndex;
                             _state._activePattern = int(i);
@@ -355,7 +362,8 @@ void RegionEditor(AppState &_state)
                     }
                 }
             }
-            ImGui::EndTimelines(maxvalueSequencer / 10, elapsedTimeSequencer);
+            ImGui::EndTimelines(&elapsedTimeSequencer);
+            _state._playTime = elapsedTimeSequencer * 1000;
 
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
             {

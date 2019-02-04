@@ -24,9 +24,9 @@ namespace ImGui {
 IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
 IMGUI_API void TimelineStart(const char *str_id, bool keep_range_constant = false);
-IMGUI_API bool TimelineEvent(float *values, unsigned int image = 0, bool *selected = nullptr);
+IMGUI_API bool TimelineEvent(float *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
-IMGUI_API void EndTimelines(int num_vertical_grid_lines = 5, float current_time = 0.f, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
+IMGUI_API void EndTimelines(float *current_time, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
 } // namespace ImGui
 
 namespace ImGui {
@@ -181,7 +181,7 @@ bool TimelineEnd(float *new_values)
     return result;
 }
 
-bool TimelineEvent(float *values, unsigned int image, bool *selected)
+bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, bool *selected)
 {
     if (s_timeline_num_rows > 0 &&
         (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end)) return false; // item culling
@@ -206,6 +206,8 @@ bool TimelineEvent(float *values, unsigned int image, bool *selected)
     start.x += columnWidth * values[0] / s_max_timeline_value + (TIMELINE_RADIUS);
     start.y += 2.0f;
     ImVec2 end = start + ImVec2(columnWidth * (values[1] - values[0]) / s_max_timeline_value, s_row_height - 4.0f);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, tintColor);
 
     PushID(-1);
     SetCursorScreenPos(start + ImVec2(TIMELINE_RADIUS, 0));
@@ -237,9 +239,10 @@ bool TimelineEvent(float *values, unsigned int image, bool *selected)
     win->DrawList->AddRectFilled(start, end, color);
     if (image > 0)
     {
-        win->DrawList->AddImage(reinterpret_cast<ImTextureID>(image), start, end);
+        win->DrawList->AddImage(reinterpret_cast<ImTextureID>(image), start, end, ImVec2(0, 0), ImVec2(1, 1), tintColor);
     }
 
+    ImGui::PopStyleColor();
     for (int i = 0; i < 2; ++i)
     {
         ImVec2 pos = s_cursor_pos;
@@ -310,9 +313,12 @@ bool TimelineEvent(float *values, unsigned int image, bool *selected)
     return changed;
 }
 
-void EndTimelines(int num_vertical_grid_lines, float current_time, ImU32 timeline_running_color)
+void EndTimelines(float *current_time, ImU32 timeline_running_color)
 {
-    if (s_timeline_num_rows > 0) ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ((s_timeline_num_rows - s_timeline_display_end) * s_row_height));
+    if (s_timeline_num_rows > 0)
+    {
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ((s_timeline_num_rows - s_timeline_display_end) * s_row_height));
+    }
 
     ImGui::NextColumn();
 
@@ -320,7 +326,6 @@ void EndTimelines(int num_vertical_grid_lines, float current_time, ImU32 timelin
 
     const float columnOffset = ImGui::GetColumnOffset(1);
     const float columnWidth = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
-    const float horizontal_interval = columnWidth / num_vertical_grid_lines;
 
     ImU32 color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
     ImU32 line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Border]);
@@ -329,19 +334,21 @@ void EndTimelines(int num_vertical_grid_lines, float current_time, ImU32 timelin
     const float rounding = GImGui->Style.ScrollbarRounding;
     const float startY = ImGui::GetWindowHeight() + win->Pos.y;
 
+    float linex = columnOffset + GetScrollX() + TIMELINE_RADIUS;
     // Draw black vertical lines (inside scrolling area)
-    for (int i = 1; i <= num_vertical_grid_lines; ++i)
+    while (linex < GetWindowContentRegionWidth())
     {
         ImVec2 a = GetWindowContentRegionMin() + win->Pos;
-        a.x += i * horizontal_interval + columnOffset + GetScrollX() + TIMELINE_RADIUS;
+        a.x += linex;
         win->DrawList->AddLine(a, ImVec2(a.x, startY), line_color);
+        linex += s_horizontal_zoom;
     }
 
     // Draw moving vertical line
-    if (current_time > 0.f && current_time < s_max_timeline_value)
+    if (*current_time > 0.f && *current_time < s_max_timeline_value)
     {
         ImVec2 a = GetWindowContentRegionMin() + win->Pos;
-        a.x += columnWidth * (current_time / s_max_timeline_value) + columnOffset + GetScrollX() + TIMELINE_RADIUS;
+        a.x += columnWidth * (*current_time / s_max_timeline_value) + columnOffset + GetScrollX();
         win->DrawList->AddLine(a, ImVec2(a.x, startY), moving_line_color);
     }
 
@@ -354,34 +361,33 @@ void EndTimelines(int num_vertical_grid_lines, float current_time, ImU32 timelin
     win = GetCurrentWindow();
     ImVec2 start(ImGui::GetCursorScreenPos().x + columnOffset, ImGui::GetCursorScreenPos().y);
     ImVec2 end(start.x + columnWidth, start.y + ImGui::GetItemsLineHeightWithSpacing());
-    if (current_time <= 0)
+
+    PushID(-100);
+    SetCursorScreenPos(start + ImVec2(TIMELINE_RADIUS, 0));
+    if (InvisibleButton(s_str_id, (end - start) - ImVec2(TIMELINE_RADIUS * 2, 0)))
+    {
+        *current_time = ((ImGui::GetMousePos().x - start.x - GetScrollX() - TIMELINE_RADIUS) / columnWidth) * s_max_timeline_value;
+    }
+    PopID();
+
+    if (*current_time <= 0)
     {
         win->DrawList->AddRectFilled(start, end, color, rounding);
     }
-    else if (current_time > s_max_timeline_value)
+    else if (*current_time > s_max_timeline_value)
     {
         win->DrawList->AddRectFilled(start, end, timeline_running_color, rounding);
     }
     else
     {
-        ImVec2 median(start.x + columnWidth * (current_time / s_max_timeline_value), end.y);
+        ImVec2 median(start.x + columnWidth * (*current_time / s_max_timeline_value), end.y);
         win->DrawList->AddRectFilled(start, median, timeline_running_color, rounding, 1 | 8);
         median.y = start.y;
         win->DrawList->AddRectFilled(median, end, color, rounding, 2 | 4);
         win->DrawList->AddLine(median, ImVec2(median.x, end.y), moving_line_color);
     }
 
-    char tmp[256] = "";
-    for (int i = 0; i < num_vertical_grid_lines; ++i)
-    {
-        ImVec2 a = start;
-        a.x += i * horizontal_interval;
-        a.y = start.y;
-
-        ImFormatString(tmp, sizeof(tmp), "%.2f", i * s_max_timeline_value / num_vertical_grid_lines);
-        win->DrawList->AddText(a, text_color, tmp);
-    }
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetItemsLineHeightWithSpacing());
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY());
 }
-// End Timeline
+
 } // namespace ImGui
