@@ -241,6 +241,7 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     {
         win->DrawList->AddImage(reinterpret_cast<ImTextureID>(image), start, end, ImVec2(0, 0), ImVec2(1, 1), tintColor);
     }
+    win->DrawList->AddRect(start, end, ColorConvertFloat4ToU32(ImVec4(0.8f, 0.8f, 0.8f, 0.8f)));
 
     ImGui::PopStyleColor();
     for (int i = 0; i < 2; ++i)
@@ -329,7 +330,6 @@ void EndTimelines(float *current_time, ImU32 timeline_running_color)
 
     ImU32 color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
     ImU32 line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Border]);
-    ImU32 text_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Text]);
     ImU32 moving_line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
     const float rounding = GImGui->Style.ScrollbarRounding;
     const float startY = ImGui::GetWindowHeight() + win->Pos.y;

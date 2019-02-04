@@ -241,9 +241,9 @@ void PianoRollEditor(AppState &_state)
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
                         if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)) & selected))
                         {
-                            if (region.eventsByNote[c][i].values[0] + 0.5f > region.eventsByNote[c][i].values[1])
+                            if (region.eventsByNote[c][i].values[0] + 0.1f > region.eventsByNote[c][i].values[1])
                             {
-                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + 0.5f;
+                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + 0.1f;
                             }
                             regionIsModified = true;
                             selectedEvent = &(region.eventsByNote[c][i]);
