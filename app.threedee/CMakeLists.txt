@@ -23,6 +23,8 @@ if(GLFW3_FOUND)
         imgui/imgui_widgets.cpp
         imgui_addons/imgui_checkbutton.cpp
         imgui_addons/imgui_checkbutton.h
+        imgui_addons/imgui_common.cpp
+        imgui_addons/imgui_common.h
         imgui_addons/imgui_knob.cpp
         imgui_addons/imgui_knob.h
         imgui_addons/imgui_seq.cpp

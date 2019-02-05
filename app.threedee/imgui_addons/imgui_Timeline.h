@@ -3,15 +3,7 @@
 #include <imgui_internal.h>
 #include <iostream>
 
-ImVec2 operator+(ImVec2 const &a, ImVec2 const &b)
-{
-    return ImVec2(a.x + b.x, a.y + b.y);
-}
-
-ImVec2 operator-(ImVec2 const &a, ImVec2 const &b)
-{
-    return ImVec2(a.x - b.x, a.y - b.y);
-}
+#include "imgui_common.h"
 
 namespace ImGui {
 // Definitions (header file)

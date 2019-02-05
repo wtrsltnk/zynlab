@@ -431,7 +431,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
             ImGui::Spacing();
             ImGui::SameLine();
             int v = static_cast<int>(_state->_mixer->Pvolume);
-            if (ImGui::VSliderInt("##mastervol", ImVec2(20, faderHeight), &v, 0, 127))
+            if (ImGui::Fader("##mastervol", ImVec2(20, faderHeight), &v, 0, 127, "%d", 100.0f / 127.0f))
             {
                 _state->_mixer->setPvolume(static_cast<unsigned char>(v));
             }
@@ -895,7 +895,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
             ImGui::SameLine(0.0f, (width - (40.0f + (3 * io.ItemSpacing.x))) / 2.0f);
 
             int v = static_cast<int>(track->Pvolume);
-            if (ImGui::VSliderInt("##vol", ImVec2(20, faderHeight), &v, 0, 127))
+            if (ImGui::Fader("##vol", ImVec2(20, faderHeight), &v, 0, 127))
             {
                 track->setPvolume(static_cast<unsigned char>(v));
                 _state->_activeTrack = trackIndex;

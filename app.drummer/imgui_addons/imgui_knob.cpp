@@ -1,5 +1,8 @@
 #include "imgui_knob.h"
+
 #include <cmath>
+#include <imgui.h>
+#include <imgui_internal.h>
 #include <stdio.h>
 
 void ImGui::UvMeter(char const *label, ImVec2 const &size, int *value, int v_min, int v_max)

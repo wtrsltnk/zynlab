@@ -24,6 +24,8 @@ IMGUI_API bool TextCentered(ImVec2 const &size, char const *label);
 
 IMGUI_API void ShowTooltipOnHover(char const *tooltip);
 
+IMGUI_API bool Fader(const char* label, const ImVec2& size, int* v, const int v_min, const int v_max, const char* format = nullptr, float power = 1.0f);
+
 } // namespace ImGui
 
 #endif // IMGUI_KNOB_H

@@ -1,5 +1,9 @@
 #include "imgui_knob.h"
+
+#include "imgui_common.h"
 #include <cmath>
+#include <imgui.h>
+#include <imgui_internal.h>
 #include <stdio.h>
 
 void ImGui::UvMeter(char const *label, ImVec2 const &size, int *value, int v_min, int v_max)
@@ -164,7 +168,7 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
     draw_list->AddLine(
         ImVec2(center.x + angle_cos * (radius_outer * 0.35f), center.y + angle_sin * (radius_outer * 0.35f)),
         ImVec2(center.x + angle_cos * (radius_outer * 0.7f), center.y + angle_sin * (radius_outer * 0.7f)),
-        ImGui::GetColorU32(ImGuiCol_SliderGrabActive), 2.0f);
+        ImGui::GetColorU32(ImGuiCol_Text), 2.0f);
     draw_list->PathArcTo(center, radius_outer, ANGLE_MIN, angle + 0.02f, 16);
     draw_list->PathStroke(ImGui::GetColorU32(ImGuiCol_SliderGrabActive), false, 3.0f);
 
@@ -280,4 +284,70 @@ void ImGui::ShowTooltipOnHover(char const *tooltip)
         ImGui::Text("%s", tooltip);
         ImGui::EndTooltip();
     }
+}
+
+bool ImGui::Fader(const char *label, const ImVec2 &size, int *v, const int v_min, const int v_max, const char *format, float power)
+{
+    ImGuiDataType data_type = ImGuiDataType_S32;
+    ImGuiWindow *window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    ImGuiContext &g = *GImGui;
+    const ImGuiStyle &style = g.Style;
+    const ImGuiID id = window->GetID(label);
+
+    const ImVec2 label_size = CalcTextSize(label, nullptr, true);
+    const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + size);
+    const ImRect bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+
+    ItemSize(bb, style.FramePadding.y);
+    if (!ItemAdd(frame_bb, id))
+        return false;
+
+    IM_ASSERT(data_type >= 0 && data_type < ImGuiDataType_COUNT);
+    if (format == nullptr)
+        format = "%d";
+
+    const bool hovered = ItemHoverable(frame_bb, id);
+    if ((hovered && g.IO.MouseClicked[0]) || g.NavActivateId == id || g.NavInputId == id)
+    {
+        SetActiveID(id, window);
+        SetFocusID(id, window);
+        FocusWindow(window);
+        g.ActiveIdAllowNavDirFlags = (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
+    }
+
+    // Draw frame
+    const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+    RenderNavHighlight(frame_bb, id);
+    RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
+
+    // Slider behavior
+    ImRect grab_bb;
+    const bool value_changed = SliderBehavior(frame_bb, id, data_type, v, &v_min, &v_max, format, power, ImGuiSliderFlags_Vertical, &grab_bb);
+    if (value_changed)
+        MarkItemEdited(id);
+
+    ImRect gutter;
+    gutter.Min = grab_bb.Min;
+    gutter.Max = ImVec2(frame_bb.Max.x - 2.0f, frame_bb.Max.y - 2.0f);
+    auto w = ((gutter.Max.x - gutter.Min.x) - 4.0f) / 2.0f;
+    gutter.Min.x += w;
+    gutter.Max.x -= w;
+    window->DrawList->AddRectFilled(gutter.Min, gutter.Max, GetColorU32(ImGuiCol_ButtonActive), style.GrabRounding);
+
+    // Render grab
+    window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(ImGuiCol_Text), style.GrabRounding);
+
+    // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
+    // For the vertical slider we allow centered text to overlap the frame padding
+    char value_buf[64];
+    sprintf(value_buf, format, int(*v * power));
+    const char *value_buf_end = value_buf + strlen(value_buf);
+    RenderTextClipped(ImVec2(frame_bb.Min.x, frame_bb.Min.y + style.FramePadding.y), frame_bb.Max, value_buf, value_buf_end, nullptr, ImVec2(0.5f, 0.0f));
+    if (label_size.x > 0.0f)
+        RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
+
+    return value_changed;
 }
