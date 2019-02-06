@@ -254,7 +254,7 @@ bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_text
         col_bg = ImGui::GetColorU32(ImGuiCol_ButtonActive);
     }
 
-    draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), GetColorU32(col_bg));
+//    draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), GetColorU32(col_bg));
     draw_list->AddImage(user_texture_id, p, ImVec2(p.x + width, p.y + height), ImVec2(0, 0), ImVec2(1, 1), GetColorU32(col_tint));
 
     return valueChange;

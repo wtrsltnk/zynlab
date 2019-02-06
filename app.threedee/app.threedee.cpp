@@ -92,6 +92,11 @@ bool AppThreeDee::Setup()
     ImGui::GetStyle().TabRounding = 2.0f;
     ImGui::GetStyle().FrameRounding = 2.0f;
 
+    ImGui::GetStyle().Colors[ImGuiCol_Text] = ImVec4(0.71f, 0.7f, 0.7f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_TextDisabled] = ImVec4(0.51f, 0.5f, 0.5f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_Tab] = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_TabActive] = ImVec4(0.22f, 0.22f, 0.22f, 1.0f);
+    ImGui::GetStyle().Colors[ImGuiCol_TabHovered] = ImVec4(0.45f, 0.49f, 0.48f, 1.0f);
     ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
     ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
     ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
@@ -258,6 +263,11 @@ void PianoRollEditor(AppState &_state)
                              std::fmax(new_values[0], new_values[1])},
                             static_cast<unsigned char>(c),
                             100};
+
+                        if (e.values[0] + 0.1f >= e.values[1])
+                        {
+                            e.values[1] = e.values[0] + 0.1f;
+                        }
 
                         region.eventsByNote[c].push_back(e);
                         selectedEvent = &(region.eventsByNote[c].back());

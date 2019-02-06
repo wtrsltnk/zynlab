@@ -4,7 +4,9 @@ project(zynlab)
 
 option(BUILD_VST "enable building all projects using VST" OFF)
 option(BUILD_TESTS "enable building all test projects" OFF)
-option(BUILD_DRUMMER "enable building drummer project" OFF)
+option(BUILD_APP_DRUMMER "enable building app.drummer project" OFF)
+option(BUILD_APP_IMGUI "enable building app.imgui project" OFF)
+option(BUILD_APP_TINY "enable building app.tiny project" OFF)
 
 # Add version information
 set(VERSION "2.4.4")
@@ -31,11 +33,17 @@ add_subdirectory("zyn.seq")
 add_subdirectory("zyn.synth")
 add_subdirectory("zyn.serialization")
 add_subdirectory("app")
-add_subdirectory("app.imgui")
 add_subdirectory("app.threedee")
-add_subdirectory("app.tiny")
 
-if(BUILD_DRUMMER)
+if(BUILD_APP_TINY)
+    add_subdirectory("app.tiny")
+endif()
+
+if (BUILD_APP_IMGUI)
+    add_subdirectory("app.imgui")
+endif()
+
+if(BUILD_APP_DRUMMER)
     add_subdirectory("app.drummer")
 endif()
 

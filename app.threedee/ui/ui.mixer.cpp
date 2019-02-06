@@ -780,7 +780,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     _state->_showTrackEffectsEditor = true;
                     ImGui::SetWindowFocus(TrackFxEditorID);
                 }
-                ImGui::OpenPopupOnItemClick("TrackEffectSelection", 0);
+                ImGui::OpenPopupOnItemClick("TrackEffectSelection", track->partefx[fx]->geteffect() == 0 ? 0 : 1);
                 if (ImGui::BeginPopupContextItem("TrackEffectSelection"))
                 {
                     for (int i = 0; i < EffectNameCount; i++)
