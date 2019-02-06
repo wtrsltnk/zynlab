@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <iostream>
+#include <memory>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -69,6 +70,7 @@ void TrackRegion::UpdatePreviewImage()
     }
 
     minNote -= 1;
+    maxNote += 1;
 
     if (maxNote < minNote)
     {
@@ -82,19 +84,28 @@ void TrackRegion::UpdatePreviewImage()
     }
 
     auto width = startAndEnd[1] - startAndEnd[0];
-    auto height = maxNote - minNote + 1;
+    auto height = maxNote - minNote;
 
     auto imageHeight = 8;
     while (imageHeight < height)
+    {
         imageHeight += 8;
+    }
 
     size_t size = size_t(128 * imageHeight);
-    auto buffer = new colour[size];
-    memset(buffer, 255, size * sizeof(colour));
+    auto buffer = std::unique_ptr<colour>(new colour[size]);
+    memset(buffer.get(), 255, size * sizeof(colour));
 
     for (int i = 0; i <= height; i++)
     {
-        if (eventsByNote[i + minNote].empty()) continue;
+        if ((i + minNote) >= NUM_MIDI_NOTES)
+        {
+            continue;
+        }
+        if (eventsByNote[i + minNote].empty())
+        {
+            continue;
+        }
 
         int y = std::abs((imageHeight - 1) - int(float(i) * (float(imageHeight - 1) / float(height))));
         for (auto &n : eventsByNote[i + minNote])
@@ -103,7 +114,7 @@ void TrackRegion::UpdatePreviewImage()
             int xTo = int(float(n.values[1] / width) * 128.0f);
             for (int j = xFrom; j < xTo; j++)
             {
-                setPixel(buffer, j, y, 128, imageHeight);
+                setPixel(buffer.get(), j, y, 128, imageHeight);
             }
         }
     }
@@ -113,8 +124,7 @@ void TrackRegion::UpdatePreviewImage()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer.get());
 
-    stbi_write_png("c:\\temp\\previewImage.png", 128, imageHeight, 3, buffer, 0);
-    delete[] buffer;
+    stbi_write_png("c:\\temp\\previewImage.png", 128, imageHeight, 3, buffer.get(), 0);
 }
