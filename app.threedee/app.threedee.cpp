@@ -246,9 +246,9 @@ void PianoRollEditor(AppState &_state)
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
                         if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)) & selected))
                         {
-                            if (region.eventsByNote[c][i].values[0] + 0.1f > region.eventsByNote[c][i].values[1])
+                            if (region.eventsByNote[c][i].values[0] + 0.2f > region.eventsByNote[c][i].values[1])
                             {
-                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + 0.1f;
+                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + 0.2f;
                             }
                             regionIsModified = true;
                             selectedEvent = &(region.eventsByNote[c][i]);
@@ -264,9 +264,9 @@ void PianoRollEditor(AppState &_state)
                             static_cast<unsigned char>(c),
                             100};
 
-                        if (e.values[0] + 0.1f >= e.values[1])
+                        if (e.values[0] + 0.2f >= e.values[1])
                         {
-                            e.values[1] = e.values[0] + 0.1f;
+                            e.values[1] = e.values[0] + 0.2f;
                         }
 
                         region.eventsByNote[c].push_back(e);
@@ -327,7 +327,7 @@ void RegionEditor(AppState &_state)
 
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
-            if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS))
+            if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS, 1.0f))
             {
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
@@ -350,9 +350,9 @@ void RegionEditor(AppState &_state)
                         {
                             _state._activeTrack = trackIndex;
                             _state._activePattern = int(i);
-                            if (std::fabs(regions[i].startAndEnd[0] - regions[i].startAndEnd[1]) < 0.5f)
+                            if (std::fabs(regions[i].startAndEnd[0] - regions[i].startAndEnd[1]) < 1.0f)
                             {
-                                regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 0.5f;
+                                regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 1.0f;
                             }
                             regions[i].UpdatePreviewImage();
                         }
@@ -364,11 +364,12 @@ void RegionEditor(AppState &_state)
                         _state._activeTrack = trackIndex;
                         _state._activePattern = int(_state.regionsByTrack[trackIndex].size());
 
-                        if (std::fabs(newRegion.startAndEnd[0] - newRegion.startAndEnd[1]) > 0.5f)
+                        if (newRegion.startAndEnd[1] - newRegion.startAndEnd[0] < 1.0f)
                         {
-                            newRegion.UpdatePreviewImage();
-                            _state.regionsByTrack[trackIndex].push_back(newRegion);
+                            newRegion.startAndEnd[1] = newRegion.startAndEnd[0] + 1.0f;
                         }
+                        newRegion.UpdatePreviewImage();
+                        _state.regionsByTrack[trackIndex].push_back(newRegion);
                     }
                 }
             }
