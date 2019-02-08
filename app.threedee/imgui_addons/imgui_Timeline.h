@@ -15,7 +15,7 @@ namespace ImGui {
 */
 IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, float snapping = 0.1f); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
-IMGUI_API void TimelineStart(const char *str_id, bool keep_range_constant = false);
+IMGUI_API void TimelineStart(const char *str_id);
 IMGUI_API bool TimelineEvent(float *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
 IMGUI_API void EndTimelines(float *current_time, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
@@ -29,7 +29,6 @@ static int s_timeline_display_start = 0;
 static int s_timeline_display_end = 0;
 static int s_timeline_display_index = 0;
 static const char *s_str_id = nullptr;
-static bool s_keep_range_constant = false;
 static ImVec2 s_cursor_pos;
 static const float TIMELINE_RADIUS = 6;
 static int s_event_counter = 0;
@@ -39,6 +38,7 @@ static int s_max_value = 50;
 static float s_horizontal_zoom = 50.0f;
 static int s_row_height = 30;
 static float s_snapping = 0.1f;
+static float s_timeline_length = 50.f;
 
 static ImVec4 color = ImVec4(0.26f, 0.59f, 0.98f, 0.10f);
 
@@ -93,12 +93,16 @@ bool BeginTimelines(const char *str_id, float max_value, int row_height, float h
     s_row_height = row_height;
     s_snapping = snapping;
 
+    s_timeline_length = max_value * s_horizontal_zoom;
+
+    int const label_column_width = 60;
+
     auto contentHeight = GetWindowContentRegionMax().y - (ImGui::GetTextLineHeightWithSpacing() * 2);
-    ImGui::SetNextWindowContentSize(ImVec2(50 + max_value * s_horizontal_zoom, s_row_height * opt_exact_num_rows));
+    ImGui::SetNextWindowContentSize(ImVec2(label_column_width + ImGui::GetStyle().ItemInnerSpacing.x + s_timeline_length, s_row_height * opt_exact_num_rows));
     const bool rv = ImGui::BeginChild(str_id, ImVec2(0, contentHeight), false, ImGuiWindowFlags_HorizontalScrollbar);
     ImGui::PushStyleColor(ImGuiCol_Column, GImGui->Style.Colors[ImGuiCol_Border]);
     ImGui::Columns(2, str_id);
-    ImGui::SetColumnWidth(0, 60);
+    ImGui::SetColumnWidth(0, label_column_width);
     const float contentRegionWidth = ImGui::GetWindowContentRegionWidth();
     if (ImGui::GetColumnOffset(1) >= contentRegionWidth * 0.48f)
     {
@@ -131,7 +135,7 @@ void EmptyTimeline(const char *str_id)
     ImGui::NextColumn();
 }
 
-void TimelineStart(const char *str_id, bool keep_range_constant)
+void TimelineStart(const char *str_id)
 {
     ++s_timeline_display_index;
 
@@ -139,7 +143,6 @@ void TimelineStart(const char *str_id, bool keep_range_constant)
         (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end)) return; // item culling
 
     s_str_id = str_id;
-    s_keep_range_constant = keep_range_constant;
     ImGuiWindow *win = GetCurrentWindow();
     const float columnOffset = ImGui::GetColumnOffset(1);
     s_cursor_pos = ImVec2(GetWindowContentRegionMin().x + win->Pos.x + columnOffset + GetScrollX(), win->DC.CursorPos.y);
@@ -150,11 +153,8 @@ void TimelineStart(const char *str_id, bool keep_range_constant)
     if (s_timeline_display_index % 2)
     {
         const ImU32 active_color = ColorConvertFloat4ToU32(color);
-        auto num_vertical_grid_lines = std::max(1, s_max_value / 10);
-        const float columnWidth = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
-        const float horizontal_interval = columnWidth / num_vertical_grid_lines;
         ImVec2 end = s_cursor_pos;
-        end.x += num_vertical_grid_lines * horizontal_interval;
+        end.x += s_timeline_length;
         end.y += s_row_height;
 
         win->DrawList->AddRectFilled(s_cursor_pos + ImVec2(TIMELINE_RADIUS, 0), end, active_color);
@@ -199,9 +199,9 @@ bool TimelineEnd(float *new_values)
     if (IsItemHovered() && IsItemActive() && IsMouseDragging(0))
     {
         ImVec2 start = s_cursor_pos;
-        start.x += columnWidth * s_start_new_value / s_max_timeline_value + (2 * TIMELINE_RADIUS);
+        start.x += snap(columnWidth * s_start_new_value / s_max_timeline_value + TIMELINE_RADIUS, s_snapping);
         start.y += 2.0f;
-        ImVec2 end = start + ImVec2(columnWidth * (end_new_value - s_start_new_value) / s_max_timeline_value - (2 * TIMELINE_RADIUS),
+        ImVec2 end = start + ImVec2(snap(columnWidth * (end_new_value - s_start_new_value) / s_max_timeline_value, s_snapping),
                                     s_row_height - 4.0f);
 
         win->DrawList->AddRectFilled(start, end, active_color);
@@ -209,7 +209,7 @@ bool TimelineEnd(float *new_values)
     if (IsItemHovered())
     {
         ImGui::BeginTooltip();
-        ImGui::Text("%.3f", s_start_new_value);
+        ImGui::Text("%.3f", double(s_start_new_value));
         ImGui::EndTooltip();
     }
 
@@ -238,11 +238,10 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     const float columnWidth = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
 
     PushID(s_event_counter++);
-    bool mustMoveBothEnds = false;
     const bool isMouseDraggingZero = IsMouseDragging(0);
 
     ImVec2 start = s_cursor_pos;
-    start.x += columnWidth * values[0] / s_max_timeline_value + (TIMELINE_RADIUS);
+    start.x += columnWidth * values[0] / s_max_timeline_value + TIMELINE_RADIUS;
     start.y += 2.0f;
     ImVec2 end = start + ImVec2(columnWidth * (values[1] - values[0]) / s_max_timeline_value, s_row_height - 4.0f);
 
@@ -251,7 +250,7 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     PushID(-1);
     SetCursorScreenPos(start + ImVec2(TIMELINE_RADIUS, 0));
     InvisibleButton(s_str_id, (end - start) - ImVec2(TIMELINE_RADIUS * 2, 0));
-    if ((IsItemActive() && isMouseDraggingZero) || mustMoveBothEnds)
+    if (IsItemActive() && isMouseDraggingZero)
     {
         const float deltaX = GetIO().MouseDelta.x / columnWidth * s_max_timeline_value;
         newValues[0] += deltaX;
@@ -294,24 +293,16 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
         InvisibleButton(s_str_id, ImVec2(TIMELINE_RADIUS * 2, s_row_height - 4.0f));
         if (IsItemActive() || IsItemHovered())
         {
-            ImGui::SetTooltip("%f", values[i]);
-            if (!s_keep_range_constant)
-            {
-                // @meshula:The item hovered line needs to be compensated for vertical scrolling. Thx!
-                ImVec2 a(pos.x, GetWindowContentRegionMin().y + win->Pos.y + win->Scroll.y);
-                ImVec2 b(pos.x, GetWindowContentRegionMax().y + win->Pos.y + win->Scroll.y);
-                win->DrawList->AddLine(a, b, line_color);
-            }
+            ImGui::SetTooltip("%f", double(values[i]));
+            // @meshula:The item hovered line needs to be compensated for vertical scrolling. Thx!
+            ImVec2 a(pos.x, GetWindowContentRegionMin().y + win->Pos.y + win->Scroll.y);
+            ImVec2 b(pos.x, GetWindowContentRegionMax().y + win->Pos.y + win->Scroll.y);
+            win->DrawList->AddLine(a, b, line_color);
             hovered = true;
         }
         if (IsItemActive() && isMouseDraggingZero)
         {
-            if (!s_keep_range_constant)
-            {
-                newValues[i] = snap((GetIO().MousePos.x - s_cursor_pos.x) / columnWidth * s_max_timeline_value, s_snapping);
-            }
-            else
-                mustMoveBothEnds = true;
+            newValues[i] = snap((GetIO().MousePos.x - s_cursor_pos.x) / columnWidth * s_max_timeline_value, s_snapping);
             changed = hovered = true;
         }
         if (IsItemActive()) changed = true;
@@ -371,24 +362,23 @@ void EndTimelines(float *current_time, ImU32 timeline_running_color)
 
     ImU32 color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
     ImU32 line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Border]);
+    ImU32 accent_line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonActive]);
     ImU32 moving_line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
     const float rounding = GImGui->Style.ScrollbarRounding;
     const float startY = ImGui::GetWindowHeight() + win->Pos.y;
 
-    float linex = columnOffset + GetScrollX() + TIMELINE_RADIUS;
+    ImVec2 a = GetWindowContentRegionMin() + win->Pos + ImVec2(columnOffset + GetScrollX() + TIMELINE_RADIUS, 0);
     // Draw black vertical lines (inside scrolling area)
-    while (linex < GetWindowContentRegionWidth())
+    for (int i = 0; i < int(s_timeline_length); i++)
     {
-        ImVec2 a = GetWindowContentRegionMin() + win->Pos;
-        a.x += linex;
-        win->DrawList->AddLine(a, ImVec2(a.x, startY), line_color);
-        linex += s_horizontal_zoom;
+        win->DrawList->AddLine(a, ImVec2(a.x, startY), i % 4 ? line_color : accent_line_color);
+        a.x += (columnWidth / s_max_timeline_value);
     }
 
     // Draw moving vertical line
     if (*current_time > 0.f && *current_time < s_max_timeline_value)
     {
-        ImVec2 a = GetWindowContentRegionMin() + win->Pos;
+        a = GetWindowContentRegionMin() + win->Pos;
         a.x += columnWidth * (*current_time / s_max_timeline_value) + columnOffset + GetScrollX();
         win->DrawList->AddLine(a, ImVec2(a.x, startY), moving_line_color);
     }

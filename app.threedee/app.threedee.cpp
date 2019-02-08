@@ -196,6 +196,19 @@ void AppThreeDee::Tick()
     }
 }
 
+static char const *snapping_modes[] = {
+    "Bar",
+    "Beat",
+    "Division",
+};
+static int snapping_mode_count = 3;
+
+static float snapping_mode_values[] = {
+    4.0f,
+    1.0f,
+    1.0f / 4.0f,
+};
+
 void PianoRollEditor(AppState &_state)
 {
     if (ImGui::Begin("Pianoroll editor"))
@@ -217,12 +230,32 @@ void PianoRollEditor(AppState &_state)
         auto &region = trackRegions[size_t(_state._activePattern)];
         unsigned int maxvalue = static_cast<unsigned int>(region.startAndEnd[1] - region.startAndEnd[0]);
 
-        static int horizontalZoom = 50;
+        static int horizontalZoom = 150;
 
         ImGui::Text("Zoom");
         ImGui::SameLine();
         ImGui::PushItemWidth(120);
-        ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 10, 100, "horizontal %d");
+        ImGui::SliderInt("##horizontalZoom", &horizontalZoom, 100, 300, "horizontal %d");
+
+        ImGui::SameLine();
+
+        static int current_snapping_mode = 2;
+
+        ImGui::PushItemWidth(100);
+        if (ImGui::BeginCombo("Snapping mode", snapping_modes[current_snapping_mode]))
+        {
+            for (int n = 0; n < snapping_mode_count; n++)
+            {
+                bool is_selected = (current_snapping_mode == n);
+                if (ImGui::Selectable(snapping_modes[n], is_selected))
+                {
+                    current_snapping_mode = n;
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+        ImGui::ShowTooltipOnHover("Set the Snap value for the Piano Roll Editor");
 
         float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
 
@@ -230,13 +263,13 @@ void PianoRollEditor(AppState &_state)
         {
             bool regionIsModified = false;
             static struct timelineEvent *selectedEvent = nullptr;
-            if (ImGui::BeginTimelines("MyTimeline", maxvalue, 20, horizontalZoom, 88))
+            if (ImGui::BeginTimelines("MyTimeline", maxvalue, 20, horizontalZoom, 88, snapping_mode_values[current_snapping_mode]))
             {
                 for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
                 {
                     char id[32];
                     sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
-                    ImGui::TimelineStart(id, false);
+                    ImGui::TimelineStart(id);
                     if (ImGui::IsItemClicked())
                     {
                         _state._stepper->HitNote(_state._activeTrack, c, 100, 200);
@@ -337,7 +370,7 @@ void RegionEditor(AppState &_state)
                     auto &regions = _state.regionsByTrack[trackIndex];
                     char id[32];
                     sprintf(id, "Track %d", trackIndex);
-                    ImGui::TimelineStart(id, false);
+                    ImGui::TimelineStart(id);
                     if (ImGui::IsItemClicked())
                     {
                         _state._activeTrack = trackIndex;
