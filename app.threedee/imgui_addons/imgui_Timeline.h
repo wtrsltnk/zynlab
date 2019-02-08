@@ -365,7 +365,7 @@ void EndTimelines(float *current_time, ImU32 timeline_running_color)
     ImU32 accent_line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonActive]);
     ImU32 moving_line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
     const float rounding = GImGui->Style.ScrollbarRounding;
-    const float startY = ImGui::GetWindowHeight() + win->Pos.y;
+    const float startY = win->Pos.y + s_row_height * s_timeline_num_rows;
 
     ImVec2 a = GetWindowContentRegionMin() + win->Pos + ImVec2(columnOffset + GetScrollX() + TIMELINE_RADIUS, 0);
     // Draw black vertical lines (inside scrolling area)
