@@ -18,9 +18,9 @@
 #include "ui/ui.subnote.h"
 #include <chrono>
 #include <zyn.common/Util.h>
-#include <zyn.serialization/BankManager.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
+#include <zyn.serialization/BankManager.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
 
@@ -64,8 +64,8 @@ public:
 private:
     void LoadToolbarIcons();
 
+    void TickRegion(TrackRegion &region, unsigned char trackIndex, float prevPlayTime, float currentPlayTime, int repeat = 0);
     void ImGuiPlayback();
-
 };
 
 #endif // _APP_THREE_DEE_H_

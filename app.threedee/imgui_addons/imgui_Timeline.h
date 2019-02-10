@@ -344,40 +344,42 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     win->DrawList->AddRect(start, end, ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.0f, 0.8f)), 0, 0, 2.0f);
 
     ImGui::PopStyleColor();
-    for (int i = 0; i < 2; ++i)
+    if (selected != nullptr && *selected)
     {
-        ImVec2 pos = s_cursor_pos;
-        pos.x += columnWidth * values[i] / s_max_timeline_value + TIMELINE_RADIUS;
-        pos.y += 2.0f;
+        for (int i = 0; i < 2; ++i)
+        {
+            ImVec2 pos = s_cursor_pos;
+            pos.x += columnWidth * values[i] / s_max_timeline_value + TIMELINE_RADIUS;
+            pos.y += 2.0f;
 
-        SetCursorScreenPos(pos - ImVec2(TIMELINE_RADIUS, 0));
-        PushID(i);
-        InvisibleButton(s_str_id, ImVec2(TIMELINE_RADIUS * 2, s_row_height - 4.0f));
-        if (IsItemActive() || IsItemHovered())
-        {
-            ImGui::SetTooltip("%.3f", double(values[i]));
-            // @meshula:The item hovered line needs to be compensated for vertical scrolling. Thx!
-            ImVec2 a(pos.x, GetWindowContentRegionMin().y + win->Pos.y + win->Scroll.y);
-            ImVec2 b(pos.x, GetWindowContentRegionMax().y + win->Pos.y + win->Scroll.y);
-            win->DrawList->AddLine(a, b, line_color);
-            hovered = true;
-        }
-        if (IsItemActive() && isMouseDraggingZero)
-        {
-            newValues[i] = snap((GetIO().MousePos.x - s_cursor_pos.x) / columnWidth * s_max_timeline_value, s_snapping);
-            changed = hovered = true;
-        }
-        if (IsItemActive()) changed = true;
-        PopID();
-        if (hovered)
-        {
-            color = ColorConvertFloat4ToU32(ImVec4(1, 1, 1, 0.5f));
-            start = pos - ImVec2(TIMELINE_RADIUS, 0);
-            end = start + ImVec2(2 * TIMELINE_RADIUS, s_row_height - 4.0f);
-            win->DrawList->AddRectFilled(start, end, color);
+            SetCursorScreenPos(pos - ImVec2(TIMELINE_RADIUS, 0));
+            PushID(i);
+            InvisibleButton(s_str_id, ImVec2(TIMELINE_RADIUS * 2, s_row_height - 4.0f));
+            if (IsItemActive() || IsItemHovered())
+            {
+                ImGui::SetTooltip("%.3f", double(values[i]));
+                // @meshula:The item hovered line needs to be compensated for vertical scrolling. Thx!
+                ImVec2 a(pos.x, GetWindowContentRegionMin().y + win->Pos.y + win->Scroll.y);
+                ImVec2 b(pos.x, GetWindowContentRegionMax().y + win->Pos.y + win->Scroll.y);
+                win->DrawList->AddLine(a, b, line_color);
+                hovered = true;
+            }
+            if (IsItemActive() && isMouseDraggingZero)
+            {
+                newValues[i] = snap((GetIO().MousePos.x - s_cursor_pos.x) / columnWidth * s_max_timeline_value, s_snapping);
+                changed = hovered = true;
+            }
+            if (IsItemActive()) changed = true;
+            PopID();
+            if (hovered)
+            {
+                color = ColorConvertFloat4ToU32(ImVec4(1, 1, 1, 0.5f));
+                start = pos - ImVec2(TIMELINE_RADIUS, 0);
+                end = start + ImVec2(2 * TIMELINE_RADIUS, s_row_height - 4.0f);
+                win->DrawList->AddRectFilled(start, end, color);
+            }
         }
     }
-
     values[0] = newValues[0];
     values[1] = newValues[1];
 

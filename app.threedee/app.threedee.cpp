@@ -140,6 +140,35 @@ bool AppThreeDee::Setup()
     return true;
 }
 
+void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, float prevPlayTime, float currentPlayTime, int repeat)
+{
+    if (region.startAndEnd[0] < prevPlayTime && region.startAndEnd[1] < prevPlayTime)
+    {
+        return;
+    }
+    if (region.startAndEnd[0] > currentPlayTime && region.startAndEnd[1] > currentPlayTime)
+    {
+        return;
+    }
+
+    for (unsigned char noteIndex = 0; noteIndex < NUM_MIDI_NOTES; noteIndex++)
+    {
+        for (auto &event : region.eventsByNote[noteIndex])
+        {
+            auto start = (region.startAndEnd[0] + event.values[0]);
+            auto end = (region.startAndEnd[0] + event.values[1]);
+            if (start >= prevPlayTime && start < currentPlayTime)
+            {
+                _state._mixer->NoteOn(trackIndex, noteIndex, 100);
+            }
+            if (end >= prevPlayTime && end < currentPlayTime)
+            {
+                _state._mixer->NoteOff(trackIndex, noteIndex);
+            }
+        }
+    }
+}
+
 void AppThreeDee::Tick()
 {
     _stepper.Tick();
@@ -166,31 +195,7 @@ void AppThreeDee::Tick()
             }
             for (auto &region : _state.regionsByTrack[trackIndex])
             {
-                if (region.startAndEnd[0] < prevPlayTime && region.startAndEnd[1] < prevPlayTime)
-                {
-                    continue;
-                }
-                if (region.startAndEnd[0] > currentPlayTime && region.startAndEnd[1] > currentPlayTime)
-                {
-                    continue;
-                }
-
-                for (unsigned char noteIndex = 0; noteIndex < NUM_MIDI_NOTES; noteIndex++)
-                {
-                    for (auto &event : region.eventsByNote[noteIndex])
-                    {
-                        auto start = (region.startAndEnd[0] + event.values[0]);
-                        auto end = (region.startAndEnd[0] + event.values[1]);
-                        if (start >= prevPlayTime && start < currentPlayTime)
-                        {
-                            _state._mixer->NoteOn(trackIndex, noteIndex, 100);
-                        }
-                        if (end >= prevPlayTime && end < currentPlayTime)
-                        {
-                            _state._mixer->NoteOff(trackIndex, noteIndex);
-                        }
-                    }
-                }
+                TickRegion(region, trackIndex, prevPlayTime, currentPlayTime);
             }
         }
     }
