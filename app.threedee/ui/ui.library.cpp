@@ -29,8 +29,8 @@ void zyn::ui::Library::Render()
         auto &style = ImGui::GetStyle();
 
         ImGui::Columns(2);
-        ImGui::SetColumnWidth(0, 200 + style.ItemSpacing.x);
-        ImGui::SetColumnWidth(1, 200 + style.ItemSpacing.x);
+        ImGui::SetColumnWidth(0, 150 + style.ItemSpacing.x);
+        ImGui::SetColumnWidth(1, 150 + style.ItemSpacing.x);
 
         ImGui::Text("Banks");
 

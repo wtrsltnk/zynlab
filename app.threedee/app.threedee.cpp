@@ -261,6 +261,9 @@ void PianoRollEditor(AppState &_state)
 
         if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
         {
+            auto hue = _state._activeTrack * 0.05f;
+            auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
+
             bool regionIsModified = false;
             static struct timelineEvent *selectedEvent = nullptr;
             if (ImGui::BeginTimelines("MyTimeline", maxvalue, 20, horizontalZoom, 88, snapping_mode_values[current_snapping_mode]))
@@ -274,10 +277,11 @@ void PianoRollEditor(AppState &_state)
                     {
                         _state._stepper->HitNote(_state._activeTrack, c, 100, 200);
                     }
+
                     for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
                     {
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
-                        if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)) & selected))
+                        if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, tintColor, &selected))
                         {
                             if (region.eventsByNote[c][i].values[0] + 0.2f > region.eventsByNote[c][i].values[1])
                             {
