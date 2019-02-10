@@ -24,7 +24,7 @@ AppState::AppState(class Mixer *mixer, class Stepper *stepper, class IBankManage
 AppState::~AppState() = default;
 
 TrackRegion::TrackRegion()
-    : previewImage(0)
+    : previewImage(0), repeat(0)
 {}
 
 TrackRegion::~TrackRegion()

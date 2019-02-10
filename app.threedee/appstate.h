@@ -48,6 +48,7 @@ public:
     unsigned int previewImage;
     float startAndEnd[2];
     std::vector<struct timelineEvent> eventsByNote[NUM_MIDI_NOTES];
+    int repeat;
 };
 
 class AppState

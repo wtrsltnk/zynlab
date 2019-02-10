@@ -313,11 +313,6 @@ void PianoRollEditor(AppState &_state)
             }
             ImGui::EndTimelines(&elapsedTime);
 
-            if (regionIsModified)
-            {
-                region.UpdatePreviewImage();
-            }
-
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)) && selectedEvent != nullptr)
             {
                 if (_state._activeTrack >= 0 && _state._activeTrack < NUM_MIXER_TRACKS)
@@ -334,9 +329,15 @@ void PianoRollEditor(AppState &_state)
                         if (itr != events.end())
                         {
                             events.erase(itr);
+                            regionIsModified = true;
                         }
                     }
                 }
+            }
+
+            if (regionIsModified)
+            {
+                region.UpdatePreviewImage();
             }
         }
         ImGui::EndChild();
@@ -392,6 +393,12 @@ void RegionEditor(AppState &_state)
                                 regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 1.0f;
                             }
                             regions[i].UpdatePreviewImage();
+                        }
+                        auto x = regions[i].startAndEnd[1] - regions[i].startAndEnd[0];
+                        for (int j = 1; j <= regions[i].repeat; j++)
+                        {
+                            float repeat_values[2]{regions[i].startAndEnd[0] + (x * j), regions[i].startAndEnd[1] + (x * j)};
+                            ImGui::TimelineReadOnlyEvent(repeat_values, regions[i].previewImage, tintColor);
                         }
                     }
 

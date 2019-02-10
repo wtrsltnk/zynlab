@@ -199,6 +199,14 @@ void zyn::ui::Mixer::ImGuiInspector()
 
         if (ImGui::CollapsingHeader("Region"))
         {
+            if (_state->_activeTrack >= 0 && _state->_activeTrack < NUM_MIXER_TRACKS)
+            {
+                auto &regions = _state->regionsByTrack[_state->_activeTrack];
+                if (_state->_activePattern >= 0 && _state->_activePattern < regions.size())
+                {
+                    ImGui::SliderInt("repeat", &regions[_state->_activePattern].repeat, 0, 16);
+                }
+            }
             ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eget nunc eu lectus auctor fermentum in in diam. Donec luctus laoreet tortor, ut placerat eros bibendum sed. Mauris rhoncus ipsum sit amet molestie feugiat. Mauris augue ante, tempus non viverra eu, ornare quis sapien. Fusce faucibus ornare libero vitae tincidunt. Nunc eget tellus mi. Phasellus nisi dui, rhoncus tincidunt placerat vitae, volutpat ut mi. Nullam vestibulum metus est, id vestibulum sem malesuada eu. ");
         }
 

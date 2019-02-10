@@ -18,6 +18,7 @@ if(GLFW3_FOUND)
         imgui/examples/imgui_impl_opengl3.cpp
         imgui/imconfig.h
         imgui/imgui.cpp
+        imgui/imgui.h
         imgui/imgui_demo.cpp
         imgui/imgui_draw.cpp
         imgui/imgui_widgets.cpp

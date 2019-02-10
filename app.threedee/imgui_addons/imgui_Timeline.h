@@ -16,6 +16,7 @@ namespace ImGui {
 IMGUI_API bool BeginTimelines(const char *str_id, float max_value = 0.f, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, float snapping = 0.1f); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
 IMGUI_API void TimelineStart(const char *str_id);
+IMGUI_API void TimelineReadOnlyEvent(float *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200));
 IMGUI_API bool TimelineEvent(float *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(float *new_values = nullptr);
 IMGUI_API void EndTimelines(float *current_time, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
@@ -218,10 +219,49 @@ bool TimelineEnd(float *new_values)
     return result;
 }
 
+void TimelineReadOnlyEvent(float *values, unsigned int image, ImU32 const tintColor)
+{
+    if (s_timeline_num_rows > 0 && (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end))
+    {
+        return; // item culling
+    }
+
+    ImGuiWindow *win = GetCurrentWindow();
+    const float columnWidth = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
+
+    PushID(s_event_counter++);
+
+    ImVec2 start = s_cursor_pos;
+    start.x += columnWidth * values[0] / s_max_timeline_value + TIMELINE_RADIUS;
+    start.y += 2.0f;
+    ImVec2 end = start + ImVec2(columnWidth * (values[1] - values[0]) / s_max_timeline_value, s_row_height - 4.0f);
+
+    ImU32 imageColor = tintColor;
+
+    auto rgba = ImGui::ColorConvertU32ToFloat4(tintColor);
+    float hsv[3];
+    ImGui::ColorConvertRGBtoHSV(rgba.x, rgba.y, rgba.z, hsv[0], hsv[1], hsv[2]);
+    imageColor = ImColor::HSV(hsv[0], hsv[1], hsv[2] * 0.5f);
+
+    if (image > 0)
+    {
+        win->DrawList->AddImage(reinterpret_cast<ImTextureID>(image), start, end, ImVec2(0, 0), ImVec2(1, 1), imageColor);
+    }
+    else
+    {
+        win->DrawList->AddRectFilled(start, end, imageColor);
+    }
+    win->DrawList->AddRect(start, end, ColorConvertFloat4ToU32(ImVec4(0.3f, 0.3f, 0.3f, 0.8f)), 0, 0, 2.0f);
+
+    PopID();
+}
+
 bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, bool *selected)
 {
-    if (s_timeline_num_rows > 0 &&
-        (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end)) return false; // item culling
+    if (s_timeline_num_rows > 0 && (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end))
+    {
+        return false; // item culling
+    }
 
     ImGuiWindow *win = GetCurrentWindow();
     const ImU32 inactive_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
@@ -270,7 +310,10 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     {
         hovered = allhovered = true;
     }
-    if (IsItemActive()) changed = true;
+    if (IsItemActive())
+    {
+        changed = true;
+    }
     PopID();
 
     auto color = inactive_color;
