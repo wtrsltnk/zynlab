@@ -297,9 +297,13 @@ void Track::NoteOn(unsigned char note,
     int lastnotecopy = lastnote;  //Useful after lastnote has been changed.
 
     if (Pnoteon == 0)
+    {
         return;
+    }
     if ((note < Pminkey) || (note > Pmaxkey))
+    {
         return;
+    }
 
     // MonoMem stuff:
     if (Ppolymode == 0)

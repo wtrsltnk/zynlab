@@ -166,14 +166,14 @@ void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocit
         return;
     }
 
-    for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
+    for (auto &track : _tracks)
     {
-        if (chan == _tracks[npart].Prcvchn)
+        if (chan == track.Prcvchn)
         {
-            meter.SetFakePeak(npart, velocity * 2);
-            if (_tracks[npart].Penabled)
+            //            meter.SetFakePeak(npart, velocity * 2);
+            if (track.Penabled)
             {
-                _tracks[npart].NoteOn(note, velocity, _keyshift);
+                track.NoteOn(note, velocity, _keyshift);
             }
         }
     }
@@ -255,7 +255,7 @@ void Mixer::SetController(unsigned char chan, int type, int par)
         // _bankManager->LoadBank(par);
     }
     else
-    {                                 //other controllers
+    {                               //other controllers
         for (auto &track : _tracks) //Send the controller to all part assigned to the track
         {
             if ((chan == track.Prcvchn) && (track.Penabled != 0))
@@ -689,7 +689,7 @@ void Mixer::InitPresets()
     for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
     {
         Preset systemEffect("SYSTEM_EFFECT", nefx);
-        
+
         sysefx[nefx].InitPresets();
         systemEffect.AddContainer(Preset("EFFECT", sysefx[nefx]));
 
@@ -716,10 +716,10 @@ void Mixer::InitPresets()
     {
         Preset insertionEffect("INSERTION_EFFECT", nefx);
         {
-          insertionEffect.AddPreset("part", &Pinsparts[nefx]);
+            insertionEffect.AddPreset("part", &Pinsparts[nefx]);
 
-          insefx[nefx].InitPresets();
-          insertionEffect.AddContainer(Preset("EFFECT", insefx[nefx]));
+            insefx[nefx].InitPresets();
+            insertionEffect.AddContainer(Preset("EFFECT", insefx[nefx]));
         }
         insertionEffects.AddContainer(insertionEffect);
     }

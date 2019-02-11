@@ -142,11 +142,15 @@ bool AppThreeDee::Setup()
 
 void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, float prevPlayTime, float currentPlayTime, int repeat)
 {
-    if (region.startAndEnd[0] < prevPlayTime && region.startAndEnd[1] < prevPlayTime)
+    auto regionSize = region.startAndEnd[1] - region.startAndEnd[0];
+    auto regionStart = region.startAndEnd[0] + repeat * regionSize;
+    auto regionEnd = region.startAndEnd[1] + repeat * regionSize;
+
+    if (regionStart < prevPlayTime && regionEnd < prevPlayTime)
     {
         return;
     }
-    if (region.startAndEnd[0] > currentPlayTime && region.startAndEnd[1] > currentPlayTime)
+    if (regionStart > currentPlayTime && regionEnd > currentPlayTime)
     {
         return;
     }
@@ -155,8 +159,8 @@ void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, floa
     {
         for (auto &event : region.eventsByNote[noteIndex])
         {
-            auto start = (region.startAndEnd[0] + event.values[0]);
-            auto end = (region.startAndEnd[0] + event.values[1]);
+            auto start = (regionStart + event.values[0]);
+            auto end = (regionStart + event.values[1]);
             if (start >= prevPlayTime && start < currentPlayTime)
             {
                 _state._mixer->NoteOn(trackIndex, noteIndex, 100);
@@ -171,7 +175,7 @@ void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, floa
 
 void AppThreeDee::Tick()
 {
-    _stepper.Tick();
+   // _stepper.Tick();
 
     std::chrono::milliseconds::rep currentTime =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
@@ -195,7 +199,10 @@ void AppThreeDee::Tick()
             }
             for (auto &region : _state.regionsByTrack[trackIndex])
             {
-                TickRegion(region, trackIndex, prevPlayTime, currentPlayTime);
+                for (int i = 0; i <= region.repeat; i++)
+                {
+                    TickRegion(region, trackIndex, prevPlayTime, currentPlayTime, i);
+                }
             }
         }
     }
@@ -639,14 +646,14 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::Spacing();
 
-        ImGui::SameLine();
+        //        ImGui::SameLine();
 
-        auto bpm = _stepper.Bpm();
-        ImGui::PushItemWidth(100);
-        if (ImGui::InputInt("##bpm", &bpm))
-        {
-            _stepper.Bpm(bpm);
-        }
+        //        auto bpm = _stepper.Bpm();
+        //        ImGui::PushItemWidth(100);
+        //        if (ImGui::InputInt("##bpm", &bpm))
+        //        {
+        //            _stepper.Bpm(bpm);
+        //        }
 
         ImGui::SameLine();
 

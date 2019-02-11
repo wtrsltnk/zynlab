@@ -428,9 +428,9 @@ void ADnote::legatonote(float freq, float velocity, int portamento_,
 
     //center freq
     NoteGlobalPar.FilterCenterPitch = pars->GlobalFilter->getfreq() + pars->PFilterVelocityScale / 127.0f * 6.0f //velocity sensing
-                                                                                    * (VelF(velocity,
-                                                                                            pars->PFilterVelocityScaleFunction) -
-                                                                                       1);
+                                                                          * (VelF(velocity,
+                                                                                  pars->PFilterVelocityScaleFunction) -
+                                                                             1);
 
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
     {
