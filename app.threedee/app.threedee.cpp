@@ -1,6 +1,7 @@
 #include "app.threedee.h"
 
 #include <zyn.mixer/Track.h>
+#include <zyn.nio/MidiInputManager.h>
 #include <zyn.synth/ADnoteParams.h>
 
 #include "examples/imgui_impl_glfw.h"
@@ -142,6 +143,7 @@ bool AppThreeDee::Setup()
 
 void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, float prevPlayTime, float currentPlayTime, int repeat)
 {
+    auto track = _state._mixer->GetTrack(trackIndex);
     auto regionSize = region.startAndEnd[1] - region.startAndEnd[0];
     auto regionStart = region.startAndEnd[0] + repeat * regionSize;
     auto regionEnd = region.startAndEnd[1] + repeat * regionSize;
@@ -155,19 +157,26 @@ void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, floa
         return;
     }
 
+    MidiEvent ev;
+    ev.type = MidiEventTypes::M_NOTE;
+    ev.channel = track->Prcvchn;
+
     for (unsigned char noteIndex = 0; noteIndex < NUM_MIDI_NOTES; noteIndex++)
     {
+        ev.num = noteIndex;
         for (auto &event : region.eventsByNote[noteIndex])
         {
             auto start = (regionStart + event.values[0]);
             auto end = (regionStart + event.values[1]);
             if (start >= prevPlayTime && start < currentPlayTime)
             {
-                _state._mixer->NoteOn(trackIndex, noteIndex, 100);
+                ev.value = 100;
+                MidiInputManager::Instance().PutEvent(ev);
             }
             if (end >= prevPlayTime && end < currentPlayTime)
             {
-                _state._mixer->NoteOff(trackIndex, noteIndex);
+                ev.value = 0;
+                MidiInputManager::Instance().PutEvent(ev);
             }
         }
     }
@@ -204,6 +213,11 @@ void AppThreeDee::Tick()
                     TickRegion(region, trackIndex, prevPlayTime, currentPlayTime, i);
                 }
             }
+        }
+
+        if (_state._playTime > _state._maxPlayTime)
+        {
+            _state._playTime = 0;
         }
     }
 }
@@ -371,13 +385,19 @@ void RegionEditor(AppState &_state)
         ImGui::SameLine();
         ImGui::PushItemWidth(120);
         ImGui::SliderInt("##verticalZoom", &verticalZoom, 30, 100, "vertical %d");
+        ImGui::SameLine();
+        ImGui::PushItemWidth(120);
+        int maxPlayTime = int(_state._maxPlayTime / 1000);
+        if (ImGui::SliderInt("##maxPlayTime", &maxPlayTime, 4, 200, "song length %d"))
+        {
+            _state._maxPlayTime = maxPlayTime * 1000;
+        }
 
-        int maxvalueSequencer = 50;
-        float elapsedTimeSequencer = static_cast<float>((static_cast<int>(_state._playTime)) % (maxvalueSequencer * 1000)) / 1000.f;
+        float elapsedTimeSequencer = float((int(_state._playTime) % int(_state._maxPlayTime))) / 1000.f;
 
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
-            if (ImGui::BeginTimelines("MyTimeline2", maxvalueSequencer, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS, 1.0f))
+            if (ImGui::BeginTimelines("MyTimeline2", _state._maxPlayTime / 1000, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS, 1.0f))
             {
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {

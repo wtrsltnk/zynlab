@@ -36,6 +36,37 @@
 
 Track::Track() {}
 
+Track::~Track()
+{
+    Cleanup(true);
+    for (auto &n : Instruments)
+    {
+        if (n.adpars != nullptr)
+            delete (n.adpars);
+        if (n.subpars != nullptr)
+            delete (n.subpars);
+        if (n.padpars != nullptr)
+            delete (n.padpars);
+        n.adpars = nullptr;
+        n.subpars = nullptr;
+        n.padpars = nullptr;
+        delete[] n.Pname;
+    }
+
+    delete[] Pname;
+    delete[] partoutl;
+    delete[] partoutr;
+    for (auto &nefx : partefx)
+        delete nefx;
+    for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
+    {
+        delete[] partfxinputl[n];
+        delete[] partfxinputr[n];
+    }
+    delete[] _tmpoutl;
+    delete[] _tmpoutr;
+}
+
 void Track::Init(IMixer *mixer, Microtonal *microtonal)
 {
     _mixer = mixer;
@@ -245,37 +276,6 @@ void Track::Cleanup(bool final_)
             partfxinputr[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
         }
     }
-}
-
-Track::~Track()
-{
-    Cleanup(true);
-    for (auto &n : Instruments)
-    {
-        if (n.adpars != nullptr)
-            delete (n.adpars);
-        if (n.subpars != nullptr)
-            delete (n.subpars);
-        if (n.padpars != nullptr)
-            delete (n.padpars);
-        n.adpars = nullptr;
-        n.subpars = nullptr;
-        n.padpars = nullptr;
-        delete[] n.Pname;
-    }
-
-    delete[] Pname;
-    delete[] partoutl;
-    delete[] partoutr;
-    for (auto &nefx : partefx)
-        delete nefx;
-    for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
-    {
-        delete[] partfxinputl[n];
-        delete[] partfxinputr[n];
-    }
-    delete[] _tmpoutl;
-    delete[] _tmpoutr;
 }
 
 /*

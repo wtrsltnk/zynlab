@@ -87,6 +87,7 @@ public:
     TrackPatternTypes _trackPatternType[NUM_MIXER_TRACKS];
 
     std::chrono::milliseconds::rep _playTime;
+    std::chrono::milliseconds::rep _maxPlayTime;
     std::vector<TrackRegion> regionsByTrack[NUM_MIXER_TRACKS];
 };
 
