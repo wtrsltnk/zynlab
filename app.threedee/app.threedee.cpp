@@ -193,6 +193,9 @@ void AppThreeDee::Tick()
     auto deltaTime = currentTime - _lastSequencerTimeInMs;
     _lastSequencerTimeInMs = currentTime;
 
+    float bpmValue = float(_stepper.Bpm()) / 60.0f;
+    deltaTime *= bpmValue;
+
     if (_state._stepper->IsPlaying())
     {
         auto prevPlayTime = (_state._playTime / 1000.0f);
@@ -230,13 +233,14 @@ static char const *snapping_modes[] = {
 static int snapping_mode_count = 3;
 
 static float snapping_mode_values[] = {
-    4.0f,
     1.0f,
     1.0f / 4.0f,
+    (1.0f / 4.0f) / 4.0f,
 };
 
 void PianoRollEditor(AppState &_state)
 {
+    const float minNoteLength = 0.1f;
     if (ImGui::Begin("Pianoroll editor"))
     {
         if (_state._activeTrack < 0 || _state._activeTrack >= NUM_MIXER_TRACKS)
@@ -309,9 +313,9 @@ void PianoRollEditor(AppState &_state)
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
                         if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, tintColor, &selected))
                         {
-                            if (region.eventsByNote[c][i].values[0] + 0.2f > region.eventsByNote[c][i].values[1])
+                            if (region.eventsByNote[c][i].values[0] + minNoteLength > region.eventsByNote[c][i].values[1])
                             {
-                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + 0.2f;
+                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + minNoteLength;
                             }
                             regionIsModified = true;
                             selectedEvent = &(region.eventsByNote[c][i]);
@@ -327,9 +331,9 @@ void PianoRollEditor(AppState &_state)
                             static_cast<unsigned char>(c),
                             100};
 
-                        if (e.values[0] + 0.2f >= e.values[1])
+                        if (e.values[0] + minNoteLength >= e.values[1])
                         {
-                            e.values[1] = e.values[0] + 0.2f;
+                            e.values[1] = e.values[0] + minNoteLength;
                         }
 
                         region.eventsByNote[c].push_back(e);
@@ -670,14 +674,14 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::Spacing();
 
-        //        ImGui::SameLine();
+        ImGui::SameLine();
 
-        //        auto bpm = _stepper.Bpm();
-        //        ImGui::PushItemWidth(100);
-        //        if (ImGui::InputInt("##bpm", &bpm))
-        //        {
-        //            _stepper.Bpm(bpm);
-        //        }
+        auto bpm = _stepper.Bpm();
+        ImGui::PushItemWidth(100);
+        if (ImGui::InputInt("##bpm", &bpm))
+        {
+            _stepper.Bpm(bpm);
+        }
 
         ImGui::SameLine();
 
