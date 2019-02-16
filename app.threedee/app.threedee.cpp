@@ -184,7 +184,7 @@ void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, floa
 
 void AppThreeDee::Tick()
 {
-   // _stepper.Tick();
+    // _stepper.Tick();
 
     std::chrono::milliseconds::rep currentTime =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
@@ -254,7 +254,7 @@ void PianoRollEditor(AppState &_state)
         }
 
         auto &region = trackRegions[size_t(_state._activePattern)];
-        unsigned int maxvalue = static_cast<unsigned int>(region.startAndEnd[1] - region.startAndEnd[0]);
+        auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
 
         static int horizontalZoom = 150;
 
@@ -292,7 +292,7 @@ void PianoRollEditor(AppState &_state)
 
             bool regionIsModified = false;
             static struct timelineEvent *selectedEvent = nullptr;
-            if (ImGui::BeginTimelines("MyTimeline", maxvalue, 20, horizontalZoom, 88, snapping_mode_values[current_snapping_mode]))
+            if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, horizontalZoom, 88, snapping_mode_values[current_snapping_mode]))
             {
                 for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
                 {
@@ -397,7 +397,8 @@ void RegionEditor(AppState &_state)
 
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
-            if (ImGui::BeginTimelines("MyTimeline2", _state._maxPlayTime / 1000, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS, 1.0f))
+            float maxValue = _state._maxPlayTime / 1000.0f;
+            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS, 1.0f))
             {
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
@@ -449,8 +450,11 @@ void RegionEditor(AppState &_state)
                     }
                 }
             }
-            ImGui::EndTimelines(&elapsedTimeSequencer);
-            _state._playTime = elapsedTimeSequencer * 1000;
+            if (ImGui::EndTimelines(&elapsedTimeSequencer))
+            {
+                _state._maxPlayTime = maxValue * 1000;
+            }
+            _state._playTime = elapsedTimeSequencer * 1000.0f;
 
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
             {
