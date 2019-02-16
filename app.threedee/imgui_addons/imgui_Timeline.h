@@ -284,8 +284,8 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     ImGui::PushStyleColor(ImGuiCol_Button, tintColor);
 
     PushID(-1);
-    SetCursorScreenPos(start + ImVec2(TIMELINE_RADIUS, 0));
-    InvisibleButton(s_str_id, (end - start) - ImVec2(TIMELINE_RADIUS * 2, 0));
+    SetCursorScreenPos(start + ImVec2((*selected ? TIMELINE_RADIUS : 0), 0));
+    InvisibleButton(s_str_id, (end - start) - ImVec2((*selected ? TIMELINE_RADIUS * 2 : 0), 0));
     if (!isMouseDraggingZero)
     {
         s_start_move_event = (GetIO().MousePos.x - s_cursor_pos.x) / columnWidth * s_max_timeline_value;

@@ -19,7 +19,7 @@ AppState::AppState(class Mixer *mixer, class Stepper *stepper, class IBankManage
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentBank(0),
       _activeTrack(0), _activeTrackInstrument(0), _activePattern(-1),
       _sequencerVerticalZoom(40), _sequencerHorizontalZoom(40),
-      _playTime(0), _maxPlayTime(1000)
+      _playTime(0), _maxPlayTime(16000)
 {}
 
 AppState::~AppState() = default;
