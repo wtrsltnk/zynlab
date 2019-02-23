@@ -240,7 +240,6 @@ static float snapping_mode_values[] = {
 
 void PianoRollEditor(AppState &_state)
 {
-    const float minNoteLength = 0.1f;
     if (ImGui::Begin("Pianoroll editor"))
     {
         if (_state._activeTrack < 0 || _state._activeTrack >= NUM_MIXER_TRACKS)
@@ -313,9 +312,9 @@ void PianoRollEditor(AppState &_state)
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
                         if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, tintColor, &selected))
                         {
-                            if (region.eventsByNote[c][i].values[0] + minNoteLength > region.eventsByNote[c][i].values[1])
+                            if (region.eventsByNote[c][i].values[0] + snapping_mode_values[current_snapping_mode] > region.eventsByNote[c][i].values[1])
                             {
-                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + minNoteLength;
+                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + snapping_mode_values[current_snapping_mode];
                             }
                             regionIsModified = true;
                             selectedEvent = &(region.eventsByNote[c][i]);
@@ -331,9 +330,9 @@ void PianoRollEditor(AppState &_state)
                             static_cast<unsigned char>(c),
                             100};
 
-                        if (e.values[0] + minNoteLength >= e.values[1])
+                        if (e.values[0] + snapping_mode_values[current_snapping_mode] >= e.values[1])
                         {
-                            e.values[1] = e.values[0] + minNoteLength;
+                            e.values[1] = e.values[0] + snapping_mode_values[current_snapping_mode];
                         }
 
                         region.eventsByNote[c].push_back(e);

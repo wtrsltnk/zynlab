@@ -459,7 +459,7 @@ bool EndTimelines(float *current_time, ImU32 timeline_running_color)
     for (int i = 0; i < int(s_timeline_length); i++)
     {
         win->DrawList->AddLine(a, ImVec2(a.x, startY), i % 4 ? line_color : accent_line_color);
-        a.x += (columnWidth / s_max_timeline_value);
+        a.x += ((s_snapping * columnWidth) / s_max_timeline_value);
     }
 
     // Draw moving vertical line
