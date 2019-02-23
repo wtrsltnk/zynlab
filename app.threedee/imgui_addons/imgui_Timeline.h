@@ -43,8 +43,6 @@ static float s_snapping = 0.1f;
 static float s_timeline_length = 50.f;
 static float s_column_width = 0;
 
-static ImVec4 color = ImVec4(0.26f, 0.59f, 0.98f, 0.10f);
-
 #define TEST(expr) \
     if (expr) std::cout << "TEST FAILED @ " << __LINE__ << std::endl;
 
@@ -172,15 +170,15 @@ void TimelineStart(const char *str_id)
     ImGui::Text("%s", str_id);
     ImGui::NextColumn();
 
-    if (s_timeline_display_index % 2)
-    {
-        const ImU32 active_color = ColorConvertFloat4ToU32(color);
-        ImVec2 end = s_cursor_pos;
-        end.x += s_timeline_length;
-        end.y += s_row_height;
+    ImVec2 end = s_cursor_pos;
+    end.x += s_timeline_length;
+    end.y += s_row_height;
 
-        win->DrawList->AddRectFilled(s_cursor_pos + ImVec2(TIMELINE_RADIUS, 0), end, active_color);
-    }
+    const ImVec4 color1 = GetStyle().Colors[ImGuiCol_Border] * ImVec4(1.0f, 1.0f, 1.0f, 0.3f);
+    const ImVec4 color2 = GetStyle().Colors[ImGuiCol_Border] * ImVec4(1.0f, 1.0f, 1.0f, 0.2f);
+    const ImU32 active_color = s_timeline_display_index % 2 ? ColorConvertFloat4ToU32(color1) : ColorConvertFloat4ToU32(color2);
+
+    win->DrawList->AddRectFilled(s_cursor_pos + ImVec2(TIMELINE_RADIUS, 0), end, active_color);
 
     s_event_counter = 0;
     s_is_event_hovered = false;
