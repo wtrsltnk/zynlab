@@ -187,7 +187,7 @@ void TimelineStart(const char *str_id)
     s_column_width = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
 }
 
-bool TimelineEnd(float *new_values)
+bool TimelineEnd(float *newValues)
 {
     if (CullTimeLine()) return false; // item culling
 
@@ -200,11 +200,16 @@ bool TimelineEnd(float *new_values)
     float end_new_value = snappedValueFromMouse();
 
     SetCursorScreenPos(s_cursor_pos);
-    if (InvisibleButton(s_str_id, ImVec2(GetWindowContentRegionWidth(), s_row_height)) && new_values != nullptr)
+    if (InvisibleButton(s_str_id, ImVec2(GetWindowContentRegionWidth(), s_row_height)) && newValues != nullptr)
     {
-        new_values[0] = s_start_new_value < end_new_value ? s_start_new_value : end_new_value;
-        new_values[1] = end_new_value > s_start_new_value ? end_new_value : s_start_new_value;
+        newValues[0] = s_start_new_value < end_new_value ? s_start_new_value : end_new_value;
+        newValues[1] = end_new_value > s_start_new_value ? end_new_value : s_start_new_value;
         result = true;
+    }
+
+    if (newValues[0] + s_snapping >= newValues[1])
+    {
+        newValues[1] = newValues[0] + s_snapping;
     }
 
     if (!s_is_event_hovered && IsItemHovered())
@@ -400,6 +405,11 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
                 win->DrawList->AddRectFilled(start, end, color);
             }
         }
+    }
+
+    if (newValues[0] + s_snapping >= newValues[1])
+    {
+        newValues[1] = newValues[0] + s_snapping;
     }
 
     values[0] = newValues[0];

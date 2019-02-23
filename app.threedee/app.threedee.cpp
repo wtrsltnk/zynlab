@@ -312,10 +312,6 @@ void PianoRollEditor(AppState &_state)
                         bool selected = (&(region.eventsByNote[c][i]) == selectedEvent);
                         if (ImGui::TimelineEvent(region.eventsByNote[c][i].values, 0, tintColor, &selected))
                         {
-                            if (region.eventsByNote[c][i].values[0] + snapping_mode_values[current_snapping_mode] > region.eventsByNote[c][i].values[1])
-                            {
-                                region.eventsByNote[c][i].values[1] = region.eventsByNote[c][i].values[0] + snapping_mode_values[current_snapping_mode];
-                            }
                             regionIsModified = true;
                             selectedEvent = &(region.eventsByNote[c][i]);
                         }
@@ -329,11 +325,6 @@ void PianoRollEditor(AppState &_state)
                              std::fmax(new_values[0], new_values[1])},
                             static_cast<unsigned char>(c),
                             100};
-
-                        if (e.values[0] + snapping_mode_values[current_snapping_mode] >= e.values[1])
-                        {
-                            e.values[1] = e.values[0] + snapping_mode_values[current_snapping_mode];
-                        }
 
                         region.eventsByNote[c].push_back(e);
                         selectedEvent = &(region.eventsByNote[c].back());
@@ -424,10 +415,6 @@ void RegionEditor(AppState &_state)
                         {
                             _state._activeTrack = trackIndex;
                             _state._activePattern = int(i);
-                            if (std::fabs(regions[i].startAndEnd[0] - regions[i].startAndEnd[1]) < 1.0f)
-                            {
-                                regions[i].startAndEnd[1] = regions[i].startAndEnd[0] + 1.0f;
-                            }
                             regions[i].UpdatePreviewImage();
                         }
                         auto x = regions[i].startAndEnd[1] - regions[i].startAndEnd[0];
@@ -444,10 +431,6 @@ void RegionEditor(AppState &_state)
                         _state._activeTrack = trackIndex;
                         _state._activePattern = int(_state.regionsByTrack[trackIndex].size());
 
-                        if (newRegion.startAndEnd[1] - newRegion.startAndEnd[0] < 1.0f)
-                        {
-                            newRegion.startAndEnd[1] = newRegion.startAndEnd[0] + 1.0f;
-                        }
                         newRegion.UpdatePreviewImage();
                         _state.regionsByTrack[trackIndex].push_back(newRegion);
                     }
@@ -455,9 +438,9 @@ void RegionEditor(AppState &_state)
             }
             if (ImGui::EndTimelines(&elapsedTimeSequencer))
             {
-                _state._maxPlayTime = maxValue * 1000;
+                _state._maxPlayTime = maxValue * 1000.f;
             }
-            _state._playTime = elapsedTimeSequencer * 1000.0f;
+            _state._playTime = elapsedTimeSequencer * 1000.f;
 
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
             {
