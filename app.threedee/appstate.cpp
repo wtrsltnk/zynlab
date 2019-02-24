@@ -8,7 +8,6 @@
 #include <stb_image_write.h>
 
 const float noteLabelWidth = 50.0f;
-const float stepWidth = 20.0f;
 
 AppState::AppState(class Mixer *mixer, class Stepper *stepper, class IBankManager *banks)
     : _mixer(mixer), _stepper(stepper), _banks(banks), _showLibrary(false), _showEditor(false), _showInspector(true),

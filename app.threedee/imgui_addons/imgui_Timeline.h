@@ -13,18 +13,18 @@ namespace ImGui {
  * Add zooming with CTRL+MouseWheel, and a horizontal scrollbar
  * Add different types of TimelineEvent (e.g. multiple ranges in a single line, dot-like markers, etc.)
 */
-IMGUI_API bool BeginTimelines(const char *str_id, float *max_value, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, float snapping = 0.1f); // last arg, when !=0, enables item culling
+IMGUI_API bool BeginTimelines(const char *str_id, timestep *max_value, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, timestep snapping = 100); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
 IMGUI_API void TimelineStart(const char *str_id);
-IMGUI_API void TimelineReadOnlyEvent(float *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200));
-IMGUI_API bool TimelineEvent(float *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
-IMGUI_API bool TimelineEnd(float *new_values = nullptr);
-IMGUI_API bool EndTimelines(float *current_time, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
+IMGUI_API void TimelineReadOnlyEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200));
+IMGUI_API bool TimelineEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
+IMGUI_API bool TimelineEnd(timestep *new_values = nullptr);
+IMGUI_API bool EndTimelines(timestep *current_time, ImU32 timeline_running_color = IM_COL32(0, 128, 0, 200));
 } // namespace ImGui
 
 namespace ImGui {
 // Timeline implementation (cpp file) from: https://github.com/nem0/LumixEngine/blob/timeline_gui/external/imgui/imgui_user.inl
-static float s_max_timeline_value = 0.f;
+static timestep s_max_timeline_value = 0.f;
 static int s_timeline_num_rows = 0;
 static int s_timeline_display_start = 0;
 static int s_timeline_display_end = 0;
@@ -34,50 +34,52 @@ static ImVec2 s_cursor_pos;
 static const float TIMELINE_RADIUS = 6;
 static int s_event_counter = 0;
 static bool s_is_event_hovered = false;
-static float s_start_new_value = 0.0f;
-static float s_start_move_event = 0.0f;
-static float *s_max_value = nullptr;
+static timestep s_start_new_value = 0;
+static timestep s_start_move_event = 0;
+static timestep *s_max_value = nullptr;
 static float s_horizontal_zoom = 50.0f;
 static int s_row_height = 30;
-static float s_snapping = 0.1f;
-static float s_timeline_length = 50.f;
+static timestep s_snapping = 100;
+static timestep s_timeline_length = 5000;
 static float s_column_width = 0;
 
 #define TEST(expr) \
-    if (expr) std::cout << "TEST FAILED @ " << __LINE__ << std::endl;
+    if (!(expr)) std::cout << "TEST FAILED @ " << __LINE__ << std::endl;
 
-float snap(float value, float step = s_snapping)
+timestep snap(timestep value, timestep step = s_snapping)
 {
-    return std::round(value / step) * step;
+    auto rounded = std::round(double(value / 1000.0) / double(step / 1000.0));
+    return timestep(rounded * step);
 }
 
 void TestSnap()
 {
-    auto snap1 = snap(0.6567f, 1.0f);
-    TEST(snap1 < 0.9f || snap1 > 1.1f);
+    auto snap1 = snap(656, 1000);
+    TEST(snap1 == 1000);
 
-    auto snap2 = snap(0.57f, 0.2f);
-    TEST(snap2 < 0.59f || snap2 > 0.61f);
+    auto snap2 = snap(570, 200);
+    TEST(snap2 == 600);
 
-    auto snap3 = snap(0.01f, 0.2f);
-    TEST(snap3 < -0.01f || snap3 > 0.01f);
+    auto snap3 = snap(10, 200);
+    TEST(snap3 == 0);
 }
 
-float snapFloor(float value, float step = s_snapping)
+timestep snapFloor(timestep value, timestep step = s_snapping)
 {
-    return std::floor(value / step) * step;
+    auto floored = std::floor(double(value / 1000.0) / double(step / 1000.0));
+    return timestep(floored * step);
 }
 
 void TestSnapFloor()
 {
-    auto snap1 = snapFloor(0.6567f, 1.0f);
-    TEST(snap1 < 0.0f || snap1 > 0.01f);
+    auto snap1 = snapFloor(656, 1000);
+    TEST(snap1 == 0);
 
-    auto snap2 = snapFloor(0.57f, 0.2f);
-    TEST(snap2 < 0.39f || snap2 > 0.41f);
+    auto snap2 = snapFloor(570, 200);
+    TEST(snap2 == 400);
 
-    auto snap3 = snapFloor(0.01f, 0.2f);
-    TEST(snap3 < -0.01f || snap3 > 0.01f);
+    auto snap3 = snapFloor(10, 200);
+    TEST(snap3 == 0);
 }
 
 bool CullTimeLine()
@@ -85,22 +87,22 @@ bool CullTimeLine()
     return s_timeline_num_rows > 0 && (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end);
 }
 
-float timeToScreenX(float time)
+float timeToScreenX(timestep time)
 {
-    return (s_column_width * time) / s_max_timeline_value;
+    return ((s_column_width * time) / 1000.0f) / s_max_timeline_value;
 }
 
-float screenXToTime(float screenX)
+timestep screenXToTime(float screenX)
 {
-    return (screenX / s_column_width) * s_max_timeline_value;
+    return timestep(((screenX * 1000.0f) / s_column_width) * s_max_timeline_value);
 }
 
-float snappedValueFromMouse()
+timestep snappedValueFromMouse()
 {
     return snap(screenXToTime(GetIO().MousePos.x - s_cursor_pos.x));
 }
 
-bool BeginTimelines(const char *str_id, float *max_value, int row_height, float horizontal_zoom, int opt_exact_num_rows, float snapping)
+bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, float horizontal_zoom, int opt_exact_num_rows, timestep snapping)
 {
     TestSnap();
     TestSnapFloor();
@@ -113,8 +115,9 @@ bool BeginTimelines(const char *str_id, float *max_value, int row_height, float 
     s_horizontal_zoom = horizontal_zoom;
     s_row_height = row_height;
     s_snapping = snapping;
+    if (s_snapping <= 0) s_snapping = 100;
 
-    s_timeline_length = (*s_max_value) * s_horizontal_zoom;
+    s_timeline_length = timestep((*s_max_value) * s_horizontal_zoom);
 
     int const label_column_width = 60;
 
@@ -130,7 +133,7 @@ bool BeginTimelines(const char *str_id, float *max_value, int row_height, float 
     {
         ImGui::SetColumnOffset(1, contentRegionWidth * 0.15f);
     }
-    s_max_timeline_value = (*s_max_value) >= 0 ? (*s_max_value) : (contentRegionWidth * 0.85f);
+    s_max_timeline_value = (*s_max_value) >= 0 ? (*s_max_value) : (timestep(contentRegionWidth) * 850);
     if (opt_exact_num_rows > 0)
     {
         // Item culling
@@ -185,7 +188,7 @@ void TimelineStart(const char *str_id)
     s_column_width = ImGui::GetColumnWidth(1) - GImGui->Style.ScrollbarSize;
 }
 
-bool TimelineEnd(float *newValues)
+bool TimelineEnd(timestep *newValues)
 {
     if (CullTimeLine()) return false; // item culling
 
@@ -195,7 +198,7 @@ bool TimelineEnd(float *newValues)
 
     auto nextPos = s_cursor_pos + ImVec2(0, s_row_height);
 
-    float end_new_value = snappedValueFromMouse();
+    timestep end_new_value = snappedValueFromMouse();
 
     SetCursorScreenPos(s_cursor_pos);
     if (InvisibleButton(s_str_id, ImVec2(GetWindowContentRegionWidth(), s_row_height)) && newValues != nullptr)
@@ -223,9 +226,9 @@ bool TimelineEnd(float *newValues)
     if (IsItemHovered() && IsItemActive() && IsMouseDragging(0))
     {
         ImVec2 start = s_cursor_pos;
-        start.x += snap(timeToScreenX(s_start_new_value) + TIMELINE_RADIUS);
+        start.x += timeToScreenX(snap(s_start_new_value)) + TIMELINE_RADIUS;
         start.y += 2.0f;
-        ImVec2 end = start + ImVec2(snap(timeToScreenX(end_new_value - s_start_new_value)), s_row_height - 4.0f);
+        ImVec2 end = start + ImVec2(timeToScreenX(snap(end_new_value - s_start_new_value)), s_row_height - 4.0f);
 
         win->DrawList->AddRectFilled(start, end, active_color);
         ImGui::BeginTooltip();
@@ -240,7 +243,7 @@ bool TimelineEnd(float *newValues)
     return result;
 }
 
-void TimelineReadOnlyEvent(float *values, unsigned int image, ImU32 const tintColor)
+void TimelineReadOnlyEvent(timestep *values, unsigned int image, ImU32 const tintColor)
 {
     if (CullTimeLine())
     {
@@ -276,7 +279,7 @@ void TimelineReadOnlyEvent(float *values, unsigned int image, ImU32 const tintCo
     PopID();
 }
 
-bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, bool *selected)
+bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, bool *selected)
 {
     if (CullTimeLine())
     {
@@ -291,7 +294,7 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     bool changed = false;
     bool hovered = false;
     bool allhovered = false;
-    float newValues[2]{values[0], values[1]};
+    timestep newValues[2]{values[0], values[1]};
 
     PushID(s_event_counter++);
 
@@ -415,7 +418,7 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
 
     if (values[0] > values[1])
     {
-        float tmp = values[0];
+        timestep tmp = values[0];
         values[0] = values[1];
         values[1] = tmp;
     }
@@ -441,7 +444,7 @@ bool TimelineEvent(float *values, unsigned int image, ImU32 const tintColor, boo
     return changed;
 }
 
-bool EndTimelines(float *current_time, ImU32 timeline_running_color)
+bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
 {
     bool changed = false;
     if (s_timeline_num_rows > 0)
@@ -464,17 +467,18 @@ bool EndTimelines(float *current_time, ImU32 timeline_running_color)
 
     ImVec2 a = GetWindowContentRegionMin() + win->Pos + ImVec2(columnOffset + GetScrollX(), 0);
     // Draw black vertical lines (inside scrolling area)
-    for (int i = 0; i < int(s_timeline_length); i++)
+    for (timestep i = 0; i < s_timeline_length; i += s_snapping)
     {
-        win->DrawList->AddLine(a, ImVec2(a.x, startY), i % 4 ? line_color : accent_line_color);
-        a.x += ((s_snapping * columnWidth) / s_max_timeline_value);
+        // TODO, fix these lines so they not crash on too many vertices
+        //win->DrawList->AddLine(a, ImVec2(a.x, startY), i % 4 ? line_color : accent_line_color);
+        a.x += timeToScreenX(s_snapping);
     }
 
     // Draw moving vertical line
-    if (*current_time > 0.f && *current_time < s_max_timeline_value)
+    if (*current_time > 0 && *current_time < s_max_timeline_value)
     {
-        a = GetWindowContentRegionMin() + win->Pos;
-        a.x += timeToScreenX(*current_time) + columnOffset + GetScrollX();
+        a = GetWindowContentRegionMin() + win->Pos + ImVec2(columnOffset + GetScrollX(), 0);
+        a.x += timeToScreenX(*current_time);
         win->DrawList->AddLine(a, ImVec2(a.x, startY), moving_line_color);
     }
 
@@ -496,8 +500,8 @@ bool EndTimelines(float *current_time, ImU32 timeline_running_color)
     SameLine();
     if (Button("-", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
     {
-        *s_max_value -= 4.0f;
-        *s_max_value -= int(*s_max_value) % 4;
+        *s_max_value -= 4000;
+        *s_max_value -= (*s_max_value) % 4;
         changed = true;
     }
     PopStyleVar();
@@ -534,9 +538,9 @@ bool EndTimelines(float *current_time, ImU32 timeline_running_color)
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY());
 
-    if (*s_max_value <= 1.0f)
+    if (*s_max_value <= s_snapping)
     {
-        *s_max_value = 1.0f;
+        *s_max_value = s_snapping;
     }
 
     return changed;

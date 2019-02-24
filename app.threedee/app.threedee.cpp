@@ -232,10 +232,10 @@ static char const *snapping_modes[] = {
 };
 static int snapping_mode_count = 3;
 
-static float snapping_mode_values[] = {
-    1.0f,
-    1.0f / 4.0f,
-    (1.0f / 4.0f) / 4.0f,
+static timestep snapping_mode_values[] = {
+    1000,
+    1000 / 4,
+    (1000 / 4) / 4,
 };
 
 void PianoRollEditor(AppState &_state)
@@ -286,7 +286,7 @@ void PianoRollEditor(AppState &_state)
         }
         ImGui::ShowTooltipOnHover("Set the Snap value for the Piano Roll Editor");
 
-        float elapsedTime = static_cast<float>((static_cast<unsigned>(_state._playTime))) / 1000.f - region.startAndEnd[0];
+        timestep elapsedTime = (static_cast<unsigned>(_state._playTime)) - region.startAndEnd[0];
 
         if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
         {
@@ -316,13 +316,13 @@ void PianoRollEditor(AppState &_state)
                             selectedEvent = &(region.eventsByNote[c][i]);
                         }
                     }
-                    float new_values[2];
+                    timestep new_values[2];
                     if (ImGui::TimelineEnd(new_values))
                     {
                         regionIsModified = true;
                         timelineEvent e{
-                            {std::fmin(new_values[0], new_values[1]),
-                             std::fmax(new_values[0], new_values[1])},
+                            {std::min(new_values[0], new_values[1]),
+                             std::max(new_values[0], new_values[1])},
                             static_cast<unsigned char>(c),
                             100};
 
@@ -387,12 +387,12 @@ void RegionEditor(AppState &_state)
             _state._maxPlayTime = maxPlayTime * 1000;
         }
 
-        float elapsedTimeSequencer = float((int(_state._playTime) % int(_state._maxPlayTime))) / 1000.f;
+        timestep elapsedTimeSequencer = _state._playTime % _state._maxPlayTime;
 
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
-            float maxValue = _state._maxPlayTime / 1000.0f;
-            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS, 1.0f))
+            timestep maxValue = _state._maxPlayTime;
+            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, verticalZoom, horizontalZoom, NUM_MIXER_TRACKS, 1000))
             {
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
@@ -420,7 +420,7 @@ void RegionEditor(AppState &_state)
                         auto x = regions[i].startAndEnd[1] - regions[i].startAndEnd[0];
                         for (int j = 1; j <= regions[i].repeat; j++)
                         {
-                            float repeat_values[2]{regions[i].startAndEnd[0] + (x * j), regions[i].startAndEnd[1] + (x * j)};
+                            timestep repeat_values[2]{regions[i].startAndEnd[0] + (x * j), regions[i].startAndEnd[1] + (x * j)};
                             ImGui::TimelineReadOnlyEvent(repeat_values, regions[i].previewImage, tintColor);
                         }
                     }
@@ -438,9 +438,9 @@ void RegionEditor(AppState &_state)
             }
             if (ImGui::EndTimelines(&elapsedTimeSequencer))
             {
-                _state._maxPlayTime = maxValue * 1000.f;
+                _state._maxPlayTime = maxValue;
             }
-            _state._playTime = elapsedTimeSequencer * 1000.f;
+            _state._playTime = elapsedTimeSequencer;
 
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
             {

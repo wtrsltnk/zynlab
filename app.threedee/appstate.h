@@ -2,6 +2,7 @@
 #define APPSTATE_H
 
 #include <zyn.seq/Sequencer.h>
+#include "imgui_addons/imgui_common.h"
 
 extern char const *const AdSynthEditorID;
 extern char const *const SubSynthEditorID;
@@ -17,7 +18,6 @@ extern const char *NoteNames[];
 extern int NoteNameCount;
 extern const char *TrackPatternTypeNames[];
 extern const float noteLabelWidth;
-extern const float stepWidth;
 
 enum class TrackPatternTypes
 {
@@ -29,7 +29,7 @@ enum class TrackPatternTypes
 
 struct timelineEvent
 {
-    float values[2];
+    timestep values[2];
     unsigned char note;
     unsigned char velocity;
 };
@@ -46,7 +46,7 @@ public:
     void UpdatePreviewImage();
 
     unsigned int previewImage;
-    float startAndEnd[2];
+    timestep startAndEnd[2];
     std::vector<struct timelineEvent> eventsByNote[NUM_MIDI_NOTES];
     int repeat;
 };
