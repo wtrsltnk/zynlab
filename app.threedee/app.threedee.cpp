@@ -36,9 +36,9 @@ int NoteNameCount = 12;
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, IBankManager *banks)
-    : _state(mixer, &_stepper, banks), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
-      _mixerUi(&_state), _padNoteUi(&_state), _sequencerUi(&_state), _subNoteUi(&_state),
-      _window(window), _stepper(&_state._sequencer, mixer),
+    : _state(mixer, banks), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
+      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state),
+      _window(window),
       _toolbarIconsAreLoaded(false),
       _display_w(800), _display_h(600)
 {
@@ -123,7 +123,6 @@ bool AppThreeDee::Setup()
     _state._banks->RescanForBanks();
     _state._banks->LoadBank(_state._currentBank);
 
-    _stepper.Setup();
     _state._activeTrack = 0;
 
     _mixerUi.Setup();
@@ -132,7 +131,6 @@ bool AppThreeDee::Setup()
     _subNoteUi.Setup();
     _padNoteUi.Setup();
     _effectUi.Setup();
-    _sequencerUi.Setup();
 
     LoadToolbarIcons();
 
@@ -193,10 +191,10 @@ void AppThreeDee::Tick()
     auto deltaTime = currentTime - _lastSequencerTimeInMs;
     _lastSequencerTimeInMs = currentTime;
 
-    float bpmValue = float(_stepper.Bpm()) / 60.0f;
+    float bpmValue = float(_state._bpm) / 60.0f;
     deltaTime *= bpmValue;
 
-    if (_state._stepper->IsPlaying())
+    if (_state._isPlaying)
     {
         auto prevPlayTime = (_state._playTime / 1000.0f);
         _state._playTime += deltaTime;
@@ -304,7 +302,7 @@ void PianoRollEditor(AppState &_state)
                     ImGui::TimelineStart(id);
                     if (ImGui::IsItemClicked())
                     {
-                        _state._stepper->HitNote(_state._activeTrack, c, 100, 200);
+                        //                        HitNote(_state._activeTrack, c, 100, 200);
                     }
 
                     for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
@@ -637,17 +635,17 @@ void AppThreeDee::ImGuiPlayback()
         {
             _state._playTime = 0;
             _state._mixer->ShutUp();
-            _stepper.Stop();
+            _state._isPlaying = false;
         }
 
         ImGui::SameLine();
 
         ImGui::SameLine();
 
-        bool isPlaying = _stepper.IsPlaying();
+        bool isPlaying = _state._isPlaying;
         if (ImGui::ImageToggleButton("toolbar_play", &isPlaying, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Play)]), ImVec2(32, 32)))
         {
-            _stepper.PlayPause();
+            _state._isPlaying = !_state._isPlaying;
         }
 
         ImGui::SameLine();
@@ -658,12 +656,8 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        auto bpm = _stepper.Bpm();
         ImGui::PushItemWidth(100);
-        if (ImGui::InputInt("##bpm", &bpm))
-        {
-            _stepper.Bpm(bpm);
-        }
+        ImGui::InputInt("##bpm", &(_state._bpm));
 
         ImGui::SameLine();
 

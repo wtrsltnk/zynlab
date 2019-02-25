@@ -55,12 +55,6 @@ if(GLFW3_FOUND)
         ui/ui.mixer.h
         ui/ui.padnote.cpp
         ui/ui.padnote.h
-        ui/ui.pianoroll.cpp
-        ui/ui.pianoroll.h
-        ui/ui.sequencer.cpp
-        ui/ui.sequencer.h
-        ui/ui.steppattern.cpp
-        ui/ui.steppattern.h
         ui/ui.subnote.cpp
         ui/ui.subnote.h
         )

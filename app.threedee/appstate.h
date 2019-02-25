@@ -54,11 +54,10 @@ public:
 class AppState
 {
 public:
-    AppState(class Mixer *mixer, class Stepper *stepper, class IBankManager *banks);
+    AppState(class Mixer *mixer, class IBankManager *banks);
     virtual ~AppState();
 
     class Mixer *_mixer;
-    class Stepper *_stepper;
     class IBankManager *_banks;
     bool _showLibrary;
     bool _showEditor;
@@ -82,10 +81,9 @@ public:
     int _activePattern;
     int _sequencerVerticalZoom;
     int _sequencerHorizontalZoom;
-    Sequencer _sequencer;
-    std::vector<TrackPattern> _clipboardPatterns;
-    TrackPatternTypes _trackPatternType[NUM_MIXER_TRACKS];
 
+    int _bpm;
+    bool _isPlaying;
     std::chrono::milliseconds::rep _playTime;
     std::chrono::milliseconds::rep _maxPlayTime;
     std::vector<TrackRegion> regionsByTrack[NUM_MIXER_TRACKS];

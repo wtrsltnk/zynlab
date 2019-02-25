@@ -14,7 +14,6 @@
 #include "ui/ui.library.h"
 #include "ui/ui.mixer.h"
 #include "ui/ui.padnote.h"
-#include "ui/ui.sequencer.h"
 #include "ui/ui.subnote.h"
 #include <chrono>
 #include <zyn.common/Util.h>
@@ -33,11 +32,9 @@ private:
     zyn::ui::Library _libraryUi;
     zyn::ui::Mixer _mixerUi;
     zyn::ui::PadNote _padNoteUi;
-    zyn::ui::Sequencer _sequencerUi;
     zyn::ui::SubNote _subNoteUi;
 
     GLFWwindow *_window;
-    Stepper _stepper;
     std::vector<unsigned int> _toolbarIcons;
     bool _toolbarIconsAreLoaded;
     std::chrono::milliseconds::rep _lastSequencerTimeInMs;

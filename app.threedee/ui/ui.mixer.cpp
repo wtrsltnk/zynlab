@@ -212,17 +212,6 @@ void zyn::ui::Mixer::ImGuiInspector()
 
         if (ImGui::CollapsingHeader("Track"))
         {
-            ImGui::PushItemWidth(100);
-            auto trackType = static_cast<unsigned char>(_state->_trackPatternType[_state->_activeTrack]);
-            if (ImGui::DropDown("##TrackType", trackType, TrackPatternTypeNames, int(TrackPatternTypes::Count), "The type of track"))
-            {
-                _state->_trackPatternType[_state->_activeTrack] = static_cast<TrackPatternTypes>(trackType);
-            }
-
-            ImGui::SameLine();
-
-            ImGui::Text("Type of pattern editor for this track");
-
             ImGui::TextWrapped("Etiam vitae condimentum justo. Duis et orci diam. Morbi rhoncus finibus augue, eget auctor eros aliquet rhoncus. Etiam felis enim, fringilla tincidunt pulvinar nec, lacinia non nibh. In eget dui porttitor, commodo odio in, interdum neque. Quisque neque neque, finibus non gravida ac, porttitor non odio. Proin magna urna, finibus vitae erat id, pulvinar elementum sapien. Morbi luctus, ex at commodo mattis, libero enim vestibulum lectus, non ornare justo tellus non mi. Nulla dictum arcu eros, sed posuere purus ultricies vitae. ");
         }
 
