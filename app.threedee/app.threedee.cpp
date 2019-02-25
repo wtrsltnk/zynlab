@@ -208,9 +208,9 @@ void AppThreeDee::Tick()
 
     if (_state._isPlaying)
     {
-        auto prevPlayTime = (_state._playTime / 1000.0f);
+        auto prevPlayTime = (_state._playTime);
         _state._playTime += deltaTime;
-        auto currentPlayTime = (_state._playTime / 1000.0f);
+        auto currentPlayTime = (_state._playTime);
 
         for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
         {
