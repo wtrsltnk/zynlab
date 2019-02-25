@@ -192,7 +192,7 @@ void zyn::ui::Effect::Render()
     {
         if (ImGui::Begin(TrackFxEditorID, &_state->_showTrackEffectsEditor))
         {
-            auto track = _state->_mixer->GetTrack(_state->_activeTrack);
+            auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
             if (_state->_currentTrackEffect >= 0 && _state->_currentTrackEffect < NUM_TRACK_EFX)
             {

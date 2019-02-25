@@ -1,8 +1,9 @@
 #ifndef APPSTATE_H
 #define APPSTATE_H
 
-#include <zyn.seq/Sequencer.h>
 #include "imgui_addons/imgui_common.h"
+#include <vector>
+#include <zyn.common/globals.h>
 
 extern char const *const AdSynthEditorID;
 extern char const *const SubSynthEditorID;
@@ -14,18 +15,11 @@ extern char const *const LibraryID;
 extern char const *const StepPatternEditorID;
 extern char const *const EffectNames[];
 extern int EffectNameCount;
-extern const char *NoteNames[];
+extern char const *const NoteNames[];
 extern int NoteNameCount;
-extern const char *TrackPatternTypeNames[];
-extern const float noteLabelWidth;
-
-enum class TrackPatternTypes
-{
-    Step,
-    Clip,
-    Arpeggiator,
-    Count,
-};
+extern char const *const SnappingModes[];
+extern int SnappingModeCount;
+extern timestep SnappingModeValues[];
 
 struct timelineEvent
 {
@@ -33,8 +27,6 @@ struct timelineEvent
     unsigned char note;
     unsigned char velocity;
 };
-
-#define NUM_MIDI_NOTES 88
 
 class TrackRegion
 {
@@ -76,11 +68,12 @@ public:
     int _currentSystemEffect;
     int _currentTrackEffect;
     int _currentBank;
-    int _activeTrack;
-    int _activeTrackInstrument;
-    int _activePattern;
+    int _currentTrack;
+    int _currentTrackInstrument;
+    int _currentPattern;
     int _sequencerVerticalZoom;
     int _sequencerHorizontalZoom;
+    int _pianoRollEditorHorizontalZoom;
 
     int _bpm;
     bool _isPlaying;

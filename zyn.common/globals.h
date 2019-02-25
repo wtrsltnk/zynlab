@@ -55,6 +55,11 @@
 #define NUM_MIDI_CHANNELS 16
 
 /*
+ * Number of keys/notes on a Piano
+ */
+#define NUM_MIDI_NOTES 88
+
+/*
  * The number of voices of additive synth for a single note
  */
 #define NUM_VOICES 8

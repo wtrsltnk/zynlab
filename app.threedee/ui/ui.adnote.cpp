@@ -38,23 +38,23 @@ bool zyn::ui::AdNote::Setup()
 
 void zyn::ui::AdNote::Render()
 {
-    auto track = _state->_mixer->GetTrack(_state->_activeTrack);
+    auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
     ImGui::Begin(AdSynthEditorID, &_state->_showADNoteEditor);
-    if (!_state->_showADNoteEditor || track == nullptr || _state->_activeTrackInstrument < 0 || _state->_activeTrackInstrument >= NUM_TRACK_INSTRUMENTS)
+    if (!_state->_showADNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)
     {
         ImGui::End();
         return;
     }
 
-    auto *parameters = track->Instruments[_state->_activeTrackInstrument].adpars;
+    auto *parameters = track->Instruments[_state->_currentTrackInstrument].adpars;
 
-    if (track->Instruments[_state->_activeTrackInstrument].Padenabled == 0)
+    if (track->Instruments[_state->_currentTrackInstrument].Padenabled == 0)
     {
         ImGui::Text("AD editor is disabled");
         if (ImGui::Button("Enable AD synth"))
         {
-            track->Instruments[_state->_activeTrackInstrument].Padenabled = 1;
+            track->Instruments[_state->_currentTrackInstrument].Padenabled = 1;
         }
         ImGui::End();
         return;
@@ -64,7 +64,7 @@ void zyn::ui::AdNote::Render()
     {
         if (ImGui::BeginTabItem("Global"))
         {
-            if (_state->_activeTrack >= 0)
+            if (_state->_currentTrack >= 0)
             {
                 ImGui::Text("ADsynth Global Parameters of the Track");
 
@@ -97,9 +97,9 @@ void zyn::ui::AdNote::Render()
         }
         for (int i = 0; i < NUM_VOICES; i++)
         {
-            if (_state->_activeTrack >= 0)
+            if (_state->_currentTrack >= 0)
             {
-                auto parameters = &_state->_mixer->GetTrack(_state->_activeTrack)->Instruments[0].adpars->VoicePar[i];
+                auto parameters = &_state->_mixer->GetTrack(_state->_currentTrack)->Instruments[0].adpars->VoicePar[i];
                 if (ImGui::BeginTabItem(voiceIds[i]))
                 {
                     ADNoteVoiceEditor(parameters);

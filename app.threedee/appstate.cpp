@@ -7,8 +7,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-const float noteLabelWidth = 50.0f;
-
 AppState::AppState(class Mixer *mixer, class IBankManager *banks)
     : _mixer(mixer), _banks(banks), _showLibrary(false), _showEditor(false), _showInspector(true),
       _showMixer(true), _showSmartControls(true), _showQuickHelp(false),
@@ -16,8 +14,8 @@ AppState::AppState(class Mixer *mixer, class IBankManager *banks)
       _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true),
       _showTrackTypeChanger(-1),
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentBank(0),
-      _activeTrack(0), _activeTrackInstrument(0), _activePattern(-1),
-      _sequencerVerticalZoom(40), _sequencerHorizontalZoom(40),
+      _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1),
+      _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150),
       _bpm(120), _isPlaying(false), _playTime(0), _maxPlayTime(16000)
 {}
 

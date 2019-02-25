@@ -19,23 +19,23 @@ bool zyn::ui::PadNote::Setup()
 
 void zyn::ui::PadNote::Render()
 {
-    auto track = _state->_mixer->GetTrack(_state->_activeTrack);
+    auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
     ImGui::Begin(PadSynthEditorID, &_state->_showPADNoteEditor);
-    if (!_state->_showPADNoteEditor || track == nullptr || _state->_activeTrackInstrument < 0 || _state->_activeTrackInstrument >= NUM_TRACK_INSTRUMENTS)
+    if (!_state->_showPADNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)
     {
         ImGui::End();
         return;
     }
 
-    auto *parameters = track->Instruments[_state->_activeTrackInstrument].padpars;
+    auto *parameters = track->Instruments[_state->_currentTrackInstrument].padpars;
 
-    if (track->Instruments[_state->_activeTrackInstrument].Ppadenabled == 0)
+    if (track->Instruments[_state->_currentTrackInstrument].Ppadenabled == 0)
     {
         ImGui::Text("PAD editor is disabled");
         if (ImGui::Button("Enable PAD synth"))
         {
-            track->Instruments[_state->_activeTrackInstrument].Ppadenabled = 1;
+            track->Instruments[_state->_currentTrackInstrument].Ppadenabled = 1;
         }
         ImGui::End();
         return;

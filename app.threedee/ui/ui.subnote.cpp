@@ -29,22 +29,22 @@ bool zyn::ui::SubNote::Setup() { return true; }
 
 void zyn::ui::SubNote::Render()
 {
-    auto track = _state->_mixer->GetTrack(_state->_activeTrack);
+    auto track = _state->_mixer->GetTrack(_state->_currentTrack);
     ImGui::Begin(SubSynthEditorID, &_state->_showSUBNoteEditor);
-    if (!_state->_showSUBNoteEditor || track == nullptr || _state->_activeTrackInstrument < 0 || _state->_activeTrackInstrument >= NUM_TRACK_INSTRUMENTS)
+    if (!_state->_showSUBNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)
     {
         ImGui::End();
         return;
     }
 
-    auto *parameters = track->Instruments[_state->_activeTrackInstrument].subpars;
+    auto *parameters = track->Instruments[_state->_currentTrackInstrument].subpars;
 
-    if (track->Instruments[_state->_activeTrackInstrument].Psubenabled == 0)
+    if (track->Instruments[_state->_currentTrackInstrument].Psubenabled == 0)
     {
         ImGui::Text("SUB editor is disabled");
         if (ImGui::Button("Enable SUB synth"))
         {
-            track->Instruments[_state->_activeTrackInstrument].Psubenabled = 1;
+            track->Instruments[_state->_currentTrackInstrument].Psubenabled = 1;
         }
         ImGui::End();
         return;
@@ -54,7 +54,7 @@ void zyn::ui::SubNote::Render()
     {
         if (ImGui::BeginTabItem("Global"))
         {
-            if (_state->_activeTrack >= 0)
+            if (_state->_currentTrack >= 0)
             {
                 ImGui::Text("SUBsynth Global Parameters of the Instrument");
 
