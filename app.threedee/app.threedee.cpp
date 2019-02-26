@@ -31,7 +31,7 @@ char const *const NoteNames[] = {
     "B",
 };
 
-int NoteNameCount = 12;
+unsigned int NoteNameCount = 12;
 
 char const *const SnappingModes[] = {
     "Bar",
@@ -39,13 +39,23 @@ char const *const SnappingModes[] = {
     "Division",
 };
 
-int SnappingModeCount = 3;
+unsigned int SnappingModeCount = 3;
 
 timestep SnappingModeValues[] = {
     1000,
     1000 / 4,
     (1000 / 4) / 4,
 };
+
+char const *const ArpModeNames[] = {
+    "Up",
+    "Down",
+    "Up and Down inclusive",
+    "Up and Down exclusive",
+    "Down and Up inclusive",
+    "Down and Up exclusive",
+};
+unsigned int ArpModeCount = 6;
 
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
@@ -194,6 +204,34 @@ void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, floa
     }
 }
 
+void AppThreeDee::TempNoteOn(unsigned int channel, unsigned int note, unsigned int length)
+{
+    MidiEvent ev;
+    ev.type = MidiEventTypes::M_NOTE;
+    ev.channel = channel;
+    ev.value = 100;
+    ev.num = note;
+
+    MidiInputManager::Instance().PutEvent(ev);
+
+    for (auto &tn : _state._tempnotes)
+    {
+        if (tn.note == note && tn.channel == channel)
+        {
+            tn.done = false;
+            tn.playUntil = _lastSequencerTimeInMs + length;
+            return;
+        }
+    }
+
+    tempnote n;
+    n.playUntil = _lastSequencerTimeInMs + length;
+    n.note = note;
+    n.channel = channel;
+    n.done = false;
+    _state._tempnotes.push_back(n);
+}
+
 void AppThreeDee::Tick()
 {
     std::chrono::milliseconds::rep currentTime =
@@ -201,13 +239,30 @@ void AppThreeDee::Tick()
             .count();
 
     auto deltaTime = currentTime - _lastSequencerTimeInMs;
-    _lastSequencerTimeInMs = currentTime;
 
-    float bpmValue = float(_state._bpm) / 60.0f;
-    deltaTime *= bpmValue;
+    for (auto &tn : _state._tempnotes)
+    {
+        if (tn.done) continue;
+        if (tn.playUntil < currentTime)
+        {
+            tn.done = true;
+            MidiEvent ev;
+            ev.type = MidiEventTypes::M_NOTE;
+            ev.channel = tn.channel;
+            ev.value = 0;
+            ev.num = tn.note;
+
+            MidiInputManager::Instance().PutEvent(ev);
+        }
+    }
+
+    _lastSequencerTimeInMs = currentTime;
 
     if (_state._isPlaying)
     {
+        float bpmValue = float(_state._bpm) / 60.0f;
+        deltaTime *= bpmValue;
+
         auto prevPlayTime = (_state._playTime);
         _state._playTime += deltaTime;
         auto currentPlayTime = (_state._playTime);
@@ -235,7 +290,7 @@ void AppThreeDee::Tick()
     }
 }
 
-void PianoRollEditor(AppState &_state)
+void AppThreeDee::PianoRollEditor()
 {
     if (ImGui::Begin("Pianoroll editor"))
     {
@@ -245,6 +300,7 @@ void PianoRollEditor(AppState &_state)
             return;
         }
 
+        auto track = _state._mixer->GetTrack(_state._currentTrack);
         auto &trackRegions = _state.regionsByTrack[_state._currentTrack];
 
         if (_state._currentPattern < 0 || size_t(_state._currentPattern) >= trackRegions.size() || trackRegions.empty())
@@ -263,12 +319,12 @@ void PianoRollEditor(AppState &_state)
 
         ImGui::SameLine();
 
-        static int current_snapping_mode = 2;
+        static unsigned int current_snapping_mode = 2;
 
         ImGui::PushItemWidth(100);
         if (ImGui::BeginCombo("Snapping mode", SnappingModes[current_snapping_mode]))
         {
-            for (int n = 0; n < SnappingModeCount; n++)
+            for (unsigned int n = 0; n < SnappingModeCount; n++)
             {
                 bool is_selected = (current_snapping_mode == n);
                 if (ImGui::Selectable(SnappingModes[n], is_selected))
@@ -283,6 +339,8 @@ void PianoRollEditor(AppState &_state)
 
         timestep elapsedTime = (static_cast<unsigned>(_state._playTime)) - region.startAndEnd[0];
 
+        static unsigned int _arpFromNote = 65;
+
         if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
         {
             auto hue = _state._currentTrack * 0.05f;
@@ -292,14 +350,15 @@ void PianoRollEditor(AppState &_state)
             static struct timelineEvent *selectedEvent = nullptr;
             if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, 88, SnappingModeValues[current_snapping_mode]))
             {
-                for (int c = NUM_MIDI_NOTES - 1; c > 0; c--)
+                for (unsigned int c = NUM_MIDI_NOTES - 1; c > 0; c--)
                 {
                     char id[32];
                     sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
                     ImGui::TimelineStart(id);
                     if (ImGui::IsItemClicked())
                     {
-                        //                        HitNote(_state._activeTrack, c, 100, 200);
+                        TempNoteOn(track->Prcvchn, c, 400);
+                        _arpFromNote = c;
                     }
 
                     for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
@@ -356,11 +415,34 @@ void PianoRollEditor(AppState &_state)
             }
         }
         ImGui::EndChild();
+
+        if (ImGui::Button("Clear all notes"))
+        {
+            region.ClearAllNotes();
+        }
+
+        ImGui::SameLine();
+
+        ImGui::VerticalSeparator();
+
+        ImGui::SameLine();
+
+        ImGui::Button("Generate Arp");
+
+        ImGui::SameLine();
+
+        ImGui::Text("From: %4s%d going", NoteNames[(107 - _arpFromNote) % NoteNameCount], (107 - _arpFromNote) / NoteNameCount - 1);
+
+        ImGui::SameLine();
+
+        static unsigned char selectedArpMode = 0;
+        ImGui::PushItemWidth(250);
+        ImGui::DropDown("##ArpMode", selectedArpMode, &ArpModeNames[0], ArpModeCount, "Arp Mode");
     }
     ImGui::End();
 }
 
-void RegionEditor(AppState &_state)
+void AppThreeDee::RegionEditor()
 {
     if (ImGui::Begin("Region editor"))
     {
@@ -486,8 +568,8 @@ void AppThreeDee::Render()
     }
     ImGui::PopStyleVar();
 
-    PianoRollEditor(_state);
-    RegionEditor(_state);
+    PianoRollEditor();
+    RegionEditor();
 
     ImGui::Render();
 

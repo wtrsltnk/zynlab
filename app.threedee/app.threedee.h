@@ -61,6 +61,9 @@ public:
 private:
     void LoadToolbarIcons();
 
+    void PianoRollEditor();
+    void RegionEditor();
+    void TempNoteOn(unsigned int channel, unsigned int note, unsigned int length);
     void TickRegion(TrackRegion &region, unsigned char trackIndex, float prevPlayTime, float currentPlayTime, int repeat = 0);
     void ImGuiPlayback();
 };

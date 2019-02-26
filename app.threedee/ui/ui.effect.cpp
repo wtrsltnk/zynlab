@@ -9,7 +9,7 @@ char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";
 char const *const TrackFxEditorID = "Track effect";
 
-int EffectNameCount = 9;
+unsigned int EffectNameCount = 9;
 
 char const *const EffectNames[] = {
     "No effect",

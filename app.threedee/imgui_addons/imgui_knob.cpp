@@ -8,8 +8,6 @@
 
 void ImGui::UvMeter(char const *label, ImVec2 const &size, int *value, int v_min, int v_max)
 {
-    ImGuiIO &io = ImGui::GetIO();
-    ImGuiStyle &style = ImGui::GetStyle();
     ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
     ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -200,7 +198,7 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
     return value_changed;
 }
 
-bool ImGui::DropDown(char const *label, unsigned char &value, char const *const names[], int nameCount, char const *tooltip)
+bool ImGui::DropDown(char const *label, unsigned char &value, char const *const names[], unsigned int nameCount, char const *tooltip)
 {
     bool value_changed = false;
 

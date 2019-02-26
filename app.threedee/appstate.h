@@ -14,12 +14,14 @@ extern char const *const TrackFxEditorID;
 extern char const *const LibraryID;
 extern char const *const StepPatternEditorID;
 extern char const *const EffectNames[];
-extern int EffectNameCount;
+extern unsigned int EffectNameCount;
 extern char const *const NoteNames[];
-extern int NoteNameCount;
+extern unsigned int NoteNameCount;
 extern char const *const SnappingModes[];
-extern int SnappingModeCount;
+extern unsigned int SnappingModeCount;
 extern timestep SnappingModeValues[];
+extern char const *const ArpModeNames[];
+extern unsigned int ArpModeCount;
 
 struct timelineEvent
 {
@@ -36,11 +38,20 @@ public:
 
     void CleanupPreviewImage();
     void UpdatePreviewImage();
+    void ClearAllNotes();
 
     unsigned int previewImage;
     timestep startAndEnd[2];
     std::vector<struct timelineEvent> eventsByNote[NUM_MIDI_NOTES];
     int repeat;
+};
+
+struct tempnote
+{
+    timestep playUntil;
+    unsigned int channel;
+    unsigned int note;
+    bool done;
 };
 
 class AppState
@@ -80,6 +91,8 @@ public:
     std::chrono::milliseconds::rep _playTime;
     std::chrono::milliseconds::rep _maxPlayTime;
     std::vector<TrackRegion> regionsByTrack[NUM_MIXER_TRACKS];
+
+    std::vector<tempnote> _tempnotes;
 };
 
 #endif // APPSTATE_H

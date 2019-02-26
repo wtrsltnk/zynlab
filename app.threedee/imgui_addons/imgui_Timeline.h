@@ -181,7 +181,7 @@ void TimelineStart(const char *str_id)
     s_column_width = (GetColumnWidth(1) - GImGui->Style.ScrollbarSize);
 
     auto start = s_cursor_pos + ImVec2(TIMELINE_RADIUS, 0);
-    auto end = s_cursor_pos + ImVec2(timeToScreenX(*s_max_value), s_row_height);
+    auto end = s_cursor_pos + ImVec2(timeToScreenX(*s_max_value) + TIMELINE_RADIUS, s_row_height);
     auto active_color = s_timeline_display_index % 2 ? ColorConvertFloat4ToU32(color1) : ColorConvertFloat4ToU32(color2);
 
     win->DrawList->AddRectFilled(start, end, active_color);

@@ -30,6 +30,14 @@ TrackRegion::~TrackRegion()
     CleanupPreviewImage();
 }
 
+void TrackRegion::ClearAllNotes()
+{
+    for (int i = 0; i < NUM_MIDI_NOTES; i++)
+    {
+        eventsByNote[i].clear();
+    }
+}
+
 void TrackRegion::CleanupPreviewImage()
 {
     if (previewImage != 0)
@@ -37,6 +45,7 @@ void TrackRegion::CleanupPreviewImage()
         glDeleteTextures(1, &previewImage);
     }
 }
+
 struct colour
 {
     unsigned char r, g, b;
