@@ -88,7 +88,7 @@ bool CullTimeLine()
 
 float timeToScreenX(timestep time)
 {
-    return float(s_column_width * float(time) / s_max_timeline_value);
+    return float(s_column_width * float(time) / s_max_timeline_value) + TIMELINE_RADIUS;
 }
 
 timestep screenXToTime(float screenX)
@@ -112,7 +112,6 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
     TestSnapFloor();
 
     int const label_column_width = 60;
-    ImGuiWindow *win = GetCurrentWindow();
 
     // reset global variables
     s_max_timeline_value = 0.f;
@@ -124,18 +123,18 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
     s_snapping = snapping;
     if (s_snapping <= 0) s_snapping = 100;
 
-    auto timeline_length = timestep((*s_max_value) * horizontal_zoom) / 1000.0f;
+    float const timeline_length = timestep((*s_max_value) * horizontal_zoom) / 1000.0f;
 
     SetNextWindowContentSize(ImVec2(label_column_width + GetStyle().ItemInnerSpacing.x + timeline_length, s_row_height * opt_exact_num_rows));
 
-    auto contentHeight = GetWindowContentRegionMax().y - (GetTextLineHeightWithSpacing() * 2);
-    if (BeginChild(str_id, ImVec2(0, contentHeight), false, ImGuiWindowFlags_HorizontalScrollbar))
+    ImVec2 const contentSize = ImVec2(0, GetWindowContentRegionMax().y - (GetTextLineHeightWithSpacing() * 2));
+    if (BeginChild(str_id, contentSize, false, ImGuiWindowFlags_HorizontalScrollbar))
     {
         PushStyleColor(ImGuiCol_Column, GImGui->Style.Colors[ImGuiCol_Border]);
         Columns(2, str_id);
         SetColumnWidth(0, label_column_width);
 
-        const float contentRegionWidth = GetWindowContentRegionWidth();
+        float const contentRegionWidth = GetWindowContentRegionWidth();
         s_max_timeline_value = s_max_value != nullptr ? (*s_max_value) : (timestep(contentRegionWidth) * 850);
         if (opt_exact_num_rows > 0)
         {
@@ -171,10 +170,11 @@ void TimelineStart(const char *str_id)
 
     if (CullTimeLine()) return; // item culling
 
-    ImGuiWindow *win = GetCurrentWindow();
-    const float columnOffset = GetColumnOffset(1) + GetScrollX();
-    const ImVec4 color1 = GetStyle().Colors[ImGuiCol_Border] * ImVec4(1.0f, 1.0f, 1.0f, 0.3f);
-    const ImVec4 color2 = GetStyle().Colors[ImGuiCol_Border] * ImVec4(1.0f, 1.0f, 1.0f, 0.2f);
+    ImGuiWindow const *const win = GetCurrentWindow();
+
+    float const columnOffset = GetColumnOffset(1) + GetScrollX();
+    ImVec4 const color1 = GetStyle().Colors[ImGuiCol_Border] * ImVec4(1.0f, 1.0f, 1.0f, 0.3f);
+    ImVec4 const color2 = GetStyle().Colors[ImGuiCol_Border] * ImVec4(1.0f, 1.0f, 1.0f, 0.2f);
 
     s_str_id = str_id;
     s_cursor_pos = ImVec2(GetWindowContentRegionMin().x + win->Pos.x + columnOffset, win->DC.CursorPos.y);
@@ -185,20 +185,19 @@ void TimelineStart(const char *str_id)
     NextColumn();
     s_column_width = (GetColumnWidth(1) - GImGui->Style.ScrollbarSize);
 
-    auto start = s_cursor_pos + ImVec2(timeToScreenX(0) + TIMELINE_RADIUS, 0);
-    auto end = s_cursor_pos + ImVec2(timeToScreenX(*s_max_value) + TIMELINE_RADIUS, s_row_height);
-    auto active_color = s_timeline_display_index % 2 ? ColorConvertFloat4ToU32(color1) : ColorConvertFloat4ToU32(color2);
+    ImVec2 const start = s_cursor_pos + ImVec2(timeToScreenX(0), 0);
+    ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(*s_max_value), s_row_height);
+    ImU32 const active_color = s_timeline_display_index % 2 ? ColorConvertFloat4ToU32(color1) : ColorConvertFloat4ToU32(color2);
+    ImU32 const line_color = ColorConvertFloat4ToU32(ImVec4(0.21f, 0.21f, 0.21f, 1.0f));
+    ImU32 const accent_line_color = ColorConvertFloat4ToU32(ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
 
     win->DrawList->AddRectFilled(start, end, active_color);
-
-    const ImU32 line_color = ColorConvertFloat4ToU32(ImVec4(0.21f, 0.21f, 0.21f, 1.0f));
-    const ImU32 accent_line_color = ColorConvertFloat4ToU32(ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
 
     // Draw black vertical lines (inside scrolling area)
     int i = 0;
     while ((s_snapping * i) <= s_max_timeline_value)
     {
-        ImVec2 linePos = s_cursor_pos + ImVec2(float(i) * timeToScreenX(s_snapping) + TIMELINE_RADIUS, 0);
+        ImVec2 const linePos = s_cursor_pos + ImVec2(timeToScreenX(s_snapping * i), 0);
         win->DrawList->AddLine(linePos, linePos + ImVec2(0, s_row_height), i % 4 ? line_color : accent_line_color);
         i++;
     }
@@ -210,11 +209,9 @@ bool TimelineEnd(timestep *newValues)
 
     bool result = false;
     ImGuiWindow *win = GetCurrentWindow();
-    const ImU32 active_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
-
-    auto nextPos = s_cursor_pos + ImVec2(0, s_row_height);
-
-    timestep end_new_value = snappedValueFromMouse();
+    ImU32 const active_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
+    ImVec2 const nextPos = s_cursor_pos + ImVec2(0, s_row_height);
+    timestep const end_new_value = snappedValueFromMouse();
 
     SetCursorScreenPos(s_cursor_pos);
     if (InvisibleButton(s_str_id, ImVec2(GetWindowContentRegionWidth(), s_row_height)) && newValues != nullptr)
@@ -241,8 +238,8 @@ bool TimelineEnd(timestep *newValues)
 
     if (IsItemHovered() && IsItemActive() && IsMouseDragging(0))
     {
-        auto start = s_cursor_pos + ImVec2(timeToScreenX(s_start_new_value) + TIMELINE_RADIUS, 0);
-        auto end = s_cursor_pos + ImVec2(timeToScreenX(end_new_value) + TIMELINE_RADIUS, s_row_height);
+        ImVec2 const start = s_cursor_pos + ImVec2(timeToScreenX(s_start_new_value), 0);
+        ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(end_new_value), s_row_height);
 
         win->DrawList->AddRectFilled(start, end, active_color);
 
@@ -265,19 +262,17 @@ void TimelineReadOnlyEvent(timestep *values, unsigned int image, ImU32 const tin
         return; // item culling
     }
 
-    ImGuiWindow *win = GetCurrentWindow();
+    ImGuiWindow const *const win = GetCurrentWindow();
 
     PushID(s_event_counter++);
 
-    auto start = s_cursor_pos + ImVec2(timeToScreenX(values[0]) + TIMELINE_RADIUS, 0);
-    auto end = s_cursor_pos + ImVec2(timeToScreenX(values[1]) + TIMELINE_RADIUS, s_row_height - 4.0f);
+    ImVec2 const start = s_cursor_pos + ImVec2(timeToScreenX(values[0]), 0);
+    ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(values[1]), s_row_height - 4.0f);
 
-    ImU32 imageColor = tintColor;
-
-    auto rgba = ColorConvertU32ToFloat4(tintColor);
+    ImVec4 const rgba = ColorConvertU32ToFloat4(tintColor);
     float hsv[3];
     ColorConvertRGBtoHSV(rgba.x, rgba.y, rgba.z, hsv[0], hsv[1], hsv[2]);
-    imageColor = ImColor::HSV(hsv[0], hsv[1], hsv[2] * 0.5f);
+    ImU32 const imageColor = ImColor::HSV(hsv[0], hsv[1], hsv[2] * 0.5f);
 
     if (image > 0)
     {
@@ -299,18 +294,19 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
         return false; // item culling
     }
 
-    ImGuiWindow *win = GetCurrentWindow();
-    const ImU32 inactive_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
-    const ImU32 active_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
-    const ImU32 line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
-    const bool isMouseDraggingZero = IsMouseDragging(0);
+    ImGuiWindow const *const win = GetCurrentWindow();
+
+    ImU32 const inactive_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
+    ImU32 const active_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
+    ImU32 const line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
+    bool const isMouseDraggingZero = IsMouseDragging(0);
     bool changed = false;
     bool hovered = false;
     bool allhovered = false;
     timestep newValues[2]{values[0], values[1]};
 
-    auto start = s_cursor_pos + ImVec2(timeToScreenX(values[0]) + TIMELINE_RADIUS, 0);
-    auto end = s_cursor_pos + ImVec2(timeToScreenX(values[1]) + TIMELINE_RADIUS, s_row_height);
+    ImVec2 const start = s_cursor_pos + ImVec2(timeToScreenX(values[0]), 0);
+    ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(values[1]), s_row_height);
 
     PushID(s_event_counter++);
 
@@ -321,8 +317,8 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
     InvisibleButton(s_str_id, (end - start));
     if (IsItemActive() && isMouseDraggingZero)
     {
-        auto move_event = snappedValueFromMouse();
-        const float deltaX = move_event - s_start_move_event;
+        timestep const move_event = snappedValueFromMouse();
+        float const deltaX = move_event - s_start_move_event;
         if (std::fabs(deltaX) > 0.001f)
         {
             newValues[0] += deltaX;
@@ -377,8 +373,8 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
         ImVec2 const handleSize = ImVec2(TIMELINE_RADIUS * 2, s_row_height);
         for (int i = 0; i < 2; ++i)
         {
-            auto pos = s_cursor_pos + ImVec2(timeToScreenX(values[i]) + TIMELINE_RADIUS, 0.0f);
-            auto offset = (i == 1 ? ImVec2(0, 0) : ImVec2(-handleSize.x, 0));
+            ImVec2 const pos = s_cursor_pos + ImVec2(timeToScreenX(values[i]), 0.0f);
+            ImVec2 const offset = (i == 1 ? ImVec2(0, 0) : ImVec2(-handleSize.x, 0));
 
             SetCursorScreenPos(pos + offset);
 
@@ -387,8 +383,8 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
             InvisibleButton(s_str_id, handleSize);
             if (IsItemActive() || IsItemHovered())
             {
-                ImVec2 a(pos.x, GetWindowContentRegionMin().y + win->Pos.y + win->Scroll.y);
-                ImVec2 b(pos.x, GetWindowContentRegionMax().y + win->Pos.y + win->Scroll.y);
+                ImVec2 const a(pos.x, GetWindowContentRegionMin().y + win->Pos.y + win->Scroll.y);
+                ImVec2 const b(pos.x, GetWindowContentRegionMax().y + win->Pos.y + win->Scroll.y);
                 win->DrawList->AddLine(a - ImVec2(1, 0), b - ImVec2(1, 0), line_color, 1.0f);
                 win->DrawList->AddLine(a + ImVec2(1, 0), b + ImVec2(1, 0), line_color, 1.0f);
                 hovered = true;
@@ -408,10 +404,10 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
 
             if (hovered)
             {
-                color = ColorConvertFloat4ToU32(ImVec4(1, 1, 1, 0.5f));
-                start = pos + offset;
-                end = start + handleSize;
-                win->DrawList->AddRectFilled(start, end, color);
+                win->DrawList->AddRectFilled(
+                    pos + offset,
+                    pos + offset + handleSize,
+                    ColorConvertFloat4ToU32(ImVec4(1, 1, 1, 0.5f)));
             }
         }
     }
@@ -426,7 +422,7 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
 
     if (values[0] > values[1])
     {
-        timestep tmp = values[0];
+        timestep const tmp = values[0];
         values[0] = values[1];
         values[1] = tmp;
     }
@@ -462,16 +458,16 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
 
     NextColumn();
 
-    ImGuiWindow *win = GetCurrentWindow();
+    ImGuiWindow const *const win = GetCurrentWindow();
 
-    const ImU32 color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
-    const ImU32 moving_line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
+    ImU32 const color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
+    ImU32 const moving_line_color = ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ColumnActive]);
 
     // Draw moving vertical line
     if (*current_time > 0 && *current_time < s_max_timeline_value)
     {
-        auto top = ImVec2(s_cursor_pos.x + timeToScreenX(*current_time) + TIMELINE_RADIUS, GetWindowContentRegionMin().y + win->Pos.y);
-        auto bottom = top + ImVec2(0, s_row_height * s_timeline_num_rows);
+        ImVec2 const top = ImVec2(s_cursor_pos.x + timeToScreenX(*current_time), GetWindowContentRegionMin().y + win->Pos.y);
+        ImVec2 const bottom = top + ImVec2(0, s_row_height * s_timeline_num_rows);
         win->DrawList->AddLine(top, bottom, moving_line_color);
     }
 
@@ -481,9 +477,9 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
 
     EndChild();
 
-    auto buttonstart = GetCursorScreenPos();
-    auto start = ImVec2(s_cursor_pos.x + timeToScreenX(0) + TIMELINE_RADIUS, GetCursorScreenPos().y);
-    auto end = ImVec2(s_cursor_pos.x + timeToScreenX(*s_max_value) + TIMELINE_RADIUS, GetCursorScreenPos().y + GetItemsLineHeightWithSpacing());
+    ImVec2 const buttonstart = GetCursorScreenPos();
+    ImVec2 const start = ImVec2(s_cursor_pos.x + timeToScreenX(0), GetCursorScreenPos().y);
+    ImVec2 const end = ImVec2(s_cursor_pos.x + timeToScreenX(*s_max_value), GetCursorScreenPos().y + GetItemsLineHeightWithSpacing());
 
     SetCursorScreenPos(buttonstart);
     PushID(-101);
@@ -522,7 +518,7 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
     }
     else
     {
-        ImVec2 median(s_cursor_pos.x + timeToScreenX(*current_time) + TIMELINE_RADIUS, end.y);
+        ImVec2 median(s_cursor_pos.x + timeToScreenX(*current_time), end.y);
         win->DrawList->AddRectFilled(start, median, timeline_running_color);
         median.y = start.y;
         win->DrawList->AddRectFilled(median, end, color);
