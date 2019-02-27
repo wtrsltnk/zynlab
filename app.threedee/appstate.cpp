@@ -17,7 +17,13 @@ AppState::AppState(class Mixer *mixer, class IBankManager *banks)
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1),
       _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150),
       _bpm(120), _isPlaying(false), _playTime(0), _maxPlayTime(16000)
-{}
+{
+    TrackRegion region;
+    region.startAndEnd[0] = 0;
+    region.startAndEnd[1] = 4000;
+    regionsByTrack[0].push_back(region);
+    _currentPattern = 0;
+}
 
 AppState::~AppState() = default;
 
