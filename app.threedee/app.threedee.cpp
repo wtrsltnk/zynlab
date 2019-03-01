@@ -2,6 +2,9 @@
 
 #include <zyn.mixer/Track.h>
 #include <zyn.nio/MidiInputManager.h>
+#include <zyn.seq/ArpModes.h>
+#include <zyn.seq/Chords.h>
+#include <zyn.seq/NotesGenerator.h>
 #include <zyn.synth/ADnoteParams.h>
 
 #include "examples/imgui_impl_glfw.h"
@@ -17,18 +20,18 @@
 #include <map>
 
 char const *const NoteNames[] = {
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-    "A",
-    "A#",
     "B",
+    "A#",
+    "A",
+    "G#",
+    "G",
+    "F#",
+    "F",
+    "E",
+    "D#",
+    "D",
+    "C#",
+    "C",
 };
 
 unsigned int NoteNameCount = 12;
@@ -46,16 +49,6 @@ timestep SnappingModeValues[] = {
     1000 / 4,
     (1000 / 4) / 4,
 };
-
-char const *const ArpModeNames[] = {
-    "Up",
-    "Down",
-    "Up and Down inclusive",
-    "Up and Down exclusive",
-    "Down and Up inclusive",
-    "Down and Up exclusive",
-};
-unsigned int ArpModeCount = 6;
 
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
@@ -292,6 +285,7 @@ void AppThreeDee::Tick()
 
 void AppThreeDee::PianoRollEditor()
 {
+    static struct TrackRegionEvent *selectedEvent = nullptr;
     if (ImGui::Begin("Pianoroll editor"))
     {
         if (_state._currentTrack < 0 || _state._currentTrack >= NUM_MIXER_TRACKS)
@@ -339,7 +333,7 @@ void AppThreeDee::PianoRollEditor()
 
         timestep elapsedTime = (static_cast<unsigned>(_state._playTime)) - region.startAndEnd[0];
 
-        static unsigned int _arpFromNote = 65;
+        static unsigned int _baseNote = 65;
 
         if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
         {
@@ -347,7 +341,6 @@ void AppThreeDee::PianoRollEditor()
             auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
 
             bool regionIsModified = false;
-            static struct timelineEvent *selectedEvent = nullptr;
             if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, 88, SnappingModeValues[current_snapping_mode]))
             {
                 for (unsigned int c = NUM_MIDI_NOTES - 1; c > 0; c--)
@@ -358,7 +351,6 @@ void AppThreeDee::PianoRollEditor()
                     if (ImGui::IsItemClicked())
                     {
                         TempNoteOn(track->Prcvchn, c, 400);
-                        _arpFromNote = c;
                     }
 
                     for (size_t i = 0; i < region.eventsByNote[c].size(); i++)
@@ -368,13 +360,14 @@ void AppThreeDee::PianoRollEditor()
                         {
                             regionIsModified = true;
                             selectedEvent = &(region.eventsByNote[c][i]);
+                            _baseNote = c;
                         }
                     }
                     timestep new_values[2];
                     if (ImGui::TimelineEnd(new_values))
                     {
                         regionIsModified = true;
-                        timelineEvent e{
+                        TrackRegionEvent e{
                             {std::min(new_values[0], new_values[1]),
                              std::max(new_values[0], new_values[1])},
                             static_cast<unsigned char>(c),
@@ -382,6 +375,7 @@ void AppThreeDee::PianoRollEditor()
 
                         region.eventsByNote[c].push_back(e);
                         selectedEvent = &(region.eventsByNote[c].back());
+                        _baseNote = c;
                     }
                 }
             }
@@ -411,7 +405,7 @@ void AppThreeDee::PianoRollEditor()
 
             if (regionIsModified)
             {
-                region.UpdatePreviewImage();
+                UpdatePreviewImage(region);
             }
         }
         ImGui::EndChild();
@@ -427,17 +421,34 @@ void AppThreeDee::PianoRollEditor()
 
         ImGui::SameLine();
 
-        ImGui::Button("Generate Arp");
-
-        ImGui::SameLine();
-
-        ImGui::Text("From: %4s%d going", NoteNames[(107 - _arpFromNote) % NoteNameCount], (107 - _arpFromNote) / NoteNameCount - 1);
-
-        ImGui::SameLine();
-
         static unsigned char selectedArpMode = 0;
-        ImGui::PushItemWidth(250);
-        ImGui::DropDown("##ArpMode", selectedArpMode, &ArpModeNames[0], ArpModeCount, "Arp Mode");
+        static unsigned char selectedChord = 0;
+        static int skips = 1;
+        if (ImGui::Button("Generate Notes from selection"))
+        {
+            NotesGeneratorOptions options = {
+                ArpModes::ToEnum(selectedArpMode),
+                Chords::ToEnum(selectedChord),
+                skips,
+            };
+            NotesGenerator generator(options);
+            generator.Generate(_state.regionsByTrack[_state._currentTrack][_state._currentPattern], *selectedEvent);
+        }
+
+        ImGui::SameLine();
+
+        ImGui::PushItemWidth(200);
+        ImGui::DropDown("##ArpMode", selectedArpMode, &(ArpModes::Names[0]), ArpModes::Enum::Count, "Arpeggio Mode");
+
+        ImGui::SameLine();
+
+        ImGui::PushItemWidth(200);
+        ImGui::DropDown("##Chord", selectedChord, &(Chords::Names[0]), (Chords::Enum::Count), "Chord");
+
+        ImGui::SameLine();
+
+        ImGui::PushItemWidth(200);
+        ImGui::SliderInt("Skips", &skips, 0, 4);
     }
     ImGui::End();
 }
@@ -489,7 +500,7 @@ void AppThreeDee::RegionEditor()
                         {
                             _state._currentTrack = trackIndex;
                             _state._currentPattern = int(i);
-                            regions[i].UpdatePreviewImage();
+                            UpdatePreviewImage(regions[i]);
                         }
                         auto x = regions[i].startAndEnd[1] - regions[i].startAndEnd[0];
                         for (int j = 1; j <= regions[i].repeat; j++)
@@ -505,7 +516,7 @@ void AppThreeDee::RegionEditor()
                         _state._currentTrack = trackIndex;
                         _state._currentPattern = int(_state.regionsByTrack[trackIndex].size());
 
-                        newRegion.UpdatePreviewImage();
+                        UpdatePreviewImage(newRegion);
                         _state.regionsByTrack[trackIndex].push_back(newRegion);
                     }
                 }

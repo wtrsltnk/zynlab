@@ -1,9 +1,9 @@
 #ifndef SEQUENCER_H
 #define SEQUENCER_H
 
-#include "Pattern.h"
 #include <chrono>
 #include <map>
+#include <set>
 #include <zyn.common/globals.h>
 
 class TrackPatternNote

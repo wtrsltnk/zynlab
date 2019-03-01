@@ -4,6 +4,7 @@
 #include "imgui_addons/imgui_common.h"
 #include <vector>
 #include <zyn.common/globals.h>
+#include <zyn.seq/TrackRegion.h>
 
 extern char const *const AdSynthEditorID;
 extern char const *const SubSynthEditorID;
@@ -22,29 +23,8 @@ extern unsigned int SnappingModeCount;
 extern timestep SnappingModeValues[];
 extern char const *const ArpModeNames[];
 extern unsigned int ArpModeCount;
-
-struct timelineEvent
-{
-    timestep values[2];
-    unsigned char note;
-    unsigned char velocity;
-};
-
-class TrackRegion
-{
-public:
-    TrackRegion();
-    virtual ~TrackRegion();
-
-    void CleanupPreviewImage();
-    void UpdatePreviewImage();
-    void ClearAllNotes();
-
-    unsigned int previewImage;
-    timestep startAndEnd[2];
-    std::vector<struct timelineEvent> eventsByNote[NUM_MIDI_NOTES];
-    int repeat;
-};
+extern char const *const ChordNames[];
+extern unsigned int ChordCount;
 
 struct tempnote
 {
@@ -53,6 +33,9 @@ struct tempnote
     unsigned int note;
     bool done;
 };
+
+void CleanupPreviewImage(unsigned int previewImage);
+void UpdatePreviewImage(TrackRegion &region);
 
 class AppState
 {

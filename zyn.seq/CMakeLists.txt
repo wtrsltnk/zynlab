@@ -3,8 +3,16 @@ cmake_minimum_required(VERSION 2.8)
 project(zyn.seq)
 
 add_library(zyn.seq STATIC
+    ArpModes.cpp
+    ArpModes.h
+    Chords.cpp
+    Chords.h
     Sequencer.cpp
     Sequencer.h
+    TrackRegion.cpp
+    TrackRegion.h
+    NotesGenerator.cpp
+    NotesGenerator.h
     )
 
 target_include_directories(zyn.seq
@@ -35,8 +43,8 @@ install(
 install(
     FILES
         ${zyn.seq_SOURCE_DIR}/Sequencer.h
-        ${zyn.seq_SOURCE_DIR}/SequencerStep.h
-        ${zyn.seq_SOURCE_DIR}/SequencerStrip.h
+        ${zyn.seq_SOURCE_DIR}/TrackRegion.h
+        ${zyn.seq_SOURCE_DIR}/NotesGenerator.h
     DESTINATION
         "include/zyn/seq"
     )

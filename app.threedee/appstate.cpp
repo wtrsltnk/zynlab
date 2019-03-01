@@ -27,31 +27,6 @@ AppState::AppState(class Mixer *mixer, class IBankManager *banks)
 
 AppState::~AppState() = default;
 
-TrackRegion::TrackRegion()
-    : previewImage(0), repeat(0)
-{}
-
-TrackRegion::~TrackRegion()
-{
-    CleanupPreviewImage();
-}
-
-void TrackRegion::ClearAllNotes()
-{
-    for (int i = 0; i < NUM_MIDI_NOTES; i++)
-    {
-        eventsByNote[i].clear();
-    }
-}
-
-void TrackRegion::CleanupPreviewImage()
-{
-    if (previewImage != 0)
-    {
-        glDeleteTextures(1, &previewImage);
-    }
-}
-
 struct colour
 {
     unsigned char r, g, b;
@@ -69,13 +44,21 @@ void setPixel(colour *buffer, int x, int y, int w, int h)
     buffer[(y * w) + x].b = 155;
 }
 
-void TrackRegion::UpdatePreviewImage()
+void CleanupPreviewImage(unsigned int previewImage)
+{
+    if (previewImage != 0)
+    {
+        glDeleteTextures(1, &previewImage);
+    }
+}
+
+void UpdatePreviewImage(TrackRegion &region)
 {
     int minNote = 999;
     int maxNote = -999;
     for (int i = 0; i < NUM_MIDI_NOTES; i++)
     {
-        if (!eventsByNote[i].empty())
+        if (!region.eventsByNote[i].empty())
         {
             if (minNote > i) minNote = i;
             if (maxNote < i) maxNote = i;
@@ -87,16 +70,16 @@ void TrackRegion::UpdatePreviewImage()
 
     if (maxNote < minNote)
     {
-        CleanupPreviewImage();
+        CleanupPreviewImage(region.previewImage);
         return;
     }
 
-    if (previewImage == 0)
+    if (region.previewImage == 0)
     {
-        glGenTextures(1, &previewImage);
+        glGenTextures(1, &(region.previewImage));
     }
 
-    auto width = startAndEnd[1] - startAndEnd[0];
+    auto width = region.startAndEnd[1] - region.startAndEnd[0];
     auto height = maxNote - minNote;
 
     auto imageHeight = 8;
@@ -115,13 +98,13 @@ void TrackRegion::UpdatePreviewImage()
         {
             continue;
         }
-        if (eventsByNote[i + minNote].empty())
+        if (region.eventsByNote[i + minNote].empty())
         {
             continue;
         }
 
         int y = std::abs((imageHeight - 1) - int(float(i) * (float(imageHeight - 1) / float(height))));
-        for (auto &n : eventsByNote[i + minNote])
+        for (auto &n : region.eventsByNote[i + minNote])
         {
             int xFrom = int(float(n.values[0] / width) * 128.0f);
             int xTo = int(float(n.values[1] / width) * 128.0f);
@@ -132,7 +115,7 @@ void TrackRegion::UpdatePreviewImage()
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, previewImage);
+    glBindTexture(GL_TEXTURE_2D, region.previewImage);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
