@@ -5,6 +5,7 @@ struct ArpModes
 {
     enum Enum
     {
+        OneNote,
         OnlyChords,
         Up,
         Down,

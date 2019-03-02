@@ -93,6 +93,18 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
     {
         switch (_options.ArpMode)
         {
+            case ArpModes::Enum::OneNote:
+            {
+                TrackRegionEvent a = {
+                    {start, start + length},
+                    baseEvent.note,
+                    velocity,
+                };
+                region.eventsByNote[baseEvent.note].push_back(a);
+
+                start += (length + _options.Space * length);
+                break;
+            }
             case ArpModes::Enum::OnlyChords:
             {
                 for (auto n : notes)
@@ -105,7 +117,7 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     region.eventsByNote[n].push_back(a);
                 }
 
-                start += (length + _options.Skips * length);
+                start += (length + _options.Space * length);
                 break;
             }
             case ArpModes::Enum::Up:
@@ -119,7 +131,7 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     };
                     region.eventsByNote[n].push_back(a);
 
-                    start += (length + _options.Skips * length);
+                    start += (length + _options.Space * length);
                 }
                 break;
             }
@@ -134,7 +146,7 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     };
                     region.eventsByNote[n].push_back(a);
 
-                    start += (length + _options.Skips * length);
+                    start += (length + _options.Space * length);
                 }
                 break;
             }
@@ -150,7 +162,7 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     };
                     region.eventsByNote[n].push_back(a);
 
-                    start += (length + _options.Skips * length);
+                    start += (length + _options.Space * length);
                 }
                 break;
             }
@@ -166,7 +178,7 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     };
                     region.eventsByNote[n].push_back(a);
 
-                    start += (length + _options.Skips * length);
+                    start += (length + _options.Space * length);
                 }
                 break;
             }
@@ -183,7 +195,7 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     };
                     region.eventsByNote[n].push_back(a);
 
-                    start += (length + _options.Skips * length);
+                    start += (length + _options.Space * length);
                     lastNote = a;
                 }
                 break;
@@ -201,7 +213,7 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     };
                     region.eventsByNote[n].push_back(a);
 
-                    start += (length + _options.Skips * length);
+                    start += (length + _options.Space * length);
                     lastNote = a;
                 }
                 break;

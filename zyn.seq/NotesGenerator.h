@@ -10,7 +10,7 @@ class NotesGeneratorOptions
 public:
     ArpModes::Enum ArpMode;
     Chords::Enum Chord;
-    int Skips;
+    int Space;
 };
 
 class NotesGenerator

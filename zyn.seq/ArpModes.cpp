@@ -1,5 +1,6 @@
 #include "ArpModes.h"
 
+char const *const ARP_MODE_NAME_ONLY_ONE_NOTE = "One note";
 char const *const ARP_MODE_NAME_ONLY_CHORDS = "Only chords";
 char const *const ARP_MODE_NAME_UP = "Up";
 char const *const ARP_MODE_NAME_DOWN = "Down";
@@ -12,6 +13,8 @@ char const *ArpModes::ToString(ArpModes::Enum arpMode)
 {
     switch (arpMode)
     {
+        case Enum::OneNote:
+            return ARP_MODE_NAME_ONLY_ONE_NOTE;
         case Enum::OnlyChords:
             return ARP_MODE_NAME_ONLY_CHORDS;
         case Enum::Up:
@@ -42,6 +45,7 @@ ArpModes::Enum ArpModes::ToEnum(unsigned int value)
 }
 
 char const *const ArpModes::Names[] = {
+    ARP_MODE_NAME_ONLY_ONE_NOTE,
     ARP_MODE_NAME_ONLY_CHORDS,
     ARP_MODE_NAME_UP,
     ARP_MODE_NAME_DOWN,

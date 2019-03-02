@@ -48,14 +48,14 @@ static float s_column_width = 0;
 
 timestep snap(timestep value, timestep step = s_snapping)
 {
-    auto rounded = std::round(double(value / 1000.0) / double(step / 1000.0));
+    auto rounded = std::round(double(value / 1024.0) / double(step / 1024.0));
     return timestep(rounded * step);
 }
 
 void TestSnap()
 {
-    auto snap1 = snap(656, 1000);
-    TEST(snap1 == 1000);
+    auto snap1 = snap(656, 1024);
+    TEST(snap1 == 1024);
 
     auto snap2 = snap(570, 200);
     TEST(snap2 == 600);
@@ -66,13 +66,13 @@ void TestSnap()
 
 timestep snapFloor(timestep value, timestep step = s_snapping)
 {
-    auto floored = std::floor(double(value / 1000.0) / double(step / 1000.0));
+    auto floored = std::floor(double(value / 1024.0) / double(step / 1024.0));
     return timestep(floored * step);
 }
 
 void TestSnapFloor()
 {
-    auto snap1 = snapFloor(656, 1000);
+    auto snap1 = snapFloor(656, 1024);
     TEST(snap1 == 0);
 
     auto snap2 = snapFloor(570, 200);
@@ -124,7 +124,7 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
     s_snapping = snapping;
     if (s_snapping <= 0) s_snapping = 100;
 
-    float const timeline_length = timestep((*s_max_value) * horizontal_zoom) / 1000.0f;
+    float const timeline_length = timestep((*s_max_value) * horizontal_zoom) / 1024.0f;
 
     SetNextWindowContentSize(ImVec2(label_column_width + GetStyle().ItemInnerSpacing.x + timeline_length, s_row_height * opt_exact_num_rows));
 
@@ -247,7 +247,7 @@ bool TimelineEnd(timestep *newValues)
         win->DrawList->AddRectFilled(start, end, active_color);
 
         BeginTooltip();
-        Text("%.1f-%.1f", double(s_start_new_value / 1000.0), double(end_new_value / 1000.0));
+        Text("%.1f-%.1f", double(s_start_new_value / 1024.0), double(end_new_value / 1024.0));
         EndTooltip();
     }
 
@@ -330,7 +330,7 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
         }
         changed = hovered = allhovered = true;
         BeginTooltip();
-        Text("%.1f-%.1f", double(newValues[0] / 1000.0), double(newValues[1] / 1000.0));
+        Text("%.1f-%.1f", double(newValues[0] / 1024.0), double(newValues[1] / 1024.0));
         EndTooltip();
     }
     else if (IsItemHovered() && !isMouseDraggingZero)
@@ -391,7 +391,7 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
                 win->DrawList->AddLine(a - ImVec2(1, 0), b - ImVec2(1, 0), line_color, 1.0f);
                 win->DrawList->AddLine(a + ImVec2(1, 0), b + ImVec2(1, 0), line_color, 1.0f);
                 hovered = true;
-                SetTooltip("%.1f", double(values[i] / 1000.0));
+                SetTooltip("%.1f", double(values[i] / 1024.0));
             }
             if (IsItemActive())
             {
@@ -489,14 +489,14 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
     PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0));
     if (Button("+", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
     {
-        *s_max_value += 4000;
+        *s_max_value += 4 * 1024;
         *s_max_value -= (*s_max_value) % 4;
         changed = true;
     }
     SameLine();
     if (Button("-", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
     {
-        *s_max_value -= 4000;
+        *s_max_value -= 4 * 1024;
         *s_max_value -= (*s_max_value) % 4;
         changed = true;
     }

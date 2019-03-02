@@ -45,9 +45,9 @@ char const *const SnappingModes[] = {
 unsigned int SnappingModeCount = 3;
 
 timestep SnappingModeValues[] = {
-    1000,
-    1000 / 4,
-    (1000 / 4) / 4,
+    1024,
+    1024 / 4,
+    (1024 / 4) / 4,
 };
 
 static ImVec4 clear_color = ImColor(90, 90, 100);
@@ -258,7 +258,7 @@ void AppThreeDee::Tick()
 
         auto prevPlayTime = (_state._playTime);
         _state._playTime += deltaTime;
-        auto currentPlayTime = (_state._playTime);
+        auto currentPlayTime = _state._playTime;
 
         for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
         {
@@ -276,7 +276,7 @@ void AppThreeDee::Tick()
             }
         }
 
-        if (_state._playTime > _state._maxPlayTime)
+        if (_state._playTime >= _state._maxPlayTime)
         {
             _state._playTime = 0;
         }
@@ -423,13 +423,13 @@ void AppThreeDee::PianoRollEditor()
 
         static unsigned char selectedArpMode = 0;
         static unsigned char selectedChord = 0;
-        static int skips = 1;
+        static int space = 1;
         if (ImGui::Button("Generate Notes from selection"))
         {
             NotesGeneratorOptions options = {
                 ArpModes::ToEnum(selectedArpMode),
                 Chords::ToEnum(selectedChord),
-                skips,
+                space,
             };
             NotesGenerator generator(options);
             generator.Generate(_state.regionsByTrack[_state._currentTrack][_state._currentPattern], *selectedEvent);
@@ -448,7 +448,7 @@ void AppThreeDee::PianoRollEditor()
         ImGui::SameLine();
 
         ImGui::PushItemWidth(200);
-        ImGui::SliderInt("Skips", &skips, 0, 4);
+        ImGui::SliderInt("Space", &space, 0, 16);
     }
     ImGui::End();
 }
@@ -466,10 +466,10 @@ void AppThreeDee::RegionEditor()
         ImGui::SliderInt("##verticalZoom", &(_state._sequencerVerticalZoom), 30, 100, "vertical %d");
         ImGui::SameLine();
         ImGui::PushItemWidth(220);
-        int maxPlayTime = int(_state._maxPlayTime / 1000);
+        int maxPlayTime = int(_state._maxPlayTime / 1024);
         if (ImGui::SliderInt("##maxPlayTime", &maxPlayTime, 4, 200, "song length %d"))
         {
-            _state._maxPlayTime = maxPlayTime * 1000;
+            _state._maxPlayTime = maxPlayTime * 1024;
         }
 
         timestep elapsedTimeSequencer = _state._playTime % _state._maxPlayTime;
@@ -477,7 +477,7 @@ void AppThreeDee::RegionEditor()
         if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
         {
             timestep maxValue = _state._maxPlayTime;
-            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, NUM_MIXER_TRACKS, 1000))
+            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, NUM_MIXER_TRACKS, 1024))
             {
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
