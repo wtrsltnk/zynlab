@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "imgui_common.h"
+#include <zyn.seq/TrackRegion.h>
 
 namespace ImGui {
 // Definitions (header file)
@@ -189,7 +190,8 @@ void TimelineStart(const char *str_id)
     ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(*s_max_value), s_row_height);
     ImU32 const active_color = s_timeline_display_index % 2 ? ColorConvertFloat4ToU32(color1) : ColorConvertFloat4ToU32(color2);
     ImU32 const line_color = ColorConvertFloat4ToU32(ImVec4(0.21f, 0.21f, 0.21f, 1.0f));
-    ImU32 const accent_line_color = ColorConvertFloat4ToU32(ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+    ImU32 const accent_line_color = ColorConvertFloat4ToU32(ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+    ImU32 const beat_line_color = ColorConvertFloat4ToU32(ImVec4(0.35f, 0.40f, 0.45f, 1.0f));
 
     win->DrawList->AddRectFilled(start, end, active_color);
 
@@ -197,8 +199,9 @@ void TimelineStart(const char *str_id)
     int i = 0;
     while ((s_snapping * i) <= s_max_timeline_value)
     {
+        ImU32 const color = i % 4 ? line_color : i % 16 ? accent_line_color : beat_line_color;
         ImVec2 const linePos = s_cursor_pos + ImVec2(timeToScreenX(s_snapping * i), 0);
-        win->DrawList->AddLine(linePos, linePos + ImVec2(0, s_row_height), i % 4 ? line_color : accent_line_color);
+        win->DrawList->AddLine(linePos, linePos + ImVec2(0, s_row_height), color);
         i++;
     }
 }
