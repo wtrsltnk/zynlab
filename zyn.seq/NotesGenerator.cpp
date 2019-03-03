@@ -75,18 +75,20 @@ std::vector<unsigned char> notesFromChord(Chords::Enum chord, unsigned char base
     }
 }
 
-void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEvent)
+void NotesGenerator::Generate(RegionsManager *regionsManager, int trackIndex, int regionIndex, TrackRegionEvent const baseEvent)
 {
-    auto notes = notesFromChord(_options.Chord, baseEvent.note);
-    auto reverseNotes = std::vector<unsigned char>(notes);
+    TrackRegion &region = regionsManager->GetRegion(trackIndex, regionIndex);
+
+    std::vector<unsigned char> notes = notesFromChord(_options.Chord, baseEvent.note);
+    std::vector<unsigned char> reverseNotes(notes);
     std::reverse(std::begin(reverseNotes), std::end(reverseNotes));
 
-    auto start = baseEvent.values[0];
-    auto length = baseEvent.values[1] - baseEvent.values[0];
-    auto velocity = baseEvent.velocity;
-    auto regionLength = region.startAndEnd[1] - region.startAndEnd[0];
+    timestep start = baseEvent.values[0];
+    timestep length = baseEvent.values[1] - baseEvent.values[0];
+    timestep regionLength = region.startAndEnd[1] - region.startAndEnd[0];
+    unsigned char velocity = baseEvent.velocity;
 
-    region.ClearAllNotes();
+    regionsManager->RemoveRegionEvent(trackIndex, regionIndex, baseEvent);
 
     TrackRegionEvent lastNote;
     while (start + length < regionLength)
@@ -216,6 +218,10 @@ void NotesGenerator::Generate(TrackRegion &region, TrackRegionEvent const baseEv
                     start += (length + _options.Space * length);
                     lastNote = a;
                 }
+                break;
+            }
+            default:
+            {
                 break;
             }
         }

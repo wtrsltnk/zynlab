@@ -3,6 +3,7 @@
 
 #include "ArpModes.h"
 #include "Chords.h"
+#include "RegionsManager.h"
 #include "TrackRegion.h"
 
 class NotesGeneratorOptions
@@ -21,7 +22,7 @@ public:
     NotesGenerator(NotesGeneratorOptions options);
     virtual ~NotesGenerator();
 
-    void Generate(TrackRegion &region, TrackRegionEvent const baseEvent);
+    void Generate(RegionsManager *regionsManager, int trackIndex, int regionIndex, TrackRegionEvent const baseEvent);
 };
 
 #endif // NotesGenerator

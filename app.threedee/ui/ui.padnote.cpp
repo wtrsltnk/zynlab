@@ -41,6 +41,11 @@ void zyn::ui::PadNote::Render()
         return;
     }
 
+    if (ImGui::Button("Apply settings"))
+    {
+        parameters->applyparameters(_state->_mixer);
+    }
+
     if (ImGui::BeginTabBar("PADnoteTab"))
     {
         if (ImGui::BeginTabItem("Envelopes LFOs"))

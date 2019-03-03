@@ -267,7 +267,7 @@ void AppThreeDee::Tick()
             {
                 continue;
             }
-            for (auto &region : _state.regionsByTrack[trackIndex])
+            for (auto &region : _state._regions.GetRegionsByTrack(trackIndex))
             {
                 for (int i = 0; i <= region.repeat; i++)
                 {
@@ -295,15 +295,14 @@ void AppThreeDee::PianoRollEditor()
         }
 
         auto track = _state._mixer->GetTrack(_state._currentTrack);
-        auto &trackRegions = _state.regionsByTrack[_state._currentTrack];
 
-        if (_state._currentPattern < 0 || size_t(_state._currentPattern) >= trackRegions.size() || trackRegions.empty())
+        if (!_state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
         {
             ImGui::End();
             return;
         }
 
-        auto &region = trackRegions[size_t(_state._currentPattern)];
+        auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
         auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
 
         ImGui::Text("Zoom");
@@ -368,10 +367,13 @@ void AppThreeDee::PianoRollEditor()
                     {
                         regionIsModified = true;
                         TrackRegionEvent e{
-                            {std::min(new_values[0], new_values[1]),
-                             std::max(new_values[0], new_values[1])},
+                            {
+                                std::min(new_values[0], new_values[1]),
+                                std::max(new_values[0], new_values[1]),
+                            },
                             static_cast<unsigned char>(c),
-                            100};
+                            100,
+                        };
 
                         region.eventsByNote[c].push_back(e);
                         selectedEvent = &(region.eventsByNote[c].back());
@@ -383,22 +385,18 @@ void AppThreeDee::PianoRollEditor()
 
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)) && selectedEvent != nullptr)
             {
-                if (_state._currentTrack >= 0 && _state._currentTrack < NUM_MIXER_TRACKS)
+                if (_state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
                 {
-                    auto &trackRegions = _state.regionsByTrack[_state._currentTrack];
-                    if (_state._currentPattern >= 0 && size_t(_state._currentPattern) < trackRegions.size())
+                    auto &events = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern).eventsByNote[selectedEvent->note];
+                    auto itr = events.begin();
+                    while (&(*itr) != selectedEvent && itr != events.end())
                     {
-                        auto &events = trackRegions[size_t(_state._currentPattern)].eventsByNote[selectedEvent->note];
-                        auto itr = events.begin();
-                        while (&(*itr) != selectedEvent && itr != events.end())
-                        {
-                            itr++;
-                        }
-                        if (itr != events.end())
-                        {
-                            events.erase(itr);
-                            regionIsModified = true;
-                        }
+                        itr++;
+                    }
+                    if (itr != events.end())
+                    {
+                        events.erase(itr);
+                        regionIsModified = true;
                     }
                 }
             }
@@ -412,7 +410,7 @@ void AppThreeDee::PianoRollEditor()
 
         if (ImGui::Button("Clear all notes"))
         {
-            region.ClearAllNotes();
+            _state._regions.ClearAllNotesInRegion(region);
         }
 
         ImGui::SameLine();
@@ -432,7 +430,7 @@ void AppThreeDee::PianoRollEditor()
                 space,
             };
             NotesGenerator generator(options);
-            generator.Generate(_state.regionsByTrack[_state._currentTrack][_state._currentPattern], *selectedEvent);
+            generator.Generate(&(_state._regions), _state._currentTrack, _state._currentPattern, *selectedEvent);
         }
 
         ImGui::SameLine();
@@ -484,7 +482,6 @@ void AppThreeDee::RegionEditor()
                     auto hue = trackIndex * 0.05f;
                     auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
 
-                    auto &regions = _state.regionsByTrack[trackIndex];
                     char id[32];
                     sprintf(id, "Track %d", trackIndex);
                     ImGui::TimelineStart(id);
@@ -493,6 +490,7 @@ void AppThreeDee::RegionEditor()
                         _state._currentTrack = trackIndex;
                     }
 
+                    auto &regions = _state._regions.GetRegionsByTrack(trackIndex);
                     for (size_t i = 0; i < regions.size(); i++)
                     {
                         bool selected = (trackIndex == _state._currentTrack && int(i) == _state._currentPattern);
@@ -514,10 +512,10 @@ void AppThreeDee::RegionEditor()
                     if (ImGui::TimelineEnd(newRegion.startAndEnd))
                     {
                         _state._currentTrack = trackIndex;
-                        _state._currentPattern = int(_state.regionsByTrack[trackIndex].size());
+                        _state._currentPattern = int(_state._regions.GetRegionsByTrack(trackIndex).size());
 
                         UpdatePreviewImage(newRegion);
-                        _state.regionsByTrack[trackIndex].push_back(newRegion);
+                        _state._regions.AddRegion(trackIndex, newRegion);
                     }
                 }
             }
@@ -529,10 +527,7 @@ void AppThreeDee::RegionEditor()
 
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
             {
-                if (_state._currentTrack >= 0 && _state._currentTrack < NUM_MIXER_TRACKS)
-                {
-                    _state.regionsByTrack[_state._currentTrack].erase(_state.regionsByTrack[_state._currentTrack].begin() + _state._currentPattern);
-                }
+                _state._regions.RemoveRegion(_state._currentTrack, _state._currentPattern);
             }
         }
         ImGui::EndChild();

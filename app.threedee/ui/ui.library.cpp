@@ -1,6 +1,7 @@
 #include "ui.library.h"
 
 #include <imgui.h>
+#include <iostream>
 #include <zyn.mixer/Mixer.h>
 
 char const *const LibraryID = "Library";
@@ -66,14 +67,18 @@ void zyn::ui::Library::Render()
                     }
 
                     auto instrumentName = _state->_banks->GetName(i);
+                    auto const &instrument = _state->_mixer->GetTrack(_state->_currentTrack);
 
-                    if (ImGui::Selectable(instrumentName.c_str(), false))
+                    bool selected = (instrument->loadedInstrument.bank == _state->_currentBank && instrument->loadedInstrument.instrument == i);
+                    if (ImGui::Selectable(instrumentName.c_str(), selected))
                     {
-                        auto const &instrument = _state->_mixer->GetTrack(_state->_currentTrack);
                         instrument->Lock();
                         _state->_banks->LoadFromSlot(i, instrument);
-                        instrument->Unlock();
+                        instrument->Penabled = 1;
                         instrument->ApplyParameters();
+                        instrument->Unlock();
+                        instrument->loadedInstrument.bank = _state->_currentBank;
+                        instrument->loadedInstrument.instrument = i;
                     }
                 }
                 ImGui::ListBoxFooter();

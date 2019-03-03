@@ -14,13 +14,13 @@ struct TrackRegionEvent
     unsigned char velocity;
 };
 
+bool operator < (TrackRegionEvent const& a, TrackRegionEvent const &b);
+
 class TrackRegion
 {
 public:
     TrackRegion();
     virtual ~TrackRegion();
-
-    void ClearAllNotes();
 
     unsigned int previewImage;
     timestep startAndEnd[2];

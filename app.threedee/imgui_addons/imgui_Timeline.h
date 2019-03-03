@@ -490,14 +490,12 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
     if (Button("+", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
     {
         *s_max_value += 4 * 1024;
-        *s_max_value -= (*s_max_value) % 4;
         changed = true;
     }
     SameLine();
     if (Button("-", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
     {
         *s_max_value -= 4 * 1024;
-        *s_max_value -= (*s_max_value) % 4;
         changed = true;
     }
     PopStyleVar();
@@ -532,7 +530,7 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
 
     if (changed && *s_max_value <= s_snapping)
     {
-        *s_max_value = s_snapping;
+        *s_max_value = s_snapping * 4;
     }
 
     return changed;

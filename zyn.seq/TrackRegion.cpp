@@ -7,10 +7,21 @@ TrackRegion::TrackRegion()
 TrackRegion::~TrackRegion()
 {}
 
-void TrackRegion::ClearAllNotes()
+bool operator<(struct TrackRegionEvent const &a, struct TrackRegionEvent const &b)
 {
-    for (int i = 0; i < NUM_MIDI_NOTES; i++)
+    if (a.note < b.note) return true;
+    if (a.note == b.note)
     {
-        eventsByNote[i].clear();
+        if (a.values[0] < b.values[0]) return true;
+        if (a.values[0] == b.values[0])
+        {
+            if (a.values[1] < b.values[1]) return true;
+            if (a.values[1] == b.values[1])
+            {
+                return a.velocity < b.velocity;
+            }
+        }
     }
+
+    return false;
 }

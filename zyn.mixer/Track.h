@@ -81,6 +81,7 @@ class Track : public WrappedPresets
 {
     float *_tmpoutr;
     float *_tmpoutl;
+
 public:
     /**Constructor*/
     Track();
@@ -169,11 +170,17 @@ public:
 
     Controller ctl;
 
-    EffectManager *partefx[NUM_TRACK_EFX];  //insertion part effects (they are part of the instrument)
-    unsigned char Pefxroute[NUM_TRACK_EFX]; //how the effect's output is routed(to next effect/to out)
-    unsigned char Pefxbypass[NUM_TRACK_EFX];         //if the effects are bypassed
+    EffectManager *partefx[NUM_TRACK_EFX];   //insertion part effects (they are part of the instrument)
+    unsigned char Pefxroute[NUM_TRACK_EFX];  //how the effect's output is routed(to next effect/to out)
+    unsigned char Pefxbypass[NUM_TRACK_EFX]; //if the effects are bypassed
 
     int lastnote;
+
+    struct
+    {
+        int bank;
+        unsigned int instrument;
+    } loadedInstrument;
 
 private:
     void RunNote(unsigned int k);
@@ -184,7 +191,7 @@ private:
     int _killallnotes; //is set to 1 if I want to kill all notes
 
     unsigned int _lastpos, _lastposb; // To keep track of previously used pos and posb.
-    bool _lastlegatomodevalid;         // To keep track of previous legatomodevalid.
+    bool _lastlegatomodevalid;        // To keep track of previous legatomodevalid.
 
     // MonoMem stuff
     std::list<unsigned char> _monomemnotes; // A list to remember held notes.

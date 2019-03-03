@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(zyn.seq)
 
@@ -11,6 +11,8 @@ add_library(zyn.seq STATIC
     Sequencer.h
     TrackRegion.cpp
     TrackRegion.h
+    RegionsManager.cpp
+    RegionsManager.h
     NotesGenerator.cpp
     NotesGenerator.h
     )

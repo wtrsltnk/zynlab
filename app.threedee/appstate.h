@@ -4,7 +4,7 @@
 #include "imgui_addons/imgui_common.h"
 #include <vector>
 #include <zyn.common/globals.h>
-#include <zyn.seq/TrackRegion.h>
+#include <zyn.seq/RegionsManager.h>
 
 extern char const *const AdSynthEditorID;
 extern char const *const SubSynthEditorID;
@@ -73,7 +73,7 @@ public:
     bool _isPlaying;
     std::chrono::milliseconds::rep _playTime;
     std::chrono::milliseconds::rep _maxPlayTime;
-    std::vector<TrackRegion> regionsByTrack[NUM_MIXER_TRACKS];
+    RegionsManager _regions;
 
     std::vector<tempnote> _tempnotes;
 };

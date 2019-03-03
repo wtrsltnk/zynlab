@@ -201,10 +201,9 @@ void zyn::ui::Mixer::ImGuiInspector()
         {
             if (_state->_currentTrack >= 0 && _state->_currentTrack < NUM_MIXER_TRACKS)
             {
-                auto &regions = _state->regionsByTrack[_state->_currentTrack];
-                if (_state->_currentPattern >= 0 && _state->_currentPattern < regions.size())
+                if (_state->_regions.DoesRegionExist(_state->_currentTrack, _state->_currentPattern))
                 {
-                    ImGui::SliderInt("repeat", &regions[_state->_currentPattern].repeat, 0, 16);
+                    ImGui::SliderInt("repeat", &_state->_regions.GetRegion(_state->_currentTrack, _state->_currentPattern).repeat, 0, 16);
                 }
             }
             ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eget nunc eu lectus auctor fermentum in in diam. Donec luctus laoreet tortor, ut placerat eros bibendum sed. Mauris rhoncus ipsum sit amet molestie feugiat. Mauris augue ante, tempus non viverra eu, ornare quis sapien. Fusce faucibus ornare libero vitae tincidunt. Nunc eget tellus mi. Phasellus nisi dui, rhoncus tincidunt placerat vitae, volutpat ut mi. Nullam vestibulum metus est, id vestibulum sem malesuada eu. ");
@@ -252,7 +251,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
         auto sinks = toCharVector(Nio::GetSinks());
         auto selectedSink = indexOf(sinks, Nio::GetSelectedSink());
         ImGui::PushItemWidth(width);
-        if (ImGui::DropDown("##Sinks", selectedSink, &sinks[0], static_cast<int>(sinks.size()), "Ouput device"))
+        if (ImGui::DropDown("##Sinks", selectedSink, &sinks[0], sinks.size(), "Ouput device"))
         {
             Nio::SelectSink(sinks[static_cast<size_t>(selectedSink)]);
         }
@@ -261,7 +260,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
         auto sources = toCharVector(Nio::GetSources());
         auto selectedSource = indexOf(sources, Nio::GetSelectedSource());
         ImGui::PushItemWidth(width);
-        if (ImGui::DropDown("##Sources", selectedSource, &sources[0], static_cast<int>(sources.size()), "Midi device"))
+        if (ImGui::DropDown("##Sources", selectedSource, &sources[0], sources.size(), "Midi device"))
         {
             Nio::SelectSource(sources[static_cast<size_t>(selectedSource)]);
         }
@@ -308,7 +307,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                 ImGui::OpenPopupOnItemClick("MasterSystemEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("MasterSystemEffectSelection"))
                 {
-                    for (int i = 0; i < EffectNameCount; i++)
+                    for (unsigned int i = 0; i < EffectNameCount; i++)
                     {
                         if (ImGui::Selectable(EffectNames[i]))
                         {
@@ -516,6 +515,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         {
             _state->_currentTrack = trackIndex;
             _state->_showLibrary = true;
+            ImGui::SetWindowFocus(LibraryID);
         }
         ImGui::ShowTooltipOnHover("Change Track preset");
 
@@ -636,7 +636,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 ImGui::OpenPopupOnItemClick("SystemEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("SystemEffectSelection"))
                 {
-                    for (int i = 0; i < EffectNameCount; i++)
+                    for (unsigned int i = 0; i < EffectNameCount; i++)
                     {
                         if (ImGui::Selectable(EffectNames[i]))
                         {
@@ -703,7 +703,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     ImGui::OpenPopupOnItemClick("InsertEffectSelection", 0);
                     if (ImGui::BeginPopupContextItem("InsertEffectSelection"))
                     {
-                        for (int i = 0; i < EffectNameCount; i++)
+                        for (unsigned int i = 0; i < EffectNameCount; i++)
                         {
                             if (ImGui::Selectable(EffectNames[i]))
                             {
@@ -780,7 +780,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 ImGui::OpenPopupOnItemClick("TrackEffectSelection", track->partefx[fx]->geteffect() == 0 ? 0 : 1);
                 if (ImGui::BeginPopupContextItem("TrackEffectSelection"))
                 {
-                    for (int i = 0; i < EffectNameCount; i++)
+                    for (unsigned int i = 0; i < EffectNameCount; i++)
                     {
                         if (ImGui::Selectable(EffectNames[i]))
                         {
