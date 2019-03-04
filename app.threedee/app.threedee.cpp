@@ -477,6 +477,7 @@ void AppThreeDee::RegionEditor()
             timestep maxValue = _state._maxPlayTime;
             if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, NUM_MIXER_TRACKS, 1024))
             {
+                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 1);
                 for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
                     auto hue = trackIndex * 0.05f;

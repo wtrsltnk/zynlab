@@ -7,13 +7,14 @@
 #include <zyn.seq/TrackRegion.h>
 
 namespace ImGui {
-// Definitions (header file)
-// Timeline (from: https://github.com/nem0/LumixEngine/blob/timeline_gui/external/imgui/imgui_user.h)=
-/* Possible enhancements:
- * Add some kind of "snap to grid" epsilon
- * Add zooming with CTRL+MouseWheel, and a horizontal scrollbar
- * Add different types of TimelineEvent (e.g. multiple ranges in a single line, dot-like markers, etc.)
-*/
+
+enum class TimelineVars
+{
+    ShowAddRemoveButtons,
+    Count,
+};
+
+IMGUI_API void TimelineSetVar(TimelineVars var, unsigned char value);
 IMGUI_API bool BeginTimelines(const char *str_id, timestep *max_value, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, timestep snapping = 100); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
 IMGUI_API void TimelineStart(const char *str_id);
@@ -42,6 +43,14 @@ static float s_horizontal_zoom = 50.0f;
 static int s_row_height = 30;
 static timestep s_snapping = 100;
 static float s_column_width = 0;
+static unsigned char s_var_values[int(TimelineVars::Count)] = {
+    0, /*ShowAddRemoveButtons*/
+};
+
+IMGUI_API void TimelineSetVar(TimelineVars var, unsigned char value)
+{
+    s_var_values[int(var)] = value;
+}
 
 #define TEST(expr) \
     if (!(expr)) std::cout << "TEST FAILED @ " << __LINE__ << std::endl;
@@ -485,21 +494,24 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
     ImVec2 const end = ImVec2(s_cursor_pos.x + timeToScreenX(*s_max_value), GetCursorScreenPos().y + GetItemsLineHeightWithSpacing());
 
     SetCursorScreenPos(buttonstart);
-    PushID(-101);
-    PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0));
-    if (Button("+", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
+    if (s_var_values[int(TimelineVars::ShowAddRemoveButtons)] != 0)
     {
-        *s_max_value += 4 * 1024;
-        changed = true;
+        PushID(-101);
+        PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0));
+        if (Button("+", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
+        {
+            *s_max_value += 4 * 1024;
+            changed = true;
+        }
+        SameLine();
+        if (Button("-", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
+        {
+            *s_max_value -= 4 * 1024;
+            changed = true;
+        }
+        PopStyleVar();
+        PopID();
     }
-    SameLine();
-    if (Button("-", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
-    {
-        *s_max_value -= 4 * 1024;
-        changed = true;
-    }
-    PopStyleVar();
-    PopID();
 
     PushID(-100);
     SetCursorScreenPos(start);
