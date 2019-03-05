@@ -342,6 +342,7 @@ void AppThreeDee::PianoRollEditor()
             bool regionIsModified = false;
             if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, 88, SnappingModeValues[current_snapping_mode]))
             {
+                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 0);
                 for (unsigned int c = NUM_MIDI_NOTES - 1; c > 0; c--)
                 {
                     char id[32];

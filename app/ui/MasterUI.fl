@@ -673,7 +673,7 @@ updatepanel();}
         label {Panic!}
         callback {virkeyboard->relaseallkeys();
 master->Lock();
-master->shutup=1;
+master->shutup=true;
 master->Unlock();}
         xywh {280 29 105 39} color 90 labelfont 1
       }
@@ -1479,7 +1479,7 @@ master->Unlock();}
         label {Stop ALL sounds!}
         callback {virkeyboard->relaseallkeys();
 master->Lock();
-master->shutup=1;
+master->shutup=true;
 master->Unlock();}
         xywh {5 149 115 31} color 90 labelfont 1 labelsize 10
       }
@@ -1677,7 +1677,7 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
     //load the data
     int result=serializer->LoadMixer(master, filename);
     
-    master->applyparameters(false);
+    master->ApplyParameters(false);
     master->Unlock();
     
     npartcounter->value(1);

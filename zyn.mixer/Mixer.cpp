@@ -59,7 +59,7 @@ void Mixer::Setup()
     pthread_mutex_init(&_mutex, nullptr);
     _fft = std::unique_ptr<IFFTwrapper>(new FFTwrapper(SystemSettings::Instance().oscilsize));
 
-    shutup = 0;
+    shutup = false;
 
     for (auto &npart : _tracks)
     {
@@ -370,17 +370,17 @@ void Mixer::AudioOut(float *outl, float *outr)
     }
 
     //Apply the part volumes and pannings (after insertion effects)
-    for (auto &npart : _tracks)
+    for (auto &track : _tracks)
     {
-        if (npart.Penabled == 0)
+        if (track.Penabled == 0)
         {
             continue;
         }
 
-        Stereo<float> newvol(npart.volume);
-        Stereo<float> oldvol(npart.oldvolumel, npart.oldvolumer);
+        Stereo<float> newvol(track.volume);
+        Stereo<float> oldvol(track.oldvolumel, track.oldvolumer);
 
-        float pan = npart.panning;
+        float pan = track.panning;
         if (pan < 0.5f)
         {
             newvol._left *= pan * 2.0f;
@@ -397,18 +397,18 @@ void Mixer::AudioOut(float *outl, float *outr)
             {
                 Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol._left, newvol._left, i, this->BufferSize()),
                                   INTERPOLATE_AMPLITUDE(oldvol._right, newvol._right, i, this->BufferSize()));
-                npart.partoutl[i] *= vol._left;
-                npart.partoutr[i] *= vol._right;
+                track.partoutl[i] *= vol._left;
+                track.partoutr[i] *= vol._right;
             }
-            npart.oldvolumel = newvol._left;
-            npart.oldvolumer = newvol._right;
+            track.oldvolumel = newvol._left;
+            track.oldvolumer = newvol._right;
         }
         else
         {
             for (unsigned int i = 0; i < this->BufferSize(); ++i)
             { //the volume did not changed
-                npart.partoutl[i] *= newvol._left;
-                npart.partoutr[i] *= newvol._right;
+                track.partoutl[i] *= newvol._left;
+                track.partoutr[i] *= newvol._right;
             }
         }
     }
@@ -622,10 +622,10 @@ void Mixer::ShutUp()
         nefx.cleanup();
     }
     meter.ResetPeaks();
-    shutup = 0;
+    shutup = false;
 }
 
-void Mixer::applyparameters(bool lockmutex)
+void Mixer::ApplyParameters(bool lockmutex)
 {
     for (auto &npart : _tracks)
     {

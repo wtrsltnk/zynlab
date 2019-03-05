@@ -124,6 +124,7 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
     int const label_column_width = 60;
 
     // reset global variables
+    s_var_values[int(TimelineVars::ShowAddRemoveButtons)] = 0;
     s_max_timeline_value = 0.f;
     s_timeline_num_rows = s_timeline_display_start = s_timeline_display_end = 0;
     s_timeline_display_index = -1;

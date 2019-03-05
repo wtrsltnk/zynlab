@@ -77,7 +77,7 @@ public:
 };
 
 /** Track implementation*/
-class Track : public WrappedPresets
+class Track : public ITrack, public WrappedPresets
 {
     float *_tmpoutr;
     float *_tmpoutl;
@@ -94,9 +94,9 @@ public:
     void Init(IMixer *mixer, Microtonal *microtonal_);
 
     // Mutex
-    void Lock();
-    bool TryLock();
-    void Unlock();
+    virtual void Lock();
+    virtual bool TryLock();
+    virtual void Unlock();
 
     // Midi commands implemented
     void NoteOn(unsigned char note, unsigned char velocity, int masterkeyshift);
@@ -107,7 +107,7 @@ public:
     void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
     void RelaseAllKeys();       //this is called on AllNotesOff controller
 
-    void ComputeInstrumentSamples(); // compute Track output
+    virtual void ComputeInstrumentSamples(); // compute Track output
 
     void ApplyParameters(bool lockmutex = true);
 
@@ -120,15 +120,14 @@ public:
     void setkeylimit(unsigned char Pkeylimit);
     void setkititemstatus(int kititem, int Penabled_);
 
-    unsigned char Penabled; /**<if the Track is enabled*/
     unsigned char Pvolume;  /**<Track volume*/
     unsigned char Pminkey;  /**<the minimum key that the Track receives noteon messages*/
     unsigned char Pmaxkey;  //the maximum key that the Track receives noteon messages
     void setPvolume(unsigned char Pvolume);
-    unsigned char Pkeyshift; //Track keyshift
-    unsigned char Prcvchn;   //from what midi channel it receive commnads
     unsigned char Ppanning;  //Track panning
     void setPpanning(unsigned char Ppanning);
+    unsigned char Pkeyshift; //Track keyshift
+    unsigned char Prcvchn;   //from what midi channel it receive commnads
     unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
     unsigned char Pveloffs;  //velocity offset
     unsigned char Pnoteon;   //if the Track receives NoteOn messages

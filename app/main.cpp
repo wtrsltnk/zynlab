@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mixer.applyparameters();
+            mixer.ApplyParameters();
             cout << "Master file loaded." << std::endl;
         }
     }

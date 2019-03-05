@@ -54,7 +54,7 @@ public:
 
     virtual IMeter *GetMeter();
 
-    void applyparameters(bool lockmutex = true);
+    void ApplyParameters(bool lockmutex = true);
 
 //    /**get all data to a newly allocated array (used for VST)
 //         * @return the datasize*/
@@ -80,7 +80,7 @@ public:
     virtual void SetProgram(unsigned char chan, unsigned int pgm);
 
     void ShutUp();
-    int shutup;
+    bool shutup;
 
     /**Audio Output*/
     virtual void AudioOut(float *outl, float *outr);

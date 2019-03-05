@@ -1276,7 +1276,7 @@ void Track::ApplyParameters(bool lockmutex)
     {
         if ((n.padpars != nullptr) && (n.Ppadenabled != 0))
         {
-            n.padpars->applyparameters(lockmutex ? _mixer : nullptr);
+            n.padpars->ApplyParameters(lockmutex ? _mixer : nullptr);
         }
     }
 }

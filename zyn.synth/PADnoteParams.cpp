@@ -559,7 +559,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum, int size, f
 /*
  * Applies the parameters (i.e. computes all the samples, based on parameters);
  */
-void PADnoteParameters::applyparameters(IMixer *mixer)
+void PADnoteParameters::ApplyParameters(IMixer *mixer)
 {
     const int samplesize = ((int(1)) << (Pquality.samplesize + 14));
     int spectrumsize = samplesize / 2;
@@ -675,7 +675,7 @@ void PADnoteParameters::applyparameters(IMixer *mixer)
 
 void PADnoteParameters::export2wav(std::string basefilename, IMixer *mixer)
 {
-    applyparameters(mixer);
+    ApplyParameters(mixer);
     basefilename += "_PADsynth_";
     for (int k = 0; k < PAD_MAX_SAMPLES; ++k)
     {

@@ -151,7 +151,7 @@ public:
     float setPbandwidth(int Pbandwidth); //returns the BandWidth in cents
     float getNhr(int n);                 //gets the n-th overtone position relatively to N harmonic
 
-    void applyparameters(IMixer *mixer);
+    void ApplyParameters(IMixer *mixer);
     void export2wav(std::string basefilename, IMixer *mixer);
 
     OscilGen *oscilgen;
