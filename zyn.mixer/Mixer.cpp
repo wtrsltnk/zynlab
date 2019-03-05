@@ -98,7 +98,7 @@ void Mixer::Defaults()
         _tracks[npart].Prcvchn = npart % NUM_MIDI_CHANNELS;
     }
 
-    partonoff(0, 1); //enable the first part
+    EnableTrack(0, 1); //enable the first part
 
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
@@ -305,7 +305,7 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
 /*
  * Enable/Disable a part
  */
-void Mixer::partonoff(int npart, int what)
+void Mixer::EnableTrack(int npart, int what)
 {
     if (npart >= NUM_MIXER_TRACKS)
     {
@@ -632,43 +632,6 @@ void Mixer::ApplyParameters(bool lockmutex)
         npart.ApplyParameters(lockmutex);
     }
 }
-
-//int Mixer::getalldata(char **data)
-//{
-//    PresetsSerializer xml;
-
-//    xml.beginbranch("MASTER");
-
-//    Lock();
-//    MixerSerializer(this).Serialize(&xml);
-//    Unlock();
-
-//    xml.endbranch();
-
-//    *data = xml.getXMLdata();
-
-//    return static_cast<int>(strlen(*data) + 1);
-//}
-
-//void Mixer::putalldata(char *data, int /*size*/)
-//{
-//    PresetsSerializer xml;
-//    if (!xml.putXMLdata(data))
-//    {
-//        return;
-//    }
-
-//    if (xml.enterbranch("MASTER") == 0)
-//    {
-//        return;
-//    }
-
-//    Lock();
-//    Deserialize(&xml);
-//    Unlock();
-
-//    xml.exitbranch();
-//}
 
 void Mixer::InitPresets()
 {

@@ -56,12 +56,6 @@ public:
 
     void ApplyParameters(bool lockmutex = true);
 
-//    /**get all data to a newly allocated array (used for VST)
-//         * @return the datasize*/
-//    int getalldata(char **data);
-//    /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
-//    void putalldata(char *data, int size);
-
     // Synth settings
     virtual unsigned int SampleRate() const;
     virtual unsigned int BufferSize() const;
@@ -87,7 +81,7 @@ public:
 
     virtual IFFTwrapper *GetFFT();
 
-    void partonoff(int npart, int what);
+    void EnableTrack(int npart, int what);
 
     virtual int GetTrackCount() const;
     virtual Track *GetTrack(int index);
@@ -108,7 +102,6 @@ public:
 
     EffectManager sysefx[NUM_SYS_EFX]; //system
     EffectManager insefx[NUM_INS_EFX]; //insertion
-                                       //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
     //part that's apply the insertion effect; -1 to disable
     short int Pinsparts[NUM_INS_EFX];

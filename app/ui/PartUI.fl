@@ -450,7 +450,7 @@ part->setkeylimit(val);} open
       Fl_Check_Button {} {
         label Enabled
         callback {master->Lock();
-master->partonoff(npart,(int) o->value());
+master->EnableTrack(npart,(int) o->value());
 master->Unlock();
 if (part->Penabled==0) partgroupui->deactivate();
     else partgroupui->activate();}
