@@ -285,26 +285,25 @@ void AppThreeDee::Tick()
 
 void AppThreeDee::PianoRollEditor()
 {
+    bool regionIsModified = false;
     static struct TrackRegionEvent *selectedEvent = nullptr;
+    if (_state._currentTrack < 0 || _state._currentTrack >= NUM_MIXER_TRACKS)
+    {
+        return;
+    }
+
+    auto track = _state._mixer->GetTrack(_state._currentTrack);
+
+    if (!_state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
+    {
+        return;
+    }
+
+    auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
+    auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
+
     if (ImGui::Begin("Pianoroll editor"))
     {
-        if (_state._currentTrack < 0 || _state._currentTrack >= NUM_MIXER_TRACKS)
-        {
-            ImGui::End();
-            return;
-        }
-
-        auto track = _state._mixer->GetTrack(_state._currentTrack);
-
-        if (!_state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
-        {
-            ImGui::End();
-            return;
-        }
-
-        auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
-        auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
-
         ImGui::Text("Zoom");
         ImGui::SameLine();
         ImGui::PushItemWidth(120);
@@ -334,12 +333,11 @@ void AppThreeDee::PianoRollEditor()
 
         static unsigned int _baseNote = 65;
 
-        if (ImGui::BeginChild("##timelinechild", ImVec2(0, -30)))
+        if (ImGui::BeginChild("##timelinechild", ImVec2(0, -60)))
         {
             auto hue = _state._currentTrack * 0.05f;
             auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
 
-            bool regionIsModified = false;
             if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, 88, SnappingModeValues[current_snapping_mode]))
             {
                 ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 0);
@@ -388,37 +386,34 @@ void AppThreeDee::PianoRollEditor()
             {
                 if (_state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
                 {
-                    auto &events = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern).eventsByNote[selectedEvent->note];
-                    auto itr = events.begin();
-                    while (&(*itr) != selectedEvent && itr != events.end())
-                    {
-                        itr++;
-                    }
-                    if (itr != events.end())
-                    {
-                        events.erase(itr);
-                        regionIsModified = true;
-                    }
+                    _state._regions.RemoveRegionEvent(_state._currentTrack, _state._currentPattern, *selectedEvent);
+                    regionIsModified = true;
                 }
-            }
-
-            if (regionIsModified)
-            {
-                UpdatePreviewImage(region);
             }
         }
         ImGui::EndChild();
 
-        if (ImGui::Button("Clear all notes"))
+        if (ImGui::Button("Clear selected"))
         {
-            _state._regions.ClearAllNotesInRegion(region);
+            _state._regions.ClearSelectedInRegion(region, *selectedEvent);
+            regionIsModified = true;
         }
 
         ImGui::SameLine();
 
-        ImGui::VerticalSeparator();
+        if (ImGui::Button("Clear all notes"))
+        {
+            _state._regions.ClearAllNotesInRegion(region);
+            regionIsModified = true;
+        }
 
         ImGui::SameLine();
+
+        if (ImGui::Button("Clear all but selected"))
+        {
+            _state._regions.ClearAllButSelectedInRegion(region, *selectedEvent);
+            regionIsModified = true;
+        }
 
         static unsigned char selectedArpMode = 0;
         static unsigned char selectedChord = 0;
@@ -432,6 +427,7 @@ void AppThreeDee::PianoRollEditor()
             };
             NotesGenerator generator(options);
             generator.Generate(&(_state._regions), _state._currentTrack, _state._currentPattern, *selectedEvent);
+            regionIsModified = true;
         }
 
         ImGui::SameLine();
@@ -450,6 +446,15 @@ void AppThreeDee::PianoRollEditor()
         ImGui::SliderInt("Space", &space, 0, 16);
     }
     ImGui::End();
+
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+    {
+    }
+
+    if (regionIsModified)
+    {
+        UpdatePreviewImage(region);
+    }
 }
 
 void AppThreeDee::RegionEditor()

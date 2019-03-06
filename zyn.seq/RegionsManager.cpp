@@ -118,3 +118,24 @@ void RegionsManager::ClearAllNotesInRegion(TrackRegion &region)
         region.eventsByNote[i].clear();
     }
 }
+
+void RegionsManager::ClearAllButSelectedInRegion(TrackRegion &region, struct TrackRegionEvent event)
+{
+    for (int i = 0; i < NUM_MIDI_NOTES; i++)
+    {
+        region.eventsByNote[i].clear();
+    }
+    region.eventsByNote[event.note].push_back(event);
+}
+
+void RegionsManager::ClearSelectedInRegion(TrackRegion &region, struct TrackRegionEvent const &event)
+{
+    auto &notes = region.eventsByNote[event.note];
+
+    auto found = indexOf(notes, event);
+
+    if (found != notes.end())
+    {
+        notes.erase(found);
+    }
+}

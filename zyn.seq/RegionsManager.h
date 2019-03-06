@@ -20,6 +20,8 @@ public:
     void RemoveRegionEvent(int trackIndex, int regionIndex, struct TrackRegionEvent const &event);
     void ClearAllNotesInRegion(int trackIndex, int regionIndex);
     void ClearAllNotesInRegion(TrackRegion &region);
+    void ClearAllButSelectedInRegion(TrackRegion &region, struct TrackRegionEvent event);
+    void ClearSelectedInRegion(TrackRegion &region, struct TrackRegionEvent const &event);
 };
 
 #endif // REGIONSMANAGER_H

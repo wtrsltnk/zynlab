@@ -68,6 +68,7 @@ void UpdatePreviewImage(TrackRegion &region)
     if (maxNote < minNote)
     {
         CleanupPreviewImage(region.previewImage);
+        region.previewImage = 0;
         return;
     }
 
@@ -103,8 +104,8 @@ void UpdatePreviewImage(TrackRegion &region)
         int y = std::abs((imageHeight - 1) - int(float(i) * (float(imageHeight - 1) / float(height))));
         for (auto &n : region.eventsByNote[i + minNote])
         {
-            int xFrom = int(float(n.values[0] / width) * 128.0f);
-            int xTo = int(float(n.values[1] / width) * 128.0f);
+            int xFrom = int(float(n.values[0]) / float(width) * 128.0f);
+            int xTo = int(float(n.values[1]) / float(width) * 128.0f);
             for (int j = xFrom; j < xTo; j++)
             {
                 setPixel(buffer.get(), j, y, 128, imageHeight);
