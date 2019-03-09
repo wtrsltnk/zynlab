@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "imgui_common.h"
+#include "imgui_knob.h"
 #include <zyn.seq/TrackRegion.h>
 
 namespace ImGui {
@@ -11,13 +12,14 @@ namespace ImGui {
 enum class TimelineVars
 {
     ShowAddRemoveButtons,
+    ShowMuteSoloButtons,
     Count,
 };
 
 IMGUI_API void TimelineSetVar(TimelineVars var, unsigned char value);
 IMGUI_API bool BeginTimelines(const char *str_id, timestep *max_value, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, timestep snapping = 100); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
-IMGUI_API void TimelineStart(const char *str_id);
+IMGUI_API void TimelineStart(const char *str_id, bool *muted = nullptr, bool *solo = nullptr);
 IMGUI_API void TimelineReadOnlyEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200));
 IMGUI_API bool TimelineEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(timestep *new_values = nullptr);
@@ -45,6 +47,7 @@ static timestep s_snapping = 100;
 static float s_column_width = 0;
 static unsigned char s_var_values[int(TimelineVars::Count)] = {
     0, /*ShowAddRemoveButtons*/
+    0, /*ShowMuteSoloButtons*/
 };
 
 IMGUI_API void TimelineSetVar(TimelineVars var, unsigned char value)
@@ -121,7 +124,7 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
     TestSnap();
     TestSnapFloor();
 
-    int const label_column_width = 60;
+    int const label_column_width = 100;
 
     // reset global variables
     s_var_values[int(TimelineVars::ShowAddRemoveButtons)] = 0;
@@ -175,7 +178,7 @@ void EmptyTimeline(const char *str_id)
     NextColumn();
 }
 
-void TimelineStart(const char *str_id)
+void TimelineStart(const char *str_id, bool *enabled, bool *solo)
 {
     ++s_timeline_display_index;
 
@@ -192,7 +195,22 @@ void TimelineStart(const char *str_id)
     s_event_counter = 0;
     s_is_event_hovered = false;
 
-    Text("%s", str_id);
+    if (s_var_values[int(TimelineVars::ShowMuteSoloButtons)] != 0)
+    {
+        assert(enabled != nullptr);
+        assert(solo != nullptr);
+
+        BeginChild("##trackinfo", ImVec2(0, s_row_height));
+        Text("%s", str_id);
+        ToggleButton("m", enabled, ImVec2(20, 20));
+        SameLine();
+        ToggleButton("s", solo, ImVec2(20, 20));
+        EndChild();
+    }
+    else
+    {
+        Text("%s", str_id);
+    }
     NextColumn();
     s_column_width = (GetColumnWidth(1) - GImGui->Style.ScrollbarSize);
 

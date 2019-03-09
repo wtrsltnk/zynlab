@@ -640,7 +640,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     {
                         if (ImGui::Selectable(EffectNames[i]))
                         {
-                            _state->_mixer->sysefx[fx].changeeffect(i);
+                            _state->_mixer->sysefx[fx].changeeffect(int(i));
                             _state->_currentTrack = trackIndex;
                             _state->_currentSystemEffect = fx;
                             _state->_showSystemEffectsEditor = true;
@@ -707,7 +707,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                         {
                             if (ImGui::Selectable(EffectNames[i]))
                             {
-                                _state->_mixer->insefx[fx].changeeffect(i);
+                                _state->_mixer->insefx[fx].changeeffect(int(i));
                                 _state->_currentInsertEffect = fx;
                                 _state->_currentTrack = trackIndex;
                                 _state->_showInsertEffectsEditor = true;
@@ -784,7 +784,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     {
                         if (ImGui::Selectable(EffectNames[i]))
                         {
-                            track->partefx[fx]->changeeffect(i);
+                            track->partefx[fx]->changeeffect(int(i));
                             _state->_currentTrack = trackIndex;
                             _state->_currentTrackEffect = fx;
                             _state->_showTrackEffectsEditor = true;

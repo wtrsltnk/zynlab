@@ -92,6 +92,8 @@ void Mixer::Defaults()
     setPvolume(80);
     setPkeyshift(64);
 
+    Psolotrack = DISABLED_MIXER_SOLO;
+
     for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
     {
         _tracks[npart].Defaults();
@@ -347,26 +349,40 @@ void Mixer::AudioOut(float *outl, float *outr)
     memset(outr, 0, this->BufferSizeInBytes());
 
     //Compute part samples and store them part[npart].partoutl,partoutr
-    for (auto &track : _tracks)
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
     {
-        if (track.Penabled != 0 && !track.TryLock())
+        //skip if the part is disabled
+        if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
         {
-            track.ComputeInstrumentSamples();
-            track.Unlock();
+            continue;
+        }
+        if (!_tracks[trackIndex].TryLock())
+        {
+            _tracks[trackIndex].ComputeInstrumentSamples();
+            _tracks[trackIndex].Unlock();
         }
     }
 
     //Insertion effects
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
-        if (Pinsparts[nefx] >= 0)
+        int trackIndex = Pinsparts[nefx];
+        if (trackIndex < 0)
         {
-            int efxpart = Pinsparts[nefx];
-            if (_tracks[efxpart].Penabled)
-            {
-                insefx[nefx].out(_tracks[efxpart].partoutl, _tracks[efxpart].partoutr);
-            }
+            continue;
         }
+        //skip if the part is disabled
+        if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
+        {
+            continue;
+        }
+        //skip if the part is not the solo track
+        if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
+        {
+            continue;
+        }
+
+        insefx[nefx].out(_tracks[trackIndex].partoutl, _tracks[trackIndex].partoutr);
     }
 
     //Apply the part volumes and pannings (after insertion effects)
@@ -437,7 +453,12 @@ void Mixer::AudioOut(float *outl, float *outr)
                 continue;
             }
             //skip if the part is disabled
-            if (_tracks[trackIndex].Penabled == 0)
+            if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
+            {
+                continue;
+            }
+            //skip if the part is not the solo track
+            if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
             {
                 continue;
             }
@@ -479,15 +500,23 @@ void Mixer::AudioOut(float *outl, float *outr)
     delete[] tmpmixr;
 
     //Mix all parts
-    for (auto &npart : _tracks)
+    for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
     {
-        if (npart.Penabled) //only mix active parts
+        //skip if the part is disabled
+        if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
         {
-            for (unsigned int i = 0; i < this->BufferSize(); ++i)
-            { //the volume did not changed
-                outl[i] += npart.partoutl[i];
-                outr[i] += npart.partoutr[i];
-            }
+            continue;
+        }
+        //skip if the part is not the solo track
+        if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
+        {
+            continue;
+        }
+
+        for (unsigned int i = 0; i < this->BufferSize(); ++i)
+        { //the volume did not changed
+            outl[i] += _tracks[trackIndex].partoutl[i];
+            outr[i] += _tracks[trackIndex].partoutr[i];
         }
     }
 

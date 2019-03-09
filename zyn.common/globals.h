@@ -50,6 +50,11 @@
 #define NUM_MIXER_TRACKS 16
 
 /*
+ * Number of tracks
+ */
+#define DISABLED_MIXER_SOLO -1
+
+/*
  * Number of Midi channes
  */
 #define NUM_MIDI_CHANNELS 16

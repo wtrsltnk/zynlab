@@ -252,8 +252,40 @@ bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_text
         col_bg = ImGui::GetColorU32(ImGuiCol_ButtonActive);
     }
 
-//    draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), GetColorU32(col_bg));
     draw_list->AddImage(user_texture_id, p, ImVec2(p.x + width, p.y + height), ImVec2(0, 0), ImVec2(1, 1), GetColorU32(col_tint));
+
+    return valueChange;
+}
+
+bool ImGui::ToggleButton(const char *str_id, bool *v, const ImVec2 &size)
+{
+    bool valueChange = false;
+
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+    ImGui::InvisibleButton(str_id, size);
+    if (ImGui::IsItemClicked())
+    {
+        *v = !*v;
+        valueChange = true;
+    }
+
+    ImU32 col_tint = ImGui::GetColorU32((*v ? ImGui::GetColorU32(ImGuiCol_Text) : ImGui::GetColorU32(ImGuiCol_Border)));
+    ImU32 col_bg = ImGui::GetColorU32(ImGui::GetColorU32(ImGuiCol_WindowBg));
+    if (ImGui::IsItemHovered())
+    {
+        col_bg = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+    }
+    if (ImGui::IsItemActive() || *v)
+    {
+        col_bg = ImGui::GetColorU32(ImGuiCol_Button);
+    }
+
+    draw_list->AddRectFilled(pos, pos + size, GetColorU32(col_bg));
+
+    auto textSize = CalcTextSize(str_id);
+    draw_list->AddText(ImVec2(pos.x + (size.x - textSize.x) / 2, pos.y), col_tint, str_id);
 
     return valueChange;
 }

@@ -341,6 +341,7 @@ void AppThreeDee::PianoRollEditor()
             if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, 88, SnappingModeValues[current_snapping_mode]))
             {
                 ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 0);
+                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowMuteSoloButtons, 0);
                 for (unsigned int c = NUM_MIDI_NOTES - 1; c > 0; c--)
                 {
                     char id[32];
@@ -467,7 +468,7 @@ void AppThreeDee::RegionEditor()
         ImGui::SliderInt("##horizontalZoom", &(_state._sequencerHorizontalZoom), 10, 100, "horizontal %d");
         ImGui::SameLine();
         ImGui::PushItemWidth(120);
-        ImGui::SliderInt("##verticalZoom", &(_state._sequencerVerticalZoom), 30, 100, "vertical %d");
+        ImGui::SliderInt("##verticalZoom", &(_state._sequencerVerticalZoom), 50, 100, "vertical %d");
         ImGui::SameLine();
         ImGui::PushItemWidth(220);
         int maxPlayTime = int(_state._maxPlayTime / 1024);
@@ -484,14 +485,30 @@ void AppThreeDee::RegionEditor()
             if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, NUM_MIXER_TRACKS, 1024))
             {
                 ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 1);
-                for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowMuteSoloButtons, 1);
+                for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
                 {
+                    ImGui::PushID(trackIndex);
+                    auto track = _state._mixer->GetTrack(trackIndex);
                     auto hue = trackIndex * 0.05f;
                     auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
 
                     char id[32];
                     sprintf(id, "Track %d", trackIndex);
-                    ImGui::TimelineStart(id);
+                    bool muted = !track->Penabled;
+                    bool solo = trackIndex == _state._mixer->Psolotrack;
+                    ImGui::TimelineStart(id, &muted, &solo);
+                    if (solo)
+                    {
+                        _state._mixer->Psolotrack = trackIndex;
+                        muted = false;
+                    }
+                    else if (!solo && trackIndex == _state._mixer->Psolotrack)
+                    {
+                        _state._mixer->Psolotrack = DISABLED_MIXER_SOLO;
+                    }
+                    track->Penabled = !muted;
+
                     if (ImGui::IsItemClicked())
                     {
                         _state._currentTrack = trackIndex;
@@ -524,6 +541,7 @@ void AppThreeDee::RegionEditor()
                         UpdatePreviewImage(newRegion);
                         _state._regions.AddRegion(trackIndex, newRegion);
                     }
+                    ImGui::PopID();
                 }
             }
             if (ImGui::EndTimelines(&elapsedTimeSequencer))

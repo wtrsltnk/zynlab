@@ -92,6 +92,7 @@ public:
     unsigned char Pkeyshift;
     unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+    short int Psolotrack;
 
     //parameters control
     void setPvolume(unsigned char Pvolume_);
