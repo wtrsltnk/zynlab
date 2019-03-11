@@ -36,9 +36,7 @@ public:
     virtual ~SampleNoteParameters();
 
     void InitPresets();
-    
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+
     void Defaults();
 
     void updateFrequencyMultipliers(void);
