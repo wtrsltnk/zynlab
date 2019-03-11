@@ -38,8 +38,6 @@ public:
 
     void InitPresets();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
     void Defaults();
 
     //Controllers functions

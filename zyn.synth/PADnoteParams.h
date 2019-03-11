@@ -46,8 +46,6 @@ public:
 
     void InitPresets();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
     void Defaults();
 
     //returns a value between 0.0f-1.0f that represents the estimation perceived bandwidth

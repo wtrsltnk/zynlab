@@ -94,29 +94,3 @@ void LFOParams::InitPresets()
     AddPreset("stretch", &Pstretch);
     AddPresetAsBool("continous", &Pcontinous);
 }
-
-void LFOParams::Serialize(IPresetsSerializer *xml)
-{
-    xml->addparreal("freq", Pfreq);
-    xml->addpar("intensity", Pintensity);
-    xml->addpar("start_phase", Pstartphase);
-    xml->addpar("lfo_type", PLFOtype);
-    xml->addpar("randomness_amplitude", Prandomness);
-    xml->addpar("randomness_frequency", Pfreqrand);
-    xml->addpar("delay", Pdelay);
-    xml->addpar("stretch", Pstretch);
-    xml->addparbool("continous", Pcontinous);
-}
-
-void LFOParams::Deserialize(IPresetsSerializer *xml)
-{
-    Pfreq = xml->getparreal("freq", Pfreq, 0.0f, 1.0f);
-    Pintensity = xml->getpar127("intensity", Pintensity);
-    Pstartphase = xml->getpar127("start_phase", Pstartphase);
-    PLFOtype = xml->getpar127("lfo_type", PLFOtype);
-    Prandomness = xml->getpar127("randomness_amplitude", Prandomness);
-    Pfreqrand = xml->getpar127("randomness_frequency", Pfreqrand);
-    Pdelay = xml->getpar127("delay", Pdelay);
-    Pstretch = xml->getpar127("stretch", Pstretch);
-    Pcontinous = xml->getparbool("continous", Pcontinous) == 1 ? 1 : 0;
-}
