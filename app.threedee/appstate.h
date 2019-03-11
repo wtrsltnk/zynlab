@@ -8,6 +8,7 @@
 
 extern char const *const AdSynthEditorID;
 extern char const *const SubSynthEditorID;
+extern char const *const SmplSynthEditorID;
 extern char const *const PadSynthEditorID;
 extern char const *const InsertionFxEditorID;
 extern char const *const SystemFxEditorID;
@@ -56,6 +57,7 @@ public:
     bool _showTrackEffectsEditor;
     bool _showADNoteEditor;
     bool _showSUBNoteEditor;
+    bool _showSMPLNoteEditor;
     bool _showPADNoteEditor;
     int _showTrackTypeChanger;
     int _currentInsertEffect;

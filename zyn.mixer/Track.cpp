@@ -33,6 +33,8 @@
 #include <zyn.synth/PADnoteParams.h>
 #include <zyn.synth/SUBnote.h>
 #include <zyn.synth/SUBnoteParams.h>
+#include <zyn.synth/SampleNote.h>
+#include <zyn.synth/SampleNoteParams.h>
 
 Track::Track() {}
 
@@ -47,9 +49,12 @@ Track::~Track()
             delete (n.subpars);
         if (n.padpars != nullptr)
             delete (n.padpars);
+        if (n.smplpars != nullptr)
+            delete (n.smplpars);
         n.adpars = nullptr;
         n.subpars = nullptr;
         n.padpars = nullptr;
+        n.smplpars = nullptr;
         delete[] n.Pname;
     }
 
@@ -83,6 +88,7 @@ void Track::Init(IMixer *mixer, Microtonal *microtonal)
         n.adpars = new ADnoteParameters(_mixer->GetFFT());
         n.subpars = new SUBnoteParameters();
         n.padpars = new PADnoteParameters(mixer->GetFFT());
+        n.smplpars = new SampleNoteParameters();
     }
 
     //Part's Insertion Effects init
@@ -116,6 +122,7 @@ void Track::Init(IMixer *mixer, Microtonal *microtonal)
             j.adnote = nullptr;
             j.subnote = nullptr;
             j.padnote = nullptr;
+            j.smplnote = nullptr;
         }
         i.time = 0;
     }
@@ -188,6 +195,7 @@ void Track::InstrumentDefaults()
         Instruments[n].Padenabled = 0;
         Instruments[n].Psubenabled = 0;
         Instruments[n].Ppadenabled = 0;
+        Instruments[n].Psmplenabled = 0;
         ZEROUNSIGNED(Instruments[n].Pname, TRACK_MAX_NAME_LEN);
         Instruments[n].Psendtoparteffect = 0;
         if (n != 0)
@@ -198,6 +206,7 @@ void Track::InstrumentDefaults()
     Instruments[0].adpars->Defaults();
     Instruments[0].subpars->Defaults();
     Instruments[0].padpars->Defaults();
+    Instruments[0].smplpars->Defaults();
 
     for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
@@ -728,26 +737,33 @@ void Track::NoteOn(unsigned char note,
  */
 void Track::NoteOff(unsigned char note) //relase the key
 {
-    int i;
-
     // This note is released, so we remove it from the list.
     if (not _monomemnotes.empty())
+    {
         _monomemnotes.remove(note);
+    }
 
-    for (i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
+    for (int i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
+    {
         if ((_trackNotes[i].status == KEY_PLAYING) && (_trackNotes[i].note == note))
         {
             if (ctl.sustain.sustain == 0)
             { //the sustain pedal is not pushed
                 if ((Ppolymode == 0) && (not _monomemnotes.empty()))
+                {
                     MonoMemRenote(); // To play most recent still held note.
+                }
                 else
+                {
                     RelaseNotePos(static_cast<unsigned int>(i));
-                /// break;
+                }
             }
             else //the sustain pedal is pushed
+            {
                 _trackNotes[i].status = KEY_RELASED_AND_SUSTAINED;
+            }
         }
+    }
 }
 
 void Track::PolyphonicAftertouch(unsigned char note,
@@ -756,16 +772,22 @@ void Track::PolyphonicAftertouch(unsigned char note,
 {
     (void)masterkeyshift;
     if (!Pnoteon || (note < Pminkey) || (note > Pmaxkey))
+    {
         return;
+    }
     if (Pdrummode)
+    {
         return;
+    }
 
     // MonoMem stuff:
     if (!Ppolymode) // if Poly is off
-
+    {
         _monomem[note].velocity = velocity; // Store this note's velocity.
+    }
 
     for (auto &i : _trackNotes)
+    {
         if ((i.note == note) && (i.status == KEY_PLAYING))
         {
             /* update velocity */
@@ -782,8 +804,11 @@ void Track::PolyphonicAftertouch(unsigned char note,
                     i.instumentNotes[0].subnote->setVelocity(vel);
                 if (Instruments[0].Ppadenabled && i.instumentNotes[0].padnote)
                     i.instumentNotes[0].padnote->setVelocity(vel);
+                if (Instruments[0].Psmplenabled && i.instumentNotes[0].smplnote)
+                    i.instumentNotes[0].smplnote->setVelocity(vel);
             }
             else // "kit mode"
+            {
                 for (int item = 0; item < NUM_TRACK_INSTRUMENTS; ++item)
                 {
                     if (Instruments[item].Pmuted)
@@ -797,8 +822,12 @@ void Track::PolyphonicAftertouch(unsigned char note,
                         i.instumentNotes[item].subnote->setVelocity(vel);
                     if (Instruments[item].Ppadenabled && i.instumentNotes[item].padnote)
                         i.instumentNotes[item].padnote->setVelocity(vel);
+                    if (Instruments[item].Psmplenabled && i.instumentNotes[item].smplnote)
+                        i.instumentNotes[item].smplnote->setVelocity(vel);
                 }
+            }
         }
+    }
 }
 
 /*
@@ -809,56 +838,91 @@ void Track::SetController(unsigned int type, int par)
     switch (type)
     {
         case C_pitchwheel:
+        {
             ctl.setpitchwheel(par);
             break;
+        }
         case C_expression:
+        {
             ctl.setexpression(par);
             setPvolume(Pvolume); //update the volume
             break;
+        }
         case C_portamento:
+        {
             ctl.setportamento(par);
             break;
+        }
         case C_panning:
+        {
             ctl.setpanning(par);
             setPpanning(Ppanning); //update the panning
             break;
+        }
         case C_filtercutoff:
+        {
             ctl.setfiltercutoff(par);
             break;
+        }
         case C_filterq:
+        {
             ctl.setfilterq(par);
             break;
+        }
         case C_bandwidth:
+        {
             ctl.setbandwidth(par);
             break;
+        }
         case C_modwheel:
+        {
             ctl.setmodwheel(par);
             break;
+        }
         case C_fmamp:
+        {
             ctl.setfmamp(par);
             break;
+        }
         case C_volume:
+        {
             ctl.setvolume(par);
             if (ctl.volume.receive != 0)
+            {
                 volume = ctl.volume.volume;
+            }
             else
+            {
                 setPvolume(Pvolume);
+            }
             break;
+        }
         case C_sustain:
+        {
             ctl.setsustain(par);
             if (ctl.sustain.sustain == 0)
+            {
                 RelaseSustainedKeys();
+            }
             break;
+        }
         case C_allsoundsoff:
+        {
             AllNotesOff(); //Panic
             break;
+        }
         case C_resetallcontrollers:
+        {
             ctl.resetall();
             RelaseSustainedKeys();
             if (ctl.volume.receive != 0)
+            {
                 volume = ctl.volume.volume;
+            }
             else
+            {
                 setPvolume(Pvolume);
+            }
             setPvolume(Pvolume);   //update the volume
             setPpanning(Ppanning); //update the panning
 
@@ -872,10 +936,14 @@ void Track::SetController(unsigned int type, int par)
             }
             //more update to add here if I add controllers
             break;
+        }
         case C_allnotesoff:
+        {
             RelaseAllKeys();
             break;
+        }
         case C_resonance_center:
+        {
             ctl.setresonancecenter(par);
             for (auto &item : Instruments)
             {
@@ -885,10 +953,13 @@ void Track::SetController(unsigned int type, int par)
                                                    ctl.resonancecenter.relcenter);
             }
             break;
+        }
         case C_resonance_bandwidth:
+        {
             ctl.setresonancebw(par);
             Instruments[0].adpars->Reson->sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
             break;
+        }
     }
 }
 /*
@@ -899,12 +970,20 @@ void Track::RelaseSustainedKeys()
 {
     // Let's call MonoMemRenote() on some conditions:
     if ((Ppolymode == 0) && (not _monomemnotes.empty()))
+    {
         if (_monomemnotes.back() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
-            MonoMemRenote();                  // To play most recent still held note.
+        {
+            MonoMemRenote(); // To play most recent still held note.
+        }
+    }
 
     for (unsigned int i = 0; i < POLIPHONY; ++i)
+    {
         if (_trackNotes[i].status == KEY_RELASED_AND_SUSTAINED)
+        {
             RelaseNotePos(i);
+        }
+    }
 }
 
 /*
@@ -914,8 +993,12 @@ void Track::RelaseSustainedKeys()
 void Track::RelaseAllKeys()
 {
     for (unsigned int i = 0; i < POLIPHONY; ++i)
+    {
         if ((_trackNotes[i].status != KEY_RELASED) && (_trackNotes[i].status != KEY_OFF)) //thanks to Frank Neumann
+        {
             RelaseNotePos(i);
+        }
+    }
 }
 
 // Call NoteOn(...) with the most recent still held key as new note
@@ -925,10 +1008,13 @@ void Track::MonoMemRenote()
     unsigned char mmrtempnote = _monomemnotes.back(); // Last list element.
     _monomemnotes.pop_back();                         // We remove it, will be added again in NoteOn(...).
     if (Pnoteon == 0)
+    {
         RelaseNotePos(_lastpos);
+    }
     else
-        NoteOn(mmrtempnote, _monomem[mmrtempnote].velocity,
-               _monomem[mmrtempnote].mkeyshift);
+    {
+        NoteOn(mmrtempnote, _monomem[mmrtempnote].velocity, _monomem[mmrtempnote].mkeyshift);
+    }
 }
 
 /*
@@ -949,6 +1035,10 @@ void Track::RelaseNotePos(unsigned int pos)
         if (j.padnote != nullptr)
             if (j.padnote)
                 j.padnote->relasekey();
+
+        if (j.smplnote != nullptr)
+            if (j.smplnote)
+                j.smplnote->relasekey();
     }
     _trackNotes[pos].status = KEY_RELASED;
 }
@@ -979,6 +1069,11 @@ void Track::KillNotePos(unsigned int pos)
         {
             delete (j.padnote);
             j.padnote = nullptr;
+        }
+        if (j.smplnote != nullptr)
+        {
+            delete (j.smplnote);
+            j.smplnote = nullptr;
         }
     }
     if (pos == static_cast<unsigned int>(ctl.portamento.noteusing))
@@ -1047,7 +1142,7 @@ void Track::RunNote(unsigned int k)
     {
         int sendcurrenttofx = _trackNotes[k].instumentNotes[item].sendtoparteffect;
 
-        for (unsigned type = 0; type < 3; ++type)
+        for (unsigned type = 0; type < 4; ++type)
         {
             //Select a note
             SynthNote **note = nullptr;
@@ -1062,6 +1157,10 @@ void Track::RunNote(unsigned int k)
             else if (type == 2)
             {
                 note = &_trackNotes[k].instumentNotes[item].padnote;
+            }
+            else if (type == 3)
+            {
+                note = &_trackNotes[k].instumentNotes[item].smplnote;
             }
 
             //Process if it exists
@@ -1099,16 +1198,20 @@ void Track::RunNote(unsigned int k)
 void Track::ComputeInstrumentSamples()
 {
     for (unsigned nefx = 0; nefx < NUM_TRACK_EFX + 1; ++nefx)
+    {
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             partfxinputl[nefx][i] = 0.0f;
             partfxinputr[nefx][i] = 0.0f;
         }
+    }
 
     for (unsigned k = 0; k < POLIPHONY; ++k)
     {
         if (_trackNotes[k].status == KEY_OFF)
+        {
             continue;
+        }
         _trackNotes[k].time++;
         //get the sampledata of the note and kill it if it's finished
         RunNote(k);
@@ -1150,10 +1253,14 @@ void Track::ComputeInstrumentSamples()
             partoutr[i] *= tmp;
         }
         for (unsigned int k = 0; k < POLIPHONY; ++k)
+        {
             KillNotePos(k);
+        }
         _killallnotes = 0;
         for (auto &nefx : partefx)
+        {
             nefx->cleanup();
+        }
     }
     ctl.updateportamento();
 }
@@ -1202,6 +1309,7 @@ void Track::setkititemstatus(int kititem, int Penabled_)
     Instruments[kititem].adpars->Defaults();
     Instruments[kititem].subpars->Defaults();
     Instruments[kititem].padpars->Defaults();
+    Instruments[kititem].smplpars->Defaults();
 
     if (resetallnotes)
     {

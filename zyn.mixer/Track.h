@@ -59,6 +59,7 @@ struct TrackNotes
         SynthNote *adnote;
         SynthNote *subnote;
         SynthNote *padnote;
+        SynthNote *smplnote;
         int sendtoparteffect;
     } instumentNotes[NUM_TRACK_INSTRUMENTS];
     int time;

@@ -547,68 +547,97 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
             if (noCollapsingHeader) ImGui::TextCentered(ImVec2(width, lineHeight), "Settings");
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
-            // AD synth enable/disable + edit button
-            auto adEnabled = track->Instruments[0].Padenabled == 1;
-            if (ImGui::Checkbox("##adEnabled", &adEnabled))
             {
-                track->Instruments[0].Padenabled = adEnabled ? 1 : 0;
-                _state->_currentTrack = trackIndex;
-                if (adEnabled)
+                // AD synth enable/disable + edit button
+                auto adEnabled = track->Instruments[0].Padenabled == 1;
+                if (ImGui::Checkbox("##adEnabled", &adEnabled))
+                {
+                    track->Instruments[0].Padenabled = adEnabled ? 1 : 0;
+                    _state->_currentTrack = trackIndex;
+                    if (adEnabled)
+                    {
+                        _state->_showADNoteEditor = true;
+                    }
+                }
+                ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
+                ImGui::SameLine();
+                if (ImGui::Button("AD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
                 {
                     _state->_showADNoteEditor = true;
+                    ImGui::SetWindowFocus(AdSynthEditorID);
+                    _state->_currentTrack = trackIndex;
                 }
+                ImGui::ShowTooltipOnHover("Edit the AD synth");
             }
-            ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
-            ImGui::SameLine();
-            if (ImGui::Button("AD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
-            {
-                _state->_showADNoteEditor = true;
-                ImGui::SetWindowFocus(AdSynthEditorID);
-                _state->_currentTrack = trackIndex;
-            }
-            ImGui::ShowTooltipOnHover("Edit the AD synth");
 
-            // SUB synth enable/disable + edit button
-            auto subEnabled = track->Instruments[0].Psubenabled == 1;
-            if (ImGui::Checkbox("##subEnabled", &subEnabled))
             {
-                track->Instruments[0].Psubenabled = subEnabled ? 1 : 0;
-                _state->_currentTrack = trackIndex;
-                if (subEnabled)
+                // SUB synth enable/disable + edit button
+                auto subEnabled = track->Instruments[0].Psubenabled == 1;
+                if (ImGui::Checkbox("##subEnabled", &subEnabled))
+                {
+                    track->Instruments[0].Psubenabled = subEnabled ? 1 : 0;
+                    _state->_currentTrack = trackIndex;
+                    if (subEnabled)
+                    {
+                        _state->_showSUBNoteEditor = true;
+                    }
+                }
+                ImGui::ShowTooltipOnHover(subEnabled ? "The SUB synth is enabled" : "The SUB synth is disabled");
+                ImGui::SameLine();
+                if (ImGui::Button("SUB", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
                 {
                     _state->_showSUBNoteEditor = true;
+                    ImGui::SetWindowFocus(SubSynthEditorID);
+                    _state->_currentTrack = trackIndex;
                 }
+                ImGui::ShowTooltipOnHover("Edit the SUB synth");
             }
-            ImGui::ShowTooltipOnHover(adEnabled ? "The SUB synth is enabled" : "The AD synth is disabled");
-            ImGui::SameLine();
-            if (ImGui::Button("SUB", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
-            {
-                _state->_showSUBNoteEditor = true;
-                ImGui::SetWindowFocus(SubSynthEditorID);
-                _state->_currentTrack = trackIndex;
-            }
-            ImGui::ShowTooltipOnHover("Edit the SUB synth");
 
-            // PAD synth enable/disable + edit button
-            auto padEnabled = track->Instruments[0].Ppadenabled == 1;
-            if (ImGui::Checkbox("##padEnabled", &padEnabled))
             {
-                track->Instruments[0].Ppadenabled = padEnabled ? 1 : 0;
-                _state->_currentTrack = trackIndex;
-                if (padEnabled)
+                // SMPL synth enable/disable + edit button
+                auto smplEnabled = track->Instruments[0].Psmplenabled == 1;
+                if (ImGui::Checkbox("##smplEnabled", &smplEnabled))
+                {
+                    track->Instruments[0].Psmplenabled = smplEnabled ? 1 : 0;
+                    _state->_currentTrack = trackIndex;
+                    if (smplEnabled)
+                    {
+                        _state->_showSMPLNoteEditor = true;
+                    }
+                }
+                ImGui::ShowTooltipOnHover(smplEnabled ? "The SMPL synth is enabled" : "The SMPL synth is disabled");
+                ImGui::SameLine();
+                if (ImGui::Button("SMPL", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
+                {
+                    _state->_showSMPLNoteEditor = true;
+                    ImGui::SetWindowFocus(SmplSynthEditorID);
+                    _state->_currentTrack = trackIndex;
+                }
+                ImGui::ShowTooltipOnHover("Edit the SMPL synth");
+            }
+
+            {
+                // PAD synth enable/disable + edit button
+                auto padEnabled = track->Instruments[0].Ppadenabled == 1;
+                if (ImGui::Checkbox("##padEnabled", &padEnabled))
+                {
+                    track->Instruments[0].Ppadenabled = padEnabled ? 1 : 0;
+                    _state->_currentTrack = trackIndex;
+                    if (padEnabled)
+                    {
+                        _state->_showPADNoteEditor = true;
+                    }
+                }
+                ImGui::ShowTooltipOnHover(padEnabled ? "The PAD synth is enabled" : "The PAD synth is disabled");
+                ImGui::SameLine();
+                if (ImGui::Button("PAD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
                 {
                     _state->_showPADNoteEditor = true;
+                    ImGui::SetWindowFocus(PadSynthEditorID);
+                    _state->_currentTrack = trackIndex;
                 }
+                ImGui::ShowTooltipOnHover("Edit the PAD synth");
             }
-            ImGui::ShowTooltipOnHover(adEnabled ? "The PAD synth is enabled" : "The AD synth is disabled");
-            ImGui::SameLine();
-            if (ImGui::Button("PAD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
-            {
-                _state->_showPADNoteEditor = true;
-                ImGui::SetWindowFocus(PadSynthEditorID);
-                _state->_currentTrack = trackIndex;
-            }
-            ImGui::ShowTooltipOnHover("Edit the PAD synth");
             ImGui::PopStyleVar();
 
             ImGui::Spacing();

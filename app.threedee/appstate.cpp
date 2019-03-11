@@ -11,7 +11,7 @@ AppState::AppState(class Mixer *mixer, class IBankManager *banks)
     : _mixer(mixer), _banks(banks), _showLibrary(false), _showEditor(false), _showInspector(true),
       _showMixer(true), _showSmartControls(true), _showQuickHelp(false),
       _showSystemEffectsEditor(true), _showInsertEffectsEditor(true), _showTrackEffectsEditor(true),
-      _showADNoteEditor(true), _showSUBNoteEditor(true), _showPADNoteEditor(true),
+      _showADNoteEditor(true), _showSUBNoteEditor(true), _showSMPLNoteEditor(true), _showPADNoteEditor(true),
       _showTrackTypeChanger(-1),
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentBank(0),
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1),
