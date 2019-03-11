@@ -33,7 +33,7 @@ private:
     void ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters);
     void ADNoteVoiceEditorOscillatorUnison(ADnoteVoiceParam *parameters);
     void ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters);
-    void ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters);
+    void ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters, unsigned char *enabled = nullptr);
     void ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters);
     void ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters);
 

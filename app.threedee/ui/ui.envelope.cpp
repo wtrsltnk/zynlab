@@ -9,11 +9,29 @@ zyn::ui::Envelope::Envelope(char const *label)
     : _label(label)
 {}
 
-void zyn::ui::Envelope::Render(EnvelopeParams *envelope)
+void zyn::ui::Envelope::Render(EnvelopeParams *envelope, unsigned char *enabled)
 {
+    bool envelopeEnabled = enabled == nullptr || (*enabled) == 1;
+
+    if (enabled != nullptr)
+    {
+        if (ImGui::Checkbox("##EnvelopeEnabled", &envelopeEnabled))
+        {
+            (*enabled) = envelopeEnabled ? 1 : 0;
+        }
+        ImGui::ShowTooltipOnHover("Enable this Envelope");
+
+        ImGui::SameLine();
+    }
+
     ImGui::Text("%s", _label);
 
     if (envelope == nullptr)
+    {
+        return;
+    }
+
+    if (!envelopeEnabled)
     {
         return;
     }

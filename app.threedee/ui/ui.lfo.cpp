@@ -16,11 +16,29 @@ static char const *lfo_types[] = {
 
 zyn::ui::Lfo::Lfo(char const *label) : _label(label) {}
 
-void zyn::ui::Lfo::Render(LFOParams *params)
+void zyn::ui::Lfo::Render(LFOParams *params, unsigned char *enabled)
 {
+    bool lfoEnabled = enabled == nullptr || (*enabled) == 1;
+
+    if (enabled != nullptr)
+    {
+        if (ImGui::Checkbox("##LfoEnabled", &lfoEnabled))
+        {
+            (*enabled) = lfoEnabled ? 1 : 0;
+        }
+        ImGui::ShowTooltipOnHover("Enable this LFO");
+
+        ImGui::SameLine();
+    }
+
     ImGui::Text("%s", _label);
 
     if (params == nullptr)
+    {
+        return;
+    }
+
+    if (!lfoEnabled)
     {
         return;
     }

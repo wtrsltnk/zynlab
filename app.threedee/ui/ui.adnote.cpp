@@ -102,7 +102,9 @@ void zyn::ui::AdNote::Render()
                 auto parameters = &_state->_mixer->GetTrack(_state->_currentTrack)->Instruments[0].adpars->VoicePar[i];
                 if (ImGui::BeginTabItem(voiceIds[i]))
                 {
+                    ImGui::PushID(i);
                     ADNoteVoiceEditor(parameters);
+                    ImGui::PopID();
 
                     ImGui::EndTabItem();
                 }
@@ -183,26 +185,36 @@ void zyn::ui::AdNote::ADNoteEditorAmplitude(ADnoteParameters *parameters)
 
     ImGui::Separator();
 
+    ImGui::PushID("AmpEnvelope");
     _AmplitudeEnvelope.Render(parameters->AmpEnvelope);
+    ImGui::PopID();
 
     ImGui::Separator();
 
+    ImGui::PushID("AmpLfo");
     _AmplitudeLfo.Render(parameters->AmpLfo);
+    ImGui::PopID();
 }
 
 void zyn::ui::AdNote::ADNoteEditorFilter(ADnoteParameters *parameters)
 {
     ImGui::Text("Global Filter Parameters");
 
+    ImGui::PushID("GlobalFilter");
     _Filter.Render(parameters->GlobalFilter);
+    ImGui::PopID();
 
     ImGui::Separator();
 
+    ImGui::PushID("FilterEnvelope");
     _FilterEnvelope.Render(parameters->FilterEnvelope);
+    ImGui::PopID();
 
     ImGui::Separator();
 
+    ImGui::PushID("FilterLfo");
     _FilterLfo.Render(parameters->FilterLfo);
+    ImGui::PopID();
 }
 
 void zyn::ui::AdNote::ADNoteEditorFrequency(ADnoteParameters *parameters)
@@ -273,9 +285,13 @@ void zyn::ui::AdNote::ADNoteEditorFrequency(ADnoteParameters *parameters)
 
     ImGui::Separator();
 
+    ImGui::PushID("FreqEnvelope");
     _FrequencyEnvelope.Render(parameters->FreqEnvelope);
+    ImGui::PopID();
 
     ImGui::Separator();
 
+    ImGui::PushID("FreqLfo");
     _FrequencyLfo.Render(parameters->FreqLfo);
+    ImGui::PopID();
 }

@@ -51,35 +51,45 @@ void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
     {
         if (ImGui::BeginTabItem("Oscillator"))
         {
+            ImGui::PushID("ADNoteVoiceEditorOscillator");
             ADNoteVoiceEditorOscillator(parameters);
+            ImGui::PopID();
 
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Amplitude"))
         {
+            ImGui::PushID("ADNoteVoiceEditorAmplitude");
             ADNoteVoiceEditorAmplitude(parameters);
+            ImGui::PopID();
 
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Filter"))
         {
-            ADNoteVoiceEditorFilter(parameters);
+            ImGui::PushID("ADNoteVoiceEditorFilter");
+            ADNoteVoiceEditorFilter(parameters, &(parameters->PFilterEnabled));
+            ImGui::PopID();
 
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Frequency"))
         {
+            ImGui::PushID("ADNoteVoiceEditorFrequency");
             ADNoteVoiceEditorFrequency(parameters);
+            ImGui::PopID();
 
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Modulation"))
         {
+            ImGui::PushID("ADNoteVoiceEditorModulation");
             ADNoteVoiceEditorModulation(parameters);
+            ImGui::PopID();
 
             ImGui::EndTabItem();
         }
@@ -191,26 +201,54 @@ void zyn::ui::AdNote::ADNoteVoiceEditorAmplitude(ADnoteVoiceParam *parameters)
 
     ImGui::Separator();
 
-    _AmplitudeEnvelope.Render(parameters->AmpEnvelope);
+    ImGui::PushID("VoiceAmpEnvelope");
+    _AmplitudeEnvelope.Render(parameters->AmpEnvelope, &(parameters->PAmpEnvelopeEnabled));
+    ImGui::PopID();
 
     ImGui::Separator();
 
-    _AmplitudeLfo.Render(parameters->AmpLfo);
+    ImGui::PushID("VoiceAmpLfo");
+    _AmplitudeLfo.Render(parameters->AmpLfo, &(parameters->PAmpLfoEnabled));
+    ImGui::PopID();
 }
 
-void zyn::ui::AdNote::ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters)
+void zyn::ui::AdNote::ADNoteVoiceEditorFilter(ADnoteVoiceParam *parameters, unsigned char *enabled)
 {
+    bool filterEnabled = enabled == nullptr || (*enabled) == 1;
+
+    if (enabled != nullptr)
+    {
+        if (ImGui::Checkbox("##FilterEnabled", &filterEnabled))
+        {
+            (*enabled) = filterEnabled ? 1 : 0;
+        }
+        ImGui::ShowTooltipOnHover("Enable this Filter");
+
+        ImGui::SameLine();
+    }
+
     ImGui::Text("Voice Filter Parameters");
 
+    if (!filterEnabled)
+    {
+        return;
+    }
+
+    ImGui::PushID("VoiceFilter");
     _Filter.Render(parameters->VoiceFilter);
+    ImGui::PopID();
 
     ImGui::Separator();
 
-    _FilterEnvelope.Render(parameters->FilterEnvelope);
+    ImGui::PushID("VoiceFilterEnvelope");
+    _FilterEnvelope.Render(parameters->FilterEnvelope, &(parameters->PFilterEnvelopeEnabled));
+    ImGui::PopID();
 
     ImGui::Separator();
 
-    _FilterLfo.Render(parameters->FilterLfo);
+    ImGui::PushID("VoiceFilterLfo");
+    _FilterLfo.Render(parameters->FilterLfo, &(parameters->PFilterLfoEnabled));
+    ImGui::PopID();
 }
 
 void zyn::ui::AdNote::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
@@ -275,11 +313,15 @@ void zyn::ui::AdNote::ADNoteVoiceEditorFrequency(ADnoteVoiceParam *parameters)
 
     ImGui::Separator();
 
-    _FrequencyEnvelope.Render(parameters->FreqEnvelope);
+    ImGui::PushID("VoiceFreqEnvelope");
+    _FrequencyEnvelope.Render(parameters->FreqEnvelope, &(parameters->PFreqEnvelopeEnabled));
+    ImGui::PopID();
 
     ImGui::Separator();
 
-    _FrequencyLfo.Render(parameters->FreqLfo);
+    ImGui::PushID("VoiceFreqLfo");
+    _FrequencyLfo.Render(parameters->FreqLfo, &(parameters->PFreqLfoEnabled));
+    ImGui::PopID();
 }
 
 void zyn::ui::AdNote::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
@@ -309,27 +351,27 @@ void zyn::ui::AdNote::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
     if (parameters->PFMEnabled > 0)
     {
-        auto vol = static_cast<int>(parameters->PVolume);
+        auto vol = static_cast<int>(parameters->PFMVolume);
         ImGui::PushItemWidth(300);
         if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))
         {
-            parameters->PVolume = static_cast<unsigned char>(vol);
+            parameters->PFMVolume = static_cast<unsigned char>(vol);
         }
         ImGui::ShowTooltipOnHover("Volume");
 
-        auto velocityScale = static_cast<int>(parameters->PAmpVelocityScaleFunction);
+        auto velocityScale = static_cast<int>(parameters->PFMVelocityScaleFunction);
         ImGui::PushItemWidth(300);
         if (ImGui::SliderInt("##V.Sns", &velocityScale, 0, 127, "V.Sns %d"))
         {
-            parameters->PAmpVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
+            parameters->PFMVelocityScaleFunction = static_cast<unsigned char>(velocityScale);
         }
         ImGui::ShowTooltipOnHover("Velocity Sensing Function (rightmost to disable)");
 
-        auto detune = static_cast<int>(parameters->PDetune) - 8192;
+        auto detune = static_cast<int>(parameters->PFMDetune) - 8192;
         ImGui::PushItemWidth(300);
         if (ImGui::SliderInt("##Detune", &detune, -35, 35, "Detune %d"))
         {
-            parameters->PDetune = static_cast<unsigned short int>(detune + 8192);
+            parameters->PFMDetune = static_cast<unsigned short int>(detune + 8192);
         }
         ImGui::ShowTooltipOnHover("Fine detune (cents)");
 
@@ -337,7 +379,7 @@ void zyn::ui::AdNote::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
         static char const *current_detune_types_item = nullptr;
 
-        auto detune_type = static_cast<int>(parameters->PDetuneType);
+        auto detune_type = static_cast<int>(parameters->PFMDetuneType);
         current_detune_types_item = detune_types[detune_type];
         ImGui::PushItemWidth(100);
         if (ImGui::BeginCombo("Detune type", current_detune_types_item))
@@ -348,7 +390,7 @@ void zyn::ui::AdNote::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
                 if (ImGui::Selectable(detune_types[n], is_selected))
                 {
                     current_detune_types_item = detune_types[n];
-                    parameters->PDetuneType = static_cast<unsigned char>(n);
+                    parameters->PFMDetuneType = static_cast<unsigned char>(n);
                 }
             }
 
@@ -366,7 +408,7 @@ void zyn::ui::AdNote::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
 
         ImGui::SameLine();
 
-        auto octave = static_cast<int>(parameters->PCoarseDetune / 1024);
+        auto octave = static_cast<int>(parameters->PFMCoarseDetune / 1024);
         if (octave >= 8)
         {
             octave -= 16;
@@ -387,16 +429,20 @@ void zyn::ui::AdNote::ADNoteVoiceEditorModulation(ADnoteVoiceParam *parameters)
             {
                 octave += 16;
             }
-            parameters->PCoarseDetune = static_cast<unsigned short>(octave * 1024 + parameters->PCoarseDetune % 1024);
+            parameters->PFMCoarseDetune = static_cast<unsigned short>(octave * 1024 + parameters->PCoarseDetune % 1024);
         }
         ImGui::ShowTooltipOnHover("Octave");
 
         ImGui::Separator();
 
+        ImGui::PushID("VoiceFMAmpEnvelope");
         _ModulationAmplitudeEnvelope.Render(parameters->FMAmpEnvelope);
+        ImGui::PopID();
 
         ImGui::Separator();
 
+        ImGui::PushID("VoiceFMFreqEnvelope");
         _ModulationFrequencyEnvelope.Render(parameters->FMFreqEnvelope);
+        ImGui::PopID();
     }
 }

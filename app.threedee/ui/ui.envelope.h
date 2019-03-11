@@ -14,7 +14,7 @@ private:
 public:
     Envelope(char const *label);
 
-    void Render(EnvelopeParams *params);
+    void Render(EnvelopeParams *params, unsigned char *enabled = nullptr);
 };
 
 } // namespace ui

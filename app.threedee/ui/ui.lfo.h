@@ -14,7 +14,7 @@ private:
 public:
     Lfo(char const *label);
 
-    void Render(LFOParams *params);
+    void Render(LFOParams *params, unsigned char *enabled = nullptr);
 };
 
 } // namespace ui
