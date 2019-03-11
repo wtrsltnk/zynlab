@@ -50,7 +50,7 @@ public:
     /** Destructor*/
     virtual ~Mixer();
 
-    void Setup();
+    void Init();
 
     virtual IMeter *GetMeter();
 
@@ -129,10 +129,11 @@ private:
     int _keyshift;
 
     //information relevent to generating plugin audio samples
-    std::unique_ptr<float> _bufl;
-    std::unique_ptr<float> _bufr;
     off_t _off;
     size_t _smps;
+
+    std::unique_ptr<float> _tmpmixl;
+    std::unique_ptr<float> _tmpmixr;
 };
 
 #endif // MIXER_H

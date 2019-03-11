@@ -215,7 +215,7 @@ float Track::ComputePeak(float volume)
               *outr = partoutr;
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
-            float tmp = fabs(outl[i] + outr[i]);
+            float tmp = std::fabs(outl[i] + outr[i]);
             if (tmp > peak)
             {
                 peak = tmp;

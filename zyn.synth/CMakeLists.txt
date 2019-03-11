@@ -31,6 +31,10 @@ add_library(zyn.synth STATIC
     PADnoteParams.h
     Resonance.cpp
     Resonance.h
+    SampleNote.cpp
+    SampleNote.h
+    SampleNoteParams.cpp
+    SampleNoteParams.h
     SUBnote.cpp
     SUBnote.h
     SUBnoteParams.cpp

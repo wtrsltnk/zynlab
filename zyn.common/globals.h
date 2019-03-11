@@ -395,9 +395,6 @@ public:
     virtual void SetProgram(unsigned char chan, unsigned int pgm) = 0;
     virtual void PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity) = 0;
 
-    // Audio Output
-    virtual void AudioOut(float *outl, float *outr) = 0;
-
     virtual class IFFTwrapper *GetFFT() = 0;
 };
 

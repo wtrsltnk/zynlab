@@ -45,13 +45,14 @@ Mixer::~Mixer()
     pthread_mutex_destroy(&_mutex);
 }
 
-void Mixer::Setup()
+void Mixer::Init()
 {
     meter.Setup();
     ctl.Init();
 
-    _bufl = std::unique_ptr<float>(new float[this->BufferSize()]);
-    _bufr = std::unique_ptr<float>(new float[this->BufferSize()]);
+    _tmpmixl = std::unique_ptr<float>(new float[this->BufferSize()]);
+    _tmpmixr = std::unique_ptr<float>(new float[this->BufferSize()]);
+
     swaplr = false;
     _off = 0;
     _smps = 0;
@@ -429,9 +430,6 @@ void Mixer::AudioOut(float *outl, float *outr)
         }
     }
 
-    auto tmpmixl = new float[this->BufferSize()];
-    auto tmpmixr = new float[this->BufferSize()];
-
     //System effects
     for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
     {
@@ -441,8 +439,8 @@ void Mixer::AudioOut(float *outl, float *outr)
         }
 
         //Clean up the samples used by the system effects
-        memset(tmpmixl, 0, this->BufferSizeInBytes());
-        memset(tmpmixr, 0, this->BufferSizeInBytes());
+        memset(_tmpmixl.get(), 0, this->BufferSizeInBytes());
+        memset(_tmpmixr.get(), 0, this->BufferSizeInBytes());
 
         //Mix the tracks according to the track settings about System Effect
         for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
@@ -466,8 +464,8 @@ void Mixer::AudioOut(float *outl, float *outr)
             const float vol = _sysefxvol[nefx][trackIndex];
             for (unsigned int i = 0; i < this->BufferSize(); ++i)
             {
-                tmpmixl[i] += _tracks[trackIndex].partoutl[i] * vol;
-                tmpmixr[i] += _tracks[trackIndex].partoutr[i] * vol;
+                _tmpmixl.get()[i] += _tracks[trackIndex].partoutl[i] * vol;
+                _tmpmixr.get()[i] += _tracks[trackIndex].partoutr[i] * vol;
             }
         }
 
@@ -479,25 +477,22 @@ void Mixer::AudioOut(float *outl, float *outr)
                 const float vol = _sysefxsend[nefxfrom][nefx];
                 for (unsigned int i = 0; i < this->BufferSize(); ++i)
                 {
-                    tmpmixl[i] += sysefx[nefxfrom]._effectOutL[i] * vol;
-                    tmpmixr[i] += sysefx[nefxfrom]._effectOutR[i] * vol;
+                    _tmpmixl.get()[i] += sysefx[nefxfrom]._effectOutL[i] * vol;
+                    _tmpmixr.get()[i] += sysefx[nefxfrom]._effectOutR[i] * vol;
                 }
             }
         }
 
-        sysefx[nefx].out(tmpmixl, tmpmixr);
+        sysefx[nefx].out(_tmpmixl.get(), _tmpmixr.get());
 
         //Add the System Effect to sound output
         const float outvol = sysefx[nefx].sysefxgetvolume();
         for (unsigned int i = 0; i < this->BufferSize(); ++i)
         {
-            outl[i] += tmpmixl[i] * outvol;
-            outr[i] += tmpmixr[i] * outvol;
+            outl[i] += _tmpmixl.get()[i] * outvol;
+            outr[i] += _tmpmixr.get()[i] * outvol;
         }
     }
-
-    delete[] tmpmixl;
-    delete[] tmpmixr;
 
     //Mix all parts
     for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)

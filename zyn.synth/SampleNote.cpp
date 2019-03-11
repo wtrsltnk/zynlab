@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  SUBnote.cpp - The "subtractive" synthesizer
+  SampleNote.cpp - The "subtractive" synthesizer
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -20,31 +20,31 @@
 
 */
 
-#include "SUBnote.h"
+#include "SampleNote.h"
 #include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <zyn.common/Util.h>
 
-SUBnote::SUBnote(SUBnoteParameters *parameters,
-                 Controller *ctl_,
-                 float freq,
-                 float velocity,
-                 int portamento_,
-                 int midinote,
-                 bool besilent)
+SampleNote::SampleNote(SampleNoteParameters *parameters,
+                       Controller *ctl_,
+                       float freq,
+                       float velocity,
+                       int portamento_,
+                       int midinote,
+                       bool besilent)
     : SynthNote(freq, velocity, portamento_, midinote, besilent), _parameters(parameters), ctl(ctl_)
 {
     NoteEnabled = ON;
     setup(freq, velocity, portamento_, midinote);
 }
 
-void SUBnote::setup(float freq,
-                    float velocity,
-                    int portamento_,
-                    int midinote,
-                    bool legato)
+void SampleNote::setup(float freq,
+                       float velocity,
+                       int portamento_,
+                       int midinote,
+                       bool legato)
 {
     portamento = portamento_;
     NoteEnabled = ON;
@@ -236,7 +236,7 @@ void SUBnote::setup(float freq,
     oldamplitude = newamplitude;
 }
 
-void SUBnote::legatonote(float freq, float velocity, int portamento_, int midinote, bool externcall)
+void SampleNote::legatonote(float freq, float velocity, int portamento_, int midinote, bool externcall)
 {
     // Manage legato stuff
     if (legato.update(freq, velocity, portamento_, midinote, externcall))
@@ -247,7 +247,7 @@ void SUBnote::legatonote(float freq, float velocity, int portamento_, int midino
     setup(freq, velocity, portamento_, midinote, true);
 }
 
-SUBnote::~SUBnote()
+SampleNote::~SampleNote()
 {
     if (NoteEnabled != OFF)
     {
@@ -258,7 +258,7 @@ SUBnote::~SUBnote()
 /*
  * Kill the note
  */
-void SUBnote::KillNote()
+void SampleNote::KillNote()
 {
     if (NoteEnabled == OFF)
     {
@@ -285,7 +285,7 @@ void SUBnote::KillNote()
 /*
  * Compute the filters coefficients
  */
-void SUBnote::computefiltercoefs(bpfilter &filter, float freq, float bw, float gain)
+void SampleNote::computefiltercoefs(bpfilter &filter, float freq, float bw, float gain)
 {
     if (freq > SystemSettings::Instance().samplerate_f / 2.0f - 200.0f)
     {
@@ -315,7 +315,7 @@ void SUBnote::computefiltercoefs(bpfilter &filter, float freq, float bw, float g
 /*
  * Initialise the filters
  */
-void SUBnote::initfilter(bpfilter &filter, float freq, float bw, float amp, float mag)
+void SampleNote::initfilter(bpfilter &filter, float freq, float bw, float amp, float mag)
 {
     filter.xn1 = 0.0f;
     filter.xn2 = 0.0f;
@@ -371,7 +371,7 @@ inline void SubFilterB(const float coeff[4], float &src, float work[4])
 
 //This dance is designed to minimize unneeded memory operations which can result
 //in quite a bit of wasted time
-void SUBnote::filter(bpfilter &filter, float *smps)
+void SampleNote::filter(bpfilter &filter, float *smps)
 {
     assert(SystemSettings::Instance().buffersize % 8 == 0);
 
@@ -398,7 +398,7 @@ void SUBnote::filter(bpfilter &filter, float *smps)
 /*
  * Init Parameters
  */
-void SUBnote::initparameters(float freq)
+void SampleNote::initparameters(float freq)
 {
     AmpEnvelope = new Envelope(_parameters->AmpEnvelope, freq);
     if (_parameters->PFreqEnvelopeEnabled != 0)
@@ -434,7 +434,7 @@ void SUBnote::initparameters(float freq)
 /*
  * Compute how much to reduce amplitude near nyquist or subaudible frequencies.
  */
-float SUBnote::computerolloff(float freq)
+float SampleNote::computerolloff(float freq)
 {
     const float lower_limit = 10.0f;
     const float lower_width = 10.0f;
@@ -458,9 +458,9 @@ float SUBnote::computerolloff(float freq)
 }
 
 /*
- * Compute Parameters of SUBnote for each tick
+ * Compute Parameters of SampleNote for each tick
  */
-void SUBnote::computecurrentparameters()
+void SampleNote::computecurrentparameters()
 {
     if ((FreqEnvelope != nullptr) || (BandWidthEnvelope != nullptr) || (oldpitchwheel != ctl->pitchwheel.data) || (oldbandwidth != ctl->bandwidth.data) || (portamento != 0))
     {
@@ -544,7 +544,7 @@ void SUBnote::computecurrentparameters()
 /*
  * Note Output
  */
-int SUBnote::noteout(float *outl, float *outr)
+int SampleNote::noteout(float *outl, float *outr)
 {
     memcpy(outl, SystemSettings::Instance().denormalkillbuf, SystemSettings::Instance().bufferbytes);
     memcpy(outr, SystemSettings::Instance().denormalkillbuf, SystemSettings::Instance().bufferbytes);
@@ -670,7 +670,7 @@ int SUBnote::noteout(float *outl, float *outr)
 /*
  * Relase Key (Note Off)
  */
-void SUBnote::relasekey()
+void SampleNote::relasekey()
 {
     AmpEnvelope->relasekey();
     if (FreqEnvelope)
@@ -690,7 +690,7 @@ void SUBnote::relasekey()
 /*
  * Check if the note is finished
  */
-bool SUBnote::finished() const
+bool SampleNote::finished() const
 {
     return NoteEnabled == OFF;
 }

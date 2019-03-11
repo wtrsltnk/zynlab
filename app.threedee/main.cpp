@@ -37,7 +37,7 @@ void initprogram()
     std::cerr << "ADsynth Oscil.Size = \t" << SystemSettings::Instance().oscilsize << " samples" << std::endl;
 
     mixer = new Mixer();
-    mixer->Setup();
+    mixer->Init();
     mixer->swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);

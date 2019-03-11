@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-    mixer.Setup();
+    mixer.Init();
     mixer.swaplr = swaplr;
 
     SaveToFileSerializer serializer;

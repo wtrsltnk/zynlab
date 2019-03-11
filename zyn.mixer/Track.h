@@ -36,6 +36,7 @@ class EffectManager;
 class ADnoteParameters;
 class SUBnoteParameters;
 class PADnoteParameters;
+class SampleNoteParameters;
 class SynthNote;
 class XMLWrapper;
 class IFFTwrapper;
@@ -69,11 +70,12 @@ class Instrument
 public:
     unsigned char Penabled, Pmuted, Pminkey, Pmaxkey;
     unsigned char *Pname;
-    unsigned char Padenabled, Psubenabled, Ppadenabled;
+    unsigned char Padenabled, Psubenabled, Ppadenabled, Psmplenabled;
     unsigned char Psendtoparteffect;
     ADnoteParameters *adpars;
     SUBnoteParameters *subpars;
     PADnoteParameters *padpars;
+    SampleNoteParameters *smplpars;
 };
 
 /** Track implementation*/
@@ -88,7 +90,7 @@ public:
     /**Destructor*/
     virtual ~Track();
 
-    /**Ìnit()
+    /**Init()
          * @param fft_ Pointer to the mixer
          * @param microtonal_ Pointer to the microtonal object*/
     void Init(IMixer *mixer, Microtonal *microtonal_);
@@ -105,7 +107,6 @@ public:
     void AllNotesOff(); //panic
     void SetController(unsigned int type, int par);
     void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
-    void RelaseAllKeys();       //this is called on AllNotesOff controller
 
     virtual void ComputeInstrumentSamples(); // compute Track output
 
@@ -121,11 +122,11 @@ public:
     void setkititemstatus(int kititem, int Penabled_);
 
     unsigned char Pvolume;  /**<Track volume*/
-    unsigned char Pminkey;  /**<the minimum key that the Track receives noteon messages*/
-    unsigned char Pmaxkey;  //the maximum key that the Track receives noteon messages
     void setPvolume(unsigned char Pvolume);
     unsigned char Ppanning;  //Track panning
     void setPpanning(unsigned char Ppanning);
+    unsigned char Pminkey;  /**<the minimum key that the Track receives noteon messages*/
+    unsigned char Pmaxkey;  //the maximum key that the Track receives noteon messages
     unsigned char Pkeyshift; //Track keyshift
     unsigned char Prcvchn;   //from what midi channel it receive commnads
     unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
@@ -186,6 +187,7 @@ private:
     void KillNotePos(unsigned int pos);
     void RelaseNotePos(unsigned int pos);
     void MonoMemRenote(); // MonoMem stuff.
+    void RelaseAllKeys();       //this is called on AllNotesOff controller
 
     int _killallnotes; //is set to 1 if I want to kill all notes
 
