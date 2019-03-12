@@ -36,7 +36,6 @@ if(GLFW3_FOUND)
         stb_image.cpp
         stb_image.h
         ui/microtonal.cpp
-        ui/oscilgen.cpp
         ui/resonance.cpp
         ui/ui.adnote.cpp
         ui/ui.adnote.h
@@ -53,6 +52,8 @@ if(GLFW3_FOUND)
         ui/ui.library.h
         ui/ui.mixer.cpp
         ui/ui.mixer.h
+        ui/ui.oscilgen.cpp
+        ui/ui.oscilgen.h
         ui/ui.padnote.cpp
         ui/ui.padnote.h
         ui/ui.subnote.cpp

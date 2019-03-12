@@ -970,13 +970,16 @@ void OscilGen::getspectrum(int n, float *spc, int what)
     if (what == 0)
     {
         for (int i = 0; i < n; ++i)
+        {
             outoscilFFTfreqs[i] = fft_t(spc[i], spc[i]);
-        memset(outoscilFFTfreqs + n, 0,
-               (SystemSettings::Instance().oscilsize / 2 - n) * sizeof(fft_t));
+        }
+        memset(outoscilFFTfreqs + n, 0, (SystemSettings::Instance().oscilsize / 2 - n) * sizeof(fft_t));
         adaptiveharmonic(outoscilFFTfreqs, 0.0f);
         adaptiveharmonicpostprocess(outoscilFFTfreqs, n - 1);
         for (int i = 0; i < n; ++i)
+        {
             spc[i] = outoscilFFTfreqs[i].imag();
+        }
     }
 }
 

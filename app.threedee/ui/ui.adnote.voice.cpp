@@ -36,8 +36,18 @@ static char const *modulation_types[] = {
     "FM",
 };
 
+static char const *voice_types[] = {
+    "Sound",
+    "Noise",
+};
+
+static unsigned int voice_type_count = 2;
+
 void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 {
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, 350);
+
     ImGui::Text("ADsynth Voice Parameters of the Instrument");
 
     auto enabled = parameters->Enabled != 0;
@@ -46,6 +56,16 @@ void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
         parameters->Enabled = enabled ? 1 : 0;
     }
     ImGui::ShowTooltipOnHover("Enable this voice");
+
+    ImGui::NextColumn();
+
+    std::vector<float> smps(SystemSettings::Instance().oscilsize);
+    parameters->OscilSmp->get(smps.data(), -1.0);
+    ImGui::PlotLines("##oscillator", smps.data(), SystemSettings::Instance().oscilsize, 0, nullptr, -1.1f, 1.1f, ImVec2(90, 60));
+
+    ImGui::NextColumn();
+
+    ImGui::Columns(1);
 
     if (ImGui::BeginTabBar("ADNote Voice"))
     {
@@ -76,22 +96,39 @@ void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Frequency"))
+        if (parameters->Type == 0)
         {
-            ImGui::PushID("ADNoteVoiceEditorFrequency");
-            ADNoteVoiceEditorFrequency(parameters);
-            ImGui::PopID();
+            if (ImGui::BeginTabItem("Frequency"))
+            {
+                ImGui::PushID("ADNoteVoiceEditorFrequency");
+                ADNoteVoiceEditorFrequency(parameters);
+                ImGui::PopID();
 
-            ImGui::EndTabItem();
-        }
+                ImGui::EndTabItem();
+            }
 
-        if (ImGui::BeginTabItem("Modulation"))
-        {
-            ImGui::PushID("ADNoteVoiceEditorModulation");
-            ADNoteVoiceEditorModulation(parameters);
-            ImGui::PopID();
+            if (ImGui::BeginTabItem("Modulation"))
+            {
+                ImGui::PushID("ADNoteVoiceEditorModulation");
+                ADNoteVoiceEditorModulation(parameters);
+                ImGui::PopID();
 
-            ImGui::EndTabItem();
+                ImGui::EndTabItem();
+            }
+
+            ImGui::Separator();
+
+            ImGui::Text("Oscillator");
+
+            std::vector<float> spc(175);
+            parameters->OscilSmp->getspectrum(175, spc.data(), 1);
+            float max = 0;
+            for (int i = 0; i < 175; i++)
+            {
+                if (max < spc[i])
+                    max = spc[i];
+            }
+            ImGui::PlotHistogram("##spectrum", spc.data(), 175, 0, nullptr, 0.0f, std::max(1.0f, max), ImVec2(350, 50));
         }
         ImGui::EndTabBar();
     }
@@ -100,6 +137,11 @@ void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 void zyn::ui::AdNote::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
 {
     ImGui::Text("Voice Oscillator Parameters");
+
+    ImGui::PushItemWidth(150);
+    if (ImGui::DropDown("##OscillatoType", parameters->Type, voice_types, voice_type_count, "Voice Type"))
+    {
+    }
 
     auto phase = static_cast<int>(64 - parameters->Poscilphase);
     ImGui::PushItemWidth(300);

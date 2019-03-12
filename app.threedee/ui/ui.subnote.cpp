@@ -16,6 +16,22 @@ static char const *overtone_positions[] = {
     "Shift",
 };
 
+static char const *const mag_types[] = {
+    "Linear",
+    "-40dB",
+    "-60dB",
+    "-80dB",
+    "-100dB",
+};
+static unsigned int mag_type_count = 5;
+
+static char const *const start_types[] = {
+    "Zero",
+    "RND",
+    "Max.",
+};
+static unsigned int start_type_count = 3;
+
 char const *const SubSynthEditorID = "SUB editor";
 
 char const *const SmplSynthEditorID = "SMPL editor";
@@ -59,6 +75,35 @@ void zyn::ui::SubNote::Render()
             if (_state->_currentTrack >= 0)
             {
                 ImGui::Text("SUBsynth Global Parameters of the Instrument");
+
+                auto stereo = parameters->Pstereo == 1;
+                if (ImGui::Checkbox("Stereo", &stereo))
+                {
+                    parameters->Pstereo = stereo ? 1 : 0;
+                }
+                ImGui::ShowTooltipOnHover("Stereo");
+
+                ImGui::SameLine();
+
+                auto filterStages = static_cast<int>(parameters->Pnumstages);
+                ImGui::PushItemWidth(100);
+                if (ImGui::SliderInt("Filter Stages", &filterStages, 1, 5))
+                {
+                    parameters->Pnumstages = static_cast<unsigned char>(filterStages);
+                }
+                ImGui::ShowTooltipOnHover("How many times the noise is filtered");
+
+                ImGui::PushItemWidth(100);
+                if (ImGui::DropDown("##MagType", parameters->Phmagtype, mag_types, mag_type_count, "Mag type"))
+                {
+                }
+
+                ImGui::SameLine();
+
+                ImGui::PushItemWidth(100);
+                if (ImGui::DropDown("##Start", parameters->Pstart, start_types, start_type_count, "Start"))
+                {
+                }
 
                 if (ImGui::BeginTabBar("SUBNote"))
                 {

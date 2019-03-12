@@ -4,7 +4,7 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.synth/ADnoteParams.h>
 
-static char voiceIds[][64]{
+static char const *const voiceIds[]{
     "Voice 1",
     "Voice 2",
     "Voice 3",
@@ -15,7 +15,7 @@ static char voiceIds[][64]{
     "Voice 8",
 };
 
-static char const *detune_types[] = {
+static char const *const detune_types[] = {
     "L35cents",
     "L10cents",
     "E100cents",
