@@ -2,10 +2,17 @@
 #define UI_OSCILGEN_H
 
 #include "../appstate.h"
-#include "ui.envelope.h"
-#include "ui.lfo.h"
-#include <zyn.mixer/Track.h>
-#include <zyn.synth/PADnoteParams.h>
+
+extern char const *const WaveShapingFunctions[];
+extern unsigned int WaveShapingFunctionCount;
+extern char const *const OscilFilterTypes[];
+extern unsigned int OscilFilterTypeCount;
+extern char const *const ModulationTypes[];
+extern unsigned int ModulationTypeCount;
+extern char const *const SpectrumAdjustmentTypes[];
+extern unsigned int SpectrumAdjustmentTypeCount;
+extern char const *const AddaptiveHarmonicsTypes[];
+extern unsigned int AddaptiveHarmonicsTypeCount;
 
 namespace zyn {
 namespace ui {

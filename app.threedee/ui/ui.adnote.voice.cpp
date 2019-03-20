@@ -3,6 +3,8 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/ADnoteParams.h>
 
+char const *const OscillatorEditorID = "Oscillator Editor";
+
 static char const *unison_sizes[] = {
     "OFF",
     "Size 2",
@@ -61,7 +63,11 @@ void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 
     std::vector<float> smps(SystemSettings::Instance().oscilsize);
     parameters->OscilSmp->get(smps.data(), -1.0);
-    ImGui::PlotLines("##oscillator", smps.data(), SystemSettings::Instance().oscilsize, 0, nullptr, -1.1f, 1.1f, ImVec2(90, 60));
+    ImGui::PlotLines("##oscillator", smps.data(), static_cast<int>(SystemSettings::Instance().oscilsize), 0, nullptr, -1.1f, 1.1f, ImVec2(90, 60));
+    if (ImGui::IsItemClicked())
+    {
+        ImGui::SetWindowFocus(OscillatorEditorID);
+    }
 
     ImGui::NextColumn();
 
@@ -115,21 +121,7 @@ void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 
                 ImGui::EndTabItem();
             }
-
-            ImGui::Separator();
-
-            ImGui::Text("Oscillator");
-
-            std::vector<float> spc(175);
-            parameters->OscilSmp->getspectrum(175, spc.data(), 1);
-            float max = 0;
-            for (int i = 0; i < 175; i++)
-            {
-                if (max < spc[i])
-                    max = spc[i];
-            }
-            ImGui::PlotHistogram("##spectrum", spc.data(), 175, 0, nullptr, 0.0f, std::max(1.0f, max), ImVec2(350, 50));
-        }
+}
         ImGui::EndTabBar();
     }
 }

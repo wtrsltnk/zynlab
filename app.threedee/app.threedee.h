@@ -13,6 +13,7 @@
 #include "ui/ui.effect.h"
 #include "ui/ui.library.h"
 #include "ui/ui.mixer.h"
+#include "ui/ui.oscilgen.h"
 #include "ui/ui.padnote.h"
 #include "ui/ui.subnote.h"
 #include <chrono>
@@ -33,6 +34,7 @@ private:
     zyn::ui::Mixer _mixerUi;
     zyn::ui::PadNote _padNoteUi;
     zyn::ui::SubNote _subNoteUi;
+    zyn::ui::OscilGen _oscilGenUi;
 
     GLFWwindow *_window;
     std::vector<unsigned int> _toolbarIcons;

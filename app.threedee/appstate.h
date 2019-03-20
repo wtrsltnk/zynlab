@@ -13,6 +13,7 @@ extern char const *const PadSynthEditorID;
 extern char const *const InsertionFxEditorID;
 extern char const *const SystemFxEditorID;
 extern char const *const TrackFxEditorID;
+extern char const *const OscillatorEditorID;
 extern char const *const LibraryID;
 extern char const *const StepPatternEditorID;
 extern char const *const EffectNames[];
@@ -59,6 +60,7 @@ public:
     bool _showSUBNoteEditor;
     bool _showSMPLNoteEditor;
     bool _showPADNoteEditor;
+    bool _showOscillatorEditor;
     int _showTrackTypeChanger;
     int _currentInsertEffect;
     int _currentSystemEffect;
@@ -67,6 +69,7 @@ public:
     int _currentTrack;
     int _currentTrackInstrument;
     int _currentPattern;
+    int _currentVoiceOscil;
     int _sequencerVerticalZoom;
     int _sequencerHorizontalZoom;
     int _pianoRollEditorHorizontalZoom;

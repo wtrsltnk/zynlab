@@ -108,6 +108,10 @@ void zyn::ui::AdNote::Render()
 
                     ImGui::EndTabItem();
                 }
+                if (ImGui::IsItemClicked())
+                {
+                    _state->_currentVoiceOscil = i;
+                }
             }
         }
         ImGui::EndTabBar();

@@ -194,6 +194,10 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
         }
         ImGui::EndTooltip();
     }
+    else if (ImGui::IsItemHovered() && tooltip != nullptr)
+    {
+        ImGui::ShowTooltipOnHover(tooltip);
+    }
 
     return value_changed;
 }

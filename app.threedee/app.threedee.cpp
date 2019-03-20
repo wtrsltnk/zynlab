@@ -54,7 +54,7 @@ static ImVec4 clear_color = ImColor(90, 90, 100);
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, IBankManager *banks)
     : _state(mixer, banks), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
-      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state),
+      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state), _oscilGenUi(&_state),
       _window(window),
       _toolbarIconsAreLoaded(false),
       _display_w(800), _display_h(600)
@@ -148,6 +148,7 @@ bool AppThreeDee::Setup()
     _subNoteUi.Setup();
     _padNoteUi.Setup();
     _effectUi.Setup();
+    _oscilGenUi.Setup();
 
     LoadToolbarIcons();
 
@@ -590,6 +591,7 @@ void AppThreeDee::Render()
     _effectUi.Render();
     _libraryUi.Render();
     _mixerUi.Render();
+    _oscilGenUi.Render();
 
     if (_state._showSmartControls)
     {

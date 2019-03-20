@@ -1002,7 +1002,7 @@ redrawoscil();}
         } {
           MenuItem {} {
             label None
-            xywh {60 60 100 20} labelfont 1 labelsize 10
+            xywh {60 60 100 20} labelfont 1 labeize 10
           }
           MenuItem {} {
             label Rev
