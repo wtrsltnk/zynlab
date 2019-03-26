@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  WavEngine.h - Records sound to a file
+  WavFile.h - Records sound to a file
   Copyright (C) 2008 Nasca Octavian Paul
   Author: Nasca Octavian Paul
           Mark McCurry
@@ -20,44 +20,27 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-#ifndef WAVENGINE_H
-#define WAVENGINE_H
+#ifndef WAVFILEWRITER_H
+#define WAVFILEWRITER_H
 
-#include "AudioOutput.h"
-#include "SafeQueue.h"
-#include "ZynSema.h"
-
-#include <pthread.h>
 #include <string>
 
-class WavFileWriter;
-class WavEngine : public AudioOutput
+class WavFileWriter
 {
 public:
-    WavEngine(unsigned int sampleRate, unsigned int bufferSize);
-    virtual ~WavEngine();
+    WavFileWriter(const std::string &filename, unsigned int samplerate, unsigned short int channels);
+    ~WavFileWriter();
 
-    bool openAudio();
-    bool Start();
-    void Stop();
+    bool good() const;
 
-    void SetAudioEnabled(bool /*nval*/) {}
-    bool IsAudioEnabled() const { return true; }
-
-    void push(Stereo<float *> smps, size_t len);
-
-    void newFile(WavFileWriter *_file);
-    void destroyFile();
-
-protected:
-    void *AudioThread();
-    static void *_AudioThread(void *arg);
+    void writeMonoSamples(unsigned int nsmps, short int *smps);
+    void writeStereoSamples(unsigned int nsmps, short int *smps);
 
 private:
-    WavFileWriter *file;
-    ZynSema work;
-    SafeQueue<float> buffer;
-
-    pthread_t *pThread;
+    unsigned int sampleswritten;
+    unsigned int samplerate;
+    unsigned short int channels;
+    FILE *file;
 };
-#endif
+
+#endif // WAVFILEWRITER_H

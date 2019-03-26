@@ -18,6 +18,9 @@
 #include <cstdlib>
 #include <iterator>
 #include <map>
+#include <zyn.common/WavFileReader.h>
+#include <zyn.mixer/Track.h>
+#include <zyn.synth/SampleNoteParams.h>
 
 char const *const NoteNames[] = {
     "B",
@@ -154,6 +157,8 @@ bool AppThreeDee::Setup()
 
     _state._playTime = 0.0f;
 
+    WavFileReader wav;
+    wav.Read("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav", &(_state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData));
     return true;
 }
 

@@ -17,7 +17,7 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-#include "WavFile.h"
+#include "WavFileWriter.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -26,7 +26,7 @@
 
 using namespace std;
 
-WavFile::WavFile(const string &filename, unsigned int samplerate, unsigned short int channels)
+WavFileWriter::WavFileWriter(const string &filename, unsigned int samplerate, unsigned short int channels)
     : sampleswritten(0), samplerate(samplerate), channels(channels),
       file(fopen(filename.c_str(), "w"))
 
@@ -41,7 +41,7 @@ WavFile::WavFile(const string &filename, unsigned int samplerate, unsigned short
     }
 }
 
-WavFile::~WavFile()
+WavFileWriter::~WavFileWriter()
 {
     if (file)
     {
@@ -79,12 +79,12 @@ WavFile::~WavFile()
     }
 }
 
-bool WavFile::good() const
+bool WavFileWriter::good() const
 {
     return file;
 }
 
-void WavFile::writeStereoSamples(unsigned int nsmps, short int *smps)
+void WavFileWriter::writeStereoSamples(unsigned int nsmps, short int *smps)
 {
     if (file)
     {
@@ -93,7 +93,7 @@ void WavFile::writeStereoSamples(unsigned int nsmps, short int *smps)
     }
 }
 
-void WavFile::writeMonoSamples(unsigned int nsmps, short int *smps)
+void WavFileWriter::writeMonoSamples(unsigned int nsmps, short int *smps)
 {
     if (file)
     {

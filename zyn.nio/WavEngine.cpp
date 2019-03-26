@@ -18,7 +18,7 @@
 
 #include "WavEngine.h"
 #include <zyn.common/Util.h>
-#include <zyn.common/WavFile.h>
+#include <zyn.common/WavFileWriter.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -92,7 +92,7 @@ void WavEngine::push(Stereo<float *> smps, size_t len)
     work.post();
 }
 
-void WavEngine::newFile(WavFile *_file)
+void WavEngine::newFile(WavFileWriter *_file)
 {
     //ensure system is clean
     destroyFile();

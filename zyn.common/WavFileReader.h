@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  WavEngine.h - Records sound to a file
+  WavFile.h - Records sound to a file
   Copyright (C) 2008 Nasca Octavian Paul
   Author: Nasca Octavian Paul
           Mark McCurry
@@ -20,44 +20,18 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-#ifndef WAVENGINE_H
-#define WAVENGINE_H
+#ifndef WAVFILEREADER_H
+#define WAVFILEREADER_H
 
-#include "AudioOutput.h"
-#include "SafeQueue.h"
-#include "ZynSema.h"
+#include "WavFile.h"
 
-#include <pthread.h>
-#include <string>
-
-class WavFileWriter;
-class WavEngine : public AudioOutput
+class WavFileReader
 {
 public:
-    WavEngine(unsigned int sampleRate, unsigned int bufferSize);
-    virtual ~WavEngine();
+    WavFileReader();
+    virtual ~WavFileReader();
 
-    bool openAudio();
-    bool Start();
-    void Stop();
-
-    void SetAudioEnabled(bool /*nval*/) {}
-    bool IsAudioEnabled() const { return true; }
-
-    void push(Stereo<float *> smps, size_t len);
-
-    void newFile(WavFileWriter *_file);
-    void destroyFile();
-
-protected:
-    void *AudioThread();
-    static void *_AudioThread(void *arg);
-
-private:
-    WavFileWriter *file;
-    ZynSema work;
-    SafeQueue<float> buffer;
-
-    pthread_t *pThread;
+    bool Read(char const *filename, Wav::WAVDATA *target);
 };
-#endif
+
+#endif // WAVFILEREADER_H

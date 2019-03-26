@@ -34,7 +34,7 @@ SampleNote::SampleNote(SampleNoteParameters *parameters,
                        int portamento_,
                        int midinote,
                        bool besilent)
-    : SynthNote(freq, velocity, portamento_, midinote, besilent), _parameters(parameters), ctl(ctl_)
+    : SynthNote(freq, velocity, portamento_, midinote, besilent), _parameters(parameters), ctl(ctl_), wavProgress(0)
 {
     NoteEnabled = ON;
     setup(freq, velocity, portamento_, midinote);
@@ -552,6 +552,29 @@ int SampleNote::noteout(float *outl, float *outr)
     if (NoteEnabled == OFF)
     {
         return 0;
+    }
+
+    if (_parameters->PwavData._samples != nullptr)
+    {
+        if ((wavProgress + (SystemSettings::Instance().buffersize*2)) > _parameters->PwavData._sample_count)
+        {
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+            { //fade-out
+                float tmp = 1.0f - static_cast<float>(i) / SystemSettings::Instance().buffersize_f;
+                outl[i] *= tmp;
+                outr[i] *= tmp;
+            }
+            KillNote();
+            return 1;
+        }
+
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+        {
+            outl[i] = 0.005f * _parameters->PwavData._samples[wavProgress++] * panning;
+            outr[i] = 0.005f * _parameters->PwavData._samples[wavProgress++] * (1.0f - panning);
+
+        }
+        return 1;
     }
 
     std::unique_ptr<float> tmprnd(new float[SystemSettings::Instance().buffersize]);

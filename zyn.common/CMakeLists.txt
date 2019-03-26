@@ -2,29 +2,35 @@ cmake_minimum_required(VERSION 3.8)
 
 project(zyn.common)
 
-add_library(zyn.common STATIC
-    Config.cpp
-    Config.h
-    IAudioGenerator.cpp
-    IAudioGenerator.h
-    IFFTwrapper.h
-    IPresetsSerializer.cpp
-    IPresetsSerializer.h
-    Presets.cpp
-    Presets.h
-    PresetsSerializer.cpp
-    PresetsSerializer.h
-    PresetsStore.cpp
-    PresetsStore.h
-    Stereo.h
-    Util.cpp
-    Util.h
-    WavFile.cpp
-    WavFile.h
-    WaveShapeSmps.cpp
-    WaveShapeSmps.h
-    globals.cpp
-    globals.h
+add_library(zyn.common STATIC)
+
+target_sources(zyn.common
+    PRIVATE
+        Config.cpp
+        Config.h
+        IAudioGenerator.cpp
+        IAudioGenerator.h
+        IFFTwrapper.h
+        IPresetsSerializer.cpp
+        IPresetsSerializer.h
+        Presets.cpp
+        Presets.h
+        PresetsSerializer.cpp
+        PresetsSerializer.h
+        PresetsStore.cpp
+        PresetsStore.h
+        Stereo.h
+        Util.cpp
+        Util.h
+        WaveShapeSmps.cpp
+        WaveShapeSmps.h
+        WavFile.h
+        WavFileReader.cpp
+        WavFileReader.h
+        WavFileWriter.cpp
+        WavFileWriter.h
+        globals.cpp
+        globals.h
 )
 
 target_include_directories(zyn.common
@@ -61,6 +67,8 @@ install(
         ${zyn.common_SOURCE_DIR}/Stereo.h
         ${zyn.common_SOURCE_DIR}/Util.h
         ${zyn.common_SOURCE_DIR}/WavFile.h
+        ${zyn.common_SOURCE_DIR}/WavFileReader.h
+        ${zyn.common_SOURCE_DIR}/WavFileWriter.h
         ${zyn.common_SOURCE_DIR}/WaveShapeSmps.h
         ${zyn.common_SOURCE_DIR}/XmlWrapper.h
         ${zyn.common_SOURCE_DIR}/globals.h

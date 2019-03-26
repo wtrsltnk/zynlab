@@ -28,6 +28,7 @@
 #include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
+#include <zyn.common/WavFile.h>
 
 class SampleNoteParameters : public WrappedPresets
 {
@@ -40,6 +41,8 @@ public:
     void Defaults();
 
     void updateFrequencyMultipliers(void);
+
+    Wav::WAVDATA PwavData;
 
     //Parameters
     //AMPLITUDE PARAMETRERS

@@ -23,23 +23,40 @@
 #ifndef WAVFILE_H
 #define WAVFILE_H
 
-#include <string>
+namespace Wav {
 
-class WavFile
+// WAVE file header format
+typedef struct
 {
-public:
-    WavFile(const std::string &filename, unsigned int samplerate, unsigned short int channels);
-    ~WavFile();
+    char riff[4];               // RIFF string
+    unsigned int overall_size;  // overall size of file in bytes
+    char wave[4];               // WAVE string
+    char fmt_chunk_marker[4];   // fmt string with trailing null char
+    unsigned int length_of_fmt; // length of the format data
+    short int format_type;      // format type. 1-PCM, 3- IEEE float, 6 - 8bit A law, 7 - 8bit mu law
+    short int channels;         // no.of channels
+    unsigned int sample_rate;   // sampling rate (blocks per second)
+    unsigned int byterate;      // SampleRate * NumChannels * BitsPerSample/8
+    short int block_align;      // NumChannels * BitsPerSample/8
+    short int bits_per_sample;  // bits per sample, 8- 8bits, 16- 16 bits etc
+} HEADER;
 
-    bool good() const;
+typedef struct
+{
+    char id[4]; // 'data' or 'fact'
+    unsigned int length;
+} CHUNK;
 
-    void writeMonoSamples(unsigned int nsmps, short int *smps);
-    void writeStereoSamples(unsigned int nsmps, short int *smps);
+typedef struct
+{
+    float *_samples;
+    short int _bits_per_sample;
+    short int _channels;
+    unsigned int _sample_rate;
+    unsigned int _sample_count;
 
-private:
-    unsigned int sampleswritten;
-    unsigned int samplerate;
-    unsigned short int channels;
-    FILE *file;
-};
-#endif
+} WAVDATA;
+
+} // namespace Wav
+
+#endif // WAVFILE_H

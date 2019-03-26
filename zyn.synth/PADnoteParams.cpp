@@ -23,7 +23,7 @@
 #include "PADnoteParams.h"
 #include "FFTwrapper.h"
 #include <cmath>
-#include <zyn.common/WavFile.h>
+#include <zyn.common/WavFileWriter.h>
 
 PADnoteParameters::PADnoteParameters(IFFTwrapper *fft)
 {
@@ -685,7 +685,7 @@ void PADnoteParameters::export2wav(std::string basefilename, IMixer *mixer)
         snprintf(tmpstr, 20, "_%02d", k + 1);
         std::string filename = basefilename + std::string(tmpstr) + ".wav";
 
-        WavFile wav(filename, SystemSettings::Instance().samplerate, 1);
+        WavFileWriter wav(filename, SystemSettings::Instance().samplerate, 1);
         if (wav.good())
         {
             int nsmps = sample[k].size;
