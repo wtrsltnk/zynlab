@@ -45,6 +45,7 @@ public:
     bool finished() const;
 
 private:
+    void channelOut(float *out, float *tmprnd, float *tmpsmp, Filter* globalFilter);
     void setup(float freq,
                float velocity,
                int portamento_,

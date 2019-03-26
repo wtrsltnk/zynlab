@@ -541,6 +541,32 @@ void SUBnote::computecurrentparameters()
     }
 }
 
+void SUBnote::channelOut(float *out, float *tmprnd, float *tmpsmp, Filter *globalFilter)
+{
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+    {
+        tmprnd[i] = RND * 2.0f - 1.0f;
+    }
+    for (int n = 0; n < numharmonics; ++n)
+    {
+        float rolloff = overtone_rolloff[n];
+        memcpy(tmpsmp, tmprnd, SystemSettings::Instance().bufferbytes);
+        for (int nph = 0; nph < numstages; ++nph)
+        {
+            filter(lfilter[nph + n * numstages], tmpsmp);
+        }
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+        {
+            out[i] += tmpsmp[i] * rolloff;
+        }
+    }
+
+    if (globalFilter != nullptr)
+    {
+        globalFilter->filterout(&out[0]);
+    }
+}
+
 /*
  * Note Output
  */
@@ -556,54 +582,14 @@ int SUBnote::noteout(float *outl, float *outr)
 
     std::unique_ptr<float> tmprnd(new float[SystemSettings::Instance().buffersize]);
     std::unique_ptr<float> tmpsmp(new float[SystemSettings::Instance().buffersize]);
-    //left channel
-    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-    {
-        tmprnd.get()[i] = RND * 2.0f - 1.0f;
-    }
-    for (int n = 0; n < numharmonics; ++n)
-    {
-        float rolloff = overtone_rolloff[n];
-        memcpy(tmpsmp.get(), tmprnd.get(), SystemSettings::Instance().bufferbytes);
-        for (int nph = 0; nph < numstages; ++nph)
-        {
-            filter(lfilter[nph + n * numstages], tmpsmp.get());
-        }
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        {
-            outl[i] += tmpsmp.get()[i] * rolloff;
-        }
-    }
 
-    if (GlobalFilterL != nullptr)
-    {
-        GlobalFilterL->filterout(&outl[0]);
-    }
+    //left channel
+    channelOut(outl, tmprnd.get(), tmpsmp.get(), GlobalFilterL);
 
     //right channel
     if (stereo != 0)
     {
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        {
-            tmprnd.get()[i] = RND * 2.0f - 1.0f;
-        }
-        for (int n = 0; n < numharmonics; ++n)
-        {
-            float rolloff = overtone_rolloff[n];
-            memcpy(tmpsmp.get(), tmprnd.get(), SystemSettings::Instance().bufferbytes);
-            for (int nph = 0; nph < numstages; ++nph)
-            {
-                filter(rfilter[nph + n * numstages], tmpsmp.get());
-            }
-            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-            {
-                outr[i] += tmpsmp.get()[i] * rolloff;
-            }
-        }
-        if (GlobalFilterR != nullptr)
-        {
-            GlobalFilterR->filterout(&outr[0]);
-        }
+        channelOut(outr, tmprnd.get(), tmpsmp.get(), GlobalFilterR);
     }
     else
     {
