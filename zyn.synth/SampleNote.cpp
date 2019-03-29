@@ -554,146 +554,36 @@ int SampleNote::noteout(float *outl, float *outr)
         return 0;
     }
 
-    if (_parameters->PwavData2.getLengthInSeconds() > 0)
+    if (_parameters->PwavData2.getLengthInSeconds() <= 0)
     {
-        if ((wavProgress + SystemSettings::Instance().buffersize) > _parameters->PwavData2.getNumSamplesPerChannel())
-        {
-            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-            {
-                if (wavProgress < _parameters->PwavData2.getNumSamplesPerChannel())
-                {
-                    outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
-                    outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
-                    wavProgress++;
-                }
-                else
-                {
-                    outl[i] = 0;
-                    outr[i] = 0;
-                }
-            }
-            KillNote();
-            return 1;
-        }
+        return 0;
+    }
 
+    if ((wavProgress + SystemSettings::Instance().buffersize) > _parameters->PwavData2.getNumSamplesPerChannel())
+    {
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
-            outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
-            outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
-            wavProgress++;
+            if (wavProgress < _parameters->PwavData2.getNumSamplesPerChannel())
+            {
+                outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
+                outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
+                wavProgress++;
+            }
+            else
+            {
+                outl[i] = 0;
+                outr[i] = 0;
+            }
         }
+        KillNote();
         return 1;
     }
 
-    std::unique_ptr<float> tmprnd(new float[SystemSettings::Instance().buffersize]);
-    std::unique_ptr<float> tmpsmp(new float[SystemSettings::Instance().buffersize]);
-    //left channel
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        tmprnd.get()[i] = RND * 2.0f - 1.0f;
-    }
-    for (int n = 0; n < numharmonics; ++n)
-    {
-        float rolloff = overtone_rolloff[n];
-        memcpy(tmpsmp.get(), tmprnd.get(), SystemSettings::Instance().bufferbytes);
-        for (int nph = 0; nph < numstages; ++nph)
-        {
-            filter(lfilter[nph + n * numstages], tmpsmp.get());
-        }
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        {
-            outl[i] += tmpsmp.get()[i] * rolloff;
-        }
-    }
-
-    if (GlobalFilterL != nullptr)
-    {
-        GlobalFilterL->filterout(&outl[0]);
-    }
-
-    //right channel
-    if (stereo != 0)
-    {
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        {
-            tmprnd.get()[i] = RND * 2.0f - 1.0f;
-        }
-        for (int n = 0; n < numharmonics; ++n)
-        {
-            float rolloff = overtone_rolloff[n];
-            memcpy(tmpsmp.get(), tmprnd.get(), SystemSettings::Instance().bufferbytes);
-            for (int nph = 0; nph < numstages; ++nph)
-            {
-                filter(rfilter[nph + n * numstages], tmpsmp.get());
-            }
-            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-            {
-                outr[i] += tmpsmp.get()[i] * rolloff;
-            }
-        }
-        if (GlobalFilterR != nullptr)
-        {
-            GlobalFilterR->filterout(&outr[0]);
-        }
-    }
-    else
-    {
-        memcpy(outr, outl, SystemSettings::Instance().bufferbytes);
-    }
-
-    if (firsttick != 0)
-    {
-        unsigned int n = 10;
-        if (n > SystemSettings::Instance().buffersize)
-        {
-            n = SystemSettings::Instance().buffersize;
-        }
-        for (unsigned int i = 0; i < n; ++i)
-        {
-            float ampfadein = 0.5f - 0.5f * cosf(static_cast<float>(i) / static_cast<float>(n) * PI);
-            outl[i] *= ampfadein;
-            outr[i] *= ampfadein;
-        }
-        firsttick = 0;
-    }
-
-    if (ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude))
-    { // Amplitude interpolation
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        {
-            float tmpvol = INTERPOLATE_AMPLITUDE(oldamplitude,
-                                                 newamplitude,
-                                                 i,
-                                                 SystemSettings::Instance().buffersize);
-            outl[i] *= tmpvol * panning;
-            outr[i] *= tmpvol * (1.0f - panning);
-        }
-    }
-    else
-    {
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        {
-            outl[i] *= newamplitude * panning;
-            outr[i] *= newamplitude * (1.0f - panning);
-        }
-    }
-
-    oldamplitude = newamplitude;
-    computecurrentparameters();
-
-    // Apply legato-specific sound signal modifications
-    legato.apply(outl, outr);
-
-    // Check if the note needs to be computed more
-    if (AmpEnvelope->finished())
-    {
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        { //fade-out
-            float tmp = 1.0f - static_cast<float>(i) / SystemSettings::Instance().buffersize_f;
-            outl[i] *= tmp;
-            outr[i] *= tmp;
-        }
-        KillNote();
+        outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
+        outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
+        wavProgress++;
     }
     return 1;
 }

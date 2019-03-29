@@ -55,7 +55,7 @@ private:
     void KillNote();
 
     SampleNoteParameters *_parameters;
-    unsigned int wavProgress;
+    int wavProgress;
 
     //parameters
     int stereo;
