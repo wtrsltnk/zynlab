@@ -1,7 +1,10 @@
 #include "app.threedee.h"
 
+#include <zyn.common/WavFileWriter.h>
 #include <zyn.mixer/Track.h>
+#include <zyn.nio/AudioOutputManager.h>
 #include <zyn.nio/MidiInputManager.h>
+#include <zyn.nio/WavEngine.h>
 #include <zyn.seq/ArpModes.h>
 #include <zyn.seq/Chords.h>
 #include <zyn.seq/NotesGenerator.h>
@@ -18,7 +21,6 @@
 #include <cstdlib>
 #include <iterator>
 #include <map>
-#include <zyn.common/WavFileReader.h>
 #include <zyn.mixer/Track.h>
 #include <zyn.synth/SampleNoteParams.h>
 
@@ -157,8 +159,8 @@ bool AppThreeDee::Setup()
 
     _state._playTime = 0.0f;
 
-    WavFileReader wav;
-    wav.Read("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav", &(_state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData));
+    _state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData2.load("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav");
+
     return true;
 }
 
@@ -694,7 +696,20 @@ void AppThreeDee::LoadToolbarIcons()
         stbi_image_free(data);
     }
 }
+void gen_random(char *s, const int len)
+{
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
 
+    for (int i = 0; i < len; ++i)
+    {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    s[len] = 0;
+}
 void AppThreeDee::ImGuiPlayback()
 {
     ImGui::Begin("Playback");
@@ -754,12 +769,35 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        ImGui::SameLine();
-
         bool isPlaying = _state._isPlaying;
         if (ImGui::ImageToggleButton("toolbar_play", &isPlaying, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Play)]), ImVec2(32, 32)))
         {
             _state._isPlaying = !_state._isPlaying;
+        }
+
+        ImGui::SameLine();
+
+        bool isRecording = _state._isRecording;
+        if (ImGui::ImageToggleButton("toolbar_record", &isRecording, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Record)]), ImVec2(32, 32)))
+        {
+            _state._isRecording = !_state._isRecording;
+
+            auto wavEngine = AudioOutputManager::getInstance().GetWavEngine();
+            if (_state._isRecording)
+            {
+                char filename[33];
+                gen_random(filename, 32);
+                std::stringstream s;
+                s << "c:\\temp\\" << filename << ".wav";
+                auto fileWriter = new WavFileWriter(s.str(), SystemSettings::Instance().samplerate, 2);
+                wavEngine->newFile(fileWriter);
+                wavEngine->Start();
+            }
+            else
+            {
+                wavEngine->Stop();
+                wavEngine->destroyFile();
+            }
         }
 
         ImGui::SameLine();

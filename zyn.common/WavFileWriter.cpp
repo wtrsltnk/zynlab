@@ -27,77 +27,25 @@
 using namespace std;
 
 WavFileWriter::WavFileWriter(const string &filename, unsigned int samplerate, unsigned short int channels)
-    : sampleswritten(0), samplerate(samplerate), channels(channels),
-      file(fopen(filename.c_str(), "w"))
-
+    : _filename(filename)
 {
-    if (file)
-    {
-        cout << "INFO: Making space for wave file header" << endl;
-        //making space for the header written at destruction
-        char tmp[44];
-        memset(tmp, 0, 44 * sizeof(char));
-        fwrite(tmp, 1, 44, file);
-    }
+    _audioFile.setSampleRate(samplerate);
+    _audioFile.setNumChannels(channels);
+
+    for (int i = 0; i < channels; i++)
+        _audioBuffer.push_back(std::vector<float>());
 }
 
 WavFileWriter::~WavFileWriter()
 {
-    if (file)
-    {
-        cout << "INFO: Writing wave file header" << endl;
-
-        unsigned int chunksize;
-        rewind(file);
-
-        fwrite("RIFF", 4, 1, file);
-        chunksize = sampleswritten * 4 + 36;
-        fwrite(&chunksize, 4, 1, file);
-
-        fwrite("WAVEfmt ", 8, 1, file);
-        chunksize = 16;
-        fwrite(&chunksize, 4, 1, file);
-        unsigned short int formattag = 1; //uncompresed wave
-        fwrite(&formattag, 2, 1, file);
-        unsigned short int nchannels = channels; //stereo
-        fwrite(&nchannels, 2, 1, file);
-        unsigned int samplerate_ = samplerate; //samplerate
-        fwrite(&samplerate_, 4, 1, file);
-        unsigned int bytespersec = samplerate * 2 * channels; //bytes/sec
-        fwrite(&bytespersec, 4, 1, file);
-        unsigned short int blockalign = 2 * channels; //2 channels * 16 bits/8
-        fwrite(&blockalign, 2, 1, file);
-        unsigned short int bitspersample = 16;
-        fwrite(&bitspersample, 2, 1, file);
-
-        fwrite("data", 4, 1, file);
-        chunksize = sampleswritten * blockalign;
-        fwrite(&chunksize, 4, 1, file);
-
-        fclose(file);
-        file = nullptr;
-    }
+    _audioFile.setAudioBuffer(_audioBuffer);
+    _audioFile.save(_filename, AudioFileFormat::Wave);
 }
 
-bool WavFileWriter::good() const
+void WavFileWriter::addSample(std::vector<float> sample)
 {
-    return file;
-}
+    assert(_audioFile.getNumChannels() == sample.size());
 
-void WavFileWriter::writeStereoSamples(unsigned int nsmps, short int *smps)
-{
-    if (file)
-    {
-        fwrite(smps, nsmps, 4, file);
-        sampleswritten += nsmps;
-    }
-}
-
-void WavFileWriter::writeMonoSamples(unsigned int nsmps, short int *smps)
-{
-    if (file)
-    {
-        fwrite(smps, nsmps, 2, file);
-        sampleswritten += nsmps;
-    }
+    for (int i = 0; i < _audioFile.getNumChannels(); i++)
+        _audioBuffer[i].push_back(sample[i]);
 }

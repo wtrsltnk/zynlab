@@ -6,6 +6,8 @@ add_library(zyn.common STATIC)
 
 target_sources(zyn.common
     PRIVATE
+        AudioFile.cpp
+        AudioFile.h
         Config.cpp
         Config.h
         IAudioGenerator.cpp
@@ -24,9 +26,6 @@ target_sources(zyn.common
         Util.h
         WaveShapeSmps.cpp
         WaveShapeSmps.h
-        WavFile.h
-        WavFileReader.cpp
-        WavFileReader.h
         WavFileWriter.cpp
         WavFileWriter.h
         globals.cpp

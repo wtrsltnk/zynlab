@@ -76,6 +76,7 @@ public:
 
     int _bpm;
     bool _isPlaying;
+    bool _isRecording;
     std::chrono::milliseconds::rep _playTime;
     std::chrono::milliseconds::rep _maxPlayTime;
     RegionsManager _regions;

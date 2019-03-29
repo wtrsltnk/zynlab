@@ -9,6 +9,8 @@
 #include <zyn.common/globals.h>
 
 class AudioOutput;
+class WavEngine;
+
 class AudioOutputManager
 {
     static AudioOutputManager *_instance;
@@ -32,6 +34,8 @@ public:
 
     std::string GetSink() const;
 
+    WavEngine *GetWavEngine();
+
     friend class EngineManager;
 
 private:
@@ -50,6 +54,7 @@ private:
     float *outl;
     float *outr;
     IAudioGenerator *_audioGenerator;
+    WavEngine *_wavEngine;
 
     unsigned int stales;
 };

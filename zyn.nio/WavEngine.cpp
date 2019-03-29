@@ -40,7 +40,7 @@ WavEngine::~WavEngine()
 
 bool WavEngine::openAudio()
 {
-    return file && file->good();
+    return file != nullptr;
 }
 
 bool WavEngine::Start()
@@ -57,6 +57,8 @@ bool WavEngine::Start()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(pThread, &attr, _AudioThread, this);
 
+    std::cout << "start recording" << std::endl;
+
     return true;
 }
 
@@ -66,6 +68,8 @@ void WavEngine::Stop()
     {
         return;
     }
+
+    std::cout << "stop recording" << std::endl;
 
     pthread_t *tmp = pThread;
     pThread = nullptr;
@@ -77,7 +81,7 @@ void WavEngine::Stop()
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
 {
-    if (pThread != nullptr)
+    if (pThread == nullptr)
     {
         return;
     }
@@ -99,7 +103,7 @@ void WavEngine::newFile(WavFileWriter *_file)
     file = _file;
 
     //check state
-    if (!file->good())
+    if (file == nullptr)
     {
         std::cerr
             << "ERROR: WavEngine handed bad file output WavEngine::newFile()"
@@ -120,22 +124,18 @@ void *WavEngine::_AudioThread(void *arg)
 
 void *WavEngine::AudioThread()
 {
-    auto *recordbuf_16bit = new short[2 * this->BufferSize()];
-
     while (!work.wait() && pThread)
     {
         for (unsigned int i = 0; i < this->BufferSize(); ++i)
         {
             float left = 0.0f, right = 0.0f;
+
             buffer.pop(left);
             buffer.pop(right);
-            recordbuf_16bit[2 * i] = static_cast<short>(limit(static_cast<int>(left * 32767.0f), -32768, 32767));
-            recordbuf_16bit[2 * i + 1] = static_cast<short>(limit(static_cast<int>(right * 32767.0f), -32768, 32767));
-        }
-        file->writeStereoSamples(this->BufferSize(), recordbuf_16bit);
-    }
 
-    delete[] recordbuf_16bit;
+            file->addSample(std::vector<float>({left,right}));
+        }
+    }
 
     return nullptr;
 }

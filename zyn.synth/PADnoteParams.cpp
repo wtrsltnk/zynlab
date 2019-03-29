@@ -686,15 +686,10 @@ void PADnoteParameters::export2wav(std::string basefilename, IMixer *mixer)
         std::string filename = basefilename + std::string(tmpstr) + ".wav";
 
         WavFileWriter wav(filename, SystemSettings::Instance().samplerate, 1);
-        if (wav.good())
+        int nsmps = sample[k].size;
+        for (int i = 0; i < nsmps; ++i)
         {
-            int nsmps = sample[k].size;
-            auto *smps = new short int[nsmps];
-            for (int i = 0; i < nsmps; ++i)
-            {
-                smps[i] = static_cast<short int>(sample[k].smp[i] * 32767.0f);
-            }
-            wav.writeMonoSamples(nsmps, smps);
+            wav.addSample(std::vector<float>({sample[k].smp[i]}));
         }
     }
 }

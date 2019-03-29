@@ -47,7 +47,6 @@ SampleNoteParameters::~SampleNoteParameters()
 
 void SampleNoteParameters::Defaults()
 {
-    PwavData._samples = nullptr;
     PVolume = 96;
     PPanning = 64;
     PAmpVelocityScaleFunction = 90;

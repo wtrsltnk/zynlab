@@ -38,7 +38,8 @@ void AudioOutputManager::destroyInstance()
 AudioOutputManager::AudioOutputManager(IAudioGenerator *audioGenerator)
     : priBuf(new float[4096], new float[4096]),
       priBuffCurrent(priBuf),
-      _audioGenerator(audioGenerator)
+      _audioGenerator(audioGenerator),
+      _wavEngine(new WavEngine(audioGenerator->SampleRate(), audioGenerator->BufferSize()))
 {
     currentOut = nullptr;
     stales = 0;
@@ -124,8 +125,9 @@ const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
             priBuffCurrent._left += this->_audioGenerator->BufferSize();
             priBuffCurrent._right += this->_audioGenerator->BufferSize();
         }
+
         //allow wave file to syphon off stream
-        //        wave->push(Stereo<float *>(outl, outr), synth->buffersize);
+        _wavEngine->push(Stereo<float *>(outl, outr), this->_audioGenerator->BufferSize());
 
         i++;
     }
@@ -177,6 +179,11 @@ std::string AudioOutputManager::GetSink() const
     std::cerr << "BUG: No current output in AudioOutputManager " << __LINE__ << std::endl;
 
     return "ERROR";
+}
+
+WavEngine *AudioOutputManager::GetWavEngine()
+{
+    return _wavEngine;
 }
 
 void AudioOutputManager::removeStaleSmps()

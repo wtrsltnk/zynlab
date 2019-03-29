@@ -23,24 +23,21 @@
 #ifndef WAVFILEWRITER_H
 #define WAVFILEWRITER_H
 
+#include "AudioFile.h"
 #include <string>
+#include <vector>
 
 class WavFileWriter
 {
 public:
-    WavFileWriter(const std::string &filename, unsigned int samplerate, unsigned short int channels);
-    ~WavFileWriter();
+    WavFileWriter(std::string const &filename, unsigned int samplerate, unsigned short int channels);
+    virtual ~WavFileWriter();
 
-    bool good() const;
-
-    void writeMonoSamples(unsigned int nsmps, short int *smps);
-    void writeStereoSamples(unsigned int nsmps, short int *smps);
-
+    void addSample(std::vector<float> sample);
 private:
-    unsigned int sampleswritten;
-    unsigned int samplerate;
-    unsigned short int channels;
-    FILE *file;
+    std::string _filename;
+    AudioFile<float> _audioFile;
+    AudioFile<float>::AudioBuffer _audioBuffer;
 };
 
 #endif // WAVFILEWRITER_H

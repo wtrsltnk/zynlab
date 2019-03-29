@@ -554,15 +554,23 @@ int SampleNote::noteout(float *outl, float *outr)
         return 0;
     }
 
-    if (_parameters->PwavData._samples != nullptr)
+    if (_parameters->PwavData2.getLengthInSeconds() > 0)
     {
-        if ((wavProgress + (SystemSettings::Instance().buffersize*2)) > _parameters->PwavData._sample_count)
+        if ((wavProgress + SystemSettings::Instance().buffersize) > _parameters->PwavData2.getNumSamplesPerChannel())
         {
             for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-            { //fade-out
-                float tmp = 1.0f - static_cast<float>(i) / SystemSettings::Instance().buffersize_f;
-                outl[i] *= tmp;
-                outr[i] *= tmp;
+            {
+                if (wavProgress < _parameters->PwavData2.getNumSamplesPerChannel())
+                {
+                    outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
+                    outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
+                    wavProgress++;
+                }
+                else
+                {
+                    outl[i] = 0;
+                    outr[i] = 0;
+                }
             }
             KillNote();
             return 1;
@@ -570,9 +578,9 @@ int SampleNote::noteout(float *outl, float *outr)
 
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
-            outl[i] = 0.005f * _parameters->PwavData._samples[wavProgress++] * panning;
-            outr[i] = 0.005f * _parameters->PwavData._samples[wavProgress++] * (1.0f - panning);
-
+            outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
+            outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
+            wavProgress++;
         }
         return 1;
     }
