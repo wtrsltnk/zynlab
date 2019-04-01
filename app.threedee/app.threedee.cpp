@@ -158,7 +158,7 @@ bool AppThreeDee::Setup()
 
     _state._playTime = 0.0f;
 
-    _state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData2.load("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav");
+    _state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData = WavData::Load("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav");
 
     return true;
 }

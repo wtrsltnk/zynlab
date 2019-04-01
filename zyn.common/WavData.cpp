@@ -20,6 +20,8 @@ WavData *WavData::Load(const std::string &filename)
     if (read == samplesPerChannel)
     {
         auto result = new WavData();
+
+        result->filename = filename;
         result->PwavData = PwavData;
         result->channels = channels;
         result->samplesPerChannel = samplesPerChannel;

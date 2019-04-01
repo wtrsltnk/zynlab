@@ -554,37 +554,25 @@ int SampleNote::noteout(float *outl, float *outr)
         return 0;
     }
 
-    if (_parameters->PwavData2.getLengthInSeconds() <= 0)
+    if (_parameters->PwavData == nullptr)
     {
         return 0;
     }
 
-    if ((wavProgress + SystemSettings::Instance().buffersize) > _parameters->PwavData2.getNumSamplesPerChannel())
-    {
-        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-        {
-            if (wavProgress < _parameters->PwavData2.getNumSamplesPerChannel())
-            {
-                outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
-                outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
-                wavProgress++;
-            }
-            else
-            {
-                outl[i] = 0;
-                outr[i] = 0;
-            }
-        }
-        KillNote();
-        return 1;
-    }
-
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        outl[i] = _parameters->PwavData2.samples[0][wavProgress] * panning;
-        outr[i] = _parameters->PwavData2.samples[1][wavProgress] * (1.0f - panning);
-        wavProgress++;
+        if (wavProgress < (_parameters->PwavData->samplesPerChannel * _parameters->PwavData->channels))
+        {
+            outl[i] += (_parameters->PwavData->PwavData[wavProgress++] * panning);
+            outr[i] += (_parameters->PwavData->PwavData[wavProgress++] * (1.0f - panning));
+        }
+        else
+        {
+            KillNote();
+            return 1;
+        }
     }
+
     return 1;
 }
 

@@ -52,9 +52,97 @@ void zyn::ui::SampleNote::Render()
                 }
                 ImGui::ShowTooltipOnHover("Stereo");
 
-                if (ImGui::BeginTabBar("SMPLNote"))
+                if (parameters->PwavData != nullptr)
                 {
-                    ImGui::EndTabBar();
+                    ImGui::Text("%s", parameters->PwavData->filename.c_str());
+                }
+                else
+                {
+                    ImGui::Text("No sample selected");
+                }
+
+                static std::string selectedTag;
+                static ILibraryItem *selectedSample;
+                if (ImGui::Button("Change sample"))
+                {
+                    ImGui::OpenPopup("Select sample");
+                    selectedSample = nullptr;
+                }
+
+                ImGui::SetNextWindowSize(ImVec2(450, 500));
+                if (ImGui::BeginPopupModal("Select sample"))
+                {
+                    ImGui::BeginGroup(); // Lock X position
+                    ImGui::Text("Current");
+                    ImGui::EndGroup();
+
+                    auto &style = ImGui::GetStyle();
+
+                    ImGui::BeginChild("SampleLibrary", ImVec2(0, -30));
+
+                    ImGui::Columns(2);
+                    ImGui::SetColumnWidth(0, 150 + style.ItemSpacing.x);
+                    ImGui::SetColumnWidth(1, 250 + style.ItemSpacing.x);
+
+                    ImGui::Text("Tags");
+
+                    if (ImGui::ListBoxHeader("##Tags", ImVec2(150, -ImGui::GetTextLineHeightWithSpacing())))
+                    {
+                        for (auto const &tag : _state->_library->GetSampleTags())
+                        {
+                            bool selected = (selectedTag == tag);
+                            if (ImGui::Selectable(tag.c_str(), &selected))
+                            {
+                                selectedTag = tag;
+                            }
+                        }
+                        ImGui::ListBoxFooter();
+                    }
+
+                    ImGui::NextColumn();
+
+                    ImGui::Text("Samples");
+
+                    if (selectedTag != "")
+                    {
+                        if (ImGui::ListBoxHeader("##Samples", ImVec2(250, -ImGui::GetTextLineHeightWithSpacing())))
+                        {
+                            for (auto sample : _state->_library->GetSamples())
+                            {
+                                if (sample->GetTags().find(selectedTag) == sample->GetTags().end())
+                                {
+                                    continue;
+                                }
+
+                                bool selected = selectedSample != nullptr && sample->GetPath() == selectedSample->GetPath();
+                                if (ImGui::Selectable(sample->GetName().c_str(), &selected))
+                                {
+                                    _state->_mixer->PreviewSample(sample->GetPath());
+                                    selectedSample = sample;
+                                }
+                            }
+                            ImGui::ListBoxFooter();
+                        }
+                    }
+
+                    ImGui::EndChild();
+
+                    if (ImGui::Button("Ok", ImVec2(120, 0)))
+                    {
+                        if (selectedSample != nullptr)
+                        {
+                            parameters->PwavData = WavData::Load(selectedSample->GetPath());
+                        }
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
                 }
             }
             ImGui::EndTabItem();

@@ -28,7 +28,7 @@
 #include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
-#include <zyn.common/AudioFile.h>
+#include <zyn.common/WavData.h>
 
 class SampleNoteParameters : public WrappedPresets
 {
@@ -42,7 +42,7 @@ public:
 
     void updateFrequencyMultipliers(void);
 
-    AudioFile<float> PwavData2;
+    WavData *PwavData;
 
     //Parameters
     //AMPLITUDE PARAMETRERS

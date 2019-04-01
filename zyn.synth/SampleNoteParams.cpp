@@ -24,6 +24,7 @@
 #include <cmath>
 
 SampleNoteParameters::SampleNoteParameters()
+    : PwavData(nullptr)
 {
     setpresettype("Psubsynth");
     AmpEnvelope = EnvelopeParams::ADSRinit_dB(64, 1, 0, 40, 127, 25);
