@@ -13,6 +13,8 @@ target_sources(zyn.common
         IAudioGenerator.cpp
         IAudioGenerator.h
         IFFTwrapper.h
+        ILibraryManager.cpp
+        ILibraryManager.h
         IPresetsSerializer.cpp
         IPresetsSerializer.h
         Presets.cpp

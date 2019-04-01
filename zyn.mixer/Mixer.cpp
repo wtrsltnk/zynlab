@@ -334,6 +334,66 @@ void Mixer::EnableTrack(int npart, int what)
     }
 }
 
+#define DR_WAV_IMPLEMENTATION
+#include <zyn.common/dr_wav.h>
+
+void Mixer::PreviewSample(std::string const &filename)
+{
+    drwav *pWav = drwav_open_file(filename.c_str());
+    if (pWav == nullptr)
+    {
+        return;
+    }
+
+    if (_samplePreview.PwavData != nullptr)
+    {
+        free(_samplePreview.PwavData);
+        _samplePreview.PwavData = nullptr;
+    }
+
+    _samplePreview.channels = pWav->channels;
+    _samplePreview.samplesPerChannel = static_cast<size_t>(pWav->totalPCMFrameCount);
+    _samplePreview.PwavData = reinterpret_cast<float *>(malloc(static_cast<size_t>(pWav->totalPCMFrameCount) * pWav->channels * sizeof(float)));
+
+    auto read = drwav_read_pcm_frames_f32(pWav, _samplePreview.samplesPerChannel, _samplePreview.PwavData);
+
+    if (read == _samplePreview.samplesPerChannel)
+    {
+        _samplePreview.done = false;
+        _samplePreview.wavProgress = 0;
+    }
+}
+
+SamplePreview::SamplePreview()
+    : PwavData(nullptr), done(true)
+{}
+
+SamplePreview::~SamplePreview()
+{}
+
+void SamplePreview::noteout(float *outl, float *outr)
+{
+    if (done)
+    {
+        return;
+    }
+
+    auto panning = 0.5f;
+
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+    {
+        if (wavProgress < (samplesPerChannel * channels))
+        {
+            outl[i] += (PwavData[wavProgress++] * panning);
+            outr[i] += (PwavData[wavProgress++] * (1.0f - panning));
+        }
+        else
+        {
+            done = true;
+        }
+    }
+}
+
 /*
  * Master audio out (the final sound)
  */
@@ -514,6 +574,8 @@ void Mixer::AudioOut(float *outl, float *outr)
             outr[i] += _tracks[trackIndex].partoutr[i];
         }
     }
+
+    _samplePreview.noteout(outl, outr);
 
     //Insertion effects for Master Out
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)

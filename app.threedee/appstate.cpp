@@ -7,16 +7,16 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-AppState::AppState(class Mixer *mixer, class IBankManager *banks)
-    : _mixer(mixer), _banks(banks), _showLibrary(false), _showEditor(false), _showInspector(true),
+AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
+    : _mixer(mixer), _library(library), _showLibrary(false), _showEditor(false), _showInspector(true),
       _showMixer(true), _showSmartControls(true), _showQuickHelp(false),
       _showSystemEffectsEditor(true), _showInsertEffectsEditor(true), _showTrackEffectsEditor(true),
       _showADNoteEditor(true), _showSUBNoteEditor(true), _showSMPLNoteEditor(true), _showPADNoteEditor(true),
       _showOscillatorEditor(true), _showTrackTypeChanger(-1),
-      _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentBank(0),
+      _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentInstrumentTag(""), _currentSampleTag(""),
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1), _currentVoiceOscil(-1),
       _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150),
-      _bpm(120), _isPlaying(false), _isRecording(false), _playTime(0), _maxPlayTime(16 * 1024)
+      _bpm(138), _isPlaying(false), _isRecording(false), _playTime(0), _maxPlayTime(16 * 1024)
 {
     _regions.AddRegion(0, 0, 4 * 1024);
     _currentPattern = 0;

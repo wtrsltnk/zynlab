@@ -4,10 +4,11 @@
 #include <imgui.h>
 
 #include "examples/imgui_impl_opengl3.h"
+#include <zyn.serialization/LibraryManager.h>
 
 static int Pexitprogram = 0;
 
-static BankManager bankManager;
+static LibraryManager libraryManager;
 static Mixer *mixer;
 
 //cleanup on signaled exit
@@ -67,6 +68,14 @@ int main(int /*argc*/, char * /*argv*/ [])
 {
     initprogram();
 
+    for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+    {
+        if (Config::Current().cfg.bankRootDirList[i].size() == 0)
+        {
+            continue;
+        }
+        libraryManager.AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
+    }
     //Run the Nio system
     if (!Nio::Start(mixer))
     {
@@ -90,7 +99,7 @@ int main(int /*argc*/, char * /*argv*/ [])
         return -1;
     }
 
-    AppThreeDee app(window, mixer, &bankManager);
+    AppThreeDee app(window, mixer, &libraryManager);
 
     glfwSetWindowSizeCallback(window, AppThreeDee::ResizeCallback);
     glfwMakeContextCurrent(window);

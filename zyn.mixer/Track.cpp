@@ -481,34 +481,26 @@ void Track::NoteOn(unsigned char note,
             { // "normal mode" legato note
                 if ((Instruments[0].Padenabled != 0) && (_trackNotes[pos].instumentNotes[0].adnote != nullptr) && (_trackNotes[posb].instumentNotes[0].adnote != nullptr))
                 {
-                    _trackNotes[pos].instumentNotes[0].adnote->legatonote(
-                        notebasefreq, vel, portamento, note, true); //'true' is to tell it it's being called from here.
-                    _trackNotes[posb].instumentNotes[0].adnote->legatonote(
-                        notebasefreq, vel, portamento, note, true);
+                    _trackNotes[pos].instumentNotes[0].adnote->legatonote(notebasefreq, vel, portamento, note, true); //'true' is to tell it it's being called from here.
+                    _trackNotes[posb].instumentNotes[0].adnote->legatonote(notebasefreq, vel, portamento, note, true);
                 }
 
                 if ((Instruments[0].Psubenabled != 0) && (_trackNotes[pos].instumentNotes[0].subnote != nullptr) && (_trackNotes[posb].instumentNotes[0].subnote != nullptr))
                 {
-                    _trackNotes[pos].instumentNotes[0].subnote->legatonote(
-                        notebasefreq, vel, portamento, note, true);
-                    _trackNotes[posb].instumentNotes[0].subnote->legatonote(
-                        notebasefreq, vel, portamento, note, true);
+                    _trackNotes[pos].instumentNotes[0].subnote->legatonote(notebasefreq, vel, portamento, note, true);
+                    _trackNotes[posb].instumentNotes[0].subnote->legatonote(notebasefreq, vel, portamento, note, true);
                 }
 
                 if ((Instruments[0].Ppadenabled != 0) && (_trackNotes[pos].instumentNotes[0].padnote != nullptr) && (_trackNotes[posb].instumentNotes[0].padnote != nullptr))
                 {
-                    _trackNotes[pos].instumentNotes[0].padnote->legatonote(
-                        notebasefreq, vel, portamento, note, true);
-                    _trackNotes[posb].instumentNotes[0].padnote->legatonote(
-                        notebasefreq, vel, portamento, note, true);
+                    _trackNotes[pos].instumentNotes[0].padnote->legatonote(notebasefreq, vel, portamento, note, true);
+                    _trackNotes[posb].instumentNotes[0].padnote->legatonote(notebasefreq, vel, portamento, note, true);
                 }
 
                 if ((Instruments[0].Psmplenabled != 0) && (_trackNotes[pos].instumentNotes[0].smplnote != nullptr) && (_trackNotes[posb].instumentNotes[0].smplnote != nullptr))
                 {
-                    _trackNotes[pos].instumentNotes[0].smplnote->legatonote(
-                        notebasefreq, vel, portamento, note, true);
-                    _trackNotes[posb].instumentNotes[0].smplnote->legatonote(
-                        notebasefreq, vel, portamento, note, true);
+                    _trackNotes[pos].instumentNotes[0].smplnote->legatonote(notebasefreq, vel, portamento, note, true);
+                    _trackNotes[posb].instumentNotes[0].smplnote->legatonote(notebasefreq, vel, portamento, note, true);
                 }
             }
             else
@@ -531,31 +523,23 @@ void Track::NoteOn(unsigned char note,
 
                     if ((item.Padenabled != 0) && (item.adpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].adnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].adnote != nullptr))
                     {
-                        _trackNotes[pos].instumentNotes[ci].adnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
-                        _trackNotes[posb].instumentNotes[ci].adnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
+                        _trackNotes[pos].instumentNotes[ci].adnote->legatonote(notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].adnote->legatonote(notebasefreq, vel, portamento, note, true);
                     }
                     if ((item.Psubenabled != 0) && (item.subpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].subnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].subnote != nullptr))
                     {
-                        _trackNotes[pos].instumentNotes[ci].subnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
-                        _trackNotes[posb].instumentNotes[ci].subnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
+                        _trackNotes[pos].instumentNotes[ci].subnote->legatonote(notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].subnote->legatonote(notebasefreq, vel, portamento, note, true);
                     }
                     if ((item.Psmplenabled != 0) && (item.smplpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].smplnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].smplnote != nullptr))
                     {
-                        _trackNotes[pos].instumentNotes[ci].smplnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
-                        _trackNotes[posb].instumentNotes[ci].smplnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
+                        _trackNotes[pos].instumentNotes[ci].smplnote->legatonote(notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].smplnote->legatonote(notebasefreq, vel, portamento, note, true);
                     }
                     if ((item.Ppadenabled != 0) && (item.padpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].padnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].padnote != nullptr))
                     {
-                        _trackNotes[pos].instumentNotes[ci].padnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
-                        _trackNotes[posb].instumentNotes[ci].padnote->legatonote(
-                            notebasefreq, vel, portamento, note, true);
+                        _trackNotes[pos].instumentNotes[ci].padnote->legatonote(notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].padnote->legatonote(notebasefreq, vel, portamento, note, true);
                     }
 
                     if ((item.adpars != nullptr) || (item.subpars != nullptr) || (item.smplpars != nullptr) || (item.padpars != nullptr))
@@ -586,20 +570,16 @@ void Track::NoteOn(unsigned char note,
             _trackNotes[pos].instumentNotes[0].sendtoparteffect = 0;
 
             if (Instruments[0].Padenabled != 0)
-                _trackNotes[pos].instumentNotes[0].adnote = new ADnote(
-                    Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, false);
+                _trackNotes[pos].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, false);
 
             if (Instruments[0].Psubenabled != 0)
-                _trackNotes[pos].instumentNotes[0].subnote = new SUBnote(
-                    Instruments[0].subpars, &ctl, notebasefreq, vel, portamento, note, false);
+                _trackNotes[pos].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars, &ctl, notebasefreq, vel, portamento, note, false);
 
             if (Instruments[0].Ppadenabled != 0)
-                _trackNotes[pos].instumentNotes[0].padnote = new PADnote(
-                    Instruments[0].padpars, &ctl, notebasefreq, vel, portamento, note, false);
+                _trackNotes[pos].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars, &ctl, notebasefreq, vel, portamento, note, false);
 
             if (Instruments[0].Psmplenabled != 0)
-                _trackNotes[pos].instumentNotes[0].smplnote = new SampleNote(
-                    Instruments[0].smplpars, &ctl, notebasefreq, vel, portamento, note, false);
+                _trackNotes[pos].instumentNotes[0].smplnote = new SampleNote(Instruments[0].smplpars, &ctl, notebasefreq, vel, portamento, note, false);
 
             if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Psmplenabled != 0) || (Instruments[0].Ppadenabled != 0))
                 _trackNotes[pos].itemsplaying++;
@@ -609,20 +589,16 @@ void Track::NoteOn(unsigned char note,
             {
                 _trackNotes[posb].instumentNotes[0].sendtoparteffect = 0;
                 if (Instruments[0].Padenabled != 0)
-                    _trackNotes[posb].instumentNotes[0].adnote = new ADnote(
-                        Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, true); //true for silent.
+                    _trackNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, true); //true for silent.
 
                 if (Instruments[0].Psubenabled != 0)
-                    _trackNotes[posb].instumentNotes[0].subnote = new SUBnote(
-                        Instruments[0].subpars, &ctl, notebasefreq, vel, portamento, note, true);
+                    _trackNotes[posb].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars, &ctl, notebasefreq, vel, portamento, note, true);
 
                 if (Instruments[0].Ppadenabled != 0)
-                    _trackNotes[posb].instumentNotes[0].padnote = new PADnote(
-                        Instruments[0].padpars, &ctl, notebasefreq, vel, portamento, note, true);
+                    _trackNotes[posb].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars, &ctl, notebasefreq, vel, portamento, note, true);
 
                 if (Instruments[0].Psmplenabled != 0)
-                    _trackNotes[posb].instumentNotes[0].smplnote = new SampleNote(
-                        Instruments[0].smplpars, &ctl, notebasefreq, vel, portamento, note, true);
+                    _trackNotes[posb].instumentNotes[0].smplnote = new SampleNote(Instruments[0].smplpars, &ctl, notebasefreq, vel, portamento, note, true);
 
                 if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Psmplenabled != 0) || (Instruments[0].Ppadenabled != 0))
                     _trackNotes[posb].itemsplaying++;
@@ -645,23 +621,19 @@ void Track::NoteOn(unsigned char note,
 
                 if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
                 {
-                    _trackNotes[pos].instumentNotes[ci].adnote = new ADnote(
-                        item.adpars, &ctl, notebasefreq, vel, portamento, note, false);
+                    _trackNotes[pos].instumentNotes[ci].adnote = new ADnote(item.adpars, &ctl, notebasefreq, vel, portamento, note, false);
                 }
                 if ((item.subpars != nullptr) && ((item.Psubenabled) != 0))
                 {
-                    _trackNotes[pos].instumentNotes[ci].subnote = new SUBnote(
-                        item.subpars, &ctl, notebasefreq, vel, portamento, note, false);
+                    _trackNotes[pos].instumentNotes[ci].subnote = new SUBnote(item.subpars, &ctl, notebasefreq, vel, portamento, note, false);
                 }
                 if ((item.padpars != nullptr) && ((item.Ppadenabled) != 0))
                 {
-                    _trackNotes[pos].instumentNotes[ci].padnote = new PADnote(
-                        item.padpars, &ctl, notebasefreq, vel, portamento, note, false);
+                    _trackNotes[pos].instumentNotes[ci].padnote = new PADnote(item.padpars, &ctl, notebasefreq, vel, portamento, note, false);
                 }
                 if ((item.smplpars != nullptr) && ((item.Psmplenabled) != 0))
                 {
-                    _trackNotes[pos].instumentNotes[ci].smplnote = new SampleNote(
-                        item.smplpars, &ctl, notebasefreq, vel, portamento, note, false);
+                    _trackNotes[pos].instumentNotes[ci].smplnote = new SampleNote(item.smplpars, &ctl, notebasefreq, vel, portamento, note, false);
                 }
 
                 // Spawn another note (but silent) if legatomodevalid==true
@@ -672,23 +644,19 @@ void Track::NoteOn(unsigned char note,
 
                     if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
                     {
-                        _trackNotes[posb].instumentNotes[ci].adnote = new ADnote(
-                            item.adpars, &ctl, notebasefreq, vel, portamento, note, true); //true for silent.
+                        _trackNotes[posb].instumentNotes[ci].adnote = new ADnote(item.adpars, &ctl, notebasefreq, vel, portamento, note, true); //true for silent.
                     }
                     if ((item.subpars != nullptr) && ((item.Psubenabled) != 0))
                     {
-                        _trackNotes[posb].instumentNotes[ci].subnote = new SUBnote(
-                            item.subpars, &ctl, notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].subnote = new SUBnote(item.subpars, &ctl, notebasefreq, vel, portamento, note, true);
                     }
                     if ((item.padpars != nullptr) && ((item.Ppadenabled) != 0))
                     {
-                        _trackNotes[posb].instumentNotes[ci].padnote = new PADnote(
-                            item.padpars, &ctl, notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].padnote = new PADnote(item.padpars, &ctl, notebasefreq, vel, portamento, note, true);
                     }
                     if ((item.smplpars != nullptr) && ((item.Psmplenabled) != 0))
                     {
-                        _trackNotes[posb].instumentNotes[ci].smplnote = new SampleNote(
-                            item.smplpars, &ctl, notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].smplnote = new SampleNote(item.smplpars, &ctl, notebasefreq, vel, portamento, note, true);
                     }
 
                     if ((item.adpars != nullptr) || (item.subpars != nullptr) || (item.smplpars != nullptr))

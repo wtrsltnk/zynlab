@@ -30,6 +30,7 @@
 #include <chrono>
 #include <memory>
 #include <pthread.h>
+#include <zyn.common/AudioFile.h>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/Presets.h>
@@ -37,6 +38,20 @@
 #include <zyn.common/globals.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/Controller.h>
+
+class SamplePreview
+{
+public:
+    SamplePreview();
+    virtual ~SamplePreview();
+
+    size_t channels;
+    size_t samplesPerChannel;
+    float* PwavData;
+    size_t wavProgress;
+    bool done;
+    void noteout(float *outl, float *outr);
+};
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
@@ -118,7 +133,10 @@ public:
 
     void Defaults();
 
+    void PreviewSample(std::string const &filename);
+
 private:
+    SamplePreview _samplePreview;
     Track _tracks[NUM_MIXER_TRACKS];
     pthread_mutex_t _mutex;
     std::unique_ptr<IFFTwrapper> _fft;

@@ -1,15 +1,5 @@
 #include "app.threedee.h"
 
-#include <zyn.common/WavFileWriter.h>
-#include <zyn.mixer/Track.h>
-#include <zyn.nio/AudioOutputManager.h>
-#include <zyn.nio/MidiInputManager.h>
-#include <zyn.nio/WavEngine.h>
-#include <zyn.seq/ArpModes.h>
-#include <zyn.seq/Chords.h>
-#include <zyn.seq/NotesGenerator.h>
-#include <zyn.synth/ADnoteParams.h>
-
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 #include "imgui_addons/imgui_Timeline.h"
@@ -21,8 +11,17 @@
 #include <cstdlib>
 #include <iterator>
 #include <map>
+#include <zyn.common/WavFileWriter.h>
 #include <zyn.mixer/Track.h>
+#include <zyn.nio/AudioOutputManager.h>
+#include <zyn.nio/MidiInputManager.h>
+#include <zyn.nio/WavEngine.h>
+#include <zyn.seq/ArpModes.h>
+#include <zyn.seq/Chords.h>
+#include <zyn.seq/NotesGenerator.h>
+#include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/SampleNoteParams.h>
+#include <zyn.serialization/LibraryManager.h>
 
 char const *const NoteNames[] = {
     "B",
@@ -57,9 +56,9 @@ timestep SnappingModeValues[] = {
 
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
-AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, IBankManager *banks)
-    : _state(mixer, banks), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
-      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state), _oscilGenUi(&_state),
+AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, ILibraryManager *library)
+    : _state(mixer, library), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
+      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state), _smplNoteUi(&_state), _oscilGenUi(&_state),
       _window(window),
       _toolbarIconsAreLoaded(false),
       _display_w(800), _display_h(600)
@@ -142,8 +141,7 @@ bool AppThreeDee::Setup()
     }
     io.Fonts->Build();
 
-    _state._banks->RescanForBanks();
-    _state._banks->LoadBank(_state._currentBank);
+    _state._library->RefreshLibrary();
 
     _state._currentTrack = 0;
 
@@ -151,6 +149,7 @@ bool AppThreeDee::Setup()
     _libraryUi.Setup();
     _adNoteUI.Setup();
     _subNoteUi.Setup();
+    _smplNoteUi.Setup();
     _padNoteUi.Setup();
     _effectUi.Setup();
     _oscilGenUi.Setup();
@@ -605,6 +604,7 @@ void AppThreeDee::Render()
         _adNoteUI.Render();
         _padNoteUi.Render();
         _subNoteUi.Render();
+        _smplNoteUi.Render();
     }
     ImGui::PopStyleVar();
 

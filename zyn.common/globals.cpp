@@ -23,8 +23,6 @@
 
 #include "globals.h"
 
-ITrack::~ITrack() = default;
-
 IMixer::~IMixer() = default;
 
 IBankManager::~IBankManager() = default;

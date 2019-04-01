@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 
 project(zyn.serialization)
 
+find_package(system.io REQUIRED)
+
 add_library(zyn.serialization STATIC
     ADnoteParamsSerializer.cpp
     ADnoteParamsSerializer.h
@@ -19,6 +21,9 @@ add_library(zyn.serialization STATIC
     FilterParamsSerializer.h
     LFOParamsSerializer.cpp
     LFOParamsSerializer.h
+    LibraryItem.cpp
+    LibraryManager.cpp
+    LibraryManager.h
     MicrotonalSerializer.cpp
     MicrotonalSerializer.h
     MixerSerializer.cpp
@@ -43,7 +48,8 @@ target_include_directories(zyn.serialization
     )
 
 target_link_libraries(zyn.serialization
-    zyn.common
+    PUBLIC zyn.common
+    PRIVATE system.io
     )
 
 target_compile_features(zyn.serialization

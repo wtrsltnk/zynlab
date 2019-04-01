@@ -353,21 +353,6 @@ public:
     virtual vuData GetVuData() = 0;
 };
 
-class ITrack
-{
-public:
-    virtual ~ITrack();
-
-    // Mutex
-    virtual void Lock() = 0;
-    virtual bool TryLock() = 0;
-    virtual void Unlock() = 0;
-
-    virtual void ComputeInstrumentSamples() = 0; // compute Track output
-
-    unsigned char Penabled; /**<if the Track is enabled*/
-};
-
 class IMixer
 {
 public:

@@ -26,6 +26,7 @@
 #define MAX_INFO_TEXT_SIZE 1000
 
 #include "Microtonal.h"
+#include <zyn.common/ILibraryManager.h>
 #include <zyn.common/globals.h>
 #include <zyn.synth/Controller.h>
 
@@ -69,31 +70,27 @@ struct TrackNotes
 class Instrument
 {
 public:
-    unsigned char Penabled, Pmuted, Pminkey, Pmaxkey;
-    unsigned char *Pname;
-    unsigned char Padenabled, Psubenabled, Ppadenabled, Psmplenabled;
-    unsigned char Psendtoparteffect;
     ADnoteParameters *adpars;
     SUBnoteParameters *subpars;
     PADnoteParameters *padpars;
     SampleNoteParameters *smplpars;
+    unsigned char Penabled, Pmuted, Pminkey, Pmaxkey;
+    unsigned char *Pname;
+    unsigned char Padenabled, Psubenabled, Ppadenabled, Psmplenabled;
+    unsigned char Psendtoparteffect;
+    unsigned char padding[3];
 };
 
 /** Track implementation*/
-class Track : public ITrack, public WrappedPresets
+class Track : public WrappedPresets
 {
     float *_tmpoutr;
     float *_tmpoutl;
 
 public:
-    /**Constructor*/
     Track();
-    /**Destructor*/
     virtual ~Track();
 
-    /**Init()
-         * @param fft_ Pointer to the mixer
-         * @param microtonal_ Pointer to the microtonal object*/
     void Init(IMixer *mixer, Microtonal *microtonal_);
 
     // Mutex
@@ -122,12 +119,13 @@ public:
     void setkeylimit(unsigned char Pkeylimit);
     void setkititemstatus(int kititem, int Penabled_);
 
-    unsigned char Pvolume;  /**<Track volume*/
+    unsigned char Penabled;
+    unsigned char Pvolume; /**<Track volume*/
     void setPvolume(unsigned char Pvolume);
-    unsigned char Ppanning;  //Track panning
+    unsigned char Ppanning; //Track panning
     void setPpanning(unsigned char Ppanning);
-    unsigned char Pminkey;  /**<the minimum key that the Track receives noteon messages*/
-    unsigned char Pmaxkey;  //the maximum key that the Track receives noteon messages
+    unsigned char Pminkey;   /**<the minimum key that the Track receives noteon messages*/
+    unsigned char Pmaxkey;   //the maximum key that the Track receives noteon messages
     unsigned char Pkeyshift; //Track keyshift
     unsigned char Prcvchn;   //from what midi channel it receive commnads
     unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
@@ -179,8 +177,8 @@ public:
 
     struct
     {
-        int bank;
-        unsigned int instrument;
+        std::string tag;
+        std::string instrumentName;
     } loadedInstrument;
 
 private:
@@ -188,7 +186,7 @@ private:
     void KillNotePos(unsigned int pos);
     void RelaseNotePos(unsigned int pos);
     void MonoMemRenote(); // MonoMem stuff.
-    void RelaseAllKeys();       //this is called on AllNotesOff controller
+    void RelaseAllKeys(); //this is called on AllNotesOff controller
 
     int _killallnotes; //is set to 1 if I want to kill all notes
 

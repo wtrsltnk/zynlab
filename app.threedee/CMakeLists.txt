@@ -58,6 +58,8 @@ if(GLFW3_FOUND)
         ui/ui.padnote.h
         ui/ui.subnote.cpp
         ui/ui.subnote.h
+        ui/ui.samplenote.cpp
+        ui/ui.samplenote.h
         )
 
     target_include_directories(app.threedee

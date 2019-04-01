@@ -11,6 +11,8 @@ class Library
 private:
     AppState *_state;
 
+    void InstrumentLibrary();
+    void SampleLibrary();
 public:
     Library(AppState *state);
     virtual ~Library();

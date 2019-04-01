@@ -3,6 +3,7 @@
 
 #include "imgui_addons/imgui_common.h"
 #include <vector>
+#include <zyn.common/ILibraryManager.h>
 #include <zyn.common/globals.h>
 #include <zyn.seq/RegionsManager.h>
 
@@ -42,11 +43,11 @@ void UpdatePreviewImage(TrackRegion &region);
 class AppState
 {
 public:
-    AppState(class Mixer *mixer, class IBankManager *banks);
+    AppState(class Mixer *mixer, ILibraryManager *library);
     virtual ~AppState();
 
     class Mixer *_mixer;
-    class IBankManager *_banks;
+    ILibraryManager *_library;
     bool _showLibrary;
     bool _showEditor;
     bool _showInspector;
@@ -65,7 +66,8 @@ public:
     int _currentInsertEffect;
     int _currentSystemEffect;
     int _currentTrackEffect;
-    int _currentBank;
+    std::string _currentInstrumentTag;
+    std::string _currentSampleTag;
     int _currentTrack;
     int _currentTrackInstrument;
     int _currentPattern;

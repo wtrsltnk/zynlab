@@ -34,8 +34,6 @@ static unsigned int start_type_count = 3;
 
 char const *const SubSynthEditorID = "SUB editor";
 
-char const *const SmplSynthEditorID = "SMPL editor";
-
 zyn::ui::SubNote::SubNote(AppState *state)
     : _state(state), _AmplitudeEnvelope("Amplitude Envelope"), _BandwidthEnvelope("Bandwidth Envelope"),
       _FilterEnvelope("Filter Envelope"), _FrequencyEnvelope("Frequency Envelope")
