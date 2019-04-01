@@ -26,6 +26,8 @@ target_sources(zyn.common
         Stereo.h
         Util.cpp
         Util.h
+        WavData.cpp
+        WavData.h
         WaveShapeSmps.cpp
         WaveShapeSmps.h
         WavFileWriter.cpp

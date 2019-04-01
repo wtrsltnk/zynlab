@@ -36,6 +36,7 @@
 #include <zyn.common/Presets.h>
 #include <zyn.common/Stereo.h>
 #include <zyn.common/globals.h>
+#include <zyn.common/WavData.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/Controller.h>
 
@@ -45,9 +46,7 @@ public:
     SamplePreview();
     virtual ~SamplePreview();
 
-    size_t channels;
-    size_t samplesPerChannel;
-    float* PwavData;
+    WavData *wavData;
     size_t wavProgress;
     bool done;
     void noteout(float *outl, float *outr);

@@ -334,30 +334,17 @@ void Mixer::EnableTrack(int npart, int what)
     }
 }
 
-#define DR_WAV_IMPLEMENTATION
-#include <zyn.common/dr_wav.h>
-
 void Mixer::PreviewSample(std::string const &filename)
 {
-    drwav *pWav = drwav_open_file(filename.c_str());
-    if (pWav == nullptr)
+    if (_samplePreview.wavData != nullptr)
     {
-        return;
+        delete _samplePreview.wavData;
+        _samplePreview.wavData = nullptr;
     }
 
-    if (_samplePreview.PwavData != nullptr)
-    {
-        free(_samplePreview.PwavData);
-        _samplePreview.PwavData = nullptr;
-    }
+    _samplePreview.wavData = WavData::Load(filename);
 
-    _samplePreview.channels = pWav->channels;
-    _samplePreview.samplesPerChannel = static_cast<size_t>(pWav->totalPCMFrameCount);
-    _samplePreview.PwavData = reinterpret_cast<float *>(malloc(static_cast<size_t>(pWav->totalPCMFrameCount) * pWav->channels * sizeof(float)));
-
-    auto read = drwav_read_pcm_frames_f32(pWav, _samplePreview.samplesPerChannel, _samplePreview.PwavData);
-
-    if (read == _samplePreview.samplesPerChannel)
+    if (_samplePreview.wavData != nullptr)
     {
         _samplePreview.done = false;
         _samplePreview.wavProgress = 0;
@@ -365,7 +352,7 @@ void Mixer::PreviewSample(std::string const &filename)
 }
 
 SamplePreview::SamplePreview()
-    : PwavData(nullptr), done(true)
+    : wavData(nullptr), done(true)
 {}
 
 SamplePreview::~SamplePreview()
@@ -373,7 +360,7 @@ SamplePreview::~SamplePreview()
 
 void SamplePreview::noteout(float *outl, float *outr)
 {
-    if (done)
+    if (done || wavData == nullptr)
     {
         return;
     }
@@ -382,10 +369,10 @@ void SamplePreview::noteout(float *outl, float *outr)
 
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        if (wavProgress < (samplesPerChannel * channels))
+        if (wavProgress < (wavData->samplesPerChannel * wavData->channels))
         {
-            outl[i] += (PwavData[wavProgress++] * panning);
-            outr[i] += (PwavData[wavProgress++] * (1.0f - panning));
+            outl[i] += (wavData->PwavData[wavProgress++] * panning);
+            outr[i] += (wavData->PwavData[wavProgress++] * (1.0f - panning));
         }
         else
         {
