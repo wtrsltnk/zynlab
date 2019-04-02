@@ -554,17 +554,18 @@ int SampleNote::noteout(float *outl, float *outr)
         return 0;
     }
 
-    if (_parameters->PwavData == nullptr)
+    if (_parameters->PwavData.find(legato.getMidinote()) == _parameters->PwavData.end())
     {
         return 0;
     }
 
+    auto wavData = _parameters->PwavData.find(legato.getMidinote())->second;
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        if (wavProgress < (_parameters->PwavData->samplesPerChannel * _parameters->PwavData->channels))
+        if (wavProgress < (wavData->samplesPerChannel * wavData->channels))
         {
-            outl[i] += (_parameters->PwavData->PwavData[wavProgress++] * panning);
-            outr[i] += (_parameters->PwavData->PwavData[wavProgress++] * (1.0f - panning));
+            outl[i] += (wavData->PwavData[wavProgress++] * panning);
+            outr[i] += (wavData->PwavData[wavProgress++] * (1.0f - panning));
         }
         else
         {

@@ -24,11 +24,12 @@
 #define SAMPLE_NOTE_PARAMETERS_H
 
 #include "EnvelopeParams.h"
+#include <map>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
+#include <zyn.common/WavData.h>
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
-#include <zyn.common/WavData.h>
 
 class SampleNoteParameters : public WrappedPresets
 {
@@ -42,7 +43,7 @@ public:
 
     void updateFrequencyMultipliers(void);
 
-    WavData *PwavData;
+    std::map<unsigned char, WavData *> PwavData;
 
     //Parameters
     //AMPLITUDE PARAMETRERS

@@ -19,9 +19,9 @@
 #include <zyn.seq/ArpModes.h>
 #include <zyn.seq/Chords.h>
 #include <zyn.seq/NotesGenerator.h>
+#include <zyn.serialization/LibraryManager.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/SampleNoteParams.h>
-#include <zyn.serialization/LibraryManager.h>
 
 char const *const NoteNames[] = {
     "B",
@@ -158,7 +158,7 @@ bool AppThreeDee::Setup()
 
     _state._playTime = 0.0f;
 
-    _state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData = WavData::Load("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav");
+    _state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData.insert(std::make_pair(64, WavData::Load("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav")));
 
     return true;
 }

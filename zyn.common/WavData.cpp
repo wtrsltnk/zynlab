@@ -2,6 +2,7 @@
 
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
+#include <system.io/system.io.fileinfo.h>
 
 WavData *WavData::Load(const std::string &filename)
 {
@@ -21,7 +22,7 @@ WavData *WavData::Load(const std::string &filename)
     {
         auto result = new WavData();
 
-        result->filename = filename;
+        result->name = System::IO::FileInfo(filename).Name();
         result->PwavData = PwavData;
         result->channels = channels;
         result->samplesPerChannel = samplesPerChannel;

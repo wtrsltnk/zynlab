@@ -64,26 +64,49 @@ void zyn::ui::SampleNote::Render()
                 }
                 ImGui::ShowTooltipOnHover("Stereo");
 
-                if (parameters->PwavData != nullptr)
-                {
-                    ImGui::Text("%s", parameters->PwavData->filename.c_str());
-                }
-                else
-                {
-                    ImGui::Text("No sample selected");
-                }
-
                 static std::string selectedTag = "";
                 static ILibraryItem *selectedSample = nullptr;
                 static char filter[64] = {0};
                 static std::set<ILibraryItem *> filteredSamples = _state->_library->GetSamples();
+                static unsigned char selectingSampleForKey = 0;
+                bool b = false;
 
-                if (ImGui::Button("Change sample"))
+                ImGui::BeginChild("samples");
+                ImGui::Columns(3);
+                ImGui::SetColumnWidth(0, 70);
+                for (unsigned char i = 87; i >= 75; i--)
                 {
-                    ImGui::OpenPopup("Select sample");
-                    selectedSample = nullptr;
-                }
+                    ImGui::PushID(i);
+                    ImGui::Text("%4s%d", NoteNames[(107 - i) % NoteNameCount], (107 - i) / NoteNameCount - 1);
 
+                    ImGui::NextColumn();
+                    if (parameters->PwavData.find(i) != parameters->PwavData.end())
+                    {
+                        ImGui::Text("%s", parameters->PwavData[i]->name.c_str());
+                    }
+                    else
+                    {
+                        ImGui::Text("<unused>");
+                    }
+                    ImGui::NextColumn();
+
+                    if (ImGui::Button("Change"))
+                    {
+                        b = true;
+                        selectedSample = nullptr;
+                        selectingSampleForKey = i;
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Clear"))
+                    {
+                        parameters->PwavData.erase(i);
+                    }
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+                }
+                ImGui::EndChild();
+
+                if (b) ImGui::OpenPopup("Select sample");
                 ImGui::SetNextWindowSize(ImVec2(650, 600));
                 if (ImGui::BeginPopupModal("Select sample", nullptr, ImGuiWindowFlags_NoResize))
                 {
@@ -165,7 +188,7 @@ void zyn::ui::SampleNote::Render()
                     {
                         if (selectedSample != nullptr)
                         {
-                            parameters->PwavData = WavData::Load(selectedSample->GetPath());
+                            parameters->PwavData[selectingSampleForKey] = WavData::Load(selectedSample->GetPath());
                         }
                         ImGui::CloseCurrentPopup();
                     }
