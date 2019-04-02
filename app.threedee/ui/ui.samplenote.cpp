@@ -69,24 +69,24 @@ void zyn::ui::SampleNote::Render()
                     selectedSample = nullptr;
                 }
 
-                ImGui::SetNextWindowSize(ImVec2(450, 500));
+                ImGui::SetNextWindowSize(ImVec2(600, 600));
                 if (ImGui::BeginPopupModal("Select sample"))
                 {
                     ImGui::BeginGroup(); // Lock X position
-                    ImGui::Text("Current");
+                    ImGui::Text("Current: \t %s", selectedSample != nullptr ? selectedSample->GetName().c_str() : "");
                     ImGui::EndGroup();
 
                     auto &style = ImGui::GetStyle();
 
-                    ImGui::BeginChild("SampleLibrary", ImVec2(0, -30));
+                    ImGui::BeginChild("SampleLibrary", ImVec2(0, -40));
 
                     ImGui::Columns(2);
-                    ImGui::SetColumnWidth(0, 150 + style.ItemSpacing.x);
-                    ImGui::SetColumnWidth(1, 250 + style.ItemSpacing.x);
+                    ImGui::SetColumnWidth(0, 250 + style.ItemSpacing.x);
+                    ImGui::SetColumnWidth(1, 350 + style.ItemSpacing.x);
 
                     ImGui::Text("Tags");
 
-                    if (ImGui::ListBoxHeader("##Tags", ImVec2(150, -ImGui::GetTextLineHeightWithSpacing())))
+                    if (ImGui::ListBoxHeader("##Tags", ImVec2(250, -ImGui::GetTextLineHeightWithSpacing())))
                     {
                         for (auto const &tag : _state->_library->GetSampleTags())
                         {
@@ -105,7 +105,7 @@ void zyn::ui::SampleNote::Render()
 
                     if (selectedTag != "")
                     {
-                        if (ImGui::ListBoxHeader("##Samples", ImVec2(250, -ImGui::GetTextLineHeightWithSpacing())))
+                        if (ImGui::ListBoxHeader("##Samples", ImVec2(350, -ImGui::GetTextLineHeightWithSpacing())))
                         {
                             for (auto sample : _state->_library->GetSamples())
                             {
