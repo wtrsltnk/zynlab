@@ -1,6 +1,9 @@
 #include "ui.samplenote.h"
 
 #include "../imgui_addons/imgui_knob.h"
+#include <algorithm>
+#include <cctype>
+#include <string>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.synth/SampleNoteParams.h>
 
@@ -13,6 +16,15 @@ zyn::ui::SampleNote::SampleNote(AppState *state)
 zyn::ui::SampleNote::~SampleNote() = default;
 
 bool zyn::ui::SampleNote::Setup() { return true; }
+
+bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
+{
+    auto it = std::search(
+        strHaystack.begin(), strHaystack.end(),
+        strNeedle.begin(), strNeedle.end(),
+        [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); });
+    return (it != strHaystack.end());
+}
 
 void zyn::ui::SampleNote::Render()
 {
@@ -61,16 +73,19 @@ void zyn::ui::SampleNote::Render()
                     ImGui::Text("No sample selected");
                 }
 
-                static std::string selectedTag;
-                static ILibraryItem *selectedSample;
+                static std::string selectedTag = "";
+                static ILibraryItem *selectedSample = nullptr;
+                static char filter[64] = {0};
+                static std::set<ILibraryItem *> filteredSamples = _state->_library->GetSamples();
+
                 if (ImGui::Button("Change sample"))
                 {
                     ImGui::OpenPopup("Select sample");
                     selectedSample = nullptr;
                 }
 
-                ImGui::SetNextWindowSize(ImVec2(600, 600));
-                if (ImGui::BeginPopupModal("Select sample"))
+                ImGui::SetNextWindowSize(ImVec2(650, 600));
+                if (ImGui::BeginPopupModal("Select sample", nullptr, ImGuiWindowFlags_NoResize))
                 {
                     ImGui::BeginGroup(); // Lock X position
                     ImGui::Text("Current: \t %s", selectedSample != nullptr ? selectedSample->GetName().c_str() : "");
@@ -88,12 +103,21 @@ void zyn::ui::SampleNote::Render()
 
                     if (ImGui::ListBoxHeader("##Tags", ImVec2(250, -ImGui::GetTextLineHeightWithSpacing())))
                     {
+                        bool selected = (selectedTag == "");
+                        if (ImGui::Selectable("Show Everything", &selected))
+                        {
+                            selectedTag = "";
+                            filter[0] = 0;
+                            filteredSamples = _state->_library->GetSamples();
+                        }
                         for (auto const &tag : _state->_library->GetSampleTags())
                         {
-                            bool selected = (selectedTag == tag);
+                            selected = (selectedTag == tag);
                             if (ImGui::Selectable(tag.c_str(), &selected))
                             {
                                 selectedTag = tag;
+                                filter[0] = 0;
+                                filteredSamples = _state->_library->GetSamples();
                             }
                         }
                         ImGui::ListBoxFooter();
@@ -103,26 +127,36 @@ void zyn::ui::SampleNote::Render()
 
                     ImGui::Text("Samples");
 
-                    if (selectedTag != "")
+                    if (ImGui::InputText("Filter", filter, 64))
                     {
-                        if (ImGui::ListBoxHeader("##Samples", ImVec2(350, -ImGui::GetTextLineHeightWithSpacing())))
+                        filteredSamples.clear();
+                        for (auto sample : _state->_library->GetSamples())
                         {
-                            for (auto sample : _state->_library->GetSamples())
+                            if (!findStringIC(sample->GetName(), filter))
                             {
-                                if (sample->GetTags().find(selectedTag) == sample->GetTags().end())
-                                {
-                                    continue;
-                                }
-
-                                bool selected = selectedSample != nullptr && sample->GetPath() == selectedSample->GetPath();
-                                if (ImGui::Selectable(sample->GetName().c_str(), &selected))
-                                {
-                                    _state->_mixer->PreviewSample(sample->GetPath());
-                                    selectedSample = sample;
-                                }
+                                continue;
                             }
-                            ImGui::ListBoxFooter();
+                            filteredSamples.insert(sample);
                         }
+                    }
+
+                    if (ImGui::ListBoxHeader("##Samples", ImVec2(350, -ImGui::GetTextLineHeightWithSpacing())))
+                    {
+                        for (auto sample : filteredSamples)
+                        {
+                            if (selectedTag.size() > 0 && sample->GetTags().find(selectedTag) == sample->GetTags().end())
+                            {
+                                continue;
+                            }
+
+                            bool selected = selectedSample != nullptr && sample->GetPath() == selectedSample->GetPath();
+                            if (ImGui::Selectable(sample->GetName().c_str(), &selected))
+                            {
+                                _state->_mixer->PreviewSample(sample->GetPath());
+                                selectedSample = sample;
+                            }
+                        }
+                        ImGui::ListBoxFooter();
                     }
 
                     ImGui::EndChild();

@@ -96,6 +96,7 @@ void Config::init()
         cfg.bankRootDirList[b++] = "banks";
 #ifdef _WIN32
         cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\zynaddsubfx-instruments\banks)";
+        cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\zynaddsubfx-instruments\samples)";
 #endif // _WIN32
     }
 
