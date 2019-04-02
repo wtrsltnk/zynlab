@@ -30,7 +30,7 @@ class LibraryManager : public ILibraryManager
     std::set<std::string> _sampleTags;
     std::set<ILibraryItem *> _samples;
 
-    void scanLocation(std::string const &location);
+    void scanLocation(std::string const &location, std::set<std::string> const &baseTags);
 
 public:
     LibraryManager();

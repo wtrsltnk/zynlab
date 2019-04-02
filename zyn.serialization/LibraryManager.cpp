@@ -17,7 +17,7 @@ LibraryManager::LibraryManager(std::set<std::string> const &libraryLocations)
 
 LibraryManager::~LibraryManager() = default;
 
-void LibraryManager::scanLocation(std::string const &location)
+void LibraryManager::scanLocation(std::string const &location, std::set<std::string> const &baseTags)
 {
     auto dir = System::IO::DirectoryInfo(location);
 
@@ -33,6 +33,7 @@ void LibraryManager::scanLocation(std::string const &location)
         auto bankDir = System::IO::DirectoryInfo(System::IO::Path::Combine(dir.FullName(), bank));
         auto items = bankDir.GetFiles();
         auto tags = std::set<std::string>({bankDir.Name()});
+        tags.insert(baseTags.begin(), baseTags.end());
 
         for (auto item : items)
         {
@@ -58,6 +59,8 @@ void LibraryManager::scanLocation(std::string const &location)
                 _samples.insert(instrument);
             }
         }
+        
+        scanLocation(System::IO::Path::Combine(location, bank), tags);
     }
 }
 
@@ -76,9 +79,11 @@ void LibraryManager::RefreshLibrary()
     _instrumentTags.clear();
     _sampleTags.clear();
 
+  std::set<std::string> tags;
+  
     for (auto location : _libraryLocations)
     {
-        scanLocation(location);
+        scanLocation(location, tags);
     }
 }
 
