@@ -57,13 +57,6 @@ void zyn::ui::SampleNote::Render()
             {
                 ImGui::Text("SMPLsynth Global Parameters of the Instrument");
 
-                auto stereo = parameters->Pstereo == 1;
-                if (ImGui::Checkbox("Stereo", &stereo))
-                {
-                    parameters->Pstereo = stereo ? 1 : 0;
-                }
-                ImGui::ShowTooltipOnHover("Stereo");
-
                 static std::string selectedTag = "";
                 static ILibraryItem *selectedSample = nullptr;
                 static char filter[64] = {0};
@@ -96,10 +89,13 @@ void zyn::ui::SampleNote::Render()
                         selectedSample = nullptr;
                         selectingSampleForKey = i;
                     }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Clear"))
+                    if (parameters->PwavData.find(i) != parameters->PwavData.end())
                     {
-                        parameters->PwavData.erase(i);
+                        ImGui::SameLine();
+                        if (ImGui::Button("Clear"))
+                        {
+                            parameters->PwavData.erase(i);
+                        }
                     }
                     ImGui::NextColumn();
                     ImGui::PopID();

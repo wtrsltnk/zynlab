@@ -509,17 +509,23 @@ void Track::NoteOn(unsigned char note,
                 for (auto &item : Instruments)
                 {
                     if (item.Pmuted != 0)
+                    {
                         continue;
+                    }
+
                     if ((note < item.Pminkey) || (note > item.Pmaxkey))
+                    {
                         continue;
+                    }
 
                     if ((lastnotecopy < item.Pminkey) || (lastnotecopy > item.Pmaxkey))
+                    {
                         continue; // We will not perform legato across 2 key regions.
+                    }
 
-                    _trackNotes[pos].instumentNotes[ci].sendtoparteffect =
-                        (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX); //if this parameter is 127 for "unprocessed"
-                    _trackNotes[posb].instumentNotes[ci].sendtoparteffect =
-                        (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
+                    //if this parameter is 127 for "unprocessed"
+                    _trackNotes[pos].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
+                    _trackNotes[posb].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
 
                     if ((item.Padenabled != 0) && (item.adpars != nullptr) && (_trackNotes[pos].instumentNotes[ci].adnote != nullptr) && (_trackNotes[posb].instumentNotes[ci].adnote != nullptr))
                     {
@@ -546,7 +552,9 @@ void Track::NoteOn(unsigned char note,
                     {
                         ci++;
                         if (((item.Padenabled != 0) || (item.Psubenabled != 0) || (item.Psmplenabled != 0) || (item.Ppadenabled != 0)) && (Pkitmode == 2))
+                        {
                             break;
+                        }
                     }
                 }
                 if (ci == 0)
@@ -570,38 +578,59 @@ void Track::NoteOn(unsigned char note,
             _trackNotes[pos].instumentNotes[0].sendtoparteffect = 0;
 
             if (Instruments[0].Padenabled != 0)
+            {
                 _trackNotes[pos].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, false);
+            }
 
             if (Instruments[0].Psubenabled != 0)
+            {
                 _trackNotes[pos].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars, &ctl, notebasefreq, vel, portamento, note, false);
+            }
 
             if (Instruments[0].Ppadenabled != 0)
+            {
                 _trackNotes[pos].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars, &ctl, notebasefreq, vel, portamento, note, false);
+            }
 
             if (Instruments[0].Psmplenabled != 0)
-                _trackNotes[pos].instumentNotes[0].smplnote = new SampleNote(Instruments[0].smplpars, &ctl, notebasefreq, vel, portamento, note, false);
+            {
+                _trackNotes[pos].instumentNotes[0].smplnote = new SampleNote(Instruments[0].smplpars, &ctl, notebasefreq, vel, note);
+            }
 
             if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Psmplenabled != 0) || (Instruments[0].Ppadenabled != 0))
+            {
                 _trackNotes[pos].itemsplaying++;
+            }
 
             // Spawn another note (but silent) if legatomodevalid==true
             if (legatomodevalid)
             {
                 _trackNotes[posb].instumentNotes[0].sendtoparteffect = 0;
                 if (Instruments[0].Padenabled != 0)
-                    _trackNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, true); //true for silent.
+                {
+                    //true for silent.
+                    _trackNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, true);
+                }
 
                 if (Instruments[0].Psubenabled != 0)
+                {
                     _trackNotes[posb].instumentNotes[0].subnote = new SUBnote(Instruments[0].subpars, &ctl, notebasefreq, vel, portamento, note, true);
+                }
 
                 if (Instruments[0].Ppadenabled != 0)
+                {
                     _trackNotes[posb].instumentNotes[0].padnote = new PADnote(Instruments[0].padpars, &ctl, notebasefreq, vel, portamento, note, true);
+                }
 
                 if (Instruments[0].Psmplenabled != 0)
-                    _trackNotes[posb].instumentNotes[0].smplnote = new SampleNote(Instruments[0].smplpars, &ctl, notebasefreq, vel, portamento, note, true);
+                {
+                    _trackNotes[posb].instumentNotes[0].smplnote = new SampleNote(Instruments[0].smplpars, &ctl, notebasefreq, vel, note);
+                }
 
                 if ((Instruments[0].Padenabled != 0) || (Instruments[0].Psubenabled != 0) || (Instruments[0].Psmplenabled != 0) || (Instruments[0].Ppadenabled != 0))
+                {
                     _trackNotes[posb].itemsplaying++;
+                }
             }
         }
         else //init the notes for the "kit mode"
@@ -609,15 +638,18 @@ void Track::NoteOn(unsigned char note,
             for (auto &item : Instruments)
             {
                 if (item.Pmuted != 0)
+                {
                     continue;
+                }
                 if ((note < item.Pminkey) || (note > item.Pmaxkey))
+                {
                     continue;
+                }
 
                 int ci = _trackNotes[pos].itemsplaying; //ci=current item
 
                 //if this parameter is 127 for "unprocessed"
-                _trackNotes[pos].instumentNotes[ci].sendtoparteffect =
-                    (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
+                _trackNotes[pos].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
 
                 if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
                 {
@@ -633,18 +665,19 @@ void Track::NoteOn(unsigned char note,
                 }
                 if ((item.smplpars != nullptr) && ((item.Psmplenabled) != 0))
                 {
-                    _trackNotes[pos].instumentNotes[ci].smplnote = new SampleNote(item.smplpars, &ctl, notebasefreq, vel, portamento, note, false);
+                    _trackNotes[pos].instumentNotes[ci].smplnote = new SampleNote(item.smplpars, &ctl, notebasefreq, vel, note);
                 }
 
                 // Spawn another note (but silent) if legatomodevalid==true
                 if (legatomodevalid)
                 {
-                    _trackNotes[posb].instumentNotes[ci].sendtoparteffect =
-                        (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX); //if this parameter is 127 for "unprocessed"
+                    //if this parameter is 127 for "unprocessed"
+                    _trackNotes[posb].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
 
                     if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
                     {
-                        _trackNotes[posb].instumentNotes[ci].adnote = new ADnote(item.adpars, &ctl, notebasefreq, vel, portamento, note, true); //true for silent.
+                        //true for silent.
+                        _trackNotes[posb].instumentNotes[ci].adnote = new ADnote(item.adpars, &ctl, notebasefreq, vel, portamento, note, true);
                     }
                     if ((item.subpars != nullptr) && ((item.Psubenabled) != 0))
                     {
@@ -656,18 +689,22 @@ void Track::NoteOn(unsigned char note,
                     }
                     if ((item.smplpars != nullptr) && ((item.Psmplenabled) != 0))
                     {
-                        _trackNotes[posb].instumentNotes[ci].smplnote = new SampleNote(item.smplpars, &ctl, notebasefreq, vel, portamento, note, true);
+                        _trackNotes[posb].instumentNotes[ci].smplnote = new SampleNote(item.smplpars, &ctl, notebasefreq, vel, note);
                     }
 
                     if ((item.adpars != nullptr) || (item.subpars != nullptr) || (item.smplpars != nullptr))
+                    {
                         _trackNotes[posb].itemsplaying++;
+                    }
                 }
 
                 if ((item.adpars != nullptr) || (item.subpars != nullptr))
                 {
                     _trackNotes[pos].itemsplaying++;
                     if (((item.Padenabled != 0) || (item.Psubenabled != 0) || (item.Psmplenabled != 0) || (item.Ppadenabled != 0)) && (Pkitmode == 2))
+                    {
                         break;
+                    }
                 }
             }
         }

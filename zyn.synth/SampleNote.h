@@ -24,17 +24,15 @@
 #define SAMPLE_NOTE_H
 
 #include "Controller.h"
-#include "Envelope.h"
 #include "SampleNoteParams.h"
 #include "SynthNote.h"
 #include <zyn.common/globals.h>
-#include <zyn.dsp/Filter.h>
 
 class SampleNote : public SynthNote
 {
 public:
     SampleNote(SampleNoteParameters *parameters, Controller *ctl_, float freq,
-               float velocity, int portamento_, int midinote, bool besilent);
+               float velocity, int midinote);
     virtual ~SampleNote();
 
     void legatonote(float freq, float velocity, int portamento_,
@@ -47,67 +45,20 @@ public:
 private:
     void setup(float freq,
                float velocity,
-               int portamento_,
-               int midinote,
-               bool legato = false);
-    void computecurrentparameters();
-    void initparameters(float freq);
+               int midinote);
     void KillNote();
 
     SampleNoteParameters *_parameters;
     unsigned int wavProgress;
 
     //parameters
-    int stereo;
-    int numstages;         //number of stages of filters
-    int numharmonics;      //number of harmonics (after the too higher hamonics are removed)
-    int firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
-    int start;             //how the harmonics start
-    float basefreq;
     float panning;
-    Envelope *AmpEnvelope;
-    Envelope *FreqEnvelope;
-    Envelope *BandWidthEnvelope;
-
-    Filter *GlobalFilterL, *GlobalFilterR;
-
-    Envelope *GlobalFilterEnvelope;
 
     //internal values
     ONOFFTYPE NoteEnabled;
-    int firsttick, portamento;
-    float volume, oldamplitude, newamplitude;
-
-    float GlobalFilterCenterPitch; //octaves
-    float GlobalFilterFreqTracking;
-
-    struct bpfilter
-    {
-        float freq, bw, amp;      //filter parameters
-        float a1, a2, b0, b2;     //filter coefs. b1=0
-        float xn1, xn2, yn1, yn2; //filter internal values
-    };
-
-    void initfilter(bpfilter &filter,
-                    float freq,
-                    float bw,
-                    float amp,
-                    float mag);
-    float computerolloff(float freq);
-    void computefiltercoefs(bpfilter &filter,
-                            float freq,
-                            float bw,
-                            float gain);
-    inline void filter(bpfilter &filter, float *smps);
-
-    bpfilter *lfilter, *rfilter;
-
-    float overtone_rolloff[MAX_SUB_HARMONICS];
-    float overtone_freq[MAX_SUB_HARMONICS];
+    float volume;
 
     Controller *ctl;
-    int oldpitchwheel, oldbandwidth;
-    float globalfiltercenterq;
 };
 
 #endif // SAMPLE_NOTE_H

@@ -112,7 +112,7 @@ bool AppThreeDee::Setup()
 
     ImGui::StyleColorsDark();
     ImGui::GetStyle().TabRounding = 2.0f;
-    ImGui::GetStyle().FrameRounding = 2.0f;
+    ImGui::GetStyle().FrameRounding = 0.0f;
 
     ImGui::GetStyle().Colors[ImGuiCol_Text] = ImVec4(0.71f, 0.7f, 0.7f, 1.0f);
     ImGui::GetStyle().Colors[ImGuiCol_TextDisabled] = ImVec4(0.51f, 0.5f, 0.5f, 1.0f);
