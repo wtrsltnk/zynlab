@@ -28,6 +28,8 @@
 #include "LFOParamsSerializer.h"
 #include "ResonanceSerializer.h"
 
+char const *ADnoteParametersSerializer::BRANCH_NAME = "ADD_SYNTH_PARAMETERS";
+
 ADnoteParametersSerializer::ADnoteParametersSerializer(ADnoteParameters *parameters)
     : _parameters(parameters)
 {}

@@ -26,6 +26,7 @@
 #include "ControllerSerializer.h"
 #include "EffectMgrSerializer.h"
 #include "PADnoteParamsSerializer.h"
+#include "SMPLnoteParamsSerializer.h"
 #include "SUBnoteParamsSerializer.h"
 #include <zyn.fx/EffectMgr.h>
 
@@ -65,7 +66,7 @@ void TrackSerializer::SerializeInstrument(IPresetsSerializer *xml)
             xml->addparbool("add_enabled", _parameters->Instruments[i].Padenabled);
             if ((_parameters->Instruments[i].Padenabled != 0) && (_parameters->Instruments[i].adpars != nullptr))
             {
-                xml->beginbranch("ADD_SYNTH_PARAMETERS");
+                xml->beginbranch(ADnoteParametersSerializer::BRANCH_NAME);
                 ADnoteParametersSerializer(_parameters->Instruments[i].adpars).Serialize(xml);
                 xml->endbranch();
             }
@@ -73,15 +74,23 @@ void TrackSerializer::SerializeInstrument(IPresetsSerializer *xml)
             xml->addparbool("sub_enabled", _parameters->Instruments[i].Psubenabled);
             if ((_parameters->Instruments[i].Psubenabled != 0) && (_parameters->Instruments[i].subpars != nullptr))
             {
-                xml->beginbranch("SUB_SYNTH_PARAMETERS");
+                xml->beginbranch(SUBnoteParametersSerializer::BRANCH_NAME);
                 SUBnoteParametersSerializer(_parameters->Instruments[i].subpars).Serialize(xml);
+                xml->endbranch();
+            }
+
+            xml->addparbool("smpl_enabled", _parameters->Instruments[i].Psmplenabled);
+            if ((_parameters->Instruments[i].Psmplenabled != 0) && (_parameters->Instruments[i].smplpars != nullptr))
+            {
+                xml->beginbranch(SMPLnoteParametersSerializer::BRANCH_NAME);
+                SMPLnoteParametersSerializer(_parameters->Instruments[i].smplpars).Serialize(xml);
                 xml->endbranch();
             }
 
             xml->addparbool("pad_enabled", _parameters->Instruments[i].Ppadenabled);
             if ((_parameters->Instruments[i].Ppadenabled != 0) && (_parameters->Instruments[i].padpars != nullptr))
             {
-                xml->beginbranch("PAD_SYNTH_PARAMETERS");
+                xml->beginbranch(PADnoteParametersSerializer::BRANCH_NAME);
                 PADnoteParametersSerializer(_parameters->Instruments[i].padpars).Serialize(xml);
                 xml->endbranch();
             }
@@ -180,21 +189,28 @@ void TrackSerializer::DeserializeInstrument(IPresetsSerializer *xml)
             _parameters->Instruments[i].Psendtoparteffect = static_cast<unsigned char>(xml->getpar127("send_to_instrument_effect", _parameters->Instruments[i].Psendtoparteffect));
 
             _parameters->Instruments[i].Padenabled = static_cast<unsigned char>(xml->getparbool("add_enabled", _parameters->Instruments[i].Padenabled));
-            if (xml->enterbranch("ADD_SYNTH_PARAMETERS"))
+            if (xml->enterbranch(ADnoteParametersSerializer::BRANCH_NAME))
             {
                 ADnoteParametersSerializer(_parameters->Instruments[i].adpars).Deserialize(xml);
                 xml->exitbranch();
             }
 
             _parameters->Instruments[i].Psubenabled = static_cast<unsigned char>(xml->getparbool("sub_enabled", _parameters->Instruments[i].Psubenabled));
-            if (xml->enterbranch("SUB_SYNTH_PARAMETERS"))
+            if (xml->enterbranch(SUBnoteParametersSerializer::BRANCH_NAME))
             {
                 SUBnoteParametersSerializer(_parameters->Instruments[i].subpars).Deserialize(xml);
                 xml->exitbranch();
             }
 
+            _parameters->Instruments[i].Psmplenabled = static_cast<unsigned char>(xml->getparbool("smpl_enabled", _parameters->Instruments[i].Psmplenabled));
+            if (xml->enterbranch(SMPLnoteParametersSerializer::BRANCH_NAME))
+            {
+                SMPLnoteParametersSerializer(_parameters->Instruments[i].smplpars).Deserialize(xml);
+                xml->exitbranch();
+            }
+
             _parameters->Instruments[i].Ppadenabled = static_cast<unsigned char>(xml->getparbool("pad_enabled", _parameters->Instruments[i].Ppadenabled));
-            if (xml->enterbranch("PAD_SYNTH_PARAMETERS"))
+            if (xml->enterbranch(PADnoteParametersSerializer::BRANCH_NAME))
             {
                 PADnoteParametersSerializer(_parameters->Instruments[i].padpars).Deserialize(xml);
                 xml->exitbranch();

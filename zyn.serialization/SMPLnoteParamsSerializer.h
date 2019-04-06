@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  SUBnoteParameters.h - Parameters for SUBnote (SUBsynth)
+  LFOParams.h - Parameters for LFO
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -20,37 +20,24 @@
 
 */
 
-#ifndef SAMPLE_NOTE_PARAMETERS_H
-#define SAMPLE_NOTE_PARAMETERS_H
+#ifndef SMPLNOTEPARAMSSERIALIZER_H
+#define SMPLNOTEPARAMSSERIALIZER_H
 
-#include "EnvelopeParams.h"
-#include <map>
 #include <zyn.common/IPresetsSerializer.h>
-#include <zyn.common/Presets.h>
-#include <zyn.common/WavData.h>
-#include <zyn.common/globals.h>
-#include <zyn.dsp/FilterParams.h>
+#include <zyn.synth/SampleNoteParams.h>
 
-#define SAMPLE_NOTE_MIN 75
-#define SAMPLE_NOTE_MAX 87
-
-class SampleNoteParameters : public WrappedPresets
+class SMPLnoteParametersSerializer
 {
+    SampleNoteParameters *_parameters;
+
 public:
-    SampleNoteParameters();
-    virtual ~SampleNoteParameters();
+    SMPLnoteParametersSerializer(SampleNoteParameters *parameters);
+    virtual ~SMPLnoteParametersSerializer();
 
-    void InitPresets();
+    void Serialize(IPresetsSerializer *xml);
+    void Deserialize(IPresetsSerializer *xml);
 
-    void Defaults();
-
-    std::map<int, WavData *> PwavData;
-
-    //Parameters
-    //AMPLITUDE PARAMETRERS
-    unsigned char PVolume;
-    unsigned char PPanning;
-    unsigned char PAmpVelocityScaleFunction;
+    static char const *BRANCH_NAME;
 };
 
-#endif // SAMPLE_NOTE_PARAMETERS_H
+#endif // SMPLNOTEPARAMSSERIALIZER_H

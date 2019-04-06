@@ -36,6 +36,8 @@ public:
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
+
+    static char const *BRANCH_NAME;
 };
 
 #endif // AD_NOTE_PARAMETERS_SERIALIZER_H

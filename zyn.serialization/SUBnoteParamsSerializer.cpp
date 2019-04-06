@@ -25,6 +25,8 @@
 #include "EnvelopeParamsSerializer.h"
 #include "FilterParamsSerializer.h"
 
+char const *SUBnoteParametersSerializer::BRANCH_NAME = "SUB_SYNTH_PARAMETERS";
+
 SUBnoteParametersSerializer::SUBnoteParametersSerializer(SUBnoteParameters *parameters)
     : _parameters(parameters)
 {}

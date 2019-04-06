@@ -28,6 +28,8 @@
 #include "OscilGenSerializer.h"
 #include "ResonanceSerializer.h"
 
+char const *PADnoteParametersSerializer::BRANCH_NAME = "PAD_SYNTH_PARAMETERS";
+
 PADnoteParametersSerializer::PADnoteParametersSerializer(PADnoteParameters *parameters)
     : _parameters(parameters)
 {}

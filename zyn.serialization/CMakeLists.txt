@@ -21,6 +21,7 @@ add_library(zyn.serialization STATIC
     FilterParamsSerializer.h
     LFOParamsSerializer.cpp
     LFOParamsSerializer.h
+    Library.cpp
     LibraryItem.cpp
     LibraryManager.cpp
     LibraryManager.h
@@ -34,6 +35,8 @@ add_library(zyn.serialization STATIC
     PADnoteParamsSerializer.h
     ResonanceSerializer.cpp
     ResonanceSerializer.h
+    SMPLnoteParamsSerializer.cpp
+    SMPLnoteParamsSerializer.h
     SUBnoteParamsSerializer.cpp
     SUBnoteParamsSerializer.h
     SaveToFileSerializer.cpp

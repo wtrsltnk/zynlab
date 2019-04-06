@@ -1,3 +1,25 @@
+/*
+  ZynAddSubFX - a software synthesizer
+
+  LFOParams.h - Parameters for LFO
+  Copyright (C) 2002-2005 Nasca Octavian Paul
+  Author: Nasca Octavian Paul
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of version 2 of the GNU General Public License
+  as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License (version 2 or later) for more details.
+
+  You should have received a copy of the GNU General Public License (version 2)
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+*/
+
 #include "LibraryManager.h"
 
 #include "SaveToFileSerializer.h"
@@ -17,13 +39,40 @@ LibraryManager::LibraryManager(std::set<std::string> const &libraryLocations)
 
 LibraryManager::~LibraryManager() = default;
 
-void LibraryManager::scanLocation(std::string const &location, std::set<std::string> const &baseTags)
+ILibrary *LibraryManager::scanLocation(std::string const &location, ILibrary *parent)
 {
     auto dir = System::IO::DirectoryInfo(location);
 
     if (!dir.Exists())
     {
-        return;
+        return nullptr;
+    }
+
+    auto lib = new Library(dir.Name(), location, parent);
+
+    auto items = dir.GetFiles();
+
+    for (auto item : items)
+    {
+        if (item[0] == '.')
+        {
+            continue;
+        }
+
+        auto itemFile = System::IO::FileInfo(System::IO::Path::Combine(dir.FullName(), item));
+        if (itemFile.Extension() == INSTRUMENT_EXTENSION)
+        {
+            auto instrument = new LibraryItem(itemFile.Name(), itemFile.FullName(), lib);
+            _instruments.insert(instrument);
+            lib->_items.insert(instrument);
+        }
+
+        if (itemFile.Extension() == SAMPLE_EXTENSION)
+        {
+            auto instrument = new LibraryItem(itemFile.Name(), itemFile.FullName(), lib);
+            _samples.insert(instrument);
+            lib->_items.insert(instrument);
+        }
     }
 
     auto banks = dir.GetDirectories();
@@ -31,40 +80,24 @@ void LibraryManager::scanLocation(std::string const &location, std::set<std::str
     for (auto bank : banks)
     {
         auto bankDir = System::IO::DirectoryInfo(System::IO::Path::Combine(dir.FullName(), bank));
-        auto items = bankDir.GetFiles();
-        auto tags = std::set<std::string>({bankDir.Name()});
-        tags.insert(baseTags.begin(), baseTags.end());
+        auto res = scanLocation(System::IO::Path::Combine(location, bank), lib);
 
-        for (auto item : items)
+        if (res != nullptr)
         {
-            if (item[0] == '.')
-            {
-                continue;
-            }
-
-            auto itemFile = System::IO::FileInfo(System::IO::Path::Combine(bankDir.FullName(), item));
-            if (itemFile.Extension() == INSTRUMENT_EXTENSION)
-            {
-                _instrumentTags.insert(bankDir.Name());
-
-                auto instrument = new LibraryItem(itemFile.Name(), itemFile.FullName(), tags);
-                _instruments.insert(instrument);
-            }
-
-            if (itemFile.Extension() == SAMPLE_EXTENSION)
-            {
-                _sampleTags.insert(bankDir.Name());
-
-                auto instrument = new LibraryItem(itemFile.Name(), itemFile.FullName(), tags);
-                _samples.insert(instrument);
-            }
+            lib->GetChildren().insert(res);
         }
-        
-        scanLocation(System::IO::Path::Combine(location, bank), tags);
     }
+
+    if (lib->GetChildren().empty() && lib->_items.empty())
+    {
+        delete lib;
+        return nullptr;
+    }
+
+    return lib;
 }
 
-void LibraryManager::RefreshLibrary()
+void LibraryManager::Cleanup()
 {
     for (auto item : _instruments)
     {
@@ -76,14 +109,25 @@ void LibraryManager::RefreshLibrary()
         delete item;
     }
     _samples.clear();
-    _instrumentTags.clear();
-    _sampleTags.clear();
+    for (auto item : _topLevelLibraries)
+    {
+        delete item;
+    }
+    _topLevelLibraries.clear();
+}
 
-  std::set<std::string> tags;
-  
+void LibraryManager::RefreshLibraries()
+{
+    Cleanup();
+
     for (auto location : _libraryLocations)
     {
-        scanLocation(location, tags);
+        auto lib = scanLocation(location, nullptr);
+
+        if (lib != nullptr)
+        {
+            _topLevelLibraries.insert(lib);
+        }
     }
 }
 
@@ -115,19 +159,14 @@ std::set<std::string> const &LibraryManager::GetLibraryLocations() const
     return _libraryLocations;
 }
 
-std::set<std::string> const &LibraryManager::GetInstrumentTags() const
+std::set<ILibrary *> const &LibraryManager::GetTopLevelLibraries() const
 {
-    return _instrumentTags;
+    return _topLevelLibraries;
 }
 
 std::set<ILibraryItem *> const &LibraryManager::GetInstruments() const
 {
     return _instruments;
-}
-
-std::set<std::string> const &LibraryManager::GetSampleTags() const
-{
-    return _sampleTags;
 }
 
 std::set<ILibraryItem *> const &LibraryManager::GetSamples() const

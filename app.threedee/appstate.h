@@ -66,8 +66,7 @@ public:
     int _currentInsertEffect;
     int _currentSystemEffect;
     int _currentTrackEffect;
-    std::string _currentInstrumentTag;
-    std::string _currentSampleTag;
+    ILibrary *_currentLibrary;
     int _currentTrack;
     int _currentTrackInstrument;
     int _currentPattern;

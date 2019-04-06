@@ -1,5 +1,6 @@
 #include "WavData.h"
 
+#include "base64.h"
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
 #include <system.io/system.io.fileinfo.h>
@@ -33,4 +34,19 @@ WavData *WavData::Load(const std::string &filename)
     free(PwavData);
 
     return nullptr;
+}
+
+std::string WavData::toBase64(WavData *wavData)
+{
+    return base64_encode(reinterpret_cast<const unsigned char *>(wavData->PwavData), wavData->samplesPerChannel * wavData->channels * sizeof(float));
+}
+
+bool WavData::fromBase64(std::string const &data, WavData *wavData)
+{
+    auto size = static_cast<size_t>(wavData->samplesPerChannel) * wavData->channels * sizeof(float);
+    wavData->PwavData = reinterpret_cast<float *>(malloc(size));
+
+    memcpy(wavData->PwavData, reinterpret_cast<float const *>(base64_decode(data).c_str()), size);
+
+    return true;
 }

@@ -28,10 +28,12 @@ target_sources(zyn.common
         Util.h
         WavData.cpp
         WavData.h
-        WaveShapeSmps.cpp
-        WaveShapeSmps.h
         WavFileWriter.cpp
         WavFileWriter.h
+        WaveShapeSmps.cpp
+        WaveShapeSmps.h
+        base64.cpp
+        base64.h
         globals.cpp
         globals.h
 )
@@ -74,6 +76,7 @@ install(
         ${zyn.common_SOURCE_DIR}/WavFileWriter.h
         ${zyn.common_SOURCE_DIR}/WaveShapeSmps.h
         ${zyn.common_SOURCE_DIR}/XmlWrapper.h
+        ${zyn.common_SOURCE_DIR}/base64.h
         ${zyn.common_SOURCE_DIR}/globals.h
     DESTINATION
         "include/zyn/common"

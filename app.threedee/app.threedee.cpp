@@ -141,7 +141,7 @@ bool AppThreeDee::Setup()
     }
     io.Fonts->Build();
 
-    _state._library->RefreshLibrary();
+    _state._library->RefreshLibraries();
 
     _state._currentTrack = 0;
 

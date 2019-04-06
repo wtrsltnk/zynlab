@@ -9,6 +9,7 @@
 #include <zyn.common/globals.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
+#include <zyn.serialization/SaveToFileSerializer.h>
 
 zyn::ui::Mixer::Mixer(AppState *appstate)
     : _state(appstate), _iconImagesAreLoaded(false)
@@ -211,6 +212,19 @@ void zyn::ui::Mixer::ImGuiInspector()
 
         if (ImGui::CollapsingHeader("Track"))
         {
+            if (ImGui::Button("Reset to defaults"))
+            {
+                _state->_mixer->GetTrack(_state->_currentTrack)->Defaults();
+            }
+            ImGui::InputText("Track name", (char *)_state->_mixer->GetTrack(_state->_currentTrack)->Pname, TRACK_MAX_NAME_LEN);
+            if (ImGui::Button("Save track to .xiz"))
+            {
+                std::stringstream ss;
+
+                ss << _state->_mixer->GetTrack(_state->_currentTrack)->Pname << ".xiz";
+
+                SaveToFileSerializer().SaveTrack(_state->_mixer->GetTrack(_state->_currentTrack), ss.str());
+            }
             ImGui::TextWrapped("Etiam vitae condimentum justo. Duis et orci diam. Morbi rhoncus finibus augue, eget auctor eros aliquet rhoncus. Etiam felis enim, fringilla tincidunt pulvinar nec, lacinia non nibh. In eget dui porttitor, commodo odio in, interdum neque. Quisque neque neque, finibus non gravida ac, porttitor non odio. Proin magna urna, finibus vitae erat id, pulvinar elementum sapien. Morbi luctus, ex at commodo mattis, libero enim vestibulum lectus, non ornare justo tellus non mi. Nulla dictum arcu eros, sed posuere purus ultricies vitae. ");
         }
 

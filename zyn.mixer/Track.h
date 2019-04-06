@@ -177,7 +177,7 @@ public:
 
     struct
     {
-        std::string tag;
+        std::string libraryPath;
         std::string instrumentName;
     } loadedInstrument;
 

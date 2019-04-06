@@ -1,8 +1,10 @@
 #include "ui.library.h"
 
+#include <algorithm>
+#include <cctype>
 #include <imgui.h>
 #include <iostream>
-#include <zyn.common/ILibraryManager.h>
+#include <string>
 #include <zyn.mixer/Mixer.h>
 
 char const *const LibraryID = "Library";
@@ -15,6 +17,10 @@ zyn::ui::Library::~Library() = default;
 
 bool zyn::ui::Library::Setup()
 {
+    _selectedSample = nullptr;
+    _filter[0] = '\0';
+    _filteredSamples = _state->_library->GetSamples();
+
     return true;
 }
 
@@ -49,63 +55,156 @@ void zyn::ui::Library::Render()
     ImGui::PopStyleVar();
 }
 
-void zyn::ui::Library::InstrumentLibrary()
+bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
 {
+    auto it = std::search(
+        strHaystack.begin(), strHaystack.end(),
+        strNeedle.begin(), strNeedle.end(),
+        [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); });
+    return (it != strHaystack.end());
+}
+
+ILibraryItem *zyn::ui::Library::GetSelectedSample()
+{
+    return _selectedSample;
+}
+
+void zyn::ui::Library::RenderSelectSample()
+{
+
+    ImGui::BeginGroup(); // Lock X position
+    ImGui::Text("Current: \t %s", _selectedSample != nullptr ? _selectedSample->GetName().c_str() : "");
+    ImGui::EndGroup();
+
     auto &style = ImGui::GetStyle();
 
-    ImGui::BeginChild("InstrumentLibrary");
+    ImGui::BeginChild("SampleLibrary", ImVec2(0, -40));
 
     ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 150 + style.ItemSpacing.x);
-    ImGui::SetColumnWidth(1, 150 + style.ItemSpacing.x);
+    ImGui::SetColumnWidth(0, 250 + style.ItemSpacing.x);
+    ImGui::SetColumnWidth(1, 350 + style.ItemSpacing.x);
 
-    ImGui::Text("Tags");
+    ImGui::Text("Libraries");
 
-    if (ImGui::ListBoxHeader("##Tags", ImVec2(200, -ImGui::GetTextLineHeightWithSpacing())))
+    for (auto topLevel : _state->_library->GetTopLevelLibraries())
     {
-        for (auto const &tag : _state->_library->GetInstrumentTags())
+        libraryTree(topLevel);
+    }
+
+    ImGui::NextColumn();
+
+    ImGui::Text("Samples");
+
+    if (ImGui::InputText("Filter", _filter, 64))
+    {
+        _filteredSamples.clear();
+        for (auto sample : _state->_library->GetSamples())
         {
-            bool selected = (_state->_currentInstrumentTag == tag);
-            if (ImGui::Selectable(tag.c_str(), &selected))
+            if (!findStringIC(sample->GetName(), _filter))
             {
-                _state->_currentInstrumentTag = tag;
+                continue;
+            }
+            _filteredSamples.insert(sample);
+        }
+    }
+
+    if (ImGui::ListBoxHeader("##Samples", ImVec2(350, -ImGui::GetTextLineHeightWithSpacing())))
+    {
+        for (auto sample : _filteredSamples)
+        {
+            if (_state->_currentLibrary != nullptr && !sample->GetLibrary()->IsParent(_state->_currentLibrary))
+            {
+                continue;
+            }
+
+            bool selected = _selectedSample != nullptr && sample->GetPath() == _selectedSample->GetPath();
+            if (ImGui::Selectable(sample->GetName().c_str(), &selected))
+            {
+                _state->_mixer->PreviewSample(sample->GetPath());
+                _selectedSample = sample;
             }
         }
         ImGui::ListBoxFooter();
+    }
+
+    ImGui::EndChild();
+}
+
+void zyn::ui::Library::libraryTree(ILibrary *library)
+{
+    if (library->GetChildren().empty())
+    {
+        ImGui::TreeNodeEx(library->GetName().c_str(), ImGuiTreeNodeFlags_Leaf);
+        if (ImGui::IsItemClicked())
+        {
+            _state->_currentLibrary = library;
+        }
+        ImGui::TreePop();
+    }
+    else
+    {
+        if (ImGui::TreeNode(library->GetName().c_str()))
+        {
+            if (ImGui::IsItemClicked())
+            {
+                _state->_currentLibrary = library;
+            }
+            for (auto level : library->GetChildren())
+            {
+                libraryTree(level);
+            }
+            ImGui::TreePop();
+        }
+    }
+}
+
+void zyn::ui::Library::InstrumentLibrary()
+{
+    ImGui::BeginChild("InstrumentLibrary");
+
+    auto maxSize = ImGui::GetItemRectSize();
+
+    ImGui::Columns(2);
+
+    ImGui::Text("Libraries");
+
+    for (auto topLevel : _state->_library->GetTopLevelLibraries())
+    {
+        libraryTree(topLevel);
     }
 
     ImGui::NextColumn();
 
     ImGui::Text("Instruments");
 
-    if (_state->_currentInstrumentTag != "")
+    if (ImGui::ListBoxHeader("##Instruments", ImVec2(maxSize.x / 2, -ImGui::GetTextLineHeightWithSpacing())))
     {
-        if (ImGui::ListBoxHeader("##Instruments", ImVec2(200, -ImGui::GetTextLineHeightWithSpacing())))
+        for (auto instrument : _state->_library->GetInstruments())
         {
-            for (auto instrument : _state->_library->GetInstruments())
+            if (_state->_currentLibrary != nullptr && !instrument->GetLibrary()->IsParent(_state->_currentLibrary))
             {
-                if (instrument->GetTags().find(_state->_currentInstrumentTag) == instrument->GetTags().end())
-                {
-                    continue;
-                }
-
-                auto instrumentName = instrument->GetName();
-                auto const &track = _state->_mixer->GetTrack(_state->_currentTrack);
-
-                bool selected = (track->loadedInstrument.tag == _state->_currentInstrumentTag && track->loadedInstrument.instrumentName == instrumentName);
-                if (ImGui::Selectable(instrumentName.c_str(), selected))
-                {
-                    track->Lock();
-                    _state->_library->LoadAsInstrument(instrument, track);
-                    track->Penabled = 1;
-                    track->ApplyParameters();
-                    track->Unlock();
-                    track->loadedInstrument.tag = _state->_currentInstrumentTag;
-                    track->loadedInstrument.instrumentName = instrumentName;
-                }
+                continue;
             }
-            ImGui::ListBoxFooter();
+
+            auto instrumentName = instrument->GetName();
+            auto const &track = _state->_mixer->GetTrack(_state->_currentTrack);
+
+            bool selected = (_state->_currentLibrary != nullptr && track->loadedInstrument.libraryPath == _state->_currentLibrary->GetPath() && track->loadedInstrument.instrumentName == instrumentName);
+            if (ImGui::Selectable(instrumentName.c_str(), selected))
+            {
+                track->Lock();
+                _state->_library->LoadAsInstrument(instrument, track);
+                track->Penabled = 1;
+                track->ApplyParameters();
+                track->Unlock();
+                if (_state->_currentLibrary != nullptr)
+                {
+                    track->loadedInstrument.libraryPath = _state->_currentLibrary->GetPath();
+                }
+                track->loadedInstrument.instrumentName = instrumentName;
+            }
         }
+        ImGui::ListBoxFooter();
     }
 
     ImGui::EndChild();
@@ -113,51 +212,38 @@ void zyn::ui::Library::InstrumentLibrary()
 
 void zyn::ui::Library::SampleLibrary()
 {
-    auto &style = ImGui::GetStyle();
-
     ImGui::BeginChild("SampleLibrary");
 
+    auto maxSize = ImGui::GetItemRectSize();
+
     ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 150 + style.ItemSpacing.x);
-    ImGui::SetColumnWidth(1, 150 + style.ItemSpacing.x);
 
-    ImGui::Text("Tags");
+    ImGui::Text("Libraries");
 
-    if (ImGui::ListBoxHeader("##Tags", ImVec2(200, -ImGui::GetTextLineHeightWithSpacing())))
+    for (auto topLevel : _state->_library->GetTopLevelLibraries())
     {
-        for (auto const &tag : _state->_library->GetSampleTags())
-        {
-            bool selected = (_state->_currentSampleTag == tag);
-            if (ImGui::Selectable(tag.c_str(), &selected))
-            {
-                _state->_currentSampleTag = tag;
-            }
-        }
-        ImGui::ListBoxFooter();
+        libraryTree(topLevel);
     }
 
     ImGui::NextColumn();
 
     ImGui::Text("Samples");
 
-    if (_state->_currentSampleTag != "")
+    if (ImGui::ListBoxHeader("##Samples", ImVec2(maxSize.x / 2, -ImGui::GetTextLineHeightWithSpacing())))
     {
-        if (ImGui::ListBoxHeader("##Samples", ImVec2(200, -ImGui::GetTextLineHeightWithSpacing())))
+        for (auto sample : _state->_library->GetSamples())
         {
-            for (auto sample : _state->_library->GetSamples())
+            if (_state->_currentLibrary != nullptr && !sample->GetLibrary()->IsParent(_state->_currentLibrary))
             {
-                if (sample->GetTags().find(_state->_currentSampleTag) == sample->GetTags().end())
-                {
-                    continue;
-                }
-
-                if (ImGui::Selectable(sample->GetName().c_str()))
-                {
-                    _state->_mixer->PreviewSample(sample->GetPath());
-                }
+                continue;
             }
-            ImGui::ListBoxFooter();
+
+            if (ImGui::Selectable(sample->GetName().c_str()))
+            {
+                _state->_mixer->PreviewSample(sample->GetPath());
+            }
         }
+        ImGui::ListBoxFooter();
     }
 
     ImGui::EndChild();
