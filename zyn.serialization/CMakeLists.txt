@@ -35,6 +35,8 @@ add_library(zyn.serialization STATIC
     PADnoteParamsSerializer.h
     ResonanceSerializer.cpp
     ResonanceSerializer.h
+    RegionsSerializer.cpp
+    RegionsSerializer.h
     SMPLnoteParamsSerializer.cpp
     SMPLnoteParamsSerializer.h
     SUBnoteParamsSerializer.cpp

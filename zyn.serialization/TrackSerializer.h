@@ -39,6 +39,8 @@ public:
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
+
+    static char const *BRANCH_NAME;
 };
 
 #endif // TRACK_SERIALIZER_H

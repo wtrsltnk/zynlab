@@ -425,7 +425,7 @@ void AppThreeDee::PianoRollEditor()
 
         static unsigned char selectedArpMode = 0;
         static unsigned char selectedChord = 0;
-        static int space = 1;
+        static int space = 3;
         if (ImGui::Button("Generate Notes from selection"))
         {
             NotesGeneratorOptions options = {

@@ -17,9 +17,10 @@ zyn::ui::Library::~Library() = default;
 
 bool zyn::ui::Library::Setup()
 {
-    _selectedSample = nullptr;
-    _filter[0] = '\0';
-    _filteredSamples = _state->_library->GetSamples();
+    _selectSample.selectedLibrary = nullptr;
+    _selectSample.selectedSample = nullptr;
+    _selectSample.filter[0] = '\0';
+    _selectSample.filteredSamples = _state->_library->GetSamples();
 
     return true;
 }
@@ -66,62 +67,71 @@ bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
 
 ILibraryItem *zyn::ui::Library::GetSelectedSample()
 {
-    return _selectedSample;
+    return _selectSample.selectedSample;
+}
+
+void zyn::ui::Library::filterSamples()
+{
+    _selectSample.filteredSamples.clear();
+    for (auto sample : _state->_library->GetSamples())
+    {
+        if (!findStringIC(sample->GetName(), _selectSample.filter))
+        {
+            continue;
+        }
+        if (_selectSample.selectedLibrary != nullptr && !sample->GetLibrary()->IsParent(_selectSample.selectedLibrary))
+        {
+            continue;
+        }
+
+        _selectSample.filteredSamples.insert(sample);
+    }
 }
 
 void zyn::ui::Library::RenderSelectSample()
 {
-
     ImGui::BeginGroup(); // Lock X position
-    ImGui::Text("Current: \t %s", _selectedSample != nullptr ? _selectedSample->GetName().c_str() : "");
+    ImGui::Text("Current: \t %s", _selectSample.selectedSample != nullptr ? _selectSample.selectedSample->GetName().c_str() : "");
     ImGui::EndGroup();
-
-    auto &style = ImGui::GetStyle();
 
     ImGui::BeginChild("SampleLibrary", ImVec2(0, -40));
 
     ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 250 + style.ItemSpacing.x);
-    ImGui::SetColumnWidth(1, 350 + style.ItemSpacing.x);
 
+    auto width = ImGui::GetContentRegionAvailWidth();
     ImGui::Text("Libraries");
 
+    ImGui::BeginChild("##TopLevelLibraries", ImVec2(width, -ImGui::GetTextLineHeightWithSpacing()));
     for (auto topLevel : _state->_library->GetTopLevelLibraries())
     {
-        libraryTree(topLevel);
+        auto newSelection = libraryTree(topLevel);
+        if (newSelection != nullptr)
+        {
+            _selectSample.selectedLibrary = newSelection;
+            filterSamples();
+        }
     }
+    ImGui::EndChild();
 
     ImGui::NextColumn();
 
+    width = ImGui::GetContentRegionAvailWidth();
     ImGui::Text("Samples");
 
-    if (ImGui::InputText("Filter", _filter, 64))
+    if (ImGui::InputText("##Filter", _selectSample.filter, 64))
     {
-        _filteredSamples.clear();
-        for (auto sample : _state->_library->GetSamples())
-        {
-            if (!findStringIC(sample->GetName(), _filter))
-            {
-                continue;
-            }
-            _filteredSamples.insert(sample);
-        }
+        filterSamples();
     }
 
-    if (ImGui::ListBoxHeader("##Samples", ImVec2(350, -ImGui::GetTextLineHeightWithSpacing())))
+    if (ImGui::ListBoxHeader("##Samples", ImVec2(width, -ImGui::GetTextLineHeightWithSpacing())))
     {
-        for (auto sample : _filteredSamples)
+        for (auto sample : _selectSample.filteredSamples)
         {
-            if (_state->_currentLibrary != nullptr && !sample->GetLibrary()->IsParent(_state->_currentLibrary))
-            {
-                continue;
-            }
-
-            bool selected = _selectedSample != nullptr && sample->GetPath() == _selectedSample->GetPath();
+            bool selected = _selectSample.selectedSample != nullptr && sample->GetPath() == _selectSample.selectedSample->GetPath();
             if (ImGui::Selectable(sample->GetName().c_str(), &selected))
             {
                 _state->_mixer->PreviewSample(sample->GetPath());
-                _selectedSample = sample;
+                _selectSample.selectedSample = sample;
             }
         }
         ImGui::ListBoxFooter();
@@ -130,14 +140,16 @@ void zyn::ui::Library::RenderSelectSample()
     ImGui::EndChild();
 }
 
-void zyn::ui::Library::libraryTree(ILibrary *library)
+ILibrary *zyn::ui::Library::libraryTree(ILibrary *library)
 {
+    ILibrary *result = nullptr;
+
     if (library->GetChildren().empty())
     {
         ImGui::TreeNodeEx(library->GetName().c_str(), ImGuiTreeNodeFlags_Leaf);
         if (ImGui::IsItemClicked())
         {
-            _state->_currentLibrary = library;
+            result = library;
         }
         ImGui::TreePop();
     }
@@ -147,15 +159,22 @@ void zyn::ui::Library::libraryTree(ILibrary *library)
         {
             if (ImGui::IsItemClicked())
             {
-                _state->_currentLibrary = library;
+                result = library;
             }
+
             for (auto level : library->GetChildren())
             {
-                libraryTree(level);
+                auto tmp = libraryTree(level);
+                if (tmp != nullptr && result == nullptr)
+                {
+                    result = tmp;
+                }
             }
             ImGui::TreePop();
         }
     }
+
+    return result;
 }
 
 void zyn::ui::Library::InstrumentLibrary()
@@ -170,7 +189,11 @@ void zyn::ui::Library::InstrumentLibrary()
 
     for (auto topLevel : _state->_library->GetTopLevelLibraries())
     {
-        libraryTree(topLevel);
+        auto newSelection = libraryTree(topLevel);
+        if (newSelection != nullptr)
+        {
+            _state->_currentLibrary = newSelection;
+        }
     }
 
     ImGui::NextColumn();

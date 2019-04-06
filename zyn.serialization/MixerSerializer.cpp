@@ -27,6 +27,8 @@
 #include "MicrotonalSerializer.h"
 #include "TrackSerializer.h"
 
+char const *MixerSerializer::BRANCH_NAME = "MASTER";
+
 MixerSerializer::MixerSerializer(Mixer *parameters)
     : _parameters(parameters)
 {}

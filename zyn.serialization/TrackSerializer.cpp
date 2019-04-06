@@ -30,6 +30,8 @@
 #include "SUBnoteParamsSerializer.h"
 #include <zyn.fx/EffectMgr.h>
 
+char const *TrackSerializer::BRANCH_NAME = "INSTRUMENT";
+
 TrackSerializer::TrackSerializer(Track *parameters)
     : _parameters(parameters)
 {}

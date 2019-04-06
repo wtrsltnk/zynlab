@@ -201,7 +201,8 @@ void zyn::ui::Mixer::ImGuiInspector()
         if (ImGui::CollapsingHeader("Song"))
         {
             if (ImGui::Button("Save song to .xiz"))
-            {}
+            {
+            }
             ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eget nunc eu lectus auctor fermentum in in diam. Donec luctus laoreet tortor, ut placerat eros bibendum sed. Mauris rhoncus ipsum sit amet molestie feugiat. Mauris augue ante, tempus non viverra eu, ornare quis sapien. Fusce faucibus ornare libero vitae tincidunt. Nunc eget tellus mi. Phasellus nisi dui, rhoncus tincidunt placerat vitae, volutpat ut mi. Nullam vestibulum metus est, id vestibulum sem malesuada eu. ");
         }
 
@@ -223,7 +224,7 @@ void zyn::ui::Mixer::ImGuiInspector()
             {
                 _state->_mixer->GetTrack(_state->_currentTrack)->Defaults();
             }
-            ImGui::InputText("Track name", (char *)_state->_mixer->GetTrack(_state->_currentTrack)->Pname, TRACK_MAX_NAME_LEN);
+            ImGui::InputText("Track name", reinterpret_cast<char *>(_state->_mixer->GetTrack(_state->_currentTrack)->Pname), TRACK_MAX_NAME_LEN);
             if (ImGui::Button("Save track to .xiz"))
             {
                 std::stringstream ss;

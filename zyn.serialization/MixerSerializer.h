@@ -37,6 +37,8 @@ public:
 
     void Serialize(IPresetsSerializer *xml);
     void Deserialize(IPresetsSerializer *xml);
+
+    static char const *BRANCH_NAME;
 };
 
 #endif // MIXER_SERIALIZER_H

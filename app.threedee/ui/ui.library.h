@@ -12,11 +12,16 @@ class Library
 private:
     AppState *_state;
 
-    ILibraryItem *_selectedSample;
-    char _filter[64];
-    std::set<ILibraryItem *> _filteredSamples;
+    struct
+    {
+        ILibrary *selectedLibrary;
+        ILibraryItem *selectedSample;
+        char filter[64];
+        std::set<ILibraryItem *> filteredSamples;
+    } _selectSample;
 
-    void libraryTree(ILibrary *library);
+    void filterSamples();
+    ILibrary *libraryTree(ILibrary *library);
     void InstrumentLibrary();
     void SampleLibrary();
 
