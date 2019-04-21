@@ -5,6 +5,10 @@
 #include <imgui.h>
 #include <iostream>
 #include <string>
+#include <system.io/system.io.directory.h>
+#include <system.io/system.io.directoryinfo.h>
+#include <system.io/system.io.fileinfo.h>
+#include <system.io/system.io.path.h>
 #include <zyn.mixer/Mixer.h>
 
 char const *const LibraryID = "Library";
@@ -21,6 +25,9 @@ bool zyn::ui::Library::Setup()
     _selectSample.selectedSample = nullptr;
     _selectSample.filter[0] = '\0';
     _selectSample.filteredSamples = _state->_library->GetSamples();
+
+    _saveFileName.currentPath = System::IO::Directory::GetCurrentWorkingDirectory();
+    updateFilesAndFolders();
 
     return true;
 }
@@ -146,12 +153,14 @@ ILibrary *zyn::ui::Library::libraryTree(ILibrary *library)
 
     if (library->GetChildren().empty())
     {
-        ImGui::TreeNodeEx(library->GetName().c_str(), ImGuiTreeNodeFlags_Leaf);
-        if (ImGui::IsItemClicked())
+        if (ImGui::TreeNodeEx(library->GetName().c_str(), ImGuiTreeNodeFlags_Leaf))
         {
-            result = library;
+            if (ImGui::IsItemClicked())
+            {
+                result = library;
+            }
+            ImGui::TreePop();
         }
-        ImGui::TreePop();
     }
     else
     {
@@ -175,6 +184,73 @@ ILibrary *zyn::ui::Library::libraryTree(ILibrary *library)
     }
 
     return result;
+}
+
+void zyn::ui::Library::updateFilesAndFolders()
+{
+    auto newFolder = System::IO::DirectoryInfo(_saveFileName.currentPath);
+    if (!newFolder.Exists())
+    {
+        return;
+    }
+
+    _saveFileName.currentFiles.clear();
+    _saveFileName.currentFolders.clear();
+
+    _saveFileName.currentFiles = newFolder.GetFiles();
+    _saveFileName.currentFolders = newFolder.GetDirectories();
+}
+
+void zyn::ui::Library::RenderGetSaveFileName()
+{
+    ImGui::BeginGroup(); // Lock X position
+    ImGui::Text("Current folder: \t %s", _saveFileName.currentPath.c_str());
+    ImGui::EndGroup();
+
+    ImGui::BeginChild("Save File Dialog", ImVec2(0, -80));
+
+    auto width = ImGui::GetContentRegionAvailWidth();
+
+    if (ImGui::ListBoxHeader("Path", ImVec2(width, -ImGui::GetTextLineHeightWithSpacing())))
+    {
+        if (ImGui::Selectable(".."))
+        {
+            auto newDir = System::IO::DirectoryInfo(System::IO::Path::Combine(_saveFileName.currentPath, ".."));
+            _saveFileName.currentPath = newDir.FullName();
+            updateFilesAndFolders();
+        }
+        for (auto folder : _saveFileName.currentFolders)
+        {
+            bool selected = false;
+            if (ImGui::Selectable(System::IO::DirectoryInfo(folder).Name().c_str(), &selected))
+            {
+                auto newDir = System::IO::DirectoryInfo(System::IO::Path::Combine(_saveFileName.currentPath, folder));
+                _saveFileName.currentPath = newDir.FullName();
+                updateFilesAndFolders();
+            }
+        }
+        for (auto file : _saveFileName.currentFiles)
+        {
+            bool selected = false;
+            if (ImGui::Selectable(System::IO::FileInfo(file).Name().c_str(), &selected))
+            {
+                strncpy(_saveFileName.fileNameBuffer, System::IO::FileInfo(file).Name().c_str(), 256);
+            }
+        }
+        ImGui::ListBoxFooter();
+    }
+
+    ImGui::EndChild();
+
+    ImGui::BeginGroup(); // Lock X position
+    ImGui::InputText("name", _saveFileName.fileNameBuffer, 256);
+    ImGui::EndGroup();
+}
+
+std::string zyn::ui::Library::GetSaveFileName()
+{
+    auto file = System::IO::FileInfo(System::IO::Path::Combine(_saveFileName.currentPath, _saveFileName.fileNameBuffer));
+    return file.FullName();
 }
 
 void zyn::ui::Library::InstrumentLibrary()

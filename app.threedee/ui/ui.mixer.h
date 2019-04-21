@@ -3,6 +3,7 @@
 
 #include "../appstate.h"
 #include "../instrumentcategories.h"
+#include "ui.library.h"
 
 namespace zyn {
 namespace ui {
@@ -11,6 +12,7 @@ class Mixer
 {
 private:
     AppState *_state;
+    zyn::ui::Library _library;
     unsigned int _iconImages[int(InstrumentCategories::COUNT)];
     bool _iconImagesAreLoaded;
 

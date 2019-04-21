@@ -20,6 +20,16 @@ private:
         std::set<ILibraryItem *> filteredSamples;
     } _selectSample;
 
+    struct
+    {
+        std::string currentPath;
+        std::vector<std::string> currentFolders;
+        std::vector<std::string> currentFiles;
+        char fileNameBuffer[256];
+    } _saveFileName;
+
+    void updateFilesAndFolders();
+
     void filterSamples();
     ILibrary *libraryTree(ILibrary *library);
     void InstrumentLibrary();
@@ -32,8 +42,10 @@ public:
     bool Setup();
     void Render();
     void RenderSelectSample();
-
     ILibraryItem *GetSelectedSample();
+
+    void RenderGetSaveFileName();
+    std::string GetSaveFileName();
 };
 
 } // namespace ui
