@@ -10,18 +10,19 @@
 #include "../instrumentcategories.h"
 #include "appstate.h"
 #include "ui/ui.adnote.h"
+#include "ui/ui.dialogs.h"
 #include "ui/ui.effect.h"
 #include "ui/ui.library.h"
 #include "ui/ui.mixer.h"
 #include "ui/ui.oscilgen.h"
 #include "ui/ui.padnote.h"
-#include "ui/ui.subnote.h"
 #include "ui/ui.samplenote.h"
+#include "ui/ui.subnote.h"
 #include <chrono>
+#include <zyn.common/ILibraryManager.h>
 #include <zyn.common/Util.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>
-#include <zyn.common/ILibraryManager.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
 
@@ -37,6 +38,7 @@ private:
     zyn::ui::SubNote _subNoteUi;
     zyn::ui::SampleNote _smplNoteUi;
     zyn::ui::OscilGen _oscilGenUi;
+    zyn::ui::Dialogs _dialogs;
 
     GLFWwindow *_window;
     std::vector<unsigned int> _toolbarIcons;

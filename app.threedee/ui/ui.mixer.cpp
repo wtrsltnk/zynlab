@@ -12,7 +12,7 @@
 #include <zyn.serialization/SaveToFileSerializer.h>
 
 zyn::ui::Mixer::Mixer(AppState *appstate)
-    : _state(appstate), _library(appstate), _iconImagesAreLoaded(false)
+    : _state(appstate), _dialogs(appstate), _iconImagesAreLoaded(false)
 {}
 
 zyn::ui::Mixer::~Mixer() = default;
@@ -21,7 +21,7 @@ bool zyn::ui::Mixer::Setup()
 {
     LoadInstrumentIcons();
 
-    _library.Setup();
+    _dialogs.Setup();
 
     return true;
 }
@@ -204,28 +204,12 @@ void zyn::ui::Mixer::ImGuiInspector()
         {
             if (ImGui::Button("Save song to .xiz"))
             {
-                _library.Setup();
-                ImGui::OpenPopup("Select Save Workspace file");
+                _dialogs.SaveFileDialog("Save workspace to file");
             }
-            ImGui::SetNextWindowSize(ImVec2(650, 600));
-            if (ImGui::BeginPopupModal("Select Save Workspace file", nullptr, ImGuiWindowFlags_NoResize))
+            if (_dialogs.RenderSaveFileDialog() == DialogResults::Ok)
             {
-                _library.RenderGetSaveFileName();
-
-                if (ImGui::Button("Save", ImVec2(120, 0)))
-                {
-                    SaveToFileSerializer()
-                        .SaveWorkspace(_state->_mixer, &_state->_regions, _library.GetSaveFileName());
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("Cancel", ImVec2(120, 0)))
-                {
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::EndPopup();
+                SaveToFileSerializer()
+                    .SaveWorkspace(_state->_mixer, &_state->_regions, _dialogs.GetSaveFileName());
             }
             ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eget nunc eu lectus auctor fermentum in in diam. Donec luctus laoreet tortor, ut placerat eros bibendum sed. Mauris rhoncus ipsum sit amet molestie feugiat. Mauris augue ante, tempus non viverra eu, ornare quis sapien. Fusce faucibus ornare libero vitae tincidunt. Nunc eget tellus mi. Phasellus nisi dui, rhoncus tincidunt placerat vitae, volutpat ut mi. Nullam vestibulum metus est, id vestibulum sem malesuada eu. ");
         }
@@ -251,28 +235,13 @@ void zyn::ui::Mixer::ImGuiInspector()
             ImGui::InputText("Track name", reinterpret_cast<char *>(_state->_mixer->GetTrack(_state->_currentTrack)->Pname), TRACK_MAX_NAME_LEN);
             if (ImGui::Button("Save track to .xiz"))
             {
-                _library.Setup();
-                ImGui::OpenPopup("Select Save Track file");
+                _dialogs.SaveFileDialog("Select Save Track file");
             }
-            ImGui::SetNextWindowSize(ImVec2(650, 600));
-            if (ImGui::BeginPopupModal("Select Save Track file", nullptr, ImGuiWindowFlags_NoResize))
+            if (_dialogs.RenderSaveFileDialog() == DialogResults::Ok)
             {
-                _library.RenderGetSaveFileName();
-
-                if (ImGui::Button("Save", ImVec2(120, 0)))
-                {
-                    SaveToFileSerializer()
-                        .SaveTrack(_state->_mixer->GetTrack(_state->_currentTrack), _library.GetSaveFileName());
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("Cancel", ImVec2(120, 0)))
-                {
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::EndPopup();
+                SaveToFileSerializer()
+                    .SaveTrack(_state->_mixer->GetTrack(_state->_currentTrack), _dialogs.GetSaveFileName());
+                ImGui::CloseCurrentPopup();
             }
             ImGui::TextWrapped("Etiam vitae condimentum justo. Duis et orci diam. Morbi rhoncus finibus augue, eget auctor eros aliquet rhoncus. Etiam felis enim, fringilla tincidunt pulvinar nec, lacinia non nibh. In eget dui porttitor, commodo odio in, interdum neque. Quisque neque neque, finibus non gravida ac, porttitor non odio. Proin magna urna, finibus vitae erat id, pulvinar elementum sapien. Morbi luctus, ex at commodo mattis, libero enim vestibulum lectus, non ornare justo tellus non mi. Nulla dictum arcu eros, sed posuere purus ultricies vitae. ");
         }

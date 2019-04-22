@@ -20,6 +20,7 @@
 #include <zyn.seq/Chords.h>
 #include <zyn.seq/NotesGenerator.h>
 #include <zyn.serialization/LibraryManager.h>
+#include <zyn.serialization/SaveToFileSerializer.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/SampleNoteParams.h>
 
@@ -58,7 +59,7 @@ static ImVec4 clear_color = ImColor(90, 90, 100);
 
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, ILibraryManager *library)
     : _state(mixer, library), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
-      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state), _smplNoteUi(&_state), _oscilGenUi(&_state),
+      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state), _smplNoteUi(&_state), _oscilGenUi(&_state), _dialogs(&_state),
       _window(window),
       _toolbarIconsAreLoaded(false),
       _display_w(800), _display_h(600)
@@ -635,6 +636,7 @@ void AppThreeDee::onKeyAction(int /*key*/, int /*scancode*/, int /*action*/, int
 
 enum class ToolbarTools
 {
+    Workspace,
     Library,
     Inspector,
     SmartControls,
@@ -650,6 +652,7 @@ enum class ToolbarTools
 };
 
 static char const *const toolbarIconFileNames[] = {
+    "workspace.png",
     "library.png",
     "inspector.png",
     "smart-controls.png",
@@ -715,6 +718,45 @@ void AppThreeDee::ImGuiPlayback()
     ImGui::Begin("Playback");
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
+
+        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Workspace)]), ImVec2(32, 32)))
+        {
+            ImGui::OpenPopup("workspace_menu_popup");
+        }
+        if (ImGui::BeginPopup("workspace_menu_popup"))
+        {
+            ImGui::Text("Workspace");
+            ImGui::Separator();
+            ImGui::Button("New");
+            ImGui::Button("Open");
+            ImGui::Button("Save");
+            if (ImGui::Button("Save As..."))
+            {
+                _dialogs.SaveFileDialog("Save workspace to file");
+            }
+            auto result = _dialogs.RenderSaveFileDialog();
+            if (result == zyn::ui::DialogResults::Ok)
+            {
+                SaveToFileSerializer()
+                    .SaveWorkspace(_state._mixer, &_state._regions, _dialogs.GetSaveFileName());
+                ImGui::CloseCurrentPopup();
+            }
+            if (result == zyn::ui::DialogResults::Cancel)
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        ImGui::PopStyleVar();
+
+        ImGui::SameLine();
+
+        ImGui::Spacing();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
+
+        ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_library", &_state._showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
 

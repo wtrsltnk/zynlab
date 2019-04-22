@@ -40,6 +40,8 @@ if(GLFW3_FOUND)
         ui/ui.adnote.cpp
         ui/ui.adnote.h
         ui/ui.adnote.voice.cpp
+        ui/ui.dialogs.cpp
+        ui/ui.dialogs.h
         ui/ui.effect.cpp
         ui/ui.effect.h
         ui/ui.envelope.cpp
