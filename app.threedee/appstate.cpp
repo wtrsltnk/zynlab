@@ -12,7 +12,7 @@ AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
       _showMixer(true), _showSmartControls(true), _showQuickHelp(false),
       _showSystemEffectsEditor(true), _showInsertEffectsEditor(true), _showTrackEffectsEditor(true),
       _showADNoteEditor(true), _showSUBNoteEditor(true), _showSMPLNoteEditor(true), _showPADNoteEditor(true),
-      _showOscillatorEditor(true), _showTrackTypeChanger(-1),
+      _showOscillatorEditor(true), _showPianoRollEditor(true), _showRegionEditor(true), _showTrackTypeChanger(-1),
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentLibrary(nullptr),
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1), _currentVoiceOscil(-1),
       _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150),

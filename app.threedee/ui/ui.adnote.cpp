@@ -38,6 +38,11 @@ bool zyn::ui::AdNote::Setup()
 
 void zyn::ui::AdNote::Render()
 {
+    if (!_state->_showADNoteEditor)
+    {
+        return;
+    }
+
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
     ImGui::Begin(AdSynthEditorID, &_state->_showADNoteEditor);

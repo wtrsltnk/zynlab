@@ -19,6 +19,11 @@ bool zyn::ui::PadNote::Setup()
 
 void zyn::ui::PadNote::Render()
 {
+    if (!_state->_showPADNoteEditor)
+    {
+        return;
+    }
+
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
     ImGui::Begin(PadSynthEditorID, &_state->_showPADNoteEditor);

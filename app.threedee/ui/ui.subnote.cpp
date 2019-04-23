@@ -45,6 +45,11 @@ bool zyn::ui::SubNote::Setup() { return true; }
 
 void zyn::ui::SubNote::Render()
 {
+    if (!_state->_showSUBNoteEditor)
+    {
+        return;
+    }
+
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
     ImGui::Begin(SubSynthEditorID, &_state->_showSUBNoteEditor);
     if (!_state->_showSUBNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)

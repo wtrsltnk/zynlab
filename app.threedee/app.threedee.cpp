@@ -293,6 +293,11 @@ void AppThreeDee::Tick()
 
 void AppThreeDee::PianoRollEditor()
 {
+    if (!_state._showPianoRollEditor)
+    {
+        return;
+    }
+
     bool regionIsModified = false;
     static struct TrackRegionEvent *selectedEvent = nullptr;
     if (_state._currentTrack < 0 || _state._currentTrack >= NUM_MIXER_TRACKS)
@@ -310,7 +315,7 @@ void AppThreeDee::PianoRollEditor()
     auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
     auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
 
-    if (ImGui::Begin("Pianoroll editor"))
+    if (ImGui::Begin("Pianoroll editor", &(_state._showPianoRollEditor)))
     {
         ImGui::Text("Zoom");
         ImGui::SameLine();
@@ -468,7 +473,12 @@ void AppThreeDee::PianoRollEditor()
 
 void AppThreeDee::RegionEditor()
 {
-    if (ImGui::Begin("Region editor"))
+    if (!_state._showRegionEditor)
+    {
+        return;
+    }
+
+    if (ImGui::Begin("Region editor", &(_state._showRegionEditor)))
     {
         ImGui::Text("Zoom");
         ImGui::SameLine();
@@ -584,6 +594,7 @@ void AppThreeDee::Render()
     window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
     ImGui::Begin("TestDockspace", nullptr, window_flags);
     {
         ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
@@ -715,7 +726,7 @@ void gen_random(char *s, const int len)
 }
 void AppThreeDee::ImGuiPlayback()
 {
-    ImGui::Begin("Playback");
+    ImGui::Begin("Playback", nullptr, ImGuiWindowFlags_NoTitleBar);
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
 
@@ -778,7 +789,17 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
+        if (ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32)))
+        {
+            if (_state._showEditor)
+            {
+                _state._showRegionEditor = _state._showPianoRollEditor = true;
+            }
+            else
+            {
+                _state._showRegionEditor = _state._showPianoRollEditor = false;
+            }
+        }
 
         ImGui::PopStyleVar();
 

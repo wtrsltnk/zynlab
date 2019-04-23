@@ -16,6 +16,11 @@ bool zyn::ui::SampleNote::Setup() { return true; }
 
 void zyn::ui::SampleNote::Render()
 {
+    if (!_state->_showSMPLNoteEditor)
+    {
+        return;
+    }
+
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
     ImGui::Begin(SmplSynthEditorID, &_state->_showSMPLNoteEditor);
     if (!_state->_showSMPLNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)
