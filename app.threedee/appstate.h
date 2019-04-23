@@ -54,16 +54,6 @@ public:
     bool _showMixer;
     bool _showSmartControls;
     bool _showQuickHelp;
-    bool _showSystemEffectsEditor;
-    bool _showInsertEffectsEditor;
-    bool _showTrackEffectsEditor;
-    bool _showADNoteEditor;
-    bool _showSUBNoteEditor;
-    bool _showSMPLNoteEditor;
-    bool _showPADNoteEditor;
-    bool _showOscillatorEditor;
-    bool _showPianoRollEditor;
-    bool _showRegionEditor;
     int _showTrackTypeChanger;
     int _currentInsertEffect;
     int _currentSystemEffect;

@@ -164,71 +164,62 @@ void zyn::ui::Effect::Render()
         return;
     }
 
-    if (_state->_showInsertEffectsEditor)
+    if (ImGui::Begin(InsertionFxEditorID))
     {
-        if (ImGui::Begin(InsertionFxEditorID, &_state->_showInsertEffectsEditor))
+        if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
         {
-            if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
-            {
-                EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
-            }
+            EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
         }
-        ImGui::End();
     }
+    ImGui::End();
 
-    if (_state->_showSystemEffectsEditor)
+    if (ImGui::Begin(SystemFxEditorID))
     {
-        if (ImGui::Begin(SystemFxEditorID, &_state->_showSystemEffectsEditor))
+        if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
         {
-            if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
-            {
-                EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
-            }
+            EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
         }
-        ImGui::End();
     }
+    ImGui::End();
 
-    if (_state->_showTrackEffectsEditor)
+    if (ImGui::Begin(TrackFxEditorID))
     {
-        if (ImGui::Begin(TrackFxEditorID, &_state->_showTrackEffectsEditor))
+        auto track = _state->_mixer->GetTrack(_state->_currentTrack);
+
+        auto io = ImGui::GetStyle();
+
+        auto width = 100;
+        auto trackIndex = _state->_currentTrack;
+        for (int fx = 0; fx < NUM_TRACK_EFX; fx++)
         {
-            auto track = _state->_mixer->GetTrack(_state->_currentTrack);
+            if (fx > 0) ImGui::SameLine();
+            ImGui::PushID(200 + fx);
+            ImGui::PushStyleColor(ImGuiCol_Button, fx != _state->_currentTrackEffect ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
-            auto io = ImGui::GetStyle();
-
-            auto width = 100;
-            auto trackIndex = _state->_currentTrack;
-            for (int fx = 0; fx < NUM_TRACK_EFX; fx++)
+            if (ImGui::Button(EffectNames[track->partefx[fx]->geteffect()], ImVec2(width - (track->partefx[fx]->geteffect() == 0 ? 0 : 22), 0)))
             {
-                if (fx > 0) ImGui::SameLine();
-                ImGui::PushID(200 + fx);
-                ImGui::PushStyleColor(ImGuiCol_Button, fx != _state->_currentTrackEffect ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+                _state->_currentTrack = trackIndex;
+                _state->_currentTrackEffect = fx;
+            }
 
-                if (ImGui::Button(EffectNames[track->partefx[fx]->geteffect()], ImVec2(width - (track->partefx[fx]->geteffect() == 0 ? 0 : 22), 0)))
+            if (track->partefx[fx]->geteffect() != 0)
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("x", ImVec2(20, 0)))
                 {
                     _state->_currentTrack = trackIndex;
                     _state->_currentTrackEffect = fx;
+                    track->partefx[fx]->changeeffect(0);
                 }
-
-                if (track->partefx[fx]->geteffect() != 0)
-                {
-                    ImGui::SameLine();
-                    if (ImGui::Button("x", ImVec2(20, 0)))
-                    {
-                        _state->_currentTrack = trackIndex;
-                        _state->_currentTrackEffect = fx;
-                        track->partefx[fx]->changeeffect(0);
-                    }
-                    ImGui::ShowTooltipOnHover("Remove effect from track");
-                }
-                ImGui::PopStyleColor(1);
-                ImGui::PopID();
+                ImGui::ShowTooltipOnHover("Remove effect from track");
             }
+            ImGui::PopStyleColor(1);
+            ImGui::PopID();
+        }
 
-            if (_state->_currentTrackEffect >= 0 && _state->_currentTrackEffect < NUM_TRACK_EFX)
-            {
-                EffectEditor(track->partefx[_state->_currentTrackEffect]);
-            }
+        if (_state->_currentTrackEffect >= 0 && _state->_currentTrackEffect < NUM_TRACK_EFX)
+        {
+            EffectEditor(track->partefx[_state->_currentTrackEffect]);
         }
         ImGui::End();
     }

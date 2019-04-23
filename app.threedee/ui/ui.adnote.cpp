@@ -38,88 +38,79 @@ bool zyn::ui::AdNote::Setup()
 
 void zyn::ui::AdNote::Render()
 {
-    if (!_state->_showADNoteEditor)
-    {
-        return;
-    }
-
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
-    ImGui::Begin(AdSynthEditorID, &_state->_showADNoteEditor);
-    if (!_state->_showADNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)
+    if (ImGui::Begin(AdSynthEditorID) && track != nullptr)
     {
-        ImGui::End();
-        return;
-    }
+        auto *parameters = track->Instruments[_state->_currentTrackInstrument].adpars;
 
-    auto *parameters = track->Instruments[_state->_currentTrackInstrument].adpars;
-
-    if (track->Instruments[_state->_currentTrackInstrument].Padenabled == 0)
-    {
-        ImGui::Text("AD editor is disabled");
-        if (ImGui::Button("Enable AD synth"))
+        if (track->Instruments[_state->_currentTrackInstrument].Padenabled == 0)
         {
-            track->Instruments[_state->_currentTrackInstrument].Padenabled = 1;
-        }
-        ImGui::End();
-        return;
-    }
-
-    if (ImGui::BeginTabBar("ADnoteTab"))
-    {
-        if (ImGui::BeginTabItem("Global"))
-        {
-            if (_state->_currentTrack >= 0)
+            ImGui::Text("AD editor is disabled");
+            if (ImGui::Button("Enable AD synth"))
             {
-                ImGui::Text("ADsynth Global Parameters of the Track");
+                track->Instruments[_state->_currentTrackInstrument].Padenabled = 1;
+            }
+            ImGui::End();
+            return;
+        }
 
-                if (ImGui::BeginTabBar("ADNote"))
+        if (ImGui::BeginTabBar("ADnoteTab"))
+        {
+            if (ImGui::BeginTabItem("Global"))
+            {
+                if (_state->_currentTrack >= 0)
                 {
-                    if (ImGui::BeginTabItem("Amplitude"))
+                    ImGui::Text("ADsynth Global Parameters of the Track");
+
+                    if (ImGui::BeginTabBar("ADNote"))
                     {
-                        ADNoteEditorAmplitude(parameters);
+                        if (ImGui::BeginTabItem("Amplitude"))
+                        {
+                            ADNoteEditorAmplitude(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Filter"))
+                        {
+                            ADNoteEditorFilter(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Frequency"))
+                        {
+                            ADNoteEditorFrequency(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
+                    }
+                }
+                ImGui::EndTabItem();
+            }
+            for (int i = 0; i < NUM_VOICES; i++)
+            {
+                if (_state->_currentTrack >= 0)
+                {
+                    auto parameters = &_state->_mixer->GetTrack(_state->_currentTrack)->Instruments[0].adpars->VoicePar[i];
+                    if (ImGui::BeginTabItem(voiceIds[i]))
+                    {
+                        ImGui::PushID(i);
+                        ADNoteVoiceEditor(parameters);
+                        ImGui::PopID();
 
                         ImGui::EndTabItem();
                     }
-
-                    if (ImGui::BeginTabItem("Filter"))
+                    if (ImGui::IsItemClicked())
                     {
-                        ADNoteEditorFilter(parameters);
-
-                        ImGui::EndTabItem();
+                        _state->_currentVoiceOscil = i;
                     }
-
-                    if (ImGui::BeginTabItem("Frequency"))
-                    {
-                        ADNoteEditorFrequency(parameters);
-
-                        ImGui::EndTabItem();
-                    }
-                    ImGui::EndTabBar();
                 }
             }
-            ImGui::EndTabItem();
+            ImGui::EndTabBar();
         }
-        for (int i = 0; i < NUM_VOICES; i++)
-        {
-            if (_state->_currentTrack >= 0)
-            {
-                auto parameters = &_state->_mixer->GetTrack(_state->_currentTrack)->Instruments[0].adpars->VoicePar[i];
-                if (ImGui::BeginTabItem(voiceIds[i]))
-                {
-                    ImGui::PushID(i);
-                    ADNoteVoiceEditor(parameters);
-                    ImGui::PopID();
-
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::IsItemClicked())
-                {
-                    _state->_currentVoiceOscil = i;
-                }
-            }
-        }
-        ImGui::EndTabBar();
     }
     ImGui::End();
 }

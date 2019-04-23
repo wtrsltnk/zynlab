@@ -149,7 +149,7 @@ void zyn::ui::Mixer::ImGuiMixer()
         return;
     }
 
-    if (ImGui::Begin("Mixer", &_state->_showMixer, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
+    if (ImGui::Begin("Mixer", nullptr, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
 
@@ -193,25 +193,11 @@ void zyn::ui::Mixer::ImGuiInspector()
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    ImGui::Begin("Inspector", &_state->_showInspector, ImVec2(trackSize.x * 2, 0), -1.0f);
+    ImGui::Begin("Inspector", nullptr, ImVec2(trackSize.x * 2, 0), -1.0f);
     {
         if (_state->_showQuickHelp && ImGui::CollapsingHeader("Quick help"))
         {
             ImGui::TextWrapped(" Aliquam arcu est, ultricies ac gravida euismod, varius ut nulla. Suspendisse id porttitor tellus. Nunc ultrices est vel lectus vestibulum feugiat. Proin ut tellus non leo lacinia interdum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam vitae odio nisl. Cras enim elit, accumsan et lacus non, cursus molestie est. Duis semper feugiat risus.\n\nMauris suscipit tristique nunc, nec lacinia leo luctus sit amet. Maecenas volutpat consequat nisi, id mattis libero blandit convallis. Ut dignissim feugiat nisl, id accumsan felis efficitur eget. Praesent eget bibendum eros. Mauris consectetur justo ut orci consectetur dictum. Pellentesque ac dui vel magna interdum fringilla. Integer a tempor elit.");
-        }
-
-        if (ImGui::CollapsingHeader("Song"))
-        {
-            if (ImGui::Button("Save song to .xiz"))
-            {
-                _dialogs.SaveFileDialog("Save workspace to file");
-            }
-            if (_dialogs.RenderSaveFileDialog() == DialogResults::Ok)
-            {
-                SaveToFileSerializer()
-                    .SaveWorkspace(_state->_mixer, &_state->_regions, _dialogs.GetSaveFileName());
-            }
-            ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eget nunc eu lectus auctor fermentum in in diam. Donec luctus laoreet tortor, ut placerat eros bibendum sed. Mauris rhoncus ipsum sit amet molestie feugiat. Mauris augue ante, tempus non viverra eu, ornare quis sapien. Fusce faucibus ornare libero vitae tincidunt. Nunc eget tellus mi. Phasellus nisi dui, rhoncus tincidunt placerat vitae, volutpat ut mi. Nullam vestibulum metus est, id vestibulum sem malesuada eu. ");
         }
 
         if (ImGui::CollapsingHeader("Region"))
@@ -333,7 +319,6 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                 if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : lineHeight), 0)))
                 {
                     _state->_currentSystemEffect = fx;
-                    _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
                 ImGui::OpenPopupOnItemClick("MasterSystemEffectSelection", 0);
@@ -345,7 +330,6 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                         {
                             _state->_mixer->sysefx[fx].changeeffect(i);
                             _state->_currentSystemEffect = fx;
-                            _state->_showSystemEffectsEditor = true;
                             ImGui::SetWindowFocus(SystemFxEditorID);
                         }
                     }
@@ -360,7 +344,6 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                     if (ImGui::Button("x", ImVec2(lineHeight, 0)))
                     {
                         _state->_currentSystemEffect = fx;
-                        _state->_showSystemEffectsEditor = true;
                         _state->_mixer->sysefx[fx].changeeffect(0);
                     }
                     ImGui::ShowTooltipOnHover("Remove system effect");
@@ -586,16 +569,11 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 {
                     track->Instruments[0].Padenabled = adEnabled ? 1 : 0;
                     _state->_currentTrack = trackIndex;
-                    if (adEnabled)
-                    {
-                        _state->_showADNoteEditor = true;
-                    }
                 }
                 ImGui::ShowTooltipOnHover(adEnabled ? "The AD synth is enabled" : "The AD synth is disabled");
                 ImGui::SameLine();
                 if (ImGui::Button("AD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
                 {
-                    _state->_showADNoteEditor = true;
                     ImGui::SetWindowFocus(AdSynthEditorID);
                     _state->_currentTrack = trackIndex;
                 }
@@ -609,16 +587,11 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 {
                     track->Instruments[0].Psubenabled = subEnabled ? 1 : 0;
                     _state->_currentTrack = trackIndex;
-                    if (subEnabled)
-                    {
-                        _state->_showSUBNoteEditor = true;
-                    }
                 }
                 ImGui::ShowTooltipOnHover(subEnabled ? "The SUB synth is enabled" : "The SUB synth is disabled");
                 ImGui::SameLine();
                 if (ImGui::Button("SUB", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
                 {
-                    _state->_showSUBNoteEditor = true;
                     ImGui::SetWindowFocus(SubSynthEditorID);
                     _state->_currentTrack = trackIndex;
                 }
@@ -632,16 +605,11 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 {
                     track->Instruments[0].Psmplenabled = smplEnabled ? 1 : 0;
                     _state->_currentTrack = trackIndex;
-                    if (smplEnabled)
-                    {
-                        _state->_showSMPLNoteEditor = true;
-                    }
                 }
                 ImGui::ShowTooltipOnHover(smplEnabled ? "The SMPL synth is enabled" : "The SMPL synth is disabled");
                 ImGui::SameLine();
                 if (ImGui::Button("SMPL", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
                 {
-                    _state->_showSMPLNoteEditor = true;
                     ImGui::SetWindowFocus(SmplSynthEditorID);
                     _state->_currentTrack = trackIndex;
                 }
@@ -655,16 +623,11 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 {
                     track->Instruments[0].Ppadenabled = padEnabled ? 1 : 0;
                     _state->_currentTrack = trackIndex;
-                    if (padEnabled)
-                    {
-                        _state->_showPADNoteEditor = true;
-                    }
                 }
                 ImGui::ShowTooltipOnHover(padEnabled ? "The PAD synth is enabled" : "The PAD synth is disabled");
                 ImGui::SameLine();
                 if (ImGui::Button("PAD", ImVec2(width - lineHeight - io.ItemSpacing.x, 0)))
                 {
-                    _state->_showPADNoteEditor = true;
                     ImGui::SetWindowFocus(PadSynthEditorID);
                     _state->_currentTrack = trackIndex;
                 }
@@ -691,7 +654,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 {
                     _state->_currentTrack = trackIndex;
                     _state->_currentSystemEffect = fx;
-                    _state->_showSystemEffectsEditor = true;
                     ImGui::SetWindowFocus(SystemFxEditorID);
                 }
                 ImGui::OpenPopupOnItemClick("SystemEffectSelection", 0);
@@ -704,7 +666,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                             _state->_mixer->sysefx[fx].changeeffect(int(i));
                             _state->_currentTrack = trackIndex;
                             _state->_currentSystemEffect = fx;
-                            _state->_showSystemEffectsEditor = true;
                             ImGui::SetWindowFocus(SystemFxEditorID);
                         }
                     }
@@ -758,7 +719,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     {
                         _state->_currentInsertEffect = fx;
                         _state->_currentTrack = trackIndex;
-                        _state->_showInsertEffectsEditor = true;
                         ImGui::SetWindowFocus(InsertionFxEditorID);
                     }
                     ImGui::OpenPopupOnItemClick("InsertEffectSelection", 0);
@@ -771,7 +731,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                                 _state->_mixer->insefx[fx].changeeffect(int(i));
                                 _state->_currentInsertEffect = fx;
                                 _state->_currentTrack = trackIndex;
-                                _state->_showInsertEffectsEditor = true;
                                 ImGui::SetWindowFocus(InsertionFxEditorID);
                             }
                         }
@@ -835,7 +794,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 {
                     _state->_currentTrack = trackIndex;
                     _state->_currentTrackEffect = fx;
-                    _state->_showTrackEffectsEditor = true;
                     ImGui::SetWindowFocus(TrackFxEditorID);
                 }
                 ImGui::OpenPopupOnItemClick("TrackEffectSelection", track->partefx[fx]->geteffect() == 0 ? 0 : 1);
@@ -848,7 +806,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                             track->partefx[fx]->changeeffect(int(i));
                             _state->_currentTrack = trackIndex;
                             _state->_currentTrackEffect = fx;
-                            _state->_showTrackEffectsEditor = true;
                             ImGui::SetWindowFocus(TrackFxEditorID);
                         }
                     }

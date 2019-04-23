@@ -19,62 +19,54 @@ bool zyn::ui::PadNote::Setup()
 
 void zyn::ui::PadNote::Render()
 {
-    if (!_state->_showPADNoteEditor)
-    {
-        return;
-    }
-
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
-    ImGui::Begin(PadSynthEditorID, &_state->_showPADNoteEditor);
-    if (!_state->_showPADNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)
+    if (ImGui::Begin(PadSynthEditorID) && track != nullptr)
     {
-        ImGui::End();
-        return;
-    }
 
-    auto *parameters = track->Instruments[_state->_currentTrackInstrument].padpars;
+        auto *parameters = track->Instruments[_state->_currentTrackInstrument].padpars;
 
-    if (track->Instruments[_state->_currentTrackInstrument].Ppadenabled == 0)
-    {
-        ImGui::Text("PAD editor is disabled");
-        if (ImGui::Button("Enable PAD synth"))
+        if (track->Instruments[_state->_currentTrackInstrument].Ppadenabled == 0)
         {
-            track->Instruments[_state->_currentTrackInstrument].Ppadenabled = 1;
-        }
-        ImGui::End();
-        return;
-    }
-
-    if (ImGui::Button("Apply settings"))
-    {
-        parameters->ApplyParameters(_state->_mixer);
-    }
-
-    if (ImGui::BeginTabBar("PADnoteTab"))
-    {
-        if (ImGui::BeginTabItem("Envelopes LFOs"))
-        {
-            ImGui::Text("PADsynth Envelopes and LFOs Parameters of the Instrument");
-
-            if (ImGui::BeginTabBar("PADNote"))
+            ImGui::Text("PAD editor is disabled");
+            if (ImGui::Button("Enable PAD synth"))
             {
-                if (ImGui::BeginTabItem("Amplitude"))
-                {
-                    PADNoteEditorAmplitude(parameters);
-
-                    ImGui::EndTabItem();
-                }
-                ImGui::EndTabBar();
+                track->Instruments[_state->_currentTrackInstrument].Ppadenabled = 1;
             }
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Harmonic structure"))
-        {
-            ImGui::EndTabItem();
+            ImGui::End();
+            return;
         }
 
-        ImGui::EndTabBar();
+        if (ImGui::Button("Apply settings"))
+        {
+            parameters->ApplyParameters(_state->_mixer);
+        }
+
+        if (ImGui::BeginTabBar("PADnoteTab"))
+        {
+            if (ImGui::BeginTabItem("Envelopes LFOs"))
+            {
+                ImGui::Text("PADsynth Envelopes and LFOs Parameters of the Instrument");
+
+                if (ImGui::BeginTabBar("PADNote"))
+                {
+                    if (ImGui::BeginTabItem("Amplitude"))
+                    {
+                        PADNoteEditorAmplitude(parameters);
+
+                        ImGui::EndTabItem();
+                    }
+                    ImGui::EndTabBar();
+                }
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Harmonic structure"))
+            {
+                ImGui::EndTabItem();
+            }
+
+            ImGui::EndTabBar();
+        }
     }
     ImGui::End();
 }

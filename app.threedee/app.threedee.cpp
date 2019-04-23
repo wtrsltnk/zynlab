@@ -293,30 +293,21 @@ void AppThreeDee::Tick()
 
 void AppThreeDee::PianoRollEditor()
 {
-    if (!_state._showPianoRollEditor)
+    if (!_state._showEditor)
     {
         return;
     }
 
     bool regionIsModified = false;
     static struct TrackRegionEvent *selectedEvent = nullptr;
-    if (_state._currentTrack < 0 || _state._currentTrack >= NUM_MIXER_TRACKS)
-    {
-        return;
-    }
 
     auto track = _state._mixer->GetTrack(_state._currentTrack);
 
-    if (!_state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
+    if (ImGui::Begin("Pianoroll editor") && track != nullptr && _state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
     {
-        return;
-    }
+        auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
+        auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
 
-    auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
-    auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
-
-    if (ImGui::Begin("Pianoroll editor", &(_state._showPianoRollEditor)))
-    {
         ImGui::Text("Zoom");
         ImGui::SameLine();
         ImGui::PushItemWidth(120);
@@ -458,27 +449,27 @@ void AppThreeDee::PianoRollEditor()
 
         ImGui::PushItemWidth(200);
         ImGui::SliderInt("Space", &space, 0, 16);
+
+        if (regionIsModified)
+        {
+            UpdatePreviewImage(region);
+        }
     }
     ImGui::End();
 
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
     {
     }
-
-    if (regionIsModified)
-    {
-        UpdatePreviewImage(region);
-    }
 }
 
 void AppThreeDee::RegionEditor()
 {
-    if (!_state._showRegionEditor)
+    if (!_state._showEditor)
     {
         return;
     }
 
-    if (ImGui::Begin("Region editor", &(_state._showRegionEditor)))
+    if (ImGui::Begin("Region editor"))
     {
         ImGui::Text("Zoom");
         ImGui::SameLine();
@@ -591,12 +582,49 @@ void AppThreeDee::Render()
     ImGui::SetNextWindowViewport(viewport->ID);
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
     window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_MenuBar;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
     ImGui::Begin("TestDockspace", nullptr, window_flags);
     {
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("New"))
+                {
+                }
+                if (ImGui::MenuItem("Open"))
+                {
+                }
+                if (ImGui::MenuItem("Save"))
+                {
+                }
+                if (ImGui::MenuItem("Save As..."))
+                {
+                    _dialogs.SaveFileDialog("Save workspace to file");
+                }
+                auto result = _dialogs.RenderSaveFileDialog();
+                if (result == zyn::ui::DialogResults::Ok)
+                {
+                    SaveToFileSerializer()
+                        .SaveWorkspace(_state._mixer, &_state._regions, _dialogs.GetSaveFileName());
+                    ImGui::CloseCurrentPopup();
+                }
+                if (result == zyn::ui::DialogResults::Cancel)
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Quit"))
+                {
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+
         ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
     }
@@ -730,43 +758,6 @@ void AppThreeDee::ImGuiPlayback()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
 
-        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Workspace)]), ImVec2(32, 32)))
-        {
-            ImGui::OpenPopup("workspace_menu_popup");
-        }
-        if (ImGui::BeginPopup("workspace_menu_popup"))
-        {
-            ImGui::Text("Workspace");
-            ImGui::Separator();
-            ImGui::Button("New");
-            ImGui::Button("Open");
-            ImGui::Button("Save");
-            if (ImGui::Button("Save As..."))
-            {
-                _dialogs.SaveFileDialog("Save workspace to file");
-            }
-            auto result = _dialogs.RenderSaveFileDialog();
-            if (result == zyn::ui::DialogResults::Ok)
-            {
-                SaveToFileSerializer()
-                    .SaveWorkspace(_state._mixer, &_state._regions, _dialogs.GetSaveFileName());
-                ImGui::CloseCurrentPopup();
-            }
-            if (result == zyn::ui::DialogResults::Cancel)
-            {
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-
-        ImGui::PopStyleVar();
-
-        ImGui::SameLine();
-
-        ImGui::Spacing();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
-
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_library", &_state._showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
@@ -789,17 +780,7 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        if (ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32)))
-        {
-            if (_state._showEditor)
-            {
-                _state._showRegionEditor = _state._showPianoRollEditor = true;
-            }
-            else
-            {
-                _state._showRegionEditor = _state._showPianoRollEditor = false;
-            }
-        }
+        ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
 
         ImGui::PopStyleVar();
 

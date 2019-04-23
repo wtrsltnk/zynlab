@@ -37,7 +37,7 @@ void zyn::ui::Library::Render()
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    if (ImGui::Begin(LibraryID, &_state->_showLibrary))
+    if (ImGui::Begin(LibraryID))
     {
         if (ImGui::BeginTabBar("LibraryTabs"))
         {

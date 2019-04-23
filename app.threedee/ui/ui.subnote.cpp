@@ -45,118 +45,109 @@ bool zyn::ui::SubNote::Setup() { return true; }
 
 void zyn::ui::SubNote::Render()
 {
-    if (!_state->_showSUBNoteEditor)
-    {
-        return;
-    }
-
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
-    ImGui::Begin(SubSynthEditorID, &_state->_showSUBNoteEditor);
-    if (!_state->_showSUBNoteEditor || track == nullptr || _state->_currentTrackInstrument < 0 || _state->_currentTrackInstrument >= NUM_TRACK_INSTRUMENTS)
+    if (ImGui::Begin(SubSynthEditorID) && track != nullptr)
     {
-        ImGui::End();
-        return;
-    }
+        auto *parameters = track->Instruments[_state->_currentTrackInstrument].subpars;
 
-    auto *parameters = track->Instruments[_state->_currentTrackInstrument].subpars;
-
-    if (track->Instruments[_state->_currentTrackInstrument].Psubenabled == 0)
-    {
-        ImGui::Text("SUB editor is disabled");
-        if (ImGui::Button("Enable SUB synth"))
+        if (track->Instruments[_state->_currentTrackInstrument].Psubenabled == 0)
         {
-            track->Instruments[_state->_currentTrackInstrument].Psubenabled = 1;
-        }
-        ImGui::End();
-        return;
-    }
-
-    if (ImGui::BeginTabBar("SUBnoteTab"))
-    {
-        if (ImGui::BeginTabItem("Global"))
-        {
-            if (_state->_currentTrack >= 0)
+            ImGui::Text("SUB editor is disabled");
+            if (ImGui::Button("Enable SUB synth"))
             {
-                ImGui::Text("SUBsynth Global Parameters of the Instrument");
-
-                auto stereo = parameters->Pstereo == 1;
-                if (ImGui::Checkbox("Stereo", &stereo))
-                {
-                    parameters->Pstereo = stereo ? 1 : 0;
-                }
-                ImGui::ShowTooltipOnHover("Stereo");
-
-                ImGui::SameLine();
-
-                auto filterStages = static_cast<int>(parameters->Pnumstages);
-                ImGui::PushItemWidth(100);
-                if (ImGui::SliderInt("Filter Stages", &filterStages, 1, 5))
-                {
-                    parameters->Pnumstages = static_cast<unsigned char>(filterStages);
-                }
-                ImGui::ShowTooltipOnHover("How many times the noise is filtered");
-
-                ImGui::PushItemWidth(100);
-                if (ImGui::DropDown("##MagType", parameters->Phmagtype, mag_types, mag_type_count, "Mag type"))
-                {
-                }
-
-                ImGui::SameLine();
-
-                ImGui::PushItemWidth(100);
-                if (ImGui::DropDown("##Start", parameters->Pstart, start_types, start_type_count, "Start"))
-                {
-                }
-
-                if (ImGui::BeginTabBar("SUBNote"))
-                {
-                    if (ImGui::BeginTabItem("Amplitude"))
-                    {
-                        SUBNoteEditorAmplitude(parameters);
-
-                        ImGui::EndTabItem();
-                    }
-
-                    if (ImGui::BeginTabItem("Bandwidth"))
-                    {
-                        SUBNoteEditorBandwidth(parameters);
-
-                        ImGui::EndTabItem();
-                    }
-
-                    if (ImGui::BeginTabItem("Overtones"))
-                    {
-                        SUBNoteEditorOvertones(parameters);
-
-                        ImGui::EndTabItem();
-                    }
-
-                    if (ImGui::BeginTabItem("Filter"))
-                    {
-                        SUBNoteEditorFilter(parameters);
-
-                        ImGui::EndTabItem();
-                    }
-
-                    if (ImGui::BeginTabItem("Frequency"))
-                    {
-                        SUBNoteEditorFrequency(parameters);
-
-                        ImGui::EndTabItem();
-                    }
-
-                    if (ImGui::BeginTabItem("Harmonics"))
-                    {
-                        SUBNoteEditorHarmonicsMagnitude(parameters);
-
-                        ImGui::EndTabItem();
-                    }
-                    ImGui::EndTabBar();
-                }
+                track->Instruments[_state->_currentTrackInstrument].Psubenabled = 1;
             }
-            ImGui::EndTabItem();
+            ImGui::End();
+            return;
         }
-        ImGui::EndTabBar();
+
+        if (ImGui::BeginTabBar("SUBnoteTab"))
+        {
+            if (ImGui::BeginTabItem("Global"))
+            {
+                if (_state->_currentTrack >= 0)
+                {
+                    ImGui::Text("SUBsynth Global Parameters of the Instrument");
+
+                    auto stereo = parameters->Pstereo == 1;
+                    if (ImGui::Checkbox("Stereo", &stereo))
+                    {
+                        parameters->Pstereo = stereo ? 1 : 0;
+                    }
+                    ImGui::ShowTooltipOnHover("Stereo");
+
+                    ImGui::SameLine();
+
+                    auto filterStages = static_cast<int>(parameters->Pnumstages);
+                    ImGui::PushItemWidth(100);
+                    if (ImGui::SliderInt("Filter Stages", &filterStages, 1, 5))
+                    {
+                        parameters->Pnumstages = static_cast<unsigned char>(filterStages);
+                    }
+                    ImGui::ShowTooltipOnHover("How many times the noise is filtered");
+
+                    ImGui::PushItemWidth(100);
+                    if (ImGui::DropDown("##MagType", parameters->Phmagtype, mag_types, mag_type_count, "Mag type"))
+                    {
+                    }
+
+                    ImGui::SameLine();
+
+                    ImGui::PushItemWidth(100);
+                    if (ImGui::DropDown("##Start", parameters->Pstart, start_types, start_type_count, "Start"))
+                    {
+                    }
+
+                    if (ImGui::BeginTabBar("SUBNote"))
+                    {
+                        if (ImGui::BeginTabItem("Amplitude"))
+                        {
+                            SUBNoteEditorAmplitude(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Bandwidth"))
+                        {
+                            SUBNoteEditorBandwidth(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Overtones"))
+                        {
+                            SUBNoteEditorOvertones(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Filter"))
+                        {
+                            SUBNoteEditorFilter(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Frequency"))
+                        {
+                            SUBNoteEditorFrequency(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+
+                        if (ImGui::BeginTabItem("Harmonics"))
+                        {
+                            SUBNoteEditorHarmonicsMagnitude(parameters);
+
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
+                    }
+                }
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
     }
     ImGui::End();
 }
