@@ -221,8 +221,8 @@ void zyn::ui::Effect::Render()
         {
             EffectEditor(track->partefx[_state->_currentTrackEffect]);
         }
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 void VolumeAndPanning(EffectManager *effectManager)

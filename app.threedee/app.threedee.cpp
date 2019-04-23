@@ -634,17 +634,17 @@ void AppThreeDee::Render()
     ImGuiPlayback();
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
-    _effectUi.Render();
     _libraryUi.Render();
     _mixerUi.Render();
-    _oscilGenUi.Render();
 
     if (_state._showSmartControls)
     {
+        _effectUi.Render();
         _adNoteUI.Render();
         _padNoteUi.Render();
         _subNoteUi.Render();
         _smplNoteUi.Render();
+        _oscilGenUi.Render();
     }
     ImGui::PopStyleVar();
 
@@ -772,23 +772,19 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::SameLine();
 
-        ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
-
-        ImGui::SameLine();
-
         ImGui::ImageToggleButton("toolbar_mixer", &_state._showMixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
 
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
 
-        ImGui::PopStyleVar();
+        ImGui::SameLine();
+
+        ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
 
         ImGui::SameLine();
 
-        ImGui::Spacing();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
+        ImGui::InvisibleButton("nothing2do", ImVec2(32, 32));
 
         ImGui::SameLine();
 
@@ -843,6 +839,10 @@ void AppThreeDee::ImGuiPlayback()
                 wavEngine->destroyFile();
             }
         }
+
+        ImGui::SameLine();
+
+        ImGui::InvisibleButton("nothing2do", ImVec2(32, 32));
 
         ImGui::SameLine();
 
