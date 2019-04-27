@@ -154,6 +154,7 @@ bool AppThreeDee::Setup()
     _padNoteUi.Setup();
     _effectUi.Setup();
     _oscilGenUi.Setup();
+    _dialogs.Setup();
 
     LoadToolbarIcons();
 
@@ -569,6 +570,50 @@ void AppThreeDee::RegionEditor()
     ImGui::End();
 }
 
+void AppThreeDee::NewFile()
+{
+    _currentFileName = "";
+}
+
+void AppThreeDee::OpenFile()
+{
+    SaveToFileSerializer()
+        .LoadWorkspace(_state._mixer, &_state._regions, _currentFileName);
+}
+
+void AppThreeDee::SaveFile()
+{
+    SaveToFileSerializer()
+        .SaveWorkspace(_state._mixer, &_state._regions, _currentFileName);
+}
+
+void AppThreeDee::RenderDialogs()
+{
+    auto result = _dialogs.RenderSaveFileDialog();
+    if (result == zyn::ui::DialogResults::Ok)
+    {
+        _currentFileName = _dialogs.GetSaveFileName();
+        SaveFile();
+        ImGui::CloseCurrentPopup();
+    }
+    if (result == zyn::ui::DialogResults::Cancel)
+    {
+        ImGui::CloseCurrentPopup();
+    }
+
+    result = _dialogs.RenderOpenFileDialog();
+    if (result == zyn::ui::DialogResults::Ok)
+    {
+        _currentFileName = _dialogs.GetOpenFileName();
+        OpenFile();
+        ImGui::CloseCurrentPopup();
+    }
+    if (result == zyn::ui::DialogResults::Cancel)
+    {
+        ImGui::CloseCurrentPopup();
+    }
+}
+
 void AppThreeDee::Render()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -586,6 +631,7 @@ void AppThreeDee::Render()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
+    bool sf = false, of = false;
     ImGui::Begin("TestDockspace", nullptr, window_flags);
     {
         if (ImGui::BeginMenuBar())
@@ -594,28 +640,28 @@ void AppThreeDee::Render()
             {
                 if (ImGui::MenuItem("New"))
                 {
+                    NewFile();
                 }
                 if (ImGui::MenuItem("Open"))
                 {
+                    of = true;
                 }
                 if (ImGui::MenuItem("Save"))
                 {
+                    if (_currentFileName == "")
+                    {
+                        sf = true;
+                    }
+                    else
+                    {
+                        SaveFile();
+                    }
                 }
                 if (ImGui::MenuItem("Save As..."))
                 {
-                    _dialogs.SaveFileDialog("Save workspace to file");
+                    sf = true;
                 }
-                auto result = _dialogs.RenderSaveFileDialog();
-                if (result == zyn::ui::DialogResults::Ok)
-                {
-                    SaveToFileSerializer()
-                        .SaveWorkspace(_state._mixer, &_state._regions, _dialogs.GetSaveFileName());
-                    ImGui::CloseCurrentPopup();
-                }
-                if (result == zyn::ui::DialogResults::Cancel)
-                {
-                    ImGui::CloseCurrentPopup();
-                }
+
                 ImGui::Separator();
                 if (ImGui::MenuItem("Quit"))
                 {
@@ -630,6 +676,16 @@ void AppThreeDee::Render()
     }
     ImGui::End();
     ImGui::PopStyleVar(2);
+
+    if (sf)
+    {
+        _dialogs.SaveFileDialog(zyn::ui::Dialogs::SAVEFILE_DIALOG_ID);
+    }
+    if (of)
+    {
+        _dialogs.OpenFileDialog(zyn::ui::Dialogs::OPENFILE_DIALOG_ID);
+    }
+    RenderDialogs();
 
     ImGuiPlayback();
 

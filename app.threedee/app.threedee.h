@@ -45,6 +45,7 @@ private:
     bool _toolbarIconsAreLoaded;
     std::chrono::milliseconds::rep _lastSequencerTimeInMs;
 
+    std::string _currentFileName;
 public:
     static void KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
     static void ResizeCallback(GLFWwindow *window, int width, int height);
@@ -72,6 +73,11 @@ private:
     void TempNoteOn(unsigned int channel, unsigned int note, unsigned int length);
     void TickRegion(TrackRegion &region, unsigned char trackIndex, float prevPlayTime, float currentPlayTime, int repeat = 0);
     void ImGuiPlayback();
+
+    void NewFile();
+    void OpenFile();
+    void SaveFile();
+    void RenderDialogs();
 };
 
 #endif // _APP_THREE_DEE_H_
