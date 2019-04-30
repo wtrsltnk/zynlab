@@ -86,5 +86,6 @@ void SMPLnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
             WavData::fromBase64(base64Data, _parameters->PwavData[i]);
             xml->exitbranch();
         }
+        xml->exitbranch();
     }
 }
