@@ -51,14 +51,14 @@ int main(int /*argc*/, char * /*argv*/ [])
 {
     Example example;
 
+    Nio::SetDefaultSink("PA");
+    Nio::SetDefaultSource("RT");
+
     //Run the Nio system
     if (!Nio::Start(&example))
     {
         return -1;
     }
-
-    Nio::SelectSink("PA");
-    Nio::SelectSource("RT");
 
     sleep(2000);
 
