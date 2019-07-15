@@ -121,7 +121,7 @@ void zyn::ui::AdNote::ADNoteVoiceEditor(ADnoteVoiceParam *parameters)
 
                 ImGui::EndTabItem();
             }
-}
+        }
         ImGui::EndTabBar();
     }
 }
@@ -137,9 +137,9 @@ void zyn::ui::AdNote::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
 
     auto phase = static_cast<int>(64 - parameters->Poscilphase);
     ImGui::PushItemWidth(300);
-    if (ImGui::SliderInt("##Phase", &phase, 0, 127, "Phase %d"))
+    if (ImGui::SliderInt("##Phase", &phase, -64, 64, "Phase %d"))
     {
-        parameters->PVolume = static_cast<unsigned char>(phase);
+        parameters->Poscilphase = 64 - static_cast<unsigned char>(phase);
     }
 
     ImGui::Separator();
