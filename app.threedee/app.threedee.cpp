@@ -160,8 +160,6 @@ bool AppThreeDee::Setup()
 
     _state._playTime = 0.0f;
 
-    _state._mixer->GetTrack(0)->Instruments[0].smplpars->PwavData.insert(std::make_pair(64, WavData::Load("C:\\Code\\synthdev\\Kick 023 Die Another Day-1.wav")));
-
     return true;
 }
 
@@ -573,6 +571,11 @@ void AppThreeDee::RegionEditor()
 void AppThreeDee::NewFile()
 {
     _currentFileName = "";
+
+    _state._regions = RegionsManager();
+    _state._regions.AddRegion(0, 0, 4 * 1024);
+    _state._currentPattern = 0;
+    _state._currentTrack = 0;
 }
 
 void AppThreeDee::OpenFile()
