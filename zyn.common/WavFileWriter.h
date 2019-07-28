@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+/*
 class WavFileWriter
 {
 public:
@@ -34,10 +35,34 @@ public:
     virtual ~WavFileWriter();
 
     void addSample(std::vector<float> sample);
+
+    bool good() const;
+
+    void writeMonoSamples(int nsmps, short int *smps);
+    void writeStereoSamples(int nsmps, short int *smps);
+
 private:
     std::string _filename;
-    AudioFile<float> _audioFile;
-    AudioFile<float>::AudioBuffer _audioBuffer;
+    std::vector<short int> _audioBuffer;
 };
+/*/
+class WavFileWriter
+{
+public:
+    WavFileWriter(std::string filename, int samplerate, int channels);
+    ~WavFileWriter();
+
+    bool good() const;
+
+    void writeMonoSamples(int nsmps, short int *smps);
+    void writeStereoSamples(int nsmps, short int *smps);
+
+private:
+    int sampleswritten;
+    int samplerate;
+    int channels;
+    FILE *file;
+};
+//*/
 
 #endif // WAVFILEWRITER_H

@@ -5,6 +5,7 @@
 #include "MidiInputManager.h"
 #include "WavEngine.h"
 #include <zyn.common/Util.h>
+#include <zyn.common/WavFileWriter.h>
 
 #include <algorithm>
 #include <cassert>
@@ -41,6 +42,9 @@ AudioOutputManager::AudioOutputManager(IAudioGenerator *audioGenerator)
       _audioGenerator(audioGenerator),
       _wavEngine(new WavEngine(audioGenerator->SampleRate(), audioGenerator->BufferSize()))
 {
+    _wavEngine->newFile(new WavFileWriter("c:\\temp\\temp.wav", audioGenerator->SampleRate(), 2));
+    _wavEngine->Start();
+
     currentOut = nullptr;
     stales = 0;
 
@@ -53,6 +57,8 @@ AudioOutputManager::AudioOutputManager(IAudioGenerator *audioGenerator)
 
 AudioOutputManager::~AudioOutputManager()
 {
+    _wavEngine->destroyFile();
+    delete _wavEngine;
     delete[] priBuf._left;
     delete[] priBuf._right;
     delete[] outr;

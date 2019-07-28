@@ -29,6 +29,7 @@ using namespace std;
 WavEngine::WavEngine(unsigned int sampleRate, unsigned int bufferSize)
     : AudioOutput(sampleRate, bufferSize), file(nullptr), buffer(sampleRate * 4), pThread(nullptr)
 {
+    _name = "WAV";
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
 
@@ -40,7 +41,7 @@ WavEngine::~WavEngine()
 
 bool WavEngine::openAudio()
 {
-    return file != nullptr;
+    return file && file->good();
 }
 
 bool WavEngine::Start()
@@ -76,7 +77,7 @@ void WavEngine::Stop()
 
     work.post();
     pthread_join(*tmp, nullptr);
-    delete pThread;
+    delete tmp;
 }
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
@@ -103,7 +104,7 @@ void WavEngine::newFile(WavFileWriter *_file)
     file = _file;
 
     //check state
-    if (file == nullptr)
+    if (!file->good())
     {
         std::cerr
             << "ERROR: WavEngine handed bad file output WavEngine::newFile()"
@@ -113,7 +114,10 @@ void WavEngine::newFile(WavFileWriter *_file)
 
 void WavEngine::destroyFile()
 {
-    delete file;
+    if (file != nullptr)
+    {
+        delete file;
+    }
     file = nullptr;
 }
 
@@ -124,18 +128,29 @@ void *WavEngine::_AudioThread(void *arg)
 
 void *WavEngine::AudioThread()
 {
+    short *recordbuf_16bit = new short[2 * _bufferSize];
+
     while (!work.wait() && pThread)
     {
-        for (unsigned int i = 0; i < this->BufferSize(); ++i)
+        for (int i = 0; i < _bufferSize; ++i)
         {
             float left = 0.0f, right = 0.0f;
-
             buffer.pop(left);
             buffer.pop(right);
-
-            file->addSample(std::vector<float>({left,right}));
+            recordbuf_16bit[2 * i] = limit((int)(left * 32767.0f),
+                                           -32768,
+                                           32767);
+            recordbuf_16bit[2 * i + 1] = limit((int)(right * 32767.0f),
+                                               -32768,
+                                               32767);
+        }
+        if (file != nullptr)
+        {
+            file->writeStereoSamples(_bufferSize, recordbuf_16bit);
         }
     }
+
+    delete[] recordbuf_16bit;
 
     return nullptr;
 }

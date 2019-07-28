@@ -234,7 +234,7 @@ Preset &Preset::AddPreset(std::string const &name, char *value, int max)
 }
 Preset &Preset::AddPresetAsString(std::string const &name, unsigned char *value, int max)
 {
-    _presets.push_back(Preset(name, (char*)value, max));
+    _presets.push_back(Preset(name, (char *)value, max));
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
@@ -457,3 +457,13 @@ void Preset::ReadPresetsFromBlob(IPresetsSerializer *xml)
 WrappedPresets::WrappedPresets() : Preset("tbd") {}
 
 WrappedPresets::~WrappedPresets() {}
+
+#include <random>
+
+static std::default_random_engine generator;
+
+unsigned char WrappedPresets::randomByte()
+{
+    std::uniform_int_distribution<unsigned char> distribution(0, 127);
+    return distribution(generator);
+}

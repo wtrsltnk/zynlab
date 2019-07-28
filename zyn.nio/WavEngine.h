@@ -41,7 +41,6 @@ public:
     bool Start();
     void Stop();
 
-    void SetAudioEnabled(bool /*nval*/) {}
     bool IsAudioEnabled() const { return true; }
 
     void push(Stereo<float *> smps, size_t len);

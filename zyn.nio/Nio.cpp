@@ -28,6 +28,13 @@ bool Nio::Start(IAudioGenerator *audioGenerator)
 void Nio::Stop()
 {
     _engineManager->Stop();
+
+    _midiInputManager = nullptr;
+    MidiInputManager::DestroyInstance(); // Disable input wrapper
+    _audioOutpuManager = nullptr;
+    AudioOutputManager::destroyInstance(); //Destroy the Output Systems
+    _engineManager = nullptr;
+    EngineManager::DestroyInstance(); //DestroyThe Engines
 }
 
 void Nio::SetDefaultSource(const std::string &name)

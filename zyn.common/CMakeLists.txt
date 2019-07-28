@@ -34,6 +34,7 @@ target_sources(zyn.common
         WaveShapeSmps.h
         base64.cpp
         base64.h
+        dr_wav.h
         globals.cpp
         globals.h
 )
