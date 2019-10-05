@@ -32,6 +32,7 @@
 #include <pthread.h>
 #include <zyn.common/AudioFile.h>
 #include <zyn.common/IAudioGenerator.h>
+#include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Stereo.h>
@@ -54,7 +55,7 @@ public:
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
-class Mixer : public IMixer, public IAudioGenerator, public WrappedPresets
+class Mixer : public IMixer, public IAudioGenerator, public IMidiEventHandler, public WrappedPresets
 {
     friend class MixerSerializer;
 

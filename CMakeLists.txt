@@ -14,7 +14,6 @@ option(BUILD_APP_TINY "enable building app.tiny project" OFF)
 set(VERSION "2.4.4")
 add_definitions(-DVERSION="${VERSION}")
 
-find_package(MXML REQUIRED)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 
@@ -24,6 +23,8 @@ if(FLTK_FOUND)
 else()
     message(STATUS "GUI module defaulting to off")
 endif()
+
+add_subdirectory("libs/mxml-release-2.4")
 
 add_subdirectory("zyn.common")
 add_subdirectory("zyn.dsp")

@@ -45,11 +45,11 @@ MidiEvent::MidiEvent()
 
 MidiInputManager *MidiInputManager::_instance = nullptr;
 
-MidiInputManager &MidiInputManager::CreateInstance(IAudioGenerator *audioGenerator)
+MidiInputManager &MidiInputManager::CreateInstance(IMidiEventHandler *midiEventHandler)
 {
     if (MidiInputManager::_instance == nullptr)
     {
-        MidiInputManager::_instance = new MidiInputManager(audioGenerator);
+        MidiInputManager::_instance = new MidiInputManager(midiEventHandler);
     }
 
     return *MidiInputManager::_instance;
@@ -66,8 +66,8 @@ void MidiInputManager::DestroyInstance()
     MidiInputManager::_instance = nullptr;
 }
 
-MidiInputManager::MidiInputManager(IAudioGenerator *audioGenerator)
-    : _queue(100), _audioGenerator(audioGenerator)
+MidiInputManager::MidiInputManager(IMidiEventHandler *midiEventHandler)
+    : _queue(100), _midiEventHandler(midiEventHandler)
 {
     _current = nullptr;
     _work.init(PTHREAD_PROCESS_PRIVATE, 0);
@@ -113,14 +113,14 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
                 std::cout << ev << std::endl;
                 if (ev.value)
                 {
-                    this->_audioGenerator->NoteOn(
+                    this->_midiEventHandler->NoteOn(
                         static_cast<unsigned char>(ev.channel),
                         static_cast<unsigned char>(ev.num),
                         static_cast<unsigned char>(ev.value));
                 }
                 else
                 {
-                    this->_audioGenerator->NoteOff(
+                    this->_midiEventHandler->NoteOff(
                         static_cast<unsigned char>(ev.channel),
                         static_cast<unsigned char>(ev.num));
                 }
@@ -128,7 +128,7 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
             }
             case MidiEventTypes::M_CONTROLLER:
             {
-                this->_audioGenerator->SetController(
+                this->_midiEventHandler->SetController(
                     static_cast<unsigned char>(ev.channel),
                     static_cast<char>(ev.num),
                     static_cast<char>(ev.value));
@@ -136,13 +136,13 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
             }
             case MidiEventTypes::M_PGMCHANGE:
             {
-                this->_audioGenerator->SetProgram(
+                this->_midiEventHandler->SetProgram(
                     static_cast<unsigned char>(ev.channel), ev.num);
                 break;
             }
             case MidiEventTypes::M_PRESSURE:
             {
-                this->_audioGenerator->PolyphonicAftertouch(
+                this->_midiEventHandler->PolyphonicAftertouch(
                     static_cast<unsigned char>(ev.channel),
                     static_cast<unsigned char>(ev.num),
                     static_cast<unsigned char>(ev.value));

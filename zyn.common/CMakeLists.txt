@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 
 project(zyn.common)
 
+find_package(system.io)
+
 add_library(zyn.common STATIC)
 
 target_sources(zyn.common
@@ -12,6 +14,8 @@ target_sources(zyn.common
         Config.h
         IAudioGenerator.cpp
         IAudioGenerator.h
+        IMidiEventHandler.cpp
+        IMidiEventHandler.h
         IFFTwrapper.h
         ILibraryManager.cpp
         ILibraryManager.h
@@ -39,16 +43,15 @@ target_sources(zyn.common
         globals.h
 )
 
-target_include_directories(zyn.common
-    PUBLIC
-        ${MXML_INCLUDE_DIRS}
-    )
-
 target_link_libraries(zyn.common
-    ${MXML_LIBRARIES}
-	${ZLIB_LIBRARIES}
+    mxml
+    system.io
+    ${ZLIB_LIBRARIES}
     z
     )
+
+target_include_directories(zyn.common
+    PRIVATE ../libs/mxml-release-2.4)
 
 target_compile_features(zyn.common
     PRIVATE cxx_auto_type

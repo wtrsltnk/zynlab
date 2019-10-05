@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 #include <zyn.common/IAudioGenerator.h>
+#include <zyn.common/IMidiEventHandler.h>
 
 /**Interface to Nio Subsystem
  *
@@ -11,7 +12,7 @@
 class Nio
 {
 public:
-    static bool Start(IAudioGenerator *audioGenerator);
+    static bool Start(IAudioGenerator *audioGenerator, IMidiEventHandler *midiEventHandler);
     static void Stop();
 
     static void SetDefaultSource(const std::string &name);

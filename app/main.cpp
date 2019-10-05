@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
     }
 
     //Run the Nio system
-    bool ioGood = Nio::Start(&mixer);
+    bool ioGood = Nio::Start(&mixer, &mixer);
 
     // Run a system command after starting zynaddsubfx
     if (!execAfterInit.empty())

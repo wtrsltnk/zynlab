@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
 
 project(app.tiny)
 
@@ -13,6 +13,7 @@ add_executable(app.tiny
     glfwapplication.cpp
     glfwapplication.h
     glad.c
+    gltf.cpp
     )
 
 target_include_directories(app.tiny

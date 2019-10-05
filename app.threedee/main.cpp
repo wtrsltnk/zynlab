@@ -77,7 +77,7 @@ int main(int /*argc*/, char * /*argv*/ [])
         libraryManager.AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
     }
     //Run the Nio system
-    if (!Nio::Start(mixer))
+    if (!Nio::Start(mixer, mixer))
     {
         return -1;
     }

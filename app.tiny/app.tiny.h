@@ -5,8 +5,12 @@
 
 class AppTiny : public GLFWApplication
 {
+    class SceneNode *_sceneRoot;
+
 public:
     AppTiny();
+
+    SceneNode* BuildScene();
 
     virtual bool OnInit();
     virtual void OnTick(double timeInMs);

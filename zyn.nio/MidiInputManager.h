@@ -5,7 +5,7 @@
 #include "ZynSema.h"
 #include <string>
 #include <set>
-#include <zyn.common/IAudioGenerator.h>
+#include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/globals.h>
 
 enum class MidiEventTypes
@@ -31,11 +31,11 @@ class MidiInputManager
 {
     static MidiInputManager *_instance;
 
-    MidiInputManager(IAudioGenerator *audioGenerator);
+    MidiInputManager(IMidiEventHandler *midiEventHandler);
     class MidiInput *GetMidiInput(std::string const &name);
 
 public:
-    static MidiInputManager &CreateInstance(IAudioGenerator *audioGenerator);
+    static MidiInputManager &CreateInstance(IMidiEventHandler *midiEventHandler);
     static MidiInputManager &Instance();
     static void DestroyInstance();
     virtual ~MidiInputManager();
@@ -55,7 +55,7 @@ private:
     class MidiInput *_current;
 
     /**the link to the rest of zyn*/
-    IAudioGenerator *_audioGenerator;
+    IMidiEventHandler *_midiEventHandler;
 };
 
 #endif // MIDIINPUTMANAGER_H

@@ -16,9 +16,9 @@ static MidiInputManager *_midiInputManager = nullptr;
 std::string Nio::defaultSink;
 std::string Nio::defaultSource;
 
-bool Nio::Start(IAudioGenerator *audioGenerator)
+bool Nio::Start(IAudioGenerator *audioGenerator, IMidiEventHandler *midiEventHandler)
 {
-    _midiInputManager = &MidiInputManager::CreateInstance(audioGenerator);    //Enable input wrapper
+    _midiInputManager = &MidiInputManager::CreateInstance(midiEventHandler);    //Enable input wrapper
     _audioOutpuManager = &AudioOutputManager::createInstance(audioGenerator); //Initialize the Output Systems
     _engineManager = &EngineManager::CreateInstance(audioGenerator);          //Initialize The Engines
 

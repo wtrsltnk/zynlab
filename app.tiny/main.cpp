@@ -53,7 +53,7 @@ void initprogram()
     signal(SIGTERM, sigterm_exit);
 
     //Run the Nio system
-    if (!Nio::Start(mixer))
+    if (!Nio::Start(mixer, mixer))
     {
         exit(-1);
     }
