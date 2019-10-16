@@ -12,7 +12,6 @@ add_executable(app.tiny
     app.tiny.h
     glfwapplication.cpp
     glfwapplication.h
-    glad.c
     gltf.cpp
     )
 
@@ -36,6 +35,7 @@ target_link_libraries(app.tiny
     zyn.dsp
     zyn.serialization
     zyn.common
+    lib.imgui
     )
 
 target_compile_definitions(app.tiny

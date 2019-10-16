@@ -1,5 +1,6 @@
 #include "ui.dialogs.h"
 
+#include "../imgui_addons/imgui_common.h"
 #include <system.io/system.io.directory.h>
 #include <system.io/system.io.directoryinfo.h>
 #include <system.io/system.io.fileinfo.h>

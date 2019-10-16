@@ -1,11 +1,12 @@
 #ifndef APPSTATE_H
 #define APPSTATE_H
 
-#include "imgui_addons/imgui_common.h"
 #include <vector>
 #include <zyn.common/ILibraryManager.h>
 #include <zyn.common/globals.h>
 #include <zyn.seq/RegionsManager.h>
+
+#define TRACK_WIDTH 150
 
 extern char const *const AdSynthEditorID;
 extern char const *const SubSynthEditorID;

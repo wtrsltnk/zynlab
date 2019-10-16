@@ -1,10 +1,10 @@
 #include "app.threedee.h"
 
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_opengl3.h"
-#include "imgui_addons/imgui_Timeline.h"
-#include "imgui_addons/imgui_checkbutton.h"
-#include "imgui_addons/imgui_knob.h"
+#include <examples/imgui_impl_glfw.h>
+#include <examples/imgui_impl_opengl3.h>
+#include <imgui_Timeline.h>
+#include <imgui_checkbutton.h>
+#include <imgui_knob.h>
 #include "stb_image.h"
 #include <algorithm>
 #include <cmath>
@@ -623,6 +623,7 @@ void AppThreeDee::Render()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuiIO &io = ImGui::GetIO();
+    io.IniFilename = nullptr;
 
     ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -675,6 +676,30 @@ void AppThreeDee::Render()
         }
 
         ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
+        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+        {
+            ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None); // Add empty node
+            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+            ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
+            ImGuiID dock_id_toolbar = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, 0.10f, nullptr, &dock_main_id);
+            ImGuiDockNode* toolbar = ImGui::DockBuilderGetNode(dock_id_toolbar);
+            toolbar->LocalFlags |= ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoSplit | ImGuiWindowFlags_NoCollapse | ImGuiDockNodeFlags_NoDocking;
+            ImGui::DockBuilderSetNodeSize(dock_id_toolbar, ImVec2(viewport->Size.x, 70));
+
+            ImGuiID dock_id_inspector = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, nullptr, &dock_main_id);
+            ImGuiDockNode* inspector = ImGui::DockBuilderGetNode(dock_id_inspector);
+            inspector->LocalFlags |= ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoSplit |  ImGuiDockNodeFlags_NoDocking;
+            ImGui::DockBuilderSetNodeSize(dock_id_inspector, ImVec2(400, viewport->Size.y - 70));
+
+            ImGuiID dock_id_mixer = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, nullptr, &dock_main_id);
+
+            ImGui::DockBuilderDockWindow("Playback", dock_id_toolbar);
+            ImGui::DockBuilderDockWindow("Mixer", dock_id_mixer);
+            ImGui::DockBuilderDockWindow("Inspector", dock_id_inspector);
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
     }
     ImGui::End();
@@ -811,9 +836,10 @@ void gen_random(char *s, const int len)
 
     s[len] = 0;
 }
+
 void AppThreeDee::ImGuiPlayback()
 {
-    ImGui::Begin("Playback", nullptr, ImGuiWindowFlags_NoTitleBar);
+    ImGui::Begin("Playback", nullptr);
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
 

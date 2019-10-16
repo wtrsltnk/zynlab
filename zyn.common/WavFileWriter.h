@@ -49,18 +49,18 @@ private:
 class WavFileWriter
 {
 public:
-    WavFileWriter(std::string filename, int samplerate, int channels);
+    WavFileWriter(std::string filename, unsigned int samplerate, unsigned int channels);
     ~WavFileWriter();
 
     bool good() const;
 
-    void writeMonoSamples(int nsmps, short int *smps);
-    void writeStereoSamples(int nsmps, short int *smps);
+    void writeMonoSamples(unsigned int nsmps, short int *smps);
+    void writeStereoSamples(unsigned int nsmps, short int *smps);
 
 private:
-    int sampleswritten;
-    int samplerate;
-    int channels;
+    unsigned int sampleswritten;
+    unsigned int samplerate;
+    unsigned int channels;
     FILE *file;
 };
 //*/

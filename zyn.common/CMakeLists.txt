@@ -44,7 +44,7 @@ target_sources(zyn.common
 )
 
 target_link_libraries(zyn.common
-    mxml
+    lib.mxml
     system.io
     ${ZLIB_LIBRARIES}
     z

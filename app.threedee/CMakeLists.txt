@@ -11,24 +11,6 @@ add_executable(app.threedee
     app.threedee.h
     appstate.cpp
     appstate.h
-    glad.c
-    imgui/examples/imgui_impl_glfw.cpp
-    imgui/examples/imgui_impl_opengl3.cpp
-    imgui/imconfig.h
-    imgui/imgui.cpp
-    imgui/imgui.h
-    imgui/imgui_demo.cpp
-    imgui/imgui_draw.cpp
-    imgui/imgui_widgets.cpp
-    imgui_addons/imgui_checkbutton.cpp
-    imgui_addons/imgui_checkbutton.h
-    imgui_addons/imgui_common.cpp
-    imgui_addons/imgui_common.h
-    imgui_addons/imgui_knob.cpp
-    imgui_addons/imgui_knob.h
-    imgui_addons/imgui_seq.cpp
-    imgui_addons/imgui_seq.h
-    imgui_addons/imgui_Timeline.h
     instrumentcategories.h
     main.cpp
     stb_image.cpp
@@ -67,7 +49,6 @@ target_include_directories(app.threedee
         ${CMAKE_SOURCE_DIR}
         ${GLFW3_INCLUDE_DIR}
         ${GLM_DIR}
-        imgui
         include
     )
 
@@ -84,10 +65,7 @@ target_link_libraries(app.threedee
     zyn.seq
     zyn.serialization
     zyn.common
-    )
-
-target_compile_definitions(app.threedee
-    PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+    lib.imgui
     )
 
 target_compile_features(app.threedee

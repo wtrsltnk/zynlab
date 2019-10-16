@@ -17,15 +17,11 @@ static int Pexitprogram = 0;
 static LibraryManager libraryManager;
 static Mixer *mixer;
 
-//cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
 {
     Pexitprogram = 1;
 }
 
-/*
- * Program initialisation
- */
 void initprogram()
 {
     Config::Current().init();
@@ -65,9 +61,6 @@ void initprogram()
         .init();
 }
 
-/*
- * Program exit
- */
 int exitprogram()
 {
     //ensure that everything has stopped with the mutex wait

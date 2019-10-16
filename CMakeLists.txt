@@ -24,7 +24,8 @@ else()
     message(STATUS "GUI module defaulting to off")
 endif()
 
-add_subdirectory("libs/mxml-release-2.4")
+add_subdirectory("lib.mxml")
+add_subdirectory("lib.imgui")
 
 add_subdirectory("zyn.common")
 add_subdirectory("zyn.dsp")

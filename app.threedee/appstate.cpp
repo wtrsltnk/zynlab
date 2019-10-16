@@ -1,5 +1,6 @@
 #include "appstate.h"
 
+#include <imgui_common.h>
 #include <glad/glad.h>
 #include <iostream>
 #include <memory>

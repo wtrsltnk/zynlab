@@ -35,7 +35,7 @@ void zyn::ui::Mixer::Render()
 
 #define MIN_DB (-48)
 
-static ImVec2 trackSize = ImVec2(150, 0);
+static ImVec2 trackSize = ImVec2(TRACK_WIDTH, 0);
 static float sliderBaseHeight = 150.0f;
 static float const largeModeTreshold = 4.5f;
 static int mostInsertEffectsPerTrack = 0;
@@ -193,7 +193,7 @@ void zyn::ui::Mixer::ImGuiInspector()
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    ImGui::Begin("Inspector", nullptr, ImVec2(trackSize.x * 2, 0), -1.0f);
+    ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
         if (_state->_showQuickHelp && ImGui::CollapsingHeader("Quick help"))
         {
@@ -650,6 +650,22 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
+                const float square_sz = ImGui::GetFrameHeight();
+                char label[64] = {'\0'};
+                sprintf(label, "##send_%d", fx);
+                char tooltip[64] = {'\0'};
+                sprintf(tooltip, "Volume for send to system effect %d", (fx + 1));
+                if (ImGui::KnobUchar(label, &(_state->_mixer->Psysefxvol[fx][trackIndex]), 0, 127, ImVec2(square_sz + io.ItemInnerSpacing.x, square_sz), tooltip))
+                {
+                    _state->_mixer->setPsysefxvol(trackIndex, fx, _state->_mixer->Psysefxvol[fx][trackIndex]);
+                }
+                if (ImGui::IsItemClicked())
+                {
+                    _state->_currentTrack = trackIndex;
+                }
+
+                ImGui::SameLine();
+
                 if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - lineHeight - 1, 0)))
                 {
                     _state->_currentTrack = trackIndex;
@@ -672,21 +688,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     ImGui::PushItemWidth(-1);
                     ImGui::PopItemWidth();
                     ImGui::EndPopup();
-                }
-
-                ImGui::SameLine();
-
-                char label[64] = {'\0'};
-                sprintf(label, "##send_%d", fx);
-                char tooltip[64] = {'\0'};
-                sprintf(tooltip, "Volume for send to system effect %d", (fx + 1));
-                if (ImGui::KnobUchar(label, &(_state->_mixer->Psysefxvol[fx][trackIndex]), 0, 127, ImVec2(lineHeight, lineHeight), tooltip))
-                {
-                    _state->_mixer->setPsysefxvol(trackIndex, fx, _state->_mixer->Psysefxvol[fx][trackIndex]);
-                }
-                if (ImGui::IsItemClicked())
-                {
-                    _state->_currentTrack = trackIndex;
                 }
 
                 ImGui::PopStyleColor(1);

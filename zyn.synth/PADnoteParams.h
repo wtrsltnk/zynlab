@@ -28,7 +28,6 @@
 #include "OscilGen.h"
 #include "Resonance.h"
 
-#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Util.h>

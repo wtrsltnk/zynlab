@@ -132,15 +132,15 @@ void *WavEngine::AudioThread()
 
     while (!work.wait() && pThread)
     {
-        for (int i = 0; i < _bufferSize; ++i)
+        for (unsigned int i = 0; i < _bufferSize; ++i)
         {
             float left = 0.0f, right = 0.0f;
             buffer.pop(left);
             buffer.pop(right);
-            recordbuf_16bit[2 * i] = limit((int)(left * 32767.0f),
+            recordbuf_16bit[2 * i] = limit(static_cast<int>(left * 32767.0f),
                                            -32768,
                                            32767);
-            recordbuf_16bit[2 * i + 1] = limit((int)(right * 32767.0f),
+            recordbuf_16bit[2 * i + 1] = limit(static_cast<int>(right * 32767.0f),
                                                -32768,
                                                32767);
         }
