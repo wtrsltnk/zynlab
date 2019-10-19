@@ -19,6 +19,7 @@ protected:
     virtual bool OnInit() = 0;
     virtual void OnTick(double timeInMs) = 0;
     virtual void OnRender() = 0;
+    virtual void OnRenderUi() = 0;
     virtual void OnDestroy() = 0;
     virtual void OnKeyAction(int key, int scancode, int action, int mods) = 0;
     virtual void OnResize(int width, int height) = 0;

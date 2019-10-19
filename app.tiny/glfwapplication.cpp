@@ -1,5 +1,9 @@
 #include "glfwapplication.h"
 
+#include <imgui.h>
+#include <examples/imgui_impl_glfw.h>
+#include <examples/imgui_impl_opengl3.h>
+
 GLFWApplication::GLFWApplication() {}
 
 GLFWApplication::~GLFWApplication() {}
@@ -25,6 +29,29 @@ int GLFWApplication::Run()
 
     gladLoadGL();
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+    io.ConfigDockingWithShift = false;
+
+    ImGui_ImplGlfw_InitForOpenGL(_window, true);
+    ImGui_ImplOpenGL3_Init("#version 130");
+
+    io.Fonts->Clear();
+    ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+    if (font != nullptr)
+    {
+        io.FontDefault = font;
+    }
+    else
+    {
+        io.Fonts->AddFontDefault();
+    }
+    io.Fonts->Build();
+
     if (!OnInit())
     {
         return -1;
@@ -36,6 +63,27 @@ int GLFWApplication::Run()
         glClear(GL_COLOR_BUFFER_BIT);
 
         this->OnRender();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        this->OnRenderUi();
+
+        ImGui::Render();
+
+        // Update and Render additional Platform Windows
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
+
+        int display_w, display_h;
+        glfwMakeContextCurrent(_window);
+        glfwGetFramebufferSize(_window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(_window);
     }

@@ -5,16 +5,13 @@
 
 class AppTiny : public GLFWApplication
 {
-    class SceneNode *_sceneRoot;
-
 public:
     AppTiny();
-
-    SceneNode* BuildScene();
 
     virtual bool OnInit();
     virtual void OnTick(double timeInMs);
     virtual void OnRender();
+    virtual void OnRenderUi();
     virtual void OnDestroy();
     virtual void OnKeyAction(int key, int scancode, int action, int mods);
     virtual void OnResize(int width, int height);

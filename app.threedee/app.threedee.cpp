@@ -142,6 +142,8 @@ bool AppThreeDee::Setup()
     }
     io.Fonts->Build();
 
+    io.IniFilename = nullptr;
+
     _state._library->RefreshLibraries();
 
     _state._currentTrack = 0;
@@ -623,7 +625,6 @@ void AppThreeDee::Render()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuiIO &io = ImGui::GetIO();
-    io.IniFilename = nullptr;
 
     ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
