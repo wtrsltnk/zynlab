@@ -505,8 +505,6 @@ bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
 
     Columns(1);
 
-    PopStyleColor();
-
     EndChild();
 
     ImVec2 const buttonstart = GetCursorScreenPos();

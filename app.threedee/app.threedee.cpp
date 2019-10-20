@@ -294,16 +294,12 @@ void AppThreeDee::Tick()
 
 void AppThreeDee::PianoRollEditor()
 {
-    if (!_state._showEditor)
-    {
-        return;
-    }
-
     bool regionIsModified = false;
     static struct TrackRegionEvent *selectedEvent = nullptr;
 
     auto track = _state._mixer->GetTrack(_state._currentTrack);
 
+    ImGui::SetNextWindowSize(ImVec2(400, 400));
     if (ImGui::Begin("Pianoroll editor") && track != nullptr && _state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
     {
         auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
@@ -465,11 +461,7 @@ void AppThreeDee::PianoRollEditor()
 
 void AppThreeDee::RegionEditor()
 {
-    if (!_state._showEditor)
-    {
-        return;
-    }
-
+    ImGui::SetNextWindowSize(ImVec2(400, 400));
     if (ImGui::Begin("Region editor"))
     {
         ImGui::Text("Zoom");
@@ -721,6 +713,8 @@ void AppThreeDee::Render()
             ImGui::DockBuilderDockWindow(InsertionFxEditorID, dock_id_instrument);
             ImGui::DockBuilderDockWindow(SystemFxEditorID, dock_id_instrument);
             ImGui::DockBuilderDockWindow(TrackFxEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow("Region editor", dock_main_id);
+            ImGui::DockBuilderDockWindow("Pianoroll editor", dock_main_id);
             ImGui::DockBuilderFinish(dockspace_id);
         }
         auto dockSize = viewport->Size;
@@ -749,8 +743,11 @@ void AppThreeDee::Render()
         }
         ImGui::PopStyleVar();
 
-        PianoRollEditor();
-        RegionEditor();
+        if (_state._showEditor)
+        {
+            PianoRollEditor();
+            RegionEditor();
+        }
 
         ImGui::EndChild();
     }
@@ -868,26 +865,32 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_library", &_state._showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
+        ImGui::ShowTooltipOnHover("Show/Hide Library");
 
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_inspector", &_state._showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
+        ImGui::ShowTooltipOnHover("Show/Hide Inspector");
 
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_quick_help", &_state._showQuickHelp, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::QuickHelp)]), ImVec2(32, 32));
+        ImGui::ShowTooltipOnHover("Show/Hide Quick Help");
 
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_mixer", &_state._showMixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
+        ImGui::ShowTooltipOnHover("Show/Hide Mixer");
 
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
+        ImGui::ShowTooltipOnHover("Show/Hide Editor");
 
         ImGui::SameLine();
 
         ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
+        ImGui::ShowTooltipOnHover("Show/Hide Smart Controls");
 
         ImGui::SameLine();
 
