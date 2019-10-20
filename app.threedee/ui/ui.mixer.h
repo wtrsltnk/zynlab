@@ -5,6 +5,8 @@
 #include "../instrumentcategories.h"
 #include "ui.dialogs.h"
 
+#define INSPECTOR_WIDTH 320
+
 namespace zyn {
 namespace ui {
 
@@ -21,7 +23,6 @@ protected:
     void ImGuiMasterTrack();
     void ImGuiMixer();
     void ImGuiTrack(int trackIndex, bool highlightTrack);
-    void ImGuiInspector();
     void ImGuiChangeInstrumentTypePopup();
     void AddInsertFx(int track);
     void RemoveInsertFxFromTrack(int fx);
@@ -36,6 +37,7 @@ public:
     bool ShowMixer() const;
     void ShowMixer(bool show);
 
+    void RenderInspector();
     bool ShowInspector() const;
     void ShowInspector(bool show);
 };

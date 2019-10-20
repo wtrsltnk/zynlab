@@ -26,6 +26,8 @@
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/FFTwrapper.h>
 
+#define TOOLBAR_HEIGHT 120
+
 class AppThreeDee
 {
 private:

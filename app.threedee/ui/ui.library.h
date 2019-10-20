@@ -4,6 +4,8 @@
 #include "../appstate.h"
 #include <zyn.common/ILibraryManager.h>
 
+#define LIBRARY_WIDTH 420
+
 namespace zyn {
 namespace ui {
 

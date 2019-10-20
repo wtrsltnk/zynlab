@@ -37,7 +37,7 @@ void zyn::ui::Library::Render()
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    if (ImGui::Begin(LibraryID))
+    if (ImGui::BeginChild(LibraryID, ImVec2(LIBRARY_WIDTH, 0)))
     {
         if (ImGui::BeginTabBar("LibraryTabs"))
         {
@@ -56,8 +56,9 @@ void zyn::ui::Library::Render()
             ImGui::EndTabBar();
         }
     }
-    ImGui::End();
+    ImGui::EndChild();
     ImGui::PopStyleVar();
+    ImGui::SameLine();
 }
 
 bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)

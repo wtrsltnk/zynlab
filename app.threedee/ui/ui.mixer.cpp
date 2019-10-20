@@ -28,7 +28,6 @@ bool zyn::ui::Mixer::Setup()
 
 void zyn::ui::Mixer::Render()
 {
-    ImGuiInspector();
     ImGuiMixer();
     ImGuiChangeInstrumentTypePopup();
 }
@@ -36,7 +35,7 @@ void zyn::ui::Mixer::Render()
 #define MIN_DB (-48)
 
 static ImVec2 trackSize = ImVec2(TRACK_WIDTH, 0);
-static float sliderBaseHeight = 150.0f;
+static float sliderBaseHeight = 140.0f;
 static float const largeModeTreshold = 4.5f;
 static int mostInsertEffectsPerTrack = 0;
 
@@ -185,7 +184,7 @@ void zyn::ui::Mixer::ImGuiMixer()
     ImGui::End();
 }
 
-void zyn::ui::Mixer::ImGuiInspector()
+void zyn::ui::Mixer::RenderInspector()
 {
     if (!_state->_showInspector)
     {
@@ -193,7 +192,7 @@ void zyn::ui::Mixer::ImGuiInspector()
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
-    ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::BeginChild("Inspector", ImVec2(INSPECTOR_WIDTH, 0));
     {
         if (_state->_showQuickHelp && ImGui::CollapsingHeader("Quick help"))
         {
@@ -236,8 +235,9 @@ void zyn::ui::Mixer::ImGuiInspector()
         ImGui::SameLine();
         ImGuiTrack(_state->_currentTrack, false);
     }
-    ImGui::End();
+    ImGui::EndChild();
     ImGui::PopStyleVar();
+    ImGui::SameLine();
 }
 
 unsigned char indexOf(std::vector<char const *> const &values, std::string const &selectedValue)
@@ -264,6 +264,10 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
     {
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
+
+        if (ImGui::Button("MASTER", ImVec2(width, 0)))
+        {
+        }
 
         // Output devices
         auto sinks = toCharVector(Nio::GetSinks());

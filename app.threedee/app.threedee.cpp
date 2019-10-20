@@ -1,14 +1,14 @@
 #include "app.threedee.h"
 
+#include "stb_image.h"
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
 #include <examples/imgui_impl_glfw.h>
 #include <examples/imgui_impl_opengl3.h>
 #include <imgui_Timeline.h>
 #include <imgui_checkbutton.h>
 #include <imgui_knob.h>
-#include "stb_image.h"
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
 #include <iterator>
 #include <map>
 #include <zyn.common/WavFileWriter.h>
@@ -676,65 +676,86 @@ void AppThreeDee::Render()
             ImGui::EndMenuBar();
         }
 
+        if (sf)
+        {
+            _dialogs.SaveFileDialog(zyn::ui::Dialogs::SAVEFILE_DIALOG_ID);
+        }
+        if (of)
+        {
+            _dialogs.OpenFileDialog(zyn::ui::Dialogs::OPENFILE_DIALOG_ID);
+        }
+        RenderDialogs();
+
+        ImGuiPlayback();
+
+        _libraryUi.Render();
+
+        _mixerUi.RenderInspector();
+
+        ImGui::BeginChild("docking_space_child");
         ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
         if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
         {
-            ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+            ImGui::DockBuilderRemoveNode(dockspace_id);                       // Clear out existing layout
             ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None); // Add empty node
             ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
             ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
             ImGuiID dock_id_toolbar = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, 0.10f, nullptr, &dock_main_id);
-            ImGuiDockNode* toolbar = ImGui::DockBuilderGetNode(dock_id_toolbar);
+            ImGuiDockNode *toolbar = ImGui::DockBuilderGetNode(dock_id_toolbar);
             toolbar->LocalFlags |= ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoSplit | ImGuiWindowFlags_NoCollapse | ImGuiDockNodeFlags_NoDocking;
             ImGui::DockBuilderSetNodeSize(dock_id_toolbar, ImVec2(viewport->Size.x, 70));
 
-            ImGuiID dock_id_inspector = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, nullptr, &dock_main_id);
-            ImGuiDockNode* inspector = ImGui::DockBuilderGetNode(dock_id_inspector);
-            inspector->LocalFlags |= ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoSplit |  ImGuiDockNodeFlags_NoDocking;
-            ImGui::DockBuilderSetNodeSize(dock_id_inspector, ImVec2(400, viewport->Size.y - 70));
-
             ImGuiID dock_id_mixer = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, nullptr, &dock_main_id);
 
-            ImGui::DockBuilderDockWindow("Playback", dock_id_toolbar);
+            ImGuiID dock_id_instrument = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
+
+            //ImGui::DockBuilderDockWindow("Playback", dock_id_toolbar);
             ImGui::DockBuilderDockWindow("Mixer", dock_id_mixer);
-            ImGui::DockBuilderDockWindow("Inspector", dock_id_inspector);
+            //            ImGui::DockBuilderDockWindow("Inspector", dock_id_inspector);
+            ImGui::DockBuilderDockWindow(AdSynthEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow(PadSynthEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow(SubSynthEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow(SmplSynthEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow(OscillatorEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow(InsertionFxEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow(SystemFxEditorID, dock_id_instrument);
+            ImGui::DockBuilderDockWindow(TrackFxEditorID, dock_id_instrument);
             ImGui::DockBuilderFinish(dockspace_id);
         }
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+        auto dockSize = viewport->Size;
+        dockSize.y -= TOOLBAR_HEIGHT;
+        if (_state._showInspector)
+        {
+            dockSize.x -= INSPECTOR_WIDTH;
+        }
+        if (_state._showLibrary && _state._currentTrack >= 0)
+        {
+            dockSize.x -= LIBRARY_WIDTH;
+        }
+        ImGui::DockSpace(dockspace_id, dockSize, ImGuiDockNodeFlags_None);
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+        _mixerUi.Render();
+
+        if (_state._showSmartControls)
+        {
+            _effectUi.Render();
+            _adNoteUI.Render();
+            _padNoteUi.Render();
+            _subNoteUi.Render();
+            _smplNoteUi.Render();
+            _oscilGenUi.Render();
+        }
+        ImGui::PopStyleVar();
+
+        PianoRollEditor();
+        RegionEditor();
+
+        ImGui::EndChild();
     }
     ImGui::End();
     ImGui::PopStyleVar(2);
-
-    if (sf)
-    {
-        _dialogs.SaveFileDialog(zyn::ui::Dialogs::SAVEFILE_DIALOG_ID);
-    }
-    if (of)
-    {
-        _dialogs.OpenFileDialog(zyn::ui::Dialogs::OPENFILE_DIALOG_ID);
-    }
-    RenderDialogs();
-
-    ImGuiPlayback();
-
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
-    _libraryUi.Render();
-    _mixerUi.Render();
-
-    if (_state._showSmartControls)
-    {
-        _effectUi.Render();
-        _adNoteUI.Render();
-        _padNoteUi.Render();
-        _subNoteUi.Render();
-        _smplNoteUi.Render();
-        _oscilGenUi.Render();
-    }
-    ImGui::PopStyleVar();
-
-    PianoRollEditor();
-    RegionEditor();
 
     ImGui::Render();
 
@@ -840,7 +861,7 @@ void gen_random(char *s, const int len)
 
 void AppThreeDee::ImGuiPlayback()
 {
-    ImGui::Begin("Playback", nullptr);
+    ImGui::BeginChild("Playback", ImVec2(0, 60));
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
 
@@ -944,9 +965,8 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::SameLine();
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / static_cast<double>(ImGui::GetIO().Framerate), static_cast<double>(ImGui::GetIO().Framerate));
-
-        ImGui::End();
     }
+    ImGui::EndChild();
 }
 
 void AppThreeDee::Cleanup()
