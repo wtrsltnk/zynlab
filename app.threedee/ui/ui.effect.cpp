@@ -157,6 +157,17 @@ bool zyn::ui::Effect::Setup()
     return true;
 }
 
+static char const *const trackEffectNames[]{
+    "Effect 1",
+    "Effect 2",
+    "Effect 3",
+    "Effect 4",
+    "Effect 5",
+    "Effect 6",
+    "Effect 7",
+    "Effect 8",
+    };
+
 void zyn::ui::Effect::Render()
 {
     if (!_state->_showSmartControls)
@@ -164,62 +175,48 @@ void zyn::ui::Effect::Render()
         return;
     }
 
-    if (ImGui::Begin(InsertionFxEditorID))
+    if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
     {
-        if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
+        if (ImGui::Begin(InsertionFxEditorID))
         {
             EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
         }
+        ImGui::End();
     }
-    ImGui::End();
 
-    if (ImGui::Begin(SystemFxEditorID))
+    if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
     {
-        if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
+        if (ImGui::Begin(SystemFxEditorID))
         {
             EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
         }
+        ImGui::End();
     }
-    ImGui::End();
 
     if (ImGui::Begin(TrackFxEditorID))
     {
+        ImGui::Text("Track effects for track %d", _state->_currentTrack);
+
         auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
         auto io = ImGui::GetStyle();
 
-        auto width = 100;
-        auto trackIndex = _state->_currentTrack;
-        for (int fx = 0; fx < NUM_TRACK_EFX; fx++)
+        if (ImGui::BeginTabBar("TrackEffectsTab"))
         {
-            if (fx > 0) ImGui::SameLine();
-            ImGui::PushID(200 + fx);
-            ImGui::PushStyleColor(ImGuiCol_Button, fx != _state->_currentTrackEffect ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
-
-            if (ImGui::Button(EffectNames[track->partefx[fx]->geteffect()], ImVec2(width - (track->partefx[fx]->geteffect() == 0 ? 0 : 22), 0)))
+            for (int fx = 0; fx < NUM_TRACK_EFX; fx++)
             {
-                _state->_currentTrack = trackIndex;
-                _state->_currentTrackEffect = fx;
-            }
+                ImGui::PushID(200 + fx);
+                ImGui::PushStyleColor(ImGuiCol_Button, fx != _state->_currentTrackEffect ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
-            if (track->partefx[fx]->geteffect() != 0)
-            {
-                ImGui::SameLine();
-                if (ImGui::Button("x", ImVec2(20, 0)))
+                if (ImGui::BeginTabItem(trackEffectNames[fx]))
                 {
-                    _state->_currentTrack = trackIndex;
-                    _state->_currentTrackEffect = fx;
-                    track->partefx[fx]->changeeffect(0);
+                    EffectEditor(track->partefx[fx]);
+                    ImGui::EndTabItem();
                 }
-                ImGui::ShowTooltipOnHover("Remove effect from track");
+                ImGui::PopStyleColor(1);
+                ImGui::PopID();
             }
-            ImGui::PopStyleColor(1);
-            ImGui::PopID();
-        }
-
-        if (_state->_currentTrackEffect >= 0 && _state->_currentTrackEffect < NUM_TRACK_EFX)
-        {
-            EffectEditor(track->partefx[_state->_currentTrackEffect]);
+            ImGui::EndTabBar();
         }
     }
     ImGui::End();

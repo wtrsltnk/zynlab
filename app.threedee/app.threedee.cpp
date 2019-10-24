@@ -734,12 +734,12 @@ void AppThreeDee::Render()
 
         if (_state._showSmartControls)
         {
-            _effectUi.Render();
             _adNoteUI.Render();
             _padNoteUi.Render();
             _subNoteUi.Render();
             _smplNoteUi.Render();
             _oscilGenUi.Render();
+            _effectUi.Render();
         }
         ImGui::PopStyleVar();
 
