@@ -207,7 +207,7 @@ void zyn::ui::Library::InstrumentLibrary()
 
     ImGui::Text("Instruments");
 
-    if (ImGui::ListBoxHeader("##Instruments", ImVec2(maxSize.x / 2, -ImGui::GetTextLineHeightWithSpacing())))
+    if (ImGui::ListBoxHeader("##Instruments", ImVec2((maxSize.x - 5) / 2, -ImGui::GetTextLineHeightWithSpacing())))
     {
         for (auto instrument : _state->_library->GetInstruments())
         {
@@ -259,7 +259,7 @@ void zyn::ui::Library::SampleLibrary()
 
     ImGui::Text("Samples");
 
-    if (ImGui::ListBoxHeader("##Samples", ImVec2(maxSize.x / 2, -ImGui::GetTextLineHeightWithSpacing())))
+    if (ImGui::ListBoxHeader("##Samples", ImVec2((maxSize.x - 5) / 2, -ImGui::GetTextLineHeightWithSpacing())))
     {
         for (auto sample : _state->_library->GetSamples())
         {

@@ -265,7 +265,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
         auto availableRegion = ImGui::GetContentRegionAvail();
         auto width = availableRegion.x;
 
-        if (ImGui::Button("MASTER", ImVec2(width, 0)))
+        if (ImGui::Button("STEREO OUT", ImVec2(width, 0)))
         {
         }
 
@@ -458,7 +458,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
         }
         ImGui::ShowTooltipOnHover("Master volume");
 
-        ImGui::TextCentered(ImVec2(width, 20), "master");
+        ImGui::TextCentered(ImVec2(width, 20), "stereo out");
     }
     ImGui::EndChild();
 }

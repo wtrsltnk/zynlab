@@ -5,7 +5,7 @@
 #include "../instrumentcategories.h"
 #include "ui.dialogs.h"
 
-#define INSPECTOR_WIDTH 320
+#define INSPECTOR_WIDTH 305
 
 namespace zyn {
 namespace ui {

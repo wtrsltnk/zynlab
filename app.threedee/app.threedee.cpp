@@ -395,7 +395,7 @@ void AppThreeDee::PianoRollEditor()
         }
         ImGui::EndChild();
 
-        if (ImGui::Button("Clear selected"))
+        if (ImGui::Button("Clear selected") && selectedEvent != nullptr)
         {
             _state._regions.ClearSelectedInRegion(region, *selectedEvent);
             regionIsModified = true;
@@ -411,7 +411,7 @@ void AppThreeDee::PianoRollEditor()
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Clear all but selected"))
+        if (ImGui::Button("Clear all but selected") && selectedEvent != nullptr)
         {
             _state._regions.ClearAllButSelectedInRegion(region, *selectedEvent);
             regionIsModified = true;
@@ -714,7 +714,7 @@ void AppThreeDee::Render()
             ImGui::DockBuilderDockWindow(SystemFxEditorID, dock_id_instrument);
             ImGui::DockBuilderDockWindow(TrackFxEditorID, dock_id_instrument);
             ImGui::DockBuilderDockWindow("Region editor", dock_main_id);
-            ImGui::DockBuilderDockWindow("Pianoroll editor", dock_main_id);
+            ImGui::DockBuilderDockWindow("Pianoroll editor", dock_id_mixer);
             ImGui::DockBuilderFinish(dockspace_id);
         }
         auto dockSize = viewport->Size;
@@ -746,8 +746,9 @@ void AppThreeDee::Render()
         if (_state._showEditor)
         {
             PianoRollEditor();
-            RegionEditor();
         }
+
+        RegionEditor();
 
         ImGui::EndChild();
     }
@@ -858,116 +859,112 @@ void gen_random(char *s, const int len)
 
 void AppThreeDee::ImGuiPlayback()
 {
+    auto width = ImGui::GetWindowContentRegionWidth();
+
     ImGui::BeginChild("Playback", ImVec2(0, 60));
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 5));
 
-        ImGui::SameLine();
-
-        ImGui::ImageToggleButton("toolbar_library", &_state._showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
-        ImGui::ShowTooltipOnHover("Show/Hide Library");
-
-        ImGui::SameLine();
-
-        ImGui::ImageToggleButton("toolbar_inspector", &_state._showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
-        ImGui::ShowTooltipOnHover("Show/Hide Inspector");
-
-        ImGui::SameLine();
-
-        ImGui::ImageToggleButton("toolbar_quick_help", &_state._showQuickHelp, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::QuickHelp)]), ImVec2(32, 32));
-        ImGui::ShowTooltipOnHover("Show/Hide Quick Help");
-
-        ImGui::SameLine();
-
-        ImGui::ImageToggleButton("toolbar_mixer", &_state._showMixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
-        ImGui::ShowTooltipOnHover("Show/Hide Mixer");
-
-        ImGui::SameLine();
-
-        ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
-        ImGui::ShowTooltipOnHover("Show/Hide Editor");
-
-        ImGui::SameLine();
-
-        ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
-        ImGui::ShowTooltipOnHover("Show/Hide Smart Controls");
-
-        ImGui::SameLine();
-
-        ImGui::InvisibleButton("nothing2do", ImVec2(32, 32));
-
-        ImGui::SameLine();
-
-        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Rewind)]), ImVec2(32, 32)))
+        ImGui::BeginChild("Playback_Left", ImVec2(480, 60));
         {
-            _state._playTime = 0;
-            _state._mixer->ShutUp();
-        }
+            ImGui::ImageToggleButton("toolbar_library", &_state._showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Library");
 
-        ImGui::SameLine();
+            ImGui::SameLine();
 
-        ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::FastForward)]), ImVec2(32, 32));
+            ImGui::ImageToggleButton("toolbar_inspector", &_state._showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Inspector");
 
-        ImGui::SameLine();
+            ImGui::SameLine();
 
-        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Stop)]), ImVec2(32, 32)))
-        {
-            _state._playTime = 0;
-            _state._mixer->ShutUp();
-            _state._isPlaying = false;
-        }
+            ImGui::ImageToggleButton("toolbar_quick_help", &_state._showQuickHelp, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::QuickHelp)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Quick Help");
 
-        ImGui::SameLine();
+            ImGui::SameLine(0.0f, 8.0f);
 
-        bool isPlaying = _state._isPlaying;
-        if (ImGui::ImageToggleButton("toolbar_play", &isPlaying, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Play)]), ImVec2(32, 32)))
-        {
-            _state._isPlaying = !_state._isPlaying;
-        }
+            ImGui::ImageToggleButton("toolbar_mixer", &_state._showMixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Mixer");
 
-        ImGui::SameLine();
+            ImGui::SameLine();
 
-        bool isRecording = _state._isRecording;
-        if (ImGui::ImageToggleButton("toolbar_record", &isRecording, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Record)]), ImVec2(32, 32)))
-        {
-            _state._isRecording = !_state._isRecording;
+            ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Editor");
 
-            auto wavEngine = AudioOutputManager::getInstance().GetWavEngine();
-            if (_state._isRecording)
+            ImGui::SameLine();
+
+            ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Smart Controls");
+
+            ImGui::SameLine(0.0f, 8.0f);
+
+            if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Rewind)]), ImVec2(32, 32)))
             {
-                char filename[33];
-                gen_random(filename, 32);
-                std::stringstream s;
-                s << "c:\\temp\\" << filename << ".wav";
-                auto fileWriter = new WavFileWriter(s.str(), SystemSettings::Instance().samplerate, 2);
-                wavEngine->newFile(fileWriter);
-                wavEngine->Start();
+                _state._playTime = 0;
+                _state._mixer->ShutUp();
             }
-            else
+
+            ImGui::SameLine();
+
+            ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::FastForward)]), ImVec2(32, 32));
+
+            ImGui::SameLine();
+
+            if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Stop)]), ImVec2(32, 32)))
             {
-                wavEngine->Stop();
-                wavEngine->destroyFile();
+                _state._playTime = 0;
+                _state._mixer->ShutUp();
+                _state._isPlaying = false;
+            }
+
+            ImGui::SameLine();
+
+            bool isPlaying = _state._isPlaying;
+            if (ImGui::ImageToggleButton("toolbar_play", &isPlaying, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Play)]), ImVec2(32, 32)))
+            {
+                _state._isPlaying = !_state._isPlaying;
+            }
+
+            ImGui::SameLine();
+
+            bool isRecording = _state._isRecording;
+            if (ImGui::ImageToggleButton("toolbar_record", &isRecording, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Record)]), ImVec2(32, 32)))
+            {
+                _state._isRecording = !_state._isRecording;
+
+                auto wavEngine = AudioOutputManager::getInstance().GetWavEngine();
+                if (_state._isRecording)
+                {
+                    char filename[33];
+                    gen_random(filename, 32);
+                    std::stringstream s;
+                    s << "c:\\temp\\" << filename << ".wav";
+                    auto fileWriter = new WavFileWriter(s.str(), SystemSettings::Instance().samplerate, 2);
+                    wavEngine->newFile(fileWriter);
+                    wavEngine->Start();
+                }
+                else
+                {
+                    wavEngine->Stop();
+                    wavEngine->destroyFile();
+                }
             }
         }
+        ImGui::EndChild();
 
         ImGui::SameLine();
 
-        ImGui::InvisibleButton("nothing2do", ImVec2(32, 32));
+        ImGui::BeginChild("Playback_Right", ImVec2(0, 60));
+        {
+            ImGui::PushItemWidth(100);
+            ImGui::InputInt("##bpm", &(_state._bpm));
 
-        ImGui::SameLine();
+            ImGui::SameLine();
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / static_cast<double>(ImGui::GetIO().Framerate), static_cast<double>(ImGui::GetIO().Framerate));
+        }
+        ImGui::EndChild();
 
         ImGui::PopStyleVar();
-
-        ImGui::Spacing();
-
-        ImGui::SameLine();
-
-        ImGui::PushItemWidth(100);
-        ImGui::InputInt("##bpm", &(_state._bpm));
-
-        ImGui::SameLine();
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / static_cast<double>(ImGui::GetIO().Framerate), static_cast<double>(ImGui::GetIO().Framerate));
     }
     ImGui::EndChild();
 }

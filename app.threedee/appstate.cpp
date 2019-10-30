@@ -9,7 +9,7 @@
 #include <stb_image_write.h>
 
 AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
-    : _mixer(mixer), _library(library), _showLibrary(false), _showEditor(false), _showInspector(true),
+    : _mixer(mixer), _library(library), _showLibrary(false), _showEditor(true), _showInspector(true),
       _showMixer(true), _showSmartControls(true), _showQuickHelp(false), _showTrackTypeChanger(-1),
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentLibrary(nullptr),
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1), _currentVoiceOscil(-1),
