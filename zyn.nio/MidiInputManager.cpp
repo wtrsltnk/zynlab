@@ -80,11 +80,10 @@ void MidiInputManager::PutEvent(MidiEvent ev)
     if (_queue.push(ev)) //check for error
     {
         std::cerr << "ERROR: Midi Ringbuffer is FULL" << std::endl;
+        return;
     }
-    else
-    {
-        _work.post();
-    }
+
+    _work.post();
 }
 
 void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)

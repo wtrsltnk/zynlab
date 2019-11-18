@@ -14,7 +14,7 @@ AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
       _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentLibrary(nullptr),
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1), _currentVoiceOscil(-1),
       _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150),
-      _bpm(138), _isPlaying(false), _isRecording(false), _playTime(0), _maxPlayTime(16 * 1024)
+      _bpm(138), _isPlaying(false), _isRecording(false), _playTime(0), _maxPlayTime(4 * 1024)
 {
     _regions.AddRegion(0, 0, 4 * 1024);
     _currentPattern = 0;

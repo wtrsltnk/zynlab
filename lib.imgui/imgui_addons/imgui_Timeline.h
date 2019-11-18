@@ -5,7 +5,14 @@
 
 #include "imgui_common.h"
 #include "imgui_knob.h"
-#include <zyn.seq/TrackRegion.h>
+
+#ifndef timestep
+
+#include <chrono>
+
+typedef std::chrono::milliseconds::rep timestep;
+
+#endif // timestep
 
 namespace ImGui {
 

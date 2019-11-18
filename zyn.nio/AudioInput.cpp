@@ -20,8 +20,7 @@
 
 */
 
-#include "AudioOutput.h"
-#include "AudioOutputManager.h"
+#include "AudioInput.h"
 #include "SafeQueue.h"
 
 #include <cstring>
@@ -29,29 +28,23 @@
 
 using namespace std;
 
-AudioOutput::AudioOutput(unsigned int sampleRate, unsigned int bufferSize)
+AudioInput::AudioInput(unsigned int sampleRate, unsigned int bufferSize)
     : _sampleRate(sampleRate), _bufferSize(bufferSize)
 {}
 
-AudioOutput::~AudioOutput() = default;
+AudioInput::~AudioInput() = default;
 
-unsigned int AudioOutput::SampleRate() const
+unsigned int AudioInput::SampleRate() const
 {
     return _sampleRate;
 }
 
-unsigned int AudioOutput::BufferSize() const
+unsigned int AudioInput::BufferSize() const
 {
     return _bufferSize;
 }
 
-const Stereo<float *> AudioOutput::NextSample()
-{
-    return AudioOutputManager::getInstance()
-        .NextSample(_bufferSize);
-}
-
-void AudioOutput::SetAudioEnabled(bool nval)
+void AudioInput::SetAudioEnabled(bool nval)
 {
     if (nval)
     {

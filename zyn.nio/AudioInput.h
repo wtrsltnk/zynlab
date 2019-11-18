@@ -20,45 +20,28 @@
 
 */
 
-#include "AudioOutput.h"
-#include "AudioOutputManager.h"
-#include "SafeQueue.h"
+#ifndef AUDIOINPUT_H
+#define AUDIOINPUT_H
 
-#include <cstring>
-#include <iostream>
+#include "Engine.h"
+#include <zyn.common/Stereo.h>
+#include <zyn.common/globals.h>
 
-using namespace std;
-
-AudioOutput::AudioOutput(unsigned int sampleRate, unsigned int bufferSize)
-    : _sampleRate(sampleRate), _bufferSize(bufferSize)
-{}
-
-AudioOutput::~AudioOutput() = default;
-
-unsigned int AudioOutput::SampleRate() const
+class AudioInput : public virtual Engine
 {
-    return _sampleRate;
-}
+public:
+    AudioInput(unsigned int sampleRate, unsigned int _bufferSize);
+    virtual ~AudioInput();
 
-unsigned int AudioOutput::BufferSize() const
-{
-    return _bufferSize;
-}
+    unsigned int SampleRate() const;
+    unsigned int BufferSize() const;
 
-const Stereo<float *> AudioOutput::NextSample()
-{
-    return AudioOutputManager::getInstance()
-        .NextSample(_bufferSize);
-}
+    virtual void SetAudioEnabled(bool nval);
+    virtual bool IsAudioEnabled() const = 0;
 
-void AudioOutput::SetAudioEnabled(bool nval)
-{
-    if (nval)
-    {
-        Start();
-    }
-    else
-    {
-        Stop();
-    }
-}
+protected:
+    unsigned int _sampleRate;
+    unsigned int _bufferSize;
+};
+
+#endif // AUDIOINPUT_H

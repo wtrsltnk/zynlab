@@ -21,6 +21,8 @@ set(DssiEnable  ${DSSI_FOUND}      CACHE BOOL  "Enable DSSI Plugin compilation")
 set(LibloEnable ${LIBLO_FOUND}     CACHE BOOL  "Enable Liblo")
 
 add_library(zyn.nio STATIC
+    AudioInput.cpp
+    AudioInput.h
     AudioOutput.cpp
     AudioOutput.h
     AudioOutputManager.cpp

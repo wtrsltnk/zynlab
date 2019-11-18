@@ -562,6 +562,27 @@ void AppThreeDee::RegionEditor()
     ImGui::End();
 }
 
+void AppThreeDee::RegionEditor2()
+{
+    if (ImGui::Begin("Region editor"))
+    {
+        auto size = ImGui::GetWindowSize();
+        ImGui::Text("%fx%f", size.x, size.y);
+        ImGuiWindow const *const win = ImGui::GetCurrentWindow();
+
+        for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+        {
+            ImGui::PushID(trackIndex);
+            auto track = _state._mixer->GetTrack(trackIndex);
+            auto hue = trackIndex * 0.05f;
+            auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
+
+            ImGui::PopID();
+        }
+    }
+    ImGui::End();
+}
+
 void AppThreeDee::NewFile()
 {
     _currentFileName = "";
@@ -748,7 +769,8 @@ void AppThreeDee::Render()
             PianoRollEditor();
         }
 
-        RegionEditor();
+        //RegionEditor();
+        RegionEditor2();
 
         ImGui::EndChild();
     }
@@ -925,29 +947,6 @@ void AppThreeDee::ImGuiPlayback()
             }
 
             ImGui::SameLine();
-
-            bool isRecording = _state._isRecording;
-            if (ImGui::ImageToggleButton("toolbar_record", &isRecording, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Record)]), ImVec2(32, 32)))
-            {
-                _state._isRecording = !_state._isRecording;
-
-                auto wavEngine = AudioOutputManager::getInstance().GetWavEngine();
-                if (_state._isRecording)
-                {
-                    char filename[33];
-                    gen_random(filename, 32);
-                    std::stringstream s;
-                    s << "c:\\temp\\" << filename << ".wav";
-                    auto fileWriter = new WavFileWriter(s.str(), SystemSettings::Instance().samplerate, 2);
-                    wavEngine->newFile(fileWriter);
-                    wavEngine->Start();
-                }
-                else
-                {
-                    wavEngine->Stop();
-                    wavEngine->destroyFile();
-                }
-            }
         }
         ImGui::EndChild();
 

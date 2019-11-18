@@ -33,16 +33,9 @@ public:
     AudioOutput(unsigned int sampleRate, unsigned int _bufferSize);
     virtual ~AudioOutput();
 
-    /**Sets the Sample Rate of this Output
-         * (used for getNext()).*/
-    void SetSamplerate(unsigned int _samplerate);
-
     /**Gets the Samples required per Out of this driver
          * not a realtime opperation */
     unsigned int SampleRate() const;
-
-    /**Sets the Frame Size for output*/
-    void SetBufferSize(unsigned int _bufferSize);
 
     /**Gets the Frame Size for output*/
     unsigned int BufferSize() const;
