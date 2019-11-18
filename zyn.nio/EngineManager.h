@@ -4,7 +4,6 @@
 #include "Engine.h"
 #include <list>
 #include <string>
-#include <zyn.common/IAudioGenerator.h>
 
 class MidiInput;
 class AudioOutput;
@@ -14,10 +13,10 @@ class EngineManager
 {
     friend class Nio;
     static EngineManager *_instance;
-    EngineManager(IAudioGenerator *audioGenerator);
+    EngineManager(unsigned int sampleRate, unsigned int bufferSize);
 
 public:
-    static EngineManager &CreateInstance(IAudioGenerator *audioGenerator);
+    static EngineManager &CreateInstance(unsigned int sampleRate, unsigned int bufferSize);
     static EngineManager &Instance();
     static void DestroyInstance();
     virtual ~EngineManager();

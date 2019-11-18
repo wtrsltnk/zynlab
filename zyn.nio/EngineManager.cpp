@@ -28,11 +28,11 @@
 
 EngineManager *EngineManager::_instance = nullptr;
 
-EngineManager &EngineManager::CreateInstance(IAudioGenerator *audioGenerator)
+EngineManager &EngineManager::CreateInstance(unsigned int sampleRate, unsigned int bufferSize)
 {
     if (EngineManager::_instance == nullptr)
     {
-        EngineManager::_instance = new EngineManager(audioGenerator);
+        EngineManager::_instance = new EngineManager(sampleRate, bufferSize);
     }
 
     return *EngineManager::_instance;
@@ -49,9 +49,9 @@ void EngineManager::DestroyInstance()
     EngineManager::_instance = nullptr;
 }
 
-EngineManager::EngineManager(IAudioGenerator *audioGenerator)
+EngineManager::EngineManager(unsigned int sampleRate, unsigned int bufferSize)
 {
-    Engine *defaultEng = new NulEngine(audioGenerator->SampleRate(), audioGenerator->BufferSize());
+    Engine *defaultEng = new NulEngine(sampleRate, bufferSize);
 
     //conditional compiling mess (but contained)
     engines.push_back(defaultEng);
@@ -67,7 +67,7 @@ EngineManager::EngineManager(IAudioGenerator *audioGenerator)
     engines.push_back(new JackEngine(mixer->_synth));
 #endif
 #ifdef PORTAUDIO
-    engines.push_back(new PaEngine(audioGenerator->SampleRate(), audioGenerator->BufferSize()));
+    engines.push_back(new PaEngine(sampleRate, bufferSize));
 #endif
 #ifdef SDL2
     // TODO Not working yet!
@@ -77,16 +77,6 @@ EngineManager::EngineManager(IAudioGenerator *audioGenerator)
     defaultOut = dynamic_cast<AudioOutput *>(defaultEng);
 
     defaultIn = dynamic_cast<MidiInput *>(defaultEng);
-
-    //Accept command line/compile time options
-    if (!Nio::defaultSink.empty())
-    {
-        SetDefaultMidiInput(Nio::defaultSink);
-    }
-    if (!Nio::defaultSource.empty())
-    {
-        SetDefaultAudioOutput(Nio::defaultSource);
-    }
 }
 
 EngineManager::~EngineManager()

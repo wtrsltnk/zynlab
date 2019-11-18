@@ -18,9 +18,21 @@ std::string Nio::defaultSource;
 
 bool Nio::Start(IAudioGenerator *audioGenerator, IMidiEventHandler *midiEventHandler)
 {
-    _midiInputManager = &MidiInputManager::CreateInstance(midiEventHandler);    //Enable input wrapper
-    _audioOutpuManager = &AudioOutputManager::createInstance(audioGenerator); //Initialize the Output Systems
-    _engineManager = &EngineManager::CreateInstance(audioGenerator);          //Initialize The Engines
+    _midiInputManager = &MidiInputManager::CreateInstance(midiEventHandler);                                     //Enable input wrapper
+    _audioOutpuManager = &AudioOutputManager::createInstance(audioGenerator);                                    //Initialize the Output Systems
+    _engineManager = &EngineManager::CreateInstance(audioGenerator->SampleRate(), audioGenerator->BufferSize()); //Initialize The Engines
+
+    if (!Nio::defaultSink.empty())
+    {
+        _engineManager->SetDefaultMidiInput(Nio::defaultSink);
+    }
+    if (!Nio::defaultSource.empty())
+    {
+        _engineManager->SetDefaultAudioOutput(Nio::defaultSource);
+    }
+
+    unsigned int sampleRate = audioGenerator->SampleRate();
+    Nio::preferedSampleRate(sampleRate);
 
     return _engineManager->Start();
 }

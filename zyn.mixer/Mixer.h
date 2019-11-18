@@ -60,9 +60,7 @@ class Mixer : public IMixer, public IAudioGenerator, public IMidiEventHandler, p
     friend class MixerSerializer;
 
 public:
-    /** Constructor TODO make private*/
     Mixer();
-    /** Destructor*/
     virtual ~Mixer();
 
     void Init();

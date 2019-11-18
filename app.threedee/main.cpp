@@ -9,24 +9,25 @@ static int Pexitprogram = 0;
 static LibraryManager libraryManager;
 static Mixer *mixer;
 
-//cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
 {
     Pexitprogram = 1;
 }
 
-/*
- * Program initialisation
- */
 void initprogram()
 {
     Config::Current().init();
 
-    /* Get the settings from the Config*/
     SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
     SystemSettings::Instance().buffersize = Config::Current().cfg.SoundBufferSize;
     SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
     SystemSettings::Instance().alias();
+
+    mixer = new Mixer();
+    mixer->Init();
+    mixer->swaplr = Config::Current().cfg.SwapStereo;
+
+    Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
 
     std::cerr.precision(1);
     std::cerr << std::fixed;
@@ -35,19 +36,10 @@ void initprogram()
     std::cerr << "Internal latency = \t\t" << SystemSettings::Instance().buffersize_f * 1000.0f / SystemSettings::Instance().samplerate_f << " ms" << std::endl;
     std::cerr << "ADsynth Oscil.Size = \t" << SystemSettings::Instance().oscilsize << " samples" << std::endl;
 
-    mixer = new Mixer();
-    mixer->Init();
-    mixer->swaplr = Config::Current().cfg.SwapStereo;
-
-    Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
-
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
 }
 
-/*
- * Program exit
- */
 int exitprogram()
 {
     //ensure that everything has stopped with the mutex wait
@@ -74,7 +66,7 @@ int main(int /*argc*/, char * /*argv*/ [])
         }
         libraryManager.AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
     }
-    //Run the Nio system
+
     if (!Nio::Start(mixer, mixer))
     {
         return -1;
