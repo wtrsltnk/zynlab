@@ -77,7 +77,7 @@ MidiInputManager::~MidiInputManager() = default;
 
 void MidiInputManager::PutEvent(MidiEvent ev)
 {
-    if (_queue.push(ev)) //check for error
+    if (_queue.push(ev))
     {
         std::cerr << "ERROR: Midi Ringbuffer is FULL" << std::endl;
         return;
@@ -109,7 +109,6 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
         {
             case MidiEventTypes::M_NOTE:
             {
-                std::cout << ev << std::endl;
                 if (ev.value)
                 {
                     this->_midiEventHandler->NoteOn(

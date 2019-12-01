@@ -26,7 +26,6 @@ struct MidiEvent
     unsigned int time;    // time offset of event (used only in jack->jack case at the moment)
 };
 
-//super simple class to manage the inputs
 class MidiInputManager
 {
     static MidiInputManager *_instance;
@@ -54,7 +53,6 @@ private:
     mutable ZynSema _work;
     class MidiInput *_current;
 
-    /**the link to the rest of zyn*/
     IMidiEventHandler *_midiEventHandler;
 };
 

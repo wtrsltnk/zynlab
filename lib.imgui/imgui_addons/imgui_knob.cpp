@@ -207,7 +207,7 @@ bool ImGui::DropDown(char const *label, unsigned char &value, char const *const 
     bool value_changed = false;
 
     auto current_effect_item = names[value];
-    if (ImGui::BeginCombo(label, current_effect_item))
+    if (ImGui::BeginCombo(label, current_effect_item, ImGuiComboFlags_HeightLarge))
     {
         for (unsigned char n = 0; n < nameCount; n++)
         {

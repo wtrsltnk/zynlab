@@ -166,7 +166,7 @@ static char const *const trackEffectNames[]{
     "Effect 6",
     "Effect 7",
     "Effect 8",
-    };
+};
 
 void zyn::ui::Effect::Render()
 {
@@ -313,7 +313,7 @@ void zyn::ui::Effect::EffectEditor(EffectManager *effectManager)
         case 8:
             EffectDynFilterEditor(effectManager);
             break;
-    };
+    }
     ImGui::PopStyleVar();
 }
 
@@ -504,7 +504,7 @@ void zyn::ui::Effect::EffectChorusEditor(EffectManager *effectManager)
 
     ImGui::Separator();
 
-    LFOEditor(effectManager, "Chorus LFO");
+    LFOEditor(effectManager, "LFO");
 }
 
 void zyn::ui::Effect::EffectPhaserEditor(EffectManager *effectManager)
@@ -577,7 +577,7 @@ void zyn::ui::Effect::EffectPhaserEditor(EffectManager *effectManager)
 
     ImGui::Separator();
 
-    LFOEditor(effectManager, "Phaser LFO");
+    LFOEditor(effectManager, "LFO");
 }
 
 void zyn::ui::Effect::EffectAlienWahEditor(EffectManager *effectManager)
@@ -633,7 +633,7 @@ void zyn::ui::Effect::EffectAlienWahEditor(EffectManager *effectManager)
 
     ImGui::Separator();
 
-    LFOEditor(effectManager, "Alien Wah LFO");
+    LFOEditor(effectManager, "LFO");
 }
 
 void zyn::ui::Effect::EffectDistortionEditor(EffectManager *effectManager)
@@ -761,7 +761,9 @@ void zyn::ui::Effect::EffectEQEditor(EffectManager *effectManager)
             auto presetStart = (band * 5);
             ImGui::PushID(band);
             auto type = static_cast<unsigned char>(effectManager->geteffectpar(presetStart + EQPresets::EQBandType));
-            if (ImGui::BeginTabItem(eqBandTypes[type]))
+            char label[32];
+            sprintf(label, "Band %d   ", band);
+            if (ImGui::BeginTabItem(label, nullptr, type != 0 ? ImGuiTabItemFlags_UnsavedDocument : ImGuiTabItemFlags_None))
             {
                 ImGui::PushItemWidth(100);
                 if (ImGui::DropDown("EQ Type", type, eqBandTypes, eqBandTypeCount, "Equalizer type"))
@@ -818,6 +820,10 @@ void zyn::ui::Effect::EffectDynFilterEditor(EffectManager *effectManager)
 
     VolumeAndPanning(effectManager);
 
+    ImGui::Separator();
+
+    LFOEditor(effectManager, "LFO");
+
     ImGui::SameLine();
 
     auto depth = effectManager->geteffectpar(DynFilterPresets::DynFilterDepth);
@@ -852,8 +858,6 @@ void zyn::ui::Effect::EffectDynFilterEditor(EffectManager *effectManager)
     {
         effectManager->seteffectpar(DynFilterPresets::DynFilterAmplitudeSmooth, ampSmooth);
     }
-
-    ImGui::Separator();
 
     ImGui::Separator();
 

@@ -67,13 +67,11 @@ void Mixer::Init()
         npart.Init(this, &microtonal);
     }
 
-    //Insertion Effects init
     for (auto &nefx : insefx)
     {
         nefx.Init(this, true);
     }
 
-    //System Effects init
     for (auto &nefx : sysefx)
     {
         nefx.Init(this, false);
@@ -101,7 +99,7 @@ void Mixer::Defaults()
         _tracks[npart].Prcvchn = npart % NUM_MIDI_CHANNELS;
     }
 
-    EnableTrack(0, 1); //enable the first part
+    EnableTrack(0, 1);
 
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
@@ -109,7 +107,6 @@ void Mixer::Defaults()
         Pinsparts[nefx] = -1;
     }
 
-    //System Effects init
     for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
     {
         sysefx[nefx].Defaults();
@@ -125,6 +122,7 @@ void Mixer::Defaults()
     }
 
     microtonal.Defaults();
+
     ShutUp();
 }
 
@@ -158,9 +156,6 @@ void Mixer::Unlock()
     pthread_mutex_unlock(&_mutex);
 }
 
-/*
- * Note On Messages (velocity=0 for NoteOff)
- */
 void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocity)
 {
     if (!velocity)
@@ -182,9 +177,6 @@ void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocit
     }
 }
 
-/*
- * Note Off Messages
- */
 void Mixer::NoteOff(unsigned char chan, unsigned char note)
 {
     for (auto &npart : _tracks)
@@ -196,9 +188,6 @@ void Mixer::NoteOff(unsigned char chan, unsigned char note)
     }
 }
 
-/*
- * Pressure Messages (velocity=0 for NoteOff)
- */
 void Mixer::PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity)
 {
     if (!velocity)
@@ -219,9 +208,6 @@ void Mixer::PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigne
     }
 }
 
-/*
- * Controllers
- */
 void Mixer::SetController(unsigned char chan, int type, int par)
 {
     if ((type == C_dataentryhi) || (type == C_dataentrylo) || (type == C_nrpnhi) || (type == C_nrpnlo))
@@ -305,29 +291,26 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
     }
 }
 
-/*
- * Enable/Disable a part
- */
-void Mixer::EnableTrack(int npart, int what)
+void Mixer::EnableTrack(int track, int enable)
 {
-    if (npart >= NUM_MIXER_TRACKS)
+    if (track >= NUM_MIXER_TRACKS)
     {
         return;
     }
 
-    meter.SetFakePeak(npart, 0);
+    meter.SetFakePeak(track, 0);
 
-    if (what != 0)
+    if (enable != 0)
     { //enabled
-        _tracks[npart].Penabled = 1;
+        _tracks[track].Penabled = 1;
         return;
     }
 
-    _tracks[npart].Penabled = 0;
-    _tracks[npart].Cleanup();
+    _tracks[track].Penabled = 0;
+    _tracks[track].Cleanup();
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
-        if (Pinsparts[nefx] == npart)
+        if (Pinsparts[nefx] == track)
         {
             insefx[nefx].cleanup();
         }
@@ -396,14 +379,21 @@ void Mixer::AudioOut(float *outl, float *outr)
     memset(outl, 0, this->BufferSizeInBytes());
     memset(outr, 0, this->BufferSizeInBytes());
 
-    //Compute part samples and store them part[npart].partoutl,partoutr
+    //Compute part samples and store them _tracks[trackIndex].partoutl,partoutr
     for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
     {
         //skip if the part is disabled
-        if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
+        if (_tracks[trackIndex].Penabled == 0)
         {
             continue;
         }
+
+        //skip if the part is not the solo track
+        if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
+        {
+            continue;
+        }
+
         if (!_tracks[trackIndex].TryLock())
         {
             _tracks[trackIndex].ComputeInstrumentSamples();
@@ -419,11 +409,13 @@ void Mixer::AudioOut(float *outl, float *outr)
         {
             continue;
         }
+
         //skip if the part is disabled
-        if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
+        if (_tracks[trackIndex].Penabled == 0)
         {
             continue;
         }
+
         //skip if the part is not the solo track
         if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
         {
@@ -497,16 +489,19 @@ void Mixer::AudioOut(float *outl, float *outr)
             {
                 continue;
             }
+
             //skip if the part is disabled
-            if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
+            if (_tracks[trackIndex].Penabled == 0)
             {
                 continue;
             }
+
             //skip if the part is not the solo track
             if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
             {
                 continue;
             }
+
             //the output volume of each part to system effect
             const float vol = _sysefxvol[nefx][trackIndex];
             for (unsigned int i = 0; i < this->BufferSize(); ++i)
@@ -545,10 +540,11 @@ void Mixer::AudioOut(float *outl, float *outr)
     for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
     {
         //skip if the part is disabled
-        if (_tracks[trackIndex].Penabled == 0 && Psolotrack != trackIndex)
+        if (_tracks[trackIndex].Penabled == 0)
         {
             continue;
         }
+
         //skip if the part is not the solo track
         if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
         {
@@ -676,9 +672,6 @@ void Mixer::SetSystemEffectSend(int Pefxfrom, int Pefxto, unsigned char Pvol)
     _sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
-/*
- * Panic! (Clean up all parts and effects)
- */
 void Mixer::ShutUp()
 {
     for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
@@ -686,15 +679,19 @@ void Mixer::ShutUp()
         _tracks[npart].Cleanup();
         meter.SetFakePeak(npart, 0);
     }
+
     for (auto &nefx : insefx)
     {
         nefx.cleanup();
     }
+
     for (auto &nefx : sysefx)
     {
         nefx.cleanup();
     }
+
     meter.ResetPeaks();
+
     shutup = false;
 }
 

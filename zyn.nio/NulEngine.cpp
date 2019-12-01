@@ -45,8 +45,7 @@ void *NulEngine::AudioThread()
     {
         NextSample();
 
-        struct timeval now
-        {};
+        struct timeval now;
         int remaining = 0;
         gettimeofday(&now, nullptr);
         if ((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0))
