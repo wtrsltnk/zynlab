@@ -19,6 +19,8 @@ public:
 
     bool Setup();
     void Render();
+
+    static std::string NoteToString(unsigned char note);
 };
 
 } // namespace ui

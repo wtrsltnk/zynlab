@@ -35,6 +35,7 @@ char const *Chords::ToString(Chords::Enum chord)
         case Enum::Count:
             return "";
     }
+    return "";
 }
 
 Chords::Enum Chords::ToEnum(unsigned char value)

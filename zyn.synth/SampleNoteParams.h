@@ -31,8 +31,8 @@
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
 
-#define SAMPLE_NOTE_MIN 75
-#define SAMPLE_NOTE_MAX 87
+#define SAMPLE_NOTE_MIN 35
+#define SAMPLE_NOTE_MAX 81
 
 class SampleNoteParameters : public WrappedPresets
 {

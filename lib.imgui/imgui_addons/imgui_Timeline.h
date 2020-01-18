@@ -26,7 +26,7 @@ enum class TimelineVars
 IMGUI_API void TimelineSetVar(TimelineVars var, unsigned char value);
 IMGUI_API bool BeginTimelines(const char *str_id, timestep *max_value, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, timestep snapping = 100); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
-IMGUI_API void TimelineStart(const char *str_id, bool *muted = nullptr, bool *solo = nullptr);
+IMGUI_API void TimelineStart(const char *str_id, bool drumMode, bool *muted = nullptr, bool *solo = nullptr);
 IMGUI_API void TimelineReadOnlyEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200));
 IMGUI_API bool TimelineEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(timestep *new_values = nullptr);
@@ -131,7 +131,7 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
     TestSnap();
     TestSnapFloor();
 
-    int const label_column_width = 100;
+    int const label_column_width = 150;
 
     // reset global variables
     s_var_values[int(TimelineVars::ShowAddRemoveButtons)] = 0;
@@ -185,7 +185,7 @@ void EmptyTimeline(const char *str_id)
     NextColumn();
 }
 
-void TimelineStart(const char *str_id, bool *enabled, bool *solo)
+void TimelineStart(const char *str_id, bool drumMode, bool *enabled, bool *solo)
 {
     ++s_timeline_display_index;
 

@@ -296,6 +296,7 @@ void AppThreeDee::PianoRollEditor()
 {
     bool regionIsModified = false;
     static struct TrackRegionEvent *selectedEvent = nullptr;
+    static bool drumMode = false;
 
     auto track = _state._mixer->GetTrack(_state._currentTrack);
 
@@ -304,6 +305,11 @@ void AppThreeDee::PianoRollEditor()
     {
         auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
         auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
+
+        if (ImGui::Button("Toggle DrumMode"))
+        {
+            drumMode = !drumMode;
+        }
 
         ImGui::Text("Zoom");
         ImGui::SameLine();
@@ -339,15 +345,31 @@ void AppThreeDee::PianoRollEditor()
             auto hue = _state._currentTrack * 0.05f;
             auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
 
-            if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, 88, SnappingModeValues[current_snapping_mode]))
+            unsigned int from = NUM_MIDI_NOTES-1, to = 0;
+
+            if (drumMode)
+            {
+                from = SAMPLE_NOTE_MAX;
+                to = SAMPLE_NOTE_MIN-1;
+            }
+
+            if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, from-to+4, SnappingModeValues[current_snapping_mode]))
             {
                 ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 0);
                 ImGui::TimelineSetVar(ImGui::TimelineVars::ShowMuteSoloButtons, 0);
-                for (unsigned int c = NUM_MIDI_NOTES - 1; c > 0; c--)
+
+                for (unsigned int c = from; c > to; c--)
                 {
                     char id[32];
-                    sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
-                    ImGui::TimelineStart(id);
+                    if (drumMode)
+                    {
+                        sprintf(id, "%s", zyn::ui::SampleNote::NoteToString(c).c_str());
+                    }
+                    else
+                    {
+                        sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
+                    }
+                    ImGui::TimelineStart(id, drumMode);
                     if (ImGui::IsItemClicked())
                     {
                         TempNoteOn(track->Prcvchn, c, 400);
@@ -499,7 +521,7 @@ void AppThreeDee::RegionEditor()
                     sprintf(id, "Track %d", trackIndex);
                     bool muted = !track->Penabled;
                     bool solo = trackIndex == _state._mixer->Psolotrack;
-                    ImGui::TimelineStart(id, &muted, &solo);
+                    ImGui::TimelineStart(id, false, &muted, &solo);
                     if (solo)
                     {
                         _state._mixer->Psolotrack = trackIndex;
@@ -558,27 +580,6 @@ void AppThreeDee::RegionEditor()
             }
         }
         ImGui::EndChild();
-    }
-    ImGui::End();
-}
-
-void AppThreeDee::RegionEditor2()
-{
-    if (ImGui::Begin("Region editor"))
-    {
-        auto size = ImGui::GetWindowSize();
-        ImGui::Text("%fx%f", size.x, size.y);
-        ImGuiWindow const *const win = ImGui::GetCurrentWindow();
-
-        for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
-        {
-            ImGui::PushID(trackIndex);
-            auto track = _state._mixer->GetTrack(trackIndex);
-            auto hue = trackIndex * 0.05f;
-            auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
-
-            ImGui::PopID();
-        }
     }
     ImGui::End();
 }
@@ -723,7 +724,7 @@ void AppThreeDee::Render()
 
             ImGuiID dock_id_instrument = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
 
-            //ImGui::DockBuilderDockWindow("Playback", dock_id_toolbar);
+            ImGui::DockBuilderDockWindow("Playback", dock_id_toolbar);
             ImGui::DockBuilderDockWindow("Mixer", dock_id_mixer);
             //            ImGui::DockBuilderDockWindow("Inspector", dock_id_inspector);
             ImGui::DockBuilderDockWindow(AdSynthEditorID, dock_id_instrument);
@@ -769,8 +770,7 @@ void AppThreeDee::Render()
             PianoRollEditor();
         }
 
-        //RegionEditor();
-        RegionEditor2();
+        RegionEditor();
 
         ImGui::EndChild();
     }

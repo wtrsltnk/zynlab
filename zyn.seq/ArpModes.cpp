@@ -32,6 +32,7 @@ char const *ArpModes::ToString(ArpModes::Enum arpMode)
         case Enum::Count:
             return "";
     }
+    return "";
 }
 
 ArpModes::Enum ArpModes::ToEnum(unsigned char value)

@@ -73,6 +73,8 @@ std::vector<unsigned char> notesFromChord(Chords::Enum chord, unsigned char base
             return {};
         }
     }
+
+    return {};
 }
 
 void NotesGenerator::Generate(RegionsManager *regionsManager, int trackIndex, int regionIndex, TrackRegionEvent const baseEvent)
