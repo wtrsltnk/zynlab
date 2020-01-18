@@ -36,6 +36,7 @@ add_subdirectory("zyn.nio")
 add_subdirectory("zyn.seq")
 add_subdirectory("zyn.synth")
 add_subdirectory("zyn.serialization")
+add_subdirectory("zyn.pinvoke")
 
 if(BUILD_APP_ZYNADSUBFX)
     add_subdirectory("app")
