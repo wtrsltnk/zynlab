@@ -111,25 +111,6 @@ bool AppThreeDee::Setup()
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    ImGui::StyleColorsDark();
-    ImGui::GetStyle().TabRounding = 2.0f;
-    ImGui::GetStyle().FrameRounding = 0.0f;
-
-    ImGui::GetStyle().Colors[ImGuiCol_Text] = ImVec4(0.71f, 0.7f, 0.7f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TextDisabled] = ImVec4(0.51f, 0.5f, 0.5f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_Tab] = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TabActive] = ImVec4(0.22f, 0.22f, 0.22f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TabHovered] = ImVec4(0.45f, 0.49f, 0.48f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TabUnfocusedActive] = ImGui::GetStyle().Colors[ImGuiCol_TabActive];
-    ImGui::GetStyle().Colors[ImGuiCol_TabUnfocused] = ImGui::GetStyle().Colors[ImGuiCol_Tab];
-    ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_Separator] = ImVec4(0.24f, 0.24f, 0.27f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_ResizeGrip] = ImVec4(0.15f, 0.14f, 0.14f, 1.0f);
-
     io.Fonts->Clear();
     ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
     if (font != nullptr)
