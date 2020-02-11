@@ -28,7 +28,7 @@ zyn::ui::AdNote::AdNote(AppState *state)
     : _state(state),
       _AmplitudeEnvelope("Amplitude Envelope"), _FilterEnvelope("Filter Envelope"), _FrequencyEnvelope("Frequency Envelope"),
       _ModulationAmplitudeEnvelope("Modulation Amplitude Envelope"), _ModulationFrequencyEnvelope("Modulation Frequency Envelope"),
-      _AmplitudeLfo("Amplitude LFO"), _FilterLfo("Filter LFO"), _FrequencyLfo("Frequency LFO")
+      _AmplitudeLfo("Amplitude LFO"), _FilterLfo("Filter LFO"), _FrequencyLfo("Frequency LFO"), _OscilGen(nullptr)
 {}
 
 bool zyn::ui::AdNote::Setup()
@@ -40,7 +40,7 @@ void zyn::ui::AdNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
-    if (ImGui::Begin(AdSynthEditorID) && track != nullptr)
+    if (ImGui::BeginChild(AdSynthEditorID, ImVec2(), true) && track != nullptr)
     {
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].adpars;
 
@@ -99,6 +99,12 @@ void zyn::ui::AdNote::Render()
                     {
                         ImGui::PushID(i);
                         ADNoteVoiceEditor(parameters);
+                        if (_OscilGen != nullptr)
+                        {
+                            ImGui::Separator();
+
+                            _OscilGen->Render();
+                        }
                         ImGui::PopID();
 
                         ImGui::EndTabItem();
@@ -112,7 +118,7 @@ void zyn::ui::AdNote::Render()
             ImGui::EndTabBar();
         }
     }
-    ImGui::End();
+    ImGui::EndChild();
 }
 
 void zyn::ui::AdNote::ADNoteEditorAmplitude(ADnoteParameters *parameters)

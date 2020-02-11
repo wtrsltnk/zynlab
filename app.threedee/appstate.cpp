@@ -9,11 +9,10 @@
 #include <stb_image_write.h>
 
 AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
-    : _mixer(mixer), _library(library), _showLibrary(false), _showEditor(true), _showInspector(true),
-      _showMixer(true), _showSmartControls(true), _showQuickHelp(false), _showTrackTypeChanger(-1),
-      _currentInsertEffect(-1), _currentSystemEffect(-1), _currentTrackEffect(-1), _currentLibrary(nullptr),
+    : _mixer(mixer), _library(library),
+      _currentInsertEffect(0), _currentSystemEffect(0), _currentTrackEffect(0), _currentLibrary(nullptr),
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1), _currentVoiceOscil(-1),
-      _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150),
+    _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150), _showTrackTypeChanger(-1),
       _bpm(138), _isPlaying(false), _isRecording(false), _playTime(0), _maxPlayTime(4 * 1024)
 {
     _regions.AddRegion(0, 0, 4 * 1024);

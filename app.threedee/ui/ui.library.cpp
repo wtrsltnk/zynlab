@@ -31,7 +31,7 @@ bool zyn::ui::Library::Setup()
 
 void zyn::ui::Library::Render()
 {
-    if (!_state->_showLibrary || _state->_currentTrack < 0)
+    if (_state->_currentTrack < 0)
     {
         return;
     }

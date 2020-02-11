@@ -46,7 +46,7 @@ bool zyn::ui::SubNote::Setup() { return true; }
 void zyn::ui::SubNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
-    if (ImGui::Begin(SubSynthEditorID) && track != nullptr)
+    if (ImGui::BeginChild(SubSynthEditorID, ImVec2(0,0), true) && track != nullptr)
     {
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].subpars;
 
@@ -149,7 +149,7 @@ void zyn::ui::SubNote::Render()
             ImGui::EndTabBar();
         }
     }
-    ImGui::End();
+    ImGui::EndChild();
 }
 
 void zyn::ui::SubNote::SUBNoteEditorHarmonicsMagnitude(SUBnoteParameters *parameters)

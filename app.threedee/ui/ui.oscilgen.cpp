@@ -85,7 +85,10 @@ bool zyn::ui::OscilGen::Setup()
 void zyn::ui::OscilGen::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
-    if (ImGui::Begin(OscillatorEditorID) && track != nullptr && _state->_currentVoiceOscil >= 0)
+
+    ImGui::Text("Oscillator");
+
+    if (ImGui::BeginChild(OscillatorEditorID, ImVec2(0,0), true) && track != nullptr && _state->_currentVoiceOscil >= 0)
     {
         auto oscil = track->Instruments[0].adpars->VoicePar[_state->_currentVoiceOscil].OscilSmp;
 
@@ -174,5 +177,5 @@ void zyn::ui::OscilGen::Render()
 
         ImGui::Columns(1);
     }
-    ImGui::End();
+    ImGui::EndChild();
 }

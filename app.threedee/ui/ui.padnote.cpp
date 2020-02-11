@@ -21,7 +21,7 @@ void zyn::ui::PadNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
-    if (ImGui::Begin(PadSynthEditorID) && track != nullptr)
+    if (ImGui::BeginChild(PadSynthEditorID, ImVec2(0,0), true) && track != nullptr)
     {
 
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].padpars;
@@ -68,7 +68,7 @@ void zyn::ui::PadNote::Render()
             ImGui::EndTabBar();
         }
     }
-    ImGui::End();
+    ImGui::EndChild();
 }
 
 void zyn::ui::PadNote::PADNoteEditorAmplitude(PADnoteParameters *parameters)

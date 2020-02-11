@@ -3,6 +3,7 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.fx/Alienwah.h>
 #include <zyn.fx/EffectPresets.h>
+#include <zyn.fx/EffectMgr.h>
 #include <zyn.mixer/Mixer.h>
 
 char const *const InsertionFxEditorID = "Insert effect";
@@ -170,30 +171,59 @@ static char const *const trackEffectNames[]{
 
 void zyn::ui::Effect::Render()
 {
-    if (!_state->_showSmartControls)
+    ImGui::BeginChild("Effects", ImVec2(), true);
+
+    const float square_sz = ImGui::GetFrameHeight();
+
+    static int visibleEffectType = 0;
+
+    bool effect = visibleEffectType == 0;
+    ImGui::ToggleButton("Track effect", &effect, ImVec2(96, square_sz));
+    ImGui::ShowTooltipOnHover("Show/Hide Track Effect");
+    if (effect)
     {
-        return;
+        visibleEffectType = 0;
     }
 
-    if (_state->_currentInsertEffect >= 0 && _state->_currentInsertEffect < NUM_INS_EFX)
+    ImGui::SameLine();
+
+    effect = visibleEffectType == 1;
+    ImGui::ToggleButton("System effect", &effect, ImVec2(96, square_sz));
+    ImGui::ShowTooltipOnHover("Show/Hide System Effect");
+    if (effect)
     {
-        if (ImGui::Begin(InsertionFxEditorID))
-        {
-            EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
-        }
-        ImGui::End();
+        visibleEffectType = 1;
     }
 
-    if (_state->_currentSystemEffect >= 0 && _state->_currentSystemEffect < NUM_SYS_EFX)
+    ImGui::SameLine();
+
+    effect = visibleEffectType == 2;
+    ImGui::ToggleButton("Insert effect", &effect, ImVec2(96, square_sz));
+    ImGui::ShowTooltipOnHover("Show/Hide Insert Effect");
+    if (effect)
     {
-        if (ImGui::Begin(SystemFxEditorID))
-        {
-            EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
-        }
-        ImGui::End();
+        visibleEffectType = 2;
     }
 
-    if (ImGui::Begin(TrackFxEditorID))
+    if (visibleEffectType == 2 && ImGui::BeginChild(InsertionFxEditorID, ImVec2(), true))
+    {
+        ImGui::Text("Insertion effect %d", _state->_currentSystemEffect);
+
+        EffectEditor(&_state->_mixer->insefx[_state->_currentInsertEffect]);
+
+        ImGui::EndChild();
+    }
+
+    if (visibleEffectType == 1 && ImGui::BeginChild(SystemFxEditorID, ImVec2(), true))
+    {
+        ImGui::Text("System effect %d", _state->_currentSystemEffect);
+
+        EffectEditor(&_state->_mixer->sysefx[_state->_currentSystemEffect]);
+
+        ImGui::EndChild();
+    }
+
+    if (visibleEffectType == 0 && ImGui::BeginChild(TrackFxEditorID, ImVec2(), true))
     {
         ImGui::Text("Track effects for track %d", _state->_currentTrack);
 
@@ -218,8 +248,9 @@ void zyn::ui::Effect::Render()
             }
             ImGui::EndTabBar();
         }
+        ImGui::EndChild();
     }
-    ImGui::End();
+    ImGui::EndChild();
 }
 
 void VolumeAndPanning(EffectManager *effectManager)

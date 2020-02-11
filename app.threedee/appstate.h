@@ -41,6 +41,15 @@ struct tempnote
 void CleanupPreviewImage(unsigned int previewImage);
 void UpdatePreviewImage(TrackRegion &region);
 
+enum class AppMode
+{
+    Regions,
+    Editor,
+    Mixer,
+    Instrument,
+    Effect,
+};
+
 class AppState
 {
 public:
@@ -49,13 +58,6 @@ public:
 
     class Mixer *_mixer;
     ILibraryManager *_library;
-    bool _showLibrary;
-    bool _showEditor;
-    bool _showInspector;
-    bool _showMixer;
-    bool _showSmartControls;
-    bool _showQuickHelp;
-    int _showTrackTypeChanger;
     int _currentInsertEffect;
     int _currentSystemEffect;
     int _currentTrackEffect;
@@ -67,6 +69,7 @@ public:
     int _sequencerVerticalZoom;
     int _sequencerHorizontalZoom;
     int _pianoRollEditorHorizontalZoom;
+    bool _showTrackTypeChanger;
 
     int _bpm;
     bool _isPlaying;
@@ -76,6 +79,12 @@ public:
     RegionsManager _regions;
 
     std::vector<tempnote> _tempnotes;
+
+    class UiState
+    {
+    public:
+        AppMode _activeMode;
+    } _uiState;
 };
 
 #endif // APPSTATE_H

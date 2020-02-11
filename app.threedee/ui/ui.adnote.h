@@ -5,6 +5,7 @@
 #include "ui.envelope.h"
 #include "ui.filter.h"
 #include "ui.lfo.h"
+#include "ui.oscilgen.h"
 #include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
 
@@ -39,6 +40,8 @@ private:
 
 public:
     AdNote(AppState *state);
+
+    OscilGen* _OscilGen;
 
     bool Setup();
     void Render();

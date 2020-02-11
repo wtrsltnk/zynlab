@@ -20,6 +20,8 @@ IMGUI_API bool DropDown(char const *label, unsigned char &value, char const *con
 
 IMGUI_API bool ImageToggleButton(const char *str_id, bool *v, ImTextureID user_texture_id, const ImVec2 &size);
 
+IMGUI_API bool ToggleButtonWithCheckbox(const char *str_id, bool *on, bool *checked, const ImVec2 &size);
+
 IMGUI_API bool ToggleButton(const char *str_id, bool *v, const ImVec2 &size);
 
 IMGUI_API bool TextCentered(ImVec2 const &size, char const *label);

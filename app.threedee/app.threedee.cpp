@@ -57,6 +57,43 @@ timestep SnappingModeValues[] = {
 
 static ImVec4 clear_color = ImColor(90, 90, 100);
 
+enum class ToolbarTools
+{
+    Workspace,
+    Library,
+    Inspector,
+    SmartControls,
+    Mixer,
+    Editor,
+    QuickHelp,
+    Rewind,
+    FastForward,
+    Stop,
+    Play,
+    Record,
+    Regions,
+    Piano,
+    Effect,
+    COUNT,
+};
+
+static char const *const toolbarIconFileNames[] = {
+    "workspace.png",
+    "library.png",
+    "inspector.png",
+    "smart-controls.png",
+    "mixer.png",
+    "editor.png",
+    "quick-help.png",
+    "rewind.png",
+    "fast-forward.png",
+    "stop.png",
+    "play.png",
+    "record.png",
+    "notation.png",
+    "piano.png",
+    "effect.png"};
+
 AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, ILibraryManager *library)
     : _state(mixer, library), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
       _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state), _smplNoteUi(&_state), _oscilGenUi(&_state), _dialogs(&_state),
@@ -282,7 +319,7 @@ void AppThreeDee::PianoRollEditor()
     auto track = _state._mixer->GetTrack(_state._currentTrack);
 
     ImGui::SetNextWindowSize(ImVec2(400, 400));
-    if (ImGui::Begin("Pianoroll editor") && track != nullptr && _state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
+    if (ImGui::BeginChild("Pianoroll editor", ImVec2(), true) && track != nullptr && _state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
     {
         auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
         auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
@@ -326,15 +363,15 @@ void AppThreeDee::PianoRollEditor()
             auto hue = _state._currentTrack * 0.05f;
             auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
 
-            unsigned int from = NUM_MIDI_NOTES-1, to = 0;
+            unsigned int from = NUM_MIDI_NOTES - 1, to = 0;
 
             if (drumMode)
             {
                 from = SAMPLE_NOTE_MAX;
-                to = SAMPLE_NOTE_MIN-1;
+                to = SAMPLE_NOTE_MIN - 1;
             }
 
-            if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, from-to+4, SnappingModeValues[current_snapping_mode]))
+            if (ImGui::BeginTimelines("MyTimeline", &maxvalue, 20, _state._pianoRollEditorHorizontalZoom, from - to + 4, SnappingModeValues[current_snapping_mode]))
             {
                 ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 0);
                 ImGui::TimelineSetVar(ImGui::TimelineVars::ShowMuteSoloButtons, 0);
@@ -455,7 +492,7 @@ void AppThreeDee::PianoRollEditor()
             UpdatePreviewImage(region);
         }
     }
-    ImGui::End();
+    ImGui::EndChild();
 
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
     {
@@ -465,7 +502,7 @@ void AppThreeDee::PianoRollEditor()
 void AppThreeDee::RegionEditor()
 {
     ImGui::SetNextWindowSize(ImVec2(400, 400));
-    if (ImGui::Begin("Region editor"))
+    if (ImGui::BeginChild("Region editor", ImVec2(), true))
     {
         ImGui::Text("Zoom");
         ImGui::SameLine();
@@ -562,7 +599,7 @@ void AppThreeDee::RegionEditor()
         }
         ImGui::EndChild();
     }
-    ImGui::End();
+    ImGui::EndChild();
 }
 
 void AppThreeDee::NewFile()
@@ -612,6 +649,11 @@ void AppThreeDee::RenderDialogs()
     {
         ImGui::CloseCurrentPopup();
     }
+}
+
+void AppThreeDee::ChangeAppMode(AppMode appMode)
+{
+    _state._uiState._activeMode = appMode;
 }
 
 void AppThreeDee::Render()
@@ -679,81 +721,163 @@ void AppThreeDee::Render()
         {
             _dialogs.OpenFileDialog(zyn::ui::Dialogs::OPENFILE_DIALOG_ID);
         }
+
         RenderDialogs();
 
-        ImGuiPlayback();
-
-        _libraryUi.Render();
-
-        _mixerUi.RenderInspector();
-
-        ImGui::BeginChild("docking_space_child");
-        ImGuiID dockspace_id = ImGui::GetID("ZynDockspace");
-        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+        ImGui::BeginChild("ActivityBar", ImVec2(56, 0), true);
         {
-            ImGui::DockBuilderRemoveNode(dockspace_id);                       // Clear out existing layout
-            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None); // Add empty node
-            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+            bool regions = _state._uiState._activeMode == AppMode::Regions;
+            ImGui::ImageToggleButton("Activity_Regions", &regions, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Regions)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Regions");
+            if (regions)
+            {
+                ChangeAppMode(AppMode::Regions);
+            }
 
-            ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
-            ImGuiID dock_id_toolbar = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, 0.10f, nullptr, &dock_main_id);
-            ImGuiDockNode *toolbar = ImGui::DockBuilderGetNode(dock_id_toolbar);
-            toolbar->LocalFlags |= ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoSplit | ImGuiWindowFlags_NoCollapse | ImGuiDockNodeFlags_NoDocking;
-            ImGui::DockBuilderSetNodeSize(dock_id_toolbar, ImVec2(viewport->Size.x, 70));
+            bool editor = _state._uiState._activeMode == AppMode::Editor;
+            ImGui::ImageToggleButton("Activity_Editor", &editor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Editor");
+            if (editor)
+            {
+                ChangeAppMode(AppMode::Editor);
+            }
 
-            ImGuiID dock_id_mixer = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, nullptr, &dock_main_id);
+            bool instrument = _state._uiState._activeMode == AppMode::Instrument;
+            ImGui::ImageToggleButton("Activity_Instrument", &instrument, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Piano)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Instrument");
+            if (instrument)
+            {
+                ChangeAppMode(AppMode::Instrument);
+            }
 
-            ImGuiID dock_id_instrument = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
+            bool mixer = _state._uiState._activeMode == AppMode::Mixer;
+            ImGui::ImageToggleButton("Activity_Mixer", &mixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Mixer");
+            if (mixer)
+            {
+                ChangeAppMode(AppMode::Mixer);
+            }
 
-            ImGui::DockBuilderDockWindow("Playback", dock_id_toolbar);
-            ImGui::DockBuilderDockWindow("Mixer", dock_id_mixer);
-            //            ImGui::DockBuilderDockWindow("Inspector", dock_id_inspector);
-            ImGui::DockBuilderDockWindow(AdSynthEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow(PadSynthEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow(SubSynthEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow(SmplSynthEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow(OscillatorEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow(InsertionFxEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow(SystemFxEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow(TrackFxEditorID, dock_id_instrument);
-            ImGui::DockBuilderDockWindow("Region editor", dock_main_id);
-            ImGui::DockBuilderDockWindow("Pianoroll editor", dock_id_mixer);
-            ImGui::DockBuilderFinish(dockspace_id);
-        }
-        auto dockSize = viewport->Size;
-        dockSize.y -= TOOLBAR_HEIGHT;
-        if (_state._showInspector)
-        {
-            dockSize.x -= INSPECTOR_WIDTH;
-        }
-        if (_state._showLibrary && _state._currentTrack >= 0)
-        {
-            dockSize.x -= LIBRARY_WIDTH;
-        }
-        ImGui::DockSpace(dockspace_id, dockSize, ImGuiDockNodeFlags_None);
+            bool effect = _state._uiState._activeMode == AppMode::Effect;
+            ImGui::ImageToggleButton("Activity_Effect", &effect, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Effect)]), ImVec2(32, 32));
+            ImGui::ShowTooltipOnHover("Show/Hide Effect");
+            if (effect)
+            {
+                ChangeAppMode(AppMode::Effect);
+            }
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
-        _mixerUi.Render();
-
-        if (_state._showSmartControls)
-        {
-            _adNoteUI.Render();
-            _padNoteUi.Render();
-            _subNoteUi.Render();
-            _smplNoteUi.Render();
-            _oscilGenUi.Render();
-            _effectUi.Render();
-        }
-        ImGui::PopStyleVar();
-
-        if (_state._showEditor)
-        {
-            PianoRollEditor();
+            ImGui::EndChild();
         }
 
-        RegionEditor();
+        ImGui::SameLine();
 
-        ImGui::EndChild();
+        switch (_state._uiState._activeMode)
+        {
+            case AppMode::Mixer:
+            {
+                _mixerUi.Render();
+                break;
+            }
+            case AppMode::Editor:
+            {
+                PianoRollEditor();
+                break;
+            }
+            case AppMode::Regions:
+            {
+                RegionEditor();
+                break;
+            }
+            case AppMode::Instrument:
+            {
+                ImGui::BeginChild("Instrument", ImVec2(), true);
+                static int visibleInstrument = 0;
+
+                bool instrument = visibleInstrument == 0;
+                bool checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Padenabled != 0;
+                ImGui::ToggleButtonWithCheckbox("Add", &instrument, &checked, ImVec2(96, 32));
+                ImGui::ShowTooltipOnHover("Show/Hide Add synth");
+                if (instrument)
+                {
+                    visibleInstrument = 0;
+                }
+                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Padenabled = checked ? 1 : 0;
+
+                ImGui::SameLine();
+
+                instrument = visibleInstrument == 1;
+                checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psubenabled != 0;
+                ImGui::ToggleButtonWithCheckbox("Sub", &instrument, &checked, ImVec2(96, 32));
+                ImGui::ShowTooltipOnHover("Show/Hide Subtractive synth");
+                if (instrument)
+                {
+                    visibleInstrument = 1;
+                }
+                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psubenabled = checked ? 1 : 0;
+
+                ImGui::SameLine();
+
+                instrument = visibleInstrument == 2;
+                checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Ppadenabled != 0;
+                ImGui::ToggleButtonWithCheckbox("Pad", &instrument, &checked, ImVec2(96, 32));
+                ImGui::ShowTooltipOnHover("Show/Hide Pad synth");
+                if (instrument)
+                {
+                    visibleInstrument = 2;
+                }
+                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Ppadenabled = checked ? 1 : 0;
+
+                ImGui::SameLine();
+
+                instrument = visibleInstrument == 3;
+                checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psmplenabled != 0;
+                ImGui::ToggleButtonWithCheckbox("Smplr", &instrument, &checked, ImVec2(96, 32));
+                ImGui::ShowTooltipOnHover("Show/Hide Sampler");
+                if (instrument)
+                {
+                    visibleInstrument = 3;
+                }
+                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psmplenabled = checked ? 1 : 0;
+
+                if (visibleInstrument == 0)
+                {
+                    _adNoteUI._OscilGen = &_oscilGenUi;
+                    _adNoteUI.Render();
+                }
+                if (visibleInstrument == 1) _subNoteUi.Render();
+                if (visibleInstrument == 2) _padNoteUi.Render();
+                if (visibleInstrument == 3) _smplNoteUi.Render();
+                ImGui::EndChild();
+                break;
+            }
+            case AppMode::Effect:
+            {
+                _effectUi.Render();
+                break;
+            }
+        }
+
+        //        ImGuiPlayback();
+
+        //        _libraryUi.Render();
+
+        //        _mixerUi.RenderInspector();
+
+        //        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
+        //        _mixerUi.Render();
+
+        //        _adNoteUI.Render();
+        //        _padNoteUi.Render();
+        //        _subNoteUi.Render();
+        //        _smplNoteUi.Render();
+        //        _oscilGenUi.Render();
+        //        _effectUi.Render();
+
+        //        ImGui::PopStyleVar();
+
+        //        PianoRollEditor();
+
+        //        RegionEditor();
     }
     ImGui::End();
     ImGui::PopStyleVar(2);
@@ -779,38 +903,6 @@ void AppThreeDee::Render()
 void AppThreeDee::onKeyAction(int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/)
 {
 }
-
-enum class ToolbarTools
-{
-    Workspace,
-    Library,
-    Inspector,
-    SmartControls,
-    Mixer,
-    Editor,
-    QuickHelp,
-    Rewind,
-    FastForward,
-    Stop,
-    Play,
-    Record,
-    COUNT,
-};
-
-static char const *const toolbarIconFileNames[] = {
-    "workspace.png",
-    "library.png",
-    "inspector.png",
-    "smart-controls.png",
-    "mixer.png",
-    "editor.png",
-    "quick-help.png",
-    "rewind.png",
-    "fast-forward.png",
-    "stop.png",
-    "play.png",
-    "record.png",
-};
 
 void AppThreeDee::LoadToolbarIcons()
 {
@@ -845,6 +937,7 @@ void AppThreeDee::LoadToolbarIcons()
         stbi_image_free(data);
     }
 }
+
 void gen_random(char *s, const int len)
 {
     static const char alphanum[] =
@@ -862,7 +955,7 @@ void gen_random(char *s, const int len)
 
 void AppThreeDee::ImGuiPlayback()
 {
-    auto width = ImGui::GetWindowContentRegionWidth();
+    /*    auto width = ImGui::GetWindowContentRegionWidth();
 
     ImGui::BeginChild("Playback", ImVec2(0, 60));
     {
@@ -947,6 +1040,7 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::PopStyleVar();
     }
     ImGui::EndChild();
+*/
 }
 
 void AppThreeDee::Cleanup()

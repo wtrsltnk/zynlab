@@ -70,6 +70,7 @@ public:
 private:
     void LoadToolbarIcons();
 
+    void ChangeAppMode(AppMode appMode);
     void PianoRollEditor();
     void RegionEditor();
     void RegionEditor2();

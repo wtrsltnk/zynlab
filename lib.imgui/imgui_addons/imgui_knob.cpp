@@ -239,13 +239,13 @@ bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_text
     float width = size.x + (style.FramePadding.x * 2);
 
     ImGui::InvisibleButton(str_id, ImVec2(width, height));
-    if (ImGui::IsItemClicked())
+    if (v != nullptr && ImGui::IsItemClicked())
     {
         *v = !*v;
         valueChange = true;
     }
 
-    ImU32 col_tint = ImGui::GetColorU32((*v ? ImGui::GetColorU32(ImVec4(1,1,1,1)) : ImGui::GetColorU32(ImGuiCol_TextDisabled)));
+    ImU32 col_tint = ImGui::GetColorU32((v == nullptr || *v ? ImGui::GetColorU32(ImVec4(1, 1, 1, 1)) : ImGui::GetColorU32(ImGuiCol_TextDisabled)));
     ImU32 col_bg = ImGui::GetColorU32(ImGui::GetColorU32(ImGuiCol_Button));
     if (ImGui::IsItemHovered())
     {
@@ -258,6 +258,52 @@ bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_text
 
     draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), col_bg);
     draw_list->AddImage(user_texture_id, p, ImVec2(p.x + width, p.y + height), ImVec2(0, 0), ImVec2(1, 1), GetColorU32(col_tint));
+
+    return valueChange;
+}
+
+bool ImGui::ToggleButtonWithCheckbox(const char *str_id, bool *v, bool *checked, const ImVec2 &size)
+{
+    bool valueChange = false;
+
+    PushID(str_id);
+
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+    const float square_sz = GetFrameHeight();
+
+    if (Checkbox("##ButtonCheck", checked))
+    {
+        valueChange = true;
+    }
+
+    SameLine();
+
+    ImGui::InvisibleButton("##InvisibleButton", ImVec2(size.x, square_sz));
+    if (ImGui::IsItemClicked())
+    {
+        *v = !*v;
+        valueChange = true;
+    }
+
+    ImU32 col_tint = ImGui::GetColorU32((*v ? ImGui::GetColorU32(ImGuiCol_Text) : ImGui::GetColorU32(ImGuiCol_Border)));
+    ImU32 col_bg = ImGui::GetColorU32(ImGui::GetColorU32(ImGuiCol_WindowBg));
+    if (ImGui::IsItemHovered())
+    {
+        col_bg = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+    }
+    if (ImGui::IsItemActive() || *v)
+    {
+        col_bg = ImGui::GetColorU32(ImGuiCol_Button);
+    }
+
+    draw_list->AddRectFilled(pos, pos + ImVec2(size.x + square_sz, square_sz), GetColorU32(col_bg));
+
+    auto textSize = CalcTextSize(str_id);
+    draw_list->AddText(ImVec2(pos.x + (size.x + square_sz - textSize.x) / 2, pos.y), col_tint, str_id);
+
+    PopID();
 
     return valueChange;
 }
@@ -350,7 +396,7 @@ bool ImGui::Fader(const char *label, const ImVec2 &size, int *v, const int v_min
         SetActiveID(id, window);
         SetFocusID(id, window);
         FocusWindow(window);
-//        g.ActiveIdAllowNavDirFlags = (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
+        //        g.ActiveIdAllowNavDirFlags = (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
     }
 
     // Draw frame

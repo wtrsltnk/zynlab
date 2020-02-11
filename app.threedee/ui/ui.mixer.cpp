@@ -29,7 +29,7 @@ bool zyn::ui::Mixer::Setup()
 void zyn::ui::Mixer::Render()
 {
     ImGuiMixer();
-    ImGuiChangeInstrumentTypePopup();
+//    ImGuiChangeInstrumentTypePopup();
 }
 
 #define MIN_DB (-48)
@@ -143,12 +143,7 @@ std::vector<char const *> toCharVector(std::set<std::string> const &strings)
 
 void zyn::ui::Mixer::ImGuiMixer()
 {
-    if (!_state->_showMixer)
-    {
-        return;
-    }
-
-    if (ImGui::Begin("Mixer", nullptr, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
+    if (ImGui::BeginChild("Mixer", ImVec2(), true, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
 
@@ -181,24 +176,14 @@ void zyn::ui::Mixer::ImGuiMixer()
 
         ImGui::PopStyleVar();
     }
-    ImGui::End();
+    ImGui::EndChild();
 }
 
 void zyn::ui::Mixer::RenderInspector()
 {
-    if (!_state->_showInspector)
-    {
-        return;
-    }
-
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
     ImGui::BeginChild("Inspector", ImVec2(INSPECTOR_WIDTH, 0));
     {
-        if (_state->_showQuickHelp && ImGui::CollapsingHeader("Quick help"))
-        {
-            ImGui::TextWrapped(" Aliquam arcu est, ultricies ac gravida euismod, varius ut nulla. Suspendisse id porttitor tellus. Nunc ultrices est vel lectus vestibulum feugiat. Proin ut tellus non leo lacinia interdum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam vitae odio nisl. Cras enim elit, accumsan et lacus non, cursus molestie est. Duis semper feugiat risus.\n\nMauris suscipit tristique nunc, nec lacinia leo luctus sit amet. Maecenas volutpat consequat nisi, id mattis libero blandit convallis. Ut dignissim feugiat nisl, id accumsan felis efficitur eget. Praesent eget bibendum eros. Mauris consectetur justo ut orci consectetur dictum. Pellentesque ac dui vel magna interdum fringilla. Integer a tempor elit.");
-        }
-
         if (ImGui::CollapsingHeader("Region"))
         {
             if (_state->_currentTrack >= 0 && _state->_currentTrack < NUM_MIXER_TRACKS)
@@ -533,7 +518,6 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(width - 20 - io.ItemSpacing.x, 0)))
         {
             _state->_currentTrack = trackIndex;
-            _state->_showLibrary = true;
             ImGui::SetWindowFocus(LibraryID);
         }
         ImGui::ShowTooltipOnHover("Change Track preset");
