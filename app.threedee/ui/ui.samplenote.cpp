@@ -72,7 +72,7 @@ std::string zyn::ui::SampleNote::NoteToString(unsigned char note)
 void zyn::ui::SampleNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
-    if (ImGui::BeginChild(SmplSynthEditorID, ImVec2(0,0), true) && track != nullptr)
+    if (ImGui::BeginChild(SmplSynthEditorID, ImVec2(0,0), false) && track != nullptr)
     {
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].smplpars;
 

@@ -46,7 +46,7 @@ bool zyn::ui::SubNote::Setup() { return true; }
 void zyn::ui::SubNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
-    if (ImGui::BeginChild(SubSynthEditorID, ImVec2(0,0), true) && track != nullptr)
+    if (ImGui::BeginChild(SubSynthEditorID, ImVec2(0,0), false) && track != nullptr)
     {
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].subpars;
 
@@ -191,7 +191,7 @@ void zyn::ui::SubNote::SUBNoteEditorAmplitude(SUBnoteParameters *parameters)
 {
     ImGui::Text("Global Amplitude Parameters");
 
-    ImGui::BeginChild("VolSns", ImVec2(250, ImGui::GetStyle().ItemSpacing.y * 3 + ImGui::GetTextLineHeight() * 2));
+    ImGui::BeginChild("VolSns", ImVec2(250, ImGui::GetStyle().ItemSpacing.y * 3 + ImGui::GetFrameHeight() * 2));
     auto vol = static_cast<int>(parameters->PVolume);
     ImGui::PushItemWidth(250);
     if (ImGui::SliderInt("##Vol", &vol, 0, 127, "Vol %d"))

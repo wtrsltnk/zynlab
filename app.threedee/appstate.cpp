@@ -1,7 +1,7 @@
 #include "appstate.h"
 
-#include <imgui_common.h>
 #include <glad/glad.h>
+#include <imgui_common.h>
 #include <iostream>
 #include <memory>
 
@@ -12,7 +12,7 @@ AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
     : _mixer(mixer), _library(library),
       _currentInsertEffect(0), _currentSystemEffect(0), _currentTrackEffect(0), _currentLibrary(nullptr),
       _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1), _currentVoiceOscil(-1),
-    _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150), _showTrackTypeChanger(-1),
+      _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150), _showTrackTypeChanger(-1),
       _bpm(138), _isPlaying(false), _isRecording(false), _playTime(0), _maxPlayTime(4 * 1024)
 {
     _regions.AddRegion(0, 0, 4 * 1024);
@@ -20,6 +20,10 @@ AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
 }
 
 AppState::~AppState() = default;
+
+AppState::UiState::UiState()
+    : _activeMode(AppMode::Regions)
+{}
 
 struct colour
 {

@@ -24,6 +24,7 @@ protected:
     void ImGuiMixer();
     void ImGuiTrack(int trackIndex, bool highlightTrack);
     void ImGuiChangeInstrumentTypePopup();
+    void OpenChangeInstrumentType();
     void AddInsertFx(int track);
     void RemoveInsertFxFromTrack(int fx);
 
@@ -33,6 +34,7 @@ public:
 
     bool Setup();
     void Render();
+    void RenderTrack(int track);
 
     bool ShowMixer() const;
     void ShowMixer(bool show);

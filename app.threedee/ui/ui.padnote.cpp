@@ -21,9 +21,8 @@ void zyn::ui::PadNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
-    if (ImGui::BeginChild(PadSynthEditorID, ImVec2(0,0), true) && track != nullptr)
+    if (ImGui::BeginChild(PadSynthEditorID, ImVec2(0,0), false) && track != nullptr)
     {
-
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].padpars;
 
         if (track->Instruments[_state->_currentTrackInstrument].Ppadenabled == 0)

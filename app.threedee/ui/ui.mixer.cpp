@@ -29,7 +29,6 @@ bool zyn::ui::Mixer::Setup()
 void zyn::ui::Mixer::Render()
 {
     ImGuiMixer();
-//    ImGuiChangeInstrumentTypePopup();
 }
 
 #define MIN_DB (-48)
@@ -143,7 +142,7 @@ std::vector<char const *> toCharVector(std::set<std::string> const &strings)
 
 void zyn::ui::Mixer::ImGuiMixer()
 {
-    if (ImGui::BeginChild("Mixer", ImVec2(), true, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
+    if (ImGui::BeginChild("Mixer", ImVec2(), false, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
 
@@ -167,16 +166,21 @@ void zyn::ui::Mixer::ImGuiMixer()
 
         for (int track = 0; track <= NUM_MIXER_TRACKS; track++)
         {
-            auto highlightTrack = _state->_currentTrack == track;
-            ImGui::PushID(track);
-            ImGuiTrack(track, highlightTrack);
-            ImGui::SameLine();
-            ImGui::PopID();
+            RenderTrack(track);
         }
 
         ImGui::PopStyleVar();
     }
     ImGui::EndChild();
+}
+
+void zyn::ui::Mixer::RenderTrack(int track)
+{
+    auto highlightTrack = _state->_currentTrack == track;
+    ImGui::PushID(track);
+    ImGuiTrack(track, highlightTrack);
+    ImGui::SameLine();
+    ImGui::PopID();
 }
 
 void zyn::ui::Mixer::RenderInspector()
@@ -852,10 +856,12 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
             ImGui::SameLine(0.0f, (width - 64 - io.ItemSpacing.x) / 2);
             if (ImGui::ImageButton(reinterpret_cast<void *>(_iconImages[track->info.Ptype]), ImVec2(64, 64)))
             {
+                OpenChangeInstrumentType();
                 _state->_showTrackTypeChanger = trackIndex;
                 _state->_currentTrack = trackIndex;
             }
             ImGui::ShowTooltipOnHover(trackTooltip.str().c_str());
+            ImGuiChangeInstrumentTypePopup();
         }
 
         auto panning = track->Ppanning;
@@ -926,6 +932,11 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
     ImGui::PopStyleColor(1);
 }
 
+void zyn::ui::Mixer::OpenChangeInstrumentType()
+{
+    ImGui::OpenPopup("Select Instrument Type");
+}
+
 void zyn::ui::Mixer::ImGuiChangeInstrumentTypePopup()
 {
     if (!_iconImagesAreLoaded)
@@ -938,17 +949,12 @@ void zyn::ui::Mixer::ImGuiChangeInstrumentTypePopup()
         return;
     }
 
-    ImGui::SetNextWindowSize(ImVec2(570, 500));
-    if (ImGui::Begin("Select Instrument Type"))
-    {
-        ImGui::SameLine();
-        if (ImGui::Button("Close"))
-        {
-            _state->_showTrackTypeChanger = -1;
-            ImGui::CloseCurrentPopup();
-        }
+    DialogResults result = DialogResults::NoResult;
 
-        ImGui::BeginChild("types", ImVec2(0, -20));
+    ImGui::SetNextWindowSize(ImVec2(570, 550));
+    if (ImGui::BeginPopupModal("Select Instrument Type", nullptr, ImGuiWindowFlags_NoResize))
+    {
+        ImGui::BeginChild("types", ImVec2(0, -40));
 
         for (int i = 0; i < int(InstrumentCategories::COUNT); i++)
         {
@@ -969,7 +975,14 @@ void zyn::ui::Mixer::ImGuiChangeInstrumentTypePopup()
             ImGui::ShowTooltipOnHover(instrumentCategoryNames[i]);
         }
         ImGui::EndChild();
-        ImGui::End();
+
+        if (ImGui::Button("Cancel", ImVec2(120, 0)))
+        {
+            result = DialogResults::Cancel;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
     }
 }
 

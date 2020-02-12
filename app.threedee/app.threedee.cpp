@@ -319,7 +319,7 @@ void AppThreeDee::PianoRollEditor()
     auto track = _state._mixer->GetTrack(_state._currentTrack);
 
     ImGui::SetNextWindowSize(ImVec2(400, 400));
-    if (ImGui::BeginChild("Pianoroll editor", ImVec2(), true) && track != nullptr && _state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
+    if (ImGui::BeginChild("Pianoroll editor", ImVec2(), false) && track != nullptr && _state._regions.DoesRegionExist(_state._currentTrack, _state._currentPattern))
     {
         auto &region = _state._regions.GetRegion(_state._currentTrack, _state._currentPattern);
         auto maxvalue = region.startAndEnd[1] - region.startAndEnd[0];
@@ -502,7 +502,7 @@ void AppThreeDee::PianoRollEditor()
 void AppThreeDee::RegionEditor()
 {
     ImGui::SetNextWindowSize(ImVec2(400, 400));
-    if (ImGui::BeginChild("Region editor", ImVec2(), true))
+    if (ImGui::BeginChild("Region editor", ImVec2(), false))
     {
         ImGui::Text("Zoom");
         ImGui::SameLine();
@@ -771,6 +771,17 @@ void AppThreeDee::Render()
 
         ImGui::SameLine();
 
+        if (_state._uiState._activeMode != AppMode::Mixer)
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
+
+            _mixerUi.RenderTrack(_state._currentTrack);
+
+            ImGui::PopStyleVar();
+
+            ImGui::SameLine();
+        }
+
         switch (_state._uiState._activeMode)
         {
             case AppMode::Mixer:
@@ -790,14 +801,14 @@ void AppThreeDee::Render()
             }
             case AppMode::Instrument:
             {
-                ImGui::BeginChild("Instrument", ImVec2(), true);
+                ImGui::BeginChild("Instrument", ImVec2(), false);
                 static int visibleInstrument = 0;
 
                 bool instrument = visibleInstrument == 0;
                 bool checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Padenabled != 0;
-                ImGui::ToggleButtonWithCheckbox("Add", &instrument, &checked, ImVec2(96, 32));
+                auto changed = ImGui::ToggleButtonWithCheckbox("Add", &instrument, &checked, ImVec2(96, 32));
                 ImGui::ShowTooltipOnHover("Show/Hide Add synth");
-                if (instrument)
+                if (instrument || changed)
                 {
                     visibleInstrument = 0;
                 }
@@ -807,9 +818,9 @@ void AppThreeDee::Render()
 
                 instrument = visibleInstrument == 1;
                 checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psubenabled != 0;
-                ImGui::ToggleButtonWithCheckbox("Sub", &instrument, &checked, ImVec2(96, 32));
+                changed = ImGui::ToggleButtonWithCheckbox("Sub", &instrument, &checked, ImVec2(96, 32));
                 ImGui::ShowTooltipOnHover("Show/Hide Subtractive synth");
-                if (instrument)
+                if (instrument || changed)
                 {
                     visibleInstrument = 1;
                 }
@@ -819,9 +830,9 @@ void AppThreeDee::Render()
 
                 instrument = visibleInstrument == 2;
                 checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Ppadenabled != 0;
-                ImGui::ToggleButtonWithCheckbox("Pad", &instrument, &checked, ImVec2(96, 32));
+                changed = ImGui::ToggleButtonWithCheckbox("Pad", &instrument, &checked, ImVec2(96, 32));
                 ImGui::ShowTooltipOnHover("Show/Hide Pad synth");
-                if (instrument)
+                if (instrument || changed)
                 {
                     visibleInstrument = 2;
                 }
@@ -831,9 +842,9 @@ void AppThreeDee::Render()
 
                 instrument = visibleInstrument == 3;
                 checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psmplenabled != 0;
-                ImGui::ToggleButtonWithCheckbox("Smplr", &instrument, &checked, ImVec2(96, 32));
+                changed = ImGui::ToggleButtonWithCheckbox("Smplr", &instrument, &checked, ImVec2(96, 32));
                 ImGui::ShowTooltipOnHover("Show/Hide Sampler");
-                if (instrument)
+                if (instrument || changed)
                 {
                     visibleInstrument = 3;
                 }

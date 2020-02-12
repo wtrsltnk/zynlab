@@ -171,7 +171,7 @@ static char const *const trackEffectNames[]{
 
 void zyn::ui::Effect::Render()
 {
-    ImGui::BeginChild("Effects", ImVec2(), true);
+    ImGui::BeginChild("Effects", ImVec2(), false);
 
     const float square_sz = ImGui::GetFrameHeight();
 

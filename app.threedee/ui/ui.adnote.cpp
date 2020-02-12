@@ -40,7 +40,7 @@ void zyn::ui::AdNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
 
-    if (ImGui::BeginChild(AdSynthEditorID, ImVec2(), true) && track != nullptr)
+    if (ImGui::BeginChild(AdSynthEditorID, ImVec2(), false) && track != nullptr)
     {
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].adpars;
 

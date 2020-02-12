@@ -69,7 +69,7 @@ public:
     int _sequencerVerticalZoom;
     int _sequencerHorizontalZoom;
     int _pianoRollEditorHorizontalZoom;
-    bool _showTrackTypeChanger;
+    int _showTrackTypeChanger;
 
     int _bpm;
     bool _isPlaying;
@@ -83,6 +83,8 @@ public:
     class UiState
     {
     public:
+        UiState();
+
         AppMode _activeMode;
     } _uiState;
 };
