@@ -180,6 +180,26 @@ bool AppThreeDee::Setup()
 
     _state._playTime = 0.0f;
 
+    TrackRegion region;
+    region.startAndEnd[0] = std::chrono::milliseconds(0).count();
+    region.startAndEnd[1] = std::chrono::milliseconds(1200).count();
+
+    TrackRegionEvent a, b;
+
+    a.note = 65;
+    a.values[0] = std::chrono::milliseconds(200).count();
+    a.values[1] = std::chrono::milliseconds(600).count();
+    a.velocity = 100;
+    region.eventsByNote->push_back(a);
+
+    b.note = 75;
+    b.values[0] = std::chrono::milliseconds(400).count();
+    b.values[1] = std::chrono::milliseconds(800).count();
+    b.velocity = 100;
+    region.eventsByNote->push_back(b);
+
+    _state._regions.AddRegion(0, region);
+
     return true;
 }
 
@@ -499,107 +519,243 @@ void AppThreeDee::PianoRollEditor()
     }
 }
 
+ImVec4 GetRulerColor()
+{
+    return ImGui::GetStyle().Colors[ImGuiCol_Border] * ImVec4(0.4f, 0.8f, 1.0f, 0.7f);
+}
+
+void RegionTrack(
+    AppState &state,
+    int trackIndex,
+    timestep max)
+{
+    ImGuiWindow const *const win = ImGui::GetCurrentWindow();
+
+    ImVec4 const color2 = ImGui::GetStyle().Colors[ImGuiCol_Border] * ImVec4(1.0f, 1.0f, 1.0f, 0.3f);
+    ImVec4 const color3 = ImGui::GetStyle().Colors[ImGuiCol_Button];
+    ImVec4 const rulerColor = GetRulerColor();
+
+    auto width = std::max(int(ImGui::GetWindowContentRegionWidth()), int(200 + (max / 1000)));
+    auto regions = state._regions.GetRegionsByTrack(trackIndex);
+    ImGui::BeginChild("TrackWindow", ImVec2(width, 100));
+
+    win->DrawList->AddRectFilled(
+        ImGui::GetWindowPos() + ImVec2(0, 0),
+        ImGui::GetWindowPos() + ImVec2(198, ImGui::GetWindowSize().y - 2),
+        ImGui::ColorConvertFloat4ToU32(color3));
+
+    win->DrawList->AddRectFilled(
+        ImGui::GetWindowPos() + ImVec2(200, 0),
+        ImGui::GetWindowPos() + ImGui::GetWindowSize() - ImVec2(0, 2),
+        ImGui::ColorConvertFloat4ToU32(color2));
+
+    ImGui::Button("Track");
+
+    auto regionWidth = ImGui::GetWindowContentRegionWidth();
+
+    for (int i = 200; i < regionWidth; i += 100)
+    {
+        win->DrawList->AddLine(
+            ImGui::GetWindowPos() + ImVec2(i, 0),
+            ImGui::GetWindowPos() + ImVec2(i, ImGui::GetWindowSize().y),
+            ImGui::ColorConvertFloat4ToU32(rulerColor));
+    }
+
+    for (unsigned int r = 0; r < regions.size(); r++)
+    {
+        ImGui::PushID(r);
+
+        auto region = regions[r];
+        auto hue = trackIndex * 0.05f;
+        auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
+        auto tintBorderColor = ImColor::HSV(hue, 0.6f, 0.9f);
+        auto min = ImGui::GetWindowPos() + ImVec2(200 + region.startAndEnd[0] / 10, 5);
+        auto max = ImGui::GetWindowPos() + ImVec2(200 + region.startAndEnd[1] / 10, 90);
+
+        ImGui::SetCursorPos(min - ImGui::GetWindowPos());
+        if (ImGui::InvisibleButton("selectRegion", max - min))
+        {
+            state._currentTrack = trackIndex;
+            state._currentPattern = int(r);
+        }
+
+        win->DrawList->AddRectFilled(
+            min,
+            max,
+            ImGui::ColorConvertFloat4ToU32(tintBorderColor));
+
+        if (region.previewImage > 0)
+        {
+            win->DrawList->AddImage(
+                reinterpret_cast<ImTextureID>(region.previewImage),
+                min + ImVec2(1, 1),
+                max - ImVec2(1, 1),
+                ImVec2(0, 0),
+                ImVec2(1, 1),
+                ImGui::ColorConvertFloat4ToU32(tintColor));
+        }
+        else
+        {
+            win->DrawList->AddRectFilled(
+                min + ImVec2(1, 1),
+                max - ImVec2(1, 1),
+                ImGui::ColorConvertFloat4ToU32(tintColor));
+        }
+
+        ImGui::PopID();
+    }
+
+    ImGui::EndChild();
+}
+
 void AppThreeDee::RegionEditor()
 {
-    ImGui::SetNextWindowSize(ImVec2(400, 400));
-    if (ImGui::BeginChild("Region editor", ImVec2(), false))
+    ImGuiWindow const *const win = ImGui::GetCurrentWindow();
+
+    ImGui::BeginChild("Regions", ImVec2(), false);
+
+    auto regionWidth = ImGui::GetWindowContentRegionWidth();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2());
+    ImGui::BeginChild("Region ruler", ImVec2(0, 30), false);
+
+    for (int i = 200; i < regionWidth; i += 100)
     {
-        ImGui::Text("Zoom");
-        ImGui::SameLine();
-        ImGui::PushItemWidth(120);
-        ImGui::SliderInt("##horizontalZoom", &(_state._sequencerHorizontalZoom), 10, 100, "horizontal %d");
-        ImGui::SameLine();
-        ImGui::PushItemWidth(120);
-        ImGui::SliderInt("##verticalZoom", &(_state._sequencerVerticalZoom), 50, 100, "vertical %d");
-        ImGui::SameLine();
-        ImGui::PushItemWidth(220);
-        int maxPlayTime = int(_state._maxPlayTime / 1024);
-        if (ImGui::SliderInt("##maxPlayTime", &maxPlayTime, 4, 200, "song length %d"))
-        {
-            _state._maxPlayTime = maxPlayTime * 1024;
-        }
+        win->DrawList->AddLine(
+            ImGui::GetWindowPos() + ImVec2(i, 0),
+            ImGui::GetWindowPos() + ImVec2(i, ImGui::GetWindowSize().y),
+            ImGui::ColorConvertFloat4ToU32(GetRulerColor()));
+    }
 
-        timestep elapsedTimeSequencer = _state._playTime % _state._maxPlayTime;
+    ImGui::EndChild();
 
-        if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
+    if (ImGui::BeginChild("Region editor", ImVec2(0, 0), false))
+    {
+        timestep max = 40000;
+        for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
         {
-            timestep maxValue = _state._maxPlayTime;
-            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, NUM_MIXER_TRACKS, 1024))
+            auto regions = _state._regions.GetRegionsByTrack(trackIndex);
+            for (auto region : regions)
             {
-                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 1);
-                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowMuteSoloButtons, 1);
-                for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+                if (max < region.startAndEnd[1])
                 {
-                    ImGui::PushID(trackIndex);
-                    auto track = _state._mixer->GetTrack(trackIndex);
-                    auto hue = trackIndex * 0.05f;
-                    auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
-
-                    char id[32];
-                    sprintf(id, "Track %d", trackIndex);
-                    bool muted = !track->Penabled;
-                    bool solo = trackIndex == _state._mixer->Psolotrack;
-                    ImGui::TimelineStart(id, false, &muted, &solo);
-                    if (solo)
-                    {
-                        _state._mixer->Psolotrack = trackIndex;
-                        muted = false;
-                    }
-                    else if (!solo && trackIndex == _state._mixer->Psolotrack)
-                    {
-                        _state._mixer->Psolotrack = DISABLED_MIXER_SOLO;
-                    }
-                    track->Penabled = !muted;
-
-                    if (ImGui::IsItemClicked())
-                    {
-                        _state._currentTrack = trackIndex;
-                    }
-
-                    auto &regions = _state._regions.GetRegionsByTrack(trackIndex);
-                    for (size_t i = 0; i < regions.size(); i++)
-                    {
-                        bool selected = (trackIndex == _state._currentTrack && int(i) == _state._currentPattern);
-                        if (ImGui::TimelineEvent(regions[i].startAndEnd, regions[i].previewImage, tintColor, &selected))
-                        {
-                            _state._currentTrack = trackIndex;
-                            _state._currentPattern = int(i);
-                            UpdatePreviewImage(regions[i]);
-                        }
-                        auto x = regions[i].startAndEnd[1] - regions[i].startAndEnd[0];
-                        for (int j = 1; j <= regions[i].repeat; j++)
-                        {
-                            timestep repeat_values[2]{regions[i].startAndEnd[0] + (x * j), regions[i].startAndEnd[1] + (x * j)};
-                            ImGui::TimelineReadOnlyEvent(repeat_values, regions[i].previewImage, tintColor);
-                        }
-                    }
-
-                    TrackRegion newRegion;
-                    if (ImGui::TimelineEnd(newRegion.startAndEnd))
-                    {
-                        _state._currentTrack = trackIndex;
-                        _state._currentPattern = int(_state._regions.GetRegionsByTrack(trackIndex).size());
-
-                        UpdatePreviewImage(newRegion);
-                        _state._regions.AddRegion(trackIndex, newRegion);
-                    }
-                    ImGui::PopID();
+                    max = region.startAndEnd[1];
                 }
             }
-            if (ImGui::EndTimelines(&elapsedTimeSequencer))
-            {
-                _state._maxPlayTime = maxValue;
-            }
-            _state._playTime = elapsedTimeSequencer;
-
-            if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
-            {
-                _state._regions.RemoveRegion(_state._currentTrack, _state._currentPattern);
-            }
         }
-        ImGui::EndChild();
+
+        for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+        {
+            ImGui::PushID(trackIndex);
+
+            RegionTrack(_state, trackIndex, max);
+
+            ImGui::PopID();
+        }
+        //        ImGui::ScrollbarEx();
     }
     ImGui::EndChild();
+    ImGui::PopStyleVar();
+    ImGui::EndChild();
+    //    ImGui::SetNextWindowSize(ImVec2(400, 400));
+    //    if (ImGui::BeginChild("Region editor", ImVec2(), false))
+    //    {
+    //        ImGui::Text("Zoom");
+    //        ImGui::SameLine();
+    //        ImGui::PushItemWidth(120);
+    //        ImGui::SliderInt("##horizontalZoom", &(_state._sequencerHorizontalZoom), 10, 100, "horizontal %d");
+    //        ImGui::SameLine();
+    //        ImGui::PushItemWidth(120);
+    //        ImGui::SliderInt("##verticalZoom", &(_state._sequencerVerticalZoom), 50, 100, "vertical %d");
+    //        ImGui::SameLine();
+    //        ImGui::PushItemWidth(220);
+    //        int maxPlayTime = int(_state._maxPlayTime / 1024);
+    //        if (ImGui::SliderInt("##maxPlayTime", &maxPlayTime, 4, 200, "song length %d"))
+    //        {
+    //            _state._maxPlayTime = maxPlayTime * 1024;
+    //        }
+
+    //        timestep elapsedTimeSequencer = _state._playTime % _state._maxPlayTime;
+
+    //        if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
+    //        {
+    //            timestep maxValue = _state._maxPlayTime;
+    //            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, NUM_MIXER_TRACKS, 1024))
+    //            {
+    //                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 1);
+    //                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowMuteSoloButtons, 1);
+    //                for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+    //                {
+    //                    ImGui::PushID(trackIndex);
+    //                    auto track = _state._mixer->GetTrack(trackIndex);
+    //                    auto hue = trackIndex * 0.05f;
+    //                    auto tintColor = ImColor::HSV(hue, 0.6f, 0.6f);
+
+    //                    char id[32];
+    //                    sprintf(id, "Track %d", trackIndex);
+    //                    bool muted = !track->Penabled;
+    //                    bool solo = trackIndex == _state._mixer->Psolotrack;
+    //                    ImGui::TimelineStart(id, false, &muted, &solo);
+    //                    if (solo)
+    //                    {
+    //                        _state._mixer->Psolotrack = trackIndex;
+    //                        muted = false;
+    //                    }
+    //                    else if (!solo && trackIndex == _state._mixer->Psolotrack)
+    //                    {
+    //                        _state._mixer->Psolotrack = DISABLED_MIXER_SOLO;
+    //                    }
+    //                    track->Penabled = !muted;
+
+    //                    if (ImGui::IsItemClicked())
+    //                    {
+    //                        _state._currentTrack = trackIndex;
+    //                    }
+
+    //                    auto &regions = _state._regions.GetRegionsByTrack(trackIndex);
+    //                    for (size_t i = 0; i < regions.size(); i++)
+    //                    {
+    //                        bool selected = (trackIndex == _state._currentTrack && int(i) == _state._currentPattern);
+    //                        if (ImGui::TimelineEvent(regions[i].startAndEnd, regions[i].previewImage, tintColor, &selected))
+    //                        {
+    //                            _state._currentTrack = trackIndex;
+    //                            _state._currentPattern = int(i);
+    //                            UpdatePreviewImage(regions[i]);
+    //                        }
+    //                        auto x = regions[i].startAndEnd[1] - regions[i].startAndEnd[0];
+    //                        for (int j = 1; j <= regions[i].repeat; j++)
+    //                        {
+    //                            timestep repeat_values[2]{regions[i].startAndEnd[0] + (x * j), regions[i].startAndEnd[1] + (x * j)};
+    //                            ImGui::TimelineReadOnlyEvent(repeat_values, regions[i].previewImage, tintColor);
+    //                        }
+    //                    }
+
+    //                    TrackRegion newRegion;
+    //                    if (ImGui::TimelineEnd(newRegion.startAndEnd))
+    //                    {
+    //                        _state._currentTrack = trackIndex;
+    //                        _state._currentPattern = int(_state._regions.GetRegionsByTrack(trackIndex).size());
+
+    //                        UpdatePreviewImage(newRegion);
+    //                        _state._regions.AddRegion(trackIndex, newRegion);
+    //                    }
+    //                    ImGui::PopID();
+    //                }
+    //            }
+    //            if (ImGui::EndTimelines(&elapsedTimeSequencer))
+    //            {
+    //                _state._maxPlayTime = maxValue;
+    //            }
+    //            _state._playTime = elapsedTimeSequencer;
+
+    //            if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyReleased(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+    //            {
+    //                _state._regions.RemoveRegion(_state._currentTrack, _state._currentPattern);
+    //            }
+    //        }
+    //        ImGui::EndChild();
+    //    }
+    //    ImGui::EndChild();
 }
 
 void AppThreeDee::NewFile()
@@ -724,47 +880,46 @@ void AppThreeDee::Render()
 
         RenderDialogs();
 
-        ImGui::BeginChild("ActivityBar", ImVec2(56, 0), true);
+        ImGui::BeginChild("ActivityBar", ImVec2(42, -50), false);
         {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
+
             bool regions = _state._uiState._activeMode == AppMode::Regions;
-            ImGui::ImageToggleButton("Activity_Regions", &regions, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Regions)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Regions");
-            if (regions)
+            if (ImGui::ImageToggleButton("Activity_Regions", &regions, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Regions)]), ImVec2(32, 32)) && regions)
             {
                 ChangeAppMode(AppMode::Regions);
             }
+            ImGui::ShowTooltipOnHover("Show/Hide Regions");
 
             bool editor = _state._uiState._activeMode == AppMode::Editor;
-            ImGui::ImageToggleButton("Activity_Editor", &editor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Editor");
-            if (editor)
+            if (ImGui::ImageToggleButton("Activity_Editor", &editor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32)) && editor)
             {
                 ChangeAppMode(AppMode::Editor);
             }
+            ImGui::ShowTooltipOnHover("Show/Hide Editor");
 
             bool instrument = _state._uiState._activeMode == AppMode::Instrument;
-            ImGui::ImageToggleButton("Activity_Instrument", &instrument, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Piano)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Instrument");
-            if (instrument)
+            if (ImGui::ImageToggleButton("Activity_Instrument", &instrument, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Piano)]), ImVec2(32, 32)) && instrument)
             {
                 ChangeAppMode(AppMode::Instrument);
             }
+            ImGui::ShowTooltipOnHover("Show/Hide Instrument");
 
             bool mixer = _state._uiState._activeMode == AppMode::Mixer;
-            ImGui::ImageToggleButton("Activity_Mixer", &mixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Mixer");
-            if (mixer)
+            if (ImGui::ImageToggleButton("Activity_Mixer", &mixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32)) && mixer)
             {
                 ChangeAppMode(AppMode::Mixer);
             }
+            ImGui::ShowTooltipOnHover("Show/Hide Mixer");
 
             bool effect = _state._uiState._activeMode == AppMode::Effect;
-            ImGui::ImageToggleButton("Activity_Effect", &effect, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Effect)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Effect");
-            if (effect)
+            if (ImGui::ImageToggleButton("Activity_Effect", &effect, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Effect)]), ImVec2(32, 32)) && effect)
             {
                 ChangeAppMode(AppMode::Effect);
             }
+            ImGui::ShowTooltipOnHover("Show/Hide Effect");
+
+            ImGui::PopStyleVar();
 
             ImGui::EndChild();
         }
@@ -807,48 +962,48 @@ void AppThreeDee::Render()
                 bool instrument = visibleInstrument == 0;
                 bool checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Padenabled != 0;
                 auto changed = ImGui::ToggleButtonWithCheckbox("Add", &instrument, &checked, ImVec2(96, 32));
-                ImGui::ShowTooltipOnHover("Show/Hide Add synth");
                 if (instrument || changed)
                 {
                     visibleInstrument = 0;
+                    _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Padenabled = checked ? 1 : 0;
                 }
-                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Padenabled = checked ? 1 : 0;
+                ImGui::ShowTooltipOnHover("Show/Hide Add synth");
 
                 ImGui::SameLine();
 
                 instrument = visibleInstrument == 1;
                 checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psubenabled != 0;
                 changed = ImGui::ToggleButtonWithCheckbox("Sub", &instrument, &checked, ImVec2(96, 32));
-                ImGui::ShowTooltipOnHover("Show/Hide Subtractive synth");
                 if (instrument || changed)
                 {
                     visibleInstrument = 1;
+                    _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psubenabled = checked ? 1 : 0;
                 }
-                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psubenabled = checked ? 1 : 0;
+                ImGui::ShowTooltipOnHover("Show/Hide Subtractive synth");
 
                 ImGui::SameLine();
 
                 instrument = visibleInstrument == 2;
                 checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Ppadenabled != 0;
                 changed = ImGui::ToggleButtonWithCheckbox("Pad", &instrument, &checked, ImVec2(96, 32));
-                ImGui::ShowTooltipOnHover("Show/Hide Pad synth");
                 if (instrument || changed)
                 {
                     visibleInstrument = 2;
+                    _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Ppadenabled = checked ? 1 : 0;
                 }
-                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Ppadenabled = checked ? 1 : 0;
+                ImGui::ShowTooltipOnHover("Show/Hide Pad synth");
 
                 ImGui::SameLine();
 
                 instrument = visibleInstrument == 3;
                 checked = _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psmplenabled != 0;
                 changed = ImGui::ToggleButtonWithCheckbox("Smplr", &instrument, &checked, ImVec2(96, 32));
-                ImGui::ShowTooltipOnHover("Show/Hide Sampler");
                 if (instrument || changed)
                 {
                     visibleInstrument = 3;
+                    _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psmplenabled = checked ? 1 : 0;
                 }
-                _state._mixer->GetTrack(_state._currentTrack)->Instruments[_state._currentTrackInstrument].Psmplenabled = checked ? 1 : 0;
+                ImGui::ShowTooltipOnHover("Show/Hide Sampler");
 
                 if (visibleInstrument == 0)
                 {
