@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.8)
 project(zyn.nio)
 
 find_package(PORTAUDIO REQUIRED)
-find_package(SDL2)
 if (UNIX)
     find_package(ALSA)
     find_package(JACK)
@@ -16,7 +15,6 @@ set(AlsaEnable  ${ALSA_FOUND}      CACHE BOOL  "Enable support for Advanced Linu
 set(JackEnable  ${JACK_FOUND}      CACHE BOOL  "Enable support for JACK Audio Connection toolKit")
 set(OssEnable   ${OSS_FOUND}       CACHE BOOL  "Enable support for Open Sound System")
 set(PaEnable    ${PORTAUDIO_FOUND} CACHE BOOL  "Enable support for Port Audio System")
-set(SdlEnable   ${SDL2_FOUND}      CACHE BOOL  "Enable support for SDL Audio System")
 set(DssiEnable  ${DSSI_FOUND}      CACHE BOOL  "Enable DSSI Plugin compilation")
 set(LibloEnable ${LIBLO_FOUND}     CACHE BOOL  "Enable Liblo")
 
@@ -86,24 +84,6 @@ if(PaEnable)
         )
     target_compile_definitions(zyn.nio
         PRIVATE -DPORTAUDIO=1
-        )
-endif()
-
-if(SdlEnable)
-    target_sources(zyn.nio
-        PRIVATE
-            SdlEngine.cpp
-            SdlEngine.h
-        )
-    target_include_directories(zyn.nio
-        PRIVATE
-            ${SDL2_INCLUDE_DIR}
-        )
-    target_link_libraries(zyn.nio
-        ${SDL2_LIBRARY}
-        )
-    target_compile_definitions(zyn.nio
-        PRIVATE -DSDL2=1
         )
 endif()
 

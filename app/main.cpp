@@ -22,7 +22,7 @@
 
 #include <FL/Fl.H>
 
-#include "ui/common.H"
+#include "ui/common.h"
 
 #include <algorithm>
 #include <cctype>
@@ -64,15 +64,6 @@ void sigterm_exit(int /*sig*/)
     Pexitprogram = 1;
 }
 
-#ifdef ENABLE_FLTKGUI
-void set_module_parameters(Fl_Widget *o)
-{
-    o->box(FL_PLASTIC_THIN_UP_BOX);
-    o->color(FL_BLACK);
-    o->labeltype(FL_NORMAL_LABEL);
-}
-#endif
-
 /*
  * Program exit
  */
@@ -93,34 +84,63 @@ int exitprogram()
     return 0;
 }
 
+int exitwithversion()
+{
+    std::cout << "Version: " << VERSION << std::endl;
+
+    return 0;
+}
+
+int exitwithhelp()
+{
+    std::cout << "Usage: zynaddsubfx [OPTION]\n\n"
+              << "  -h , --help \t\t\t\t Display command-line help and exit\n"
+              << "  -v , --version \t\t\t Display version and exit\n"
+              << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
+              << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
+              << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
+              << "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
+              << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
+              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
+              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
+              << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
+              << "  -O , --output\t\t\t\t Set Output Engine\n"
+              << "  -I , --input\t\t\t\t Set Input Engine\n"
+              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
+              << std::endl;
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     Config::Current().init();
-    int noui = 0;
-    std::cerr << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
-              << std::endl;
-    std::cerr << "                Copyright (c) 2009-2014 Mark McCurry [active maintainer]"
-              << std::endl;
-    std::cerr << "Compiled: " << __DATE__ << " " << __TIME__
-              << std::endl;
-    std::cerr << "This program is free software (GNU GPL v.2 or later) and \n";
-    std::cerr << "it comes with ABSOLUTELY NO WARRANTY.\n"
+
+    std::cout << "\n"
+              << "ZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others\n"
+              << "              Copyright (c) 2009-2014 Mark McCurry [active maintainer]\n"
+              << "Compiled: " << __DATE__ << " " << __TIME__ << "\n"
+              << "This program is free software (GNU GPL v2 or later) and \n"
+              << "it comes with ABSOLUTELY NO WARRANTY.\n"
               << std::endl;
 
     if (argc == 1)
     {
-        std::cerr << "Try 'zynaddsubfx --help' for command-line options." << std::endl;
+        std::cout << "Try 'zynaddsubfx --help' for command-line options." << std::endl;
     }
 
+    auto const &config = Config::Current();
+    auto &settings = SystemSettings::Instance();
+
     /* Get the settings from the Config*/
-    SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
-    SystemSettings::Instance().buffersize = Config::Current().cfg.SoundBufferSize;
-    SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
-    swaplr = Config::Current().cfg.SwapStereo;
+    settings.samplerate = config.cfg.SampleRate;
+    settings.buffersize = config.cfg.SoundBufferSize;
+    settings.oscilsize = config.cfg.OscilSize;
+    swaplr = config.cfg.SwapStereo;
 
-    Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
+    settings.alias();
 
-    SystemSettings::Instance().alias(); //build aliases
+    Nio::preferedSampleRate(settings.samplerate);
 
     sprng(static_cast<unsigned int>(time(nullptr)));
 
@@ -144,20 +164,19 @@ int main(int argc, char *argv[])
         {"exec-after-init", 1, nullptr, 'e'},
         {nullptr, 0, nullptr, 0}};
     opterr = 0;
-    int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
 
-    string loadfile, loadinstrument, execAfterInit;
+    int option_index = 0;
+    std::string loadfile, loadinstrument, execAfterInit;
+    int noui = 0;
 
     while (true)
     {
-        unsigned int tmp = 0;
-
         /**\todo check this process for a small memory leak*/
-        opt = getopt_long(argc,
-                          argv,
-                          "l:L:r:b:o:I:O:N:e:hvaSDUY",
-                          opts,
-                          &option_index);
+        int opt = getopt_long(argc,
+                              argv,
+                              "l:L:r:b:o:I:O:N:e:hvaSDUY",
+                              opts,
+                              &option_index);
         char *optarguments = optarg;
 
 #define GETOP(x)      \
@@ -176,13 +195,11 @@ int main(int argc, char *argv[])
         {
             case 'h':
             {
-                exitwithhelp = 1;
-                break;
+                return exitwithhelp();
             }
             case 'v':
             {
-                exitwithversion = 1;
-                break;
+                return exitwithversion();
             }
             case 'Y':
             { /* this command a dummy command (has NO effect)
@@ -210,8 +227,8 @@ int main(int argc, char *argv[])
             }
             case 'r':
             {
-                GETOPNUM(SystemSettings::Instance().samplerate);
-                if (SystemSettings::Instance().samplerate < 4000)
+                GETOPNUM(settings.samplerate);
+                if (settings.samplerate < 4000)
                 {
                     std::cerr << "ERROR:Incorrect sample rate: " << optarguments
                               << std::endl;
@@ -221,8 +238,8 @@ int main(int argc, char *argv[])
             }
             case 'b':
             {
-                GETOPNUM(SystemSettings::Instance().buffersize);
-                if (SystemSettings::Instance().buffersize < 2)
+                GETOPNUM(settings.buffersize);
+                if (settings.buffersize < 2)
                 {
                     std::cerr << "ERROR:Incorrect buffer size: " << optarguments
                               << std::endl;
@@ -232,19 +249,21 @@ int main(int argc, char *argv[])
             }
             case 'o':
             {
+                unsigned int tmp = 0;
+
                 if (optarguments)
                 {
-                    SystemSettings::Instance().oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
+                    settings.oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
                 }
-                if (SystemSettings::Instance().oscilsize < MAX_AD_HARMONICS * 2)
+                if (settings.oscilsize < MAX_AD_HARMONICS * 2)
                 {
-                    SystemSettings::Instance().oscilsize = MAX_AD_HARMONICS * 2;
+                    settings.oscilsize = MAX_AD_HARMONICS * 2;
                 }
-                SystemSettings::Instance().oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(SystemSettings::Instance().oscilsize - 1.0f) / logf(2.0f))));
-                if (tmp != SystemSettings::Instance().oscilsize)
+                settings.oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(settings.oscilsize - 1.0f) / logf(2.0f))));
+                if (tmp != settings.oscilsize)
                 {
                     std::cerr << "synth.oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                              << SystemSettings::Instance().oscilsize << "." << std::endl;
+                              << settings.oscilsize << "." << std::endl;
                 }
                 break;
             }
@@ -278,49 +297,24 @@ int main(int argc, char *argv[])
             {
                 std::cerr << "ERROR:Bad option or parameter.\n"
                           << std::endl;
-                exitwithhelp = 1;
-                break;
+
+                return exitwithhelp();
             }
         }
     }
 
-    if (exitwithversion)
-    {
-        cout << "Version: " << VERSION << std::endl;
-        return 0;
-    }
-    if (exitwithhelp != 0)
-    {
-        cout << "Usage: zynaddsubfx [OPTION]\n\n"
-             << "  -h , --help \t\t\t\t Display command-line help and exit\n"
-             << "  -v , --version \t\t\t Display version and exit\n"
-             << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
-             << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
-             << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
-             << "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
-             << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
-             << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
-             << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
-             << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
-             << "  -O , --output\t\t\t\t Set Output Engine\n"
-             << "  -I , --input\t\t\t\t Set Input Engine\n"
-             << "  -e , --exec-after-init\t\t Run post-initialization script\n"
-             << std::endl;
+    settings.alias();
 
-        return 0;
-    }
-
-    SystemSettings::Instance().alias();
-
-    std::cerr.precision(1);
-    std::cerr << std::fixed;
-    std::cerr << "\nSample Rate = \t\t" << SystemSettings::Instance().samplerate << std::endl;
-    std::cerr << "Sound Buffer Size = \t" << SystemSettings::Instance().buffersize << " samples" << std::endl;
-    std::cerr << "Internal latency = \t\t" << SystemSettings::Instance().buffersize_f * 1000.0f / SystemSettings::Instance().samplerate_f << " ms" << std::endl;
-    std::cerr << "ADsynth Oscil.Size = \t" << SystemSettings::Instance().oscilsize << " samples" << std::endl;
+    std::cout.precision(1);
+    std::cout << std::fixed << "\n"
+              << "Sample Rate        = " << settings.samplerate << "\n"
+              << "Sound Buffer Size  = " << settings.buffersize << " samples\n"
+              << "Internal latency   = " << settings.buffersize_f * 1000.0f / settings.samplerate_f << " ms\n"
+              << "ADsynth Oscil.Size = " << settings.oscilsize << " samples" << std::endl;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
+
     mixer.Init();
     mixer.swaplr = swaplr;
 
@@ -330,14 +324,13 @@ int main(int argc, char *argv[])
         int tmp = serializer.LoadMixer(&mixer, loadfile);
         if (tmp < 0)
         {
-            std::cerr << "ERROR: Could not load master file " << loadfile
-                      << "." << std::endl;
+            std::cerr << "ERROR: Could not load master file " << loadfile << "." << std::endl;
             exit(1);
         }
         else
         {
             mixer.ApplyParameters();
-            cout << "Master file loaded." << std::endl;
+            std::cout << "Master file loaded." << std::endl;
         }
     }
 
@@ -353,17 +346,22 @@ int main(int argc, char *argv[])
         else
         {
             mixer.GetTrack(0)->ApplyParameters();
-            cout << "Instrument file loaded." << std::endl;
+            std::cout << "Instrument file loaded." << std::endl;
         }
     }
 
     //Run the Nio system
-    bool ioGood = Nio::Start(&mixer, &mixer);
+    bool expectedEngineStarted = Nio::Start(&mixer, &mixer);
+
+    if (!expectedEngineStarted)
+    {
+        std::cerr << "Failed to start default engine, Defaulting to NULL engine" << std::endl;
+    }
 
     // Run a system command after starting zynaddsubfx
     if (!execAfterInit.empty())
     {
-        cout << "Executing user supplied command: " << execAfterInit << std::endl;
+        std::cout << "Executing user supplied command: " << execAfterInit << std::endl;
         if (system(execAfterInit.c_str()) == -1)
         {
             std::cerr << "Command Failed..." << std::endl;
@@ -378,7 +376,7 @@ int main(int argc, char *argv[])
     {
         ui->showUI();
 
-        if (!ioGood)
+        if (!expectedEngineStarted)
         {
             fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
         }

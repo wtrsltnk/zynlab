@@ -19,9 +19,6 @@
 #ifdef PORTAUDIO
 #include "PaEngine.h"
 #endif
-#ifdef SDL2
-#include "SdlEngine.h"
-#endif
 
 #include <algorithm>
 #include <iostream>
@@ -68,10 +65,6 @@ EngineManager::EngineManager(unsigned int sampleRate, unsigned int bufferSize)
 #endif
 #ifdef PORTAUDIO
     engines.push_back(new PaEngine(sampleRate, bufferSize));
-#endif
-#ifdef SDL2
-    // TODO Not working yet!
-//    engines.push_back(new SdlEngine(mixer->_synth));
 #endif
 
     defaultOut = dynamic_cast<AudioOutput *>(defaultEng);

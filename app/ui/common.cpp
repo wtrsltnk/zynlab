@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  PAaudiooutput.h - Audio output for PortAudio
-  Copyright (C) 2002 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+  common.cpp  -  Main file of the synthesizer
+  Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2012-2014 Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -19,31 +19,14 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
-#ifndef SDL2_ENGINE_H
-#define SDL2_ENGINE_H
 
-#include "AudioOutput.h"
-#include <zyn.common/globals.h>
+#include <FL/Fl_Widget.H>
 
-#include <SDL2/SDL.h>
+#include "common.h"
 
-class SdlEngine : public AudioOutput
+void set_module_parameters(Fl_Widget *o)
 {
-public:
-    SdlEngine(unsigned int sampleRate, unsigned int bufferSize);
-    virtual ~SdlEngine();
-
-    bool Start();
-    void Stop();
-
-    bool IsAudioEnabled() const;
-
-protected:
-    static void my_audio_callback(void *userdata, Uint8 *stream, int len);
-    void process(float *stream, int len);
-
-private:
-    SDL_AudioDeviceID _dev;
-};
-
-#endif
+    o->box(FL_PLASTIC_THIN_UP_BOX);
+    o->color(FL_BLACK);
+    o->labeltype(FL_NORMAL_LABEL);
+}

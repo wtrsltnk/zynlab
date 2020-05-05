@@ -1,4 +1,3 @@
-
 /*******************************************************************************/
 /* Copyright (C) 2012 Jonathan Moore Liles                                     */
 /*                                                                             */
@@ -17,6 +16,9 @@
 /* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /*******************************************************************************/
 
+#ifndef UICOMMON_H_
+#define UICOMMON_H_
+
 class Fl_Widget;
 extern void set_module_parameters ( Fl_Widget * );
 
@@ -27,3 +29,5 @@ extern void set_module_parameters ( Fl_Widget * );
 #define FL_NO_BOX FL_FLAT_BOX
 #define FL_UP_FRAME FL_UP_BOX
 #endif
+
+#endif // UICOMMON_H_

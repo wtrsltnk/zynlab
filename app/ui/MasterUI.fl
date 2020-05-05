@@ -57,7 +57,7 @@ decl {\#include "zyn.mixer/Track.h"} {public local
 } 
 
 decl {\#include <zyn.serialization/SaveToFileSerializer.h>} {public global
-}
+} 
 
 decl {\#include <zyn.common/Util.h>} {public local
 } 
@@ -465,7 +465,7 @@ class MasterUI {open
     Config::Current().save();
     *exitprogram=1;
 };} open selected
-      xywh {983 194 382 516} type Double xclass zynaddsubfx visible
+      xywh {987 198 389 520} type Double xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}

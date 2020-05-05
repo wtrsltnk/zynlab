@@ -4,10 +4,8 @@ project(app)
 
 add_executable(app
     main.cpp
-    )
-
-add_library(zyn.fltkui
-    ui/common.H
+    ui/common.cpp
+    ui/common.h
     ui/NioUI.cpp
     ui/NioUI.H
     ui/WidgetPDial.cpp
@@ -44,35 +42,11 @@ if(FltkGui)
 		if (FLTK_LDFLAGS)
 			string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
 		endif()
-	endif()
+        endif()
 
-    target_compile_definitions(zyn.fltkui
-        PRIVATE -DFLTK_GUI
-        )
-
-    target_sources(zyn.fltkui
+    target_sources(app
         PRIVATE ${app_FLTK_UI_SRCS}
         PRIVATE ${UI_fl_files}
-        )
-
-    target_include_directories(zyn.fltkui
-        PRIVATE ${FLTK_INCLUDE_DIR}
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ui"
-        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
-        )
-
-    target_compile_features(zyn.fltkui
-        PRIVATE cxx_auto_type
-        PRIVATE cxx_nullptr
-        PRIVATE cxx_lambdas
-        )
-
-    target_include_directories(app
-        PRIVATE ${FLTK_INCLUDE_DIR}
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ui"
-        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         )
 endif()
 
@@ -80,6 +54,13 @@ target_compile_features(app
     PRIVATE cxx_auto_type
     PRIVATE cxx_nullptr
     PRIVATE cxx_lambdas
+    )
+
+target_include_directories(app
+    PRIVATE ${FLTK_INCLUDE_DIR}
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ui"
+    PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
 target_compile_definitions(app
@@ -96,9 +77,7 @@ target_link_libraries(app
     zyn.synth
     zyn.fx
     zyn.dsp
-    zyn.common
     zyn.seq
     zyn.serialization
-    zyn.fltkui
-    )
+    zyn.common)
 

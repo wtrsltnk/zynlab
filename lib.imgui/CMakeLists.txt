@@ -33,6 +33,9 @@ target_include_directories(lib.imgui
     PUBLIC imgui
     PUBLIC imgui_addons)
 
+target_link_libraries(lib.imgui
+    PUBLIC ${GLFW3_LIBRARY})
+
 target_compile_definitions(lib.imgui
     PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD
     )

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(lib.mxml)
 
-add_library(lib.mxml
+add_library(lib.mxml STATIC
     mxml-attr.c
     mxml-entity.c
     mxml-file.c
