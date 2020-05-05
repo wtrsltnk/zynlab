@@ -202,12 +202,13 @@ int main(int argc, char *argv[])
                 return exitwithversion();
             }
             case 'Y':
-            { /* this command a dummy command (has NO effect)
-                        and is used because I need for NSIS installer
-                        (NSIS sometimes forces a command line for a
-                        program, even if I don't need that; eg. when
-                        I want to add a icon to a shortcut.
-                     */
+            {
+                /* this command a dummy command (has NO effect)
+                 * and is used because I need for NSIS installer
+                 * (NSIS sometimes forces a command line for a
+                 * program, even if I don't need that; eg. when
+                 * I want to add a icon to a shortcut.
+                 */
                 break;
             }
             case 'U':
@@ -232,7 +233,7 @@ int main(int argc, char *argv[])
                 {
                     std::cerr << "ERROR:Incorrect sample rate: " << optarguments
                               << std::endl;
-                    exit(1);
+                    return 1;
                 }
                 break;
             }
@@ -243,7 +244,7 @@ int main(int argc, char *argv[])
                 {
                     std::cerr << "ERROR:Incorrect buffer size: " << optarguments
                               << std::endl;
-                    exit(1);
+                    return 1;
                 }
                 break;
             }

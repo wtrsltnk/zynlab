@@ -98,8 +98,6 @@ const char *TipWin::getStr() const
     return (textmode ? text : tip).c_str();
 }
 
-//static int numobj = 0;
-
 WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
     : Fl_Dial(x, y, w, h, label), oldvalue(0.0), pos(false), textset(false)
 {
@@ -112,15 +110,11 @@ WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
 
 WidgetPDial::~WidgetPDial()
 {
-    //cout << "There are now " << --numobj << endl;
     delete tipwin;
 }
 
 int WidgetPDial::handle(int event)
 {
-    //#ifdef NTK_GUI
-    //    return Fl_Dial::handle( event );
-    //#else
     double dragsize, min = minimum(), max = maximum();
     int my;
 
