@@ -63,7 +63,7 @@ public:
 
     void clearbankrootdirlist();
     void clearpresetsdirlist();
-    void init();
+    static void init();
     void save();
 
 private:

@@ -67,7 +67,7 @@ void MidiInputManager::DestroyInstance()
 }
 
 MidiInputManager::MidiInputManager(IMidiEventHandler *midiEventHandler)
-    : _queue(100), _midiEventHandler(midiEventHandler)
+    : _queue(SafeQueue<MidiEvent>(100)), _midiEventHandler(midiEventHandler)
 {
     _current = nullptr;
     _work.init(PTHREAD_PROCESS_PRIVATE, 0);

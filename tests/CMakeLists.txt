@@ -4,6 +4,7 @@ project(tests)
 
 add_executable(tests
     common-tests.cpp
+    fftw-tests.cpp
     catch.cpp
     )
 

@@ -39,21 +39,26 @@ RtEngine::~RtEngine()
 
 bool RtEngine::Start()
 {
+    std::cout << "Starting RtEngine...";
+
     try
     {
         this->midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynlab");
         this->midiin->setCallback(RtEngine::callback, this);
-        this->midiin->openPort();
+        this->midiin->openPort(1);
+
+        std::cout << "succeeded." << std::endl;
+
+        return true;
     }
     catch (const std::exception &ex)
     {
         delete this->midiin;
         this->midiin = nullptr;
 
+        std::cout << "failed." << std::endl;
         return false;
     }
-
-    return true;
 }
 
 void RtEngine::Stop()

@@ -6,6 +6,8 @@ option(BUILD_VST "enable building all projects using VST" OFF)
 option(BUILD_TESTS "enable building all test projects" OFF)
 option(BUILD_APP_ZYNADSUBFX "enable building app project" ON)
 option(BUILD_APP_THREEDEE "enable building app.threedee project" ON)
+option(BUILD_APP_MIXER "enable building app.mixer project" ON)
+option(BUILD_PINVOKE "enable building pinvoke project" OFF)
 
 # Add version information
 set(VERSION "2.4.4")
@@ -41,6 +43,10 @@ endif()
 
 if(BUILD_APP_THREEDEE)
     add_subdirectory("app.threedee")
+endif()
+
+if(BUILD_APP_MIXER)
+    add_subdirectory("app.mixer")
 endif()
 
 if(BUILD_TESTS)

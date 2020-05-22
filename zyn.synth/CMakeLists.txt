@@ -41,7 +41,8 @@ add_library(zyn.synth STATIC
     SUBnoteParams.h
     SynthNote.cpp
     SynthNote.h
-    fftsg.c
+    pffft.c
+    pffft.h
     )
 
 target_include_directories(zyn.synth
@@ -60,6 +61,10 @@ target_compile_features(zyn.synth
     PRIVATE cxx_nullptr
     PRIVATE cxx_lambdas
     )
+
+target_compile_definitions(zyn.synth
+    PUBLIC
+        -DPFFFT_SIMD_DISABLE)
 
 install(
     TARGETS

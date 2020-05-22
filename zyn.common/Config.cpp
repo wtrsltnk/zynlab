@@ -27,100 +27,108 @@
 
 using namespace std;
 
-Config::Config() = default;
-
 Config *Config::_instance = nullptr;
 
-Config &Config::Current()
+Config::Config()
 {
-    if (Config::_instance == nullptr)
-    {
-        Config::_instance = new Config();
-    }
-
-    return *Config::_instance;
-}
-
-void Config::init()
-{
-    maxstringsize = MAX_STRING_SIZE; //for ui
-    //defaults
     cfg.SampleRate = 44100;
     cfg.SoundBufferSize = 256;
     cfg.OscilSize = 1024;
     cfg.SwapStereo = 0;
-
-    cfg.LinuxOSSWaveOutDev = new char[MAX_STRING_SIZE];
-    snprintf(cfg.LinuxOSSWaveOutDev, MAX_STRING_SIZE, "/dev/dsp");
-    cfg.LinuxOSSSeqInDev = new char[MAX_STRING_SIZE];
-    snprintf(cfg.LinuxOSSSeqInDev, MAX_STRING_SIZE, "/dev/sequencer");
-
-    cfg.DumpFile = "zynaddsubfx_dump.txt";
-
-    cfg.WindowsWaveOutId = 0;
-    cfg.WindowsMidiInId = 0;
-
-    cfg.BankUIAutoClose = 0;
-    cfg.DumpNotesToFile = 0;
-    cfg.DumpAppend = 1;
-
-    cfg.GzipCompression = 3;
-
-    cfg.Interpolation = 0;
-    cfg.CheckPADsynth = 1;
-    cfg.IgnoreProgramChange = 0;
-
-    cfg.UserInterfaceMode = 0;
-    cfg.VirKeybLayout = 1;
-
-    //get the midi input devices name
-    cfg.currentBankDir = "./testbnk";
-
-    char filename[MAX_STRING_SIZE];
-    getConfigFileName(filename, MAX_STRING_SIZE);
-    readConfig(filename);
-
-    if (cfg.bankRootDirList[0].empty())
-    {
-        int b = 0;
-        //banks
-        cfg.bankRootDirList[b++] = "~/banks";
-        cfg.bankRootDirList[b++] = "./";
-        cfg.bankRootDirList[b++] = "/usr/share/zynaddsubfx/banks";
-        cfg.bankRootDirList[b++] = "/usr/local/share/zynaddsubfx/banks";
-#ifdef __APPLE__
-        cfg.bankRootDirList[b++] = "../Resources/banks";
-#else
-        cfg.bankRootDirList[b++] = "../banks";
-#endif
-        cfg.bankRootDirList[b++] = "banks";
-#ifdef _WIN32
-        cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\zynaddsubfx-instruments\banks)";
-        cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\samples)";
-#endif // _WIN32
-    }
-
-    if (cfg.presetsDirList[0].empty())
-    {
-        //presets
-        cfg.presetsDirList[0] = "./";
-#ifdef __APPLE__
-        cfg.presetsDirList[1] = "../Resources/presets";
-#else
-        cfg.presetsDirList[1] = "../presets";
-#endif
-        cfg.presetsDirList[2] = "presets";
-        cfg.presetsDirList[3] = "/usr/share/zynaddsubfx/presets";
-        cfg.presetsDirList[4] = "/usr/local/share/zynaddsubfx/presets";
-    }
-    cfg.LinuxALSAaudioDev = "default";
-    cfg.nameTag = "";
 }
 
 Config::~Config()
 {
     delete[] cfg.LinuxOSSWaveOutDev;
     delete[] cfg.LinuxOSSSeqInDev;
+}
+
+Config &Config::Current()
+{
+    return *_instance;
+}
+
+void Config::init()
+{
+    if (_instance != nullptr)
+    {
+        return;
+    }
+
+    _instance = new Config();
+
+    _instance->maxstringsize = MAX_STRING_SIZE; //for ui
+    //defaults
+    _instance->cfg.SampleRate = 44100;
+    _instance->cfg.SoundBufferSize = 256;
+    _instance->cfg.OscilSize = 1024;
+    _instance->cfg.SwapStereo = 0;
+
+    _instance->cfg.LinuxOSSWaveOutDev = new char[MAX_STRING_SIZE];
+    snprintf(_instance->cfg.LinuxOSSWaveOutDev, MAX_STRING_SIZE, "/dev/dsp");
+    _instance->cfg.LinuxOSSSeqInDev = new char[MAX_STRING_SIZE];
+    snprintf(_instance->cfg.LinuxOSSSeqInDev, MAX_STRING_SIZE, "/dev/sequencer");
+
+    _instance->cfg.DumpFile = "zynaddsubfx_dump.txt";
+
+    _instance->cfg.WindowsWaveOutId = 0;
+    _instance->cfg.WindowsMidiInId = 0;
+
+    _instance->cfg.BankUIAutoClose = 0;
+    _instance->cfg.DumpNotesToFile = 0;
+    _instance->cfg.DumpAppend = 1;
+
+    _instance->cfg.GzipCompression = 3;
+
+    _instance->cfg.Interpolation = 0;
+    _instance->cfg.CheckPADsynth = 1;
+    _instance->cfg.IgnoreProgramChange = 0;
+
+    _instance->cfg.UserInterfaceMode = 0;
+    _instance->cfg.VirKeybLayout = 1;
+
+    //get the midi input devices name
+    _instance->cfg.currentBankDir = "./testbnk";
+
+    char filename[MAX_STRING_SIZE];
+    _instance->getConfigFileName(filename, MAX_STRING_SIZE);
+    _instance->readConfig(filename);
+
+    if (_instance->cfg.bankRootDirList[0].empty())
+    {
+        int b = 0;
+        //banks
+        _instance->cfg.bankRootDirList[b++] = "~/banks";
+        _instance->cfg.bankRootDirList[b++] = "./";
+        _instance->cfg.bankRootDirList[b++] = "/usr/share/zynaddsubfx/banks";
+        _instance->cfg.bankRootDirList[b++] = "/usr/local/share/zynaddsubfx/banks";
+#ifdef __APPLE__
+        _instance->cfg.bankRootDirList[b++] = "../Resources/banks";
+#else
+        _instance->cfg.bankRootDirList[b++] = "../banks";
+#endif
+        _instance->cfg.bankRootDirList[b++] = "banks";
+#ifdef _WIN32
+        _instance->cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\zynaddsubfx-instruments\banks)";
+        _instance->cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\samples)";
+#endif // _WIN32
+    }
+
+    if (_instance->cfg.presetsDirList[0].empty())
+    {
+        //presets
+        _instance->cfg.presetsDirList[0] = "./";
+#ifdef __APPLE__
+        _instance->cfg.presetsDirList[1] = "../Resources/presets";
+#else
+        _instance->cfg.presetsDirList[1] = "../presets";
+#endif
+        _instance->cfg.presetsDirList[2] = "presets";
+        _instance->cfg.presetsDirList[3] = "/usr/share/zynaddsubfx/presets";
+        _instance->cfg.presetsDirList[4] = "/usr/local/share/zynaddsubfx/presets";
+    }
+    _instance->cfg.LinuxALSAaudioDev = "default";
+    _instance->cfg.nameTag = "";
 }
 
 void Config::save()

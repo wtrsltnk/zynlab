@@ -91,7 +91,7 @@ TEST_CASE("Presets")
     SECTION("Track Presets", "[zyn.mixer]")
     {
         Mixer mixer;
-        mixer.Setup();
+        mixer.Init();
 
         Microtonal micro;
         micro.Defaults();
@@ -175,12 +175,6 @@ TEST_CASE("Presets")
 
     SECTION("LFOParams Presets", "[zyn.synth]")
     {
-        PresetsSerializer serializerA;
-        serializerA.minimal = false;
-
-        PresetsSerializer serializerB;
-        serializerB.minimal = false;
-
         auto sut = LFOParams(70, 0, 64, 0, 0, 0, 0, 0);
         sut.Defaults();
         sut.InitPresets();
@@ -197,11 +191,6 @@ TEST_CASE("Presets")
 
     SECTION("Resonance Presets", "[zyn.synth]")
     {
-        PresetsSerializer serializerA;
-        serializerA.minimal = false;
-        PresetsSerializer serializerB;
-        serializerB.minimal = false;
-
         auto sut = Resonance();
         sut.Defaults();
         sut.InitPresets();
