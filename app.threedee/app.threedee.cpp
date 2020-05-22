@@ -812,131 +812,6 @@ void AppThreeDee::ChangeAppMode(AppMode appMode)
     _state._uiState._activeMode = appMode;
 }
 
-void AppThreeDee::HitKey(
-    int octave,
-    int key)
-{
-    if (key < 0)
-    {
-        return;
-    }
-
-    octave += 4;
-    TempNoteOn(0, (octave * 12) + key, 400);
-}
-
-static int keyDown = 0;
-
-void KeyUp(
-    unsigned int channel,
-    unsigned int note)
-{
-    keyDown = 0;
-
-    MidiEvent ev;
-    ev.type = MidiEventTypes::M_NOTE;
-    ev.channel = channel;
-    ev.value = 0;
-    ev.num = note;
-
-    MidiInputManager::Instance().PutEvent(ev);
-}
-
-void KeyDown(
-    unsigned int channel,
-    unsigned int note)
-{
-    if (keyDown == note)
-    {
-        return;
-    }
-
-    if (keyDown != 0)
-    {
-        std::cout << "keyUp forced " << note << std::endl;
-        KeyUp(channel, keyDown);
-        keyDown = 0;
-    }
-
-    keyDown = note;
-
-    MidiEvent ev;
-    ev.type = MidiEventTypes::M_NOTE;
-    ev.channel = channel;
-    ev.value = 100;
-    ev.num = note;
-
-    MidiInputManager::Instance().PutEvent(ev);
-}
-
-int WhiteKeyTopNote(
-    int octaveNote)
-{
-    switch (octaveNote)
-    {
-        case 0: // A
-        {
-            return 0;
-        }
-        case 1: // B
-        {
-            return 2;
-        }
-        case 2: // C
-        {
-            return 3;
-        }
-        case 3: // D
-        {
-            return 5;
-        }
-        case 4: // E
-        {
-            return 7;
-        }
-        case 5: // F
-        {
-            return 8;
-        }
-        case 6: // G
-        {
-            return 10;
-        }
-    }
-
-    return -1;
-}
-
-int BlackKeyToNote(
-    int octaveNote)
-{
-    switch (octaveNote)
-    {
-        case 0: // A#
-        {
-            return 1;
-        }
-        case 2: // C#
-        {
-            return 4;
-        }
-        case 3: // D#
-        {
-            return 6;
-        }
-        case 5: // F#
-        {
-            return 9;
-        }
-        case 6: // G#
-        {
-            return 11;
-        }
-    }
-
-    return -1;
-}
-
 void AppThreeDee::Menu()
 {
     bool sf = false, of = false;
@@ -1036,6 +911,130 @@ void AppThreeDee::ActivityBar()
     }
 }
 
+
+void AppThreeDee::HitKey(
+    int octave,
+    int key)
+{
+    if (key < 0)
+    {
+        return;
+    }
+
+    octave += 4;
+    TempNoteOn(0, (octave * 12) + key, 400);
+}
+
+static int keyDown = 0;
+
+void KeyUp(
+    unsigned int channel,
+    unsigned int note)
+{
+    keyDown = 0;
+
+    MidiEvent ev;
+    ev.type = MidiEventTypes::M_NOTE;
+    ev.channel = channel;
+    ev.value = 0;
+    ev.num = note;
+
+    MidiInputManager::Instance().PutEvent(ev);
+}
+
+void KeyDown(
+    unsigned int channel,
+    unsigned int note)
+{
+    if (keyDown == note)
+    {
+        return;
+    }
+
+    if (keyDown != 0)
+    {
+        KeyUp(channel, keyDown);
+        keyDown = 0;
+    }
+
+    keyDown = note;
+
+    MidiEvent ev;
+    ev.type = MidiEventTypes::M_NOTE;
+    ev.channel = channel;
+    ev.value = 100;
+    ev.num = note;
+
+    MidiInputManager::Instance().PutEvent(ev);
+}
+
+int WhiteKeyTopNote(
+    int octaveNote)
+{
+    switch (octaveNote)
+    {
+        case 0: // A
+        {
+            return 0;
+        }
+        case 1: // B
+        {
+            return 2;
+        }
+        case 2: // C
+        {
+            return 3;
+        }
+        case 3: // D
+        {
+            return 5;
+        }
+        case 4: // E
+        {
+            return 7;
+        }
+        case 5: // F
+        {
+            return 8;
+        }
+        case 6: // G
+        {
+            return 10;
+        }
+    }
+
+    return -1;
+}
+
+int BlackKeyToNote(
+    int octaveNote)
+{
+    switch (octaveNote)
+    {
+        case 0: // A#
+        {
+            return 1;
+        }
+        case 2: // C#
+        {
+            return 4;
+        }
+        case 3: // D#
+        {
+            return 6;
+        }
+        case 5: // F#
+        {
+            return 9;
+        }
+        case 6: // G#
+        {
+            return 11;
+        }
+    }
+
+    return -1;
+}
 enum class KeyTypes
 {
     Black,
