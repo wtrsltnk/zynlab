@@ -74,3 +74,19 @@ target_compile_features(app.threedee
     PRIVATE cxx_range_for
     PRIVATE cxx_thread_local
     )
+
+if(WIN32)
+    find_file(FFTW_BIN_PATH
+        NAME "libfftw3-3.dll"
+        PATHS ${CMAKE_PREFIX_PATH}/bin)
+
+    configure_file(${FFTW_BIN_PATH} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+
+    if(PaEnable)
+        find_file(PORTAUDIO_BIN_PATH
+            NAME "libportaudio.dll" "libportaudio_x86.dll"
+            PATHS ${CMAKE_PREFIX_PATH}/bin)
+
+        configure_file(${PORTAUDIO_BIN_PATH} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+    endif(PaEnable)
+endif(WIN32)

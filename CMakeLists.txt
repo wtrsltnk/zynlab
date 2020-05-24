@@ -7,6 +7,7 @@ option(BUILD_TESTS "enable building all test projects" OFF)
 option(BUILD_APP_ZYNADSUBFX "enable building app project" ON)
 option(BUILD_APP_THREEDEE "enable building app.threedee project" ON)
 option(BUILD_APP_MIXER "enable building app.mixer project" ON)
+option(BUILD_APP_TRACKER "enable building app.tracker project" ON)
 option(BUILD_PINVOKE "enable building pinvoke project" OFF)
 
 # Add version information
@@ -47,6 +48,10 @@ endif()
 
 if(BUILD_APP_MIXER)
     add_subdirectory("app.mixer")
+endif()
+
+if(BUILD_APP_TRACKER)
+    add_subdirectory("app.tracker")
 endif()
 
 if(BUILD_TESTS)
