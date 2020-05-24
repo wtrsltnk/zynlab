@@ -9,6 +9,15 @@
 #include <zyn.nio/MidiInputManager.h>
 #include <zyn.nio/Nio.h>
 
+ImVec2 operator+(ImVec2 const &a, ImVec2 const &b)
+{
+    return ImVec2(a.x + b.x, a.y + b.y);
+}
+
+ImVec2 operator-(ImVec2 const &a, ImVec2 const &b)
+{
+    return ImVec2(a.x - b.x, a.y - b.y);
+}
 class Application :
     public IApplication
 {
@@ -30,7 +39,7 @@ public:
         {
             io.Fonts->AddFontDefault();
         }
-        _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\consola.ttf", 12.0f);
+        _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 12.0f);
         io.Fonts->Build();
 
         Config::init();
@@ -70,13 +79,23 @@ public:
         ImGui::ShowDemoWindow();
 
         ImGui::Begin("TracksContainer", nullptr, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+        auto tracksPos = ImGui::GetWindowContentRegionMin();
+        auto tracksMax = ImGui::GetWindowContentRegionMax();
 
         ImGui::PushFont(_monofont);
-        ImGui::BeginChild(
-            "Tracks",
-            ImVec2((numTracks)*100 + 100, numRows * ImGui::GetTextLineHeightWithSpacing()),
-            false,
-            ImGuiWindowFlags_NoScrollbar);
+
+        auto lineHeight = ImGui::GetTextLineHeightWithSpacing();
+        auto selectionRowMin = ImVec2(tracksPos.x, tracksPos.y - 2 + currentRow * lineHeight);
+        auto selectionRowMax = ImVec2(tracksMax.x, tracksPos.y + (currentRow + 1) * lineHeight);
+
+        auto drawList = ImGui::GetWindowDrawList();
+
+        drawList->AddRectFilled(
+            ImGui::GetWindowPos() + selectionRowMin,
+            ImGui::GetWindowPos() + selectionRowMax,
+            ImColor(20, 220, 20, 55));
+
+        ImGui::SetScrollY((currentRow - ((tracksMax.y - tracksPos.y) / lineHeight) / 2 + 1) * lineHeight);
 
         auto columnWidth = ImGui::CalcTextSize("--- -- --");
         ImGui::Columns(numTracks + 1);
@@ -97,15 +116,17 @@ public:
                 ImGui::NextColumn();
             }
         }
-        ImGui::EndChild();
+
         ImGui::PopFont();
-        if (ImGui::IsKeyPressed(ImGuiKey_UpArrow))
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
         {
-            currentRow = (currentRow - 1) % numRows;
+            currentRow--;
+            if (currentRow < 0) currentRow = numRows - 1;
         }
-        if (ImGui::IsKeyPressed(ImGuiKey_DownArrow))
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
         {
-            currentRow = (currentRow + 1) % numRows;
+            currentRow++;
+            if (currentRow >= numRows) currentRow = 0;
         }
 
         ImGui::End();
