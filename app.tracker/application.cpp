@@ -90,14 +90,14 @@ public:
         //show Main Window
         ImGui::ShowDemoWindow();
 
-        ImGui::Begin("TracksContainer", nullptr, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+        ImGui::Begin("TracksContainer", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
         auto content = ImGui::GetContentRegionAvail();
 
         auto contentTop = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(100);
         ImGui::BeginChild(
-            "container", ImVec2(0, -40));
+            "container", ImVec2(content.x, -40));
 
         ImGui::PushFont(_monofont);
         auto spaceWidth = ImGui::CalcTextSize(" ");
@@ -109,11 +109,12 @@ public:
                            spaceWidth + cellParameterWidth +
                            spaceWidth + cellFxWidth;
 
+        auto fullWidth = 30 + (columnWidth.x + 15) * numTracks;
         auto lineHeight = ImGui::GetTextLineHeightWithSpacing();
 
         ImGui::BeginChild(
             "tracks",
-            ImVec2(30 + (columnWidth.x + 15) * numTracks, lineHeight * numRows));
+            ImVec2(fullWidth, lineHeight * numRows));
         auto tracksPos = ImGui::GetWindowContentRegionMin();
         auto tracksMax = ImGui::GetWindowContentRegionMax();
 
@@ -217,13 +218,57 @@ public:
         ImGui::PopFont();
 
         ImGui::EndChild();
+
+        // FOOTERS
+        ImGui::BeginChild(
+            "footerscontainer", ImVec2(0, 20));
+        ImGui::SetScrollX(tracksScrollx);
+
         ImGui::BeginChild(
             "footers",
-            ImVec2(30 + (columnWidth.x + 15) * numTracks, 40));
-        ImGui::SetScrollX(tracksScrollx);
+            ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, 40));
 
         ImGui::Columns(numTracks + 1);
         ImGui::SetColumnWidth(0, 30);
+        ImGui::NextColumn();
+        for (int i = 0; i < numTracks; i++)
+        {
+            ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
+            ImGui::Text("footer %d", i + 1);
+            ImGui::NextColumn();
+        }
+        ImGui::Columns(1);
+        ImGui::EndChild();
+
+        ImGui::EndChild();
+
+        // SCROLLBAR
+
+        ImGui::BeginChild(
+            "scrollbar", ImVec2(0, 20),
+            false,
+            ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        ImGui::SetScrollX(tracksScrollx);
+
+        ImGui::BeginChild(
+            "scrollbarcontent ", ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, 20));
+        ImGui::EndChild();
+        ImGui::EndChild();
+
+        // HEADERS
+
+        ImGui::SetCursorPosY(contentTop);
+        ImGui::BeginChild(
+            "headerscontainer", ImVec2(0, -40));
+
+        ImGui::SetScrollX(tracksScrollx);
+        ImGui::BeginChild(
+            "headers",
+            ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, 100));
+
+        ImGui::Columns(numTracks + 1);
+        ImGui::SetColumnWidth(0, 30);
+        ImGui::NextColumn();
         for (int i = 0; i < numTracks; i++)
         {
             ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
@@ -232,22 +277,6 @@ public:
         }
         ImGui::Columns(1);
         ImGui::EndChild();
-
-        ImGui::SetCursorPosY(contentTop);
-        ImGui::BeginChild(
-            "headers",
-            ImVec2(30 + (columnWidth.x + 15) * numTracks, 100));
-        ImGui::SetScrollX(tracksScrollx);
-
-        ImGui::Columns(numTracks + 1);
-        ImGui::SetColumnWidth(0, 30);
-        for (int i = 0; i < numTracks; i++)
-        {
-            ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
-            ImGui::Text("Track %d", i + 1);
-            ImGui::NextColumn();
-        }
-        ImGui::Columns(1);
         ImGui::EndChild();
 
         ImGui::End();
