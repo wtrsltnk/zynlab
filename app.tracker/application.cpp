@@ -75,11 +75,15 @@ public:
     virtual void Render3d()
     {}
 
-    const int numTracks = 8;
+    const char *emptyCellNote = "---";
+    const char *emptyCellParameter = "..";
+    const char *emptyCellFx = "000";
+
+    const int numTracks = 16;
     const int numRows = 64;
-    const char *emptyCell = "--- .. .. 000";
     int currentRow = 0;
     int currentTrack = 0;
+    int currentProperty = 0;
 
     virtual void Render2d()
     {
@@ -87,13 +91,32 @@ public:
         ImGui::ShowDemoWindow();
 
         ImGui::Begin("TracksContainer", nullptr, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+
+        auto content = ImGui::GetContentRegionAvail();
+
+        auto contentTop = ImGui::GetCursorPosY();
+        ImGui::SetCursorPosY(100);
+        ImGui::BeginChild(
+            "container", ImVec2(0, -40));
+
+        ImGui::PushFont(_monofont);
+        auto spaceWidth = ImGui::CalcTextSize(" ");
+        auto cellNoteWidth = ImGui::CalcTextSize(emptyCellNote);
+        auto cellParameterWidth = ImGui::CalcTextSize(emptyCellParameter);
+        auto cellFxWidth = ImGui::CalcTextSize(emptyCellFx);
+        auto columnWidth = cellNoteWidth +
+                           spaceWidth + cellParameterWidth +
+                           spaceWidth + cellParameterWidth +
+                           spaceWidth + cellFxWidth;
+
+        auto lineHeight = ImGui::GetTextLineHeightWithSpacing();
+
+        ImGui::BeginChild(
+            "tracks",
+            ImVec2(30 + (columnWidth.x + 15) * numTracks, lineHeight * numRows));
         auto tracksPos = ImGui::GetWindowContentRegionMin();
         auto tracksMax = ImGui::GetWindowContentRegionMax();
 
-        ImGui::PushFont(_monofont);
-        auto columnWidth = ImGui::CalcTextSize(emptyCell);
-
-        auto lineHeight = ImGui::GetTextLineHeightWithSpacing();
         auto selectionRowMin = ImVec2(tracksPos.x, tracksPos.y - 2 + currentRow * lineHeight);
         auto selectionRowMax = ImVec2(tracksMax.x, tracksPos.y + (currentRow + 1) * lineHeight);
 
@@ -105,7 +128,7 @@ public:
             ImColor(20, 220, 20, 55));
 
         ImGui::Columns(numTracks + 1);
-        ImGui::SetColumnWidth(0, 50);
+        ImGui::SetColumnWidth(0, 30);
         for (int i = 0; i < numTracks; i++)
         {
             ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
@@ -120,47 +143,112 @@ public:
             {
                 if (i == currentTrack && r == currentRow)
                 {
+                    auto cursorWidth = cellNoteWidth.x;
                     auto min = ImGui::GetWindowPos() + ImGui::GetCursorPos() - ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY());
+                    if (currentProperty > 0)
+                    {
+                        min.x += cellNoteWidth.x + spaceWidth.x;
+                        cursorWidth = cellParameterWidth.x;
+                    }
+                    if (currentProperty > 1)
+                    {
+                        min.x += cellParameterWidth.x + spaceWidth.x;
+                        cursorWidth = cellParameterWidth.x;
+                    }
+                    if (currentProperty > 2)
+                    {
+                        min.x += cellParameterWidth.x + spaceWidth.x;
+                        cursorWidth = cellFxWidth.x;
+                    }
                     drawList->AddRectFilled(
                         min - ImVec2(4, 0),
-                        min + ImVec2(ImGui::GetWindowSize().x, lineHeight),
+                        min + ImVec2(cursorWidth, lineHeight),
                         ImColor(20, 20, 220, 255));
                 }
 
-                ImGui::Text("%s", emptyCell);
+                ImGui::Text("%s %s %s %s", emptyCellNote, emptyCellParameter, emptyCellParameter, emptyCellFx);
                 ImGui::NextColumn();
             }
         }
 
-        ImGui::PopFont();
+        ImGui::EndChild();
+
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
         {
             currentRow--;
             if (currentRow < 0) currentRow = numRows - 1;
 
-            ImGui::SetScrollY((currentRow - ((tracksMax.y - tracksPos.y) / lineHeight) / 2 + 1) * lineHeight);
+            ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
         }
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
         {
             currentRow++;
             if (currentRow >= numRows) currentRow = 0;
 
-            ImGui::SetScrollY((currentRow - ((tracksMax.y - tracksPos.y) / lineHeight) / 2 + 1) * lineHeight);
+            ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
         }
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
         {
-            currentTrack++;
-            if (currentTrack >= numTracks) currentTrack = 0;
+            currentProperty++;
+            if (currentProperty >= 4)
+            {
+                currentProperty = 0;
+                currentTrack++;
+                if (currentTrack >= numTracks) currentTrack = 0;
+            }
 
-            ImGui::SetScrollX((currentTrack - ((tracksMax.x - tracksPos.x) / columnWidth.x) / 2 + 1) * columnWidth.x);
+            ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
         }
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
         {
-            currentTrack--;
-            if (currentTrack < 0) currentTrack = numTracks - 1;
+            currentProperty--;
+            if (currentProperty < 0)
+            {
+                currentProperty = 4;
+                currentTrack--;
+                if (currentTrack < 0) currentTrack = numTracks - 1;
+            }
 
-            ImGui::SetScrollX((currentTrack - ((tracksMax.x - tracksPos.x) / columnWidth.x) / 2 + 1) * columnWidth.x);
+            ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
         }
+
+        auto tracksScrollx = ImGui::GetScrollX();
+
+        ImGui::PopFont();
+
+        ImGui::EndChild();
+        ImGui::BeginChild(
+            "footers",
+            ImVec2(30 + (columnWidth.x + 15) * numTracks, 40));
+        ImGui::SetScrollX(tracksScrollx);
+
+        ImGui::Columns(numTracks + 1);
+        ImGui::SetColumnWidth(0, 30);
+        for (int i = 0; i < numTracks; i++)
+        {
+            ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
+            ImGui::Text("Track %d", i + 1);
+            ImGui::NextColumn();
+        }
+        ImGui::Columns(1);
+        ImGui::EndChild();
+
+        ImGui::SetCursorPosY(contentTop);
+        ImGui::BeginChild(
+            "headers",
+            ImVec2(30 + (columnWidth.x + 15) * numTracks, 100));
+        ImGui::SetScrollX(tracksScrollx);
+
+        ImGui::Columns(numTracks + 1);
+        ImGui::SetColumnWidth(0, 30);
+        for (int i = 0; i < numTracks; i++)
+        {
+            ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
+            ImGui::Text("Track %d", i + 1);
+            ImGui::NextColumn();
+        }
+        ImGui::Columns(1);
+        ImGui::EndChild();
 
         ImGui::End();
     }
