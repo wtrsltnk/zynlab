@@ -79,7 +79,7 @@ public:
     const char *emptyCellParameter = "..";
     const char *emptyCellFx = "000";
 
-    const int numTracks = 16;
+    const int numTracks = NUM_MIXER_TRACKS;
     const int numRows = 64;
     int currentRow = 0;
     int currentTrack = 0;
@@ -87,19 +87,22 @@ public:
 
     virtual void Render2d()
     {
+        auto selectionColor = ImColor(20, 180, 20, 255);
+        auto headerHeight = 60;
+
         //show Main Window
         ImGui::ShowDemoWindow();
 
         ImGui::Begin("TracksContainer", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
+        ImGui::PushFont(_monofont);
         auto content = ImGui::GetContentRegionAvail();
 
         auto contentTop = ImGui::GetCursorPosY();
-        ImGui::SetCursorPosY(100);
+        ImGui::SetCursorPosY(headerHeight);
         ImGui::BeginChild(
             "container", ImVec2(content.x, -40));
 
-        ImGui::PushFont(_monofont);
         auto spaceWidth = ImGui::CalcTextSize(" ");
         auto cellNoteWidth = ImGui::CalcTextSize(emptyCellNote);
         auto cellParameterWidth = ImGui::CalcTextSize(emptyCellParameter);
@@ -164,7 +167,7 @@ public:
                     drawList->AddRectFilled(
                         min - ImVec2(4, 0),
                         min + ImVec2(cursorWidth, lineHeight),
-                        ImColor(20, 20, 220, 255));
+                        selectionColor);
                 }
 
                 ImGui::Text("%s %s %s %s", emptyCellNote, emptyCellParameter, emptyCellParameter, emptyCellFx);
@@ -215,8 +218,6 @@ public:
 
         auto tracksScrollx = ImGui::GetScrollX();
 
-        ImGui::PopFont();
-
         ImGui::EndChild();
 
         // FOOTERS
@@ -264,20 +265,70 @@ public:
         ImGui::SetScrollX(tracksScrollx);
         ImGui::BeginChild(
             "headers",
-            ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, 100));
+            ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, headerHeight));
 
         ImGui::Columns(numTracks + 1);
         ImGui::SetColumnWidth(0, 30);
         ImGui::NextColumn();
+
         for (int i = 0; i < numTracks; i++)
         {
+            drawList = ImGui::GetWindowDrawList();
+
+            if (i == currentTrack)
+            {
+                drawList->AddLine(
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(-4, 0),
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(-4, 14),
+                    selectionColor,
+                    2);
+                drawList->AddLine(
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(-4, 0),
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(10, 0),
+                    selectionColor,
+                    3);
+                drawList->AddLine(
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(columnWidth.x + 4, 0),
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(columnWidth.x + 4, 14),
+                    selectionColor,
+                    2);
+                drawList->AddLine(
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(columnWidth.x + 4, 0),
+                    ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(columnWidth.x - 10, 0),
+                    selectionColor,
+                    3);
+            }
+
+            auto hue = i * 0.05f;
+            drawList->AddRectFilled(
+                ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(0, 4),
+                ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(columnWidth.x, 8),
+                ImColor::HSV(hue, 0.9f, 0.7f));
+
             ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
-            ImGui::Text("Track %d", i + 1);
+            auto w = ImGui::CalcTextSize("Track 00").x / 2.0f;
+            ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 9));
+            ImGui::SetNextWindowSize(ImVec2(columnWidth.x + 15, headerHeight));
+            ImGui::Text("Track %02d", i + 1);
             ImGui::NextColumn();
         }
         ImGui::Columns(1);
         ImGui::EndChild();
         ImGui::EndChild();
+
+        for (int i = 0; i < numTracks; i++)
+        {
+            if (i == currentTrack)
+            {
+                continue;
+            }
+
+            drawList->AddRectFilled(
+                ImGui::GetWindowPos() + ImVec2(40 - tracksScrollx + (columnWidth.x + 15) * i, _mixer->GetTrack(i)->Penabled ? headerHeight : 0),
+                ImGui::GetWindowPos() + ImVec2(40 - tracksScrollx + (columnWidth.x + 15) * (i + 1), ImGui::GetContentRegionMax().y),
+                ImColor(20, 20, 20, _mixer->GetTrack(i)->Penabled ? 70 : 150));
+        }
+        ImGui::PopFont();
 
         ImGui::End();
     }
