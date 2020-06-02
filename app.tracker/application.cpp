@@ -45,7 +45,7 @@ public:
         {
             io.Fonts->AddFontDefault();
         }
-        _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 12.0f);
+        _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
         io.Fonts->Build();
 
         Config::init();
@@ -88,7 +88,9 @@ public:
     virtual void Render2d()
     {
         auto selectionColor = ImColor(20, 180, 20, 255);
-        auto headerHeight = 60;
+        auto headerHeight = 105;
+        auto footerHeight = 20;
+        auto scrollbarHeight = 20;
 
         //show Main Window
         ImGui::ShowDemoWindow();
@@ -96,12 +98,12 @@ public:
         ImGui::Begin("TracksContainer", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
         ImGui::PushFont(_monofont);
-        auto content = ImGui::GetContentRegionAvail();
+        auto content = ImGui::GetContentRegionAvail() - ImVec2(10, 0);
 
         auto contentTop = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(headerHeight);
         ImGui::BeginChild(
-            "container", ImVec2(content.x, -40));
+            "container", ImVec2(content.x, -(footerHeight + scrollbarHeight)));
 
         auto spaceWidth = ImGui::CalcTextSize(" ");
         auto cellNoteWidth = ImGui::CalcTextSize(emptyCellNote);
@@ -126,10 +128,25 @@ public:
 
         auto drawList = ImGui::GetWindowDrawList();
 
+        for (int i = 0; i < numRows; i += 4)
+        {
+            auto highlightRowMin = ImVec2(tracksPos.x, tracksPos.y - 2 + i * lineHeight);
+            auto highlightRowMax = ImVec2(tracksMax.x, tracksPos.y + (i + 1) * lineHeight);
+
+            drawList->AddRectFilled(
+                ImGui::GetWindowPos() + highlightRowMin,
+                ImGui::GetWindowPos() + highlightRowMax,
+                ImColor(120, 120, 120, 55));
+        }
+
+        // SELECTED ROW
+
         drawList->AddRectFilled(
             ImGui::GetWindowPos() + selectionRowMin,
             ImGui::GetWindowPos() + selectionRowMax,
             ImColor(20, 220, 20, 55));
+
+        // MAKE ROOM FOR THE HEADERS
 
         ImGui::Columns(numTracks + 1);
         ImGui::SetColumnWidth(0, 30);
@@ -137,6 +154,8 @@ public:
         {
             ImGui::SetColumnWidth(i + 1, columnWidth.x + 15);
         }
+
+        // ALL TRACKS AND CELLS
 
         for (int r = 0; r < 64; r++)
         {
@@ -177,16 +196,18 @@ public:
 
         ImGui::EndChild();
 
+        // Events
+
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
         {
-            currentRow--;
+            currentRow -= (ImGui::GetIO().KeyCtrl ? 4 : 1);
             if (currentRow < 0) currentRow = numRows - 1;
 
             ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
         }
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
         {
-            currentRow++;
+            currentRow += (ImGui::GetIO().KeyCtrl ? 4 : 1);
             if (currentRow >= numRows) currentRow = 0;
 
             ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
@@ -215,19 +236,34 @@ public:
 
             ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
         }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
+        {
+            if (ImGui::GetIO().KeyShift)
+            {
+                currentTrack--;
+                if (currentTrack < 0) currentTrack = numTracks - 1;
+            }
+            else
+            {
+                currentTrack++;
+                if (currentTrack >= numTracks) currentTrack = 0;
+            }
+            ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
+        }
 
         auto tracksScrollx = ImGui::GetScrollX();
 
         ImGui::EndChild();
 
         // FOOTERS
+
         ImGui::BeginChild(
-            "footerscontainer", ImVec2(0, 20));
+            "footerscontainer", ImVec2(content.x, footerHeight));
         ImGui::SetScrollX(tracksScrollx);
 
         ImGui::BeginChild(
             "footers",
-            ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, 40));
+            ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, footerHeight));
 
         ImGui::Columns(numTracks + 1);
         ImGui::SetColumnWidth(0, 30);
@@ -246,13 +282,13 @@ public:
         // SCROLLBAR
 
         ImGui::BeginChild(
-            "scrollbar", ImVec2(0, 20),
+            "scrollbar", ImVec2(content.x, scrollbarHeight),
             false,
             ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         ImGui::SetScrollX(tracksScrollx);
 
         ImGui::BeginChild(
-            "scrollbarcontent ", ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, 20));
+            "scrollbarcontent ", ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, scrollbarHeight));
         ImGui::EndChild();
         ImGui::EndChild();
 
@@ -260,7 +296,7 @@ public:
 
         ImGui::SetCursorPosY(contentTop);
         ImGui::BeginChild(
-            "headerscontainer", ImVec2(0, -40));
+            "headerscontainer", ImVec2(content.x, -40));
 
         ImGui::SetScrollX(tracksScrollx);
         ImGui::BeginChild(
@@ -273,6 +309,7 @@ public:
 
         for (int i = 0; i < numTracks; i++)
         {
+            ImGui::PushID(i);
             drawList = ImGui::GetWindowDrawList();
 
             if (i == currentTrack)
@@ -310,11 +347,31 @@ public:
             ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 9));
             ImGui::SetNextWindowSize(ImVec2(columnWidth.x + 15, headerHeight));
             ImGui::Text("Track %02d", i + 1);
+            bool v = _mixer->GetTrack(i)->Penabled == 1;
+            if (ImGui::Checkbox("##enabled", &v))
+            {
+                _mixer->GetTrack(i)->Penabled = v ? 1 : 0;
+                if (v)
+                {
+                    currentTrack = i;
+                    currentProperty = 0;
+                }
+            }
+            ImGui::SameLine();
+            ImGui::Button("edit", ImVec2(-1, 0));
+
+            ImGui::Button("m", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
+            ImGui::SameLine();
+            ImGui::Button("s", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
+
+            ImGui::PopID();
             ImGui::NextColumn();
         }
         ImGui::Columns(1);
         ImGui::EndChild();
         ImGui::EndChild();
+
+        // LO-LIGHT disabled tracks
 
         for (int i = 0; i < numTracks; i++)
         {
@@ -323,9 +380,16 @@ public:
                 continue;
             }
 
+            auto min = ImVec2(
+                40 - tracksScrollx + (columnWidth.x + 15) * i,
+                _mixer->GetTrack(i)->Penabled ? headerHeight : 0);
+            auto max = ImVec2(
+                40 - tracksScrollx + (columnWidth.x + 15) * (i + 1),
+                ImGui::GetContentRegionMax().y);
+
             drawList->AddRectFilled(
-                ImGui::GetWindowPos() + ImVec2(40 - tracksScrollx + (columnWidth.x + 15) * i, _mixer->GetTrack(i)->Penabled ? headerHeight : 0),
-                ImGui::GetWindowPos() + ImVec2(40 - tracksScrollx + (columnWidth.x + 15) * (i + 1), ImGui::GetContentRegionMax().y),
+                ImGui::GetWindowPos() + min,
+                ImGui::GetWindowPos() + max,
                 ImColor(20, 20, 20, _mixer->GetTrack(i)->Penabled ? 70 : 150));
         }
         ImGui::PopFont();
