@@ -35,7 +35,7 @@ std::set<ILibrary *> &Library::GetChildren()
 
 bool Library::IsParent(ILibrary *library)
 {
-    if (library == this)
+    if (library == (ILibrary *)this)
     {
         return true;
     }
@@ -46,4 +46,14 @@ bool Library::IsParent(ILibrary *library)
     }
 
     return _parent->IsParent(library);
+}
+
+void Library::AddLibraryItem(ILibraryItem *item)
+{
+    _items.insert(item);
+}
+
+std::set<ILibraryItem *> &Library::GetItems()
+{
+    return _items;
 }

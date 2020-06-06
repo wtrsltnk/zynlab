@@ -46,6 +46,8 @@ public:
     virtual ILibrary *GetParent();
     virtual std::set<ILibrary *> &GetChildren();
     virtual bool IsParent(ILibrary *library);
+    virtual void AddLibraryItem(class ILibraryItem *item);
+    virtual std::set<class ILibraryItem *> &GetItems();
 };
 
 class LibraryItem : public ILibraryItem

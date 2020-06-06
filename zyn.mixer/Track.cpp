@@ -58,7 +58,6 @@ Track::~Track()
         delete[] n.Pname;
     }
 
-    delete[] Pname;
     delete[] partoutl;
     delete[] partoutr;
     for (auto &nefx : partefx)
@@ -127,8 +126,6 @@ void Track::Init(IMixer *mixer, Microtonal *microtonal)
         i.time = 0;
     }
     Cleanup();
-
-    Pname = new unsigned char[TRACK_MAX_NAME_LEN];
 
     oldvolumel = oldvolumer = 0.5f;
     lastnote = -1;

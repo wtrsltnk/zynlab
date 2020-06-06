@@ -35,6 +35,7 @@ target_link_libraries(app.tracker
         zyn.nio
         zyn.mixer
         zyn.synth
+        zyn.serialization
         zyn.common)
 
 target_compile_options(app.tracker

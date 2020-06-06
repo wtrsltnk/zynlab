@@ -138,7 +138,7 @@ public:
     unsigned char Plegatomode; // 0=normal, 1=legato
     unsigned char Pkeylimit;   //how many keys are alowed to be played same time (0=off), the older will be relased
 
-    unsigned char *Pname; //name of the instrument
+    unsigned char Pname[TRACK_MAX_NAME_LEN + 1]; //name of the instrument
     struct
     { //instrument additional information
         unsigned char Ptype;
