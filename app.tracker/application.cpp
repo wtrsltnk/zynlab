@@ -80,84 +80,404 @@ std::vector<Note> &Pattern::Notes(
     return _notes[trackIndex];
 }
 
-class Application :
-    public IApplication
+class PatternEdtor
 {
-    Mixer *_mixer;
-    ILibraryManager *_library;
+    IMixer *_mixer;
     Pattern *_pattern;
 
     ImFont *_monofont;
+    bool _editMode;
+    unsigned int _columnsWidths[NUM_MIXER_TRACKS];
 
 public:
-    Application()
+    PatternEdtor()
         : _mixer(nullptr),
-          _library(nullptr),
           _pattern(nullptr),
-          _monofont(nullptr)
+          _monofont(nullptr),
+          _editMode(false)
     {}
 
-    virtual bool Setup()
+    Pattern *GetPattern() { return _pattern; }
+
+    void SetUp(
+        IMixer *mixer,
+        ImFont *font)
     {
-        ImGuiIO &io = ImGui::GetIO();
-        io.Fonts->Clear();
-        ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-        if (font != nullptr)
-        {
-            io.FontDefault = font;
-        }
-        else
-        {
-            io.Fonts->AddFontDefault();
-        }
-        _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
-        io.Fonts->Build();
-
-        Config::init();
-
-        SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
-        SystemSettings::Instance().buffersize = Config::Current().cfg.SoundBufferSize;
-        SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
-        SystemSettings::Instance().alias();
-
-        _mixer = new Mixer();
-
-        _mixer->Init();
-
-        _library = new LibraryManager();
-
-        for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
-        {
-            if (Config::Current().cfg.bankRootDirList[i].size() == 0)
-            {
-                continue;
-            }
-            std::cout << Config::Current().cfg.bankRootDirList[i] << std::endl;
-            _library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
-        }
-
-        _library->RefreshLibraries();
-
-        Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
-
-        if (!Nio::Start(_mixer, _mixer))
-        {
-            return false;
-        }
-
-        Nio::SelectSink("PA");
-        Nio::SelectSource("RT");
+        _mixer = mixer;
+        _monofont = font;
 
         _pattern = new Pattern(64);
 
-        _pattern->Notes(0)[0]._note = 50;
-        _pattern->Notes(0)[0]._length = 64;
-
-        return true;
+        for (int i = 0; i < 16; i++)
+        {
+            _pattern->Notes(0)[i * 4]._note = 50 + 1;
+            _pattern->Notes(0)[i * 4]._length = 64;
+        }
     }
 
-    virtual void Render3d()
-    {}
+    void Render2d()
+    {
+        auto selectionColor = ImColor(20, 180, 20, 255);
+        auto selectedRowBackgroundColor = ImColor(20, 220, 20, 55);
+
+        ImGui::Begin(
+            "PatternEditor",
+            nullptr,
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        {
+            ImGui::PushFont(_monofont);
+            auto content = ImGui::GetContentRegionAvail() - ImVec2(rowIndexColumnWidth, 0);
+            float tracksScrollx = 0, tracksScrolly = 0, lineHeight = 30;
+
+            auto spaceWidth = ImGui::CalcTextSize(" ");
+            auto cellNoteWidth = ImGui::CalcTextSize(emptyCellNote);
+            auto cellParameterWidth = ImGui::CalcTextSize(emptyCellParameter);
+            auto cellFxWidth = ImGui::CalcTextSize(emptyCellFx);
+            auto columnWidth = cellNoteWidth +
+                               spaceWidth + cellParameterWidth +
+                               spaceWidth + cellParameterWidth +
+                               spaceWidth + cellFxWidth;
+            auto fullWidth = (columnWidth.x + 15) * numTracks;
+
+            auto contentTop = ImGui::GetCursorPosY();
+            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, headerHeight));
+            ImGui::BeginChild(
+                "container",
+                ImVec2(content.x, -(footerHeight + scrollbarHeight)));
+            {
+                lineHeight = ImGui::GetTextLineHeightWithSpacing();
+
+                ImGui::BeginChild(
+                    "tracks",
+                    ImVec2(fullWidth, lineHeight * _pattern->Length()));
+                {
+                    auto tracksPos = ImGui::GetWindowContentRegionMin();
+                    auto tracksMax = ImGui::GetWindowContentRegionMax();
+
+                    auto selectionRowMin = ImVec2(tracksPos.x, tracksPos.y + currentRow * lineHeight);
+                    auto selectionRowMax = ImVec2(tracksMax.x, tracksPos.y + (currentRow + 1) * lineHeight);
+
+                    auto drawList = ImGui::GetWindowDrawList();
+
+                    for (unsigned int i = 0; i < _pattern->Length(); i += 4)
+                    {
+                        auto highlightRowMin = ImVec2(tracksPos.x, tracksPos.y + i * lineHeight);
+                        auto highlightRowMax = ImVec2(tracksMax.x, tracksPos.y + (i + 1) * lineHeight);
+
+                        drawList->AddRectFilled(
+                            ImGui::GetWindowPos() + highlightRowMin,
+                            ImGui::GetWindowPos() + highlightRowMax,
+                            ImColor(120, 120, 120, 55));
+                    }
+
+                    // SELECTED ROW
+
+                    drawList->AddRectFilled(
+                        ImGui::GetWindowPos() + selectionRowMin,
+                        ImGui::GetWindowPos() + selectionRowMax,
+                        selectedRowBackgroundColor);
+
+                    // MAKE ROOM FOR THE HEADERS
+
+                    ImGui::Columns(numTracks);
+                    for (unsigned int i = 0; i < numTracks; i++)
+                    {
+                        _columnsWidths[i] = columnWidth.x;
+                        ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
+                    }
+
+                    // ALL TRACKS AND CELLS
+
+                    for (unsigned int r = 0; r < _pattern->Length(); r++)
+                    {
+                        for (unsigned int i = 0; i < numTracks; i++)
+                        {
+                            auto notes = _pattern->Notes(i);
+                            auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+                            if (i == currentTrack && r == currentRow)
+                            {
+                                auto cursorWidth = cellNoteWidth.x;
+                                auto min = markerPos + ImVec2(2, 0) - ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY());
+                                if (currentProperty > 0)
+                                {
+                                    min.x += cellNoteWidth.x + spaceWidth.x - 1;
+                                    cursorWidth = cellParameterWidth.x;
+                                }
+                                if (currentProperty > 1)
+                                {
+                                    min.x += cellParameterWidth.x + spaceWidth.x - 1;
+                                    cursorWidth = cellParameterWidth.x;
+                                }
+                                if (currentProperty > 2)
+                                {
+                                    min.x += cellParameterWidth.x + spaceWidth.x;
+                                    cursorWidth = cellFxWidth.x;
+                                }
+
+                                drawList->AddRectFilled(
+                                    min - ImVec2(4, 0),
+                                    min + ImVec2(cursorWidth, lineHeight),
+                                    selectionColor);
+                            }
+
+                            char const *cellNote = emptyCellNote;
+                            char const *cellParameter1 = emptyCellParameter;
+                            char const *cellParameter2 = emptyCellParameter;
+                            char const *cellFx = emptyCellFx;
+                            if (notes[r]._note != 0)
+                            {
+                                cellNote = NoteToString(notes[r]._note);
+                                if (notes[r]._length != 0)
+                                {
+                                    cellParameter1 = ValueToString(notes[r]._length);
+                                }
+                                if (notes[r]._velocity != 0)
+                                {
+                                    cellParameter2 = ValueToString(notes[r]._velocity);
+                                }
+                            }
+                            ImGui::Text("%s %s %s %s", cellNote, cellParameter1, cellParameter2, cellFx);
+                            ImGui::NextColumn();
+                        }
+                    }
+                }
+                ImGui::EndChild();
+
+                // EVENTS
+
+                if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+                {
+                    if (HandleKeyboardNotes())
+                    {
+                        ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
+                    }
+                    else if (HandleKeyboardNavigation())
+                    {
+                        ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
+                        ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
+                    }
+                }
+
+                tracksScrollx = ImGui::GetScrollX();
+                tracksScrolly = ImGui::GetScrollY();
+            }
+            ImGui::EndChild();
+
+            // FOOTERS
+
+            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
+            ImGui::BeginChild(
+                "footerscontainer",
+                ImVec2(content.x, footerHeight));
+            {
+                ImGui::SetScrollX(tracksScrollx);
+
+                ImGui::BeginChild(
+                    "footers",
+                    ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, footerHeight));
+                {
+                    ImGui::Columns(numTracks);
+                    for (unsigned int i = 0; i < numTracks; i++)
+                    {
+                        ImGui::PushID(i);
+                        auto drawList = ImGui::GetWindowDrawList();
+                        auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+                        if (i == currentTrack)
+                        {
+                            drawList->AddLine(
+                                markerPos + ImVec2(-4, 2),
+                                markerPos + ImVec2(-4, 16),
+                                selectionColor,
+                                2);
+                            drawList->AddLine(
+                                markerPos + ImVec2(-4, 16),
+                                markerPos + ImVec2(10, 16),
+                                selectionColor,
+                                3);
+                            drawList->AddLine(
+                                markerPos + ImVec2(_columnsWidths[i] + 3, 2),
+                                markerPos + ImVec2(_columnsWidths[i] + 3, 16),
+                                selectionColor,
+                                2);
+                            drawList->AddLine(
+                                markerPos + ImVec2(_columnsWidths[i] + 4, 16),
+                                markerPos + ImVec2(_columnsWidths[i] - 11, 16),
+                                selectionColor,
+                                3);
+                        }
+
+                        auto w = ImGui::CalcTextSize("footer 00").x / 2.0f;
+                        ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
+                        ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 0));
+                        ImGui::Text("footer %02d", i + 1);
+                        ImGui::PopID();
+                        ImGui::NextColumn();
+                    }
+                    ImGui::Columns(1);
+                }
+                ImGui::EndChild();
+            }
+            ImGui::EndChild();
+
+            // SCROLLBAR
+
+            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
+            ImGui::BeginChild(
+                "scrollbar",
+                ImVec2(content.x, scrollbarHeight),
+                false,
+                ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            {
+                ImGui::SetScrollX(tracksScrollx);
+
+                ImGui::BeginChild(
+                    "scrollbarcontent ",
+                    ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, scrollbarHeight));
+                {}
+                ImGui::EndChild();
+            }
+            ImGui::EndChild();
+
+            // ROWINDICES
+
+            ImGui::SetCursorPosY(contentTop);
+            if (ImGui::Selectable("E", _editMode, 0, ImVec2(rowIndexColumnWidth - 5, headerHeight - 5)))
+            {
+                _editMode = !_editMode;
+            }
+            ImGui::SetCursorPosY(contentTop);
+            ImGui::MoveCursorPos(ImVec2(0, headerHeight));
+            ImGui::BeginChild(
+                "rowinedicescontainer",
+                ImVec2(rowIndexColumnWidth, -(footerHeight + scrollbarHeight)),
+                false,
+                ImGuiWindowFlags_NoScrollbar);
+            {
+                ImGui::SetScrollY(tracksScrolly);
+
+                ImGui::BeginChild(
+                    "rowindices",
+                    ImVec2(rowIndexColumnWidth, lineHeight * _pattern->Length()));
+                {
+                    auto drawList = ImGui::GetWindowDrawList();
+
+                    for (unsigned int r = 0; r < _pattern->Length(); r++)
+                    {
+                        auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+                        if (r % 4 == 0)
+                        {
+                            drawList->AddRectFilled(
+                                markerPos,
+                                markerPos + ImVec2(rowIndexColumnWidth, lineHeight),
+                                ImColor(120, 120, 120, 55));
+                        }
+                        if (r == currentRow)
+                        {
+                            drawList->AddRectFilled(
+                                markerPos,
+                                markerPos + ImVec2(rowIndexColumnWidth, lineHeight),
+                                selectedRowBackgroundColor);
+                        }
+                        ImGui::Text("%02d", r);
+                    }
+                }
+                ImGui::EndChild();
+            }
+            ImGui::EndChild();
+
+            // HEADERS
+
+            ImGui::SetCursorPosY(contentTop);
+            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
+            ImGui::BeginChild(
+                "headerscontainer",
+                ImVec2(content.x, -40));
+            {
+                ImGui::SetScrollX(tracksScrollx);
+                ImGui::BeginChild(
+                    "headers",
+                    ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, headerHeight));
+                {
+                    ImGui::Columns(numTracks);
+
+                    auto drawList = ImGui::GetWindowDrawList();
+                    for (unsigned int i = 0; i < numTracks; i++)
+                    {
+                        ImGui::PushID(i);
+                        auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+
+                        if (i == currentTrack)
+                        {
+                            drawList->AddLine(
+                                markerPos + ImVec2(-4, 0),
+                                markerPos + ImVec2(-4, 14),
+                                selectionColor,
+                                2);
+                            drawList->AddLine(
+                                markerPos + ImVec2(-4, 0),
+                                markerPos + ImVec2(10, 0),
+                                selectionColor,
+                                3);
+                            drawList->AddLine(
+                                markerPos + ImVec2(_columnsWidths[i] + 3, 0),
+                                markerPos + ImVec2(_columnsWidths[i] + 3, 14),
+                                selectionColor,
+                                2);
+                            drawList->AddLine(
+                                markerPos + ImVec2(_columnsWidths[i] + 3, 0),
+                                markerPos + ImVec2(_columnsWidths[i] - 11, 0),
+                                selectionColor,
+                                3);
+                        }
+
+                        drawList->AddRectFilled(
+                            markerPos + ImVec2(0, 4),
+                            markerPos + ImVec2(_columnsWidths[i], 8),
+                            ImColor::HSV(i * 0.05f, 0.9f, 0.7f));
+
+                        ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
+
+                        auto w = ImGui::CalcTextSize("Track 00").x / 2.0f;
+                        ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 9));
+                        ImGui::SetNextWindowSize(ImVec2(_columnsWidths[i] + 15, headerHeight));
+                        ImGui::Text("Track %02d", i + 1);
+
+                        bool v = _mixer->GetTrack(i)->Penabled == 1;
+                        if (ImGui::Checkbox("##enabled", &v))
+                        {
+                            _mixer->GetTrack(i)->Penabled = v ? 1 : 0;
+                            if (v)
+                            {
+                                currentTrack = i;
+                                currentProperty = 0;
+                            }
+                        }
+                        ImGui::SameLine();
+                        ImGui::Button("edit", ImVec2(-1, 0));
+
+                        ImGui::Selectable(
+                            "m", true,
+                            ImGuiSelectableFlags_None,
+                            ImVec2(14, 14));
+                        ImGui::SameLine();
+                        ImGui::Selectable(
+                            "s", true,
+                            ImGuiSelectableFlags_None,
+                            ImVec2(14, 14));
+
+                        ImGui::PopID();
+                        ImGui::NextColumn();
+                    }
+                    ImGui::Columns(1);
+                }
+                ImGui::EndChild();
+            }
+            ImGui::EndChild();
+
+            ImGui::PopFont();
+        }
+        ImGui::End();
+    }
 
     const unsigned int numTracks = NUM_MIXER_TRACKS;
     unsigned int currentRow = 0;
@@ -208,8 +528,34 @@ public:
         {'P', 88}, // E-6
     };
 
+    bool HandlePlayingNotes(
+        bool repeat = false)
+    {
+        for (auto p : _charToNoteMap)
+        {
+            if (ImGui::IsKeyPressed((ImWchar)p.first, repeat))
+            {
+                _mixer->PreviewNote(currentTrack, p.second);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool HandleKeyboardNotes()
     {
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
+        {
+            _editMode = !_editMode;
+        }
+
+        if (!_editMode)
+        {
+            HandlePlayingNotes();
+            return false;
+        }
+
         if (currentProperty == 0)
         {
             for (auto p : _charToNoteMap)
@@ -217,6 +563,7 @@ public:
                 if (ImGui::IsKeyPressed((ImWchar)p.first))
                 {
                     _pattern->Notes(currentTrack)[currentRow]._note = p.second;
+                    _mixer->PreviewNote(currentTrack, p.second);
                     MoveCurrentRowDown(true);
                     return true;
                 }
@@ -343,6 +690,135 @@ public:
             if (currentTrack >= numTracks) currentTrack = 0;
         }
     }
+};
+
+class Application :
+    public IApplication,
+    public INoteSource
+{
+    Mixer *_mixer;
+    ILibraryManager *_library;
+
+    PatternEdtor _patternEditor;
+    unsigned int _bpm;
+    unsigned int _sampleIndex;
+    unsigned int _stepIndex;
+
+    ImFont *_monofont;
+
+public:
+    Application()
+        : _mixer(nullptr),
+          _library(nullptr),
+          _bpm(138),
+          _sampleIndex(0),
+          _stepIndex(0),
+          _monofont(nullptr)
+    {}
+
+    virtual std::vector<SimpleNote> GetNotes(
+        unsigned int frameCount,
+        unsigned int sampleRate)
+    {
+        _sampleIndex += frameCount;
+
+        auto samplesPerBeat = (unsigned int)((sampleRate * 60) / _bpm);
+        auto samplesPerStep = samplesPerBeat / 4;
+        if (_sampleIndex > samplesPerStep)
+        {
+            _sampleIndex -= samplesPerStep;
+            return NextStep();
+        }
+
+        return std::vector<SimpleNote>();
+    }
+
+    std::vector<SimpleNote> NextStep()
+    {
+        std::vector<SimpleNote> result;
+        _stepIndex++;
+        if (_stepIndex > _patternEditor.GetPattern()->Length())
+        {
+            _stepIndex = 0;
+        }
+
+        for (int t = 0; t < NUM_MIXER_TRACKS; t++)
+        {
+            auto notes = _patternEditor.GetPattern()->Notes(t);
+            if (notes[_stepIndex]._note != 0)
+            {
+                SimpleNote n(
+                    notes[_stepIndex]._note,
+                    notes[_stepIndex]._velocity,
+                    notes[_stepIndex]._length,
+                    t);
+                result.push_back(n);
+            }
+        }
+
+        return result;
+    }
+
+    virtual bool Setup()
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        io.Fonts->Clear();
+        ImFont *font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+        if (font != nullptr)
+        {
+            io.FontDefault = font;
+        }
+        else
+        {
+            io.Fonts->AddFontDefault();
+        }
+        _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
+        io.Fonts->Build();
+
+        Config::init();
+
+        SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
+        SystemSettings::Instance().buffersize = Config::Current().cfg.SoundBufferSize;
+        SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
+        SystemSettings::Instance().alias();
+
+        _mixer = new Mixer();
+
+        _mixer->Init();
+
+        _mixer->SetNoteSource(this);
+
+        _library = new LibraryManager();
+
+        for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+        {
+            if (Config::Current().cfg.bankRootDirList[i].size() == 0)
+            {
+                continue;
+            }
+            std::cout << Config::Current().cfg.bankRootDirList[i] << std::endl;
+            _library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
+        }
+
+        _library->RefreshLibraries();
+
+        Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
+
+        if (!Nio::Start(_mixer, _mixer))
+        {
+            return false;
+        }
+
+        Nio::SelectSink("PA");
+        Nio::SelectSource("RT");
+
+        _patternEditor.SetUp(_mixer, _monofont);
+
+        return true;
+    }
+
+    virtual void Render3d()
+    {}
 
     ILibraryItem *LibraryTree(
         ILibrary *library)
@@ -390,450 +866,186 @@ public:
 
     virtual void Render2d()
     {
-        auto selectionColor = ImColor(20, 180, 20, 255);
-        auto selectedRowBackgroundColor = ImColor(20, 220, 20, 55);
-
         //show Main Window
         ImGui::ShowDemoWindow();
 
         ImGui::Begin(
             "instruments");
         {
-            for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
+            if (ImGui::CollapsingHeader("Instrument Tracks", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                auto track = _mixer->GetTrack(i);
-                ImGui::PushID(i);
+                ImGui::BeginChild("TracksContainer", ImVec2(0, 300));
+                for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
+                {
+                    auto track = _mixer->GetTrack(i);
+                    ImGui::PushID(i);
 
-                bool v = track->Penabled == 1;
-                if (ImGui::Checkbox("##enabled", &v))
-                {
-                    track->Penabled = v ? 1 : 0;
+                    bool v = track->Penabled == 1;
+                    if (ImGui::Checkbox("##enabled", &v))
+                    {
+                        track->Penabled = v ? 1 : 0;
+                    }
+                    if (ImGui::IsItemClicked())
+                    {
+                        _patternEditor.currentTrack = i;
+                    }
+                    ImGui::SameLine();
+
+                    char buf[256] = {0};
+                    sprintf_s(buf, 256, "%02d : %s", int(i), track->Pname);
+                    ImGui::Selectable(buf, i == _patternEditor.currentTrack);
+                    if (ImGui::IsItemClicked())
+                    {
+                        _patternEditor.currentTrack = i;
+                    }
+
+                    ImGui::PopID();
                 }
-                if (ImGui::IsItemClicked())
+                ImGui::EndChild();
+
+                if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !_patternEditor.HandlePlayingNotes())
                 {
-                    currentTrack = i;
+                    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
+                    {
+                        if (_patternEditor.currentTrack > 0)
+                        {
+                            _patternEditor.currentTrack--;
+                        }
+                    }
+                    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
+                    {
+                        if (_patternEditor.currentTrack < NUM_MIXER_TRACKS - 1)
+                        {
+                            _patternEditor.currentTrack++;
+                        }
+                    }
                 }
+            }
+
+            if (ImGui::CollapsingHeader("Instrument Properties"))
+            {
+                ImGui::BeginChild("InstrumentProperties", ImVec2(0, 200));
+                if (_patternEditor.currentTrack >= 0 && _patternEditor.currentTrack < NUM_MIXER_TRACKS)
+                {
+                    auto track = _mixer->GetTrack(_patternEditor.currentTrack);
+
+                    bool v = track->Penabled == 1;
+                    if (ImGui::Checkbox("Enabled", &v))
+                    {
+                        track->Penabled = v ? 1 : 0;
+                    }
+
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(80);
+
+                    int midiChannel = track->Prcvchn;
+                    if (ImGui::SliderInt(
+                            "MIDI Channel",
+                            &midiChannel,
+                            1, NUM_MIDI_CHANNELS))
+                    {
+                        track->Prcvchn = midiChannel;
+                    }
+
+                    ImGui::InputText(
+                        "Name",
+                        (char *)(track->Pname),
+                        IM_ARRAYSIZE(track->Pname));
+                    ImGui::Text(
+                        "By : %s", (track->info.Pauthor));
+                    ImGui::TextWrapped(
+                        "%s", track->info.Pcomments);
+                }
+                ImGui::EndChild();
+            }
+
+            if (ImGui::CollapsingHeader("Instrument Library"))
+            {
+                // todo : dont do this every frame
+                auto libs = _library->GetTopLevelLibraries();
+                std::vector<ILibrary *> slibs(libs.begin(), libs.end());
+                std::sort(slibs.begin(), slibs.end(), [](ILibrary *a, ILibrary *b) {
+                    return a->GetName() < b->GetName();
+                });
+                for (auto topLevel : slibs)
+                {
+                    auto selection = LibraryTree(topLevel);
+                    if (selection != nullptr)
+                    {
+                        auto const &track = _mixer->GetTrack(_patternEditor.currentTrack);
+                        track->Lock();
+                        _library->LoadAsInstrument(selection, track);
+                        track->Penabled = 1;
+                        track->ApplyParameters();
+                        track->Unlock();
+                    }
+                }
+            }
+        }
+        ImGui::End();
+
+        char const *const EffectNames[] = {
+            "No effect",
+            "Reverb",
+            "Echo",
+            "Chorus",
+            "Phaser",
+            "AlienWah",
+            "Distortion",
+            "Equalizer",
+            "DynFilter",
+        };
+
+        static char const *const reverbPresetNames[] = {
+            "Cathedral 1",
+            "Cathedral 2",
+            "Cathedral 3",
+            "Hall 1",
+            "Hall 2",
+            "Room 1",
+            "Room 2",
+            "Basement",
+            "Tunnel",
+            "Echoed 1",
+            "Echoed 2",
+            "Very Long 1",
+            "Very Long 2",
+        };
+
+        ImGui::Begin(
+            "Effects Editor");
+        {
+            auto track = _mixer->GetTrack(_patternEditor.currentTrack);
+            for (int e = 0; e < NUM_TRACK_EFX; e++)
+            {
+                if (e > 0) ImGui::SameLine();
+                ImGui::PushID(e);
+
+                int item_current = track->partefx[e]->geteffect();
+                ImGui::BeginChild("fx", ImVec2(320, 120), true);
+
+                ImGui::SetNextItemWidth(100);
+                if (ImGui::Combo("##effect", &item_current, EffectNames, IM_ARRAYSIZE(EffectNames)))
+                {
+                    track->partefx[e]->changeeffect(item_current);
+                }
+
                 ImGui::SameLine();
 
-                char buf[256] = {0};
-                sprintf_s(buf, 256, "%02d : %s", int(i), track->Pname);
-                ImGui::Selectable(buf, i == currentTrack);
-                if (ImGui::IsItemClicked())
+                int preset_current = track->partefx[e]->getpreset();
+                ImGui::SetNextItemWidth(150);
+                if (ImGui::Combo("preset", &preset_current, reverbPresetNames, IM_ARRAYSIZE(reverbPresetNames)))
                 {
-                    currentTrack = i;
+                    track->partefx[e]->changepreset(preset_current);
                 }
 
+                ImGui::EndChild();
                 ImGui::PopID();
             }
         }
         ImGui::End();
 
-        ImGui::Begin(
-            "Instrument Properties");
-        {
-            if (currentTrack >= 0 && currentTrack < NUM_MIXER_TRACKS)
-            {
-                auto track = _mixer->GetTrack(currentTrack);
-
-                bool v = track->Penabled == 1;
-                if (ImGui::Checkbox("Enabled", &v))
-                {
-                    track->Penabled = v ? 1 : 0;
-                }
-
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(80);
-
-                int midiChannel = track->Prcvchn;
-                if (ImGui::SliderInt(
-                        "MIDI Channel",
-                        &midiChannel,
-                        1, NUM_MIDI_CHANNELS))
-                {
-                    track->Prcvchn = midiChannel;
-                }
-
-                ImGui::InputText(
-                    "Name",
-                    (char *)(track->Pname),
-                    IM_ARRAYSIZE(track->Pname));
-                ImGui::InputText(
-                    "Author",
-                    (char *)(track->info.Pauthor),
-                    IM_ARRAYSIZE(track->info.Pauthor));
-                ImGui::InputTextMultiline(
-                    "Comments",
-                    (char *)(track->info.Pcomments),
-                    IM_ARRAYSIZE(track->info.Pcomments));
-            }
-        }
-        ImGui::End();
-
-        ImGui::Begin(
-            "Instrument Library");
-        {
-            auto libs = _library->GetTopLevelLibraries();
-            std::vector<ILibrary *> slibs(libs.begin(), libs.end());
-            std::sort(slibs.begin(), slibs.end(), [](ILibrary *a, ILibrary *b) {
-                return a->GetName() < b->GetName();
-            });
-            for (auto topLevel : slibs)
-            {
-                auto selection = LibraryTree(topLevel);
-                if (selection != nullptr)
-                {
-                    auto const &track = _mixer->GetTrack(currentTrack);
-                    track->Lock();
-                    _library->LoadAsInstrument(selection, track);
-                    track->Penabled = 1;
-                    track->ApplyParameters();
-                    track->Unlock();
-                }
-            }
-        }
-        ImGui::End();
-
-        ImGui::Begin(
-            "TracksContainer",
-            nullptr,
-            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-        {
-            ImGui::PushFont(_monofont);
-            auto content = ImGui::GetContentRegionAvail() - ImVec2(rowIndexColumnWidth, 0);
-            float tracksScrollx = 0, tracksScrolly = 0, lineHeight = 30;
-
-            auto spaceWidth = ImGui::CalcTextSize(" ");
-            auto cellNoteWidth = ImGui::CalcTextSize(emptyCellNote);
-            auto cellParameterWidth = ImGui::CalcTextSize(emptyCellParameter);
-            auto cellFxWidth = ImGui::CalcTextSize(emptyCellFx);
-            auto columnWidth = cellNoteWidth +
-                               spaceWidth + cellParameterWidth +
-                               spaceWidth + cellParameterWidth +
-                               spaceWidth + cellFxWidth;
-            auto fullWidth = (columnWidth.x + 15) * numTracks;
-
-            auto contentTop = ImGui::GetCursorPosY();
-            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, headerHeight));
-            ImGui::BeginChild(
-                "container",
-                ImVec2(content.x, -(footerHeight + scrollbarHeight)));
-            {
-                lineHeight = ImGui::GetTextLineHeightWithSpacing();
-
-                ImGui::BeginChild(
-                    "tracks",
-                    ImVec2(fullWidth, lineHeight * _pattern->Length()));
-                {
-                    auto tracksPos = ImGui::GetWindowContentRegionMin();
-                    auto tracksMax = ImGui::GetWindowContentRegionMax();
-
-                    auto selectionRowMin = ImVec2(tracksPos.x, tracksPos.y + currentRow * lineHeight);
-                    auto selectionRowMax = ImVec2(tracksMax.x, tracksPos.y + (currentRow + 1) * lineHeight);
-
-                    auto drawList = ImGui::GetWindowDrawList();
-
-                    for (unsigned int i = 0; i < _pattern->Length(); i += 4)
-                    {
-                        auto highlightRowMin = ImVec2(tracksPos.x, tracksPos.y + i * lineHeight);
-                        auto highlightRowMax = ImVec2(tracksMax.x, tracksPos.y + (i + 1) * lineHeight);
-
-                        drawList->AddRectFilled(
-                            ImGui::GetWindowPos() + highlightRowMin,
-                            ImGui::GetWindowPos() + highlightRowMax,
-                            ImColor(120, 120, 120, 55));
-                    }
-
-                    // SELECTED ROW
-
-                    drawList->AddRectFilled(
-                        ImGui::GetWindowPos() + selectionRowMin,
-                        ImGui::GetWindowPos() + selectionRowMax,
-                        selectedRowBackgroundColor);
-
-                    // MAKE ROOM FOR THE HEADERS
-
-                    ImGui::Columns(numTracks);
-                    for (unsigned int i = 0; i < numTracks; i++)
-                    {
-                        ImGui::SetColumnWidth(i, columnWidth.x + 15);
-                    }
-
-                    // ALL TRACKS AND CELLS
-
-                    for (unsigned int r = 0; r < _pattern->Length(); r++)
-                    {
-                        for (unsigned int i = 0; i < numTracks; i++)
-                        {
-                            auto notes = _pattern->Notes(i);
-                            auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
-                            if (i == currentTrack && r == currentRow)
-                            {
-                                auto cursorWidth = cellNoteWidth.x;
-                                auto min = markerPos + ImVec2(2, 0) - ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY());
-                                if (currentProperty > 0)
-                                {
-                                    min.x += cellNoteWidth.x + spaceWidth.x - 1;
-                                    cursorWidth = cellParameterWidth.x;
-                                }
-                                if (currentProperty > 1)
-                                {
-                                    min.x += cellParameterWidth.x + spaceWidth.x - 1;
-                                    cursorWidth = cellParameterWidth.x;
-                                }
-                                if (currentProperty > 2)
-                                {
-                                    min.x += cellParameterWidth.x + spaceWidth.x;
-                                    cursorWidth = cellFxWidth.x;
-                                }
-
-                                drawList->AddRectFilled(
-                                    min - ImVec2(4, 0),
-                                    min + ImVec2(cursorWidth, lineHeight),
-                                    selectionColor);
-                            }
-
-                            char const *cellNote = emptyCellNote;
-                            char const *cellParameter1 = emptyCellParameter;
-                            char const *cellParameter2 = emptyCellParameter;
-                            char const *cellFx = emptyCellFx;
-                            if (notes[r]._note != 0)
-                            {
-                                cellNote = NoteToString(notes[r]._note);
-                                if (notes[r]._length != 0)
-                                {
-                                    cellParameter1 = ValueToString(notes[r]._length);
-                                }
-                                if (notes[r]._velocity != 0)
-                                {
-                                    cellParameter2 = ValueToString(notes[r]._velocity);
-                                }
-                            }
-                            ImGui::Text("%s %s %s %s", cellNote, cellParameter1, cellParameter2, cellFx);
-                            ImGui::NextColumn();
-                        }
-                    }
-                }
-                ImGui::EndChild();
-
-                // Events
-
-                if (HandleKeyboardNotes())
-                {
-                    ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                }
-                else if (HandleKeyboardNavigation())
-                {
-                    ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                    ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
-                }
-
-                tracksScrollx = ImGui::GetScrollX();
-                tracksScrolly = ImGui::GetScrollY();
-            }
-            ImGui::EndChild();
-
-            // FOOTERS
-
-            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
-            ImGui::BeginChild(
-                "footerscontainer",
-                ImVec2(content.x, footerHeight));
-            {
-                ImGui::SetScrollX(tracksScrollx);
-
-                ImGui::BeginChild(
-                    "footers",
-                    ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, footerHeight));
-                {
-                    ImGui::Columns(numTracks);
-                    for (unsigned int i = 0; i < numTracks; i++)
-                    {
-                        ImGui::PushID(i);
-                        auto drawList = ImGui::GetWindowDrawList();
-                        auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
-                        if (i == currentTrack)
-                        {
-                            drawList->AddLine(
-                                markerPos + ImVec2(-4, 2),
-                                markerPos + ImVec2(-4, 16),
-                                selectionColor,
-                                2);
-                            drawList->AddLine(
-                                markerPos + ImVec2(-4, 16),
-                                markerPos + ImVec2(10, 16),
-                                selectionColor,
-                                3);
-                            drawList->AddLine(
-                                markerPos + ImVec2(columnWidth.x + 3, 2),
-                                markerPos + ImVec2(columnWidth.x + 3, 16),
-                                selectionColor,
-                                2);
-                            drawList->AddLine(
-                                markerPos + ImVec2(columnWidth.x + 4, 16),
-                                markerPos + ImVec2(columnWidth.x - 11, 16),
-                                selectionColor,
-                                3);
-                        }
-
-                        auto w = ImGui::CalcTextSize("footer 00").x / 2.0f;
-                        ImGui::SetColumnWidth(i, columnWidth.x + 15);
-                        ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 0));
-                        ImGui::Text("footer %02d", i + 1);
-                        ImGui::PopID();
-                        ImGui::NextColumn();
-                    }
-                    ImGui::Columns(1);
-                }
-                ImGui::EndChild();
-            }
-            ImGui::EndChild();
-
-            // SCROLLBAR
-
-            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
-            ImGui::BeginChild(
-                "scrollbar",
-                ImVec2(content.x, scrollbarHeight),
-                false,
-                ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-            {
-                ImGui::SetScrollX(tracksScrollx);
-
-                ImGui::BeginChild(
-                    "scrollbarcontent ",
-                    ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, scrollbarHeight));
-                {}
-                ImGui::EndChild();
-            }
-            ImGui::EndChild();
-
-            // ROWINDICES
-
-            ImGui::SetCursorPosY(contentTop);
-            ImGui::MoveCursorPos(ImVec2(0, headerHeight));
-            ImGui::BeginChild(
-                "rowinedicescontainer",
-                ImVec2(rowIndexColumnWidth, -(footerHeight + scrollbarHeight)),
-                false,
-                ImGuiWindowFlags_NoScrollbar);
-            {
-                ImGui::SetScrollY(tracksScrolly);
-
-                ImGui::BeginChild(
-                    "rowindices",
-                    ImVec2(rowIndexColumnWidth, lineHeight * _pattern->Length()));
-                {
-                    auto drawList = ImGui::GetWindowDrawList();
-
-                    for (unsigned int r = 0; r < _pattern->Length(); r++)
-                    {
-                        auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
-                        if (r % 4 == 0)
-                        {
-                            drawList->AddRectFilled(
-                                markerPos,
-                                markerPos + ImVec2(rowIndexColumnWidth, lineHeight),
-                                ImColor(120, 120, 120, 55));
-                        }
-                        if (r == currentRow)
-                        {
-                            drawList->AddRectFilled(
-                                markerPos,
-                                markerPos + ImVec2(rowIndexColumnWidth, lineHeight),
-                                selectedRowBackgroundColor);
-                        }
-                        ImGui::Text("%02d", r);
-                    }
-                }
-                ImGui::EndChild();
-            }
-            ImGui::EndChild();
-
-            // HEADERS
-
-            ImGui::SetCursorPosY(contentTop);
-            ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
-            ImGui::BeginChild(
-                "headerscontainer",
-                ImVec2(content.x, -40));
-            {
-                ImGui::SetScrollX(tracksScrollx);
-                ImGui::BeginChild(
-                    "headers",
-                    ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, headerHeight));
-                {
-                    ImGui::Columns(numTracks);
-
-                    auto drawList = ImGui::GetWindowDrawList();
-                    for (unsigned int i = 0; i < numTracks; i++)
-                    {
-                        ImGui::PushID(i);
-                        auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
-
-                        if (i == currentTrack)
-                        {
-                            drawList->AddLine(
-                                markerPos + ImVec2(-4, 0),
-                                markerPos + ImVec2(-4, 14),
-                                selectionColor,
-                                2);
-                            drawList->AddLine(
-                                markerPos + ImVec2(-4, 0),
-                                markerPos + ImVec2(10, 0),
-                                selectionColor,
-                                3);
-                            drawList->AddLine(
-                                markerPos + ImVec2(columnWidth.x + 3, 0),
-                                markerPos + ImVec2(columnWidth.x + 3, 14),
-                                selectionColor,
-                                2);
-                            drawList->AddLine(
-                                markerPos + ImVec2(columnWidth.x + 3, 0),
-                                markerPos + ImVec2(columnWidth.x - 11, 0),
-                                selectionColor,
-                                3);
-                        }
-
-                        auto hue = i * 0.05f;
-                        drawList->AddRectFilled(
-                            markerPos + ImVec2(0, 4),
-                            markerPos + ImVec2(columnWidth.x, 8),
-                            ImColor::HSV(hue, 0.9f, 0.7f));
-
-                        ImGui::SetColumnWidth(i, columnWidth.x + 15);
-                        auto w = ImGui::CalcTextSize("Track 00").x / 2.0f;
-                        ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 9));
-                        ImGui::SetNextWindowSize(ImVec2(columnWidth.x + 15, headerHeight));
-                        ImGui::Text("Track %02d", i + 1);
-                        bool v = _mixer->GetTrack(i)->Penabled == 1;
-                        if (ImGui::Checkbox("##enabled", &v))
-                        {
-                            _mixer->GetTrack(i)->Penabled = v ? 1 : 0;
-                            if (v)
-                            {
-                                currentTrack = i;
-                                currentProperty = 0;
-                            }
-                        }
-                        ImGui::SameLine();
-                        ImGui::Button("edit", ImVec2(-1, 0));
-
-                        ImGui::Button("m", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
-                        ImGui::SameLine();
-                        ImGui::Button("s", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
-
-                        ImGui::PopID();
-                        ImGui::NextColumn();
-                    }
-                    ImGui::Columns(1);
-                }
-                ImGui::EndChild();
-            }
-            ImGui::EndChild();
-
-            ImGui::PopFont();
-        }
-        ImGui::End();
+        _patternEditor.Render2d();
     }
 
     virtual void Cleanup()

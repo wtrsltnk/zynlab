@@ -51,7 +51,6 @@ static MasterUI *ui;
 
 #endif //ENABLE_FLTKGUI
 
-static BankManager banks;
 static Mixer mixer;
 
 static unsigned int swaplr = 0; //1 for left-right swapping
@@ -368,6 +367,8 @@ int main(int argc, char *argv[])
             std::cerr << "Command Failed..." << std::endl;
         }
     }
+
+    BankManager banks;
 
 #ifdef ENABLE_FLTKGUI
 

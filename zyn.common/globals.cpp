@@ -23,6 +23,23 @@
 
 #include "globals.h"
 
+SimpleNote::SimpleNote() : note(0), velocity(0), length(0), channel(0) {}
+
+SimpleNote::SimpleNote(
+    unsigned int n,
+    unsigned int v,
+    unsigned int l,
+    unsigned int c)
+    : note(n),
+      velocity(v),
+      length(l),
+      channel(c)
+{}
+
+SimpleNote::~SimpleNote() = default;
+
+INoteSource::~INoteSource() = default;
+
 IMixer::~IMixer() = default;
 
 IBankManager::~IBankManager() = default;

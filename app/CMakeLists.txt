@@ -80,4 +80,3 @@ target_link_libraries(app
     zyn.seq
     zyn.serialization
     zyn.common)
-

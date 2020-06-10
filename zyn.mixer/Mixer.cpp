@@ -38,6 +38,9 @@
 using namespace std;
 
 Mixer::Mixer()
+    : shutup(false),
+      Pvolume(0),
+      _noteSource(nullptr)
 {}
 
 Mixer::~Mixer()
@@ -54,8 +57,6 @@ void Mixer::Init()
     _tmpmixr = std::unique_ptr<float>(new float[this->BufferSize()]);
 
     swaplr = false;
-    _off = 0;
-    _smps = 0;
 
     pthread_mutex_init(&_mutex, nullptr);
     _fft = std::unique_ptr<IFFTwrapper>(new FFTwrapper(SystemSettings::Instance().oscilsize));
@@ -290,6 +291,42 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
         }
     }
 }
+void Mixer::PreviewNote(unsigned int channel, unsigned int note, unsigned int length, unsigned int velocity)
+{
+    NoteOn(channel, note, velocity);
+
+    std::chrono::milliseconds::rep currentTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+
+    auto found = std::find_if(_instrumentsPreview.begin(), _instrumentsPreview.end(), [channel, note](InstrumentPreview p) {
+        return (p.note == note && p.channel == channel);
+    });
+    if (found != _instrumentsPreview.end())
+    {
+        (*found).done = false;
+        (*found).playUntil = currentTime + length;
+        return;
+    }
+
+    InstrumentPreview n;
+    n.playUntil = currentTime + length;
+    n.note = note;
+    n.channel = channel;
+    n.done = false;
+
+    _instrumentsPreview.push_back(n);
+}
+
+INoteSource *Mixer::GetNoteSource() const
+{
+    return _noteSource;
+}
+
+void Mixer::SetNoteSource(INoteSource *source)
+{
+    _noteSource = source;
+}
 
 void Mixer::EnableTrack(int track, int enable)
 {
@@ -369,6 +406,29 @@ void SamplePreview::noteout(float *outl, float *outr)
  */
 void Mixer::AudioOut(float *outl, float *outr)
 {
+    std::chrono::milliseconds::rep currentTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+
+    if (_noteSource != nullptr)
+    {
+        auto notes = _noteSource->GetNotes(BufferSize(), SampleRate());
+        for (auto n : notes)
+        {
+            PreviewNote(n.channel, n.note, 400, 100);
+        }
+    }
+
+    for (auto &tn : _instrumentsPreview)
+    {
+        if (tn.done) continue;
+        if (tn.playUntil < currentTime)
+        {
+            tn.done = true;
+            NoteOff(tn.channel, tn.note);
+        }
+    }
+
     //Swaps the Left channel with Right Channel
     if (swaplr)
     {

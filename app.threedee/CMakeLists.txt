@@ -90,3 +90,8 @@ if(WIN32)
         configure_file(${PORTAUDIO_BIN_PATH} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
     endif(PaEnable)
 endif(WIN32)
+
+if(MINGW)
+    target_link_options(app.threedee
+        PUBLIC -static -mwindows)
+endif()

@@ -32,12 +32,12 @@
 #include <pthread.h>
 #include <zyn.common/AudioFile.h>
 #include <zyn.common/IAudioGenerator.h>
-#include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/IFFTwrapper.h>
+#include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Stereo.h>
-#include <zyn.common/globals.h>
 #include <zyn.common/WavData.h>
+#include <zyn.common/globals.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/Controller.h>
 
@@ -51,6 +51,17 @@ public:
     size_t wavProgress;
     bool done;
     void noteout(float *outl, float *outr);
+};
+
+typedef std::chrono::milliseconds::rep timestep;
+
+class InstrumentPreview
+{
+public:
+    timestep playUntil;
+    unsigned int channel;
+    unsigned int note;
+    bool done;
 };
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
@@ -85,6 +96,11 @@ public:
     virtual void PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity);
     virtual void SetController(unsigned char chan, int type, int par);
     virtual void SetProgram(unsigned char chan, unsigned int pgm);
+
+    virtual void PreviewNote(unsigned int channel, unsigned int note, unsigned int length, unsigned int velocity = 100);
+
+    virtual INoteSource *GetNoteSource() const;
+    virtual void SetNoteSource(INoteSource *source);
 
     void ShutUp();
     bool shutup;
@@ -135,18 +151,16 @@ public:
 
 private:
     SamplePreview _samplePreview;
+    std::vector<InstrumentPreview> _instrumentsPreview;
     Track _tracks[NUM_MIXER_TRACKS];
     pthread_mutex_t _mutex;
     std::unique_ptr<IFFTwrapper> _fft;
+    INoteSource *_noteSource;
 
     float _volume;
     float _sysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     float _sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
     int _keyshift;
-
-    //information relevent to generating plugin audio samples
-    off_t _off;
-    size_t _smps;
 
     std::unique_ptr<float> _tmpmixl;
     std::unique_ptr<float> _tmpmixr;

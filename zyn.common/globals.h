@@ -353,6 +353,30 @@ public:
     virtual vuData GetVuData() = 0;
 };
 
+class SimpleNote
+{
+public:
+    SimpleNote();
+    SimpleNote(unsigned int n,
+               unsigned int v,
+               unsigned int l,
+               unsigned int c);
+    virtual ~SimpleNote();
+
+    unsigned int note;
+    unsigned int velocity;
+    unsigned int length;
+    unsigned int channel;
+};
+
+class INoteSource
+{
+public:
+    virtual ~INoteSource();
+
+    virtual std::vector<SimpleNote> GetNotes(unsigned int frameCount, unsigned int sampleRate) = 0;
+};
+
 class IMixer
 {
 public:
@@ -379,6 +403,11 @@ public:
     virtual void SetController(unsigned char chan, int type, int par) = 0;
     virtual void SetProgram(unsigned char chan, unsigned int pgm) = 0;
     virtual void PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity) = 0;
+
+    virtual void PreviewNote(unsigned int channel, unsigned int note, unsigned int length = 400, unsigned int velocity = 100) = 0;
+
+    virtual INoteSource *GetNoteSource() const = 0;
+    virtual void SetNoteSource(INoteSource *source) = 0;
 
     virtual class IFFTwrapper *GetFFT() = 0;
 };
