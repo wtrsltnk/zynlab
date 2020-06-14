@@ -51,21 +51,30 @@ public:
 
 class Pattern
 {
+    std::string _name;
     unsigned int _length;
     std::vector<Note> _notes[NUM_MIXER_TRACKS];
 
 public:
     Pattern(
+        std::string const &name,
         unsigned int length = 64);
 
+    std::string const &Name() const;
+    void Rename(
+        std::string const &name);
     unsigned int Length() const;
+    void Resize(
+        unsigned int len);
     std::vector<Note> &Notes(
         unsigned int trackIndex);
 };
 
 Pattern::Pattern(
+    std::string const &name,
     unsigned int length)
-    : _length(length)
+    : _name(name),
+      _length(length)
 {
     for (unsigned int t = 0; t < NUM_MIXER_TRACKS; t++)
     {
@@ -73,9 +82,34 @@ Pattern::Pattern(
     }
 }
 
+std::string const &Pattern::Name() const
+{
+    return _name;
+}
+
+void Pattern::Rename(
+    std::string const &name)
+{
+    _name = name;
+}
+
 unsigned int Pattern::Length() const
 {
     return _length;
+}
+
+void Pattern::Resize(
+    unsigned int len)
+{
+    if (len < 4) return;
+    if (len > 128) return;
+
+    _length = len;
+
+    for (unsigned int t = 0; t < NUM_MIXER_TRACKS; t++)
+    {
+        _notes[t].resize(_length);
+    }
 }
 
 std::vector<Note> &Pattern::Notes(
@@ -122,7 +156,10 @@ public:
 
     void AddPattern()
     {
-        auto pattern = new Pattern(64);
+        static int counter = 0;
+        std::stringstream ss;
+        ss << "Pattern " << counter++;
+        auto pattern = new Pattern(ss.str(), 64);
 
         _patterns.push_back(pattern);
     }
@@ -148,6 +185,44 @@ public:
         }
     }
 
+    void MovePattern(unsigned int index, int direction)
+    {
+        if (_patterns.size() == 1 || index >= _patterns.size())
+        {
+            return;
+        }
+
+        if (std::abs(direction) == direction)
+        { // move down the list
+            if (index + direction >= _patterns.size())
+            {
+                return;
+            }
+        }
+        else
+        { // move up the list
+            if (index < static_cast<unsigned int>(-1 * direction))
+            {
+                return;
+            }
+        }
+
+        unsigned int newIndex = index + direction;
+
+        auto tmp = *(_patterns.begin() + index);
+
+        _patterns.erase(_patterns.begin() + index);
+
+        _patterns.insert(_patterns.begin() + newIndex, tmp);
+
+        currentPattern = newIndex;
+    }
+
+    void DuplicatePattern(
+        unsigned int index)
+    {
+    }
+
     void SetUp(
         IMixer *mixer,
         ImFont *font)
@@ -155,15 +230,14 @@ public:
         _mixer = mixer;
         _monofont = font;
 
-        auto pattern = new Pattern(64);
+        AddPattern();
+        auto pattern = *_patterns.begin();
 
         for (int i = 0; i < 16; i++)
         {
             pattern->Notes(0)[i * 4]._note = 60 + i;
             pattern->Notes(0)[i * 4]._length = 64;
         }
-
-        _patterns.push_back(pattern);
     }
 
     float tracksScrollx = 0;
@@ -175,10 +249,11 @@ public:
         auto selectedRowBackgroundColorEditmode = ImColor(20, 220, 20, 55);
         auto selectedRowBackgroundColor = ImColor(70, 120, 70, 70);
 
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
         ImGui::Begin(
             "PatternEditor",
             nullptr,
-            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            flags);
         {
             ImGui::PushFont(_monofont);
             auto content = ImGui::GetContentRegionAvail() - ImVec2(rowIndexColumnWidth, 0);
@@ -1050,12 +1125,97 @@ public:
         return result;
     }
 
+    const int patternPanelWidth = 153;
+    const int effectsPanelHeight = 160;
+    const int playerControlsPanelWidth = 370;
+    const int playerControlsPanelHeight = 80;
+
     virtual void Render2d()
     {
         //show Main Window
         ImGui::ShowDemoWindow();
 
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
+
+        ImGui::SetNextWindowSize(ImVec2(153, Height() - effectsPanelHeight));
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::Begin(
+            "patterns",
+            nullptr,
+            flags);
+        {
+            ImGui::BeginChild("PatternsContainer");
+            {
+                if (ImGui::Button(ICON_FK_PLUS, ImVec2(0, 0)))
+                {
+                    _patternEditor.AddPattern();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FK_MINUS, ImVec2(0, 0)))
+                {
+                    _patternEditor.RemovePattern(_patternEditor.currentPattern);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FK_ARROW_UP, ImVec2(0, 0)))
+                {
+                    _patternEditor.MovePattern(_patternEditor.currentPattern, -1);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FK_ARROW_DOWN, ImVec2(0, 0)))
+                {
+                    _patternEditor.MovePattern(_patternEditor.currentPattern, 1);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FK_FILE_O, ImVec2(0, 0)))
+                {
+                    _patternEditor.DuplicatePattern(_patternEditor.currentPattern);
+                }
+
+                ImGui::BeginChild("patterns", ImVec2(0, -100));
+                {
+                    for (unsigned int i = 0; i < _patternEditor.GetPatternCount(); i++)
+                    {
+                        ImGui::PushID(i);
+
+                        auto pattern = _patternEditor.GetPattern(i);
+                        char buf[256] = {0};
+                        sprintf_s(buf, 256, "%02d : %s", int(i), pattern->Name().c_str());
+                        ImGui::Selectable(buf, i == _patternEditor.currentPattern);
+                        if (ImGui::IsItemClicked())
+                        {
+                            _patternEditor.currentPattern = i;
+                        }
+
+                        ImGui::PopID();
+                    }
+                }
+                ImGui::EndChild();
+
+                ImGui::BeginChild("selectedpattern");
+                {
+                    ImGui::Text("Name");
+                    auto name = _patternEditor.GetPattern(_patternEditor.currentPattern)->Name();
+                    char text[128] = {0};
+                    strcpy_s(text, 128, name.c_str());
+                    ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
+                    ImGui::InputText("##name", text, 128, ImGuiInputTextFlags_EnterReturnsTrue);
+
+                    ImGui::Text("Length");
+                    int len = _patternEditor.GetPattern(_patternEditor.currentPattern)->Length();
+                    ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
+                    if (ImGui::InputInt("##length", &len, 4))
+                    {
+                        _patternEditor.GetPattern(_patternEditor.currentPattern)->Resize(len);
+                    }
+                }
+                ImGui::EndChild();
+            }
+            ImGui::EndChild();
+        }
+        ImGui::End();
+
+        ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, playerControlsPanelHeight));
+        ImGui::SetNextWindowPos(ImVec2(Width() - playerControlsPanelWidth, 0));
         ImGui::Begin(
             "PlayerControls",
             nullptr,
@@ -1085,39 +1245,8 @@ public:
         }
         ImGui::End();
 
-        ImGui::Begin(
-            "patterns",
-            nullptr,
-            flags);
-        {
-            ImGui::BeginChild("PatternsContainer");
-            if (ImGui::Button(ICON_FK_PLUS, ImVec2(0, 0)))
-            {
-                _patternEditor.AddPattern();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FK_MINUS, ImVec2(0, 0)))
-            {
-                _patternEditor.RemovePattern(_patternEditor.currentPattern);
-            }
-            for (unsigned int i = 0; i < _patternEditor.GetPatternCount(); i++)
-            {
-                ImGui::PushID(i);
-
-                char buf[256] = {0};
-                sprintf_s(buf, 256, "%02d", int(i));
-                ImGui::Selectable(buf, i == _patternEditor.currentPattern);
-                if (ImGui::IsItemClicked())
-                {
-                    _patternEditor.currentPattern = i;
-                }
-
-                ImGui::PopID();
-            }
-            ImGui::EndChild();
-        }
-        ImGui::End();
-
+        ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, Height() - playerControlsPanelHeight));
+        ImGui::SetNextWindowPos(ImVec2(Width() - playerControlsPanelWidth, playerControlsPanelHeight));
         ImGui::Begin(
             "instruments",
             nullptr,
@@ -1263,6 +1392,8 @@ public:
             "Very Long 2",
         };
 
+        ImGui::SetNextWindowSize(ImVec2(Width() - playerControlsPanelWidth, effectsPanelHeight));
+        ImGui::SetNextWindowPos(ImVec2(0, Height() - effectsPanelHeight));
         ImGui::Begin(
             "Effects Editor",
             nullptr,
@@ -1297,6 +1428,9 @@ public:
             }
         }
         ImGui::End();
+
+        ImGui::SetNextWindowSize(ImVec2(Width() - patternPanelWidth - playerControlsPanelWidth, Height() - effectsPanelHeight));
+        ImGui::SetNextWindowPos(ImVec2(patternPanelWidth, 0));
 
         _patternEditor.Render2d();
     }

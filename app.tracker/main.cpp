@@ -326,3 +326,13 @@ void CreateGlContext()
 
     InvalidateRect(g_hwnd, NULL, FALSE);
 }
+
+int IApplication::Width() const
+{
+    return g_display_w;
+}
+
+int IApplication::Height() const
+{
+    return g_display_h;
+}
