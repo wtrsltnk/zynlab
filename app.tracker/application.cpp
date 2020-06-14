@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <application.h>
 #include <imgui.h>
+#include <imgui_plot.h>
 #include <iostream>
 #include <map>
 #include <zyn.common/Config.h>
@@ -11,6 +12,8 @@
 #include <zyn.nio/MidiInputManager.h>
 #include <zyn.nio/Nio.h>
 #include <zyn.serialization/LibraryManager.h>
+
+#include "IconsFontaudio.h"
 
 ImVec2 operator+(ImVec2 const &a, ImVec2 const &b)
 {
@@ -110,7 +113,7 @@ public:
 
         for (int i = 0; i < 16; i++)
         {
-            _pattern->Notes(0)[i * 4]._note = 50 + 1;
+            _pattern->Notes(0)[i * 4]._note = 60 + i;
             _pattern->Notes(0)[i * 4]._length = 64;
         }
     }
@@ -118,7 +121,8 @@ public:
     void Render2d()
     {
         auto selectionColor = ImColor(20, 180, 20, 255);
-        auto selectedRowBackgroundColor = ImColor(20, 220, 20, 55);
+        auto selectedRowBackgroundColorEditmode = ImColor(20, 220, 20, 55);
+        auto selectedRowBackgroundColor = ImColor(70, 120, 70, 70);
 
         ImGui::Begin(
             "PatternEditor",
@@ -172,10 +176,11 @@ public:
 
                     // SELECTED ROW
 
+                    auto color = _editMode ? selectedRowBackgroundColorEditmode : selectedRowBackgroundColor;
                     drawList->AddRectFilled(
                         ImGui::GetWindowPos() + selectionRowMin,
                         ImGui::GetWindowPos() + selectionRowMax,
-                        selectedRowBackgroundColor);
+                        color);
 
                     // MAKE ROOM FOR THE HEADERS
 
@@ -247,16 +252,18 @@ public:
 
                 if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    if (HandleKeyboardNotes())
+                    if (!HandleKeyboardNotes())
                     {
-                        ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                    }
-                    else if (HandleKeyboardNavigation())
-                    {
-                        ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                        ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
+                        HandleKeyboardNavigation();
                     }
                 }
+                else
+                {
+                    _editMode = false;
+                }
+
+                ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
+                ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
 
                 tracksScrollx = ImGui::GetScrollX();
                 tracksScrolly = ImGui::GetScrollY();
@@ -455,16 +462,18 @@ public:
                         ImGui::SameLine();
                         ImGui::Button("edit", ImVec2(-1, 0));
 
-                        ImGui::Selectable(
-                            "m", true,
-                            ImGuiSelectableFlags_None,
-                            ImVec2(14, 14));
-                        ImGui::SameLine();
-                        ImGui::Selectable(
-                            "s", true,
-                            ImGuiSelectableFlags_None,
-                            ImVec2(14, 14));
-
+                        if (_mixer->GetTrack(i)->Penabled)
+                        {
+                            ImGui::PlotLines(
+                                "##l",
+                                _mixer->GetTrack(i)->_bufferl.buf_.get(),
+                                (int)_mixer->GetTrack(i)->_bufferl.size(),
+                                0,
+                                nullptr,
+                                -0.5f,
+                                0.5f,
+                                ImVec2(_columnsWidths[i], 60));
+                        }
                         ImGui::PopID();
                         ImGui::NextColumn();
                     }
@@ -489,7 +498,7 @@ public:
     const char *emptyCellParameter = "..";
     const char *emptyCellFx = "000";
 
-    const int headerHeight = 85;
+    const int headerHeight = 125;
     const int footerHeight = 20;
     const int rowIndexColumnWidth = 30;
     const int scrollbarHeight = 20;
@@ -692,6 +701,13 @@ public:
     }
 };
 
+enum class PlayStates
+{
+    Stopped,
+    StartPlaying,
+    Playing,
+};
+
 class Application :
     public IApplication,
     public INoteSource
@@ -702,7 +718,7 @@ class Application :
     PatternEdtor _patternEditor;
     unsigned int _bpm;
     unsigned int _sampleIndex;
-    unsigned int _stepIndex;
+    PlayStates _playState;
 
     ImFont *_monofont;
 
@@ -712,14 +728,42 @@ public:
           _library(nullptr),
           _bpm(138),
           _sampleIndex(0),
-          _stepIndex(0),
+          _playState(PlayStates::Stopped),
           _monofont(nullptr)
     {}
+
+    void StopPlaying()
+    {
+        _playState = PlayStates::Stopped;
+        for (int t = 0; t < NUM_MIXER_TRACKS; t++)
+        {
+            _mixer->GetTrack(t)
+                ->RelaseAllKeys();
+        }
+    }
+
+    void StartPlaying()
+    {
+        _playState = PlayStates::StartPlaying;
+    }
 
     virtual std::vector<SimpleNote> GetNotes(
         unsigned int frameCount,
         unsigned int sampleRate)
     {
+        std::vector<SimpleNote> result;
+        if (_playState == PlayStates::Stopped)
+        {
+            return result;
+        }
+
+        if (_playState == PlayStates::StartPlaying)
+        {
+            _playState = PlayStates::Playing;
+            auto notes = GetCurrentStepNotes();
+            result.insert(result.end(), notes.begin(), notes.end());
+        }
+
         _sampleIndex += frameCount;
 
         auto samplesPerBeat = (unsigned int)((sampleRate * 60) / _bpm);
@@ -727,30 +771,36 @@ public:
         if (_sampleIndex > samplesPerStep)
         {
             _sampleIndex -= samplesPerStep;
-            return NextStep();
+            NextStep();
+            auto notes = GetCurrentStepNotes();
+            result.insert(result.end(), notes.begin(), notes.end());
         }
 
-        return std::vector<SimpleNote>();
+        return result;
     }
 
-    std::vector<SimpleNote> NextStep()
+    void NextStep()
+    {
+        _patternEditor.currentRow++;
+        if (_patternEditor.currentRow >= _patternEditor.GetPattern()->Length())
+        {
+            _patternEditor.currentRow = 0;
+        }
+    }
+
+    std::vector<SimpleNote> GetCurrentStepNotes()
     {
         std::vector<SimpleNote> result;
-        _stepIndex++;
-        if (_stepIndex > _patternEditor.GetPattern()->Length())
-        {
-            _stepIndex = 0;
-        }
 
         for (int t = 0; t < NUM_MIXER_TRACKS; t++)
         {
             auto notes = _patternEditor.GetPattern()->Notes(t);
-            if (notes[_stepIndex]._note != 0)
+            if (notes[_patternEditor.currentRow]._note != 0)
             {
                 SimpleNote n(
-                    notes[_stepIndex]._note,
-                    notes[_stepIndex]._velocity,
-                    notes[_stepIndex]._length,
+                    notes[_patternEditor.currentRow]._note,
+                    notes[_patternEditor.currentRow]._velocity,
+                    notes[_patternEditor.currentRow]._length,
                     t);
                 result.push_back(n);
             }
@@ -767,6 +817,11 @@ public:
         if (font != nullptr)
         {
             io.FontDefault = font;
+
+            ImFontConfig config;
+            config.MergeMode = true;
+            static const ImWchar icon_ranges[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
+            io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 13.0f, &config, icon_ranges);
         }
         else
         {
@@ -774,7 +829,6 @@ public:
         }
         _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
         io.Fonts->Build();
-
         Config::init();
 
         SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
@@ -868,6 +922,31 @@ public:
     {
         //show Main Window
         ImGui::ShowDemoWindow();
+
+        ImGui::Begin("PlayerControls");
+        bool playing = _playState != PlayStates::Stopped;
+        if (!playing)
+        {
+            if (ImGui::Button(ICON_FAD_PLAY, ImVec2(0, 0)))
+            {
+                StartPlaying();
+            }
+        }
+        else
+        {
+            if (ImGui::Button(ICON_FAD_PAUSE, ImVec2(0, 0)))
+            {
+                StopPlaying();
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FAD_STOP, ImVec2(0, 0)))
+        {
+            StopPlaying();
+            _patternEditor.currentRow = 0;
+        }
+
+        ImGui::End();
 
         ImGui::Begin(
             "instruments");

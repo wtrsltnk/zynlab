@@ -28,6 +28,7 @@
 #include "Microtonal.h"
 #include <zyn.common/ILibraryManager.h>
 #include <zyn.common/globals.h>
+#include <zyn.common/circularbuffer.h>
 #include <zyn.synth/Controller.h>
 
 #include <list> // For the monomemnotes list.
@@ -90,6 +91,9 @@ class Track : public WrappedPresets
 public:
     Track();
     virtual ~Track();
+
+    circular_buffer<float> _bufferr;
+    circular_buffer<float> _bufferl;
 
     void Init(IMixer *mixer, Microtonal *microtonal_);
 
@@ -181,12 +185,12 @@ public:
         std::string instrumentName;
     } loadedInstrument;
 
+    void RelaseAllKeys(); //this is called on AllNotesOff controller
 private:
     void RunNote(unsigned int k);
     void KillNotePos(unsigned int pos);
     void RelaseNotePos(unsigned int pos);
     void MonoMemRenote(); // MonoMem stuff.
-    void RelaseAllKeys(); //this is called on AllNotesOff controller
 
     int _killallnotes; //is set to 1 if I want to kill all notes
 

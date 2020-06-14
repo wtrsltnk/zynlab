@@ -15,6 +15,8 @@ add_executable(app.tracker
     imgui/imgui_impl_win32.h
     imgui/imgui_internal.h
     imgui/imgui_widgets.cpp
+    imgui_plot.cpp
+    include/imgui_plot.h
     main.cpp
     )
 

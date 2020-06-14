@@ -36,7 +36,12 @@
 #include <zyn.synth/SampleNote.h>
 #include <zyn.synth/SampleNoteParams.h>
 
-Track::Track() {}
+Track::Track()
+    : _tmpoutr(nullptr),
+      _tmpoutl(nullptr),
+      _bufferr(SystemSettings::Instance().buffersize*4),
+      _bufferl(SystemSettings::Instance().buffersize*4)
+{}
 
 Track::~Track()
 {
@@ -1242,6 +1247,12 @@ void Track::ComputeInstrumentSamples()
         }
     }
     ctl.updateportamento();
+
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; i++)
+    {
+        _bufferr.put(partoutr[i]);
+        _bufferl.put(partoutl[i]);
+    }
 }
 
 /*
