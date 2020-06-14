@@ -7,7 +7,6 @@ public:
     virtual ~IApplication();
     
     virtual bool Setup() = 0;
-    virtual void Render3d() = 0;
     virtual void Render2d() = 0;
     virtual void Cleanup() = 0;
 };
