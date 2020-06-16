@@ -4,6 +4,14 @@ project(app.tracker)
 
 add_executable(app.tracker
     application.cpp
+    patterneditor.cpp
+    patterneditor.h
+    pattern.cpp
+    pattern.h
+    song.cpp
+    song.h
+    note.cpp
+    note.h
     glad.c
     imgui/imgui.cpp
     imgui/imgui.h
