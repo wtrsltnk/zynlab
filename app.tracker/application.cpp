@@ -37,6 +37,8 @@ class Application :
     PlayStates _playState;
 
     ImFont *_monofont;
+    ImFont *_fkFont;
+    ImFont *_fadFont;
 
 public:
     Application()
@@ -45,7 +47,9 @@ public:
           _bpm(138),
           _sampleIndex(0),
           _playState(PlayStates::Stopped),
-          _monofont(nullptr)
+          _monofont(nullptr),
+          _fkFont(nullptr),
+          _fadFont(nullptr)
     {}
 
     void StopPlaying()
@@ -167,20 +171,24 @@ public:
         if (font != nullptr)
         {
             io.FontDefault = font;
-
-            ImFontConfig config;
-            config.MergeMode = true;
-            config.GlyphMinAdvanceX = 13.0f;
-            static const ImWchar fontaudio_icon_ranges[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
-            io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 13.0f, &config, fontaudio_icon_ranges);
-            static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
-            io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
         }
         else
         {
             io.Fonts->AddFontDefault();
         }
+
+        ImFontConfig config;
+        config.MergeMode = true;
+        config.GlyphMinAdvanceX = 13.0f;
+
+        static const ImWchar fontaudio_icon_ranges[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
+        _fadFont = io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 13.0f, &config, fontaudio_icon_ranges);
+
+        static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
+        _fkFont = io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
+
         _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
+
         io.Fonts->Build();
         Config::init();
 
@@ -270,14 +278,12 @@ public:
 
     const int instrumentPanelWidth = 370;
     const int effectsPanelHeight = 160;
+    const int tabbarPanelHeight = 40;
     const int playerControlsPanelWidth = 153;
-    const int playerControlsPanelHeight = 80;
+    const int playerControlsPanelHeight = 40;
 
     virtual void Render2d()
     {
-        //show Main Window
-        ImGui::ShowDemoWindow();
-
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
         ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, playerControlsPanelHeight));
@@ -285,7 +291,7 @@ public:
         ImGui::Begin(
             "PlayerControls",
             nullptr,
-            flags);
+            flags | ImGuiWindowFlags_NoTitleBar);
         {
             bool playing = _playState != PlayStates::Stopped;
             if (!playing)
@@ -307,6 +313,10 @@ public:
             {
                 StopPlaying();
                 _patternEditor.currentRow = 0;
+                if (_patternEditor.IsRecording())
+                {
+                    _patternEditor.ToggleRecording();
+                }
             }
             ImGui::SameLine();
 
@@ -317,6 +327,7 @@ public:
             }
             if (ImGui::Button(ICON_FAD_RECORD, ImVec2(0, 0)))
             {
+                ImGui::SetWindowFocus("PatternEditor");
                 _patternEditor.ToggleRecording();
             }
             if (isRecording)
@@ -587,10 +598,58 @@ public:
         }
         ImGui::End();
 
-        ImGui::SetNextWindowSize(ImVec2(Width() - playerControlsPanelWidth - instrumentPanelWidth, Height() - effectsPanelHeight));
+        ImGui::SetNextWindowSize(ImVec2(Width() - playerControlsPanelWidth - instrumentPanelWidth, tabbarPanelHeight));
         ImGui::SetNextWindowPos(ImVec2(playerControlsPanelWidth, 0));
 
-        _patternEditor.Render2d();
+        static int selectedTab = 0;
+        ImGui::Begin("tabbar", nullptr, flags | ImGuiWindowFlags_NoTitleBar);
+        {
+            char buf[256] = {0};
+
+            sprintf_s(buf, 256, "%s Edit", ICON_FK_PENCIL);
+            if (ImGui::Button(buf))
+            {
+                selectedTab = 0;
+                ImGui::SetWindowFocus("PatternEditor");
+            }
+
+            ImGui::SameLine();
+
+            sprintf_s(buf, 256, "%s Synth", ICON_FAD_KEYBOARD);
+            if (ImGui::Button(buf))
+            {
+                selectedTab = 1;
+            }
+
+            ImGui::SameLine();
+
+            sprintf_s(buf, 256, "%s Automation", ICON_FAD_AUTOMATION_3P);
+            if (ImGui::Button(buf))
+            {
+                selectedTab = 2;
+            }
+        }
+        ImGui::End();
+
+        ImGui::SetNextWindowSize(ImVec2(
+            Width() - playerControlsPanelWidth - instrumentPanelWidth,
+            Height() - effectsPanelHeight - tabbarPanelHeight));
+        ImGui::SetNextWindowPos(ImVec2(playerControlsPanelWidth, tabbarPanelHeight));
+
+        switch (selectedTab)
+        {
+            case 0:
+            {
+                _patternEditor.Render2d();
+                break;
+            }
+            default:
+            {
+                //show Main Window
+                ImGui::ShowDemoWindow();
+                break;
+            }
+        }
     }
 
     virtual void Cleanup()

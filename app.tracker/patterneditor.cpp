@@ -1,6 +1,7 @@
 #include "patterneditor.h"
 
 #include <imgui.h>
+#include <iostream>
 #include <zyn.mixer/Track.h>
 
 ImVec2 operator+(ImVec2 const &a, ImVec2 const &b)
@@ -204,18 +205,20 @@ void PatternEditor::Render2d()
                 else if (HandleKeyboardNavigation())
                 {
                     ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                    ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
+                    auto scrollx = (currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x;
+                    tracksScrollx = scrollx > 0 ? scrollx : 0;
+                    ImGui::SetScrollX(tracksScrollx);
                 }
             }
 
             if (keepRowInFocus)
             {
                 ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                ImGui::SetScrollX((currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x);
+                auto scrollx = (currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x;
+                ImGui::SetScrollX(scrollx);
                 keepRowInFocus = false;
             }
 
-            tracksScrollx = ImGui::GetScrollX();
             tracksScrolly = ImGui::GetScrollY();
         }
         ImGui::EndChild();
@@ -288,16 +291,11 @@ void PatternEditor::Render2d()
             ImGui::SetScrollX(tracksScrollx);
 
             ImGui::BeginChild(
-                "scrollbarcontent ",
+                "scrollbarcontent",
                 ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, scrollbarHeight));
             {
             }
             ImGui::EndChild();
-
-            if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
-            {
-                tracksScrollx = ImGui::GetScrollX();
-            }
         }
         ImGui::EndChild();
 
@@ -353,7 +351,7 @@ void PatternEditor::Render2d()
         ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
         ImGui::BeginChild(
             "headerscontainer",
-            ImVec2(content.x, -40));
+            ImVec2(content.x, headerHeight));
         {
             ImGui::SetScrollX(tracksScrollx);
             ImGui::BeginChild(
