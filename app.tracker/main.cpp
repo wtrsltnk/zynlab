@@ -5,10 +5,12 @@
 #include <glad/glad.h>
 #include <imgui.h>
 #include <imgui_impl_win32.h>
+#include <iostream>
 #include <random>
 #include <stdio.h>
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
-#include <application.h>
+#include <iapplication.h>
+#include <chrono>
 #include <imgui_impl_opengl3.h>
 #include <imgui_internal.h>
 #include <wchar.h>
@@ -70,19 +72,10 @@ int wmain(
         &msg,
         sizeof(msg));
 
-    BOOL bRet;
-    while ((bRet = GetMessage(&msg, nullptr, 0, 0)) != 0)
+    while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
-        if (bRet == -1)
-        {
-            // handle the error and possibly exit
-            break;
-        }
-        else
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
 
     app->Cleanup();
@@ -108,7 +101,7 @@ bool Init(
     wc.hInstance = hInstance;
     wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
     wc.lpszClassName = L"IMGUI";
-    wc.style = CS_OWNDC;
+    wc.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
 
     if (!RegisterClass(&wc))
     {
@@ -142,8 +135,6 @@ bool Init(
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
 
     //Init Win32
     ImGui_ImplWin32_Init(
@@ -167,7 +158,6 @@ bool Init(
 void Cleanup(
     HINSTANCE hInstance)
 {
-
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
 
@@ -195,7 +185,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
     {
-        InvalidateRect(g_hwnd, NULL, FALSE);
         return true;
     }
 
@@ -227,7 +216,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         {
             if (!glReady)
             {
-                break;
+                return 0;
             }
 
             // Start the Dear ImGui frame
@@ -262,14 +251,12 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             ImGui_ImplOpenGL3_RenderDrawData(
                 ImGui::GetDrawData());
 
-            wglMakeCurrent(
-                g_HDCDeviceContext,
-                g_GLRenderContext);
-
             SwapBuffers(
                 g_HDCDeviceContext);
 
-            return 0;
+            ValidateRect(hWnd, NULL);
+
+            return 0L;
         }
     }
 
@@ -324,7 +311,7 @@ void CreateGlContext()
 
     glReady = true;
 
-    InvalidateRect(g_hwnd, NULL, FALSE);
+    InvalidateRect(g_hwnd, NULL, TRUE);
 }
 
 int IApplication::Width() const
@@ -335,4 +322,9 @@ int IApplication::Width() const
 int IApplication::Height() const
 {
     return g_display_h;
+}
+
+void IApplication::PostRedraw()
+{
+    InvalidateRect(g_hwnd, NULL, FALSE);
 }

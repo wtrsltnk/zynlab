@@ -1,27 +1,30 @@
 #ifndef PATTERNEDITOR_H
 #define PATTERNEDITOR_H
 
+#include <imgui.h>
 #include <map>
 #include <string>
 #include <vector>
 #include <zyn.common/globals.h>
 
-#include <imgui.h>
-#include  "song.h"
+#include "applicationsession.h"
+#include "song.h"
 
 class PatternEditor
 {
+    ApplicationSession *_session;
     IMixer *_mixer;
     Song *_song;
 
     ImFont *_monofont;
     bool _editMode;
     unsigned int _columnsWidths[NUM_MIXER_TRACKS];
+    void UpdateValue(char pressedChar, unsigned int &inputValue);
 
 public:
     PatternEditor();
 
-    void SetUp(IMixer *mixer, ImFont *font);
+    void SetUp(ApplicationSession *session, IMixer *mixer, ImFont *font);
     Song *CurrentSong();
 
     float tracksScrollx = 0;
@@ -29,12 +32,8 @@ public:
 
     void Render2d();
 
-    const unsigned int numTracks = NUM_MIXER_TRACKS;
-    unsigned int currentTrack = 0;
-    unsigned int currentRow = 0;
-    unsigned int currentProperty = 0;
-    unsigned int skipRowStepSize = 4;
     bool keepRowInFocus = false;
+    unsigned int byteCursor = 0;
 
     const char *emptyCellNote = "---";
     const char *emptyCellParameter = "..";

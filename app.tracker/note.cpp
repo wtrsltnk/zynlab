@@ -223,41 +223,66 @@ char const *Note::NoteToString(
     return "---";
 }
 
+unsigned int Note::StringToValue(
+    char const str[2])
+{
+    unsigned int result = 0;
+    if (str[1] >= '0' && str[1] <= '9')
+    {
+        result += str[1] - '0';
+    }
+    else if (str[1] >= 'A' && str[1] <= 'F')
+    {
+        result += str[1] - 'A' + 10;
+    }
+
+    if (str[0] >= '0' && str[0] <= '9')
+    {
+        result += (str[0] - '0') * 16;
+    }
+    else if (str[0] >= 'A' && str[0] <= 'F')
+    {
+        result += (str[0] - 'A' + 10) * 16;
+    }
+
+    return result;
+}
+
 char const *Note::ValueToString(
     unsigned int value)
 {
     switch (value)
     {
         case 1:
-            return "1";
+            return "01";
         case 2:
-            return "2";
+            return "02";
         case 3:
-            return "3";
+            return "03";
         case 4:
-            return "4";
+            return "04";
         case 5:
-            return "5";
+            return "05";
         case 6:
-            return "6";
+            return "06";
         case 7:
-            return "7";
+            return "07";
         case 8:
-            return "8";
+            return "08";
         case 9:
-            return "9";
+            return "09";
         case 10:
-            return "a";
+            return "0A";
         case 11:
-            return "b";
+            return "0B";
         case 12:
-            return "c";
+            return "0C";
         case 13:
-            return "d";
+            return "0D";
         case 14:
-            return "e";
+            return "0E";
         case 15:
-            return "f";
+            return "0F";
         case 16:
             return "10";
         case 17:
@@ -279,17 +304,17 @@ char const *Note::ValueToString(
         case 25:
             return "19";
         case 26:
-            return "1a";
+            return "1A";
         case 27:
-            return "1b";
+            return "1B";
         case 28:
-            return "1c";
+            return "1C";
         case 29:
-            return "1d";
+            return "1D";
         case 30:
-            return "1e";
+            return "1E";
         case 31:
-            return "1f";
+            return "1F";
         case 32:
             return "20";
         case 33:
@@ -311,17 +336,17 @@ char const *Note::ValueToString(
         case 41:
             return "29";
         case 42:
-            return "2a";
+            return "2A";
         case 43:
-            return "2b";
+            return "2B";
         case 44:
-            return "2c";
+            return "2C";
         case 45:
-            return "2d";
+            return "2D";
         case 46:
-            return "2e";
+            return "2E";
         case 47:
-            return "2f";
+            return "2F";
         case 48:
             return "30";
         case 49:
@@ -343,17 +368,17 @@ char const *Note::ValueToString(
         case 57:
             return "39";
         case 58:
-            return "3a";
+            return "3A";
         case 59:
-            return "3b";
+            return "3B";
         case 60:
-            return "3c";
+            return "3C";
         case 61:
-            return "3d";
+            return "3D";
         case 62:
-            return "3e";
+            return "3E";
         case 63:
-            return "3f";
+            return "3F";
         case 64:
             return "40";
         case 65:
@@ -375,17 +400,17 @@ char const *Note::ValueToString(
         case 73:
             return "49";
         case 74:
-            return "4a";
+            return "4A";
         case 75:
-            return "4b";
+            return "4B";
         case 76:
-            return "4c";
+            return "4C";
         case 77:
-            return "4d";
+            return "4D";
         case 78:
-            return "4e";
+            return "4E";
         case 79:
-            return "4f";
+            return "4F";
         case 80:
             return "50";
         case 81:
@@ -407,17 +432,17 @@ char const *Note::ValueToString(
         case 89:
             return "59";
         case 90:
-            return "5a";
+            return "5A";
         case 91:
-            return "5b";
+            return "5B";
         case 92:
-            return "5c";
+            return "5C";
         case 93:
-            return "5d";
+            return "5D";
         case 94:
-            return "5e";
+            return "5E";
         case 95:
-            return "5f";
+            return "5F";
         case 96:
             return "60";
         case 97:
@@ -439,17 +464,17 @@ char const *Note::ValueToString(
         case 105:
             return "69";
         case 106:
-            return "6a";
+            return "6A";
         case 107:
-            return "6b";
+            return "6B";
         case 108:
-            return "6c";
+            return "6C";
         case 109:
-            return "6d";
+            return "6D";
         case 110:
-            return "6e";
+            return "6E";
         case 111:
-            return "6f";
+            return "6F";
         case 112:
             return "70";
         case 113:
@@ -471,17 +496,17 @@ char const *Note::ValueToString(
         case 121:
             return "79";
         case 122:
-            return "7a";
+            return "7A";
         case 123:
-            return "7b";
+            return "7B";
         case 124:
-            return "7c";
+            return "7C";
         case 125:
-            return "7d";
+            return "7D";
         case 126:
-            return "7e";
+            return "7E";
         case 127:
-            return "7f";
+            return "7F";
     }
 
     return "..";

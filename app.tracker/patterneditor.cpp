@@ -24,7 +24,8 @@ namespace ImGui
 } // namespace ImGui
 
 PatternEditor::PatternEditor()
-    : _mixer(nullptr),
+    : _session(nullptr),
+      _mixer(nullptr),
       _song(nullptr),
       _monofont(nullptr),
       _editMode(false)
@@ -35,8 +36,12 @@ PatternEditor::PatternEditor()
     }
 }
 
-void PatternEditor::SetUp(IMixer *mixer, ImFont *font)
+void PatternEditor::SetUp(
+    ApplicationSession *session,
+    IMixer *mixer,
+    ImFont *font)
 {
+    _session = session;
     _mixer = mixer;
     _monofont = font;
     _song = new Song();
@@ -48,6 +53,7 @@ void PatternEditor::SetUp(IMixer *mixer, ImFont *font)
     {
         pattern->Notes(0)[i * 4]._note = 60 + i;
         pattern->Notes(0)[i * 4]._length = 64;
+        pattern->Notes(0)[i * 4]._velocity = 100;
     }
 }
 
@@ -80,7 +86,7 @@ void PatternEditor::Render2d()
                            spaceWidth + cellParameterWidth +
                            spaceWidth + cellParameterWidth +
                            spaceWidth + cellFxWidth;
-        auto fullWidth = (columnWidth.x + 15) * numTracks;
+        auto fullWidth = (columnWidth.x + 15) * NUM_MIXER_TRACKS;
 
         auto contentTop = ImGui::GetCursorPosY();
         ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, headerHeight));
@@ -103,8 +109,8 @@ void PatternEditor::Render2d()
                     auto tracksPos = ImGui::GetWindowContentRegionMin();
                     auto tracksMax = ImGui::GetWindowContentRegionMax();
 
-                    auto selectionRowMin = ImVec2(tracksPos.x, tracksPos.y + currentRow * lineHeight);
-                    auto selectionRowMax = ImVec2(tracksMax.x, tracksPos.y + (currentRow + 1) * lineHeight);
+                    auto selectionRowMin = ImVec2(tracksPos.x, tracksPos.y + _session->currentRow * lineHeight);
+                    auto selectionRowMax = ImVec2(tracksMax.x, tracksPos.y + (_session->currentRow + 1) * lineHeight);
 
                     auto drawList = ImGui::GetWindowDrawList();
 
@@ -129,8 +135,8 @@ void PatternEditor::Render2d()
 
                     // MAKE ROOM FOR THE HEADERS
 
-                    ImGui::Columns(numTracks);
-                    for (unsigned int i = 0; i < numTracks; i++)
+                    ImGui::Columns(NUM_MIXER_TRACKS);
+                    for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
                     {
                         _columnsWidths[i] = columnWidth.x;
                         ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
@@ -140,25 +146,25 @@ void PatternEditor::Render2d()
 
                     for (unsigned int r = 0; r < pattern->Length(); r++)
                     {
-                        for (unsigned int i = 0; i < numTracks; i++)
+                        for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
                         {
                             auto notes = pattern->Notes(i);
                             auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
-                            if (i == currentTrack && r == currentRow)
+                            if (i == _session->currentTrack && r == _session->currentRow)
                             {
                                 auto cursorWidth = cellNoteWidth.x;
                                 auto min = markerPos + ImVec2(2, 0) - ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY());
-                                if (currentProperty > 0)
+                                if (_session->currentProperty > 0)
                                 {
                                     min.x += cellNoteWidth.x + spaceWidth.x - 1;
                                     cursorWidth = cellParameterWidth.x;
                                 }
-                                if (currentProperty > 1)
+                                if (_session->currentProperty > 1)
                                 {
                                     min.x += cellParameterWidth.x + spaceWidth.x - 1;
                                     cursorWidth = cellParameterWidth.x;
                                 }
-                                if (currentProperty > 2)
+                                if (_session->currentProperty > 2)
                                 {
                                     min.x += cellParameterWidth.x + spaceWidth.x;
                                     cursorWidth = cellFxWidth.x;
@@ -200,12 +206,12 @@ void PatternEditor::Render2d()
             {
                 if (HandleKeyboardNotes())
                 {
-                    ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
+                    ImGui::SetScrollY((_session->currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
                 }
                 else if (HandleKeyboardNavigation())
                 {
-                    ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                    auto scrollx = (currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x;
+                    ImGui::SetScrollY((_session->currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
+                    auto scrollx = (_session->currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x;
                     tracksScrollx = scrollx > 0 ? scrollx : 0;
                     ImGui::SetScrollX(tracksScrollx);
                 }
@@ -213,8 +219,8 @@ void PatternEditor::Render2d()
 
             if (keepRowInFocus)
             {
-                ImGui::SetScrollY((currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
-                auto scrollx = (currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x;
+                ImGui::SetScrollY((_session->currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
+                auto scrollx = (_session->currentTrack - (content.x / columnWidth.x) / 2 + 1) * columnWidth.x;
                 ImGui::SetScrollX(scrollx);
                 keepRowInFocus = false;
             }
@@ -236,13 +242,13 @@ void PatternEditor::Render2d()
                 "footers",
                 ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, footerHeight));
             {
-                ImGui::Columns(numTracks);
-                for (unsigned int i = 0; i < numTracks; i++)
+                ImGui::Columns(NUM_MIXER_TRACKS);
+                for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
                 {
                     ImGui::PushID(i);
                     auto drawList = ImGui::GetWindowDrawList();
                     auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
-                    if (i == currentTrack)
+                    if (i == _session->currentTrack)
                     {
                         drawList->AddLine(
                             markerPos + ImVec2(-4, 2),
@@ -266,9 +272,9 @@ void PatternEditor::Render2d()
                             3);
                     }
 
-                    auto w = ImGui::CalcTextSize("footer 00").x / 2.0f;
+                    auto w = ImGui::CalcTextSize("footer 00").x;
                     ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
-                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 0));
+                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() - w) / 2.0f, 0));
                     ImGui::Text("footer %02d", i + 1);
                     ImGui::PopID();
                     ImGui::NextColumn();
@@ -330,7 +336,7 @@ void PatternEditor::Render2d()
                                 markerPos + ImVec2(rowIndexColumnWidth, lineHeight),
                                 ImColor(120, 120, 120, 55));
                         }
-                        if (r == currentRow)
+                        if (r == _session->currentRow)
                         {
                             drawList->AddRectFilled(
                                 markerPos,
@@ -358,15 +364,15 @@ void PatternEditor::Render2d()
                 "headers",
                 ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, headerHeight));
             {
-                ImGui::Columns(numTracks);
+                ImGui::Columns(NUM_MIXER_TRACKS);
 
                 auto drawList = ImGui::GetWindowDrawList();
-                for (unsigned int i = 0; i < numTracks; i++)
+                for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
                 {
                     ImGui::PushID(i);
                     auto markerPos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
 
-                    if (i == currentTrack)
+                    if (i == _session->currentTrack)
                     {
                         drawList->AddLine(
                             markerPos + ImVec2(-4, 0),
@@ -408,8 +414,8 @@ void PatternEditor::Render2d()
                         _mixer->GetTrack(i)->Penabled = v ? 1 : 0;
                         if (v)
                         {
-                            currentTrack = i;
-                            currentProperty = 0;
+                            _session->currentTrack = i;
+                            _session->currentProperty = 0;
                         }
                     }
                     ImGui::SameLine();
@@ -447,7 +453,7 @@ bool PatternEditor::HandlePlayingNotes(bool repeat)
     {
         if (ImGui::IsKeyPressed((ImWchar)p.first, repeat))
         {
-            _mixer->PreviewNote(currentTrack, p.second);
+            _mixer->PreviewNote(_session->currentTrack, p.second);
             return true;
         }
     }
@@ -455,11 +461,67 @@ bool PatternEditor::HandlePlayingNotes(bool repeat)
     return false;
 }
 
+char GetByteCharPressed()
+{
+    char chars[16] = {
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+    };
+
+    for (int i = 0; i < 16; i++)
+    {
+        if (ImGui::IsKeyPressed(chars[i]))
+        {
+            return chars[i];
+        }
+    }
+
+    return '\0';
+}
+
+void PatternEditor::UpdateValue(char pressedChar, unsigned int &inputValue)
+{
+    char newValue[64];
+    std::fill(newValue, newValue + 64, '\0');
+    auto value = Note::ValueToString(inputValue);
+    for (unsigned int i = 0; i < strlen(value); i++)
+    {
+        if (i == byteCursor)
+        {
+            newValue[i] = pressedChar;
+            continue;
+        }
+        newValue[i] = value[i];
+    }
+    byteCursor++;
+    if (byteCursor >= 2)
+    {
+        byteCursor = 0;
+    }
+
+    inputValue = Note::StringToValue(newValue);
+}
+
 bool PatternEditor::HandleKeyboardNotes()
 {
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Insert)))
     {
         _editMode = !_editMode;
+        return false;
     }
 
     if (!_editMode)
@@ -468,7 +530,7 @@ bool PatternEditor::HandleKeyboardNotes()
         return false;
     }
 
-    if (currentProperty == 0)
+    if (_session->currentProperty == 0)
     {
         auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
         if (pattern != nullptr)
@@ -477,16 +539,37 @@ bool PatternEditor::HandleKeyboardNotes()
             {
                 if (ImGui::IsKeyPressed((ImWchar)p.first))
                 {
-                    pattern->Notes(currentTrack)[currentRow]._note = p.second;
-                    _mixer->PreviewNote(currentTrack, p.second);
+                    pattern->Notes(_session->currentTrack)[_session->currentRow]._note = p.second;
+                    _mixer->PreviewNote(_session->currentTrack, p.second);
                     MoveCurrentRowDown(true);
                     return true;
                 }
             }
         }
     }
-    else if (currentProperty == 1)
+    else if (_session->currentProperty == 1)
     {
+        auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+        if (pattern != nullptr)
+        {
+            char c = GetByteCharPressed();
+            if (c != '\0')
+            {
+                UpdateValue(c, pattern->Notes(_session->currentTrack)[_session->currentRow]._length);
+            }
+        }
+    }
+    else if (_session->currentProperty == 2)
+    {
+        auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+        if (pattern != nullptr)
+        {
+            char c = GetByteCharPressed();
+            if (c != '\0')
+            {
+                UpdateValue(c, pattern->Notes(_session->currentTrack)[_session->currentRow]._velocity);
+            }
+        }
     }
 
     return false;
@@ -528,6 +611,11 @@ bool PatternEditor::HandleKeyboardNavigation()
         result = true;
     }
 
+    if (result)
+    {
+        byteCursor = 0;
+    }
+
     return result;
 }
 
@@ -541,13 +629,13 @@ void PatternEditor::MoveCurrentRowUp(bool largeStep)
     }
 
     unsigned int step = largeStep ? 4 : 1;
-    if (currentRow >= step)
+    if (_session->currentRow >= step)
     {
-        currentRow -= step;
+        _session->currentRow -= step;
     }
     else
     {
-        currentRow = pattern->Length() - 1;
+        _session->currentRow = pattern->Length() - 1;
     }
 }
 
@@ -560,61 +648,70 @@ void PatternEditor::MoveCurrentRowDown(bool largeStep)
         return;
     }
 
-    unsigned int step = largeStep ? skipRowStepSize : 1;
+    unsigned int step = largeStep ? _session->skipRowStepSize : 1;
 
-    currentRow += step;
+    _session->currentRow += step;
 
-    if (currentRow >= pattern->Length()) currentRow = 0;
+    if (_session->currentRow >= pattern->Length())
+    {
+        _session->currentRow = 0;
+    }
 }
 
 void PatternEditor::ChangeCurrentTrack(bool moveLeft)
 {
     if (moveLeft)
     {
-        if (currentTrack > 0)
+        if (_session->currentTrack > 0)
         {
-            currentTrack--;
+            _session->currentTrack--;
         }
         else
         {
-            currentTrack = numTracks - 1;
+            _session->currentTrack = NUM_MIXER_TRACKS - 1;
         }
     }
     else
     {
-        currentTrack++;
-        if (currentTrack >= numTracks) currentTrack = 0;
+        _session->currentTrack++;
+        if (_session->currentTrack >= NUM_MIXER_TRACKS)
+        {
+            _session->currentTrack = 0;
+        }
     }
 }
 
 void PatternEditor::MoveToPreviousProperty()
 {
-    if (currentProperty == 0)
+    if (_session->currentProperty == 0)
     {
-        currentProperty = 4;
-        if (currentTrack > 0)
+        _session->currentProperty = 4;
+        if (_session->currentTrack > 0)
         {
-            currentTrack--;
+            _session->currentTrack--;
         }
         else
         {
-            currentTrack = numTracks - 1;
+            _session->currentTrack = NUM_MIXER_TRACKS - 1;
         }
     }
     else
     {
-        currentProperty--;
+        _session->currentProperty--;
     }
 }
 
 void PatternEditor::MoveToNextProperty()
 {
-    currentProperty++;
-    if (currentProperty >= 4)
+    _session->currentProperty++;
+    if (_session->currentProperty >= 4)
     {
-        currentProperty = 0;
-        currentTrack++;
-        if (currentTrack >= numTracks) currentTrack = 0;
+        _session->currentProperty = 0;
+        _session->currentTrack++;
+        if (_session->currentTrack >= NUM_MIXER_TRACKS)
+        {
+            _session->currentTrack = 0;
+        }
     }
 }
 

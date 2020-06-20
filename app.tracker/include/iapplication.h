@@ -1,5 +1,5 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#ifndef IAPPLICATION_H
+#define IAPPLICATION_H
 
 class IApplication
 {
@@ -12,6 +12,8 @@ public:
 
     int Width() const;
     int Height() const;
+
+    void PostRedraw();
 };
 
-#endif // APPLICATION_H
+#endif // IAPPLICATION_H

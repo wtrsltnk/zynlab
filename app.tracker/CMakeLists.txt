@@ -4,10 +4,17 @@ project(app.tracker)
 
 add_executable(app.tracker
     application.cpp
+    application.h
+    applicationsession.cpp
+    applicationsession.h
+    effectseditor.cpp
+    effectseditor.h
     patterneditor.cpp
     patterneditor.h
     pattern.cpp
     pattern.h
+    instrumentspanel.cpp
+    instrumentspanel.h
     song.cpp
     song.h
     note.cpp

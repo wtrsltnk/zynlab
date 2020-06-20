@@ -205,7 +205,6 @@ bool Init(
 void Cleanup(
     HINSTANCE hInstance)
 {
-
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     

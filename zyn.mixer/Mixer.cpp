@@ -415,7 +415,7 @@ void Mixer::AudioOut(float *outl, float *outr)
         auto notes = _noteSource->GetNotes(BufferSize(), SampleRate());
         for (auto n : notes)
         {
-            PreviewNote(n.channel, n.note, 400, 100);
+            PreviewNote(n.channel, n.note, n.length * 10, n.velocity);
         }
     }
 
