@@ -5,20 +5,14 @@
 #include <zyn.mixer/Track.h>
 
 InstrumentsPanel::InstrumentsPanel()
-    : _session(nullptr),
-      _mixer(nullptr),
-      _library(nullptr)
+    : _session(nullptr)
 {
 }
 
 void InstrumentsPanel::SetUp(
-    ApplicationSession *session,
-    IMixer *mixer,
-    ILibraryManager *library)
+    ApplicationSession *session)
 {
     _session = session;
-    _mixer = mixer;
-    _library = library;
 }
 
 void InstrumentsPanel::Render2d()
@@ -35,7 +29,7 @@ void InstrumentsPanel::Render2d()
             ImGui::BeginChild("TracksContainer", ImVec2(0, 300));
             for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
             {
-                auto track = _mixer->GetTrack(i);
+                auto track = _session->_mixer->GetTrack(i);
                 ImGui::PushID(i);
 
                 bool v = track->Penabled == 1;
@@ -85,7 +79,7 @@ void InstrumentsPanel::Render2d()
             ImGui::BeginChild("InstrumentProperties", ImVec2(0, 200));
             if (_session->currentTrack < NUM_MIXER_TRACKS)
             {
-                auto track = _mixer->GetTrack(_session->currentTrack);
+                auto track = _session->_mixer->GetTrack(_session->currentTrack);
 
                 bool v = track->Penabled == 1;
                 if (ImGui::Checkbox("Enabled", &v))
@@ -120,7 +114,7 @@ void InstrumentsPanel::Render2d()
         if (ImGui::CollapsingHeader("Instrument Library"))
         {
             // todo : dont do this every frame
-            auto libs = _library->GetTopLevelLibraries();
+            auto libs = _session->_library->GetTopLevelLibraries();
             std::vector<ILibrary *> slibs(libs.begin(), libs.end());
             std::sort(slibs.begin(), slibs.end(), [](ILibrary *a, ILibrary *b) {
                 return a->GetName() < b->GetName();
@@ -130,14 +124,14 @@ void InstrumentsPanel::Render2d()
                 auto selection = LibraryTree(topLevel);
                 if (selection != nullptr)
                 {
-                    auto const &track = _mixer->GetTrack(_session->currentTrack);
+                    auto const &track = _session->_mixer->GetTrack(_session->currentTrack);
                     track->Lock();
-                    _library->LoadAsInstrument(selection, track);
+                    _session->_library->LoadAsInstrument(selection, track);
                     track->Penabled = 1;
                     track->ApplyParameters();
                     track->Unlock();
 
-                    _mixer->PreviewNote(track->Prcvchn, NOTE_C5);
+                    _session->_mixer->PreviewNote(track->Prcvchn, NOTE_C5, 400);
                 }
             }
         }

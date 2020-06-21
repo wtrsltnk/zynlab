@@ -8,13 +8,10 @@
 #include <zyn.common/globals.h>
 
 #include "applicationsession.h"
-#include "song.h"
 
 class PatternEditor
 {
     ApplicationSession *_session;
-    IMixer *_mixer;
-    Song *_song;
 
     ImFont *_monofont;
     bool _editMode;
@@ -24,8 +21,7 @@ class PatternEditor
 public:
     PatternEditor();
 
-    void SetUp(ApplicationSession *session, IMixer *mixer, ImFont *font);
-    Song *CurrentSong();
+    void SetUp(ApplicationSession *session, ImFont *font);
 
     float tracksScrollx = 0;
     float tracksScrolly = 0;

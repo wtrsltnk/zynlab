@@ -25,8 +25,6 @@ namespace ImGui
 
 PatternEditor::PatternEditor()
     : _session(nullptr),
-      _mixer(nullptr),
-      _song(nullptr),
       _monofont(nullptr),
       _editMode(false)
 {
@@ -38,28 +36,10 @@ PatternEditor::PatternEditor()
 
 void PatternEditor::SetUp(
     ApplicationSession *session,
-    IMixer *mixer,
     ImFont *font)
 {
     _session = session;
-    _mixer = mixer;
     _monofont = font;
-    _song = new Song();
-
-    _song->AddPattern();
-    auto pattern = _song->GetPattern(0);
-
-    for (int i = 0; i < 16; i++)
-    {
-        pattern->Notes(0)[i * 4]._note = 60 + i;
-        pattern->Notes(0)[i * 4]._length = 64;
-        pattern->Notes(0)[i * 4]._velocity = 100;
-    }
-}
-
-Song *PatternEditor::CurrentSong()
-{
-    return _song;
 }
 
 void PatternEditor::Render2d()
@@ -98,7 +78,7 @@ void PatternEditor::Render2d()
 
             lineHeight = ImGui::GetTextLineHeightWithSpacing();
 
-            auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+            auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
 
             if (pattern != nullptr)
             {
@@ -317,7 +297,7 @@ void PatternEditor::Render2d()
         {
             ImGui::SetScrollY(tracksScrolly);
 
-            auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+            auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
             if (pattern != nullptr)
             {
                 ImGui::BeginChild(
@@ -408,10 +388,10 @@ void PatternEditor::Render2d()
                     ImGui::SetNextWindowSize(ImVec2(_columnsWidths[i] + 15, headerHeight));
                     ImGui::Text("Track %02d", i + 1);
 
-                    bool v = _mixer->GetTrack(i)->Penabled == 1;
+                    bool v = _session->_mixer->GetTrack(i)->Penabled == 1;
                     if (ImGui::Checkbox("##enabled", &v))
                     {
-                        _mixer->GetTrack(i)->Penabled = v ? 1 : 0;
+                        _session->_mixer->GetTrack(i)->Penabled = v ? 1 : 0;
                         if (v)
                         {
                             _session->currentTrack = i;
@@ -421,12 +401,12 @@ void PatternEditor::Render2d()
                     ImGui::SameLine();
                     ImGui::Button("edit", ImVec2(-1, 0));
 
-                    if (_mixer->GetTrack(i)->Penabled)
+                    if (_session->_mixer->GetTrack(i)->Penabled)
                     {
                         ImGui::PlotLines(
                             "##l",
-                            _mixer->GetTrack(i)->_bufferl.buf_.get(),
-                            (int)_mixer->GetTrack(i)->_bufferl.size(),
+                            _session->_mixer->GetTrack(i)->_bufferl.buf_.get(),
+                            (int)_session->_mixer->GetTrack(i)->_bufferl.size(),
                             0,
                             nullptr,
                             -0.5f,
@@ -453,7 +433,7 @@ bool PatternEditor::HandlePlayingNotes(bool repeat)
     {
         if (ImGui::IsKeyPressed((ImWchar)p.first, repeat))
         {
-            _mixer->PreviewNote(_session->currentTrack, p.second);
+            _session->_mixer->PreviewNote(_session->currentTrack, p.second, 400);
             return true;
         }
     }
@@ -524,6 +504,13 @@ bool PatternEditor::HandleKeyboardNotes()
         return false;
     }
 
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+    {
+        _session->currentRow = 0;
+
+        return false;
+    }
+
     if (!_editMode)
     {
         HandlePlayingNotes();
@@ -532,7 +519,7 @@ bool PatternEditor::HandleKeyboardNotes()
 
     if (_session->currentProperty == 0)
     {
-        auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+        auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
         if (pattern != nullptr)
         {
             for (auto p : _charToNoteMap)
@@ -540,7 +527,7 @@ bool PatternEditor::HandleKeyboardNotes()
                 if (ImGui::IsKeyPressed((ImWchar)p.first))
                 {
                     pattern->Notes(_session->currentTrack)[_session->currentRow]._note = p.second;
-                    _mixer->PreviewNote(_session->currentTrack, p.second);
+                    _session->_mixer->PreviewNote(_session->currentTrack, p.second, 400);
                     MoveCurrentRowDown(true);
                     return true;
                 }
@@ -549,7 +536,7 @@ bool PatternEditor::HandleKeyboardNotes()
     }
     else if (_session->currentProperty == 1)
     {
-        auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+        auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
         if (pattern != nullptr)
         {
             char c = GetByteCharPressed();
@@ -561,7 +548,7 @@ bool PatternEditor::HandleKeyboardNotes()
     }
     else if (_session->currentProperty == 2)
     {
-        auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+        auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
         if (pattern != nullptr)
         {
             char c = GetByteCharPressed();
@@ -621,7 +608,7 @@ bool PatternEditor::HandleKeyboardNavigation()
 
 void PatternEditor::MoveCurrentRowUp(bool largeStep)
 {
-    auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+    auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
 
     if (pattern == nullptr)
     {
@@ -641,7 +628,7 @@ void PatternEditor::MoveCurrentRowUp(bool largeStep)
 
 void PatternEditor::MoveCurrentRowDown(bool largeStep)
 {
-    auto pattern = CurrentSong()->GetPattern(CurrentSong()->currentPattern);
+    auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
 
     if (pattern == nullptr)
     {

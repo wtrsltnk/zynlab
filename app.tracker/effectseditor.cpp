@@ -5,16 +5,13 @@
 #include <zyn.mixer/Track.h>
 
 EffectsEditor::EffectsEditor()
-    : _session(nullptr),
-      _mixer(nullptr)
+    : _session(nullptr)
 {}
 
 void EffectsEditor::SetUp(
-    ApplicationSession *session,
-    IMixer *mixer)
+    ApplicationSession *session)
 {
     _session = session;
-    _mixer = mixer;
 }
 
 char const *const EffectNames[] = {
@@ -54,19 +51,26 @@ void EffectsEditor::Render2d()
         nullptr,
         flags);
     {
-        auto track = _mixer->GetTrack(_session->currentTrack);
+        auto track = _session->_mixer->GetTrack(_session->currentTrack);
         for (int e = 0; e < NUM_TRACK_EFX; e++)
         {
             if (e > 0) ImGui::SameLine();
             ImGui::PushID(e);
 
             int item_current = track->partefx[e]->geteffect();
-            ImGui::BeginChild("fx", ImVec2(320, 120), true);
+            ImGui::BeginChild("fx", ImVec2(item_current == 0 ? 120 : 320, 120), true);
 
             ImGui::SetNextItemWidth(100);
             if (ImGui::Combo("##effect", &item_current, EffectNames, IM_ARRAYSIZE(EffectNames)))
             {
                 track->partefx[e]->changeeffect(item_current);
+            }
+
+            if (item_current == 0)
+            {
+                ImGui::EndChild();
+                ImGui::PopID();
+                continue;
             }
 
             ImGui::SameLine();

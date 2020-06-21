@@ -245,6 +245,11 @@ unsigned int Note::StringToValue(
         result += (str[0] - 'A' + 10) * 16;
     }
 
+    if (result >= 127)
+    {
+        return 127;
+    }
+
     return result;
 }
 

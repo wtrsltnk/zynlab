@@ -1,17 +1,17 @@
-#ifndef EFFECTSEDITOR_H
-#define EFFECTSEDITOR_H
+#ifndef PATTERNSMANAGER_H
+#define PATTERNSMANAGER_H
 
-#include <zyn.common/globals.h>
 #include "applicationsession.h"
 
-class EffectsEditor
+class PatternsManager
 {
     ApplicationSession *_session;
+
 public:
-    EffectsEditor();
+    PatternsManager();
 
     void SetUp(ApplicationSession *session);
     void Render2d();
 };
 
-#endif // EFFECTSEDITOR_H
+#endif // PATTERNSMANAGER_H

@@ -11,8 +11,6 @@
 class InstrumentsPanel
 {
     ApplicationSession *_session;
-    IMixer *_mixer;
-    ILibraryManager *_library;
 
     ILibraryItem *LibraryTree(
         ILibrary *library);
@@ -20,10 +18,7 @@ class InstrumentsPanel
 public:
     InstrumentsPanel();
 
-    void SetUp(
-        ApplicationSession *session,
-        IMixer *mixer,
-        ILibraryManager *library);
+    void SetUp(ApplicationSession *session);
     void Render2d();
 };
 

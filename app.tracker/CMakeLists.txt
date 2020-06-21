@@ -11,6 +11,8 @@ add_executable(app.tracker
     effectseditor.h
     patterneditor.cpp
     patterneditor.h
+    patternsmanager.cpp
+    patternsmanager.h
     pattern.cpp
     pattern.h
     instrumentspanel.cpp

@@ -5,30 +5,21 @@
 #include "effectseditor.h"
 #include "instrumentspanel.h"
 #include "patterneditor.h"
+#include "patternsmanager.h"
 #include <iapplication.h>
-#include <zyn.mixer/Mixer.h>
-
-enum class PlayStates
-{
-    Stopped,
-    StartPlaying,
-    Playing,
-};
 
 class Application :
     public IApplication,
     public INoteSource
 {
     ApplicationSession _session;
-    Mixer *_mixer;
-    ILibraryManager *_library;
 
     PatternEditor _patternEditor;
     InstrumentsPanel _instruments;
     EffectsEditor _effectsEditor;
+    PatternsManager _patternsManager;
 
     unsigned int _sampleIndex;
-    PlayStates _playState;
 
     ImFont *_monofont;
     ImFont *_fkFont;
@@ -48,12 +39,6 @@ public:
     virtual void Render2d();
 
     virtual void Cleanup();
-
-    void StopPlaying();
-
-    void StartPlaying();
-
-    void TogglePlaying();
 
     virtual std::vector<SimpleNote> GetNotes(
         unsigned int frameCount,

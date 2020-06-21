@@ -18,10 +18,7 @@
 #include "application.h"
 
 Application::Application()
-    : _mixer(nullptr),
-      _library(nullptr),
-      _sampleIndex(0),
-      _playState(PlayStates::Stopped),
+    : _sampleIndex(0),
       _monofont(nullptr),
       _fkFont(nullptr),
       _fadFont(nullptr)
@@ -72,13 +69,11 @@ bool Application::Setup()
     SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
     SystemSettings::Instance().alias();
 
-    _mixer = new Mixer();
+    _session._mixer = new Mixer();
+    _session._mixer->Init();
+    _session._mixer->SetNoteSource(this);
 
-    _mixer->Init();
-
-    _mixer->SetNoteSource(this);
-
-    _library = new LibraryManager();
+    _session._library = new LibraryManager();
 
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
     {
@@ -86,14 +81,14 @@ bool Application::Setup()
         {
             continue;
         }
-        _library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
+        _session._library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
     }
 
-    _library->RefreshLibraries();
+    _session._library->RefreshLibraries();
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
 
-    if (!Nio::Start(_mixer, _mixer))
+    if (!Nio::Start(_session._mixer, _session._mixer))
     {
         return false;
     }
@@ -101,9 +96,22 @@ bool Application::Setup()
     Nio::SelectSink("PA");
     Nio::SelectSource("RT");
 
-    _patternEditor.SetUp(&_session, _mixer, _monofont);
-    _instruments.SetUp(&_session, _mixer, _library);
-    _effectsEditor.SetUp(&_session, _mixer);
+    _session._song = new Song();
+
+    _session._song->AddPattern();
+    auto pattern = _session._song->GetPattern(0);
+
+    for (int i = 0; i < 16; i++)
+    {
+        pattern->Notes(0)[i * 4]._note = 60 + i;
+        pattern->Notes(0)[i * 4]._length = 64;
+        pattern->Notes(0)[i * 4]._velocity = 100;
+    }
+
+    _patternEditor.SetUp(&_session, _monofont);
+    _instruments.SetUp(&_session);
+    _effectsEditor.SetUp(&_session);
+    _patternsManager.SetUp(&_session);
 
     return true;
 }
@@ -119,30 +127,32 @@ void Application::Render2d()
         nullptr,
         flags | ImGuiWindowFlags_NoTitleBar);
     {
-        bool playing = _playState != PlayStates::Stopped;
+        bool playing = _session._playState != PlayStates::Stopped;
         if (!playing)
         {
             if (ImGui::Button(ICON_FAD_PLAY, ImVec2(0, 0)))
             {
-                StartPlaying();
+                _session.StartPlaying();
+                ImGui::SetWindowFocus("PatternEditor");
             }
         }
         else
         {
             if (ImGui::Button(ICON_FAD_PAUSE, ImVec2(0, 0)))
             {
-                StopPlaying();
+                _session.StopPlaying();
+                ImGui::SetWindowFocus("PatternEditor");
             }
         }
         ImGui::SameLine();
         if (ImGui::Button(ICON_FAD_STOP, ImVec2(0, 0)))
         {
-            StopPlaying();
-            _session.currentRow = 0;
+            _session.StopPlaying();
             if (_patternEditor.IsRecording())
             {
                 _patternEditor.ToggleRecording();
             }
+            ImGui::SetWindowFocus("PatternEditor");
         }
         ImGui::SameLine();
 
@@ -165,80 +175,7 @@ void Application::Render2d()
 
     ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, Height() - playerControlsPanelHeight - effectsPanelHeight));
     ImGui::SetNextWindowPos(ImVec2(0, playerControlsPanelHeight));
-    ImGui::Begin(
-        "patterns",
-        nullptr,
-        flags);
-    {
-        ImGui::BeginChild("PatternsContainer");
-        {
-            if (ImGui::Button(ICON_FK_PLUS, ImVec2(0, 0)))
-            {
-                _patternEditor.CurrentSong()->AddPattern();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FK_MINUS, ImVec2(0, 0)))
-            {
-                _patternEditor.CurrentSong()->RemovePattern(_patternEditor.CurrentSong()->currentPattern);
-            }
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FK_ARROW_UP, ImVec2(0, 0)))
-            {
-                _patternEditor.CurrentSong()->MovePattern(_patternEditor.CurrentSong()->currentPattern, -1);
-            }
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FK_ARROW_DOWN, ImVec2(0, 0)))
-            {
-                _patternEditor.CurrentSong()->MovePattern(_patternEditor.CurrentSong()->currentPattern, 1);
-            }
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FK_FILE_O, ImVec2(0, 0)))
-            {
-                _patternEditor.CurrentSong()->DuplicatePattern(_patternEditor.CurrentSong()->currentPattern);
-            }
-
-            ImGui::BeginChild("patterns", ImVec2(0, -100));
-            {
-                for (unsigned int i = 0; i < _patternEditor.CurrentSong()->GetPatternCount(); i++)
-                {
-                    ImGui::PushID(i);
-
-                    auto pattern = _patternEditor.CurrentSong()->GetPattern(i);
-                    char buf[256] = {0};
-                    sprintf_s(buf, 256, "%02d : %s", int(i), pattern->Name().c_str());
-                    ImGui::Selectable(buf, i == _patternEditor.CurrentSong()->currentPattern);
-                    if (ImGui::IsItemClicked())
-                    {
-                        _patternEditor.CurrentSong()->currentPattern = i;
-                    }
-
-                    ImGui::PopID();
-                }
-            }
-            ImGui::EndChild();
-
-            ImGui::BeginChild("selectedpattern");
-            {
-                ImGui::Text("Name");
-                auto name = _patternEditor.CurrentSong()->GetPattern(_patternEditor.CurrentSong()->currentPattern)->Name();
-                char text[128] = {0};
-                strcpy_s(text, 128, name.c_str());
-                ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
-                ImGui::InputText("##name", text, 128, ImGuiInputTextFlags_EnterReturnsTrue);
-
-                ImGui::Text("Length");
-                int len = _patternEditor.CurrentSong()->GetPattern(_patternEditor.CurrentSong()->currentPattern)->Length();
-                ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
-                if (ImGui::InputInt("##length", &len, 4))
-                {
-                    _patternEditor.CurrentSong()->GetPattern(_patternEditor.CurrentSong()->currentPattern)->Resize(len);
-                }
-            }
-            ImGui::EndChild();
-        }
-        ImGui::EndChild();
-    }
-    ImGui::End();
+    _patternsManager.Render2d();
 
     ImGui::SetNextWindowSize(ImVec2(instrumentPanelWidth, Height()));
     ImGui::SetNextWindowPos(ImVec2(Width() - instrumentPanelWidth, 0));
@@ -302,48 +239,20 @@ void Application::Render2d()
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
     {
-        TogglePlaying();
+        _session.TogglePlaying();
     }
 }
 
 void Application::Cleanup()
 {
     //ensure that everything has stopped with the mutex wait
-    _mixer->Lock();
-    _mixer->Unlock();
+    _session._mixer->Lock();
+    _session._mixer->Unlock();
 
     Nio::Stop();
 
-    delete _mixer;
-    _mixer = nullptr;
-}
-
-void Application::StopPlaying()
-{
-    _playState = PlayStates::Stopped;
-    for (int t = 0; t < NUM_MIXER_TRACKS; t++)
-    {
-        _mixer->GetTrack(t)
-            ->RelaseAllKeys();
-    }
-    _patternEditor.keepRowInFocus = true;
-}
-
-void Application::StartPlaying()
-{
-    _playState = PlayStates::StartPlaying;
-}
-
-void Application::TogglePlaying()
-{
-    if (_playState == PlayStates::Stopped)
-    {
-        StartPlaying();
-    }
-    else
-    {
-        StopPlaying();
-    }
+    delete _session._mixer;
+    _session._mixer = nullptr;
 }
 
 std::vector<SimpleNote> Application::GetNotes(
@@ -353,14 +262,14 @@ std::vector<SimpleNote> Application::GetNotes(
     PostRedraw();
 
     std::vector<SimpleNote> result;
-    if (_playState == PlayStates::Stopped)
+    if (_session._playState == PlayStates::Stopped)
     {
         return result;
     }
 
-    if (_playState == PlayStates::StartPlaying)
+    if (_session._playState == PlayStates::StartPlaying)
     {
-        _playState = PlayStates::Playing;
+        _session._playState = PlayStates::Playing;
         auto notes = GetCurrentStepNotes();
         result.insert(result.end(), notes.begin(), notes.end());
     }
@@ -382,7 +291,7 @@ std::vector<SimpleNote> Application::GetNotes(
 
 void Application::NextStep()
 {
-    auto song = _patternEditor.CurrentSong();
+    auto song = _session._song;
     auto pattern = song->GetPattern(song->currentPattern);
 
     if (pattern == nullptr)
@@ -406,7 +315,7 @@ void Application::NextStep()
 
 std::vector<SimpleNote> Application::GetCurrentStepNotes()
 {
-    auto pattern = _patternEditor.CurrentSong()->GetPattern(_patternEditor.CurrentSong()->currentPattern);
+    auto pattern = _session._song->GetPattern(_session._song->currentPattern);
 
     if (pattern == nullptr)
     {
