@@ -16,11 +16,12 @@ class ApplicationSession
 public:
     ApplicationSession();
 
-    Mixer *_mixer;
-    ILibraryManager *_library;
+    Mixer *_mixer = nullptr;
+    ILibraryManager *_library= nullptr;
 
     PlayStates _playState = PlayStates::Stopped;
-    Song *_song;
+    bool _editMode = false;
+    Song *_song = nullptr;
     unsigned int _bpm = 138;
     unsigned int currentTrack = 0;
     unsigned int currentRow = 0;
@@ -30,6 +31,9 @@ public:
     void StopPlaying();
     void StartPlaying();
     void TogglePlaying();
+
+    bool IsRecording() const;
+    void ToggleRecording();
 };
 
 #endif // APPLICATIONSESSION_H

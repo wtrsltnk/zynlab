@@ -1,4 +1,6 @@
 #include "instrumentspanel.h"
+
+#include "patterneditor.h"
 #include <algorithm>
 #include <imgui.h>
 #include <zyn.common/globals.h>
@@ -20,7 +22,7 @@ void InstrumentsPanel::Render2d()
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin(
-        "instruments",
+        "Instruments",
         nullptr,
         flags);
     {
@@ -132,6 +134,8 @@ void InstrumentsPanel::Render2d()
                     track->Unlock();
 
                     _session->_mixer->PreviewNote(track->Prcvchn, NOTE_C5, 400);
+
+                    ImGui::SetWindowFocus(PatternEditor::ID);
                 }
             }
         }

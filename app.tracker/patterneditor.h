@@ -11,10 +11,8 @@
 
 class PatternEditor
 {
-    ApplicationSession *_session;
-
-    ImFont *_monofont;
-    bool _editMode;
+    ApplicationSession *_session = nullptr;
+    ImFont *_monofont = nullptr;
     unsigned int _columnsWidths[NUM_MIXER_TRACKS];
     void UpdateValue(char pressedChar, unsigned int &inputValue);
 
@@ -83,8 +81,8 @@ public:
     void ChangeCurrentTrack(bool moveLeft);
     void MoveToPreviousProperty();
     void MoveToNextProperty();
-    bool IsRecording() const;
-    void ToggleRecording();
+
+    static char const *ID;
 };
 
 #endif // PATTERNEDITOR_H

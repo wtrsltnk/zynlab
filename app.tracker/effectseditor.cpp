@@ -47,7 +47,7 @@ void EffectsEditor::Render2d()
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin(
-        "Effects Editor",
+        "Effects",
         nullptr,
         flags);
     {

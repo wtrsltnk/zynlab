@@ -1,4 +1,5 @@
 #include "pattern.h"
+#include <iostream>
 
 Pattern::Pattern(
     std::string const &name,
@@ -20,7 +21,9 @@ std::string const &Pattern::Name() const
 void Pattern::Rename(
     std::string const &name)
 {
+    std::cout << _name << "" << name << std::endl;
     _name = name;
+    std::cout << _name << "" << name << std::endl;
 }
 
 unsigned int Pattern::Length() const

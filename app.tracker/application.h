@@ -2,10 +2,13 @@
 #define APPLICATION_H
 
 #include "applicationsession.h"
+#include "automationeditor.h"
 #include "effectseditor.h"
 #include "instrumentspanel.h"
 #include "patterneditor.h"
 #include "patternsmanager.h"
+#include "playercontrolspanel.h"
+#include "syntheditor.h"
 #include <iapplication.h>
 
 class Application :
@@ -14,10 +17,13 @@ class Application :
 {
     ApplicationSession _session;
 
+    PlayerControlsPanel _playerControlsPanel;
     PatternEditor _patternEditor;
     InstrumentsPanel _instruments;
     EffectsEditor _effectsEditor;
     PatternsManager _patternsManager;
+    AutomationEditor _automationEditor;
+    SynthEditor _synthEditor;
 
     unsigned int _sampleIndex;
 

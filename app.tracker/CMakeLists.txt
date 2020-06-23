@@ -7,20 +7,10 @@ add_executable(app.tracker
     application.h
     applicationsession.cpp
     applicationsession.h
+    automationeditor.cpp
+    automationeditor.h
     effectseditor.cpp
     effectseditor.h
-    patterneditor.cpp
-    patterneditor.h
-    patternsmanager.cpp
-    patternsmanager.h
-    pattern.cpp
-    pattern.h
-    instrumentspanel.cpp
-    instrumentspanel.h
-    song.cpp
-    song.h
-    note.cpp
-    note.h
     glad.c
     imgui/imgui.cpp
     imgui/imgui.h
@@ -32,9 +22,27 @@ add_executable(app.tracker
     imgui/imgui_impl_win32.h
     imgui/imgui_internal.h
     imgui/imgui_widgets.cpp
+    imgui_helpers.cpp
+    imgui_helpers.h
     imgui_plot.cpp
     include/imgui_plot.h
+    instrumentspanel.cpp
+    instrumentspanel.h
     main.cpp
+    note.cpp
+    note.h
+    pattern.cpp
+    pattern.h
+    patterneditor.cpp
+    patterneditor.h
+    patternsmanager.cpp
+    patternsmanager.h
+    playercontrolspanel.cpp
+    playercontrolspanel.h
+    song.cpp
+    song.h
+    syntheditor.cpp
+    syntheditor.h
     )
 
 target_include_directories(app.tracker

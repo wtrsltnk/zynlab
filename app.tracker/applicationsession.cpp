@@ -1,10 +1,7 @@
 #include "applicationsession.h"
 
 ApplicationSession::ApplicationSession()
-    : _mixer(nullptr),
-      _library(nullptr)
-{
-}
+{}
 
 void ApplicationSession::StopPlaying()
 {
@@ -32,4 +29,14 @@ void ApplicationSession::TogglePlaying()
     {
         StopPlaying();
     }
+}
+
+bool ApplicationSession::IsRecording() const
+{
+    return _editMode;
+}
+
+void ApplicationSession::ToggleRecording()
+{
+    _editMode = !_editMode;
 }

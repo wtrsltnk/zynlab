@@ -3,16 +3,7 @@
 #include <imgui.h>
 #include <iostream>
 #include <zyn.mixer/Track.h>
-
-ImVec2 operator+(ImVec2 const &a, ImVec2 const &b)
-{
-    return ImVec2(a.x + b.x, a.y + b.y);
-}
-
-ImVec2 operator-(ImVec2 const &a, ImVec2 const &b)
-{
-    return ImVec2(a.x - b.x, a.y - b.y);
-}
+#include "imgui_helpers.h"
 
 namespace ImGui
 {
@@ -24,9 +15,6 @@ namespace ImGui
 } // namespace ImGui
 
 PatternEditor::PatternEditor()
-    : _session(nullptr),
-      _monofont(nullptr),
-      _editMode(false)
 {
     for (int i = 0; i < NUM_MIXER_TRACKS; i++)
     {
@@ -42,6 +30,8 @@ void PatternEditor::SetUp(
     _monofont = font;
 }
 
+char const *PatternEditor::ID = "PatternEditor";
+
 void PatternEditor::Render2d()
 {
     auto selectionColor = ImColor(20, 180, 20, 255);
@@ -50,7 +40,7 @@ void PatternEditor::Render2d()
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     ImGui::Begin(
-        "PatternEditor",
+        PatternEditor::ID,
         nullptr,
         flags);
     {
@@ -107,7 +97,7 @@ void PatternEditor::Render2d()
 
                     // SELECTED ROW
 
-                    auto color = _editMode ? selectedRowBackgroundColorEditmode : selectedRowBackgroundColor;
+                    auto color = _session->IsRecording() ? selectedRowBackgroundColorEditmode : selectedRowBackgroundColor;
                     drawList->AddRectFilled(
                         ImGui::GetWindowPos() + selectionRowMin,
                         ImGui::GetWindowPos() + selectionRowMax,
@@ -500,7 +490,8 @@ bool PatternEditor::HandleKeyboardNotes()
 {
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Insert)))
     {
-        _editMode = !_editMode;
+        _session->ToggleRecording();
+
         return false;
     }
 
@@ -511,7 +502,7 @@ bool PatternEditor::HandleKeyboardNotes()
         return false;
     }
 
-    if (!_editMode)
+    if (!_session->IsRecording())
     {
         HandlePlayingNotes();
         return false;
@@ -700,14 +691,4 @@ void PatternEditor::MoveToNextProperty()
             _session->currentTrack = 0;
         }
     }
-}
-
-bool PatternEditor::IsRecording() const
-{
-    return _editMode;
-}
-
-void PatternEditor::ToggleRecording()
-{
-    _editMode = !_editMode;
 }

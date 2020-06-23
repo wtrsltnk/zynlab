@@ -36,6 +36,8 @@ bool Application::Setup()
     style.PopupRounding = 0;
     style.ScrollbarRounding = 0;
     style.WindowRounding = 0;
+    style.Colors[ImGuiCol_Border] = ImVec4(30 / 255.0f, 30 / 255.0f, 30 / 255.0f, 240 / 255.0f);
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(21 / 255.0f, 37 / 255.0f, 61 / 255.0f, 240 / 255.0f);
 
     ImGuiIO &io = ImGui::GetIO();
     io.Fonts->Clear();
@@ -100,6 +102,7 @@ bool Application::Setup()
 
     _session._song->AddPattern();
     auto pattern = _session._song->GetPattern(0);
+    pattern->Rename("Intro");
 
     for (int i = 0; i < 16; i++)
     {
@@ -108,10 +111,13 @@ bool Application::Setup()
         pattern->Notes(0)[i * 4]._velocity = 100;
     }
 
+    _playerControlsPanel.SetUp(&_session);
     _patternEditor.SetUp(&_session, _monofont);
     _instruments.SetUp(&_session);
     _effectsEditor.SetUp(&_session);
     _patternsManager.SetUp(&_session);
+    _automationEditor.SetUp(&_session);
+    _synthEditor.SetUp(&_session);
 
     return true;
 }
@@ -122,56 +128,7 @@ void Application::Render2d()
 
     ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, playerControlsPanelHeight));
     ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::Begin(
-        "PlayerControls",
-        nullptr,
-        flags | ImGuiWindowFlags_NoTitleBar);
-    {
-        bool playing = _session._playState != PlayStates::Stopped;
-        if (!playing)
-        {
-            if (ImGui::Button(ICON_FAD_PLAY, ImVec2(0, 0)))
-            {
-                _session.StartPlaying();
-                ImGui::SetWindowFocus("PatternEditor");
-            }
-        }
-        else
-        {
-            if (ImGui::Button(ICON_FAD_PAUSE, ImVec2(0, 0)))
-            {
-                _session.StopPlaying();
-                ImGui::SetWindowFocus("PatternEditor");
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(ICON_FAD_STOP, ImVec2(0, 0)))
-        {
-            _session.StopPlaying();
-            if (_patternEditor.IsRecording())
-            {
-                _patternEditor.ToggleRecording();
-            }
-            ImGui::SetWindowFocus("PatternEditor");
-        }
-        ImGui::SameLine();
-
-        bool isRecording = _patternEditor.IsRecording();
-        if (isRecording)
-        {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(255, 0, 0, 155));
-        }
-        if (ImGui::Button(ICON_FAD_RECORD, ImVec2(0, 0)))
-        {
-            ImGui::SetWindowFocus("PatternEditor");
-            _patternEditor.ToggleRecording();
-        }
-        if (isRecording)
-        {
-            ImGui::PopStyleColor();
-        }
-    }
-    ImGui::End();
+    _playerControlsPanel.Render2d();
 
     ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, Height() - playerControlsPanelHeight - effectsPanelHeight));
     ImGui::SetNextWindowPos(ImVec2(0, playerControlsPanelHeight));
@@ -188,32 +145,47 @@ void Application::Render2d()
     ImGui::SetNextWindowSize(ImVec2(Width() - playerControlsPanelWidth - instrumentPanelWidth, tabbarPanelHeight));
     ImGui::SetNextWindowPos(ImVec2(playerControlsPanelWidth, 0));
 
-    static int selectedTab = 0;
+    static enum class SelectableTabs {
+        PatternEditor,
+        Mixer,
+        Synth,
+        AutomationEditor,
+    } selectedTab = SelectableTabs::Synth;
+
     ImGui::Begin("tabbar", nullptr, flags | ImGuiWindowFlags_NoTitleBar);
     {
         char buf[256] = {0};
 
-        sprintf_s(buf, 256, "%s Edit", ICON_FK_PENCIL);
-        if (ImGui::Button(buf))
+        sprintf_s(buf, 256, "%s EDIT", ICON_FK_PENCIL);
+        if (ImGui::Button(buf, ImVec2(120, 0)))
         {
-            selectedTab = 0;
-            ImGui::SetWindowFocus("PatternEditor");
+            selectedTab = SelectableTabs::PatternEditor;
+            ImGui::SetWindowFocus(PatternEditor::ID);
         }
 
         ImGui::SameLine();
 
-        sprintf_s(buf, 256, "%s Synth", ICON_FAD_KEYBOARD);
-        if (ImGui::Button(buf))
+        sprintf_s(buf, 256, "%s MIXER", ICON_FK_SLIDERS);
+        if (ImGui::Button(buf, ImVec2(120, 0)))
         {
-            selectedTab = 1;
+            selectedTab = SelectableTabs::Mixer;
+            ImGui::SetWindowFocus("Mixer");
         }
 
         ImGui::SameLine();
 
-        sprintf_s(buf, 256, "%s Automation", ICON_FAD_AUTOMATION_3P);
-        if (ImGui::Button(buf))
+        sprintf_s(buf, 256, "%s SYNTH", ICON_FAD_KEYBOARD);
+        if (ImGui::Button(buf, ImVec2(120, 0)))
         {
-            selectedTab = 2;
+            selectedTab = SelectableTabs::Synth;
+        }
+
+        ImGui::SameLine();
+
+        sprintf_s(buf, 256, "%s AUTOMATION", ICON_FAD_AUTOMATION_3P);
+        if (ImGui::Button(buf, ImVec2(120, 0)))
+        {
+            selectedTab = SelectableTabs::AutomationEditor;
         }
     }
     ImGui::End();
@@ -225,9 +197,24 @@ void Application::Render2d()
 
     switch (selectedTab)
     {
-        case 0:
+        case SelectableTabs::PatternEditor:
         {
             _patternEditor.Render2d();
+            break;
+        }
+        case SelectableTabs::Mixer:
+        {
+            ImGui::ShowDemoWindow();
+            break;
+        }
+        case SelectableTabs::Synth:
+        {
+            _synthEditor.Render2d();
+            break;
+        }
+        case SelectableTabs::AutomationEditor:
+        {
+            _automationEditor.Render2d();
             break;
         }
         default:

@@ -217,55 +217,65 @@ void EnvelopeParams::ConvertToFree(EnvelopeParams *envelope)
     switch (envelope->Envmode)
     {
         case 1:
-            envelope->Penvpoints = 4;
+            envelope->Penvpoints = 5;
             envelope->Penvsustain = 2;
             envelope->Penvval[0] = 0;
             envelope->Penvdt[1] = envelope->PA_dt;
             envelope->Penvval[1] = 127;
             envelope->Penvdt[2] = envelope->PD_dt;
             envelope->Penvval[2] = envelope->PS_val;
-            envelope->Penvdt[3] = envelope->PR_dt;
-            envelope->Penvval[3] = 0;
+            envelope->Penvdt[3] = envelope->PD_dt + envelope->Penvsustain;
+            envelope->Penvval[3] = envelope->PS_val;
+            envelope->Penvdt[4] = envelope->PR_dt;
+            envelope->Penvval[4] = 0;
             break;
         case 2:
-            envelope->Penvpoints = 4;
+            envelope->Penvpoints = 5;
             envelope->Penvsustain = 2;
             envelope->Penvval[0] = 0;
             envelope->Penvdt[1] = envelope->PA_dt;
             envelope->Penvval[1] = 127;
             envelope->Penvdt[2] = envelope->PD_dt;
             envelope->Penvval[2] = envelope->PS_val;
-            envelope->Penvdt[3] = envelope->PR_dt;
-            envelope->Penvval[3] = 0;
+            envelope->Penvdt[3] = envelope->PD_dt + envelope->Penvsustain;
+            envelope->Penvval[3] = envelope->PS_val;
+            envelope->Penvdt[4] = envelope->PR_dt;
+            envelope->Penvval[4] = 0;
             break;
         case 3:
-            envelope->Penvpoints = 3;
+            envelope->Penvpoints = 4;
             envelope->Penvsustain = 1;
             envelope->Penvval[0] = envelope->PA_val;
             envelope->Penvdt[1] = envelope->PA_dt;
             envelope->Penvval[1] = 64;
-            envelope->Penvdt[2] = envelope->PR_dt;
-            envelope->Penvval[2] = envelope->PR_val;
+            envelope->Penvdt[2] = envelope->PA_dt + envelope->Penvsustain;
+            envelope->Penvval[2] = 64;
+            envelope->Penvdt[3] = envelope->PR_dt;
+            envelope->Penvval[3] = envelope->PR_val;
             break;
         case 4:
-            envelope->Penvpoints = 4;
+            envelope->Penvpoints = 5;
             envelope->Penvsustain = 2;
             envelope->Penvval[0] = envelope->PA_val;
             envelope->Penvdt[1] = envelope->PA_dt;
             envelope->Penvval[1] = envelope->PD_val;
             envelope->Penvdt[2] = envelope->PD_dt;
             envelope->Penvval[2] = 64;
-            envelope->Penvdt[3] = envelope->PR_dt;
-            envelope->Penvval[3] = envelope->PR_val;
+            envelope->Penvdt[3] = envelope->PD_dt + envelope->Penvsustain;
+            envelope->Penvval[3] = 64;
+            envelope->Penvdt[4] = envelope->PR_dt;
+            envelope->Penvval[4] = envelope->PR_val;
             break;
         case 5:
-            envelope->Penvpoints = 3;
+            envelope->Penvpoints = 4;
             envelope->Penvsustain = 1;
             envelope->Penvval[0] = envelope->PA_val;
             envelope->Penvdt[1] = envelope->PA_dt;
             envelope->Penvval[1] = 64;
-            envelope->Penvdt[2] = envelope->PR_dt;
-            envelope->Penvval[2] = envelope->PR_val;
+            envelope->Penvdt[2] = envelope->PA_dt + envelope->Penvsustain;
+            envelope->Penvval[2] = 64;
+            envelope->Penvdt[3] = envelope->PR_dt;
+            envelope->Penvval[3] = envelope->PR_val;
             break;
     }
 }
