@@ -175,7 +175,7 @@ ILibraryItem *InstrumentsPanel::LibraryTree(
                     ImGui::TreePop();
                 }
 
-                if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+                if (ImGui::IsItemClicked(0))
                 {
                     result = item;
                 }

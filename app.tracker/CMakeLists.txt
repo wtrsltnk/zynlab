@@ -16,10 +16,10 @@ add_executable(app.tracker
     imgui/imgui.h
     imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
-    imgui/imgui_impl_opengl3.cpp
-    imgui/imgui_impl_opengl3.h
-    imgui/imgui_impl_win32.cpp
-    imgui/imgui_impl_win32.h
+    imgui/examples/imgui_impl_opengl3.cpp
+    imgui/examples/imgui_impl_opengl3.h
+    imgui/examples/imgui_impl_win32.cpp
+    imgui/examples/imgui_impl_win32.h
     imgui/imgui_internal.h
     imgui/imgui_widgets.cpp
     imgui_helpers.cpp
@@ -28,6 +28,8 @@ add_executable(app.tracker
     include/imgui_plot.h
     instrumentspanel.cpp
     instrumentspanel.h
+    librarydialog.cpp
+    librarydialog.h
     main.cpp
     note.cpp
     note.h
@@ -39,6 +41,8 @@ add_executable(app.tracker
     patternsmanager.h
     playercontrolspanel.cpp
     playercontrolspanel.h
+    samplenoteeditor.cpp
+    samplenoteeditor.h
     song.cpp
     song.h
     syntheditor.cpp

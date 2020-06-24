@@ -17,6 +17,8 @@ SynthEditor::SynthEditor()
 void SynthEditor::SetUp(ApplicationSession *session)
 {
     _session = session;
+
+    _sampleNoteEditor.SetUp(_session);
 }
 
 bool CheckButton(const char *label, bool *p_value, ImVec2 const &size)
@@ -103,7 +105,7 @@ void SynthEditor::RenderLfo(
         return;
     }
 
-    auto plotSize = ImVec2(400, 200);
+    auto plotSize = ImVec2(200, 80);
 
     ImGui::BeginChild("LFO", ImVec2(plotSize.x + plotSize.y, plotSize.y + ImGui::GetTextLineHeightWithSpacing()));
     {
@@ -157,7 +159,7 @@ void SynthEditor::RenderEnvelope(
         return;
     }
 
-    auto plotSize = ImVec2(400, 200);
+    auto plotSize = ImVec2(200, 80);
 
     ImGui::BeginChild("Envelope", ImVec2(plotSize.x + plotSize.y, plotSize.y + ImGui::GetTextLineHeightWithSpacing()));
     {
@@ -291,10 +293,39 @@ void SynthEditor::Render2d()
         {
             bool b;
 
-            bool addChecked = track->Instruments[0].Padenabled;
+            bool drumKitChecked = track->Pdrummode == 1;
+            if (ImGui::Checkbox("DRUMMODE", &drumKitChecked))
+            {
+                track->Pdrummode = drumKitChecked ? 1 : 0;
+            }
+
+            if (drumKitChecked)
+            {
+                ImGui::Text("Drumkit instruments");
+                for (unsigned int i = 0; i < NUM_TRACK_INSTRUMENTS; i++)
+                {
+                    if (i % 4 != 0)
+                    {
+                        ImGui::SameLine();
+                    }
+                    char title[8] = {0};
+                    sprintf_s(title, 8, "%u", i + 1);
+                    bool active = (_session->currentTrackInstrument == i);
+                    if (CheckButton(title, &active, ImVec2(24, 24)))
+                    {
+                        activeSynth = ActiveSynth::Add;
+                        _session->currentTrackInstrument = i;
+                    }
+                }
+
+                ImGui::Separator();
+            }
+
+            auto instrument = track->Instruments[_session->currentTrackInstrument];
+            bool addChecked = instrument.Padenabled;
             if (ImGui::Checkbox("##ADD_CHECK", &addChecked))
             {
-                track->Instruments[0].Padenabled = addChecked ? 1 : 0;
+                instrument.Padenabled = addChecked ? 1 : 0;
             }
             ImGui::SameLine();
 
@@ -329,10 +360,10 @@ void SynthEditor::Render2d()
 
             ImGui::Separator();
 
-            bool subChecked = track->Instruments[0].Psubenabled;
+            bool subChecked = instrument.Psubenabled;
             if (ImGui::Checkbox("##SUB_CHECK", &subChecked))
             {
-                track->Instruments[0].Psubenabled = subChecked ? 1 : 0;
+                instrument.Psubenabled = subChecked ? 1 : 0;
             }
             ImGui::SameLine();
             b = (activeSynth == ActiveSynth::Sub);
@@ -343,10 +374,10 @@ void SynthEditor::Render2d()
 
             ImGui::Separator();
 
-            bool padChecked = track->Instruments[0].Ppadenabled;
+            bool padChecked = instrument.Ppadenabled;
             if (ImGui::Checkbox("##PAD_CHECK", &padChecked))
             {
-                track->Instruments[0].Ppadenabled = padChecked ? 1 : 0;
+                instrument.Ppadenabled = padChecked ? 1 : 0;
             }
             ImGui::SameLine();
             b = (activeSynth == ActiveSynth::Pad);
@@ -357,10 +388,10 @@ void SynthEditor::Render2d()
 
             ImGui::Separator();
 
-            bool smplChecked = track->Instruments[0].Psmplenabled;
+            bool smplChecked = instrument.Psmplenabled;
             if (ImGui::Checkbox("##SMPL_CHECK", &smplChecked))
             {
-                track->Instruments[0].Psmplenabled = smplChecked ? 1 : 0;
+                instrument.Psmplenabled = smplChecked ? 1 : 0;
             }
             ImGui::SameLine();
             b = (activeSynth == ActiveSynth::Smpl);
@@ -375,7 +406,7 @@ void SynthEditor::Render2d()
 
         if (activeSynth == ActiveSynth::Add)
         {
-            ADnoteParameters *addparams = track->Instruments[0].adpars;
+            ADnoteParameters *addparams = track->Instruments[_session->currentTrackInstrument].adpars;
 
             ImGui::BeginChild("add-synth");
             {
@@ -409,6 +440,10 @@ void SynthEditor::Render2d()
                 ImGui::Text("test add synth");
             }
             ImGui::EndChild();
+        }
+        else if (activeSynth == ActiveSynth::Smpl)
+        {
+            _sampleNoteEditor.Render2d();
         }
     }
 

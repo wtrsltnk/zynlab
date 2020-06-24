@@ -37,5 +37,6 @@ target_link_libraries(lib.imgui
     PUBLIC ${GLFW3_LIBRARY})
 
 target_compile_definitions(lib.imgui
-    PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD
-    )
+    PRIVATE
+        -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+        -DIMGUI_IMPL_WIN32_DISABLE_GAMEPAD)

@@ -1,4 +1,6 @@
-﻿#include <algorithm>
+﻿#include "application.h"
+
+#include <algorithm>
 #include <iapplication.h>
 #include <imgui.h>
 #include <imgui_plot.h>
@@ -15,7 +17,6 @@
 
 #include "IconsFontaudio.h"
 #include "IconsForkAwesome.h"
-#include "application.h"
 
 Application::Application()
     : _sampleIndex(0),

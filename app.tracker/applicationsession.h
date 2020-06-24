@@ -17,13 +17,14 @@ public:
     ApplicationSession();
 
     Mixer *_mixer = nullptr;
-    ILibraryManager *_library= nullptr;
+    ILibraryManager *_library = nullptr;
 
     PlayStates _playState = PlayStates::Stopped;
     bool _editMode = false;
     Song *_song = nullptr;
     unsigned int _bpm = 138;
     unsigned int currentTrack = 0;
+    unsigned int currentTrackInstrument = 0;
     unsigned int currentRow = 0;
     unsigned int currentProperty = 0;
     unsigned int skipRowStepSize = 4;

@@ -4,14 +4,14 @@
 #include <Windows.h>
 #include <glad/glad.h>
 #include <imgui.h>
-#include <imgui_impl_win32.h>
+#include <examples/imgui_impl_win32.h>
 #include <iostream>
 #include <random>
 #include <stdio.h>
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include <iapplication.h>
 #include <chrono>
-#include <imgui_impl_opengl3.h>
+#include <examples/imgui_impl_opengl3.h>
 #include <imgui_internal.h>
 #include <wchar.h>
 
