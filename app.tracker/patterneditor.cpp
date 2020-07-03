@@ -1,9 +1,10 @@
 #include "patterneditor.h"
 
+#include "imgui_helpers.h"
+#include "syntheditor.h"
 #include <imgui.h>
 #include <iostream>
 #include <zyn.mixer/Track.h>
-#include "imgui_helpers.h"
 
 namespace ImGui
 {
@@ -389,7 +390,12 @@ void PatternEditor::Render2d()
                         }
                     }
                     ImGui::SameLine();
-                    ImGui::Button("edit", ImVec2(-1, 0));
+                    if (ImGui::Button("edit", ImVec2(-1, 0)))
+                    {
+                        ImGui::SetWindowFocus(SynthEditor::ID);
+                        _session->currentTrack = i;
+                        _session->selectedTab = SelectableTabs::Synth;
+                    }
 
                     if (_session->_mixer->GetTrack(i)->Penabled)
                     {
@@ -513,6 +519,12 @@ bool PatternEditor::HandleKeyboardNotes()
         auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
         if (pattern != nullptr)
         {
+            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+            {
+                pattern->Notes(_session->currentTrack)[_session->currentRow]._note = 0;
+                MoveCurrentRowDown(true);
+                return true;
+            }
             for (auto p : _charToNoteMap)
             {
                 if (ImGui::IsKeyPressed((ImWchar)p.first))

@@ -2,16 +2,16 @@
 //                                  INCLUDES
 // =============================================================================
 #include <Windows.h>
+#include <examples/imgui_impl_win32.h>
 #include <glad/glad.h>
 #include <imgui.h>
-#include <examples/imgui_impl_win32.h>
 #include <iostream>
 #include <random>
 #include <stdio.h>
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
-#include <iapplication.h>
 #include <chrono>
 #include <examples/imgui_impl_opengl3.h>
+#include <iapplication.h>
 #include <imgui_internal.h>
 #include <wchar.h>
 
@@ -190,6 +190,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     switch (msg)
     {
+        case WM_MOUSEMOVE:
+        {
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
+        }
         case WM_SIZE:
         {
             if (wParam != SIZE_MINIMIZED)

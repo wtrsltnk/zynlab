@@ -57,7 +57,7 @@ bool Application::Setup()
     config.GlyphMinAdvanceX = 13.0f;
 
     static const ImWchar fontaudio_icon_ranges[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
-    _fadFont = io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 13.0f, &config, fontaudio_icon_ranges);
+    _fadFont = io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 18.0f, &config, fontaudio_icon_ranges);
 
     static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
     _fkFont = io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
@@ -146,13 +146,6 @@ void Application::Render2d()
     ImGui::SetNextWindowSize(ImVec2(Width() - playerControlsPanelWidth - instrumentPanelWidth, tabbarPanelHeight));
     ImGui::SetNextWindowPos(ImVec2(playerControlsPanelWidth, 0));
 
-    static enum class SelectableTabs {
-        PatternEditor,
-        Mixer,
-        Synth,
-        AutomationEditor,
-    } selectedTab = SelectableTabs::Synth;
-
     ImGui::Begin("tabbar", nullptr, flags | ImGuiWindowFlags_NoTitleBar);
     {
         char buf[256] = {0};
@@ -160,7 +153,7 @@ void Application::Render2d()
         sprintf_s(buf, 256, "%s EDIT", ICON_FK_PENCIL);
         if (ImGui::Button(buf, ImVec2(120, 0)))
         {
-            selectedTab = SelectableTabs::PatternEditor;
+            _session.selectedTab = SelectableTabs::PatternEditor;
             ImGui::SetWindowFocus(PatternEditor::ID);
         }
 
@@ -169,7 +162,7 @@ void Application::Render2d()
         sprintf_s(buf, 256, "%s MIXER", ICON_FK_SLIDERS);
         if (ImGui::Button(buf, ImVec2(120, 0)))
         {
-            selectedTab = SelectableTabs::Mixer;
+            _session.selectedTab = SelectableTabs::Mixer;
             ImGui::SetWindowFocus("Mixer");
         }
 
@@ -178,7 +171,7 @@ void Application::Render2d()
         sprintf_s(buf, 256, "%s SYNTH", ICON_FAD_KEYBOARD);
         if (ImGui::Button(buf, ImVec2(120, 0)))
         {
-            selectedTab = SelectableTabs::Synth;
+            _session.selectedTab = SelectableTabs::Synth;
         }
 
         ImGui::SameLine();
@@ -186,7 +179,7 @@ void Application::Render2d()
         sprintf_s(buf, 256, "%s AUTOMATION", ICON_FAD_AUTOMATION_3P);
         if (ImGui::Button(buf, ImVec2(120, 0)))
         {
-            selectedTab = SelectableTabs::AutomationEditor;
+            _session.selectedTab = SelectableTabs::AutomationEditor;
         }
     }
     ImGui::End();
@@ -196,7 +189,7 @@ void Application::Render2d()
         Height() - effectsPanelHeight - tabbarPanelHeight));
     ImGui::SetNextWindowPos(ImVec2(playerControlsPanelWidth, tabbarPanelHeight));
 
-    switch (selectedTab)
+    switch (_session.selectedTab)
     {
         case SelectableTabs::PatternEditor:
         {

@@ -61,6 +61,11 @@ void zyn::ui::Library::Render()
     ImGui::SameLine();
 }
 
+ILibraryItem *zyn::ui::Library::GetSelectedSample()
+{
+    return _selectSample.selectedSample;
+}
+
 bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
 {
     auto it = std::search(
@@ -68,11 +73,6 @@ bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
         strNeedle.begin(), strNeedle.end(),
         [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); });
     return (it != strHaystack.end());
-}
-
-ILibraryItem *zyn::ui::Library::GetSelectedSample()
-{
-    return _selectSample.selectedSample;
 }
 
 void zyn::ui::Library::filterSamples()

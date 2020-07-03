@@ -46,7 +46,7 @@ void InstrumentsPanel::Render2d()
                 ImGui::SameLine();
 
                 char buf[256] = {0};
-                sprintf_s(buf, 256, "%02d : %s", int(i), track->Pname);
+                sprintf_s(buf, 256, "%02d : %s", int(i + 1), track->Pname);
                 ImGui::Selectable(buf, i == _session->currentTrack);
                 if (ImGui::IsItemClicked())
                 {

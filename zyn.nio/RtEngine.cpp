@@ -29,12 +29,12 @@
 RtEngine::RtEngine()
     : midiin(nullptr)
 {
-    this->_name = "RT";
+    _name = "RT";
 }
 
 RtEngine::~RtEngine()
 {
-    this->Stop();
+    Stop();
 }
 
 bool RtEngine::Start()
@@ -43,9 +43,21 @@ bool RtEngine::Start()
 
     try
     {
-        this->midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynlab");
-        this->midiin->setCallback(RtEngine::callback, this);
-        this->midiin->openPort(1);
+        midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynlab");
+        midiin->setCallback(RtEngine::callback, this);
+
+        auto portCount = midiin->getPortCount();
+
+        for (unsigned int i = 0; i < portCount; i++)
+        {
+            std::cout << std::endl
+                      << "port " << i << " = " << midiin->getPortName(i) << std::endl;
+        }
+
+        if (portCount > 0)
+        {
+            midiin->openPort(0);
+        }
 
         std::cout << "succeeded." << std::endl;
 
@@ -53,8 +65,8 @@ bool RtEngine::Start()
     }
     catch (const std::exception &ex)
     {
-        delete this->midiin;
-        this->midiin = nullptr;
+        delete midiin;
+        midiin = nullptr;
 
         std::cout << "failed." << std::endl;
         return false;
@@ -63,13 +75,13 @@ bool RtEngine::Start()
 
 void RtEngine::Stop()
 {
-    delete this->midiin;
-    this->midiin = nullptr;
+    delete midiin;
+    midiin = nullptr;
 }
 
 bool RtEngine::IsMidiEnabled() const
 {
-    return (this->midiin != nullptr);
+    return (midiin != nullptr);
 }
 
 void RtEngine::callback(double /*timeStamp*/, std::vector<unsigned char> *message, void * /*userData*/)

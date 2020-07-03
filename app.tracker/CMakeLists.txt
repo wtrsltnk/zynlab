@@ -28,6 +28,8 @@ add_executable(app.tracker
     include/imgui_plot.h
     instrumentspanel.cpp
     instrumentspanel.h
+    knob.cpp
+    knob.h
     librarydialog.cpp
     librarydialog.h
     main.cpp
@@ -41,8 +43,6 @@ add_executable(app.tracker
     patternsmanager.h
     playercontrolspanel.cpp
     playercontrolspanel.h
-    samplenoteeditor.cpp
-    samplenoteeditor.h
     song.cpp
     song.h
     syntheditor.cpp

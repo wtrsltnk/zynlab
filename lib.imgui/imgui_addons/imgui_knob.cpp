@@ -1,5 +1,7 @@
 #include "imgui_knob.h"
 
+#include <iostream>
+
 #include "imgui_common.h"
 #include <cmath>
 #include <imgui.h>
@@ -143,6 +145,10 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
     }
     bool value_changed = false;
     bool is_active = ImGui::IsItemActive();
+    if (is_active)
+    {
+        std::cout << "knob active: " << io.MouseDelta.y << std::endl;
+    }
     bool is_hovered = ImGui::IsItemActive();
     if (is_active && io.MouseDelta.y != 0.0f)
     {
