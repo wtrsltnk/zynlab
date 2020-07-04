@@ -24,6 +24,7 @@ WavData *WavData::Load(const std::string &filename)
         auto result = new WavData();
 
         result->name = System::IO::FileInfo(filename).Name();
+        result->path = filename;
         result->PwavData = PwavData;
         result->channels = channels;
         result->samplesPerChannel = samplesPerChannel;

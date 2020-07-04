@@ -192,7 +192,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         case WM_MOUSEMOVE:
         {
-            InvalidateRect(hWnd, NULL, TRUE);
+            InvalidateRect(hWnd, NULL, FALSE);
             break;
         }
         case WM_SIZE:
@@ -316,7 +316,7 @@ void CreateGlContext()
 
     glReady = true;
 
-    InvalidateRect(g_hwnd, NULL, TRUE);
+    InvalidateRect(g_hwnd, NULL, FALSE);
 }
 
 int IApplication::Width() const

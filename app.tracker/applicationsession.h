@@ -39,14 +39,18 @@ public:
     bool _editMode = false;
     Song *_song = nullptr;
     unsigned int _bpm = 138;
+    SelectableTabs selectedTab = SelectableTabs::Synth;
+
+    // Synth state
     unsigned int currentTrack = 0;
     unsigned int currentTrackInstrument = 0;
-    unsigned int currentVoice = 0;
+    unsigned int currentVoice = NUM_VOICES;
     ActiveSynths currentSynth = ActiveSynths::Add;
+
+    // Pattern state
     unsigned int currentRow = 0;
     unsigned int currentProperty = 0;
     unsigned int skipRowStepSize = 4;
-    SelectableTabs selectedTab = SelectableTabs::Synth;
 
     void StopPlaying();
     void StartPlaying();

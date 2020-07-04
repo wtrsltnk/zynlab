@@ -27,7 +27,7 @@ void PlayerControlsPanel::Render2d()
         bool playing = _session->_playState != PlayStates::Stopped;
         if (!playing)
         {
-            if (ImGui::Button(ICON_FAD_PLAY, ImVec2(0, 0)))
+            if (ImGui::Button(ICON_FK_PLAY, ImVec2(0, 0)))
             {
                 _session->StartPlaying();
                 ImGui::SetWindowFocus(PatternEditor::ID);
@@ -41,7 +41,7 @@ void PlayerControlsPanel::Render2d()
         }
         else
         {
-            if (ImGui::Button(ICON_FAD_PAUSE, ImVec2(0, 0)))
+            if (ImGui::Button(ICON_FK_PAUSE, ImVec2(0, 0)))
             {
                 _session->StopPlaying();
                 ImGui::SetWindowFocus(PatternEditor::ID);
@@ -54,7 +54,7 @@ void PlayerControlsPanel::Render2d()
             }
         }
         ImGui::SameLine();
-        if (ImGui::Button(ICON_FAD_STOP, ImVec2(0, 0)))
+        if (ImGui::Button(ICON_FK_STOP, ImVec2(0, 0)))
         {
             _session->StopPlaying();
             if (_session->IsRecording())

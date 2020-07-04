@@ -4,6 +4,7 @@
 #include "IconsForkAwesome.h"
 #include "imgui_helpers.h"
 #include <imgui.h>
+#include <imgui_plot.h>
 #include <zyn.synth/ADnoteGlobalParam.h>
 #include <zyn.synth/ADnoteParams.h>
 
@@ -51,8 +52,36 @@ void SynthEditor::Render2d()
         auto track = _session->_mixer->GetTrack(_session->currentTrack);
         ImGui::BeginChild("btns", ImVec2(121, 0));
         {
-            bool b;
+            ImGui::Text("Tracks");
+            for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
+            {
+                auto t = _session->_mixer->GetTrack(i);
+                if (i % 4 != 0)
+                {
+                    ImGui::SameLine();
+                }
+                char title[8] = {0};
+                sprintf_s(title, 8, "%u", i + 1);
+                bool active = (_session->currentTrack == i);
+                bool disabled = t->Penabled == 0 && !active;
+                if (disabled)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_Separator));
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_TitleBg));
+                }
+                if (CheckButton(title, &active, ImVec2(24, 24)))
+                {
+                    _session->currentTrack = i;
+                }
+                if (disabled)
+                {
+                    ImGui::PopStyleColor(2);
+                }
+            }
 
+            ImGui::Separator();
+
+            bool b;
             bool drumKitChecked = track->Pdrummode == 1;
             if (ImGui::Checkbox("Drummode", &drumKitChecked))
             {
@@ -63,30 +92,24 @@ void SynthEditor::Render2d()
                 }
             }
 
-            if (!drumKitChecked)
+            if (drumKitChecked)
             {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TitleBgActive));
-                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_TitleBg));
-            }
-            ImGui::Text("Kits");
-            for (unsigned int i = 0; i < NUM_TRACK_INSTRUMENTS; i++)
-            {
-                if (i % 4 != 0)
+                ImGui::Text("Kits");
+                for (unsigned int i = 0; i < NUM_TRACK_INSTRUMENTS; i++)
                 {
-                    ImGui::SameLine();
+                    if (i % 4 != 0)
+                    {
+                        ImGui::SameLine();
+                    }
+                    char title[8] = {0};
+                    sprintf_s(title, 8, "%u", i + 1);
+                    bool active = (_session->currentTrackInstrument == i);
+                    if (CheckButton(title, &active, ImVec2(24, 24)) )
+                    {
+                        _session->currentSynth = ActiveSynths::Add;
+                        _session->currentTrackInstrument = i;
+                    }
                 }
-                char title[8] = {0};
-                sprintf_s(title, 8, "%u", i + 1);
-                bool active = (_session->currentTrackInstrument == i);
-                if (CheckButton(title, &active, ImVec2(24, 24)) && drumKitChecked)
-                {
-                    _session->currentSynth = ActiveSynths::Add;
-                    _session->currentTrackInstrument = i;
-                }
-            }
-            if (!drumKitChecked)
-            {
-                ImGui::PopStyleColor(2);
             }
 
             ImGui::Separator();
@@ -100,14 +123,8 @@ void SynthEditor::Render2d()
             }
             ImGui::SameLine();
 
-            b = (_session->currentSynth == ActiveSynths::Add);
-            if (CheckButton("Add", &b, ImVec2(-1, 0)))
-            {
-                _session->currentSynth = ActiveSynths::Add;
-            }
-
-            bool voiceActive = (_session->currentVoice >= NUM_VOICES);
-            if (CheckButton("Global", &voiceActive, ImVec2(-1, 0)))
+            bool voiceActive = (_session->currentSynth == ActiveSynths::Add && _session->currentVoice >= NUM_VOICES);
+            if (CheckButton("Add", &voiceActive, ImVec2(-1, 0)))
             {
                 _session->currentSynth = ActiveSynths::Add;
                 _session->currentVoice = NUM_VOICES;
@@ -126,7 +143,7 @@ void SynthEditor::Render2d()
                 auto voiceEnabled = instrument.adpars->VoicePar[i].Enabled && addChecked;
                 if (!voiceEnabled)
                 {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TitleBgActive));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_Separator));
                     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_TitleBg));
                 }
                 if (CheckButton(title, &voiceActive, ImVec2(24, 24)))
@@ -309,25 +326,25 @@ void SynthEditor::RenderAddSynth(
 {
     if (_session->currentVoice >= NUM_VOICES)
     {
+        if (KnobUchar("Vol", &(addparams->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
+        {
+        }
+
+        ImGui::SameLine();
+
+        if (KnobUchar("Pan", &addparams->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
+        {
+        }
+
+        ImGui::SameLine();
+
+        if (KnobUchar("V.Sns", &(addparams->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
+        {
+        }
+
         if (ImGui::CollapsingHeader("Amplitude"))
         {
             ImGui::PushID("GLOBAL AMPLITUDDE");
-
-            if (KnobUchar("Vol", &(addparams->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
-            {
-            }
-
-            ImGui::SameLine();
-
-            if (KnobUchar("Pan", &addparams->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
-            {
-            }
-
-            ImGui::SameLine();
-
-            if (KnobUchar("V.Sns", &(addparams->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
-            {
-            }
 
             if (KnobUchar("P.Str.", &addparams->PPunchStrength, 0, 127, ImVec2(50, 40), "Punch Strength"))
             {
@@ -675,6 +692,22 @@ static char const *const start_types[] = {
 void SynthEditor::RenderSubSynth(
     SUBnoteParameters *parameters)
 {
+    if (KnobUchar("Vol", &(parameters->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
+    {
+    }
+
+    ImGui::SameLine();
+
+    if (KnobUchar("Pan", &parameters->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
+    {
+    }
+
+    ImGui::SameLine();
+
+    if (KnobUchar("V.Sns", &(parameters->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
+    {
+    }
+
     auto stereo = parameters->Pstereo == 1;
     if (ImGui::Checkbox("Stereo", &stereo))
     {
@@ -706,24 +739,6 @@ void SynthEditor::RenderSubSynth(
 
     if (ImGui::CollapsingHeader("Amplitude"))
     {
-        if (KnobUchar("Vol", &(parameters->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
-        {
-        }
-
-        ImGui::SameLine();
-
-        if (KnobUchar("Pan", &parameters->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
-        {
-        }
-
-        ImGui::SameLine();
-
-        if (KnobUchar("V.Sns", &(parameters->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
-        {
-        }
-
-        ImGui::Separator();
-
         RenderEnvelope("Amplitude Envelope", parameters->AmpEnvelope, nullptr);
     }
 
@@ -979,48 +994,90 @@ void SynthEditor::RenderSmplSynth(
 {
     bool selectSample = false;
     static unsigned char selectingSampleForKey = 0;
+    static int selectedNote = SAMPLE_NOTE_MIN;
 
     ImGui::BeginChild("samples", ImVec2(0, -200));
     {
-        ImGui::Columns(3);
-        ImGui::SetColumnWidth(0, 150);
-        for (unsigned char i = SAMPLE_NOTE_MIN; i < SAMPLE_NOTE_MAX; i++)
+        if (ImGui::BeginTabBar("samplestabs"))
         {
-            ImGui::PushID(i);
-            ImGui::Text("%s", NoteToString(i).c_str());
-
-            ImGui::NextColumn();
-            if (params->PwavData.find(i) != params->PwavData.end())
+            if (ImGui::BeginTabItem("midi-notes"))
             {
-                ImGui::Text("%s", params->PwavData[i]->name.c_str());
-            }
-            else
-            {
-                ImGui::Text("<unused>");
-            }
-            ImGui::NextColumn();
-
-            if (ImGui::Button("Change"))
-            {
-                selectSample = true;
-                selectingSampleForKey = i;
-            }
-            if (params->PwavData.find(i) != params->PwavData.end())
-            {
-                ImGui::SameLine();
-                if (ImGui::Button("Clear"))
+                ImGui::Columns(2);
+                ImGui::SetColumnWidth(0, 200);
+                for (unsigned char i = SAMPLE_NOTE_MIN; i < SAMPLE_NOTE_MAX; i++)
                 {
-                    params->PwavData.erase(i);
+                    ImGui::PushID(i);
+
+                    char label[32];
+                    sprintf(label, "%s", NoteToString(i).c_str());
+                    if (ImGui::Selectable(label, selectedNote == i, ImGuiSelectableFlags_SpanAllColumns))
+                    {
+                        selectedNote = i;
+                    }
+
+                    ImGui::NextColumn();
+                    if (params->PwavData.find(i) != params->PwavData.end())
+                    {
+                        ImGui::Text("%s", params->PwavData[i]->name.c_str());
+                    }
+                    else
+                    {
+                        ImGui::Text("<unused>");
+                    }
+                    ImGui::NextColumn();
+                    ImGui::PopID();
                 }
+                ImGui::EndTabItem();
             }
-            ImGui::NextColumn();
-            ImGui::PopID();
+            if (ImGui::BeginTabItem("qwerty-keyboard"))
+            {
+                ImGui::BeginChild("realkeyboard", ImVec2(0, 0));
+                {
+                }
+                ImGui::EndChild();
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
         }
     }
     ImGui::EndChild();
 
     ImGui::BeginChild("sample", ImVec2(0, 190));
     {
+        if (ImGui::Button("Change"))
+        {
+            selectSample = true;
+            selectingSampleForKey = selectedNote;
+        }
+        auto selectedWav = params->PwavData.find(selectedNote);
+        if (selectedWav != params->PwavData.end())
+        {
+            ImGui::SameLine();
+            if (ImGui::Button("Clear"))
+            {
+                params->PwavData.erase(selectedNote);
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Play"))
+            {
+                _session->_mixer->PreviewSample((*selectedWav).second->path);
+            }
+
+            ImGui::PlotConfig conf;
+            conf.values.ys = (*selectedWav).second->PwavData;
+            conf.values.count = (*selectedWav).second->samplesPerChannel * (*selectedWav).second->channels;
+            conf.scale.min = -1;
+            conf.scale.max = 1;
+            conf.tooltip.show = true;
+            conf.tooltip.format = "x=%.2f, y=%.2f";
+            conf.grid_x.show = false;
+            conf.grid_y.show = false;
+            conf.frame_size = ImVec2(ImGui::GetContentRegionAvailWidth(), 160);
+            conf.line_thickness = 2.f;
+
+            ImGui::Plot("plot", conf);
+        }
     }
     ImGui::EndChild();
 

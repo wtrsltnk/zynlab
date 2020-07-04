@@ -7,6 +7,7 @@ class WavData
 {
 public:
     std::string name;
+    std::string path;
     unsigned int channels;
     unsigned int samplesPerChannel;
     float *PwavData;
