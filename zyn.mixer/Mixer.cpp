@@ -659,7 +659,7 @@ IFFTwrapper *Mixer::GetFFT()
     return _fft.get();
 }
 
-int Mixer::GetTrackCount() const
+unsigned int Mixer::GetTrackCount() const
 {
     return NUM_MIXER_TRACKS;
 }

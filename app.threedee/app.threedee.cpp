@@ -307,7 +307,7 @@ void AppThreeDee::Tick()
         _state._playTime += deltaTime;
         auto currentPlayTime = _state._playTime;
 
-        for (unsigned char trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+        for (unsigned char trackIndex = 0; trackIndex < _state._mixer->GetTrackCount(); trackIndex++)
         {
             auto *track = _state._mixer->GetTrack(trackIndex);
             if (!track->Penabled)
@@ -632,7 +632,7 @@ void AppThreeDee::RegionEditor()
     if (ImGui::BeginChild("Region editor", ImVec2(0, 0), false))
     {
         timestep max = 40000;
-        for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+        for (short int trackIndex = 0; trackIndex < _state._mixer->GetTrackCount(); trackIndex++)
         {
             auto regions = _state._regions.GetRegionsByTrack(trackIndex);
             for (auto region : regions)
@@ -644,7 +644,7 @@ void AppThreeDee::RegionEditor()
             }
         }
 
-        for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+        for (short int trackIndex = 0; trackIndex < _state._mixer->GetTrackCount(); trackIndex++)
         {
             ImGui::PushID(trackIndex);
 
@@ -680,11 +680,11 @@ void AppThreeDee::RegionEditor()
     //        if (ImGui::BeginChild("##timeline2child", ImVec2(0, -30)))
     //        {
     //            timestep maxValue = _state._maxPlayTime;
-    //            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, NUM_MIXER_TRACKS, 1024))
+    //            if (ImGui::BeginTimelines("MyTimeline2", &maxValue, _state._sequencerVerticalZoom, _state._sequencerHorizontalZoom, _state._mixer->GetTrackCount(), 1024))
     //            {
     //                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowAddRemoveButtons, 1);
     //                ImGui::TimelineSetVar(ImGui::TimelineVars::ShowMuteSoloButtons, 1);
-    //                for (short int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; trackIndex++)
+    //                for (short int trackIndex = 0; trackIndex < _state._mixer->GetTrackCount(); trackIndex++)
     //                {
     //                    ImGui::PushID(trackIndex);
     //                    auto track = _state._mixer->GetTrack(trackIndex);

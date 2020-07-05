@@ -69,10 +69,10 @@ void zyn::ui::SubNote::Render()
                 {
                     ImGui::Text("SUBsynth Global Parameters of the Instrument");
 
-                    auto stereo = parameters->Pstereo == 1;
+                    auto stereo = parameters->PStereo == 1;
                     if (ImGui::Checkbox("Stereo", &stereo))
                     {
-                        parameters->Pstereo = stereo ? 1 : 0;
+                        parameters->PStereo = stereo ? 1 : 0;
                     }
                     ImGui::ShowTooltipOnHover("Stereo");
 

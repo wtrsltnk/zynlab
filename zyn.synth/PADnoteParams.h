@@ -23,6 +23,7 @@
 #ifndef PAD_NOTE_PARAMETERS_H
 #define PAD_NOTE_PARAMETERS_H
 
+#include "AbstractNoteParameters.h"
 #include "EnvelopeParams.h"
 #include "LFOParams.h"
 #include "OscilGen.h"
@@ -37,7 +38,8 @@
 #include <pthread.h>
 #include <string>
 
-class PADnoteParameters : public WrappedPresets
+class PADnoteParameters :
+    public AbstractNoteParameters
 {
 public:
     PADnoteParameters(IFFTwrapper *fft);
@@ -80,8 +82,8 @@ public:
             unsigned char par1;
             unsigned char par2;
         } amp;
-        unsigned char autoscale;        //if the scale of the harmonic profile is computed automaticaly
-        unsigned char onehalf; //what part of the base function is used to make the distribution
+        unsigned char autoscale; //if the scale of the harmonic profile is computed automaticaly
+        unsigned char onehalf;   //what part of the base function is used to make the distribution
     } Php;
 
     unsigned int Pbandwidth; //the values are from 0 to 1000
@@ -114,24 +116,14 @@ public:
     EnvelopeParams *FreqEnvelope; //Frequency Envelope
     LFOParams *FreqLfo;           //Frequency LFO
 
-    //Amplitude parameters
-    unsigned char PStereo;
-    /* Panning -  0 - random
-                  1 - left
-                 64 - center
-                127 - right */
-    unsigned char PPanning;
-
-    unsigned char PVolume;
-
-    unsigned char PAmpVelocityScaleFunction;
-
     EnvelopeParams *AmpEnvelope;
 
     LFOParams *AmpLfo;
 
-    unsigned char PPunchStrength, PPunchTime, PPunchStretch,
-        PPunchVelocitySensing;
+    unsigned char PPunchStrength;
+    unsigned char PPunchTime;
+    unsigned char PPunchStretch;
+    unsigned char PPunchVelocitySensing;
 
     //Filter Parameters
     FilterParams *GlobalFilter;
@@ -173,7 +165,6 @@ private:
                                      float basefreq);
     void deletesamples();
     void deletesample(int n);
-
 };
 
 #endif

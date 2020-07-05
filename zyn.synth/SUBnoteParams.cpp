@@ -57,7 +57,7 @@ void SUBnoteParameters::Defaults()
     Pbandwidth = 40;
     Phmagtype = 0;
     Pbwscale = 64;
-    Pstereo = 1;
+    PStereo = 1;
     Pstart = 1;
 
     PDetune = 8192;
@@ -110,7 +110,7 @@ void SUBnoteParameters::InitPresets()
 
     Preset amplitudeParameters("AMPLITUDE_PARAMETERS");
     {
-        amplitudeParameters.AddPresetAsBool("stereo", &Pstereo);
+        amplitudeParameters.AddPresetAsBool("stereo", &PStereo);
         amplitudeParameters.AddPreset("volume", &PVolume);
         amplitudeParameters.AddPreset("panning", &PPanning);
         amplitudeParameters.AddPreset("velocity_sensing", &PAmpVelocityScaleFunction);

@@ -78,15 +78,16 @@ bool Application::Setup()
 
     _session._library = new LibraryManager();
 
-    for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
-    {
-        if (Config::Current().cfg.bankRootDirList[i].size() == 0)
-        {
-            continue;
-        }
-        _session._library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
-    }
+    _session._library->AddLibraryLocation("C:\\Program Files (x86)\\ZynAddSubFX\\banks\\");
 
+//    for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+//    {
+//        if (Config::Current().cfg.bankRootDirList[i].size() == 0)
+//        {
+//            continue;
+//        }
+//        _session._library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
+//    }
     _session._library->RefreshLibraries();
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
@@ -305,7 +306,7 @@ std::vector<SimpleNote> Application::GetCurrentStepNotes()
 
     std::vector<SimpleNote> result;
 
-    for (int t = 0; t < NUM_MIXER_TRACKS; t++)
+    for (int t = 0; t < _session._mixer->GetTrackCount(); t++)
     {
         auto notes = pattern->Notes(t);
         if (notes[_session.currentRow]._note != 0)

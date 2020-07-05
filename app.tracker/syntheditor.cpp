@@ -53,7 +53,7 @@ void SynthEditor::Render2d()
         ImGui::BeginChild("btns", ImVec2(121, 0));
         {
             ImGui::Text("Tracks");
-            for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
+            for (unsigned int i = 0; i < _session->_mixer->GetTrackCount(); i++)
             {
                 auto t = _session->_mixer->GetTrack(i);
                 if (i % 4 != 0)
@@ -104,7 +104,7 @@ void SynthEditor::Render2d()
                     char title[8] = {0};
                     sprintf_s(title, 8, "%u", i + 1);
                     bool active = (_session->currentTrackInstrument == i);
-                    if (CheckButton(title, &active, ImVec2(24, 24)) )
+                    if (CheckButton(title, &active, ImVec2(24, 24)))
                     {
                         _session->currentSynth = ActiveSynths::Add;
                         _session->currentTrackInstrument = i;
@@ -321,26 +321,40 @@ static char const *oscillator_type_icons[] = {
     ICON_FAD_MODRANDOM,
 };
 
+void SynthEditor::RenderAbstractSynth(AbstractNoteParameters *params)
+{
+    if (KnobUchar("Vol", &(params->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
+    {
+    }
+
+    ImGui::SameLine();
+
+    if (KnobUchar("Pan", &params->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
+    {
+    }
+
+    ImGui::SameLine();
+
+    if (KnobUchar("V.Sns", &(params->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
+    {
+    }
+
+    ImGui::SameLine();
+
+    auto stereo = params->PStereo == 1;
+    if (ImGui::Checkbox("Stereo", &stereo))
+    {
+        params->PStereo = stereo ? 1 : 0;
+    }
+    ShowTooltipOnHover("Stereo");
+}
+
 void SynthEditor::RenderAddSynth(
     ADnoteParameters *addparams)
 {
     if (_session->currentVoice >= NUM_VOICES)
     {
-        if (KnobUchar("Vol", &(addparams->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
-        {
-        }
-
-        ImGui::SameLine();
-
-        if (KnobUchar("Pan", &addparams->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
-        {
-        }
-
-        ImGui::SameLine();
-
-        if (KnobUchar("V.Sns", &(addparams->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
-        {
-        }
+        RenderAbstractSynth(addparams);
 
         if (ImGui::CollapsingHeader("Amplitude"))
         {
@@ -367,15 +381,6 @@ void SynthEditor::RenderAddSynth(
             if (KnobUchar("P.Vel.", &addparams->PPunchVelocitySensing, 0, 127, ImVec2(50, 40), "Punch Velocity Sensing"))
             {
             }
-
-            ImGui::SameLine();
-
-            auto stereo = addparams->PStereo == 1;
-            if (ImGui::Checkbox("Stereo", &stereo))
-            {
-                addparams->PStereo = stereo ? 1 : 0;
-            }
-            ShowTooltipOnHover("Stereo");
 
             ImGui::SameLine();
 
@@ -416,6 +421,10 @@ void SynthEditor::RenderAddSynth(
         {
             ImGui::PushID("GLOBAL FREQUENCY");
 
+            RenderDetune(addparams->PDetuneType, addparams->PCoarseDetune, addparams->PDetune);
+
+            ImGui::Separator();
+
             RenderEnvelope("Frequency Envelope", addparams->FreqEnvelope, nullptr);
 
             ImGui::Separator();
@@ -429,56 +438,126 @@ void SynthEditor::RenderAddSynth(
     }
     else
     {
-        auto &voiceParams = addparams->VoicePar[_session->currentVoice];
+        auto voiceparams = &addparams->VoicePar[_session->currentVoice];
 
-        auto enabled = voiceParams.Enabled != 0;
+        auto enabled = voiceparams->Enabled != 0;
         if (ImGui::Checkbox("Enabled Voice", &enabled))
         {
-            voiceParams.Enabled = enabled ? 1 : 0;
+            voiceparams->Enabled = enabled ? 1 : 0;
         }
         ShowTooltipOnHover("Enable this voice");
 
         std::vector<float> smps(SystemSettings::Instance().oscilsize);
-        voiceParams.OscilSmp->get(smps.data(), -1.0);
+        voiceparams->OscilSmp->get(smps.data(), -1.0);
         ImGui::PlotLines("##oscillator", smps.data(), static_cast<int>(SystemSettings::Instance().oscilsize), 0, nullptr, -1.1f, 1.1f, ImVec2(90, 60));
 
         ImGui::SameLine();
 
-        if (KnobUchar("Vol", &(voiceParams.PVolume), 0, 127, ImVec2(50, 40), "Volume"))
+        if (KnobUchar("Vol", &(voiceparams->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
         {
         }
 
         ImGui::SameLine();
 
-        auto volumeminus = voiceParams.PVolumeminus == 1;
+        auto volumeminus = voiceparams->PVolumeminus == 1;
         if (ImGui::Checkbox("Minus", &volumeminus))
         {
-            voiceParams.PVolumeminus = volumeminus ? 1 : 0;
+            voiceparams->PVolumeminus = volumeminus ? 1 : 0;
         }
 
         ImGui::SameLine();
 
-        if (KnobUchar("Pan", &voiceParams.PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
+        if (KnobUchar("Pan", &voiceparams->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
         {
         }
 
         ImGui::SameLine();
 
-        if (KnobUchar("V.Sns", &(voiceParams.PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
+        if (KnobUchar("V.Sns", &(voiceparams->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
         {
         }
 
-        if (ImGui::CollapsingHeader("Voice Oscillator"))
+        if (ImGui::CollapsingHeader("Amplitude"))
+        {
+            ImGui::PushID("Voice Amplitude");
+
+            RenderEnvelope("Amplitude Envelope", voiceparams->AmpEnvelope, &(voiceparams->PAmpEnvelopeEnabled));
+
+            ImGui::Separator();
+
+            RenderLfo("Amplitude LFO", voiceparams->AmpLfo, &(voiceparams->PAmpLfoEnabled));
+
+            ImGui::PopID();
+        }
+        if (ImGui::CollapsingHeader("Filter"))
+        {
+            ImGui::PushID("VOICE FILTER");
+
+            auto filterbypass = voiceparams->Pfilterbypass == 1;
+            if (ImGui::Checkbox("Bypass Global F.", &filterbypass))
+            {
+                voiceparams->Pfilterbypass = filterbypass ? 1 : 0;
+            }
+
+            ImGui::Separator();
+
+            RenderEnvelope("Filter Envelope", voiceparams->FilterEnvelope, &(voiceparams->PFilterEnvelopeEnabled));
+
+            ImGui::Separator();
+
+            RenderLfo("Filter LFO", voiceparams->FilterLfo, &(voiceparams->PFilterLfoEnabled));
+
+            ImGui::PopID();
+        }
+        if (ImGui::CollapsingHeader("Frequency"))
+        {
+            ImGui::PushID("VOICE FREQUENCY");
+
+            RenderDetune(voiceparams->PDetuneType, voiceparams->PCoarseDetune, voiceparams->PDetune);
+
+            ImGui::Separator();
+
+            auto freq440hz = voiceparams->Pfixedfreq == 1;
+            if (ImGui::Checkbox("440Hz", &freq440hz))
+            {
+                voiceparams->Pfixedfreq = freq440hz ? 1 : 0;
+            }
+            ShowTooltipOnHover("Set the voice base frequency to 440Hz");
+
+            if (freq440hz)
+            {
+                ImGui::SameLine();
+
+                auto fixedfreqET = static_cast<int>(voiceparams->PfixedfreqET);
+                ImGui::PushItemWidth(100);
+                if (ImGui::SliderInt("##EqT", &fixedfreqET, 0, 127, "Eq.T. %d"))
+                {
+                    voiceparams->PfixedfreqET = static_cast<unsigned short int>(fixedfreqET);
+                }
+                ShowTooltipOnHover("How the frequency varies acording to the keyboard (leftmost for fixed frequency)");
+            }
+
+            ImGui::Separator();
+
+            RenderEnvelope("Frequency Envelope", voiceparams->FreqEnvelope, &(voiceparams->PFreqEnvelopeEnabled));
+
+            ImGui::Separator();
+
+            RenderLfo("Frequency LFO", voiceparams->FreqLfo, &(voiceparams->PFreqLfoEnabled));
+
+            ImGui::PopID();
+        }
+        if (ImGui::CollapsingHeader("Oscillator"))
         {
             ImGui::PushID("VOICE OSCILLATOR");
 
             ImGui::BeginGroup();
             for (int i = 0; i < oscillator_type_count; i++)
             {
-                int filter_type = voiceParams.Type;
+                int filter_type = voiceparams->Type;
                 if (ImGui::RadioButton(oscillator_types[i], &(filter_type), i))
                 {
-                    voiceParams.Type = i;
+                    voiceparams->Type = i;
                 }
                 ShowTooltipOnHover(oscillator_type_tooltips[i]);
 
@@ -491,7 +570,7 @@ void SynthEditor::RenderAddSynth(
             }
             ImGui::EndGroup();
 
-            if (voiceParams.Type == 0) // Sound
+            if (voiceparams->Type == 0) // Sound
             {
                 ImGui::SameLine();
 
@@ -499,7 +578,7 @@ void SynthEditor::RenderAddSynth(
 
                 ImGui::SameLine();
 
-                if (KnobUchar("Phase", &(voiceParams.PFMoscilphase), 0, 127, ImVec2(50, 40), "Velocity Sensing Function"))
+                if (KnobUchar("Phase", &(voiceparams->PFMoscilphase), 0, 127, ImVec2(50, 40), "Velocity Sensing Function"))
                 {
                 }
 
@@ -508,83 +587,13 @@ void SynthEditor::RenderAddSynth(
 
             ImGui::PopID();
         }
-        if (ImGui::CollapsingHeader("Voice Amplitude"))
-        {
-            ImGui::PushID("Voice Amplitude");
-
-            RenderEnvelope("Amplitude Envelope", voiceParams.AmpEnvelope, &(voiceParams.PAmpEnvelopeEnabled));
-
-            ImGui::Separator();
-
-            RenderLfo("Amplitude LFO", voiceParams.AmpLfo, &(voiceParams.PAmpLfoEnabled));
-
-            ImGui::PopID();
-        }
-        if (ImGui::CollapsingHeader("Voice Filter"))
-        {
-            ImGui::PushID("VOICE FILTER");
-
-            auto filterbypass = voiceParams.Pfilterbypass == 1;
-            if (ImGui::Checkbox("Bypass Global F.", &filterbypass))
-            {
-                voiceParams.Pfilterbypass = filterbypass ? 1 : 0;
-            }
-
-            ImGui::Separator();
-
-            RenderEnvelope("Filter Envelope", voiceParams.FilterEnvelope, &(voiceParams.PFilterEnvelopeEnabled));
-
-            ImGui::Separator();
-
-            RenderLfo("Filter LFO", voiceParams.FilterLfo, &(voiceParams.PFilterLfoEnabled));
-
-            ImGui::PopID();
-        }
-        if (ImGui::CollapsingHeader("Voice Frequency"))
-        {
-            ImGui::PushID("VOICE FREQUENCY");
-
-            RenderDetune(voiceParams.PDetuneType, voiceParams.PCoarseDetune, voiceParams.PDetune);
-
-            ImGui::Separator();
-
-            auto freq440hz = voiceParams.Pfixedfreq == 1;
-            if (ImGui::Checkbox("440Hz", &freq440hz))
-            {
-                voiceParams.Pfixedfreq = freq440hz ? 1 : 0;
-            }
-            ShowTooltipOnHover("Set the voice base frequency to 440Hz");
-
-            if (freq440hz)
-            {
-                ImGui::SameLine();
-
-                auto fixedfreqET = static_cast<int>(voiceParams.PfixedfreqET);
-                ImGui::PushItemWidth(100);
-                if (ImGui::SliderInt("##EqT", &fixedfreqET, 0, 127, "Eq.T. %d"))
-                {
-                    voiceParams.PfixedfreqET = static_cast<unsigned short int>(fixedfreqET);
-                }
-                ShowTooltipOnHover("How the frequency varies acording to the keyboard (leftmost for fixed frequency)");
-            }
-
-            ImGui::Separator();
-
-            RenderEnvelope("Frequency Envelope", voiceParams.FreqEnvelope, &(voiceParams.PFreqEnvelopeEnabled));
-
-            ImGui::Separator();
-
-            RenderLfo("Frequency LFO", voiceParams.FreqLfo, &(voiceParams.PFreqLfoEnabled));
-
-            ImGui::PopID();
-        }
-        if (ImGui::CollapsingHeader("Voice Modulator"))
+        if (ImGui::CollapsingHeader("Modulator"))
         {
             ImGui::PushID("VOICE MODULATOR AMPLITUDE");
 
             static char const *current_modulation_type_item = nullptr;
 
-            auto modulation_type = static_cast<int>(voiceParams.PFMEnabled);
+            auto modulation_type = static_cast<int>(voiceparams->PFMEnabled);
             current_modulation_type_item = modulation_types[modulation_type];
             ImGui::PushItemWidth(300);
             if (ImGui::BeginCombo("Modulation type", current_modulation_type_item))
@@ -595,7 +604,7 @@ void SynthEditor::RenderAddSynth(
                     if (ImGui::Selectable(modulation_types[n], is_selected))
                     {
                         current_modulation_type_item = modulation_types[n];
-                        voiceParams.PFMEnabled = static_cast<unsigned char>(n);
+                        voiceparams->PFMEnabled = static_cast<unsigned char>(n);
                     }
                 }
 
@@ -603,31 +612,31 @@ void SynthEditor::RenderAddSynth(
             }
             ShowTooltipOnHover("Modulation type");
 
-            if (voiceParams.PFMEnabled)
+            if (voiceparams->PFMEnabled)
             {
-                if (KnobUchar("Vol", &(voiceParams.PFMVolume), 0, 127, ImVec2(50, 40), "Volume"))
+                if (KnobUchar("Vol", &(voiceparams->PFMVolume), 0, 127, ImVec2(50, 40), "Volume"))
                 {
                 }
 
                 ImGui::SameLine();
 
-                if (KnobUchar("V.Sns", &(voiceParams.PFMVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function"))
+                if (KnobUchar("V.Sns", &(voiceparams->PFMVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function"))
                 {
                 }
 
                 ImGui::SameLine();
 
-                if (KnobUchar("F.Damp", &(voiceParams.PFMVolumeDamp), 0, 127, ImVec2(50, 40), "Modulator Damp at Higher frequency"))
+                if (KnobUchar("F.Damp", &(voiceparams->PFMVolumeDamp), 0, 127, ImVec2(50, 40), "Modulator Damp at Higher frequency"))
                 {
                 }
 
                 ImGui::Separator();
 
-                RenderDetune(voiceParams.PFMDetuneType, voiceParams.PFMCoarseDetune, voiceParams.PFMDetune);
+                RenderDetune(voiceparams->PFMDetuneType, voiceparams->PFMCoarseDetune, voiceparams->PFMDetune);
 
                 ImGui::Separator();
 
-                RenderEnvelope("Modulator Amplitude Envelope", voiceParams.FMAmpEnvelope, &(voiceParams.PFMAmpEnvelopeEnabled));
+                RenderEnvelope("Modulator Amplitude Envelope", voiceparams->FMAmpEnvelope, &(voiceparams->PFMAmpEnvelopeEnabled));
 
                 ImGui::PopID();
 
@@ -635,7 +644,7 @@ void SynthEditor::RenderAddSynth(
 
                 ImGui::PushID("VOICE MODULATOR FREQUENCY");
 
-                RenderEnvelope("Modulator Frequency Envelope", voiceParams.FMFreqEnvelope, &(voiceParams.PFMFreqEnvelopeEnabled));
+                RenderEnvelope("Modulator Frequency Envelope", voiceparams->FMFreqEnvelope, &(voiceparams->PFMFreqEnvelopeEnabled));
 
                 ImGui::Separator();
 
@@ -645,12 +654,12 @@ void SynthEditor::RenderAddSynth(
 
                 ImGui::SameLine();
 
-                if (KnobUchar("Phase", &(voiceParams.PFMoscilphase), 0, 127, ImVec2(50, 40), "Velocity Sensing Function"))
+                if (KnobUchar("Phase", &(voiceparams->PFMoscilphase), 0, 127, ImVec2(50, 40), "Velocity Sensing Function"))
                 {
                 }
 
                 std::vector<float> fmsmps(SystemSettings::Instance().oscilsize);
-                voiceParams.FMSmp->get(fmsmps.data(), -1.0);
+                voiceparams->FMSmp->get(fmsmps.data(), -1.0);
                 ImGui::PlotLines("##oscillator", smps.data(), static_cast<int>(SystemSettings::Instance().oscilsize), 0, nullptr, -1.1f, 1.1f, ImVec2(400, 200));
 
                 ImGui::Separator();
@@ -690,91 +699,70 @@ static char const *const start_types[] = {
 };
 
 void SynthEditor::RenderSubSynth(
-    SUBnoteParameters *parameters)
+    SUBnoteParameters *params)
 {
-    if (KnobUchar("Vol", &(parameters->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
-    {
-    }
-
-    ImGui::SameLine();
-
-    if (KnobUchar("Pan", &parameters->PPanning, 0, 127, ImVec2(50, 40), "Panning (leftmost is random)"))
-    {
-    }
-
-    ImGui::SameLine();
-
-    if (KnobUchar("V.Sns", &(parameters->PAmpVelocityScaleFunction), 0, 127, ImVec2(50, 40), "Velocity Sensing Function (rightmost to disable)"))
-    {
-    }
-
-    auto stereo = parameters->Pstereo == 1;
-    if (ImGui::Checkbox("Stereo", &stereo))
-    {
-        parameters->Pstereo = stereo ? 1 : 0;
-    }
-    ShowTooltipOnHover("Stereo");
-
-    ImGui::SameLine();
-
-    auto filterStages = static_cast<int>(parameters->Pnumstages);
-    ImGui::PushItemWidth(100);
-    if (ImGui::SliderInt("Filter Stages", &filterStages, 1, 5))
-    {
-        parameters->Pnumstages = static_cast<unsigned char>(filterStages);
-    }
-    ShowTooltipOnHover("How many times the noise is filtered");
+    RenderAbstractSynth(params);
 
     ImGui::PushItemWidth(100);
-    if (DropDown("##MagType", parameters->Phmagtype, mag_types, mag_type_count, "Mag type"))
+    if (DropDown("##MagType", params->Phmagtype, mag_types, mag_type_count, "Mag type"))
     {
     }
+    ShowTooltipOnHover("How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)");
 
     ImGui::SameLine();
 
     ImGui::PushItemWidth(100);
-    if (DropDown("##Start", parameters->Pstart, start_types, start_type_count, "Start"))
+    if (DropDown("##Start", params->Pstart, start_types, start_type_count, "Start"))
     {
     }
+    ShowTooltipOnHover("How the harmonics start(\"0\"=0,\"1\"=random,\"2\"=1)");
 
     if (ImGui::CollapsingHeader("Amplitude"))
     {
-        RenderEnvelope("Amplitude Envelope", parameters->AmpEnvelope, nullptr);
+        RenderEnvelope("Amplitude Envelope", params->AmpEnvelope, nullptr);
     }
 
-    if (ImGui::CollapsingHeader("Bandwidth"))
+    if (ImGui::CollapsingHeader("Filter"))
     {
-        auto bandwidth = static_cast<int>(parameters->Pbandwidth);
-        ImGui::PushItemWidth(250);
-        if (ImGui::SliderInt("##Bandwidth", &bandwidth, 0, 127, "Bandwidth %d"))
+        ImGui::PushID("GLOBAL FILTER");
+
+        auto filterStages = static_cast<int>(params->Pnumstages);
+        ImGui::PushItemWidth(100);
+        if (ImGui::SliderInt("Filter Stages", &filterStages, 1, 5))
         {
-            parameters->Pbandwidth = static_cast<unsigned char>(bandwidth);
+            params->Pnumstages = static_cast<unsigned char>(filterStages);
         }
-        ShowTooltipOnHover("Bandwidth");
+        ShowTooltipOnHover("How many times the noise is filtered");
 
-        auto bandwidthScale = static_cast<int>(parameters->Pbwscale);
-        ImGui::PushItemWidth(250);
-        if (ImGui::SliderInt("##BandwidthScale", &bandwidthScale, 0, 127, "Scale %d"))
+        bool filterEnabled = params->PGlobalFilterEnabled == 1;
+        if (ImGui::Checkbox("Enable Filter", &filterEnabled))
         {
-            parameters->Pbwscale = static_cast<unsigned char>(bandwidthScale);
+            params->PGlobalFilterEnabled = filterEnabled ? 1 : 0;
         }
-        ShowTooltipOnHover("Bandwidth Scale");
 
-        ImGui::Separator();
+        if (filterEnabled)
+        {
+            ImGui::Separator();
 
-        RenderEnvelope("Bandwidth Envelope", parameters->BandWidthEnvelope, &(parameters->PFreqEnvelopeEnabled));
+            RenderFilter(params->GlobalFilter);
+
+            ImGui::Separator();
+
+            RenderEnvelope("Filter Envelope", params->GlobalFilterEnvelope, nullptr);
+        }
+        ImGui::PopID();
     }
 
     if (ImGui::CollapsingHeader("Frequency"))
     {
-        RenderDetune(parameters->PDetuneType, parameters->PCoarseDetune, parameters->PDetune);
+        RenderDetune(params->PDetuneType, params->PCoarseDetune, params->PDetune);
 
         ImGui::Separator();
 
-        auto freq440hz = parameters->Pfixedfreq == 1;
+        auto freq440hz = params->Pfixedfreq == 1;
         if (ImGui::Checkbox("440Hz", &freq440hz))
         {
-            parameters->Pfixedfreq = freq440hz ? 1 : 0;
+            params->Pfixedfreq = freq440hz ? 1 : 0;
         }
         ShowTooltipOnHover("Set the voice base frequency to 440Hz");
 
@@ -782,41 +770,41 @@ void SynthEditor::RenderSubSynth(
         {
             ImGui::SameLine();
 
-            auto fixedfreqET = static_cast<int>(parameters->PfixedfreqET);
+            auto fixedfreqET = static_cast<int>(params->PfixedfreqET);
             ImGui::PushItemWidth(100);
             if (ImGui::SliderInt("##EqT", &fixedfreqET, 0, 127, "Eq.T. %d"))
             {
-                parameters->PfixedfreqET = static_cast<unsigned short int>(fixedfreqET);
+                params->PfixedfreqET = static_cast<unsigned short int>(fixedfreqET);
             }
             ShowTooltipOnHover("How the frequency varies acording to the keyboard (leftmost for fixed frequency)");
         }
 
         ImGui::Separator();
 
-        RenderEnvelope("Frequency Envelope", parameters->FreqEnvelope, &(parameters->PFreqEnvelopeEnabled));
+        RenderEnvelope("Frequency Envelope", params->FreqEnvelope, &(params->PFreqEnvelopeEnabled));
     }
 
-    if (ImGui::CollapsingHeader("Filter"))
+    if (ImGui::CollapsingHeader("Bandwidth"))
     {
-        ImGui::PushID("GLOBAL FILTER");
-
-        bool filterEnabled = parameters->PGlobalFilterEnabled == 1;
-        if (ImGui::Checkbox("Enable Filter", &filterEnabled))
+        auto bandwidth = static_cast<int>(params->Pbandwidth);
+        ImGui::PushItemWidth(250);
+        if (ImGui::SliderInt("##Bandwidth", &bandwidth, 0, 127, "Bandwidth %d"))
         {
-            parameters->PGlobalFilterEnabled = filterEnabled ? 1 : 0;
+            params->Pbandwidth = static_cast<unsigned char>(bandwidth);
         }
+        ShowTooltipOnHover("Bandwidth");
 
-        if (filterEnabled)
+        auto bandwidthScale = static_cast<int>(params->Pbwscale);
+        ImGui::PushItemWidth(250);
+        if (ImGui::SliderInt("##BandwidthScale", &bandwidthScale, 0, 127, "Scale %d"))
         {
-            ImGui::Separator();
-
-            RenderFilter(parameters->GlobalFilter);
-
-            ImGui::Separator();
-
-            RenderEnvelope("Filter Envelope", parameters->GlobalFilterEnvelope, nullptr);
+            params->Pbwscale = static_cast<unsigned char>(bandwidthScale);
         }
-        ImGui::PopID();
+        ShowTooltipOnHover("Bandwidth Scale");
+
+        ImGui::Separator();
+
+        RenderEnvelope("Bandwidth Envelope", params->BandWidthEnvelope, &(params->PFreqEnvelopeEnabled));
     }
 
     if (ImGui::CollapsingHeader("Overtones"))
@@ -824,23 +812,23 @@ void SynthEditor::RenderSubSynth(
         ImGui::Text("Overtone Parameters");
 
         ImGui::PushItemWidth(100);
-        if (DropDown("Overtone positions", parameters->POvertoneSpread.type, overtone_positions, overtone_position_count, "Overtone positions"))
+        if (DropDown("Overtone positions", params->POvertoneSpread.type, overtone_positions, overtone_position_count, "Overtone positions"))
         {
         }
 
-        if (KnobUchar("Par1", &(parameters->POvertoneSpread.par1), 0, 127, ImVec2(40, 40), "Overtone spread par 1"))
-        {
-        }
-
-        ImGui::SameLine();
-
-        if (KnobUchar("Par2", &(parameters->POvertoneSpread.par2), 0, 127, ImVec2(40, 40), "Overtone spread par 2"))
+        if (KnobUchar("Par1", &(params->POvertoneSpread.par1), 0, 127, ImVec2(50, 40), "Overtone spread par 1"))
         {
         }
 
         ImGui::SameLine();
 
-        if (KnobUchar("ForceH", &(parameters->POvertoneSpread.par3), 0, 127, ImVec2(40, 40), "Overtone spread par 3"))
+        if (KnobUchar("Par2", &(params->POvertoneSpread.par2), 0, 127, ImVec2(50, 40), "Overtone spread par 2"))
+        {
+        }
+
+        ImGui::SameLine();
+
+        if (KnobUchar("ForceH", &(params->POvertoneSpread.par3), 0, 127, ImVec2(50, 40), "Overtone spread par 3"))
         {
         }
     }
@@ -855,10 +843,10 @@ void SynthEditor::RenderSubSynth(
             {
                 ImGui::SameLine();
             }
-            int v = static_cast<int>(parameters->Phmag[i]);
+            int v = static_cast<int>(params->Phmag[i]);
             if (ImGui::VSliderInt("##harmonic", ImVec2(10, 100), &v, 0, 127, ""))
             {
-                parameters->Phmag[i] = static_cast<unsigned char>(v);
+                params->Phmag[i] = static_cast<unsigned char>(v);
             }
             ImGui::PopID();
         }
@@ -870,10 +858,10 @@ void SynthEditor::RenderSubSynth(
             {
                 ImGui::SameLine();
             }
-            int v = static_cast<int>(parameters->Phrelbw[i]);
+            int v = static_cast<int>(params->Phrelbw[i]);
             if (ImGui::VSliderInt("##subharmonic", ImVec2(10, 100), &v, 0, 127, ""))
             {
-                parameters->Phrelbw[i] = static_cast<unsigned char>(v);
+                params->Phrelbw[i] = static_cast<unsigned char>(v);
             }
             ImGui::PopID();
         }
@@ -884,6 +872,97 @@ void SynthEditor::RenderSubSynth(
 void SynthEditor::RenderPadSynth(
     PADnoteParameters *params)
 {
+    RenderAbstractSynth(params);
+
+    if (ImGui::CollapsingHeader("Amplitude"))
+    {
+        if (KnobUchar("P.Str.", &params->PPunchStrength, 0, 127, ImVec2(50, 40), "Punch Strength"))
+        {
+        }
+
+        ImGui::SameLine();
+
+        if (KnobUchar("P.t.", &params->PPunchTime, 0, 127, ImVec2(50, 40), "Punch time (duration)"))
+        {
+        }
+
+        ImGui::SameLine();
+
+        if (KnobUchar("P.Stc.", &params->PPunchStretch, 0, 127, ImVec2(50, 40), "Punch Stretch"))
+        {
+        }
+
+        ImGui::SameLine();
+
+        if (KnobUchar("P.Vel.", &params->PPunchVelocitySensing, 0, 127, ImVec2(50, 40), "Punch Velocity Sensing"))
+        {
+        }
+
+        ImGui::Separator();
+
+        RenderEnvelope("Amplitude Envelope", params->AmpEnvelope, nullptr);
+
+        ImGui::Separator();
+
+        RenderLfo("Amplitude LFO", params->AmpLfo, nullptr);
+    }
+
+    if (ImGui::CollapsingHeader("Filter"))
+    {
+        ImGui::PushID("GLOBAL FILTER");
+
+        RenderFilter(params->GlobalFilter);
+
+        ImGui::Separator();
+
+        RenderEnvelope("Filter Envelope", params->FilterEnvelope, nullptr);
+
+        ImGui::Separator();
+
+        RenderLfo("Filter LFO", params->FilterLfo, nullptr);
+
+        ImGui::PopID();
+    }
+    if (ImGui::CollapsingHeader("Frequency"))
+    {
+        ImGui::PushID("GLOBAL FREQUENCY");
+
+        RenderDetune(params->PDetuneType, params->PCoarseDetune, params->PDetune);
+
+        ImGui::Separator();
+
+        auto freq440hz = params->Pfixedfreq == 1;
+        if (ImGui::Checkbox("440Hz", &freq440hz))
+        {
+            params->Pfixedfreq = freq440hz ? 1 : 0;
+        }
+        ShowTooltipOnHover("Set the voice base frequency to 440Hz");
+
+        if (freq440hz)
+        {
+            ImGui::SameLine();
+
+            auto fixedfreqET = static_cast<int>(params->PfixedfreqET);
+            ImGui::PushItemWidth(100);
+            if (ImGui::SliderInt("##EqT", &fixedfreqET, 0, 127, "Eq.T. %d"))
+            {
+                params->PfixedfreqET = static_cast<unsigned short int>(fixedfreqET);
+            }
+            ShowTooltipOnHover("How the frequency varies acording to the keyboard (leftmost for fixed frequency)");
+        }
+
+        ImGui::Separator();
+
+        RenderEnvelope("Frequency Envelope", params->FreqEnvelope, nullptr);
+
+        ImGui::Separator();
+
+        RenderLfo("Frequency LFO", params->FreqLfo, nullptr);
+
+        ImGui::Separator();
+
+        ImGui::PopID();
+    }
 }
 
 std::string NoteToString(unsigned char note)
@@ -992,6 +1071,8 @@ std::string NoteToString(unsigned char note)
 void SynthEditor::RenderSmplSynth(
     SampleNoteParameters *params)
 {
+    RenderAbstractSynth(params);
+
     bool selectSample = false;
     static unsigned char selectingSampleForKey = 0;
     static int selectedNote = SAMPLE_NOTE_MIN;
@@ -1502,25 +1583,25 @@ void SynthEditor::RenderFilter(FilterParams *filter)
         }
     }
 
-    if (KnobUchar("C.Freq", &(filter->Pfreq), 0, 127, ImVec2(40, 40), "Center Frequency of the Filter or the base position in the vowel's sequence"))
+    if (KnobUchar("C.Freq", &(filter->Pfreq), 0, 127, ImVec2(50, 40), "Center Frequency of the Filter or the base position in the vowel's sequence"))
     {
     }
 
     ImGui::SameLine();
 
-    if (KnobUchar("Q", &(filter->Pq), 0, 127, ImVec2(40, 40), "Filter resonance or bandwidth"))
+    if (KnobUchar("Q", &(filter->Pq), 0, 127, ImVec2(50, 40), "Filter resonance or bandwidth"))
     {
     }
 
     ImGui::SameLine();
 
-    if (KnobUchar("freq.tr.", &(filter->Pfreqtrack), 0, 127, ImVec2(40, 40), "Filter frequency tracking (left is negative, middle is 0, and right is positive)"))
+    if (KnobUchar("freq.tr.", &(filter->Pfreqtrack), 0, 127, ImVec2(50, 40), "Filter frequency tracking (left is negative, middle is 0, and right is positive)"))
     {
     }
 
     ImGui::SameLine();
 
-    if (KnobUchar("gain", &(filter->Pgain), 0, 127, ImVec2(40, 40), "Filter output gain/damp"))
+    if (KnobUchar("gain", &(filter->Pgain), 0, 127, ImVec2(50, 40), "Filter output gain/damp"))
     {
     }
 }

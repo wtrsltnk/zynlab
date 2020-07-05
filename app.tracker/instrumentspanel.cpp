@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <imgui.h>
 #include <zyn.common/globals.h>
+#include <zyn.mixer/Mixer.h>
 #include <zyn.mixer/Track.h>
 
 InstrumentsPanel::InstrumentsPanel()
@@ -29,7 +30,7 @@ void InstrumentsPanel::Render2d()
         if (ImGui::CollapsingHeader("Instrument Tracks", ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImGui::BeginChild("TracksContainer", ImVec2(0, 300));
-            for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
+            for (unsigned int i = 0; i < _session->_mixer->GetTrackCount(); i++)
             {
                 auto track = _session->_mixer->GetTrack(i);
                 ImGui::PushID(i);
@@ -68,7 +69,7 @@ void InstrumentsPanel::Render2d()
                 }
                 if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
                 {
-                    if (_session->currentTrack < NUM_MIXER_TRACKS - 1)
+                    if (_session->currentTrack < _session->_mixer->GetTrackCount() - 1)
                     {
                         _session->currentTrack++;
                     }
@@ -79,7 +80,7 @@ void InstrumentsPanel::Render2d()
         if (ImGui::CollapsingHeader("Instrument Properties"))
         {
             ImGui::BeginChild("InstrumentProperties", ImVec2(0, 200));
-            if (_session->currentTrack < NUM_MIXER_TRACKS)
+            if (_session->currentTrack < _session->_mixer->GetTrackCount())
             {
                 auto track = _session->_mixer->GetTrack(_session->currentTrack);
 

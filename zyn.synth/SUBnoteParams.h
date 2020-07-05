@@ -23,13 +23,15 @@
 #ifndef SUB_NOTE_PARAMETERS_H
 #define SUB_NOTE_PARAMETERS_H
 
+#include "AbstractNoteParameters.h"
 #include "EnvelopeParams.h"
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
 
-class SUBnoteParameters : public WrappedPresets
+class SUBnoteParameters :
+    public AbstractNoteParameters
 {
 public:
     SUBnoteParameters();
@@ -43,10 +45,6 @@ public:
 
     //Parameters
     //AMPLITUDE PARAMETRERS
-    unsigned char Pstereo; //0 for mono,1 for stereo
-    unsigned char PVolume;
-    unsigned char PPanning;
-    unsigned char PAmpVelocityScaleFunction;
     EnvelopeParams *AmpEnvelope;
 
     //Frequency Parameters

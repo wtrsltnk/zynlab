@@ -5,6 +5,8 @@ project(zyn.synth)
 find_package(FFTW REQUIRED)
 
 add_library(zyn.synth STATIC
+    AbstractNoteParameters.cpp
+    AbstractNoteParameters.h
     ADnote.cpp
     ADnote.h
     ADnoteParams.cpp

@@ -1,6 +1,7 @@
 #ifndef ADNOTEVOICEPARAM_H
 #define ADNOTEVOICEPARAM_H
 
+#include "AbstractNoteParameters.h"
 #include "EnvelopeParams.h"
 #include "LFOParams.h"
 #include "OscilGen.h"
@@ -10,7 +11,8 @@
 /***********************************************************/
 /*                    VOICE PARAMETERS                     */
 /***********************************************************/
-class ADnoteVoiceParam : public WrappedPresets
+class ADnoteVoiceParam :
+    public AbstractNoteParameters
 {
 public:
     void InitPresets();
@@ -99,22 +101,8 @@ public:
     *   AMPLITUDE PARAMETERS   *
     ***************************/
 
-    /* Panning
-             0 - random
-             1 - left
-            64 - center
-           127 - right
-       The Panning is ignored if the instrument is mono */
-    unsigned char PPanning;
-
-    /* Voice Volume */
-    unsigned char PVolume;
-
     /* If the Volume negative */
     unsigned char PVolumeminus;
-
-    /* Velocity sensing */
-    unsigned char PAmpVelocityScaleFunction;
 
     /* Amplitude Envelope */
     unsigned char PAmpEnvelopeEnabled;

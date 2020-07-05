@@ -17,6 +17,7 @@ void PlayerControlsPanel::SetUp(
 
 void PlayerControlsPanel::Render2d()
 {
+    ImVec2 iconSize(30, 30);
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin(
@@ -27,7 +28,7 @@ void PlayerControlsPanel::Render2d()
         bool playing = _session->_playState != PlayStates::Stopped;
         if (!playing)
         {
-            if (ImGui::Button(ICON_FK_PLAY, ImVec2(0, 0)))
+            if (ImGui::Button(ICON_FAD_PLAY, iconSize))
             {
                 _session->StartPlaying();
                 ImGui::SetWindowFocus(PatternEditor::ID);
@@ -41,7 +42,7 @@ void PlayerControlsPanel::Render2d()
         }
         else
         {
-            if (ImGui::Button(ICON_FK_PAUSE, ImVec2(0, 0)))
+            if (ImGui::Button(ICON_FAD_PAUSE, iconSize))
             {
                 _session->StopPlaying();
                 ImGui::SetWindowFocus(PatternEditor::ID);
@@ -53,8 +54,10 @@ void PlayerControlsPanel::Render2d()
                 ImGui::EndTooltip();
             }
         }
+
         ImGui::SameLine();
-        if (ImGui::Button(ICON_FK_STOP, ImVec2(0, 0)))
+
+        if (ImGui::Button(ICON_FAD_STOP, iconSize))
         {
             _session->StopPlaying();
             if (_session->IsRecording())
@@ -77,7 +80,7 @@ void PlayerControlsPanel::Render2d()
         {
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(255, 0, 0, 155));
         }
-        if (ImGui::Button(ICON_FAD_RECORD, ImVec2(0, 0)))
+        if (ImGui::Button(ICON_FAD_RECORD, iconSize))
         {
             ImGui::SetWindowFocus(PatternEditor::ID);
             _session->ToggleRecording();

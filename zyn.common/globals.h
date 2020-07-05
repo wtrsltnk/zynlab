@@ -385,7 +385,7 @@ public:
     virtual IMeter *GetMeter() = 0;
 
     // Instruments
-    virtual int GetTrackCount() const = 0;
+    virtual unsigned int GetTrackCount() const = 0;
     virtual Track *GetTrack(int index) = 0;
     virtual void EnableTrack(int index, bool enabled) = 0;
 

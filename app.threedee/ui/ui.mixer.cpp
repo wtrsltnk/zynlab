@@ -146,7 +146,7 @@ void zyn::ui::Mixer::ImGuiMixer()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
 
-        int c[NUM_MIXER_TRACKS] = {0};
+        std::vector<int> c(_state->_mixer->GetTrackCount());
         mostInsertEffectsPerTrack = 0;
         for (int i = 0; i < NUM_INS_EFX; i++)
         {
@@ -164,7 +164,7 @@ void zyn::ui::Mixer::ImGuiMixer()
         ImGuiMasterTrack();
         ImGui::SameLine();
 
-        for (int track = 0; track <= NUM_MIXER_TRACKS; track++)
+        for (int track = 0; track <= _state->_mixer->GetTrackCount(); track++)
         {
             RenderTrack(track);
         }
@@ -190,7 +190,7 @@ void zyn::ui::Mixer::RenderInspector()
     {
         if (ImGui::CollapsingHeader("Region"))
         {
-            if (_state->_currentTrack >= 0 && _state->_currentTrack < NUM_MIXER_TRACKS)
+            if (_state->_currentTrack >= 0 && _state->_currentTrack < _state->_mixer->GetTrackCount())
             {
                 if (_state->_regions.DoesRegionExist(_state->_currentTrack, _state->_currentPattern))
                 {
@@ -454,7 +454,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
 
 void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
 {
-    if (trackIndex < 0 || trackIndex >= NUM_MIXER_TRACKS)
+    if (trackIndex < 0 || trackIndex >= _state->_mixer->GetTrackCount())
     {
         return;
     }
@@ -536,7 +536,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         // Select midi channel
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         ImGui::PushItemWidth(width);
-        if (ImGui::DropDown("##MidiChannel", track->Prcvchn, trackNames, NUM_MIXER_TRACKS, "Midi channel"))
+        if (ImGui::DropDown("##MidiChannel", track->Prcvchn, trackNames, _state->_mixer->GetTrackCount(), "Midi channel"))
         {
             _state->_currentTrack = trackIndex;
         }

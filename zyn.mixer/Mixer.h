@@ -66,7 +66,11 @@ public:
 
 /** It sends Midi Messages to Instruments, receives samples from instruments,
  *  process them with system/insertion effects and mix them */
-class Mixer : public IMixer, public IAudioGenerator, public IMidiEventHandler, public WrappedPresets
+class Mixer :
+    public IMixer,
+    public IAudioGenerator,
+    public IMidiEventHandler,
+    public WrappedPresets
 {
     friend class MixerSerializer;
 
@@ -112,7 +116,7 @@ public:
 
     void EnableTrack(int npart, int what);
 
-    virtual int GetTrackCount() const;
+    virtual unsigned int GetTrackCount() const;
     virtual Track *GetTrack(int index);
     virtual void EnableTrack(int index, bool enabled);
 

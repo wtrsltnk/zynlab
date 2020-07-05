@@ -55,7 +55,7 @@ void SUBnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
 
     xml->beginbranch("AMPLITUDE_PARAMETERS");
     {
-        xml->addparbool("stereo", _parameters->Pstereo);
+        xml->addparbool("stereo", _parameters->PStereo);
         xml->addpar("volume", _parameters->PVolume);
         xml->addpar("panning", _parameters->PPanning);
         xml->addpar("velocity_sensing", _parameters->PAmpVelocityScaleFunction);
@@ -153,7 +153,7 @@ void SUBnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
 
     if (xml->enterbranch("AMPLITUDE_PARAMETERS"))
     {
-        _parameters->Pstereo = xml->getparbool("stereo", _parameters->Pstereo);
+        _parameters->PStereo = xml->getparbool("stereo", _parameters->PStereo);
         _parameters->PVolume = xml->getpar127("volume", _parameters->PVolume);
         _parameters->PPanning = xml->getpar127("panning", _parameters->PPanning);
         _parameters->PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing", _parameters->PAmpVelocityScaleFunction);

@@ -46,7 +46,8 @@ enum FMTYPE
 };
 extern int ADnote_unison_sizes[];
 
-class ADnoteParameters : public WrappedPresets
+class ADnoteParameters :
+    public AbstractNoteParameters
 {
     IFFTwrapper *_fft;
 
@@ -57,11 +58,6 @@ public:
     void InitPresets();
 
     void Defaults();
-
-    /* The instrument type  - MONO/STEREO
-    If the mode is MONO, the panning of voices are not used
-    Stereo=1, Mono=0. */
-    unsigned char PStereo;
 
     /******************************************
     *     FREQUENCY GLOBAL PARAMETERS        *
@@ -80,22 +76,14 @@ public:
     *     AMPLITUDE GLOBAL PARAMETERS          *
     ********************************************/
 
-    /* Panning -  0 - random
-              1 - left
-             64 - center
-            127 - right */
-    unsigned char PPanning;
-
-    unsigned char PVolume;
-
-    unsigned char PAmpVelocityScaleFunction;
-
     EnvelopeParams *AmpEnvelope;
 
     LFOParams *AmpLfo;
 
-    unsigned char PPunchStrength, PPunchTime, PPunchStretch,
-        PPunchVelocitySensing;
+    unsigned char PPunchStrength;
+    unsigned char PPunchTime;
+    unsigned char PPunchStretch;
+    unsigned char PPunchVelocitySensing;
 
     /******************************************
     *        FILTER GLOBAL PARAMETERS        *

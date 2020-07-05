@@ -23,6 +23,7 @@
 #ifndef SAMPLE_NOTE_PARAMETERS_H
 #define SAMPLE_NOTE_PARAMETERS_H
 
+#include "AbstractNoteParameters.h"
 #include "EnvelopeParams.h"
 #include <map>
 #include <zyn.common/IPresetsSerializer.h>
@@ -34,7 +35,8 @@
 #define SAMPLE_NOTE_MIN 35
 #define SAMPLE_NOTE_MAX 81
 
-class SampleNoteParameters : public WrappedPresets
+class SampleNoteParameters :
+    public AbstractNoteParameters
 {
 public:
     SampleNoteParameters();
@@ -45,12 +47,6 @@ public:
     void Defaults();
 
     std::map<int, WavData *> PwavData;
-
-    //Parameters
-    //AMPLITUDE PARAMETRERS
-    unsigned char PVolume;
-    unsigned char PPanning;
-    unsigned char PAmpVelocityScaleFunction;
 };
 
 #endif // SAMPLE_NOTE_PARAMETERS_H

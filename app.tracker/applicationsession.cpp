@@ -7,7 +7,7 @@ void ApplicationSession::StopPlaying()
 {
     _playState = PlayStates::Stopped;
     currentRow = 0;
-    for (int t = 0; t < NUM_MIXER_TRACKS; t++)
+    for (int t = 0; t < _mixer->GetTrackCount(); t++)
     {
         _mixer->GetTrack(t)
             ->RelaseAllKeys();

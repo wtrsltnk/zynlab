@@ -26,6 +26,7 @@ public:
     void RenderLfo(char const *label, LFOParams *lfo, unsigned char *enabled);
     void RenderFilter(FilterParams *filter);
     void RenderDetune(unsigned char &detuneType, unsigned short int &coarseDetune, unsigned short int &detune);
+    void RenderAbstractSynth(AbstractNoteParameters *params);
     void RenderAddSynth(ADnoteParameters *params);
     void RenderSubSynth(SUBnoteParameters *params);
     void RenderPadSynth(PADnoteParameters *params);

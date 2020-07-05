@@ -293,9 +293,9 @@ detunevalueoutput->do_callback();} open
       }
       Fl_Check_Button stereo {
         label Stereo
-        callback {pars->Pstereo=(int) o->value();}
+        callback {pars->PStereo=(int) o->value();}
         xywh {440 406 55 35} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
-        code0 {o->value(pars->Pstereo);}
+        code0 {o->value(pars->PStereo);}
       }
       Fl_Button {} {
         label Clear
@@ -499,7 +499,7 @@ if (pars->PGlobalFilterEnabled==0) globalfiltergroup->deactivate();
 filtere->show();
 globalfiltergroup->redraw();
 
-stereo->value(pars->Pstereo);
+stereo->value(pars->PStereo);
 filterstages->value(pars->Pnumstages);
 magtype->value(pars->Phmagtype);
 start->value(pars->Pstart);
