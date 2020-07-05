@@ -80,14 +80,14 @@ bool Application::Setup()
 
     _session._library->AddLibraryLocation("C:\\Program Files (x86)\\ZynAddSubFX\\banks\\");
 
-//    for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
-//    {
-//        if (Config::Current().cfg.bankRootDirList[i].size() == 0)
-//        {
-//            continue;
-//        }
-//        _session._library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
-//    }
+    //    for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+    //    {
+    //        if (Config::Current().cfg.bankRootDirList[i].size() == 0)
+    //        {
+    //            continue;
+    //        }
+    //        _session._library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
+    //    }
     _session._library->RefreshLibraries();
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
@@ -126,6 +126,7 @@ bool Application::Setup()
 
 void Application::Render2d()
 {
+    static bool _showStats = false;
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, playerControlsPanelHeight));
@@ -182,6 +183,15 @@ void Application::Render2d()
         {
             _session.selectedTab = SelectableTabs::AutomationEditor;
         }
+
+        ImGui::SameLine();
+
+        sprintf_s(buf, 256, "%s STATS", ICON_FAD_AUTOMATION_3P);
+        if (ImGui::Button(buf, ImVec2(120, 0)))
+        {
+            _showStats = true;
+            ImGui::SetWindowFocus("Stats");
+        }
     }
     ImGui::End();
 
@@ -223,6 +233,23 @@ void Application::Render2d()
     {
         _session.TogglePlaying();
     }
+
+    ImGui::Begin("Stats", &_showStats);
+    {
+        auto activeNoteCount = 0;
+        for (unsigned int i = 0; i < _session._mixer->GetTrackCount(); i++)
+        {
+            Track *track = _session._mixer->GetTrack(i);
+            if (track->Penabled == 0)
+            {
+                continue;
+            }
+            activeNoteCount += track->GetActiveNotes();
+        }
+
+        ImGui::Text("Active Notes: %d", activeNoteCount);
+    }
+    ImGui::End();
 }
 
 void Application::Cleanup()

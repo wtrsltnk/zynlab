@@ -115,6 +115,7 @@ public:
     void ApplyParameters(bool lockmutex = true);
 
     void Cleanup(bool final = false);
+    int GetActiveNotes();
 
     //the Track's instruments
     Instrument Instruments[NUM_TRACK_INSTRUMENTS];

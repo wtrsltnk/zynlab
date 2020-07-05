@@ -501,6 +501,10 @@ void SynthEditor::RenderAddSynth(
 
             ImGui::Separator();
 
+            RenderFilter(voiceparams->VoiceFilter);
+
+            ImGui::Separator();
+
             RenderEnvelope("Filter Envelope", voiceparams->FilterEnvelope, &(voiceparams->PFilterEnvelopeEnabled));
 
             ImGui::Separator();

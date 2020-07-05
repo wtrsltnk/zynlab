@@ -39,8 +39,8 @@
 Track::Track()
     : _tmpoutr(nullptr),
       _tmpoutl(nullptr),
-      _bufferr(SystemSettings::Instance().buffersize*4),
-      _bufferl(SystemSettings::Instance().buffersize*4)
+      _bufferr(SystemSettings::Instance().buffersize * 4),
+      _bufferl(SystemSettings::Instance().buffersize * 4)
 {}
 
 Track::~Track()
@@ -287,6 +287,20 @@ void Track::Cleanup(bool final_)
             partfxinputr[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
         }
     }
+}
+
+int Track::GetActiveNotes()
+{
+    int count = 0;
+    for (int i = 0; i < POLIPHONY; i++)
+    {
+        if (_trackNotes[i].status != NoteStatus::KEY_OFF)
+        {
+            count++;
+        }
+    }
+
+    return count;
 }
 
 /*
