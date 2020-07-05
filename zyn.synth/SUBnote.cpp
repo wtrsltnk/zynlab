@@ -61,7 +61,7 @@ void SUBnote::setup(float freq,
     if (!legato)
     {
         numstages = _parameters->Pnumstages;
-        stereo = _parameters->Pstereo;
+        stereo = _parameters->PStereo;
         start = _parameters->Pstart;
         firsttick = 1;
     }
@@ -137,7 +137,9 @@ void SUBnote::setup(float freq,
     {
         lfilter = new bpfilter[numstages * numharmonics];
         if (stereo != 0)
+        {
             rfilter = new bpfilter[numstages * numharmonics];
+        }
     }
 
     //how much the amplitude is normalised (because the harmonics)
@@ -270,7 +272,6 @@ void SUBnote::KillNote()
     if (stereo != 0)
     {
         delete[] rfilter;
-        stereo = 0;
     }
     rfilter = nullptr;
     delete AmpEnvelope;
@@ -541,7 +542,7 @@ void SUBnote::computecurrentparameters()
     }
 }
 
-void SUBnote::channelOut(float *out, float *tmprnd, float *tmpsmp, Filter *globalFilter)
+void SUBnote::channelOut(float *out, float *tmprnd, float *tmpsmp, bpfilter *bpf, Filter *globalFilter)
 {
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
@@ -553,7 +554,7 @@ void SUBnote::channelOut(float *out, float *tmprnd, float *tmpsmp, Filter *globa
         memcpy(tmpsmp, tmprnd, SystemSettings::Instance().bufferbytes);
         for (int nph = 0; nph < numstages; ++nph)
         {
-            filter(lfilter[nph + n * numstages], tmpsmp);
+            filter(bpf[nph + n * numstages], tmpsmp);
         }
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
@@ -584,12 +585,12 @@ int SUBnote::noteout(float *outl, float *outr)
     std::unique_ptr<float> tmpsmp(new float[SystemSettings::Instance().buffersize]);
 
     //left channel
-    channelOut(outl, tmprnd.get(), tmpsmp.get(), GlobalFilterL);
+    channelOut(outl, tmprnd.get(), tmpsmp.get(), lfilter, GlobalFilterL);
 
     //right channel
     if (stereo != 0)
     {
-        channelOut(outr, tmprnd.get(), tmpsmp.get(), GlobalFilterR);
+        channelOut(outr, tmprnd.get(), tmpsmp.get(), rfilter, GlobalFilterR);
     }
     else
     {

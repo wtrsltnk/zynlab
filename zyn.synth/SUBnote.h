@@ -45,7 +45,6 @@ public:
     bool finished() const;
 
 private:
-    void channelOut(float *out, float *tmprnd, float *tmpsmp, Filter* globalFilter);
     void setup(float freq,
                float velocity,
                int portamento_,
@@ -88,6 +87,7 @@ private:
         float xn1, xn2, yn1, yn2; //filter internal values
     };
 
+    void channelOut(float *out, float *tmprnd, float *tmpsmp, bpfilter *bpf, Filter *globalFilter);
     void initfilter(bpfilter &filter,
                     float freq,
                     float bw,
