@@ -5,10 +5,6 @@
 #include <imgui.h>
 #include <iostream>
 #include <string>
-#include <system.io/system.io.directory.h>
-#include <system.io/system.io.directoryinfo.h>
-#include <system.io/system.io.fileinfo.h>
-#include <system.io/system.io.path.h>
 #include <zyn.mixer/Mixer.h>
 
 char const *const LibraryID = "Library";

@@ -14,7 +14,8 @@ add_library(lib.mxml STATIC
     mxml-string.c)
 
 target_include_directories(lib.mxml
-    PRIVATE vcnet)
+    PRIVATE vcnet
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(
     TARGETS

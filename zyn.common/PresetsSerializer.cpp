@@ -96,7 +96,7 @@ PresetsSerializer::PresetsSerializer()
 
     minimal = false;
 
-    node = tree = mxmlNewElement(nullptr, R"(?xml version="1.0f" encoding="UTF-8"?)");
+    node = tree = mxmlNewElement(nullptr, R"(?xml version="1.0" encoding="UTF-8"?)");
 
     mxml_node_t *doctype = mxmlNewElement(tree, "!DOCTYPE");
     mxmlElementSetAttr(doctype, "ZynAddSubFX-data", nullptr);

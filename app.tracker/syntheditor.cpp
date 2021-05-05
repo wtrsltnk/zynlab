@@ -448,7 +448,8 @@ void SynthEditor::RenderAddSynth(
         ShowTooltipOnHover("Enable this voice");
 
         std::vector<float> smps(SystemSettings::Instance().oscilsize);
-        voiceparams->OscilSmp->get(smps.data(), -1.0);
+
+        voiceparams->OscilSmp->get(smps.data(), -1.0f);
         ImGui::PlotLines("##oscillator", smps.data(), static_cast<int>(SystemSettings::Instance().oscilsize), 0, nullptr, -1.1f, 1.1f, ImVec2(90, 60));
 
         ImGui::SameLine();

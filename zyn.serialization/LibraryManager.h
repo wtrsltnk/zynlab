@@ -26,6 +26,7 @@
 #include <set>
 #include <string>
 #include <zyn.common/ILibraryManager.h>
+#include <sqlite3.h>
 
 class Track;
 
@@ -41,8 +42,8 @@ public:
     virtual ~Library();
 
     std::set<ILibraryItem *> _items;
-    virtual std::string const &GetName();
-    virtual std::string const &GetPath();
+    virtual std::string const &GetName() const;
+    virtual std::string const &GetPath() const;
     virtual ILibrary *GetParent();
     virtual std::set<ILibrary *> &GetChildren();
     virtual bool IsParent(ILibrary *library);
@@ -61,8 +62,8 @@ public:
     LibraryItem(std::string const &name, std::string const &path, ILibrary *parent);
     virtual ~LibraryItem();
 
-    virtual std::string const &GetName();
-    virtual std::string const &GetPath();
+    virtual std::string const &GetName() const;
+    virtual std::string const &GetPath() const;
     virtual ILibrary *GetLibrary();
 };
 

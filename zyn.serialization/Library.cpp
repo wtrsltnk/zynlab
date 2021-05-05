@@ -13,12 +13,12 @@ Library::~Library()
     _children.clear();
 }
 
-std::string const &Library::GetName()
+std::string const &Library::GetName()const
 {
     return _name;
 }
 
-std::string const &Library::GetPath()
+std::string const &Library::GetPath()const
 {
     return _path;
 }

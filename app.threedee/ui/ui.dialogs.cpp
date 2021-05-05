@@ -1,10 +1,7 @@
 #include "ui.dialogs.h"
 
+#include "../../zyn.common/filesystemapi.h"
 #include "../imgui_addons/imgui_common.h"
-#include <system.io/system.io.directory.h>
-#include <system.io/system.io.directoryinfo.h>
-#include <system.io/system.io.fileinfo.h>
-#include <system.io/system.io.path.h>
 
 char const *zyn::ui::Dialogs::SAVEFILE_DIALOG_ID = "Save workspace to file";
 char const *zyn::ui::Dialogs::OPENFILE_DIALOG_ID = "Open workspace file";
@@ -26,20 +23,18 @@ bool zyn::ui::Dialogs::Setup()
 
 std::string zyn::ui::Dialogs::GetSaveFileName()
 {
-    auto file = System::IO::FileInfo(System::IO::Path::Combine(_saveFileDialog.currentPath, _saveFileDialog.fileNameBuffer));
-    return file.FullName();
+    return FilesystemApi::PathCombine(_saveFileDialog.currentPath, _saveFileDialog.fileNameBuffer);
 }
 
 void zyn::ui::Dialogs::updateSaveFileDialog()
 {
-    auto newFolder = System::IO::DirectoryInfo(_saveFileDialog.currentPath);
-    if (!newFolder.Exists())
+    if (!FilesystemApi::DirectoryExists(_saveFileDialog.currentPath))
     {
         return;
     }
 
-    _saveFileDialog.currentFiles = newFolder.GetFiles();
-    _saveFileDialog.currentFolders = newFolder.GetDirectories();
+    _saveFileDialog.currentFiles = FilesystemApi::DirectoryGetFiles(_saveFileDialog.currentPath, "*");
+    _saveFileDialog.currentFolders = FilesystemApi::DirectoryGetDirectories(_saveFileDialog.currentPath, "*");
 }
 
 void zyn::ui::Dialogs::SaveFileDialog(char const *title)
@@ -68,26 +63,24 @@ zyn::ui::DialogResults zyn::ui::Dialogs::RenderSaveFileDialog()
         {
             if (ImGui::Selectable(".."))
             {
-                auto newDir = System::IO::DirectoryInfo(System::IO::Path::Combine(_saveFileDialog.currentPath, ".."));
-                _saveFileDialog.currentPath = newDir.FullName();
+                _saveFileDialog.currentPath = FilesystemApi::PathCombine(_saveFileDialog.currentPath, "..");
                 updateSaveFileDialog();
             }
             for (auto folder : _saveFileDialog.currentFolders)
             {
                 bool selected = false;
-                if (ImGui::Selectable(System::IO::DirectoryInfo(folder).Name().c_str(), &selected))
+                if (ImGui::Selectable(FilesystemApi::PathGetFileName(folder).c_str(), &selected))
                 {
-                    auto newDir = System::IO::DirectoryInfo(System::IO::Path::Combine(_saveFileDialog.currentPath, folder));
-                    _saveFileDialog.currentPath = newDir.FullName();
+                    _saveFileDialog.currentPath = FilesystemApi::PathCombine(_saveFileDialog.currentPath, folder);
                     updateSaveFileDialog();
                 }
             }
             for (auto file : _saveFileDialog.currentFiles)
             {
                 bool selected = false;
-                if (ImGui::Selectable(System::IO::FileInfo(file).Name().c_str(), &selected))
+                if (ImGui::Selectable(FilesystemApi::PathGetFileName(file).c_str(), &selected))
                 {
-                    strncpy(_saveFileDialog.fileNameBuffer, System::IO::FileInfo(file).Name().c_str(), 256);
+                    strncpy(_saveFileDialog.fileNameBuffer, FilesystemApi::PathGetFileName(file).c_str(), 256);
                 }
             }
             ImGui::ListBoxFooter();
@@ -119,14 +112,13 @@ zyn::ui::DialogResults zyn::ui::Dialogs::RenderSaveFileDialog()
 
 void zyn::ui::Dialogs::updateOpenFileDialog()
 {
-    auto newFolder = System::IO::DirectoryInfo(_openFileDialog.currentPath);
-    if (!newFolder.Exists())
+    if (!FilesystemApi::DirectoryExists(_openFileDialog.currentPath))
     {
         return;
     }
 
-    _openFileDialog.currentFiles = newFolder.GetFiles();
-    _openFileDialog.currentFolders = newFolder.GetDirectories();
+    _openFileDialog.currentFiles = FilesystemApi::DirectoryGetFiles(_openFileDialog.currentPath, "*");
+    _openFileDialog.currentFolders = FilesystemApi::DirectoryGetDirectories(_openFileDialog.currentPath, "*");
 }
 
 void zyn::ui::Dialogs::OpenFileDialog(char const *title)
@@ -155,26 +147,24 @@ zyn::ui::DialogResults zyn::ui::Dialogs::RenderOpenFileDialog()
         {
             if (ImGui::Selectable(".."))
             {
-                auto newDir = System::IO::DirectoryInfo(System::IO::Path::Combine(_openFileDialog.currentPath, ".."));
-                _openFileDialog.currentPath = newDir.FullName();
+                _openFileDialog.currentPath = FilesystemApi::PathCombine(_openFileDialog.currentPath, "..");
                 updateOpenFileDialog();
             }
             for (auto folder : _openFileDialog.currentFolders)
             {
                 bool selected = false;
-                if (ImGui::Selectable(System::IO::DirectoryInfo(folder).Name().c_str(), &selected))
+                if (ImGui::Selectable(FilesystemApi::PathGetFileName(folder).c_str(), &selected))
                 {
-                    auto newDir = System::IO::DirectoryInfo(System::IO::Path::Combine(_openFileDialog.currentPath, folder));
-                    _openFileDialog.currentPath = newDir.FullName();
+                    _openFileDialog.currentPath = FilesystemApi::PathCombine(_openFileDialog.currentPath, folder);
                     updateOpenFileDialog();
                 }
             }
             for (auto file : _openFileDialog.currentFiles)
             {
                 bool selected = false;
-                if (ImGui::Selectable(System::IO::FileInfo(file).Name().c_str(), &selected))
+                if (ImGui::Selectable(FilesystemApi::PathGetFileName(file).c_str(), &selected))
                 {
-                    strncpy(_openFileDialog.fileNameBuffer, System::IO::FileInfo(file).Name().c_str(), 256);
+                    strncpy(_openFileDialog.fileNameBuffer, FilesystemApi::PathGetFileName(file).c_str(), 256);
                 }
             }
             ImGui::ListBoxFooter();
@@ -206,6 +196,5 @@ zyn::ui::DialogResults zyn::ui::Dialogs::RenderOpenFileDialog()
 
 std::string zyn::ui::Dialogs::GetOpenFileName()
 {
-    auto file = System::IO::FileInfo(System::IO::Path::Combine(_openFileDialog.currentPath, _openFileDialog.fileNameBuffer));
-    return file.FullName();
+    return FilesystemApi::PathCombine(_openFileDialog.currentPath, _openFileDialog.fileNameBuffer);
 }

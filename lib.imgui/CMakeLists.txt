@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(lib.imgui)
 
-find_package(GLFW3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLM REQUIRED)
 
@@ -28,13 +27,13 @@ add_library(lib.imgui
     )
 
 target_include_directories(lib.imgui
-    PRIVATE ${GLFW3_INCLUDE_DIR}
     PUBLIC include
     PUBLIC imgui
     PUBLIC imgui_addons)
 
 target_link_libraries(lib.imgui
-    PUBLIC ${GLFW3_LIBRARY})
+    PUBLIC
+        glfw)
 
 target_compile_definitions(lib.imgui
     PRIVATE

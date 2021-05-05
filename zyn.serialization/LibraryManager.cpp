@@ -22,14 +22,14 @@
 
 #include "LibraryManager.h"
 
+#include "../zyn.common/filesystemapi.h"
 #include "SaveToFileSerializer.h"
-#include <system.io/system.io.directoryinfo.h>
-#include <system.io/system.io.fileinfo.h>
-#include <system.io/system.io.path.h>
 #include <zyn.mixer/Track.h>
 
 #define INSTRUMENT_EXTENSION ".xiz"
 #define SAMPLE_EXTENSION ".wav"
+
+using namespace FilesystemApi;
 
 LibraryManager::LibraryManager() {}
 
@@ -41,16 +41,14 @@ LibraryManager::~LibraryManager() = default;
 
 ILibrary *LibraryManager::scanLocation(std::string const &location, ILibrary *parent)
 {
-    auto dir = System::IO::DirectoryInfo(location);
-
-    if (!dir.Exists())
+    if (!DirectoryExists(location))
     {
         return nullptr;
     }
 
-    auto lib = new Library(dir.Name(), location, parent);
+    auto lib = new Library(PathGetFileName(location), location, parent);
 
-    auto items = dir.GetFiles();
+    auto items = DirectoryGetFiles(location, "*");
 
     for (auto item : items)
     {
@@ -59,28 +57,28 @@ ILibrary *LibraryManager::scanLocation(std::string const &location, ILibrary *pa
             continue;
         }
 
-        auto itemFile = System::IO::FileInfo(System::IO::Path::Combine(dir.FullName(), item));
-        if (itemFile.Extension() == INSTRUMENT_EXTENSION)
+        auto itemFile = PathCombine(location, item);
+        if (PathGetExtension(itemFile) == INSTRUMENT_EXTENSION)
         {
-            auto instrument = new LibraryItem(itemFile.Name(), itemFile.FullName(), lib);
+            auto instrument = new LibraryItem(PathGetFileName(itemFile), itemFile, lib);
             _instruments.insert(instrument);
             lib->_items.insert(instrument);
         }
 
-        if (itemFile.Extension() == SAMPLE_EXTENSION)
+        if (PathGetExtension(itemFile) == SAMPLE_EXTENSION)
         {
-            auto instrument = new LibraryItem(itemFile.Name(), itemFile.FullName(), lib);
+            auto instrument = new LibraryItem(PathGetFileName(itemFile), itemFile, lib);
             _samples.insert(instrument);
             lib->_items.insert(instrument);
         }
     }
 
-    auto banks = dir.GetDirectories();
+    auto banks = DirectoryGetDirectories(location, "*");
 
     for (auto bank : banks)
     {
-        auto bankDir = System::IO::DirectoryInfo(System::IO::Path::Combine(dir.FullName(), bank));
-        auto res = scanLocation(System::IO::Path::Combine(location, bank), lib);
+        auto bankDir = PathCombine(location, bank);
+        auto res = scanLocation(PathCombine(location, bank), lib);
 
         if (res != nullptr)
         {

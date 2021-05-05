@@ -3,7 +3,8 @@
 #include "base64.h"
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
-#include <system.io/system.io.fileinfo.h>
+
+#include <string>
 
 WavData *WavData::Load(const std::string &filename)
 {
@@ -23,7 +24,19 @@ WavData *WavData::Load(const std::string &filename)
     {
         auto result = new WavData();
 
-        result->name = System::IO::FileInfo(filename).Name();
+        auto found = filename.find_last_of('/');
+        if (found == std::string::npos)
+        {
+            found = filename.find_last_of('\\');
+        }
+        if (found == std::string::npos)
+        {
+            result->name = filename;
+        }
+        else
+        {
+            result->name = filename.substr(found + 1);
+        }
         result->path = filename;
         result->PwavData = PwavData;
         result->channels = channels;

@@ -11,8 +11,8 @@ class ILibrary
 public:
     virtual ~ILibrary();
 
-    virtual std::string const &GetName() = 0;
-    virtual std::string const &GetPath() = 0;
+    virtual std::string const &GetName() const = 0;
+    virtual std::string const &GetPath() const = 0;
     virtual std::set<ILibrary *> &GetChildren() = 0;
     virtual class ILibrary *GetParent() = 0;
     virtual bool IsParent(ILibrary *library) = 0;
@@ -25,8 +25,8 @@ class ILibraryItem
 public:
     virtual ~ILibraryItem();
 
-    virtual std::string const &GetName() = 0;
-    virtual std::string const &GetPath() = 0;
+    virtual std::string const &GetName() const = 0;
+    virtual std::string const &GetPath() const = 0;
     virtual ILibrary *GetLibrary() = 0;
 };
 

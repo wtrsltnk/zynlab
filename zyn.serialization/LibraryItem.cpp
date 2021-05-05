@@ -28,12 +28,12 @@ LibraryItem::LibraryItem(std::string const &name, std::string const &path, ILibr
 
 LibraryItem::~LibraryItem() = default;
 
-std::string const &LibraryItem::GetName()
+std::string const &LibraryItem::GetName() const
 {
     return _name;
 }
 
-std::string const &LibraryItem::GetPath()
+std::string const &LibraryItem::GetPath() const
 {
     return _path;
 }

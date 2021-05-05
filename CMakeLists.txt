@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.12)
 
 project(zynlab)
 
+include(cmake/CPM.cmake)
+include(cmake/Dependencies.cmake)
+
 option(BUILD_VST "enable building all projects using VST" OFF)
 option(BUILD_TESTS "enable building all test projects" OFF)
 option(BUILD_APP_ZYNADSUBFX "enable building app project" ON)
@@ -14,18 +17,13 @@ option(BUILD_PINVOKE "enable building pinvoke project" OFF)
 set(VERSION "2.4.4")
 add_definitions(-DVERSION="${VERSION}")
 
-find_package(FLTK)
 find_package(OpenGL) #for FLTK
 
-if(FLTK_FOUND)
-    set(FltkGui TRUE)
-    add_definitions(-DENABLE_FLTKGUI)
-else()
-    message(STATUS "GUI module defaulting to off")
-endif()
+add_definitions(-DENABLE_FLTKGUI)
 
 add_subdirectory("lib.imgui")
 add_subdirectory("lib.mxml")
+add_subdirectory("lib.sqlite3")
 
 add_subdirectory("zyn.common")
 add_subdirectory("zyn.dsp")

@@ -26,6 +26,25 @@ int SaveToFileSerializer::LoadTrack(Track *track, const std::string &filename)
     return 0;
 }
 
+int SaveToFileSerializer::LoadTrackFromData(class Track *track, const char* data)
+{
+    PresetsSerializer xml;
+    if (xml.putXMLdata(data) < 0)
+    {
+        return -1;
+    }
+
+    if (xml.enterbranch(TrackSerializer::BRANCH_NAME) == 0)
+    {
+        return -10;
+    }
+
+    TrackSerializer(track).DeserializeInstrument(&xml);
+    xml.exitbranch();
+
+    return 0;
+}
+
 int SaveToFileSerializer::SaveTrack(Track *track, const std::string &filename)
 {
     PresetsSerializer xml;

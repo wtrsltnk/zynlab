@@ -407,7 +407,7 @@ void PatternEditor::Render2d()
                             nullptr,
                             -0.5f,
                             0.5f,
-                            ImVec2(_columnsWidths[i], 60));
+                            ImVec2(_columnsWidths[i], 40));
                     }
                     ImGui::PopID();
                     ImGui::NextColumn();

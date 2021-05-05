@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(zyn.serialization)
 
-find_package(system.io REQUIRED)
-
 add_library(zyn.serialization STATIC
     ADnoteParamsSerializer.cpp
     ADnoteParamsSerializer.h
@@ -54,7 +52,8 @@ target_include_directories(zyn.serialization
 
 target_link_libraries(zyn.serialization
     PUBLIC zyn.common
-    PRIVATE system.io
+    PUBLIC lib.sqlite3
+    PUBLIC lib.mxml
     )
 
 target_compile_features(zyn.serialization

@@ -16,6 +16,7 @@ add_library(zyn.mixer STATIC
 target_include_directories(zyn.mixer
     PRIVATE
         ${CMAKE_SOURCE_DIR}
+        ${FFTW_INCLUDE_DIR}
     )
 
 target_link_libraries(zyn.mixer

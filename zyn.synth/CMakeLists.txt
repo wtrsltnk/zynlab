@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(zyn.synth)
 
-find_package(FFTW REQUIRED)
-
 add_library(zyn.synth STATIC
     AbstractNoteParameters.cpp
     AbstractNoteParameters.h
@@ -55,7 +53,7 @@ target_include_directories(zyn.synth
 target_link_libraries(zyn.synth
     zyn.dsp
     zyn.common
-    ${FFTW_LIBRARIES}
+    fftw3
     )
 
 target_compile_features(zyn.synth
@@ -71,6 +69,7 @@ target_compile_definitions(zyn.synth
 install(
     TARGETS
         zyn.synth
+        fftw3
     EXPORT
         zyn.synth
     DESTINATION

@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(zyn.nio)
 
-find_package(PORTAUDIO REQUIRED)
 if (UNIX)
     find_package(ALSA)
     find_package(JACK)
@@ -75,12 +74,8 @@ if(PaEnable)
             PaEngine.cpp
             PaEngine.h
         )
-    target_include_directories(zyn.nio
-        PRIVATE
-            ${PORTAUDIO_INCLUDE_DIR}
-        )
     target_link_libraries(zyn.nio
-        ${PORTAUDIO_LIBRARIES}
+        portaudio
         )
     target_compile_definitions(zyn.nio
         PRIVATE -DPORTAUDIO=1

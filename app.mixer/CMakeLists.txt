@@ -29,6 +29,7 @@ target_compile_features(app.mixer
     PRIVATE cxx_auto_type
     PRIVATE cxx_nullptr
     PRIVATE cxx_range_for
+    PRIVATE cxx_std_17
     )
 
 target_link_libraries(app.mixer

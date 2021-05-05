@@ -85,7 +85,7 @@ if(WIN32)
         NAME "libfftw3-3.dll"
         PATHS ${CMAKE_PREFIX_PATH}/bin)
 
-    configure_file(${FFTW_BIN_PATH} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+    #configure_file(${FFTW_BIN_PATH} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
     if(PaEnable)
         find_file(PORTAUDIO_BIN_PATH

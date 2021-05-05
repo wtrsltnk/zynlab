@@ -145,4 +145,6 @@ void PatternsManager::SelectPattern(unsigned int i)
     auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
     auto name = pattern->Name();
     strcpy_s(_patternPropertiesNameBuffer, 128, name.c_str());
+
+    _session->selectedTab = SelectableTabs::PatternEditor;
 }

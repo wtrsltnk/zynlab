@@ -142,7 +142,12 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
             out = &x.notch;
             break;
         default:
+        {
             std::cerr << "Impossible SVFilter type encountered [" << type << "]" << std::endl;
+            type = 0;
+            out = &x.low;
+            break;
+        }
     }
 
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)

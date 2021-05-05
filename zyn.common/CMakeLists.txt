@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(zyn.common)
 
-find_package(system.io)
-
 add_library(zyn.common STATIC)
 
 target_sources(zyn.common
@@ -14,11 +12,11 @@ target_sources(zyn.common
         Config.h
         IAudioGenerator.cpp
         IAudioGenerator.h
-        IMidiEventHandler.cpp
-        IMidiEventHandler.h
         IFFTwrapper.h
         ILibraryManager.cpp
         ILibraryManager.h
+        IMidiEventHandler.cpp
+        IMidiEventHandler.h
         IPresetsSerializer.cpp
         IPresetsSerializer.h
         Presets.cpp
@@ -39,23 +37,22 @@ target_sources(zyn.common
         base64.cpp
         base64.h
         dr_wav.h
+        filesystemapi.cpp
+        filesystemapi.h
         globals.cpp
         globals.h
 )
 
 target_link_libraries(zyn.common
     lib.mxml
-    system.io
     ${ZLIB_LIBRARIES}
     z
     )
 
-target_include_directories(zyn.common
-    PRIVATE ../libs/mxml-release-2.4)
-
 target_compile_features(zyn.common
     PRIVATE cxx_auto_type
     PRIVATE cxx_nullptr
+    PRIVATE cxx_std_17
     )
 
 install(

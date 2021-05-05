@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(app.threedee)
 
-find_package(GLFW3 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(GLM REQUIRED)
 
 add_executable(app.threedee
     app.threedee.cpp
@@ -47,15 +45,14 @@ add_executable(app.threedee
 target_include_directories(app.threedee
     PRIVATE
         ${CMAKE_SOURCE_DIR}
-        ${GLFW3_INCLUDE_DIR}
-        ${GLM_DIR}
         include
     )
 
 target_link_libraries(app.threedee
     ${ZLIB_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${GLFW3_LIBRARY}
+    glfw
+    glm
     zyn.nio
     zyn.net
     zyn.mixer
@@ -73,6 +70,7 @@ target_compile_features(app.threedee
     PRIVATE cxx_nullptr
     PRIVATE cxx_range_for
     PRIVATE cxx_thread_local
+    PRIVATE cxx_std_17
     )
 
 if(WIN32)
@@ -80,7 +78,7 @@ if(WIN32)
         NAME "libfftw3-3.dll"
         PATHS ${CMAKE_PREFIX_PATH}/bin)
 
-    configure_file(${FFTW_BIN_PATH} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+    #configure_file(${FFTW_BIN_PATH} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
     if(PaEnable)
         find_file(PORTAUDIO_BIN_PATH

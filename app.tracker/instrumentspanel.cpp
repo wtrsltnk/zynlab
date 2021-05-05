@@ -160,7 +160,13 @@ ILibraryItem *InstrumentsPanel::LibraryTree(
     {
         if (ImGui::TreeNode(library->GetName().c_str()))
         {
-            for (auto level : library->GetChildren())
+            auto &s1 = library->GetChildren();
+            std::vector<ILibrary *> children(s1.begin(), s1.end());
+            std::sort(children.begin(), children.end(), [](ILibrary const *a, ILibrary const *b) -> bool {
+                return a->GetName() < b->GetName();
+            });
+
+            for (auto level : children)
             {
                 auto tmp = LibraryTree(level);
                 if (tmp != nullptr && result == nullptr)
@@ -169,7 +175,12 @@ ILibraryItem *InstrumentsPanel::LibraryTree(
                 }
             }
 
-            for (auto item : library->GetItems())
+            auto &s2 = library->GetItems();
+            std::vector<ILibraryItem *> items(s2.begin(), s2.end());
+            std::sort(items.begin(), items.end(), [](ILibraryItem const *a, ILibraryItem const *b) -> bool {
+                return a->GetName() < b->GetName();
+            });
+            for (auto item : items)
             {
                 if (ImGui::TreeNodeEx(item->GetName().c_str(), ImGuiTreeNodeFlags_Leaf))
                 {

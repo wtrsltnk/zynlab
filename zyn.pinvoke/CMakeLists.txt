@@ -27,4 +27,5 @@ target_compile_features(zyn.pinvoke
     PRIVATE cxx_nullptr
     PRIVATE cxx_range_for
     PRIVATE cxx_thread_local
+    PRIVATE cxx_std_17
     )
