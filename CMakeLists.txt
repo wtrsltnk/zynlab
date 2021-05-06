@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(zynlab)
 
-include(cmake/CPM.cmake)
-include(cmake/Dependencies.cmake)
-
 option(BUILD_VST "enable building all projects using VST" OFF)
 option(BUILD_TESTS "enable building all test projects" OFF)
 option(BUILD_APP_ZYNADSUBFX "enable building app project" ON)
@@ -12,6 +9,9 @@ option(BUILD_APP_THREEDEE "enable building app.threedee project" ON)
 option(BUILD_APP_MIXER "enable building app.mixer project" ON)
 option(BUILD_APP_TRACKER "enable building app.tracker project" ON)
 option(BUILD_PINVOKE "enable building pinvoke project" OFF)
+
+include(cmake/CPM.cmake)
+include(cmake/Dependencies.cmake)
 
 # Add version information
 set(VERSION "2.4.4")

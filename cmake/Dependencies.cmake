@@ -8,25 +8,43 @@ CPMAddPackage(
 if (fftw3_ADDED)
     get_filename_component(_vs_bin_path "${CMAKE_LINKER}" DIRECTORY)
 
-    if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3-3.lib")
-        execute_process(RESULT_VARIABLE LIB_RESULT
-            COMMAND "${_vs_bin_path}/dlltool.exe" --def libfftw3-3.def --dllname libfftw3-3.dll --output-lib libfftw3-3.lib
-            WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
-    endif()
+    if(MINGW)
+        if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3-3.lib")
+            execute_process(RESULT_VARIABLE LIB_RESULT
+                COMMAND "${_vs_bin_path}/dlltool.exe" --def libfftw3-3.def --dllname libfftw3-3.dll --output-lib libfftw3-3.lib
+                WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
+        endif()
 
-    if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3f-3.lib")
-        execute_process(RESULT_VARIABLE LIB_F_RESULT
-            COMMAND "${_vs_bin_path}/dlltool.exe" --def libfftw3f-3.def --dllname libfftw3f-3.dll --output-lib libfftw3f-3.lib
-            WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
-    endif()
+        if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3f-3.lib")
+            execute_process(RESULT_VARIABLE LIB_F_RESULT
+                COMMAND "${_vs_bin_path}/dlltool.exe" --def libfftw3f-3.def --dllname libfftw3f-3.dll --output-lib libfftw3f-3.lib
+                WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
+        endif()
 
-    if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3l-3.lib")
-        execute_process(RESULT_VARIABLE LIB_L_RESULT
-            COMMAND "${_vs_bin_path}/dlltool.exe" --def libfftw3l-3.def --dllname libfftw3l-3.dll --output-lib libfftw3l-3.lib
-            WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
-    endif()
+        if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3l-3.lib")
+            execute_process(RESULT_VARIABLE LIB_L_RESULT
+                COMMAND "${_vs_bin_path}/dlltool.exe" --def libfftw3l-3.def --dllname libfftw3l-3.dll --output-lib libfftw3l-3.lib
+                WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
+        endif()
+    elseif(MSVC)
+        if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3-3.lib")
+            execute_process(RESULT_VARIABLE LIB_RESULT
+                COMMAND "${_vs_bin_path}/lib.exe" /machine:x64 /def:libfftw3-3.def
+                WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
+        endif()
 
-    message(STATUS "${LIB_L_RESULT} @ ${fftw3_SOURCE_DIR}")
+        if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3f-3.lib")
+            execute_process(RESULT_VARIABLE LIB_RESULT
+                COMMAND "${_vs_bin_path}/lib.exe" /machine:x64 /def:libfftw3f-3.def
+                WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
+        endif()
+
+        if(NOT EXISTS "${fftw3_SOURCE_DIR}/libfftw3l-3.lib")
+            execute_process(RESULT_VARIABLE LIB_RESULT
+                COMMAND "${_vs_bin_path}/lib.exe" /machine:x64 /def:libfftw3l-3.def
+                WORKING_DIRECTORY ${fftw3_SOURCE_DIR})
+        endif()
+     endif()
 
     add_library(fftw3 INTERFACE)
 
@@ -61,27 +79,29 @@ CPMAddPackage(
         "GLFW_INSTALL Off"
 )
 
-CPMAddPackage(
-    NAME fltk
-    GITHUB_REPOSITORY "fltk/fltk"
-    GIT_TAG release-1.3.5
-    GIT_SHALLOW ON
-    OPTIONS
-        "FLTK_BUILD_TEST Off"
-        "OPTION_BUILD_EXAMPLES Off"
-        "OPTION_BUILD_HTML_DOCUMENTATION Off"
-        "OPTION_INSTALL_HTML_DOCUMENTATION Off"
-)
+#if (BUILD_APP_ZYNADSUBFX)
+#    CPMAddPackage(
+#        NAME fltk
+#        GITHUB_REPOSITORY "fltk/fltk"
+#        GIT_TAG release-1.3.5
+#        GIT_SHALLOW ON
+#        OPTIONS
+#            "FLTK_BUILD_TEST Off"
+#            "OPTION_BUILD_EXAMPLES Off"
+#            "OPTION_BUILD_HTML_DOCUMENTATION Off"
+#            "OPTION_INSTALL_HTML_DOCUMENTATION Off"
+#    )
 
-if (fltk_ADDED)
-    find_file(FLTK_FLUID_EXECUTABLE "fluid.exe" HINT ${fltk_BINARY_DIR} HINT ${fltk_BINARY_DIR}/bin)
-    find_file(fltk_HEADER_FILE "FL/FL.h" HINT ${fltk_SOURCE_DIR} HINT ${fltk_SOURCE_DIR})
-    get_filename_component(fltk_HEADER_FILE_LOCATION ${fltk_HEADER_FILE} DIRECTORY)
+#    if (fltk_ADDED)
+#        find_file(FLTK_FLUID_EXECUTABLE "fluid.exe" HINT ${fltk_BINARY_DIR} HINT ${fltk_BINARY_DIR}/bin)
+#        find_file(fltk_HEADER_FILE "FL/FL.h" HINT ${fltk_SOURCE_DIR} HINT ${fltk_SOURCE_DIR})
+#        get_filename_component(fltk_HEADER_FILE_LOCATION ${fltk_HEADER_FILE} DIRECTORY)
 
-    target_include_directories(fltk
-        INTERFACE
-            $<BUILD_INTERFACE:${fltk_HEADER_FILE_LOCATION}>)
-endif()
+#        target_include_directories(fltk
+#            INTERFACE
+#                $<BUILD_INTERFACE:${fltk_HEADER_FILE_LOCATION}>)
+#    endif()
+#endif(BUILD_APP_ZYNADSUBFX)
 
 CPMAddPackage(
     NAME portaudio
@@ -91,6 +111,16 @@ CPMAddPackage(
     OPTIONS
         "PA_BUILD_TESTS Off"
         "PA_BUILD_EXAMPLES Off"
+)
+
+CPMAddPackage(
+    NAME zlib
+    GITHUB_REPOSITORY "madler/zlib"
+    GIT_TAG v1.2.11
+    GIT_SHALLOW ON
+    OPTIONS
+        "ASM686 Off"
+        "AMD64 On"
 )
 
 CPMAddPackage(

@@ -25,7 +25,7 @@
 
 #include <algorithm>
 #include <cctype>
-#include <dirent.h>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
@@ -107,46 +107,65 @@ void PresetsStore::RescaneForPresets(const string &type)
             continue;
         }
 
-        //open directory
-        string dirname = i;
-        DIR *dir = opendir(dirname.c_str());
-        if (dir == nullptr)
+        std::filesystem::path dir(i);
+
+        if (!std::filesystem::exists(dir))
         {
             continue;
         }
-        struct dirent *fn;
 
-        //check all files in directory
-        while ((fn = readdir(dir)))
+        for (auto &p : std::filesystem::directory_iterator(dir))
         {
-            string filename = fn->d_name;
-            if (filename.find(ftype) == string::npos)
+            if (p.path().string().find(ftype) == string::npos)
             {
                 continue;
             }
 
-            //ensure proper path is formed
-            char tmpc = dirname[dirname.size() - 1];
-            const char *tmps;
-            if ((tmpc == '/') || (tmpc == '\\'))
-            {
-                tmps = "";
-            }
-            else
-            {
-                tmps = "/";
-            }
+            auto name = p.path().stem().string();
 
-            string location = "" + dirname + tmps + filename;
-
-            //trim file type off of name
-            string name = filename.substr(0, filename.find(ftype));
-
-            //put on list
-            presets.push_back(presetstruct(location, name));
+            presets.push_back(presetstruct(p.path().string(), name));
         }
 
-        closedir(dir);
+//        //open directory
+//        string dirname = i;
+//        DIR *dir = opendir(dirname.c_str());
+//        if (dir == nullptr)
+//        {
+//            continue;
+//        }
+//        struct dirent *fn;
+
+//        //check all files in directory
+//        while ((fn = readdir(dir)))
+//        {
+//            string filename = fn->d_name;
+//            if (filename.find(ftype) == string::npos)
+//            {
+//                continue;
+//            }
+
+//            //ensure proper path is formed
+//            char tmpc = dirname[dirname.size() - 1];
+//            const char *tmps;
+//            if ((tmpc == '/') || (tmpc == '\\'))
+//            {
+//                tmps = "";
+//            }
+//            else
+//            {
+//                tmps = "/";
+//            }
+
+//            string location = "" + dirname + tmps + filename;
+
+//            //trim file type off of name
+//            string name = filename.substr(0, filename.find(ftype));
+
+//            //put on list
+//            presets.push_back(presetstruct(location, name));
+//        }
+
+//        closedir(dir);
     }
 
     //sort the presets

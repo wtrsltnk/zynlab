@@ -178,7 +178,7 @@ void Reverb::out(const Stereo<float *> &smp)
         return;
     }
 
-    float inputbuf[SystemSettings::Instance().buffersize];
+    std::vector<float> inputbuf(SystemSettings::Instance().buffersize);
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         inputbuf[i] = (smp._left[i] + smp._right[i]) / 2.0f;
@@ -202,20 +202,20 @@ void Reverb::out(const Stereo<float *> &smp)
 
     if (bandwidth)
     {
-        bandwidth->process(SystemSettings::Instance().buffersize, inputbuf);
+        bandwidth->process(SystemSettings::Instance().buffersize, inputbuf.data());
     }
 
     if (lpf)
     {
-        lpf->filterout(inputbuf);
+        lpf->filterout(inputbuf.data());
     }
     if (hpf)
     {
-        hpf->filterout(inputbuf);
+        hpf->filterout(inputbuf.data());
     }
 
-    processmono(0, efxoutl, inputbuf); //left
-    processmono(1, efxoutr, inputbuf); //right
+    processmono(0, efxoutl, inputbuf.data()); //left
+    processmono(1, efxoutr, inputbuf.data()); //right
 
     float lvol = rs / REV_COMBS * pangainL;
     float rvol = rs / REV_COMBS * pangainR;

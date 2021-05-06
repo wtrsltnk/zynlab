@@ -167,11 +167,11 @@ void SVFilter::filterout(float *smp)
 
     if (needsinterpolation)
     {
-        float ismp[SystemSettings::Instance().buffersize];
-        memcpy(ismp, smp, SystemSettings::Instance().bufferbytes);
+        std::vector<float> ismp(SystemSettings::Instance().buffersize);
+        memcpy(ismp.data(), smp, SystemSettings::Instance().bufferbytes);
 
         for (int i = 0; i < stages + 1; ++i)
-            singlefilterout(ismp, st[i], ipar);
+            singlefilterout(ismp.data(), st[i], ipar);
 
         for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {

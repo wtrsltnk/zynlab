@@ -46,7 +46,7 @@ target_sources(zyn.common
 target_link_libraries(zyn.common
     lib.mxml
     ${ZLIB_LIBRARIES}
-    z
+    zlib
     )
 
 target_compile_features(zyn.common
@@ -58,6 +58,7 @@ target_compile_features(zyn.common
 install(
     TARGETS
         zyn.common
+        zlib
     EXPORT
         zyn.common
     DESTINATION

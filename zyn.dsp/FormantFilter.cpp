@@ -47,7 +47,7 @@ FormantFilter::FormantFilter(FilterParams *pars)
                 pars->Pvowels[j].formants[i].q);
         }
 
-    for (float & i : oldformantamp)
+    for (float &i : oldformantamp)
         i = 1.0f;
     for (int i = 0; i < numformants; ++i)
     {
@@ -193,17 +193,17 @@ void FormantFilter::setfreq_and_q(float frequency, float q_)
 
 void FormantFilter::filterout(float *smp)
 {
-    float inbuffer[SystemSettings::Instance().buffersize];
+    std::vector<float> inbuffer(SystemSettings::Instance().buffersize);
 
-    memcpy(inbuffer, smp, SystemSettings::Instance().bufferbytes);
+    memcpy(inbuffer.data(), smp, SystemSettings::Instance().bufferbytes);
     memset(smp, 0, SystemSettings::Instance().bufferbytes);
 
     for (int j = 0; j < numformants; ++j)
     {
-        float tmpbuf[SystemSettings::Instance().buffersize];
+        std::vector<float> tmpbuf(SystemSettings::Instance().buffersize);
         for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
-        formant[j]->filterout(tmpbuf);
+        formant[j]->filterout(tmpbuf.data());
 
         if (ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
             for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)

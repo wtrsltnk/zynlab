@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 
 project(app)
 
+find_package(FLTK)
+
 add_executable(app
     main.cpp
     ui/common.cpp
@@ -56,6 +58,7 @@ target_compile_features(app
     )
 
 target_include_directories(app
+    PRIVATE ${FLTK_INCLUDE_DIR}
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ui"
     PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
@@ -66,7 +69,7 @@ target_compile_definitions(app
     )
 
 target_link_libraries(app
-    fltk
+    ${FLTK_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     zyn.nio

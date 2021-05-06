@@ -27,7 +27,9 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <vector>
 
 #ifdef HAVE_SCHEDULER

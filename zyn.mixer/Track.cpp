@@ -343,7 +343,7 @@ void Track::NoteOn(unsigned char note,
     else
     {
         // Poly mode is On so just make sure the list is empty.
-        if (not _monomemnotes.empty())
+        if (! _monomemnotes.empty())
             _monomemnotes.clear();
     }
 
@@ -372,7 +372,7 @@ void Track::NoteOn(unsigned char note,
         {
             // Legato mode is on and applicable.
             legatomodevalid = true;
-            if ((not ismonofirstnote) && (_lastlegatomodevalid))
+            if ((! ismonofirstnote) && (_lastlegatomodevalid))
             {
                 // At least one other key is held or sustained, and the
                 // previous note was played while in valid legato mode.
@@ -474,7 +474,7 @@ void Track::NoteOn(unsigned char note,
         // still held down or sustained for the Portamento to activate
         // (that's like Legato).
         int portamento = 0;
-        if ((Ppolymode != 0) || (not ismonofirstnote))
+        if ((Ppolymode != 0) || (! ismonofirstnote))
         {
             // I added a third argument to the
             // ctl.initportamento(...) function to be able
@@ -736,7 +736,7 @@ void Track::NoteOn(unsigned char note,
 void Track::NoteOff(unsigned char note) //relase the key
 {
     // This note is released, so we remove it from the list.
-    if (not _monomemnotes.empty())
+    if (! _monomemnotes.empty())
     {
         _monomemnotes.remove(note);
     }
@@ -747,7 +747,7 @@ void Track::NoteOff(unsigned char note) //relase the key
         {
             if (ctl.sustain.sustain == 0)
             { //the sustain pedal is not pushed
-                if ((Ppolymode == 0) && (not _monomemnotes.empty()))
+                if ((Ppolymode == 0) && (! _monomemnotes.empty()))
                 {
                     MonoMemRenote(); // To play most recent still held note.
                 }
@@ -967,7 +967,7 @@ void Track::SetController(unsigned int type, int par)
 void Track::RelaseSustainedKeys()
 {
     // Let's call MonoMemRenote() on some conditions:
-    if ((Ppolymode == 0) && (not _monomemnotes.empty()))
+    if ((Ppolymode == 0) && (! _monomemnotes.empty()))
     {
         if (_monomemnotes.back() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
         {
