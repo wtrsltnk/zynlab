@@ -50,7 +50,8 @@ protected:
 
 private:
     struct timeval playing_until;
-    std::thread *pThread = nullptr;
+
+    std::thread *_thread = nullptr;
 };
 
 #endif

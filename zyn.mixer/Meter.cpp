@@ -8,20 +8,14 @@ vuData::vuData()
       rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
 
-Meter::Meter()
-{
-}
+Meter::Meter() = default;
 
-Meter::~Meter()
-{
-    pthread_mutex_destroy(&_vumutex);
-}
+Meter::~Meter() = default;
 
 IMeter::~IMeter() = default;
 
 void Meter::Setup()
 {
-    pthread_mutex_init(&_vumutex, nullptr);
     for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
     {
         _vuoutpeakpart[npart] = 1e-9f;
@@ -34,21 +28,25 @@ void Meter::Setup()
  */
 void Meter::ResetPeaks()
 {
-    pthread_mutex_lock(&_vumutex);
+    std::lock_guard<std::mutex> guard(_vumutex);
+
     _vu.outpeakl = 1e-9f;
     _vu.outpeakr = 1e-9f;
     _vu.maxoutpeakl = 1e-9f;
     _vu.maxoutpeakr = 1e-9f;
     _vu.clipped = 0;
-    pthread_mutex_unlock(&_vumutex);
 }
 
 vuData Meter::GetVuData()
 {
     vuData tmp;
-    pthread_mutex_lock(&_vumutex);
-    tmp = _vu;
-    pthread_mutex_unlock(&_vumutex);
+
+    {
+        std::lock_guard<std::mutex> guard(_vumutex);
+
+        tmp = _vu;
+    }
+
     return tmp;
 }
 
@@ -59,25 +57,25 @@ void Meter::SetFakePeak(int instrument, unsigned char velocity)
 
 unsigned char Meter::GetFakePeak(int instrument)
 {
-    pthread_mutex_lock(&_vumutex);
+    std::lock_guard<std::mutex> guard(_vumutex);
+
     unsigned char peak = _fakepeakpart[instrument];
-    pthread_mutex_unlock(&_vumutex);
 
     return peak;
 }
 
 float Meter::GetOutPeak(int instrument)
 {
-    pthread_mutex_lock(&_vumutex);
+    std::lock_guard<std::mutex> guard(_vumutex);
+
     float db = _vuoutpeakpart[instrument];
-    pthread_mutex_unlock(&_vumutex);
 
     return db;
 }
 
 void Meter::Tick(const float *outl, const float *outr, Track *part, float volume)
 {
-    if (pthread_mutex_trylock(&_vumutex))
+    if (_vumutex.try_lock())
     {
         return;
     }
@@ -130,5 +128,5 @@ void Meter::Tick(const float *outl, const float *outr, Track *part, float volume
         }
     }
 
-    pthread_mutex_unlock(&_vumutex);
+    _vumutex.unlock();
 }

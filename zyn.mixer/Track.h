@@ -27,12 +27,12 @@
 
 #include "Microtonal.h"
 #include <zyn.common/ILibraryManager.h>
-#include <zyn.common/globals.h>
 #include <zyn.common/circularbuffer.h>
+#include <zyn.common/globals.h>
 #include <zyn.synth/Controller.h>
 
 #include <list> // For the monomemnotes list.
-#include <pthread.h>
+#include <mutex>
 
 class EffectManager;
 class ADnoteParameters;
@@ -217,7 +217,7 @@ private:
     IMixer *_mixer;
     Microtonal *_microtonal;
     IFFTwrapper *_fft;
-    pthread_mutex_t _instrumentMutex;
+    std::mutex _instrumentMutex;
 };
 
 #endif // TRACK_H

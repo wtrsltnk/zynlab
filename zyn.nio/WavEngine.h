@@ -27,8 +27,8 @@
 #include "SafeQueue.h"
 #include "ZynSema.h"
 
-#include <pthread.h>
 #include <string>
+#include <thread>
 
 class WavFileWriter;
 class WavEngine : public AudioOutput
@@ -57,6 +57,6 @@ private:
     ZynSema work;
     SafeQueue<float> buffer;
 
-    pthread_t *pThread;
+    std::thread *_thread = nullptr;
 };
 #endif

@@ -29,7 +29,7 @@
 #include "Track.h"
 #include <chrono>
 #include <memory>
-#include <pthread.h>
+#include <mutex>
 #include <zyn.common/AudioFile.h>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IFFTwrapper.h>
@@ -157,7 +157,7 @@ private:
     SamplePreview _samplePreview;
     std::vector<InstrumentPreview> _instrumentsPreview;
     Track _tracks[NUM_MIXER_TRACKS];
-    pthread_mutex_t _mutex;
+    std::mutex _mutex;
     std::unique_ptr<IFFTwrapper> _fft;
     INoteSource *_noteSource;
 

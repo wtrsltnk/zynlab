@@ -43,10 +43,7 @@ Mixer::Mixer()
       _noteSource(nullptr)
 {}
 
-Mixer::~Mixer()
-{
-    pthread_mutex_destroy(&_mutex);
-}
+Mixer::~Mixer() = default;
 
 void Mixer::Init()
 {
@@ -58,7 +55,6 @@ void Mixer::Init()
 
     swaplr = false;
 
-    pthread_mutex_init(&_mutex, nullptr);
     _fft = std::unique_ptr<IFFTwrapper>(new FFTwrapper(SystemSettings::Instance().oscilsize));
 
     shutup = false;
@@ -149,12 +145,12 @@ float Mixer::BufferSizeFloat() const
 
 void Mixer::Lock()
 {
-    pthread_mutex_lock(&_mutex);
+    _mutex.lock();
 }
 
 void Mixer::Unlock()
 {
-    pthread_mutex_unlock(&_mutex);
+    _mutex.unlock();
 }
 
 void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocity)
@@ -454,11 +450,7 @@ void Mixer::AudioOut(float *outl, float *outr)
             continue;
         }
 
-        if (!_tracks[trackIndex].TryLock())
-        {
-            _tracks[trackIndex].ComputeInstrumentSamples();
-            _tracks[trackIndex].Unlock();
-        }
+        _tracks[trackIndex].ComputeInstrumentSamples();
     }
 
     //Insertion effects

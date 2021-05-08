@@ -80,7 +80,8 @@ MidiInputManager::MidiInputManager(
       _midiEventHandler(midiEventHandler)
 {
     _current = nullptr;
-    _work.init(PTHREAD_PROCESS_PRIVATE, 0);
+
+    _work.init(0 /*PROCESS_PRIVATE*/, 0);
 }
 
 MidiInputManager::~MidiInputManager() = default;

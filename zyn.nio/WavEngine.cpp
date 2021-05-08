@@ -26,11 +26,14 @@
 
 using namespace std;
 
-WavEngine::WavEngine(unsigned int sampleRate, unsigned int bufferSize)
-    : AudioOutput(sampleRate, bufferSize), file(nullptr), buffer(sampleRate * 4), pThread(nullptr)
+WavEngine::WavEngine(
+    unsigned int sampleRate,
+    unsigned int bufferSize)
+    : AudioOutput(sampleRate, bufferSize),
+      file(nullptr), buffer(sampleRate * 4)
 {
     _name = "WAV";
-    work.init(PTHREAD_PROCESS_PRIVATE, 0);
+    work.init(0 /*PROCESS_PRIVATE*/, 0);
 }
 
 WavEngine::~WavEngine()
@@ -46,17 +49,12 @@ bool WavEngine::openAudio()
 
 bool WavEngine::Start()
 {
-    if (pThread != nullptr)
+    if (_thread != nullptr)
     {
         return true;
     }
 
-    pThread = new pthread_t;
-
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(pThread, &attr, _AudioThread, this);
+    _thread = new std::thread(_AudioThread, this);
 
     std::cout << "start recording" << std::endl;
 
@@ -65,24 +63,26 @@ bool WavEngine::Start()
 
 void WavEngine::Stop()
 {
-    if (pThread == nullptr)
+    if (_thread == nullptr)
     {
         return;
     }
 
     std::cout << "stop recording" << std::endl;
 
-    pthread_t *tmp = pThread;
-    pThread = nullptr;
+    auto tmp = _thread;
+    _thread = nullptr;
 
     work.post();
-    pthread_join(*tmp, nullptr);
+
+    tmp->join();
+
     delete tmp;
 }
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
 {
-    if (pThread == nullptr)
+    if (_thread == nullptr)
     {
         return;
     }
@@ -97,7 +97,8 @@ void WavEngine::push(Stereo<float *> smps, size_t len)
     work.post();
 }
 
-void WavEngine::newFile(WavFileWriter *_file)
+void WavEngine::newFile(
+    WavFileWriter *_file)
 {
     //ensure system is clean
     destroyFile();
@@ -121,7 +122,8 @@ void WavEngine::destroyFile()
     file = nullptr;
 }
 
-void *WavEngine::_AudioThread(void *arg)
+void *WavEngine::_AudioThread(
+    void *arg)
 {
     return (static_cast<WavEngine *>(arg))->AudioThread();
 }
@@ -130,10 +132,8 @@ void *WavEngine::AudioThread()
 {
     short *recordbuf_16bit = new short[2 * _bufferSize];
 
-    std::cout << "wait " << __FILE__ << " " << __LINE__ << std::endl;
-    while (!work.wait() && pThread)
+    while (!work.wait() && _thread != nullptr)
     {
-        std::cout << "post wait " << __FILE__ << " " << __LINE__ << std::endl;
         for (unsigned int i = 0; i < _bufferSize; ++i)
         {
             float left = 0.0f, right = 0.0f;
@@ -150,7 +150,6 @@ void *WavEngine::AudioThread()
         {
             file->writeStereoSamples(_bufferSize, recordbuf_16bit);
         }
-        std::cout << "wait " << __FILE__ << " " << __LINE__ << std::endl;
     }
 
     delete[] recordbuf_16bit;

@@ -35,7 +35,6 @@
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
 
-#include <pthread.h>
 #include <string>
 
 class PADnoteParameters :

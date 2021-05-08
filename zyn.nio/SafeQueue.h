@@ -19,8 +19,8 @@ public:
           readPtr(0),
           bufSize(maxlen)
     {
-        w_space.init(PTHREAD_PROCESS_PRIVATE, maxlen - 1);
-        r_space.init(PTHREAD_PROCESS_PRIVATE, 0);
+        w_space.init(0 /*PROCESS_PRIVATE*/, maxlen - 1);
+        r_space.init(0 /*PROCESS_PRIVATE*/, 0);
         buffer = new T[maxlen];
     }
 

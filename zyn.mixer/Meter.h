@@ -1,7 +1,7 @@
 #ifndef METER_H
 #define METER_H
 
-#include <pthread.h>
+#include <mutex>
 #include <zyn.common/globals.h>
 
 class Meter : public IMeter
@@ -29,7 +29,7 @@ private:
     float _vuoutpeakpart[NUM_MIXER_TRACKS];
     unsigned char _fakepeakpart[NUM_MIXER_TRACKS];
 
-    pthread_mutex_t _vumutex;
+    std::mutex _vumutex;
 };
 
 #endif // METER_H
