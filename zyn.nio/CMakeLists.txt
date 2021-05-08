@@ -13,7 +13,7 @@ endif (UNIX)
 set(AlsaEnable  ${ALSA_FOUND}      CACHE BOOL  "Enable support for Advanced Linux Sound Architecture")
 set(JackEnable  ${JACK_FOUND}      CACHE BOOL  "Enable support for JACK Audio Connection toolKit")
 set(OssEnable   ${OSS_FOUND}       CACHE BOOL  "Enable support for Open Sound System")
-set(PaEnable    ${PORTAUDIO_FOUND} CACHE BOOL  "Enable support for Port Audio System")
+set(PaEnable                       CACHE BOOL  "Enable support for Port Audio System" ON)
 set(DssiEnable  ${DSSI_FOUND}      CACHE BOOL  "Enable DSSI Plugin compilation")
 set(LibloEnable ${LIBLO_FOUND}     CACHE BOOL  "Enable Liblo")
 
@@ -45,6 +45,7 @@ add_library(zyn.nio STATIC
     RtMidi.h
     WavEngine.cpp
     WavEngine.h
+    ZynSema.h
     )
 
 target_compile_definitions(zyn.nio
@@ -148,6 +149,7 @@ install(
         ${zyn.nio_SOURCE_DIR}/RtError.h
         ${zyn.nio_SOURCE_DIR}/RtMidi.h
         ${zyn.nio_SOURCE_DIR}/WavEngine.h
+        ${zyn.nio_SOURCE_DIR}/ZynSema.h
     DESTINATION
         "include/zyn/nio"
     )

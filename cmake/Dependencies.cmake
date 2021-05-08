@@ -67,17 +67,21 @@ if (fftw3_ADDED)
 
 endif()
 
-CPMAddPackage(
-    NAME glfw
-    GITHUB_REPOSITORY "glfw/glfw"
-    GIT_TAG 3.3.4
-    GIT_SHALLOW ON
-    OPTIONS
-        "GLFW_BUILD_EXAMPLES Off"
-        "GLFW_BUILD_TESTS Off"
-        "GLFW_BUILD_DOCS Off"
-        "GLFW_INSTALL Off"
-)
+if(BUILD_APP_THREEDEE)
+
+    CPMAddPackage(
+        NAME glfw
+        GITHUB_REPOSITORY "glfw/glfw"
+        GIT_TAG 3.3.4
+        GIT_SHALLOW ON
+        OPTIONS
+            "GLFW_BUILD_EXAMPLES Off"
+            "GLFW_BUILD_TESTS Off"
+            "GLFW_BUILD_DOCS Off"
+            "GLFW_INSTALL Off"
+    )
+
+endif()
 
 #if (BUILD_APP_ZYNADSUBFX)
 #    CPMAddPackage(
