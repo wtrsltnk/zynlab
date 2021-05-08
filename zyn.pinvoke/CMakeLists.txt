@@ -23,9 +23,10 @@ target_link_libraries(zyn.pinvoke
     )
 
 target_compile_features(zyn.pinvoke
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
-    PRIVATE cxx_range_for
-    PRIVATE cxx_thread_local
-    PRIVATE cxx_std_17
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
+        cxx_range_for
+        cxx_thread_local
+        cxx_std_17
     )

@@ -35,14 +35,17 @@ set(UI_fl_files
 )
 
 set_source_files_properties(ui/MasterUI.h PROPERTIES GENERATED 1)
+
 fltk_wrap_ui(app ${UI_fl_files})
 
     find_program (FLTK_CONFIG fltk-config)
+
     if (FLTK_CONFIG)
-            execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
-            if (FLTK_LDFLAGS)
-                    string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
-            endif()
+        execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
+
+        if (FLTK_LDFLAGS)
+                string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
+        endif()
     endif()
 
 target_sources(app
@@ -51,21 +54,24 @@ target_sources(app
     )
 
 target_compile_features(app
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
-    PRIVATE cxx_lambdas
-    PRIVATE cxx_std_17
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
+        cxx_lambdas
+        cxx_std_17
     )
 
 target_include_directories(app
-    PRIVATE ${FLTK_INCLUDE_DIR}
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ui"
-    PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+    PRIVATE
+        ${FLTK_INCLUDE_DIR}
+        "${CMAKE_CURRENT_SOURCE_DIR}/.."
+        "${CMAKE_CURRENT_SOURCE_DIR}/ui"
+        "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
 target_compile_definitions(app
-    PRIVATE -DFLTK_GUI
+    PRIVATE
+        -DFLTK_GUI
     )
 
 target_link_libraries(app

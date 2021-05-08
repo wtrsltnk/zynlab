@@ -39,8 +39,9 @@ target_link_libraries(zyn.fx
     )
 
 target_compile_features(zyn.fx
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
     )
 
 install(

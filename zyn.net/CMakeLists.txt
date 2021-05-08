@@ -19,8 +19,9 @@ target_include_directories(zyn.net
     )
 
 target_compile_features(zyn.net
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
     )
 
 target_link_libraries(zyn.net
@@ -29,7 +30,8 @@ target_link_libraries(zyn.net
     )
 
 target_compile_definitions(zyn.net
-    PUBLIC -DWIN32
+    PUBLIC
+        -DWIN32
     )
 
 install(

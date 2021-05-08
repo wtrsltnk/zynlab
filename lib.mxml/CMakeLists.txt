@@ -16,7 +16,8 @@ add_library(lib.mxml STATIC
 target_include_directories(lib.mxml
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    PRIVATE vcnet)
+    PRIVATE
+        vcnet)
 
 install(
     TARGETS

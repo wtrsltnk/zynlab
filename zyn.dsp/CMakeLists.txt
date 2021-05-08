@@ -23,8 +23,9 @@ target_include_directories(zyn.dsp
     )
 
 target_compile_features(zyn.dsp
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
     )
 
 target_link_libraries(zyn.dsp

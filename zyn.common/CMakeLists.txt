@@ -50,9 +50,10 @@ target_link_libraries(zyn.common
     )
 
 target_compile_features(zyn.common
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
-    PRIVATE cxx_std_17
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
+        cxx_std_17
     )
 
 install(

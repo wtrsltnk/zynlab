@@ -51,15 +51,17 @@ target_include_directories(zyn.serialization
     )
 
 target_link_libraries(zyn.serialization
-    PUBLIC zyn.common
-    PUBLIC lib.sqlite3
-    PUBLIC lib.mxml
+    PUBLIC
+        zyn.common
+        lib.sqlite3
+        lib.mxml
     )
 
 target_compile_features(zyn.serialization
-    PRIVATE cxx_auto_type
-    PRIVATE cxx_nullptr
-    PRIVATE cxx_thread_local
+    PRIVATE
+        cxx_auto_type
+        cxx_nullptr
+        cxx_thread_local
     )
 
 install(
