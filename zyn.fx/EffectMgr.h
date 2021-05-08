@@ -26,8 +26,6 @@
 #include <zyn.common/Presets.h>
 #include <zyn.dsp/FilterParams.h>
 
-#include <pthread.h>
-
 class Effect;
 class FilterParams;
 class IPresetsSerializer;

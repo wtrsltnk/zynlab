@@ -4,7 +4,7 @@
 
 #include "ZynSema.h"
 #include <cstdlib>
-#include <pthread.h>
+#include <iostream>
 
 /**
  * C++ thread safe lockless queue
@@ -13,8 +13,11 @@ template <class T>
 class SafeQueue
 {
 public:
-    SafeQueue(size_t maxlen)
-        : writePtr(0), readPtr(0), bufSize(maxlen)
+    SafeQueue(
+        size_t maxlen)
+        : writePtr(0),
+          readPtr(0),
+          bufSize(maxlen)
     {
         w_space.init(PTHREAD_PROCESS_PRIVATE, maxlen - 1);
         r_space.init(PTHREAD_PROCESS_PRIVATE, 0);
@@ -23,9 +26,13 @@ public:
 
     ~SafeQueue() { delete[] buffer; }
 
-    unsigned int size() const { return rSpace(); }
+    unsigned int size() const
+    {
+        return rSpace();
+    }
 
-    int push(const T &in)
+    int push(
+        const T &in)
     {
         if (!wSpace())
         {
@@ -57,7 +64,8 @@ public:
         return 0;
     }
 
-    int pop(T &out)
+    int pop(
+        T &out)
     {
         if (!rSpace())
         {
@@ -69,7 +77,7 @@ public:
         out = buffer[r];
         readPtr = r;
 
-        //adjust ranges
+        //adjust rangesð
         r_space.wait(); //guaranteed not to wait
         w_space.post();
         return 0;
@@ -78,16 +86,24 @@ public:
     void clear()
     {
         //thread unsafe
-        while (!r_space.trywait())
+        while (r_space.trywait())
         {
             w_space.post();
         }
+
         readPtr = writePtr;
     }
 
 private:
-    unsigned int wSpace() const { return w_space.getvalue(); }
-    unsigned int rSpace() const { return r_space.getvalue(); }
+    unsigned int wSpace() const
+    {
+        return w_space.getvalue();
+    }
+
+    unsigned int rSpace() const
+    {
+        return r_space.getvalue();
+    }
 
     //write space
     mutable ZynSema w_space;

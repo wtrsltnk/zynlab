@@ -124,6 +124,7 @@ target_compile_features(zyn.nio
         cxx_lambdas
         cxx_nullptr
         cxx_strong_enums
+        cxx_thread_local
     )
 
 install(

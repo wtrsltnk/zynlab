@@ -130,8 +130,10 @@ void *WavEngine::AudioThread()
 {
     short *recordbuf_16bit = new short[2 * _bufferSize];
 
+    std::cout << "wait " << __FILE__ << " " << __LINE__ << std::endl;
     while (!work.wait() && pThread)
     {
+        std::cout << "post wait " << __FILE__ << " " << __LINE__ << std::endl;
         for (unsigned int i = 0; i < _bufferSize; ++i)
         {
             float left = 0.0f, right = 0.0f;
@@ -148,6 +150,7 @@ void *WavEngine::AudioThread()
         {
             file->writeStereoSamples(_bufferSize, recordbuf_16bit);
         }
+        std::cout << "wait " << __FILE__ << " " << __LINE__ << std::endl;
     }
 
     delete[] recordbuf_16bit;

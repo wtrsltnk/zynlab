@@ -3,67 +3,85 @@
 
 #if defined __APPLE__ || defined WIN32
 
-#include <pthread.h>
+#include <condition_variable>
+#include <mutex>
 
 class ZynSema
 {
 public:
-    ZynSema (void) : _count (0)
-    {
-    }
+    ZynSema()
+        : _count(0)
+    {}
 
-    ~ZynSema (void)
-    {
-        pthread_mutex_destroy (&_mutex);
-        pthread_cond_destroy (&_cond);
-    }
+    ~ZynSema() = default;
 
-    int init (int, int v)
+    int init(
+        int s,
+        int v)
     {
+        (void)s;
+
         _count = v;
-        return pthread_mutex_init (&_mutex, 0) || pthread_cond_init (&_cond, 0);
-    }
 
-    int post (void)
-    {
-        pthread_mutex_lock (&_mutex);
-        if (++_count == 1) pthread_cond_signal (&_cond);
-        pthread_mutex_unlock (&_mutex);
         return 0;
     }
 
-    int wait (void)
+    int post()
     {
-        pthread_mutex_lock (&_mutex);
-        while (_count < 1) pthread_cond_wait (&_cond, &_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
+
+        if (++_count == 1)
+        {
+            _cond.notify_all();
+        }
+
+        return 0;
+    }
+
+    int wait()
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+
+        while (_count < 1)
+        {
+            _cond.wait(lock);
+        }
+
         --_count;
-        pthread_mutex_unlock (&_mutex);
+
         return 0;
     }
 
-    int trywait (void)
+    bool trywait()
     {
-        if (pthread_mutex_trylock (&_mutex)) return -1;
+        if (!_mutex.try_lock())
+        {
+            return false;
+        }
+
         if (_count < 1)
         {
-            pthread_mutex_unlock (&_mutex);
-            return -1;
+            _mutex.unlock();
+
+            return false;
         }
+
         --_count;
-        pthread_mutex_unlock (&_mutex);
-        return 0;
+
+        _mutex.unlock();
+
+        return true;
     }
 
-    int getvalue (void) const
+    int getvalue() const
     {
         return _count;
     }
 
-
 private:
-    int              _count;
-    pthread_mutex_t  _mutex;
-    pthread_cond_t   _cond;
+    int _count;
+    std::mutex _mutex;
+    std::condition_variable _cond;
 };
 
 #else // POSIX sempahore
@@ -73,33 +91,42 @@ private:
 class ZynSema
 {
 public:
-    ZynSema (void)
+    ZynSema()
+    {}
+
+    ~ZynSema()
     {
+        sem_destroy(&_sema);
     }
-    ~ZynSema (void)
+
+    int init(
+        int s,
+        int v)
     {
-        sem_destroy (&_sema);
+        return sem_init(&_sema, s, v);
     }
-    int init (int s, int v)
+
+    int post()
     {
-        return sem_init (&_sema, s, v);
+        return sem_post(&_sema);
     }
-    int post (void)
+
+    int wait()
     {
-        return sem_post (&_sema);
+        return sem_wait(&_sema);
     }
-    int wait (void)
+
+    int trywait()
     {
-        return sem_wait (&_sema);
+        return sem_trywait(&_sema);
     }
-    int trywait (void)
-    {
-        return sem_trywait (&_sema);
-    }
-    int getvalue(void)
+
+    int getvalue()
     {
         int v = 0;
+
         sem_getvalue(&_sema, &v);
+
         return v;
     }
 

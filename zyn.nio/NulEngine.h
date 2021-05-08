@@ -25,8 +25,8 @@
 
 #include "AudioOutput.h"
 #include "MidiInput.h"
-#include <pthread.h>
 #include <sys/time.h>
+#include <thread>
 #include <zyn.common/globals.h>
 
 class NulEngine : public AudioOutput, MidiInput
@@ -50,7 +50,7 @@ protected:
 
 private:
     struct timeval playing_until;
-    pthread_t *pThread;
+    std::thread *pThread = nullptr;
 };
 
 #endif

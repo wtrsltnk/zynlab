@@ -1,10 +1,13 @@
 #include "MidiInputManager.h"
+
 #include "EngineManager.h"
 #include "MidiInput.h"
 #include <iostream>
 #include <utility>
 
-std::ostream &operator<<(std::ostream &out, const MidiEvent &ev)
+std::ostream &operator<<(
+    std::ostream &out,
+    const MidiEvent &ev)
 {
     switch (ev.type)
     {
@@ -40,12 +43,17 @@ std::ostream &operator<<(std::ostream &out, const MidiEvent &ev)
 }
 
 MidiEvent::MidiEvent()
-    : channel(0), type(MidiEventTypes::M_NOTE), num(0), value(0), time(0)
+    : channel(0),
+      type(MidiEventTypes::M_NOTE),
+      num(0),
+      value(0),
+      time(0)
 {}
 
 MidiInputManager *MidiInputManager::_instance = nullptr;
 
-MidiInputManager &MidiInputManager::CreateInstance(IMidiEventHandler *midiEventHandler)
+MidiInputManager &MidiInputManager::CreateInstance(
+    IMidiEventHandler *midiEventHandler)
 {
     if (MidiInputManager::_instance == nullptr)
     {
@@ -66,8 +74,10 @@ void MidiInputManager::DestroyInstance()
     MidiInputManager::_instance = nullptr;
 }
 
-MidiInputManager::MidiInputManager(IMidiEventHandler *midiEventHandler)
-    : _queue(SafeQueue<MidiEvent>(100)), _midiEventHandler(midiEventHandler)
+MidiInputManager::MidiInputManager(
+    IMidiEventHandler *midiEventHandler)
+    : _queue(256),
+      _midiEventHandler(midiEventHandler)
 {
     _current = nullptr;
     _work.init(PTHREAD_PROCESS_PRIVATE, 0);
@@ -75,7 +85,8 @@ MidiInputManager::MidiInputManager(IMidiEventHandler *midiEventHandler)
 
 MidiInputManager::~MidiInputManager() = default;
 
-void MidiInputManager::PutEvent(MidiEvent ev)
+void MidiInputManager::PutEvent(
+    MidiEvent ev)
 {
     if (_queue.push(ev))
     {
@@ -86,7 +97,9 @@ void MidiInputManager::PutEvent(MidiEvent ev)
     _work.post();
 }
 
-void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
+void MidiInputManager::Flush(
+    unsigned int frameStart,
+    unsigned int frameStop)
 {
     if (Empty())
     {
@@ -94,9 +107,11 @@ void MidiInputManager::Flush(unsigned int frameStart, unsigned int frameStop)
     }
 
     MidiEvent ev;
-    while (!_work.trywait())
+
+    while (_work.trywait())
     {
         _queue.peak(ev);
+
         if (ev.time < frameStart || ev.time > frameStop)
         {
             //Back out of transaction
@@ -156,12 +171,14 @@ bool MidiInputManager::Empty() const
     return semvalue <= 0;
 }
 
-MidiInput *MidiInputManager::GetMidiInput(std::string const &name)
+MidiInput *MidiInputManager::GetMidiInput(
+    std::string const &name)
 {
     return dynamic_cast<MidiInput *>(EngineManager::Instance().GetEngine(name));
 }
 
-bool MidiInputManager::SetSource(std::string const &name)
+bool MidiInputManager::SetSource(
+    std::string const &name)
 {
     MidiInput *src = GetMidiInput(name);
 

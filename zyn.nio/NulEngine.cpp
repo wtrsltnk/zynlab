@@ -26,8 +26,10 @@
 #include <unistd.h>
 #include <zyn.common/globals.h>
 
-NulEngine::NulEngine(unsigned int sampleRate, unsigned int bufferSize)
-    : AudioOutput(sampleRate, bufferSize), pThread(nullptr)
+NulEngine::NulEngine(
+    unsigned int sampleRate,
+    unsigned int bufferSize)
+    : AudioOutput(sampleRate, bufferSize)
 {
     _name = "NULL";
     playing_until.tv_sec = 0;
@@ -74,6 +76,7 @@ void *NulEngine::AudioThread()
         playing_until.tv_sec += playing_until.tv_usec / 1000000;
         playing_until.tv_usec %= 1000000;
     }
+
     return nullptr;
 }
 
@@ -96,19 +99,17 @@ void NulEngine::SetAudioEnabled(bool nval)
     {
         if (!IsAudioEnabled())
         {
-            auto *thread = new pthread_t;
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-            pThread = thread;
-            pthread_create(pThread, &attr, _AudioThread, this);
+            pThread = new std::thread(_AudioThread, this);
         }
     }
     else if (IsAudioEnabled())
     {
-        pthread_t *thread = pThread;
+        auto thread = pThread;
+
         pThread = nullptr;
-        pthread_join(*thread, nullptr);
+
+        thread->join();
+
         delete thread;
     }
 }

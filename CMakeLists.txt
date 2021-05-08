@@ -21,7 +21,6 @@ find_package(OpenGL) #for FLTK
 
 add_definitions(-DENABLE_FLTKGUI)
 
-add_subdirectory("lib.imgui")
 add_subdirectory("lib.mxml")
 add_subdirectory("lib.sqlite3")
 
@@ -41,6 +40,7 @@ if(BUILD_APP_ZYNADSUBFX)
 endif()
 
 if(BUILD_APP_THREEDEE)
+    add_subdirectory("lib.imgui")
     add_subdirectory("app.threedee")
 endif()
 

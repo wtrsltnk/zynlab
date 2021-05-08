@@ -2,13 +2,13 @@
 #define REALMIXER_H
 
 #include <memory>
-#include <pthread.h>
+#include <mutex>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/globals.h>
+#include <zyn.synth/Controller.h>
 #include <zyn.synth/SUBnoteParams.h>
 #include <zyn.synth/SynthNote.h>
-#include <zyn.synth/Controller.h>
 
 enum NoteStatus
 {
@@ -34,7 +34,7 @@ class RealMixer :
     std::unique_ptr<float> _tmpoutl;
     std::unique_ptr<float> _tmpoutr;
 
-    pthread_mutex_t _mutex;
+    std::mutex _mutex;
     SUBnoteParameters *_params;
     TrackNote _trackNotes[POLIPHONY];
     Controller ctl;

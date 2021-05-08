@@ -43,7 +43,7 @@ bool RtEngine::Start()
 
     try
     {
-        midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynlab");
+        midiin = new RtMidiIn(RtMidi::WINDOWS_MM, "zynaddsubfx");
         midiin->setCallback(RtEngine::callback, this);
 
         auto portCount = midiin->getPortCount();
