@@ -81,6 +81,8 @@ protected:
 
 public:
     Preset(Preset const &preset);
+    virtual ~Preset();
+
     Preset(std::string const &name);
     Preset(std::string const &name, int id);
     Preset(std::string const &name, Preset const &container);
@@ -92,7 +94,6 @@ public:
     Preset(std::string const &name, int *value, int min = -2147483648, int max = 2147483647);
     Preset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
     Preset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
-    virtual ~Preset();
 
     PresetTypes Type() const;
     std::string const &Name() const;

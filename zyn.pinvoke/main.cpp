@@ -1,3 +1,4 @@
+#include "par.h"
 #include <fstream>
 #include <iostream>
 #include <memory.h>
@@ -30,6 +31,24 @@ extern "C" void NoteOff(
     Mixer *mixer,
     unsigned char chan,
     unsigned char note);
+
+extern "C" void SetPar(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id,
+    unsigned char par);
+
+extern "C" void SetParBool(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id,
+    bool value);
+
+extern "C" void SetParReal(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id,
+    float value);
 
 static std::ofstream logfile;
 
@@ -129,6 +148,48 @@ void NoteOff(
     }
 
     mixer->NoteOff(chan, note);
+}
+
+void SetPar(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id,
+    unsigned char par)
+{
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        return;
+    }
+}
+
+void SetParBool(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id,
+    bool value)
+{
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        return;
+    }
+}
+
+void SetParReal(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id,
+    float value)
+{
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        return;
+    }
 }
 
 void DestroyMixer(

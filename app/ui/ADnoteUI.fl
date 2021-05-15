@@ -188,7 +188,7 @@ class ADvoiceUI {open : {public Fl_Group}
   } {
     Fl_Window ADnoteVoiceParameters {
       label Voice open
-      xywh {3665 31 749 579} type Double box NO_BOX
+      xywh {739 346 768 593} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group voiceparametersgroup {open
@@ -835,7 +835,7 @@ class ADnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}
-      xywh {2701 557 524 414} type Double visible
+      xywh {1568 611 541 433} type Double visible
     } {
       Fl_Group {} {
         label FREQUENCY

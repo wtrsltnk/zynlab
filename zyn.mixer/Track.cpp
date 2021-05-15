@@ -271,20 +271,22 @@ void Track::Cleanup(bool final_)
 
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
-        partoutl[i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
-        partoutr[i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
+        if (partoutl != nullptr) partoutl[i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
+        if (partoutr != nullptr) partoutr[i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
     }
 
     ctl.resetall();
     for (auto &nefx : partefx)
-        nefx->cleanup();
+    {
+        if (nefx != nullptr) nefx->cleanup();
+    }
 
     for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
     {
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
-            partfxinputl[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
-            partfxinputr[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
+            if (partfxinputl[n] != nullptr) partfxinputl[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
+            if (partfxinputr[n] != nullptr) partfxinputr[n][i] = final_ ? 0.0f : SystemSettings::Instance().denormalkillbuf[i];
         }
     }
 }

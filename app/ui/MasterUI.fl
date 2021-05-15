@@ -451,8 +451,7 @@ panellistitemgroup->redraw();} {}
 
 class MasterUI {open
 } {
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {if ((
@@ -464,8 +463,8 @@ class MasterUI {open
  || fl_choice("Exit and leave the unsaved data?","No","Yes","Cancel"))) {
     Config::Current().save();
     *exitprogram=1;
-};} open selected
-      xywh {987 198 389 520} type Double xclass zynaddsubfx visible
+};}
+      xywh {896 184 399 532} type Double xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -681,25 +680,25 @@ master->Unlock();}
         xywh {0 310 390 205}
       } {
         Fl_Group partui {open
-          xywh {0 310 383 175}
+          xywh {7 310 383 175}
           code0 {o->init(master->GetTrack(0),master,0,bankui);}
           code1 {o->show();}
           class PartUI
         } {}
       }
       Fl_Tabs {} {open
-        xywh {0 145 390 165} box UP_FRAME
+        xywh {5 145 390 165} box UP_FRAME
       } {
         Fl_Group {} {
           label {System Effects} open
-          xywh {0 162 390 145} labelsize 15 align 9
+          xywh {5 162 390 145} labelsize 15 align 9
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
             callback {nsyseff=(int) o->value()-1;
 sysefftype->value(master->sysefx[nsyseff].geteffect());
 syseffectui->refresh(&master->sysefx[nsyseff]);}
-            xywh {5 181 80 22} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+            xywh {10 181 80 22} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
             code0 {o->bounds(1,NUM_SYS_EFX);}
             code1 {o->value(nsyseff+1);}
           }
@@ -709,7 +708,7 @@ syseffectui->refresh(&master->sysefx[nsyseff]);}
 master->sysefx[nsyseff].changeeffect((int) o->value());
 master->Unlock();
 syseffectui->refresh(&master->sysefx[nsyseff]);}
-            xywh {285 176 100 22} down_box BORDER_BOX labelsize 10
+            xywh {290 176 100 22} down_box BORDER_BOX labelsize 10
             code0 {o->value(master->sysefx[nsyseff].geteffect());}
           } {
             MenuItem {} {
@@ -750,10 +749,10 @@ syseffectui->refresh(&master->sysefx[nsyseff]);}
             }
           }
           Fl_Group syseffectuigroup {open
-            xywh {5 203 380 95} color 48
+            xywh {10 203 380 95} color 48
           } {
             Fl_Group syseffectui {
-              xywh {5 203 380 95}
+              xywh {10 203 380 95}
               code0 {o->init(&master->sysefx[nsyseff]);}
               class EffUI
             } {}
@@ -761,24 +760,24 @@ syseffectui->refresh(&master->sysefx[nsyseff]);}
           Fl_Button {} {
             label {Send to...}
             callback {syseffsendwindow->show();}
-            xywh {90 181 85 22} box THIN_UP_BOX labelfont 1 labelsize 11
+            xywh {95 181 85 22} box THIN_UP_BOX labelfont 1 labelsize 11
           }
           Fl_Button {} {
             label C
             callback {presetsui->copy(&master->sysefx[nsyseff]);}
-            xywh {180 187 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+            xywh {185 187 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
           }
           Fl_Button {} {
             label P
             callback {master->Lock();
 presetsui->paste(&master->sysefx[nsyseff],syseffectui);
 master->Unlock();}
-            xywh {210 187 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+            xywh {215 187 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
           }
         }
         Fl_Group {} {
           label {Insertion Effects} open
-          xywh {0 165 390 145} labelsize 15 align 9 hide
+          xywh {5 165 390 145} labelsize 15 align 9 hide
         } {
           Fl_Counter inseffnocounter {
             label {Ins.Effect No.}
@@ -796,7 +795,7 @@ if (master->Pinsparts[ninseff]!=-1) {
  	inseffectui->deactivate();
         inseffectuigroup->deactivate();
 };}
-            xywh {5 183 80 22} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+            xywh {10 183 80 22} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
             code0 {o->bounds(1,NUM_INS_EFX);}
             code1 {o->value(ninseff+1);}
           }
@@ -807,7 +806,7 @@ master->insefx[ninseff].changeeffect((int) o->value());
 master->Unlock();
 inseffectui->refresh(&master->insefx[ninseff]);
 inseffectui->show();}
-            xywh {285 173 100 22} down_box BORDER_BOX labelsize 10
+            xywh {290 173 100 22} down_box BORDER_BOX labelsize 10
             code0 {o->value(master->insefx[ninseff].geteffect());}
             code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
           } {
@@ -849,10 +848,10 @@ inseffectui->show();}
             }
           }
           Fl_Group inseffectuigroup {open
-            xywh {5 205 380 95} box FLAT_BOX color 48
+            xywh {10 205 380 95} box FLAT_BOX color 48
           } {
             Fl_Group inseffectui {
-              xywh {5 205 380 90} box UP_FRAME
+              xywh {10 205 380 90} box UP_FRAME
               code0 {o->init(&master->insefx[ninseff]);}
               code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
               class EffUI
@@ -871,7 +870,7 @@ if ((int) o->value()==1){
     inseffectui->activate();
 };
 master->insefx[ninseff].cleanup();} open
-            xywh {95 183 80 22} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
+            xywh {100 183 80 22} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
             code0 {o->add("Master Out");o->add("Off");}
             code1 {char tmp[50]; for (int i=0;i<NUM_MIXER_TRACKS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
             code3 {o->value(master->Pinsparts[ninseff]+2);}
@@ -879,14 +878,14 @@ master->insefx[ninseff].cleanup();} open
           Fl_Button {} {
             label C
             callback {presetsui->copy(&master->insefx[ninseff]);}
-            xywh {180 185 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+            xywh {185 185 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
           }
           Fl_Button {} {
             label P
             callback {master->Lock();
 presetsui->paste(&master->insefx[ninseff],inseffectui);
 master->Unlock();}
-            xywh {210 185 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+            xywh {215 185 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
           }
         }
       }
@@ -896,11 +895,11 @@ master->Unlock();}
         xywh {320 69 65 23} color 51 labelfont 1
       }
       Fl_Group {} {
-        xywh {1 490 389 55}
+        xywh {1 490 390 55}
       } {
         Fl_Box {} {
-          label {VU-Meter}
-          xywh {5 490 380 30} box FLAT_BOX color 48 selection_color 75
+          label {VU-Meter} selected
+          xywh {11 490 380 30} box FLAT_BOX color 48 selection_color 75
           code0 {o->init(master,-1);}
           class VUMeter
         }
@@ -925,7 +924,7 @@ npart=nval;
 updatepanel();
 simplenpartcounter->value(nval+1);
 simplenpartcounter->do_callback();}
-        tooltip {The part number} xywh {5 312 50 18} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+        tooltip {The part number} xywh {8 312 50 18} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
         code0 {o->bounds(1,NUM_MIXER_TRACKS);}
         code1 {bankui->init(o);}
       }
@@ -964,7 +963,7 @@ panelwindow->show();}
     }
     Fl_Window aboutwindow {
       label {Copyright...}
-      xywh {411 344 365 280} type Double hide
+      xywh {415 348 364 282} type Double hide
     } {
       Fl_Box {} {
         label {Copyright (c) 2002-2009 Nasca O. PAUL and others. Please read AUTHORS.txt}
@@ -991,7 +990,7 @@ GNU General Public License for details.}
     }
     Fl_Window syseffsendwindow {
       label {System Effects Send}
-      xywh {171 234 150 250} type Double hide resizable
+      xywh {179 242 128 254} type Double hide resizable
     } {
       Fl_Scroll {} {open
         xywh {0 45 120 170} box FLAT_BOX resizable
@@ -1010,7 +1009,7 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel}
-      xywh {162 276 1167 469} type Single hide
+      xywh {166 280 1173 470} type Single hide
     } {
       Fl_Pack {} {open
         xywh {5 5 1155 425} type HORIZONTAL
@@ -1037,7 +1036,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes","Cancel"))
     Config::Current().save();
 	*exitprogram=1;
 };}
-      xywh {687 295 600 335} type Double hide
+      xywh {691 299 604 336} type Double hide
     } {
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 690 25}
@@ -1523,7 +1522,7 @@ virkeys->take_focus();}
     Fl_Window selectuiwindow {
       label {User Interface mode}
       callback {*exitprogram=1;}
-      xywh {342 246 430 250} type Double hide non_modal
+      xywh {346 250 432 253} type Double hide non_modal
     } {
       Fl_Box {} {
         label {Welcome to ZynAddSubFX}
@@ -1566,8 +1565,7 @@ Config::Current().cfg.UserInterfaceMode=2;}
   for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)
     syseffsend[neff1][neff2]->value(master->GetSystemEffectSend(neff1, neff2));} {}
   }
-  Function {updatepanel()} {open
-  } {
+  Function {updatepanel()} {} {
     code {for (int npart=0;npart<NUM_MIXER_TRACKS;npart++){
   panellistitem[npart]->refresh();
 };} {}

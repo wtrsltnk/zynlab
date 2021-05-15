@@ -53,18 +53,18 @@ enum NoteStatus
 
 struct TrackNotes
 {
-    NoteStatus status;
-    int note; //if there is no note playing, the "note"=-1
-    int itemsplaying;
+    NoteStatus status = NoteStatus::KEY_OFF;
+    int note = 0; //if there is no note playing, the "note"=-1
+    int itemsplaying = 0;
     struct
     {
-        SynthNote *adnote;
-        SynthNote *subnote;
-        SynthNote *padnote;
-        SynthNote *smplnote;
-        int sendtoparteffect;
+        SynthNote *adnote = nullptr;
+        SynthNote *subnote = nullptr;
+        SynthNote *padnote = nullptr;
+        SynthNote *smplnote = nullptr;
+        int sendtoparteffect = 0;
     } instumentNotes[NUM_TRACK_INSTRUMENTS];
-    int time;
+    int time = 0;
 };
 
 //the Track's instrument
