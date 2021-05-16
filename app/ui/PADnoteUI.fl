@@ -454,17 +454,17 @@ resui->setcbwidget(cbwidget,applybutton);}
           }
           Fl_Dial bwdial {
             label BandWidth
-            callback {bwcents->value(pars->setPbandwidth((int) o->value()));
+            callback {bwcents->value(pars->setPBandwidth((int) o->value()));
 cbwidget->do_callback();}
             xywh {15 295 35 35} box ROUND_UP_BOX labelsize 10 maximum 1000 step 1
-            code0 {o->value(pars->Pbandwidth);}
+            code0 {o->value(pars->PBandwidth);}
             code1 {if (pars->Pmode!=0) o->deactivate();}
             class WidgetPDial
           }
           Fl_Value_Output bwcents {
             label cents
             xywh {55 305 55 15} labelsize 10 align 6 maximum 10000 step 0.1
-            code0 {o->value(pars->setPbandwidth(pars->Pbandwidth));}
+            code0 {o->value(pars->setPBandwidth(pars->PBandwidth));}
             code1 {if (pars->Pmode!=0) o->deactivate();}
           }
           Fl_Group {} {
@@ -1066,7 +1066,7 @@ hpamppar1->value(pars->Php.amp.par1);
 hpamppar2->value(pars->Php.amp.par2);
 hpautoscale->value(pars->Php.autoscale);
 
-bwdial->value(pars->Pbandwidth);
+bwdial->value(pars->PBandwidth);
 if (pars->Pmode==0){
    bwprofilegroup->activate();
    bwdial->activate();

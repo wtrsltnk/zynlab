@@ -42,7 +42,7 @@ void PADnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
 
     xml->addparbool("stereo", _parameters->PStereo);
     xml->addpar("mode", _parameters->Pmode);
-    xml->addpar("bandwidth", _parameters->Pbandwidth);
+    xml->addpar("bandwidth", _parameters->PBandwidth);
     xml->addpar("bandwidth_scale", _parameters->Pbwscale);
 
     xml->beginbranch("HARMONIC_PROFILE");
@@ -168,7 +168,7 @@ void PADnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
 {
     _parameters->PStereo = xml->getparbool("stereo", _parameters->PStereo);
     _parameters->Pmode = xml->getpar127("mode", 0);
-    _parameters->Pbandwidth = xml->getpar("bandwidth", _parameters->Pbandwidth, 0, 1000);
+    _parameters->PBandwidth = xml->getpar("bandwidth", _parameters->PBandwidth, 0, 1000);
     _parameters->Pbwscale = xml->getpar127("bandwidth_scale", _parameters->Pbwscale);
 
     if (xml->enterbranch("HARMONIC_PROFILE"))

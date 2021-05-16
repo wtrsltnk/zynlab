@@ -31,7 +31,7 @@ SUBnoteParameters::SUBnoteParameters()
     BandWidthEnvelope = EnvelopeParams::ASRinit_bw(64, 0, 100, 70, 64, 60);
 
     GlobalFilter = new FilterParams(2, 80, 40);
-    GlobalFilterEnvelope = EnvelopeParams::ADSRinit_filter(0, 1, 64, 40, 64, 70, 60, 64);
+    FilterEnvelope = EnvelopeParams::ADSRinit_filter(0, 1, 64, 40, 64, 70, 60, 64);
 
     Defaults();
 }
@@ -42,7 +42,7 @@ SUBnoteParameters::~SUBnoteParameters()
     delete (FreqEnvelope);
     delete (BandWidthEnvelope);
     delete (GlobalFilter);
-    delete (GlobalFilterEnvelope);
+    delete (FilterEnvelope);
 }
 
 void SUBnoteParameters::Defaults()
@@ -54,7 +54,7 @@ void SUBnoteParameters::Defaults()
     Pfixedfreq = 0;
     PfixedfreqET = 0;
     Pnumstages = 2;
-    Pbandwidth = 40;
+    PBandwidth = 40;
     Phmagtype = 0;
     Pbwscale = 64;
     PStereo = 1;
@@ -80,14 +80,14 @@ void SUBnoteParameters::Defaults()
     Phmag[0] = 127;
 
     PGlobalFilterEnabled = 0;
-    PGlobalFilterVelocityScale = 64;
-    PGlobalFilterVelocityScaleFunction = 64;
+    PFilterVelocityScale = 64;
+    PFilterVelocityScaleFunction = 64;
 
     AmpEnvelope->Defaults();
     FreqEnvelope->Defaults();
     BandWidthEnvelope->Defaults();
     GlobalFilter->Defaults();
-    GlobalFilterEnvelope->Defaults();
+    FilterEnvelope->Defaults();
 }
 
 void SUBnoteParameters::InitPresets()
@@ -132,7 +132,7 @@ void SUBnoteParameters::InitPresets()
         frequencyParameters.AddPreset("overtone_spread_par3", &POvertoneSpread.par3);
         frequencyParameters.AddPreset("detune_type", &PDetuneType);
 
-        frequencyParameters.AddPreset("bandwidth", &Pbandwidth);
+        frequencyParameters.AddPreset("bandwidth", &PBandwidth);
         frequencyParameters.AddPreset("bandwidth_scale", &Pbwscale);
 
         frequencyParameters.AddPresetAsBool("freq_envelope_enabled", &PFreqEnvelopeEnabled);
@@ -152,11 +152,11 @@ void SUBnoteParameters::InitPresets()
         GlobalFilter->InitPresets();
         filterParameters.AddContainer(Preset("FILTER", *GlobalFilter));
 
-        filterParameters.AddPreset("filter_velocity_sensing", &PGlobalFilterVelocityScaleFunction);
-        filterParameters.AddPreset("filter_velocity_sensing_amplitude", &PGlobalFilterVelocityScale);
+        filterParameters.AddPreset("filter_velocity_sensing", &PFilterVelocityScaleFunction);
+        filterParameters.AddPreset("filter_velocity_sensing_amplitude", &PFilterVelocityScale);
 
-        GlobalFilterEnvelope->InitPresets();
-        filterParameters.AddContainer(Preset("FILTER_ENVELOPE", *GlobalFilterEnvelope));
+        FilterEnvelope->InitPresets();
+        filterParameters.AddContainer(Preset("FILTER_ENVELOPE", *FilterEnvelope));
     }
     AddContainer(filterParameters);
 }

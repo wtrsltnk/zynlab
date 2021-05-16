@@ -93,8 +93,8 @@ void SUBnote::setup(float freq,
 
     //global filter
     GlobalFilterCenterPitch = _parameters->GlobalFilter->getfreq()                        //center freq
-                              + (_parameters->PGlobalFilterVelocityScale / 127.0f * 6.0f) //velocity sensing
-                                    * (VelF(velocity, _parameters->PGlobalFilterVelocityScaleFunction) - 1);
+                              + (_parameters->PFilterVelocityScale / 127.0f * 6.0f) //velocity sensing
+                                    * (VelF(velocity, _parameters->PFilterVelocityScaleFunction) - 1);
 
     if (!legato)
     {
@@ -152,7 +152,7 @@ void SUBnote::setup(float freq,
         overtone_rolloff[n] = computerolloff(freq);
 
         //the bandwidth is not absolute(Hz); it is relative to frequency
-        float bw = powf(10, (_parameters->Pbandwidth - 127.0f) / 127.0f * 4) * numstages;
+        float bw = powf(10, (_parameters->PBandwidth - 127.0f) / 127.0f * 4) * numstages;
 
         //Bandwidth Scale
         bw *= powf(1000 / freq, (_parameters->Pbwscale - 64.0f) / 64.0f * 3.0f);
@@ -220,7 +220,7 @@ void SUBnote::setup(float freq,
         if (_parameters->PGlobalFilterEnabled != 0)
         {
             globalfiltercenterq = _parameters->GlobalFilter->getq();
-            GlobalFilterFreqTracking = _parameters->GlobalFilter->getfreqtracking(basefreq);
+            GlobalFilterFreqTracking = _parameters->GlobalFilter->getfreqtracking(freq);
         }
     }
     else
@@ -426,7 +426,7 @@ void SUBnote::initparameters(float freq)
         {
             GlobalFilterR = Filter::generate(_parameters->GlobalFilter);
         }
-        GlobalFilterEnvelope = new Envelope(_parameters->GlobalFilterEnvelope, freq);
+        GlobalFilterEnvelope = new Envelope(_parameters->FilterEnvelope, freq);
         GlobalFilterFreqTracking = _parameters->GlobalFilter->getfreqtracking(basefreq);
     }
     computecurrentparameters();

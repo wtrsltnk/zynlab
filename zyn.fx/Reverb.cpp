@@ -41,7 +41,7 @@ Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_)
       Plohidamp(80),
       Ptype(1),
       Proomsize(64),
-      Pbandwidth(30),
+      PBandwidth(30),
       roomsize(1.0f),
       rs(1.0f),
       bandwidth(nullptr),
@@ -466,10 +466,10 @@ void Reverb::setroomsize(unsigned char _Proomsize)
     settype(Ptype);
 }
 
-void Reverb::setbandwidth(unsigned char _Pbandwidth)
+void Reverb::setbandwidth(unsigned char _PBandwidth)
 {
-    Pbandwidth = _Pbandwidth;
-    float v = Pbandwidth / 127.0f;
+    PBandwidth = _PBandwidth;
+    float v = PBandwidth / 127.0f;
     if (bandwidth)
     {
         bandwidth->setBandwidth(powf(v, 2.0f) * 200.0f);
@@ -637,7 +637,7 @@ unsigned char Reverb::GetParameter(int npar) const
         }
         case ReverbPresets::ReverbBandwidth:
         {
-            return Pbandwidth;
+            return PBandwidth;
         }
         default:
         {

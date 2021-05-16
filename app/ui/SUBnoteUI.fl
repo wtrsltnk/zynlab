@@ -333,9 +333,9 @@ bandwidthsettingsui->redraw();}
         }
         Fl_Value_Slider bandwidth {
           label {Band Width}
-          callback {pars->Pbandwidth=(int) o->value();}
+          callback {pars->PBandwidth=(int) o->value();}
           xywh {225 40 115 15} type {Horz Knob} box NO_BOX labelsize 10 align 1 maximum 127 step 1
-          code0 {o->value(pars->Pbandwidth);}
+          code0 {o->value(pars->PBandwidth);}
         }
         Fl_Value_Slider bwidthscale {
           label {B.Width Scale}
@@ -352,13 +352,13 @@ bandwidthsettingsui->redraw();}
         Fl_Group filterenv {
           label {SUBsynth - Filter Envelope} open
           xywh {445 331 275 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->GlobalFilterEnvelope);}
+          code0 {o->init(pars->FilterEnvelope);}
           class EnvelopeUI
         } {}
         Fl_Group filterui {
           label {SUBsynthl - Filter} open
           xywh {445 246 275 75} box FLAT_BOX color 50 align 144
-          code0 {o->init(pars->GlobalFilter,&pars->PGlobalFilterVelocityScale,&pars->PGlobalFilterVelocityScaleFunction);}
+          code0 {o->init(pars->GlobalFilter,&pars->PFilterVelocityScale,&pars->PFilterVelocityScaleFunction);}
           class FilterUI
         } {}
       }
@@ -460,7 +460,7 @@ vsns->value(pars->PAmpVelocityScaleFunction);
 pan->value(pars->PPanning);
 
 
-bandwidth->value(pars->Pbandwidth);
+bandwidth->value(pars->PBandwidth);
 bwidthscale->value(pars->Pbwscale-64);
 bwee->value(pars->PBandWidthEnvelopeEnabled);
 if (pars->PBandWidthEnvelopeEnabled==0) bandwidthenvelopegroup->deactivate();

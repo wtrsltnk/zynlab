@@ -43,6 +43,7 @@ enum FMTYPE
     FREQ_MOD,
     PITCH_MOD
 };
+
 extern int ADnote_unison_sizes[];
 
 class ADnoteParameters :
@@ -56,26 +57,11 @@ public:
 
     void Defaults();
 
-    /******************************************
-    *     FREQUENCY GLOBAL PARAMETERS        *
-    ******************************************/
-    unsigned short int PDetune;       //fine detune
-    unsigned short int PCoarseDetune; //coarse detune+octave
-    unsigned char PDetuneType;        //detune type
-
-    unsigned char PBandwidth; //how much the relative fine detunes of the voices are changed
-
-    EnvelopeParams *FreqEnvelope; //Frequency Envelope
-
-    LFOParams *FreqLfo; //Frequency LFO
-
     /********************************************
     *     AMPLITUDE GLOBAL PARAMETERS          *
     ********************************************/
 
-    EnvelopeParams *AmpEnvelope;
-
-    LFOParams *AmpLfo;
+    LFOParams *AmpLfo = nullptr;
 
     unsigned char PPunchStrength;
     unsigned char PPunchTime;
@@ -85,22 +71,18 @@ public:
     /******************************************
     *        FILTER GLOBAL PARAMETERS        *
     ******************************************/
-    FilterParams *GlobalFilter;
 
-    // filter velocity sensing
-    unsigned char PFilterVelocityScale;
+    /** LFO Envelope */
+    LFOParams *FilterLfo = nullptr;
 
-    // filter velocity sensing
-    unsigned char PFilterVelocityScaleFunction;
+    /******************************************
+    *            OTHER PARAMETERS             *
+    ******************************************/
 
-    EnvelopeParams *FilterEnvelope;
+    /** RESONANCE */
+    Resonance *Reson = nullptr;
 
-    LFOParams *FilterLfo;
-
-    // RESONANCE
-    Resonance *Reson;
-
-    //how the randomness is applied to the harmonics on more voices using the same oscillator
+    /** how the randomness is applied to the harmonics on more voices using the same oscillator */
     unsigned char Hrandgrouping;
 
     ADnoteVoiceParam VoicePar[NUM_VOICES];

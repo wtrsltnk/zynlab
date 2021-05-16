@@ -55,8 +55,8 @@ public:
         int size);
 
     //returns the BandWidth in cents
-    float setPbandwidth(
-        int Pbandwidth);
+    float setPBandwidth(
+        int PBandwidth);
 
     //gets the n-th overtone position relatively to N harmonic
     float getNhr(
@@ -68,9 +68,6 @@ public:
     void export2wav(
         std::string basefilename,
         std::mutex &mutex);
-
-    //parameters
-    unsigned char Ppadsynth_used;
 
     //the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
     //the harmonic profile is used only on mode 0
@@ -103,7 +100,7 @@ public:
         unsigned char onehalf;   //what part of the base function is used to make the distribution
     } Php;
 
-    unsigned int Pbandwidth; //the values are from 0 to 1000
+    unsigned int PBandwidth; //the values are from 0 to 1000
     unsigned char Pbwscale;  //how the bandwidth is increased according to the harmonic's frequency
 
     struct
@@ -118,44 +115,29 @@ public:
         unsigned char basenote, oct, smpoct;
     } Pquality;
 
-    //frequency parameters
-    //If the base frequency is fixed to 440 Hz
-    unsigned char Pfixedfreq;
+    /***************************
+    *   AMPLITUDE PARAMETERS   *
+    ***************************/
 
-    /* Equal temperate (this is used only if the Pfixedfreq is enabled)
-           If this parameter is 0, the frequency is fixed (to 440 Hz);
-           if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
-    unsigned char PfixedfreqET;
-    unsigned short int PDetune;       //fine detune
-    unsigned short int PCoarseDetune; //coarse detune+octave
-    unsigned char PDetuneType;        //detune type
-
-    EnvelopeParams *FreqEnvelope; //Frequency Envelope
-    LFOParams *FreqLfo;           //Frequency LFO
-
-    EnvelopeParams *AmpEnvelope;
-
-    LFOParams *AmpLfo;
+    /** Amplitude LFO */
+    LFOParams *AmpLfo = nullptr;
 
     unsigned char PPunchStrength;
     unsigned char PPunchTime;
     unsigned char PPunchStretch;
     unsigned char PPunchVelocitySensing;
 
-    //Filter Parameters
-    FilterParams *GlobalFilter;
+    /*************************
+    *   FILTER PARAMETERS    *
+    *************************/
 
-    // filter velocity sensing
-    unsigned char PFilterVelocityScale;
+    /** LFO Envelope */
+    LFOParams *FilterLfo = nullptr;
 
-    // filter velocity sensing
-    unsigned char PFilterVelocityScaleFunction;
+    /** Oscillator */
+    OscilGen *oscilgen = nullptr;
 
-    EnvelopeParams *FilterEnvelope;
-    LFOParams *FilterLfo;
-
-    OscilGen *oscilgen;
-    Resonance *resonance;
+    Resonance *resonance = nullptr;
 
     struct
     {

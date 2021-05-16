@@ -69,7 +69,6 @@ PADnoteParameters::~PADnoteParameters()
 
 void PADnoteParameters::Defaults()
 {
-    Ppadsynth_used = 1;
     Pmode = 0;
     Php.base.type = 0;
     Php.base.par1 = 80;
@@ -84,7 +83,7 @@ void PADnoteParameters::Defaults()
     Php.autoscale = true;
     Php.onehalf = 0;
 
-    setPbandwidth(500);
+    setPBandwidth(500);
     Pbwscale = 0;
 
     resonance->Defaults();
@@ -305,10 +304,10 @@ float PADnoteParameters::getprofile(float *smp, int size)
  * Compute the real bandwidth in cents and returns it
  * Also, sets the bandwidth parameter
  */
-float PADnoteParameters::setPbandwidth(int Pbandwidth)
+float PADnoteParameters::setPBandwidth(int PBandwidth)
 {
-    this->Pbandwidth = static_cast<unsigned char>(Pbandwidth);
-    float result = powf(Pbandwidth / 1000.0f, 1.1f);
+    this->PBandwidth = static_cast<unsigned char>(PBandwidth);
+    float result = powf(PBandwidth / 1000.0f, 1.1f);
     result = powf(10.0f, result * 4.0f) * 0.25f;
     return result;
 }
@@ -416,7 +415,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             continue;
 
         //compute the bandwidth of each harmonic
-        float bandwidthcents = setPbandwidth(Pbandwidth);
+        float bandwidthcents = setPBandwidth(PBandwidth);
         float bw =
             (powf(2.0f, bandwidthcents / 1200.0f) - 1.0f) * basefreq / bwadjust;
         float power = 1.0f;
@@ -697,7 +696,7 @@ void PADnoteParameters::InitPresets()
 
     AddPresetAsBool("stereo", &PStereo);
     AddPreset("mode", &Pmode);
-    AddPreset("bandwidth", &Pbandwidth);
+    AddPreset("bandwidth", &PBandwidth);
     AddPreset("bandwidth_scale", &Pbwscale);
 
     Preset harmonicProfile("HARMONIC_PROFILE");

@@ -53,7 +53,7 @@ private:
     unsigned char Plohidamp;  //Low/HighFrequency Damping
     unsigned char Ptype;      //reverb type
     unsigned char Proomsize;  //room size
-    unsigned char Pbandwidth; //bandwidth
+    unsigned char PBandwidth; //bandwidth
 
     //parameter control
     void setvolume(unsigned char _Pvolume);
@@ -65,7 +65,7 @@ private:
     void setlpf(unsigned char _Plpf);
     void settype(unsigned char _Ptype);
     void setroomsize(unsigned char _Proomsize);
-    void setbandwidth(unsigned char _Pbandwidth);
+    void setbandwidth(unsigned char _PBandwidth);
     void processmono(int ch, float *output, const float *inputbuf);
 
     //Parameters

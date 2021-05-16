@@ -80,7 +80,7 @@ void SUBnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
         xml->addpar("overtone_spread_par3", _parameters->POvertoneSpread.par3);
         xml->addpar("detune_type", _parameters->PDetuneType);
 
-        xml->addpar("bandwidth", _parameters->Pbandwidth);
+        xml->addpar("bandwidth", _parameters->PBandwidth);
         xml->addpar("bandwidth_scale", _parameters->Pbwscale);
 
         xml->addparbool("freq_envelope_enabled", _parameters->PFreqEnvelopeEnabled);
@@ -116,12 +116,12 @@ void SUBnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
             }
             xml->endbranch();
 
-            xml->addpar("filter_velocity_sensing", _parameters->PGlobalFilterVelocityScaleFunction);
-            xml->addpar("filter_velocity_sensing_amplitude", _parameters->PGlobalFilterVelocityScale);
+            xml->addpar("filter_velocity_sensing", _parameters->PFilterVelocityScaleFunction);
+            xml->addpar("filter_velocity_sensing_amplitude", _parameters->PFilterVelocityScale);
 
             xml->beginbranch("FILTER_ENVELOPE");
             {
-                EnvelopeParamsSerializer(_parameters->GlobalFilterEnvelope).Serialize(xml);
+                EnvelopeParamsSerializer(_parameters->FilterEnvelope).Serialize(xml);
             }
             xml->endbranch();
         }
@@ -179,7 +179,7 @@ void SUBnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
         _parameters->updateFrequencyMultipliers();
         _parameters->PDetuneType = xml->getpar127("detune_type", _parameters->PDetuneType);
 
-        _parameters->Pbandwidth = xml->getpar127("bandwidth", _parameters->Pbandwidth);
+        _parameters->PBandwidth = xml->getpar127("bandwidth", _parameters->PBandwidth);
         _parameters->Pbwscale = xml->getpar127("bandwidth_scale", _parameters->Pbwscale);
 
         _parameters->PFreqEnvelopeEnabled = xml->getparbool("freq_envelope_enabled", _parameters->PFreqEnvelopeEnabled);
@@ -208,12 +208,12 @@ void SUBnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
             xml->exitbranch();
         }
 
-        _parameters->PGlobalFilterVelocityScaleFunction = xml->getpar127("filter_velocity_sensing", _parameters->PGlobalFilterVelocityScaleFunction);
-        _parameters->PGlobalFilterVelocityScale = xml->getpar127("filter_velocity_sensing_amplitude", _parameters->PGlobalFilterVelocityScale);
+        _parameters->PFilterVelocityScaleFunction = xml->getpar127("filter_velocity_sensing", _parameters->PFilterVelocityScaleFunction);
+        _parameters->PFilterVelocityScale = xml->getpar127("filter_velocity_sensing_amplitude", _parameters->PFilterVelocityScale);
 
         if (xml->enterbranch("FILTER_ENVELOPE"))
         {
-            EnvelopeParamsSerializer(_parameters->GlobalFilterEnvelope).Deserialize(xml);
+            EnvelopeParamsSerializer(_parameters->FilterEnvelope).Deserialize(xml);
             xml->exitbranch();
         }
 

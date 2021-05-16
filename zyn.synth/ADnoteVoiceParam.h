@@ -19,7 +19,9 @@ public:
 
     void Defaults();
 
-    void Enable(Resonance *Reson);
+    void Enable(
+        Resonance *Reson);
+
     void Disable();
 
     /** If the voice is enabled */
@@ -44,7 +46,7 @@ public:
     unsigned char Unison_vibratto_speed;
 
     /** Unison invert phase */
-    unsigned char Unison_invert_phase; //0=none,1=random,2=50%,3=33%,4=25%
+    unsigned char Unison_invert_phase; // 0=none,1=random,2=50%,3=33%,4=25%
 
     /** Type of the voice (0=Sound,1=Noise)*/
     unsigned char Type;
@@ -55,119 +57,85 @@ public:
     /** If the resonance is enabled for this voice */
     unsigned char Presonance;
 
-    // What external oscil should I use, -1 for internal OscilSmp&FMSmp
+    /** What external oscil should I use, -1 for internal OscilSmp&FMSmp */
     short int Pextoscil, PextFMoscil;
-    // it is not allowed that the externoscil,externFMoscil => current voice
+    /** it is not allowed that the externoscil,externFMoscil => current voice */
 
-    // oscillator phases
+    /** oscillator phases */
     unsigned char Poscilphase, PFMoscilphase;
 
-    // filter bypass
+    /** filter bypass */
     unsigned char Pfilterbypass;
 
     /** Voice oscillator */
-    OscilGen *OscilSmp;
-
-    /**********************************
-    *     FREQUENCY PARAMETERS        *
-    **********************************/
-
-    /** If the base frequency is fixed to 440 Hz*/
-    unsigned char Pfixedfreq;
-
-    /* Equal temperate (this is used only if the Pfixedfreq is enabled)
-       If this parameter is 0, the frequency is fixed (to 440 Hz);
-       if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
-    unsigned char PfixedfreqET;
-
-    /** Fine detune */
-    unsigned short int PDetune;
-
-    /** Coarse detune + octave */
-    unsigned short int PCoarseDetune;
-
-    /** Detune type */
-    unsigned char PDetuneType;
-
-    /* Frequency Envelope */
-    unsigned char PFreqEnvelopeEnabled;
-    EnvelopeParams *FreqEnvelope;
-
-    /* Frequency LFO */
-    unsigned char PFreqLfoEnabled;
-    LFOParams *FreqLfo;
+    OscilGen *OscilSmp = nullptr;
 
     /***************************
     *   AMPLITUDE PARAMETERS   *
     ***************************/
 
-    /* If the Volume negative */
+    /** If the Volume negative */
     unsigned char PVolumeminus;
 
-    /* Amplitude Envelope */
-    unsigned char PAmpEnvelopeEnabled;
-    EnvelopeParams *AmpEnvelope;
-
-    /* Amplitude LFO */
+    /** Amplitude LFO */
     unsigned char PAmpLfoEnabled;
-    LFOParams *AmpLfo;
+    LFOParams *AmpLfo = nullptr;
 
     /*************************
     *   FILTER PARAMETERS    *
     *************************/
 
-    /* Voice Filter */
+    /** Voice Filter */
     unsigned char PFilterEnabled;
-    FilterParams *VoiceFilter;
+    FilterParams *VoiceFilter = nullptr;
 
-    /* Filter Envelope */
+    /** Filter Envelope */
     unsigned char PFilterEnvelopeEnabled;
-    EnvelopeParams *FilterEnvelope;
 
-    /* LFO Envelope */
+    /** LFO Envelope */
     unsigned char PFilterLfoEnabled;
-    LFOParams *FilterLfo;
+    LFOParams *FilterLfo = nullptr;
 
     /****************************
     *   MODULLATOR PARAMETERS   *
     ****************************/
 
-    /* Modullator Parameters (0=off,1=Morph,2=RM,3=PM,4=FM.. */
+    /** Modullator Parameters (0=off,1=Morph,2=RM,3=PM,4=FM.. */
     unsigned char PFMEnabled;
 
-    /* Voice that I use as modullator instead of FMSmp.
+    /** Voice that I use as modullator instead of FMSmp.
        It is -1 if I use FMSmp(default).
        It maynot be equal or bigger than current voice */
     short int PFMVoice;
 
-    /* Modullator oscillator */
-    OscilGen *FMSmp;
+    /** Modullator oscillator */
+    OscilGen *FMSmp = nullptr;
 
-    /* Modullator Volume */
+    /** Modullator Volume */
     unsigned char PFMVolume;
 
-    /* Modullator damping at higher frequencies */
+    /** Modullator damping at higher frequencies */
     unsigned char PFMVolumeDamp;
 
-    /* Modullator Velocity Sensing */
+    /** Modullator Velocity Sensing */
     unsigned char PFMVelocityScaleFunction;
 
-    /* Fine Detune of the Modullator*/
+    /** Fine Detune of the Modullator*/
     unsigned short int PFMDetune;
 
-    /* Coarse Detune of the Modullator */
+    /** Coarse Detune of the Modullator */
     unsigned short int PFMCoarseDetune;
 
-    /* The detune type */
+    /** The detune type */
     unsigned char PFMDetuneType;
 
     /* Frequency Envelope of the Modullator */
     unsigned char PFMFreqEnvelopeEnabled;
-    EnvelopeParams *FMFreqEnvelope;
+    EnvelopeParams *FMFreqEnvelope = nullptr;
 
-    /* Frequency Envelope of the Modullator */
+    /** Frequency Envelope of the Modullator */
     unsigned char PFMAmpEnvelopeEnabled;
-    EnvelopeParams *FMAmpEnvelope;
+    EnvelopeParams *FMAmpEnvelope = nullptr;
 };
 
 #endif // ADNOTEVOICEPARAM_H
