@@ -25,12 +25,12 @@
 #include <cmath>
 #include <zyn.common/WavFileWriter.h>
 
-PADnoteParameters::PADnoteParameters(IFFTwrapper *fft)
+PADnoteParameters::PADnoteParameters()
 {
     setpresettype("Ppadsynth");
 
     resonance = new Resonance();
-    oscilgen = new OscilGen(fft, resonance);
+    oscilgen = new OscilGen(resonance);
     oscilgen->ADvsPAD = true;
 
     FreqEnvelope = EnvelopeParams::ASRinit(0, 0, 64, 50, 64, 60);
@@ -559,7 +559,8 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum, int size, f
 /*
  * Applies the parameters (i.e. computes all the samples, based on parameters);
  */
-void PADnoteParameters::ApplyParameters(IMixer *mixer)
+void PADnoteParameters::ApplyParameters(
+    std::mutex &mutex)
 {
     const int samplesize = ((int(1)) << (Pquality.samplesize + 14));
     int spectrumsize = samplesize / 2;
@@ -599,15 +600,22 @@ void PADnoteParameters::ApplyParameters(IMixer *mixer)
         float basefreqadjust = powf(2.0f, tmp);
 
         if (Pmode == 0)
-            generatespectrum_bandwidthMode(spectrum.get(),
-                                           spectrumsize,
-                                           basefreq * basefreqadjust,
-                                           profile.get(),
-                                           profilesize,
-                                           bwadjust);
+        {
+            generatespectrum_bandwidthMode(
+                spectrum.get(),
+                spectrumsize,
+                basefreq * basefreqadjust,
+                profile.get(),
+                profilesize,
+                bwadjust);
+        }
         else
-            generatespectrum_otherModes(spectrum.get(), spectrumsize,
-                                        basefreq * basefreqadjust);
+        {
+            generatespectrum_otherModes(
+                spectrum.get(),
+                spectrumsize,
+                basefreq * basefreqadjust);
+        }
 
         const int extra_samples = 5; //the last samples contains the first samples (used for linear/cubic interpolation)
         newsample.smp = new float[samplesize + extra_samples];
@@ -617,6 +625,7 @@ void PADnoteParameters::ApplyParameters(IMixer *mixer)
         {
             fftfreqs.get()[i] = std::polar(spectrum.get()[i], float(RND) * 6.29f);
         }
+
         localFft.freqs2smps(fftfreqs.get(), newsample.smp); //that's all; here is the only ifft for the whole sample; no windows are used ;-)
 
         //normalize(rms)
@@ -635,47 +644,30 @@ void PADnoteParameters::ApplyParameters(IMixer *mixer)
             newsample.smp[i + samplesize] = newsample.smp[i];
 
         //replace the current sample with the new computed sample
-        if (mixer != nullptr)
-        {
-            mixer->Lock();
-            deletesample(nsample);
-            sample[nsample].smp = newsample.smp;
-            sample[nsample].size = samplesize;
-            sample[nsample].basefreq = basefreq * basefreqadjust;
-            mixer->Unlock();
-        }
-        else
-        {
-            deletesample(nsample);
-            sample[nsample].smp = newsample.smp;
-            sample[nsample].size = samplesize;
-            sample[nsample].basefreq = basefreq * basefreqadjust;
-        }
+        mutex.lock();
+        deletesample(nsample);
+        sample[nsample].smp = newsample.smp;
+        sample[nsample].size = samplesize;
+        sample[nsample].basefreq = basefreq * basefreqadjust;
+        mutex.unlock();
+
         newsample.smp = nullptr;
     }
 
     //delete the additional samples that might exists and are not useful
-    if (mixer != nullptr)
+    mutex.lock();
+    for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
     {
-        mixer->Lock();
-        for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
-        {
-            deletesample(i);
-        }
-        mixer->Unlock();
+        deletesample(i);
     }
-    else
-    {
-        for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
-        {
-            deletesample(i);
-        }
-    }
+    mutex.unlock();
 }
 
-void PADnoteParameters::export2wav(std::string basefilename, IMixer *mixer)
+void PADnoteParameters::export2wav(
+    std::string basefilename,
+    std::mutex &mutex)
 {
-    ApplyParameters(mixer);
+    ApplyParameters(mutex);
     basefilename += "_PADsynth_";
     for (int k = 0; k < PAD_MAX_SAMPLES; ++k)
     {
@@ -686,10 +678,11 @@ void PADnoteParameters::export2wav(std::string basefilename, IMixer *mixer)
         std::string filename = basefilename + std::string(tmpstr) + ".wav";
 
         WavFileWriter wav(filename, SystemSettings::Instance().samplerate, 1);
-        if(wav.good()) {
+        if (wav.good())
+        {
             int nsmps = sample[k].size;
             short int *smps = new short int[nsmps];
-            for(int i = 0; i < nsmps; ++i)
+            for (int i = 0; i < nsmps; ++i)
                 smps[i] = (short int)(sample[k].smp[i] * 32767.0f);
             wav.writeMonoSamples(nsmps, smps);
         }

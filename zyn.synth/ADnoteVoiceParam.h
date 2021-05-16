@@ -19,7 +19,7 @@ public:
 
     void Defaults();
 
-    void Enable(IFFTwrapper *fft, Resonance *Reson);
+    void Enable(Resonance *Reson);
     void Disable();
 
     /** If the voice is enabled */

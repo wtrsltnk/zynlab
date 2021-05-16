@@ -35,13 +35,14 @@
 #include <zyn.common/globals.h>
 #include <zyn.dsp/FilterParams.h>
 
+#include <mutex>
 #include <string>
 
 class PADnoteParameters :
     public AbstractNoteParameters
 {
 public:
-    PADnoteParameters(IFFTwrapper *fft);
+    PADnoteParameters();
     virtual ~PADnoteParameters();
 
     void InitPresets();
@@ -49,7 +50,24 @@ public:
     void Defaults();
 
     //returns a value between 0.0f-1.0f that represents the estimation perceived bandwidth
-    float getprofile(float *smp, int size);
+    float getprofile(
+        float *smp,
+        int size);
+
+    //returns the BandWidth in cents
+    float setPbandwidth(
+        int Pbandwidth);
+
+    //gets the n-th overtone position relatively to N harmonic
+    float getNhr(
+        int n);
+
+    void ApplyParameters(
+        std::mutex &mutex);
+
+    void export2wav(
+        std::string basefilename,
+        std::mutex &mutex);
 
     //parameters
     unsigned char Ppadsynth_used;
@@ -136,12 +154,6 @@ public:
     EnvelopeParams *FilterEnvelope;
     LFOParams *FilterLfo;
 
-    float setPbandwidth(int Pbandwidth); //returns the BandWidth in cents
-    float getNhr(int n);                 //gets the n-th overtone position relatively to N harmonic
-
-    void ApplyParameters(IMixer *mixer);
-    void export2wav(std::string basefilename, IMixer *mixer);
-
     OscilGen *oscilgen;
     Resonance *resonance;
 
@@ -153,17 +165,23 @@ public:
     } sample[PAD_MAX_SAMPLES], newsample;
 
 private:
-    void generatespectrum_bandwidthMode(float *spectrum,
-                                        int size,
-                                        float basefreq,
-                                        const float *profile,
-                                        int profilesize,
-                                        float bwadjust);
-    void generatespectrum_otherModes(float *spectrum,
-                                     int size,
-                                     float basefreq);
+    void generatespectrum_bandwidthMode(
+        float *spectrum,
+        int size,
+        float basefreq,
+        const float *profile,
+        int profilesize,
+        float bwadjust);
+
+    void generatespectrum_otherModes(
+        float *spectrum,
+        int size,
+        float basefreq);
+
     void deletesamples();
-    void deletesample(int n);
+
+    void deletesample(
+        int n);
 };
 
 #endif

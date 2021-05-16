@@ -41,7 +41,6 @@ class PADnoteParameters;
 class SampleNoteParameters;
 class SynthNote;
 class XMLWrapper;
-class IFFTwrapper;
 
 enum NoteStatus
 {
@@ -71,12 +70,12 @@ struct TrackNotes
 class Instrument
 {
 public:
-    ADnoteParameters *adpars;
-    SUBnoteParameters *subpars;
-    PADnoteParameters *padpars;
-    SampleNoteParameters *smplpars;
+    ADnoteParameters *adpars = nullptr;
+    SUBnoteParameters *subpars = nullptr;
+    PADnoteParameters *padpars = nullptr;
+    SampleNoteParameters *smplpars = nullptr;
     unsigned char Penabled, Pmuted, Pminkey, Pmaxkey;
-    unsigned char *Pname;
+    unsigned char Pname[TRACK_MAX_NAME_LEN];
     unsigned char Padenabled, Psubenabled, Ppadenabled, Psmplenabled;
     unsigned char Psendtoparteffect;
     unsigned char padding[3];
@@ -85,8 +84,8 @@ public:
 /** Track implementation*/
 class Track : public WrappedPresets
 {
-    float *_tmpoutr;
-    float *_tmpoutl;
+    float *_tmpoutr = nullptr;
+    float *_tmpoutl = nullptr;
 
 public:
     Track();
@@ -112,7 +111,7 @@ public:
 
     virtual void ComputeInstrumentSamples(); // compute Track output
 
-    void ApplyParameters(bool lockmutex = true);
+    void ApplyParameters();
 
     void Cleanup(bool final = false);
     int GetActiveNotes();
@@ -124,24 +123,24 @@ public:
     void setkeylimit(unsigned char Pkeylimit);
     void setkititemstatus(int kititem, int Penabled_);
 
-    unsigned char Penabled;
-    unsigned char Pvolume; /**<Track volume*/
+    unsigned char Penabled = 0;
+    unsigned char Pvolume = 0; /**<Track volume*/
     void setPvolume(unsigned char Pvolume);
-    unsigned char Ppanning; //Track panning
+    unsigned char Ppanning = 0; //Track panning
     void setPpanning(unsigned char Ppanning);
-    unsigned char Pminkey;   /**<the minimum key that the Track receives noteon messages*/
-    unsigned char Pmaxkey;   //the maximum key that the Track receives noteon messages
-    unsigned char Pkeyshift; //Track keyshift
-    unsigned char Prcvchn;   //from what midi channel it receive commnads
-    unsigned char Pvelsns;   //velocity sensing (amplitude velocity scale)
-    unsigned char Pveloffs;  //velocity offset
-    unsigned char Pnoteon;   //if the Track receives NoteOn messages
-    unsigned char Pkitmode;  //if the kitmode is enabled
-    unsigned char Pdrummode; //if all keys are mapped and the system is 12tET (used for drums)
+    unsigned char Pminkey = 0;   /**<the minimum key that the Track receives noteon messages*/
+    unsigned char Pmaxkey = 0;   //the maximum key that the Track receives noteon messages
+    unsigned char Pkeyshift = 0; //Track keyshift
+    unsigned char Prcvchn = 0;   //from what midi channel it receive commnads
+    unsigned char Pvelsns = 0;   //velocity sensing (amplitude velocity scale)
+    unsigned char Pveloffs = 0;  //velocity offset
+    unsigned char Pnoteon = 0;   //if the Track receives NoteOn messages
+    unsigned char Pkitmode = 0;  //if the kitmode is enabled
+    unsigned char Pdrummode = 0; //if all keys are mapped and the system is 12tET (used for drums)
 
-    unsigned char Ppolymode;   //Track mode - 0=monophonic , 1=polyphonic
-    unsigned char Plegatomode; // 0=normal, 1=legato
-    unsigned char Pkeylimit;   //how many keys are alowed to be played same time (0=off), the older will be relased
+    unsigned char Ppolymode = 0;   //Track mode - 0=monophonic , 1=polyphonic
+    unsigned char Plegatomode = 0; // 0=normal, 1=legato
+    unsigned char Pkeylimit = 0;   //how many keys are alowed to be played same time (0=off), the older will be relased
 
     unsigned char Pname[TRACK_MAX_NAME_LEN + 1]; //name of the instrument
     struct
@@ -161,16 +160,16 @@ public:
     void ComputePeakLeftAndRight(float volume, float &peakl, float &peakr);
 
 public:
-    float *partoutl; //Left channel output of the Track
-    float *partoutr; //Right channel output of the Track
+    float *partoutl = nullptr; //Left channel output of the Track
+    float *partoutr = nullptr; //Right channel output of the Track
 
     float *partfxinputl[NUM_TRACK_EFX + 1]; //Left and right signal that pass thru part effects;
     float *partfxinputr[NUM_TRACK_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
-    float volume;
-    float oldvolumel;
-    float oldvolumer; //this is applied by Master
-    float panning;    //this is applied by Master, too
+    float volume = 0;
+    float oldvolumel = 0;
+    float oldvolumer = 0; //this is applied by Master
+    float panning = 0;    //this is applied by Master, too
 
     Controller ctl;
 
@@ -178,7 +177,7 @@ public:
     unsigned char Pefxroute[NUM_TRACK_EFX];  //how the effect's output is routed(to next effect/to out)
     unsigned char Pefxbypass[NUM_TRACK_EFX]; //if the effects are bypassed
 
-    int lastnote;
+    int lastnote = 0;
 
     struct
     {
@@ -195,16 +194,16 @@ private:
 
     int _killallnotes; //is set to 1 if I want to kill all notes
 
-    unsigned int _lastpos, _lastposb; // To keep track of previously used pos and posb.
-    bool _lastlegatomodevalid;        // To keep track of previous legatomodevalid.
+    unsigned int _lastpos = 0, _lastposb = 0; // To keep track of previously used pos and posb.
+    bool _lastlegatomodevalid = false;        // To keep track of previous legatomodevalid.
 
     // MonoMem stuff
     std::list<unsigned char> _monomemnotes; // A list to remember held notes.
     struct
     {
-        unsigned char velocity;
-        unsigned char stub[3];
-        int mkeyshift; // I'm not sure masterkeyshift should be remembered.
+        unsigned char velocity = 0;
+        unsigned char stub[3] = {0, 0, 0};
+        int mkeyshift = 0; // I'm not sure masterkeyshift should be remembered.
     } _monomem[256];
     /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to
@@ -213,10 +212,9 @@ private:
 
     TrackNotes _trackNotes[POLIPHONY];
 
-    float _oldfreq; //this is used for portamento
-    IMixer *_mixer;
-    Microtonal *_microtonal;
-    IFFTwrapper *_fft;
+    float _oldfreq = 0; //this is used for portamento
+    IMixer *_mixer = nullptr;
+    Microtonal *_microtonal = nullptr;
     std::mutex _instrumentMutex;
 };
 

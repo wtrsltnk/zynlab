@@ -36,12 +36,13 @@ target_sources(zyn.common
         WaveShapeSmps.h
         base64.cpp
         base64.h
+        circularbuffer.h
         dr_wav.h
         filesystemapi.cpp
         filesystemapi.h
         globals.cpp
         globals.h
-)
+    )
 
 target_link_libraries(zyn.common
     lib.mxml

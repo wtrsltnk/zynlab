@@ -98,12 +98,10 @@ void rmsNormalize(fft_t *freqs)
 
 #define DIFF(par) (old##par != P##par)
 
-OscilGen::OscilGen(IFFTwrapper *fft_, Resonance *res_)
+OscilGen::OscilGen(Resonance *res_)
 {
-    assert(fft_);
-
     setpresettype("Poscilgen");
-    fft = fft_;
+    _fft = IFFTwrapper::GlobalInstance();
     res = res_;
 
     tmpsmps = new float[SystemSettings::Instance().oscilsize];
@@ -204,7 +202,7 @@ void OscilGen::convert2sine()
     auto *freqs = new fft_t[SystemSettings::Instance().oscilsize / 2];
 
     get(oscil, -1.0f);
-    fft->smps2freqs(oscil, freqs);
+    _fft->smps2freqs(oscil, freqs);
 
     normalize(freqs);
 
@@ -336,7 +334,7 @@ void OscilGen::changebasefunction()
     if (Pcurrentbasefunc != 0)
     {
         getbasefunction(tmpsmps);
-        fft->smps2freqs(tmpsmps, basefuncFFTfreqs);
+        _fft->smps2freqs(tmpsmps, basefuncFFTfreqs);
         clearDC(basefuncFFTfreqs);
     }
     else //in this case basefuncFFTfreqs are not used
@@ -382,7 +380,7 @@ void OscilGen::waveshape()
         double gain = i / (SystemSettings::Instance().oscilsize / 8.0);
         oscilFFTfreqs[SystemSettings::Instance().oscilsize / 2 - i] *= gain;
     }
-    fft->freqs2smps(oscilFFTfreqs, tmpsmps);
+    _fft->freqs2smps(oscilFFTfreqs, tmpsmps);
 
     //Normalize
     normalize(tmpsmps, SystemSettings::Instance().oscilsize);
@@ -390,7 +388,7 @@ void OscilGen::waveshape()
     //Do the waveshaping
     waveShapeSmps(SystemSettings::Instance().oscilsize, tmpsmps, Pwaveshapingfunction, Pwaveshaping);
 
-    fft->smps2freqs(tmpsmps, oscilFFTfreqs); //perform FFT
+    _fft->smps2freqs(tmpsmps, oscilFFTfreqs); //perform FFT
 }
 
 /*
@@ -434,7 +432,7 @@ void OscilGen::modulation()
         double tmp = i / (SystemSettings::Instance().oscilsize / 8.0);
         oscilFFTfreqs[SystemSettings::Instance().oscilsize / 2 - i] *= tmp;
     }
-    fft->freqs2smps(oscilFFTfreqs, tmpsmps);
+    _fft->freqs2smps(oscilFFTfreqs, tmpsmps);
     unsigned int extra_points = 2;
     auto *in = new float[SystemSettings::Instance().oscilsize + extra_points];
 
@@ -481,7 +479,7 @@ void OscilGen::modulation()
     }
 
     delete[] in;
-    fft->smps2freqs(tmpsmps, oscilFFTfreqs); //perform FFT
+    _fft->smps2freqs(tmpsmps, oscilFFTfreqs); //perform FFT
 }
 
 /*
@@ -934,7 +932,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
             smps[i - 1] = abs(outoscilFFTfreqs, i);
     else
     {
-        fft->freqs2smps(outoscilFFTfreqs, smps);
+        _fft->freqs2smps(outoscilFFTfreqs, smps);
         for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize; ++i)
             smps[i] *= 0.25f; //correct the amplitude
     }
@@ -1003,7 +1001,7 @@ void OscilGen::useasbase()
 void OscilGen::getcurrentbasefunction(float *smps)
 {
     if (Pcurrentbasefunc != 0)
-        fft->freqs2smps(basefuncFFTfreqs, smps);
+        _fft->freqs2smps(basefuncFFTfreqs, smps);
     else
         getbasefunction(smps); //the sine case
 }

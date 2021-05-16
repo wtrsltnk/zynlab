@@ -45,23 +45,23 @@ public:
 
     //Parameters
     //AMPLITUDE PARAMETRERS
-    EnvelopeParams *AmpEnvelope;
+    EnvelopeParams *AmpEnvelope = nullptr;
 
     //Frequency Parameters
     unsigned short int PDetune;
     unsigned short int PCoarseDetune;
     unsigned char PDetuneType;
     unsigned char PFreqEnvelopeEnabled;
-    EnvelopeParams *FreqEnvelope;
+    EnvelopeParams *FreqEnvelope = nullptr;
     unsigned char PBandWidthEnvelopeEnabled;
-    EnvelopeParams *BandWidthEnvelope;
+    EnvelopeParams *BandWidthEnvelope = nullptr;
 
     //Filter Parameters (Global)
     unsigned char PGlobalFilterEnabled;
-    FilterParams *GlobalFilter;
+    FilterParams *GlobalFilter = nullptr;
     unsigned char PGlobalFilterVelocityScale;
     unsigned char PGlobalFilterVelocityScaleFunction;
-    EnvelopeParams *GlobalFilterEnvelope;
+    EnvelopeParams *GlobalFilterEnvelope = nullptr;
 
     //Other Parameters
 

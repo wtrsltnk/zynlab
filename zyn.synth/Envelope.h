@@ -31,19 +31,30 @@ class Envelope
 {
 public:
     /**Constructor*/
-    Envelope(class EnvelopeParams *envpars, float basefreq);
+    Envelope(
+        class EnvelopeParams *envpars,
+        float basefreq);
+
     /**Destructor*/
     ~Envelope();
+
     void relasekey();
+
     float envout();
+
     float envout_dB();
+
     /**Determines the status of the Envelope
          * @return returns 1 if the envelope is finished*/
     bool finished() const;
 
 private:
-    float env_rap2dB(float rap);
-    float env_dB2rap(float db);
+    float env_rap2dB(
+        float rap);
+
+    float env_dB2rap(
+        float db);
+
     int envpoints;
     int envsustain;                    //"-1" means disabled
     float envdt[MAX_ENVELOPE_POINTS];  //millisecons

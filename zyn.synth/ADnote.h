@@ -48,18 +48,31 @@ public:
      * @param portamento_ 1 if the note has portamento
      * @param midinote_ The midi number of the note
      * @param besilent Start silent note if true*/
-    ADnote(ADnoteParameters *pars, Controller *ctl_,
-           float freq, float velocity, int portamento_, int midinote_,
+    ADnote(ADnoteParameters *pars,
+           Controller *ctl_,
+           float freq,
+           float velocity,
+           int portamento_,
+           int midinote_,
            bool besilent);
+
     /**Destructor*/
     virtual ~ADnote();
 
     /**Alters the playing note for legato effect*/
-    void legatonote(float freq, float velocity, int portamento_,
-                    int midinote_, bool externcall);
+    void legatonote(
+        float freq,
+        float velocity,
+        int portamento_,
+        int midinote_,
+        bool externcall);
 
-    int noteout(float *outl, float *outr);
+    int noteout(
+        float *outl,
+        float *outr);
+
     void relasekey();
+
     bool finished() const;
 
 private:
@@ -111,13 +124,13 @@ private:
     inline void fadein(float *smps) const;
 
     //GLOBALS
-    ADnoteParameters *partparams;
-    unsigned char stereo; //if the note is stereo (allows note Panning)
-    int midinote;
-    float velocity, basefreq;
+    ADnoteParameters *partparams = nullptr;
+    unsigned char stereo = 0; //if the note is stereo (allows note Panning)
+    int midinote = 0;
+    float velocity = 0.0f, basefreq = 0.0f;
 
     ONOFFTYPE NoteEnabled;
-    Controller *ctl;
+    Controller *ctl = nullptr;
 
     /*****************************************************************/
     /*                    GLOBAL PARAMETERS                          */
@@ -126,16 +139,19 @@ private:
     struct Global
     {
         void kill();
-        void initparameters(const ADnoteParameters &param,
-                            float basefreq, float velocity,
-                            bool stereo);
+        void initparameters(
+            const ADnoteParameters &param,
+            float basefreq,
+            float velocity,
+            bool stereo);
+
         /******************************************
         *     FREQUENCY GLOBAL PARAMETERS        *
         ******************************************/
         float Detune; //cents
 
-        Envelope *FreqEnvelope;
-        LFO *FreqLfo;
+        Envelope *FreqEnvelope = nullptr;
+        LFO *FreqLfo = nullptr;
 
         /********************************************
         *     AMPLITUDE GLOBAL PARAMETERS          *
@@ -144,8 +160,8 @@ private:
 
         float Panning; // [ 0 .. 1 ]
 
-        Envelope *AmpEnvelope;
-        LFO *AmpLfo;
+        Envelope *AmpEnvelope = nullptr;
+        LFO *AmpLfo = nullptr;
 
         struct
         {
@@ -156,15 +172,15 @@ private:
         /******************************************
         *        FILTER GLOBAL PARAMETERS        *
         ******************************************/
-        class Filter *GlobalFilterL, *GlobalFilterR;
+        class Filter *GlobalFilterL = nullptr, *GlobalFilterR = nullptr;
 
         float FilterCenterPitch; //octaves
         float FilterQ;
         float FilterFreqTracking;
 
-        Envelope *FilterEnvelope;
+        Envelope *FilterEnvelope = nullptr;
 
-        LFO *FilterLfo;
+        LFO *FilterLfo = nullptr;
     } NoteGlobalPar;
 
     /***********************************************************/
@@ -187,7 +203,7 @@ private:
         int DelayTicks;
 
         /* Waveform of the Voice */
-        float *OscilSmp;
+        float *OscilSmp = nullptr;
 
         /************************************
         *     FREQUENCY PARAMETERS          *
@@ -198,8 +214,8 @@ private:
         // cents = basefreq*VoiceDetune
         float Detune, FineDetune;
 
-        Envelope *FreqEnvelope;
-        LFO *FreqLfo;
+        Envelope *FreqEnvelope = nullptr;
+        LFO *FreqLfo = nullptr;
 
         /***************************
         *   AMPLITUDE PARAMETERS   *
@@ -209,21 +225,21 @@ private:
         float Panning;
         float Volume; // [-1.0f .. 1.0f]
 
-        Envelope *AmpEnvelope;
-        LFO *AmpLfo;
+        Envelope *AmpEnvelope = nullptr;
+        LFO *AmpLfo = nullptr;
 
         /*************************
         *   FILTER PARAMETERS    *
         *************************/
 
-        class Filter *VoiceFilterL;
-        class Filter *VoiceFilterR;
+        class Filter *VoiceFilterL = nullptr;
+        class Filter *VoiceFilterR = nullptr;
 
         float FilterCenterPitch; /* Filter center Pitch*/
         float FilterFreqTracking;
 
-        Envelope *FilterEnvelope;
-        LFO *FilterLfo;
+        Envelope *FilterEnvelope = nullptr;
+        LFO *FilterLfo = nullptr;
 
         /****************************
         *   MODULLATOR PARAMETERS   *
@@ -234,16 +250,16 @@ private:
         int FMVoice;
 
         // Voice Output used by other voices if use this as modullator
-        float *VoiceOut;
+        float *VoiceOut = nullptr;
 
         /* Wave of the Voice */
-        float *FMSmp;
+        float *FMSmp = nullptr;
 
         float FMVolume;
         float FMDetune; //in cents
 
-        Envelope *FMFreqEnvelope;
-        Envelope *FMAmpEnvelope;
+        Envelope *FMFreqEnvelope = nullptr;
+        Envelope *FMAmpEnvelope = nullptr;
     } NoteVoicePar[NUM_VOICES];
 
     /********************************************************/
@@ -280,31 +296,32 @@ private:
     //unison vibratto
     struct
     {
-        float amplitude; //amplitude which be added to unison_freq_rap
-        float *step;     //value which increments the position
-        float *position; //between -1.0f and 1.0f
+        float amplitude;           //amplitude which be added to unison_freq_rap
+        float *step = nullptr;     //value which increments the position
+        float *position = nullptr; //between -1.0f and 1.0f
     } unison_vibratto[NUM_VOICES];
 
     //integer part (skip) of the Modullator
-    unsigned int *oscposhiFM[NUM_VOICES], *oscfreqhiFM[NUM_VOICES];
+    unsigned int *oscposhiFM[NUM_VOICES];
+    unsigned int *oscfreqhiFM[NUM_VOICES];
 
     //used to compute and interpolate the amplitudes of voices and modullators
-    float oldamplitude[NUM_VOICES],
-        newamplitude[NUM_VOICES],
-        FMoldamplitude[NUM_VOICES],
-        FMnewamplitude[NUM_VOICES];
+    float oldamplitude[NUM_VOICES];
+    float newamplitude[NUM_VOICES];
+    float FMoldamplitude[NUM_VOICES];
+    float FMnewamplitude[NUM_VOICES];
 
     //used by Frequency Modulation (for integration)
     float *FMoldsmp[NUM_VOICES];
 
     //temporary buffer
-    float *tmpwavel;
-    float *tmpwaver;
+    float *tmpwavel = nullptr;
+    float *tmpwaver = nullptr;
     int max_unison;
-    float **tmpwave_unison;
+    float **tmpwave_unison = nullptr;
 
     //Filter bypass samples
-    float *bypassl, *bypassr;
+    float *bypassl = nullptr, *bypassr = nullptr;
 
     //interpolate the amplitudes
     float globaloldamplitude, globalnewamplitude;

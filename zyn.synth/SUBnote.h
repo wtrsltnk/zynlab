@@ -30,31 +30,51 @@
 #include <zyn.common/globals.h>
 #include <zyn.dsp/Filter.h>
 
-class SUBnote : public SynthNote
+class SUBnote :
+    public SynthNote
 {
 public:
-    SUBnote(SUBnoteParameters *parameters, Controller *ctl_, float freq,
-            float velocity, int portamento_, int midinote, bool besilent);
+    SUBnote(
+        SUBnoteParameters *parameters,
+        Controller *ctl_,
+        float freq,
+        float velocity,
+        int portamento_,
+        int midinote,
+        bool besilent);
+
     virtual ~SUBnote();
 
-    void legatonote(float freq, float velocity, int portamento_,
-                    int midinote, bool externcall);
+    void legatonote(
+        float freq,
+        float velocity,
+        int portamento_,
+        int midinote,
+        bool externcall);
 
-    int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
+    int noteout(
+        float *outl,
+        float *outr); //note output,return 0 if the note is finished
+
     void relasekey();
+
     bool finished() const;
 
 private:
-    void setup(float freq,
-               float velocity,
-               int portamento_,
-               int midinote,
-               bool legato = false);
+    void setup(
+        float freq,
+        float velocity,
+        int portamento_,
+        int midinote,
+        bool legato = false);
+
     void computecurrentparameters();
+
     void initparameters(float freq);
+
     void KillNote();
 
-    SUBnoteParameters *_parameters;
+    SUBnoteParameters *_parameters = nullptr;
 
     //parameters
     int stereo;
@@ -64,13 +84,13 @@ private:
     int start;             //how the harmonics start
     float basefreq;
     float panning;
-    Envelope *AmpEnvelope;
-    Envelope *FreqEnvelope;
-    Envelope *BandWidthEnvelope;
+    Envelope *AmpEnvelope = nullptr;
+    Envelope *FreqEnvelope = nullptr;
+    Envelope *BandWidthEnvelope = nullptr;
 
-    Filter *GlobalFilterL, *GlobalFilterR;
+    Filter *GlobalFilterL = nullptr, *GlobalFilterR = nullptr;
 
-    Envelope *GlobalFilterEnvelope;
+    Envelope *GlobalFilterEnvelope = nullptr;
 
     //internal values
     ONOFFTYPE NoteEnabled;
@@ -87,25 +107,39 @@ private:
         float xn1, xn2, yn1, yn2; //filter internal values
     };
 
-    void channelOut(float *out, float *tmprnd, float *tmpsmp, bpfilter *bpf, Filter *globalFilter);
-    void initfilter(bpfilter &filter,
-                    float freq,
-                    float bw,
-                    float amp,
-                    float mag);
-    float computerolloff(float freq);
-    void computefiltercoefs(bpfilter &filter,
-                            float freq,
-                            float bw,
-                            float gain);
-    inline void filter(bpfilter &filter, float *smps);
+    void channelOut(
+        float *out,
+        float *tmprnd,
+        float *tmpsmp,
+        bpfilter *bpf,
+        Filter *globalFilter);
 
-    bpfilter *lfilter, *rfilter;
+    void initfilter(
+        bpfilter &filter,
+        float freq,
+        float bw,
+        float amp,
+        float mag);
+
+    float computerolloff(
+        float freq);
+
+    void computefiltercoefs(
+        bpfilter &filter,
+        float freq,
+        float bw,
+        float gain);
+
+    inline void filter(
+        bpfilter &filter,
+        float *smps);
+
+    bpfilter *lfilter = nullptr, *rfilter = nullptr;
 
     float overtone_rolloff[MAX_SUB_HARMONICS];
     float overtone_freq[MAX_SUB_HARMONICS];
 
-    Controller *ctl;
+    Controller *ctl = nullptr;
     int oldpitchwheel, oldbandwidth;
     float globalfiltercenterq;
 };

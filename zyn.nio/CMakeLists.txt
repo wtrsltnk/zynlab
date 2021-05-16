@@ -43,6 +43,7 @@ add_library(zyn.nio STATIC
     RtError.h
     RtMidi.cpp
     RtMidi.h
+    SafeQueue.h
     WavEngine.cpp
     WavEngine.h
     ZynSema.h

@@ -38,10 +38,26 @@
 using namespace std;
 
 Mixer::Mixer()
-    : shutup(false),
-      Pvolume(0),
-      _noteSource(nullptr)
-{}
+{
+    for (int se = 0; se < NUM_SYS_EFX; se++)
+    {
+        for (int t = 0; t < NUM_MIXER_TRACKS; t++)
+        {
+            Psysefxvol[se][t] = 0.0f;
+            _sysefxvol[se][t] = 0.0f;
+        }
+        for (int s = 0; s < NUM_SYS_EFX; s++)
+        {
+            Psysefxsend[se][s] = 0.0f;
+            _sysefxsend[se][s] = 0.0f;
+        }
+    }
+
+    for (int ie = 0; ie < NUM_INS_EFX; ie++)
+    {
+        Pinsparts[ie] = 0.0f;
+    }
+}
 
 Mixer::~Mixer() = default;
 
@@ -55,23 +71,21 @@ void Mixer::Init()
 
     swaplr = false;
 
-    _fft = std::unique_ptr<IFFTwrapper>(new FFTwrapper(SystemSettings::Instance().oscilsize));
-
     shutup = false;
 
-    for (auto &npart : _tracks)
+    for (auto &track : _tracks)
     {
-        npart.Init(this, &microtonal);
+        track.Init(this, &microtonal);
     }
 
-    for (auto &nefx : insefx)
+    for (auto &effect : insefx)
     {
-        nefx.Init(this, true);
+        effect.Init(this, true);
     }
 
-    for (auto &nefx : sysefx)
+    for (auto &effect : sysefx)
     {
-        nefx.Init(this, false);
+        effect.Init(this, false);
     }
 
     Defaults();
@@ -151,6 +165,11 @@ void Mixer::Lock()
 void Mixer::Unlock()
 {
     _mutex.unlock();
+}
+
+std::mutex &Mixer::Mutex()
+{
+    return _mutex;
 }
 
 void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocity)
@@ -646,11 +665,6 @@ void Mixer::AudioOut(float *outl, float *outr)
     LFOParams::time++;
 }
 
-IFFTwrapper *Mixer::GetFFT()
-{
-    return _fft.get();
-}
-
 unsigned int Mixer::GetTrackCount() const
 {
     return NUM_MIXER_TRACKS;
@@ -747,11 +761,11 @@ void Mixer::ShutUp()
     shutup = false;
 }
 
-void Mixer::ApplyParameters(bool lockmutex)
+void Mixer::ApplyParameters()
 {
     for (auto &npart : _tracks)
     {
-        npart.ApplyParameters(lockmutex);
+        npart.ApplyParameters();
     }
 }
 

@@ -23,7 +23,7 @@
 #include "Track.h"
 
 #include "Microtonal.h"
-#include <zyn.common/IFFTwrapper.h>
+#include <algorithm>
 #include <zyn.common/PresetsSerializer.h>
 #include <zyn.common/Util.h>
 #include <zyn.fx/EffectMgr.h>
@@ -37,9 +37,7 @@
 #include <zyn.synth/SampleNoteParams.h>
 
 Track::Track()
-    : _tmpoutr(nullptr),
-      _tmpoutl(nullptr),
-      _bufferr(SystemSettings::Instance().buffersize * 4),
+    : _bufferr(SystemSettings::Instance().buffersize * 4),
       _bufferl(SystemSettings::Instance().buffersize * 4)
 {}
 
@@ -60,7 +58,6 @@ Track::~Track()
         n.subpars = nullptr;
         n.padpars = nullptr;
         n.smplpars = nullptr;
-        delete[] n.Pname;
     }
 
     delete[] partoutl;
@@ -76,22 +73,22 @@ Track::~Track()
     delete[] _tmpoutr;
 }
 
-void Track::Init(IMixer *mixer, Microtonal *microtonal)
+void Track::Init(
+    IMixer *mixer,
+    Microtonal *microtonal)
 {
     _mixer = mixer;
     ctl.Init();
     _microtonal = microtonal;
-    _fft = mixer->GetFFT();
 
     partoutl = new float[SystemSettings::Instance().buffersize];
     partoutr = new float[SystemSettings::Instance().buffersize];
 
     for (auto &n : Instruments)
     {
-        n.Pname = new unsigned char[TRACK_MAX_NAME_LEN];
-        n.adpars = new ADnoteParameters(_mixer->GetFFT());
+        n.adpars = new ADnoteParameters();
         n.subpars = new SUBnoteParameters();
-        n.padpars = new PADnoteParameters(mixer->GetFFT());
+        n.padpars = new PADnoteParameters();
         n.smplpars = new SampleNoteParameters();
     }
 
@@ -102,10 +99,7 @@ void Track::Init(IMixer *mixer, Microtonal *microtonal)
         nefx->Init(mixer, true);
     }
 
-    for (auto &nefx : Pefxbypass)
-    {
-        nefx = false;
-    }
+    std::fill(Pefxbypass, Pefxbypass + NUM_TRACK_EFX, false);
 
     for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
     {
@@ -141,6 +135,17 @@ void Track::Init(IMixer *mixer, Microtonal *microtonal)
 
     _tmpoutr = new float[SystemSettings::Instance().buffersize];
     _tmpoutl = new float[SystemSettings::Instance().buffersize];
+}
+
+void Track::ApplyParameters()
+{
+    for (auto &n : Instruments)
+    {
+        if (n.padpars == nullptr) continue;
+        if (n.Ppadenabled == 0) continue;
+
+        n.padpars->ApplyParameters(_mixer->Mutex());
+    }
 }
 
 void Track::Lock()
@@ -205,19 +210,20 @@ void Track::InstrumentDefaults()
     }
     Instruments[0].Penabled = 1;
     Instruments[0].Padenabled = 1;
-    Instruments[0].adpars->Defaults();
-    Instruments[0].subpars->Defaults();
-    Instruments[0].padpars->Defaults();
-    Instruments[0].smplpars->Defaults();
+    if (Instruments[0].adpars != nullptr) Instruments[0].adpars->Defaults();
+    if (Instruments[0].subpars != nullptr) Instruments[0].subpars->Defaults();
+    if (Instruments[0].padpars != nullptr) Instruments[0].padpars->Defaults();
+    if (Instruments[0].smplpars != nullptr) Instruments[0].smplpars->Defaults();
 
     for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
-        partefx[nefx]->Defaults();
+        if (partefx[nefx] != nullptr) partefx[nefx]->Defaults();
         Pefxroute[nefx] = 0; //route to next effect
     }
 }
 
-float Track::ComputePeak(float volume)
+float Track::ComputePeak(
+    float volume)
 {
     auto peak = 1.0e-12f;
     if (Penabled != 0)
@@ -238,7 +244,10 @@ float Track::ComputePeak(float volume)
     return peak;
 }
 
-void Track::ComputePeakLeftAndRight(float volume, float &peakl, float &peakr)
+void Track::ComputePeakLeftAndRight(
+    float volume,
+    float &peakl,
+    float &peakr)
 {
     peakl = 1.0e-12f;
     peakr = 1.0e-12f;
@@ -264,7 +273,8 @@ void Track::ComputePeakLeftAndRight(float volume, float &peakl, float &peakr)
 /*
  * Cleanup the part
  */
-void Track::Cleanup(bool final_)
+void Track::Cleanup(
+    bool final_)
 {
     for (unsigned int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
@@ -308,9 +318,10 @@ int Track::GetActiveNotes()
 /*
  * Note On Messages
  */
-void Track::NoteOn(unsigned char note,
-                   unsigned char velocity,
-                   int masterkeyshift)
+void Track::NoteOn(
+    unsigned char note,
+    unsigned char velocity,
+    int masterkeyshift)
 {
     unsigned int i;
     int pos;
@@ -1314,10 +1325,10 @@ void Track::setkititemstatus(int kititem, int Penabled_)
         Instruments[kititem].Pname[0] = '\0';
     }
 
-    Instruments[kititem].adpars->Defaults();
-    Instruments[kititem].subpars->Defaults();
-    Instruments[kititem].padpars->Defaults();
-    Instruments[kititem].smplpars->Defaults();
+    if (Instruments[kititem].adpars != nullptr) Instruments[kititem].adpars->Defaults();
+    if (Instruments[kititem].subpars != nullptr) Instruments[kititem].subpars->Defaults();
+    if (Instruments[kititem].padpars != nullptr) Instruments[kititem].padpars->Defaults();
+    if (Instruments[kititem].smplpars != nullptr) Instruments[kititem].smplpars->Defaults();
 
     if (resetallnotes)
     {
@@ -1384,15 +1395,4 @@ void Track::InitPresets()
         instrumentEffects.AddContainer(instrumentEffect);
     }
     AddContainer(instrumentEffects);
-}
-
-void Track::ApplyParameters(bool lockmutex)
-{
-    for (auto &n : Instruments)
-    {
-        if ((n.padpars != nullptr) && (n.Ppadenabled != 0))
-        {
-            n.padpars->ApplyParameters(lockmutex ? _mixer : nullptr);
-        }
-    }
 }

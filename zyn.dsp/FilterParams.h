@@ -27,23 +27,37 @@
 #include <zyn.common/Presets.h>
 #include <zyn.common/globals.h>
 
-class FilterParams : public WrappedPresets
+class FilterParams :
+    public WrappedPresets
 {
 public:
-    FilterParams(unsigned char Ptype_, unsigned char Pfreq, unsigned char Pq_);
+    FilterParams(
+        unsigned char Ptype_,
+        unsigned char Pfreq,
+        unsigned char Pq_);
+
     virtual ~FilterParams();
 
     void InitPresets();
-    
-    void Defaults();
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
 
-    void getfromFilterParams(FilterParams *pars);
+    void Defaults();
+
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+    void getfromFilterParams(
+        FilterParams *pars);
 
     float getfreq();
+
     float getq();
-    float getfreqtracking(float notefreq);
+
+    float getfreqtracking(
+        float notefreq);
+
     float getgain();
 
     unsigned char Pcategory;  //Filter category (Analog/Formant/StVar)
@@ -77,15 +91,28 @@ public:
     } Psequence[FF_MAX_SEQUENCE];
 
     float getcenterfreq();
+
     float getoctavesfreq();
-    float getfreqpos(float freq);
-    float getfreqx(float x);
 
-    void formantfilterH(int nvowel, int nfreqs, float *freqs); //used by UI
+    float getfreqpos(
+        float freq);
 
-    float getformantfreq(unsigned char freq);
-    float getformantamp(unsigned char amp);
-    float getformantq(unsigned char q);
+    float getfreqx(
+        float x);
+
+    void formantfilterH(
+        int nvowel,
+        int nfreqs,
+        float *freqs); //used by UI
+
+    float getformantfreq(
+        unsigned char freq);
+
+    float getformantamp(
+        unsigned char amp);
+
+    float getformantq(
+        unsigned char q);
 
     bool changed;
 

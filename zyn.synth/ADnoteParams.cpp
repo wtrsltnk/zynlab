@@ -26,14 +26,12 @@
 #include "OscilGen.h"
 #include "Resonance.h"
 #include <cmath>
-#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.dsp/FilterParams.h>
 
 int ADnote_unison_sizes[] = {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
-ADnoteParameters::ADnoteParameters(IFFTwrapper *fft)
-    : _fft(fft)
+ADnoteParameters::ADnoteParameters()
 {
     setpresettype("Padsynth");
 
@@ -185,7 +183,7 @@ void ADnoteParameters::InitPresets()
  */
 void ADnoteParameters::EnableVoice(int nvoice)
 {
-    VoicePar[nvoice].Enable(_fft, Reson);
+    VoicePar[nvoice].Enable(Reson);
 }
 
 /*

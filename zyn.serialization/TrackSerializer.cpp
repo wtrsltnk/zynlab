@@ -38,6 +38,8 @@ TrackSerializer::TrackSerializer(Track *parameters)
 
 TrackSerializer::~TrackSerializer() = default;
 
+#define INSTRUMENT_5_KIT_1_VALUE
+
 void TrackSerializer::SerializeInstrument(IPresetsSerializer *xml)
 {
     xml->beginbranch("INFO");

@@ -34,7 +34,7 @@ class OscilGen : public WrappedPresets
     friend class OscilGenSerializer;
 
 public:
-    OscilGen(IFFTwrapper *fft_, Resonance *res_);
+    OscilGen(Resonance *res_);
     virtual ~OscilGen();
 
     /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
@@ -117,7 +117,7 @@ private:
 
     float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
                                                             //    private:
-    IFFTwrapper *fft;
+    IFFTwrapper *_fft;
     //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
     void changebasefunction();
     //Waveshaping

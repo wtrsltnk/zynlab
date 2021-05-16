@@ -1674,9 +1674,9 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
     
     //load the data
     int result=serializer->LoadMixer(master, filename);
-    
-    master->ApplyParameters(false);
+
     master->Unlock();
+    master->ApplyParameters();
     
     npartcounter->value(1);
     refresh_master_ui();

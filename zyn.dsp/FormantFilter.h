@@ -26,22 +26,36 @@
 #include "Filter.h"
 #include <zyn.common/globals.h>
 
-class FormantFilter : public Filter
+class FormantFilter :
+    public Filter
 {
 public:
-    FormantFilter(class FilterParams *pars);
+    FormantFilter(
+        class FilterParams *pars);
+
     virtual ~FormantFilter();
 
-    void filterout(float *smp);
-    void setfreq(float frequency);
-    void setfreq_and_q(float frequency, float q_);
-    void setq(float q_);
-    void setgain(float dBgain);
+    void filterout(
+        float *smp);
 
-    void cleanup(void);
+    void setfreq(
+        float frequency);
+
+    void setfreq_and_q(
+        float frequency,
+        float q_);
+
+    void setq(
+        float q_);
+
+    void setgain(
+        float dBgain);
+
+    void cleanup();
 
 private:
-    void setpos(float input);
+    void setpos(
+        float input);
 
     class AnalogFilter *formant[FF_MAX_FORMANTS];
 

@@ -24,6 +24,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <mutex>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -396,6 +397,7 @@ public:
     // Mutex
     virtual void Lock() = 0;
     virtual void Unlock() = 0;
+    virtual std::mutex &Mutex() = 0;
 
     // Midi IN
     virtual void NoteOn(unsigned char chan, unsigned char note, unsigned char velocity) = 0;
@@ -408,8 +410,6 @@ public:
 
     virtual INoteSource *GetNoteSource() const = 0;
     virtual void SetNoteSource(INoteSource *source) = 0;
-
-    virtual class IFFTwrapper *GetFFT() = 0;
 };
 
 #endif

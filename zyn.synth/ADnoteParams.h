@@ -33,7 +33,6 @@ class LFOParams;
 class FilterParams;
 class Resonance;
 class OscilGen;
-class IFFTwrapper;
 
 enum FMTYPE
 {
@@ -49,10 +48,8 @@ extern int ADnote_unison_sizes[];
 class ADnoteParameters :
     public AbstractNoteParameters
 {
-    IFFTwrapper *_fft;
-
 public:
-    ADnoteParameters(IFFTwrapper *fft);
+    ADnoteParameters();
     virtual ~ADnoteParameters();
 
     void InitPresets();

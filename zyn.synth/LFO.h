@@ -35,10 +35,15 @@ public:
      * @param lfopars pointer to a LFOParams object
      * @param basefreq base frequency of LFO
      */
-    LFO(LFOParams *lfopars, float basefreq);
+    LFO(
+        LFOParams *lfopars,
+        float basefreq);
+
     /**Deconstructor*/
     virtual ~LFO();
+
     float lfoout();
+
     float amplfoout();
 
 private:

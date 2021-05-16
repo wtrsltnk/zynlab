@@ -23,6 +23,15 @@
 #include "FFTwrapper.h"
 #include <cmath>
 #include <cstring>
+#include <memory>
+#include <zyn.common/globals.h>
+
+IFFTwrapper *IFFTwrapper::GlobalInstance()
+{
+    static std::unique_ptr<IFFTwrapper> instance(new FFTwrapper(SystemSettings::Instance().oscilsize));
+
+    return instance.get();
+}
 
 IFFTwrapper::~IFFTwrapper() = default;
 

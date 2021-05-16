@@ -968,7 +968,7 @@ hprofile->redraw();}
       }
       Fl_Button applybutton {
         label {Apply Changes}
-        callback {pars->ApplyParameters(master);
+        callback {pars->ApplyParameters(master->Mutex());
 o->color(FL_GRAY);
 if (oscui!=NULL) {
 	oscui->applybutton->color(FL_GRAY);
@@ -1005,7 +1005,7 @@ fl_filename_setext(filename,"");
 
 
 
-pars->export2wav(filename, master);}
+pars->export2wav(filename, master->Mutex());}
         tooltip {export samples as wav file} xywh {5 400 55 30} box THIN_UP_BOX color 51 labelsize 11 align 128
       }
     }
@@ -1099,7 +1099,7 @@ hprofile->redraw();
 overtonepos->redraw();
 
 osc->redraw();
-pars->ApplyParameters(master);
+pars->ApplyParameters(master->Mutex());
 applybutton->color(FL_GRAY);
 applybutton->parent()->redraw();} {}
   }

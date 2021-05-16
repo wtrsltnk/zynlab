@@ -32,7 +32,6 @@
 #include <mutex>
 #include <zyn.common/AudioFile.h>
 #include <zyn.common/IAudioGenerator.h>
-#include <zyn.common/IFFTwrapper.h>
 #include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/Stereo.h>
@@ -82,7 +81,7 @@ public:
 
     virtual IMeter *GetMeter();
 
-    void ApplyParameters(bool lockmutex = true);
+    void ApplyParameters();
 
     // Synth settings
     virtual unsigned int SampleRate() const;
@@ -93,6 +92,7 @@ public:
     // Mutex
     virtual void Lock();
     virtual void Unlock();
+    virtual std::mutex &Mutex();
 
     //Midi IN
     virtual void NoteOn(unsigned char chan, unsigned char note, unsigned char velocity);
@@ -107,12 +107,10 @@ public:
     virtual void SetNoteSource(INoteSource *source);
 
     void ShutUp();
-    bool shutup;
+    bool shutup = false;
 
     /**Audio Output*/
     virtual void AudioOut(float *outl, float *outr);
-
-    virtual IFFTwrapper *GetFFT();
 
     void EnableTrack(int npart, int what);
 
@@ -121,11 +119,11 @@ public:
     virtual void EnableTrack(int index, bool enabled);
 
     //parameters
-    unsigned char Pvolume;
-    unsigned char Pkeyshift;
+    unsigned char Pvolume = 0;
+    unsigned char Pkeyshift = 0;
     unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
-    short int Psolotrack;
+    short int Psolotrack = 0;
 
     //parameters control
     void setPvolume(unsigned char Pvolume_);
@@ -142,7 +140,7 @@ public:
 
     Meter meter;
     Controller ctl;
-    bool swaplr; //if L and R are swapped
+    bool swaplr = false; //if L and R are swapped
 
     //other objects
     Microtonal microtonal;
@@ -158,13 +156,12 @@ private:
     std::vector<InstrumentPreview> _instrumentsPreview;
     Track _tracks[NUM_MIXER_TRACKS];
     std::mutex _mutex;
-    std::unique_ptr<IFFTwrapper> _fft;
-    INoteSource *_noteSource;
+    INoteSource *_noteSource = nullptr;
 
-    float _volume;
+    float _volume = 0;
     float _sysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     float _sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
-    int _keyshift;
+    int _keyshift = 0;
 
     std::unique_ptr<float> _tmpmixl;
     std::unique_ptr<float> _tmpmixr;

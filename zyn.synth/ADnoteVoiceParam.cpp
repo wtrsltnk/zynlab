@@ -1,9 +1,9 @@
 #include "ADnoteVoiceParam.h"
 
-void ADnoteVoiceParam::Enable(IFFTwrapper *fft, Resonance *Reson)
+void ADnoteVoiceParam::Enable(Resonance *Reson)
 {
-    OscilSmp = new OscilGen(fft, Reson);
-    FMSmp = new OscilGen(fft, nullptr);
+    OscilSmp = new OscilGen(Reson);
+    FMSmp = new OscilGen(nullptr);
 
     AmpEnvelope = EnvelopeParams::ADSRinit_dB(64, 1, 0, 100, 127, 100);
     AmpLfo = new LFOParams(90, 32, 64, 0, 0, 30, 0, 1);

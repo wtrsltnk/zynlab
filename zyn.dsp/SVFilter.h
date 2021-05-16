@@ -26,43 +26,73 @@
 #include "Filter.h"
 #include <zyn.common/globals.h>
 
-class SVFilter : public Filter
+class SVFilter :
+    public Filter
 {
 public:
-    SVFilter(unsigned char Ftype, float Ffreq, float Fq, unsigned char Fstages);
+    SVFilter(
+        unsigned char Ftype,
+        float Ffreq,
+        float Fq,
+        unsigned char Fstages);
+
     virtual ~SVFilter();
 
-    void filterout(float *smp);
-    void setfreq(float frequency);
-    void setfreq_and_q(float frequency, float q_);
-    void setq(float q_);
+    void filterout(
+        float *smp);
 
-    void settype(int type_);
-    void setgain(float dBgain);
-    void setstages(int stages_);
+    void setfreq(
+        float frequency);
+
+    void setfreq_and_q(
+        float frequency,
+        float q_);
+
+    void setq(
+        float q_);
+
+    void settype(
+        int type_);
+
+    void setgain(
+        float dBgain);
+
+    void setstages(
+        int stages_);
+
     void cleanup();
 
 private:
     struct fstage
     {
-        float low, high, band, notch;
+        float low;
+        float high;
+        float band;
+        float notch;
     } st[MAX_FILTER_STAGES + 1];
 
     struct parameters
     {
-        float f, q, q_sqrt;
+        float f;
+        float q;
+        float q_sqrt;
     } par, ipar;
 
-    void singlefilterout(float *smp, fstage &x, parameters &par);
-    void computefiltercoefs(void);
+    void singlefilterout(
+        float *smp,
+        fstage &x,
+        parameters &par);
+
+    void computefiltercoefs();
+
     int type;   // The type of the filter (LPF1,HPF1,LPF2,HPF2...)
     int stages; // how many times the filter is applied (0->1,1->2,etc.)
     float freq; // Frequency given in Hz
     float q;    // Q factor (resonance or Q factor)
     float gain; // the gain of the filter (if are shelf/peak) filters
 
-    bool abovenq, //if the frequency is above the nyquist
-        oldabovenq;
+    bool abovenq; //if the frequency is above the nyquist
+    bool oldabovenq;
     bool needsinterpolation, firsttime;
 };
 

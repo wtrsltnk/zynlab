@@ -35,23 +35,44 @@
 /**Implementation of Several analog filters (lowpass, highpass...)
  * Implemented with IIR filters
  * Coefficients generated with "Cookbook formulae for audio EQ"*/
-class AnalogFilter : public Filter
+class AnalogFilter :
+    public Filter
 {
 public:
-    AnalogFilter(unsigned char Ftype, float Ffreq, float Fq, unsigned char Fstages);
+    AnalogFilter(
+        unsigned char Ftype,
+        float Ffreq,
+        float Fq,
+        unsigned char Fstages);
+
     virtual ~AnalogFilter();
 
-    void filterout(float *smp);
-    void setfreq(float frequency);
-    void setfreq_and_q(float frequency, float q_);
-    void setq(float q_);
+    void filterout(
+        float *smp);
 
-    void settype(int type_);
-    void setgain(float dBgain);
-    void setstages(int stages_);
+    void setfreq(
+        float frequency);
+
+    void setfreq_and_q(
+        float frequency,
+        float q_);
+
+    void setq(
+        float q_);
+
+    void settype(
+        int type_);
+
+    void setgain(
+        float dBgain);
+
+    void setstages(
+        int stages_);
+
     void cleanup();
 
-    float H(float freq); //Obtains the response for a given frequency
+    float H(
+        float freq); //Obtains the response for a given frequency
 
 private:
     struct fstage
@@ -68,9 +89,13 @@ private:
     //old coeffs are used for interpolation when paremeters change quickly
 
     //Apply IIR filter to Samples, with coefficients, and past history
-    void singlefilterout(float *smp, fstage &hist, const Coeff &coeff);
+    void singlefilterout(
+        float *smp,
+        fstage &hist,
+        const Coeff &coeff);
+
     //Update coeff and order
-    void computefiltercoefs(void);
+    void computefiltercoefs();
 
     int type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
     int stages; //how many times the filter is applied (0->1,1->2,etc.)
@@ -80,10 +105,10 @@ private:
 
     int order; //the order of the filter (number of poles)
 
-    bool needsinterpolation, //Interpolation between coeff changes
-        firsttime;           //First Iteration of filter
-    bool abovenq,            //if the frequency is above the nyquist
-        oldabovenq;          //if the last time was above nyquist
+    bool needsinterpolation; //Interpolation between coeff changes
+    bool firsttime;          //First Iteration of filter
+    bool abovenq;            //if the frequency is above the nyquist
+    bool oldabovenq;         //if the last time was above nyquist
                              //(used to see if it needs interpolation)
 };
 

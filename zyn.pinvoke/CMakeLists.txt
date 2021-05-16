@@ -37,7 +37,7 @@ target_compile_features(zyn.pinvoke
 
 add_executable(testpar
     test/testpar.cpp
-#    test/catch_amalgamated.cpp
+    test/acutest.h
     )
 
 target_include_directories(testpar

@@ -30,18 +30,30 @@
 class Unison
 {
 public:
-    Unison(int update_period_samples_, float max_delay_sec_, float srate_f);
+    Unison(
+        int update_period_samples_,
+        float max_delay_sec_,
+        float srate_f);
+
     ~Unison();
 
-    void setSize(int new_size);
-    void setBaseFrequency(float freq);
-    void setBandwidth(float bandwidth_cents);
+    void setSize(
+        int new_size);
 
-    void process(int bufsize, float *inbuf, float *outbuf = nullptr);
+    void setBaseFrequency(
+        float freq);
+
+    void setBandwidth(
+        float bandwidth_cents);
+
+    void process(
+        int bufsize,
+        float *inbuf,
+        float *outbuf = nullptr);
 
 private:
-    void updateParameters(void);
-    void updateUnisonData(void);
+    void updateParameters();
+    void updateUnisonData();
 
     int unison_size;
     float base_freq;
@@ -62,13 +74,13 @@ private:
             step = 0.0f;
             relative_amplitude = 1.0f;
         }
-    } * uv;
+    } *uv = nullptr;
 
     int update_period_samples;
     int update_period_sample_k;
     int max_delay, delay_k;
     bool first_time;
-    float *delay_buffer;
+    float *delay_buffer = nullptr;
     float unison_amplitude_samples;
     float unison_bandwidth_cents;
 

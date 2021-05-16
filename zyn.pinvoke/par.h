@@ -13,27 +13,27 @@ enum class ParTypes
 class Par
 {
 public:
-    const char *id;
-    ParTypes type;
-    union {
-        unsigned char *ucvalue;
-        unsigned short *usvalue;
-        float *fvalue;
-        bool *bvalue;
-    };
+    const char *id = "null";
+    ParTypes type = ParTypes::Unknown;
+    unsigned char *ucvalue = nullptr;
+    unsigned short *usvalue = nullptr;
+    float *fvalue = nullptr;
+    bool *bvalue = nullptr;
 
-    union {
-        unsigned char ucmin;
-        unsigned short usmin;
-        float fmin;
-        bool bmin;
-    };
-    union {
-        unsigned char ucmax;
-        unsigned short usmax;
-        float fmax;
-        bool bmax;
-    };
+    unsigned char ucmin = 0;
+    unsigned short usmin = 0;
+    float fmin = 0;
+    bool bmin = false;
+
+    unsigned char ucmax = 0;
+    unsigned short usmax = 0;
+    float fmax = 0;
+    bool bmax = false;
+
+    unsigned char AsUnsignedChar() const;
+    unsigned short AsUnsignedShort() const;
+    float AsUnsignedFloat() const;
+    bool AsUnsignedBool() const;
 
     static Par Empty();
 
@@ -47,7 +47,10 @@ public:
     static Par GetPar(class EnvelopeParams *pars, const char *id, const char *relativeid);
     static Par GetPar(class LFOParams *pars, const char *id, const char *relativeid);
     static Par GetPar(class FilterParams *pars, const char *id, const char *relativeid);
-    static Par GetPar(class Resonance*pars, const char *id, const char *relativeid);
+    static Par GetPar(class Resonance *pars, const char *id, const char *relativeid);
 };
+
+bool operator==(const Par &p1, const Par &p2);
+bool operator!=(const Par &p1, const Par &p2);
 
 #endif // PAR_H
