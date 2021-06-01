@@ -106,6 +106,11 @@ extern "C" void LoadPresets(
         return;
     }
 
+    if (track->Penabled == false)
+    {
+        mixer->EnableTrack(chan, true);
+    }
+
     track->Lock();
 
     track->AllNotesOff();

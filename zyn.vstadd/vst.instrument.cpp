@@ -9,9 +9,8 @@ ZynInstrument::ZynInstrument(audioMasterCallback audioMaster)
 {
     ctl.Init();
     ctl.Defaults();
-    fft = new FFTwrapper(settings.oscilsize);
 
-    adpars = new ADnoteParameters(fft);
+    adpars = new ADnoteParameters();
     adpars->Defaults();
 
     setNumInputs(0);

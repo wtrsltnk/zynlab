@@ -91,13 +91,13 @@ LRESULT VstKnob::HandleMessages(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    auto knob = reinterpret_cast<VstKnob *>(GetWindowLongPtr(hWnd, GWL_USERDATA));
+    auto knob = reinterpret_cast<VstKnob *>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     if (knob != nullptr)
     {
         if (uMsg == WM_DESTROY)
         {
-            SetWindowLongPtr(hWnd, GWL_USERDATA, 0);
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
 
             knob->close();
         }
@@ -110,7 +110,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             knob = reinterpret_cast<VstKnob *>((reinterpret_cast<LPCREATESTRUCT>(lParam))->lpCreateParams);
 
-            SetWindowLongPtr(hWnd, GWL_USERDATA, reinterpret_cast<LONG_PTR>(knob));
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(knob));
 
             return knob->HandleMessages(uMsg, wParam, lParam);
         }
