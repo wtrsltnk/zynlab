@@ -12,14 +12,17 @@
 
 class SynthEditor
 {
-    ApplicationSession *_session = nullptr;
+    IMixer *_mixer;
 
     LibraryDialog _libraryDialog;
 
 public:
     SynthEditor();
 
-    void SetUp(ApplicationSession *session);
+    void SetUp(
+        IMixer *mixer,
+        ILibraryManager *library);
+
     void Render2d();
 
     void RenderEnvelope(char const *label, EnvelopeParams *envelope, unsigned char *enabled);

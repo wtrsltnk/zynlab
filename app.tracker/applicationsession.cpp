@@ -1,5 +1,7 @@
 #include "applicationsession.h"
 
+#include <zyn.mixer/Track.h>
+
 ApplicationSession::ApplicationSession()
 {}
 
@@ -7,10 +9,9 @@ void ApplicationSession::StopPlaying()
 {
     _playState = PlayStates::Stopped;
     currentRow = 0;
-    for (int t = 0; t < _mixer->GetTrackCount(); t++)
+    for (unsigned int t = 0; t < _mixer->GetTrackCount(); t++)
     {
-        _mixer->GetTrack(t)
-            ->RelaseAllKeys();
+        _mixer->GetTrack(t)->RelaseAllKeys();
     }
 }
 

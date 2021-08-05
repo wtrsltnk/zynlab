@@ -10,7 +10,6 @@
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/globals.h>
-#include <zyn.mixer/Mixer.h>
 #include <zyn.nio/MidiInputManager.h>
 #include <zyn.nio/Nio.h>
 #include <zyn.serialization/LibraryManager.h>
@@ -18,12 +17,7 @@
 #include "IconsFontaudio.h"
 #include "IconsForkAwesome.h"
 
-Application::Application()
-    : _sampleIndex(0),
-      _monofont(nullptr),
-      _fkFont(nullptr),
-      _fadFont(nullptr)
-{}
+Application::Application() = default;
 
 bool Application::Setup()
 {
@@ -72,11 +66,15 @@ bool Application::Setup()
     SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
     SystemSettings::Instance().alias();
 
-    _session._mixer = new Mixer();
-    _session._mixer->Init();
-    _session._mixer->SetNoteSource(this);
+    _mixer = std::make_unique<Mixer>();
+    _mixer->Init();
+    _mixer->SetNoteSource(this);
 
-    _session._library = new LibraryManager();
+    _session._mixer = _mixer.get();
+
+    _library = std::make_unique<LibraryManager>();
+
+    _session._library = _library.get();
 
     _session._library->AddLibraryLocation("C:\\Program Files (x86)\\ZynAddSubFX\\banks\\");
     //*
@@ -94,7 +92,7 @@ bool Application::Setup()
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
 
-    if (!Nio::Start(_session._mixer, _session._mixer))
+    if (!Nio::Start(_mixer.get(), _mixer.get()))
     {
         return false;
     }
@@ -121,7 +119,7 @@ bool Application::Setup()
     _effectsEditor.SetUp(&_session);
     _patternsManager.SetUp(&_session);
     _automationEditor.SetUp(&_session);
-    _synthEditor.SetUp(&_session);
+    _synthEditor.SetUp(_mixer.get(), _library.get());
 
     return true;
 }
@@ -257,13 +255,10 @@ void Application::Render2d()
 void Application::Cleanup()
 {
     //ensure that everything has stopped with the mutex wait
-    _session._mixer->Lock();
-    _session._mixer->Unlock();
+    _mixer->Lock();
+    _mixer->Unlock();
 
     Nio::Stop();
-
-    delete _session._mixer;
-    _session._mixer = nullptr;
 }
 
 std::vector<SimpleNote> Application::GetNotes(

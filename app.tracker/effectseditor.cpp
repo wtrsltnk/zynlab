@@ -51,7 +51,7 @@ void EffectsEditor::Render2d()
         nullptr,
         flags);
     {
-        auto track = _session->_mixer->GetTrack(_session->currentTrack);
+        auto track = _session->_mixer->GetTrack(_session->_mixer->State.currentTrack);
         for (int e = 0; e < NUM_TRACK_EFX; e++)
         {
             if (e > 0) ImGui::SameLine();

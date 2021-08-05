@@ -5,23 +5,28 @@
 #include "imgui_helpers.h"
 #include <imgui.h>
 #include <imgui_plot.h>
+#include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
 
 char const *SynthEditor::ID = "SynthEditor";
 
 unsigned char min = 0, max = 127;
 
-SynthEditor::SynthEditor()
-{}
+SynthEditor::SynthEditor() = default;
 
-void SynthEditor::SetUp(ApplicationSession *session)
+void SynthEditor::SetUp(
+    IMixer *mixer,
+    ILibraryManager *library)
 {
-    _session = session;
+    _mixer = mixer;
 
-    _libraryDialog.SetUp(session);
+    _libraryDialog.SetUp(mixer, library);
 }
 
-bool CheckButton(const char *label, bool *p_value, ImVec2 const &size)
+bool CheckButton(
+    const char *label,
+    bool *p_value,
+    ImVec2 const &size)
 {
     bool result = false;
     auto &s = ImGui::GetStyle();
@@ -48,20 +53,20 @@ void SynthEditor::Render2d()
         nullptr,
         flags);
     {
-        auto track = _session->_mixer->GetTrack(_session->currentTrack);
+        auto track = _mixer->GetTrack(_mixer->State.currentTrack);
         ImGui::BeginChild("btns", ImVec2(121, 0));
         {
             ImGui::Text("Tracks");
-            for (unsigned int i = 0; i < _session->_mixer->GetTrackCount(); i++)
+            for (unsigned int i = 0; i < _mixer->GetTrackCount(); i++)
             {
-                auto t = _session->_mixer->GetTrack(i);
+                auto t = _mixer->GetTrack(i);
                 if (i % 4 != 0)
                 {
                     ImGui::SameLine();
                 }
                 char title[8] = {0};
                 sprintf_s(title, 8, "%u", i + 1);
-                bool active = (_session->currentTrack == i);
+                bool active = (_mixer->State.currentTrack == i);
                 bool disabled = t->Penabled == 0 && !active;
                 if (disabled)
                 {
@@ -70,7 +75,7 @@ void SynthEditor::Render2d()
                 }
                 if (CheckButton(title, &active, ImVec2(24, 24)))
                 {
-                    _session->currentTrack = i;
+                    _mixer->State.currentTrack = i;
                 }
                 if (disabled)
                 {
@@ -87,7 +92,7 @@ void SynthEditor::Render2d()
                 track->Pdrummode = drumKitChecked ? 1 : 0;
                 if (track->Pdrummode == 0)
                 {
-                    _session->currentTrackInstrument = 0;
+                    _mixer->State.currentTrackInstrument = 0;
                 }
             }
 
@@ -102,31 +107,31 @@ void SynthEditor::Render2d()
                     }
                     char title[8] = {0};
                     sprintf_s(title, 8, "%u", i + 1);
-                    bool active = (_session->currentTrackInstrument == i);
+                    bool active = (_mixer->State.currentTrackInstrument == i);
                     if (CheckButton(title, &active, ImVec2(24, 24)))
                     {
-                        _session->currentSynth = ActiveSynths::Add;
-                        _session->currentTrackInstrument = i;
+                        _mixer->State.currentSynth = ActiveSynths::Add;
+                        _mixer->State.currentTrackInstrument = i;
                     }
                 }
             }
 
             ImGui::Separator();
 
-            auto &instrument = track->Instruments[_session->currentTrackInstrument];
+            auto &instrument = track->Instruments[_mixer->State.currentTrackInstrument];
             bool addChecked = instrument.Padenabled;
             if (ImGui::Checkbox("##ADD_CHECK", &addChecked))
             {
                 instrument.Padenabled = addChecked ? 1 : 0;
-                _session->currentSynth = ActiveSynths::Add;
+                _mixer->State.currentSynth = ActiveSynths::Add;
             }
             ImGui::SameLine();
 
-            bool voiceActive = (_session->currentSynth == ActiveSynths::Add && _session->currentVoice >= NUM_VOICES);
+            bool voiceActive = (_mixer->State.currentSynth == ActiveSynths::Add && _mixer->State.currentVoice >= NUM_VOICES);
             if (CheckButton("Add", &voiceActive, ImVec2(-1, 0)))
             {
-                _session->currentSynth = ActiveSynths::Add;
-                _session->currentVoice = NUM_VOICES;
+                _mixer->State.currentSynth = ActiveSynths::Add;
+                _mixer->State.currentVoice = NUM_VOICES;
             }
 
             ImGui::PushID("VOICES");
@@ -138,7 +143,7 @@ void SynthEditor::Render2d()
                 }
                 char title[8] = {0};
                 sprintf_s(title, 8, "%u", i + 1);
-                voiceActive = (_session->currentVoice == i);
+                voiceActive = (_mixer->State.currentVoice == i);
                 auto voiceEnabled = instrument.adpars->VoicePar[i].Enabled && addChecked;
                 if (!voiceEnabled)
                 {
@@ -147,8 +152,8 @@ void SynthEditor::Render2d()
                 }
                 if (CheckButton(title, &voiceActive, ImVec2(24, 24)))
                 {
-                    _session->currentSynth = ActiveSynths::Add;
-                    _session->currentVoice = i;
+                    _mixer->State.currentSynth = ActiveSynths::Add;
+                    _mixer->State.currentVoice = i;
                 }
                 if (!voiceEnabled)
                 {
@@ -163,13 +168,13 @@ void SynthEditor::Render2d()
             if (ImGui::Checkbox("##SUB_CHECK", &subChecked))
             {
                 instrument.Psubenabled = subChecked ? 1 : 0;
-                _session->currentSynth = ActiveSynths::Sub;
+                _mixer->State.currentSynth = ActiveSynths::Sub;
             }
             ImGui::SameLine();
-            b = (_session->currentSynth == ActiveSynths::Sub);
+            b = (_mixer->State.currentSynth == ActiveSynths::Sub);
             if (CheckButton("Sub", &b, ImVec2(-1, 0)))
             {
-                _session->currentSynth = ActiveSynths::Sub;
+                _mixer->State.currentSynth = ActiveSynths::Sub;
             }
 
             ImGui::Separator();
@@ -178,13 +183,13 @@ void SynthEditor::Render2d()
             if (ImGui::Checkbox("##PAD_CHECK", &padChecked))
             {
                 instrument.Ppadenabled = padChecked ? 1 : 0;
-                _session->currentSynth = ActiveSynths::Pad;
+                _mixer->State.currentSynth = ActiveSynths::Pad;
             }
             ImGui::SameLine();
-            b = (_session->currentSynth == ActiveSynths::Pad);
+            b = (_mixer->State.currentSynth == ActiveSynths::Pad);
             if (CheckButton("Pad", &b, ImVec2(-1, 0)))
             {
-                _session->currentSynth = ActiveSynths::Pad;
+                _mixer->State.currentSynth = ActiveSynths::Pad;
             }
 
             ImGui::Separator();
@@ -193,97 +198,97 @@ void SynthEditor::Render2d()
             if (ImGui::Checkbox("##SMPL_CHECK", &smplChecked))
             {
                 instrument.Psmplenabled = smplChecked ? 1 : 0;
-                _session->currentSynth = ActiveSynths::Smpl;
+                _mixer->State.currentSynth = ActiveSynths::Smpl;
             }
             ImGui::SameLine();
-            b = (_session->currentSynth == ActiveSynths::Smpl);
+            b = (_mixer->State.currentSynth == ActiveSynths::Smpl);
             if (CheckButton("Smpl", &b, ImVec2(-1, 0)))
             {
-                _session->currentSynth = ActiveSynths::Smpl;
+                _mixer->State.currentSynth = ActiveSynths::Smpl;
             }
         }
         ImGui::EndChild();
 
         ImGui::SameLine();
 
-        if (_session->currentSynth == ActiveSynths::Add)
+        if (_mixer->State.currentSynth == ActiveSynths::Add)
         {
             ImGui::BeginChild("add-synth");
             {
-                if (track->Instruments[_session->currentTrackInstrument].Padenabled == 0)
+                if (track->Instruments[_mixer->State.currentTrackInstrument].Padenabled == 0)
                 {
                     ImGui::Text("ADD editor is disabled");
                     if (ImGui::Button("Enable ADD synth"))
                     {
-                        track->Instruments[_session->currentTrackInstrument].Padenabled = 1;
+                        track->Instruments[_mixer->State.currentTrackInstrument].Padenabled = 1;
                     }
                 }
                 else
                 {
-                    ADnoteParameters *params = track->Instruments[_session->currentTrackInstrument].adpars;
+                    ADnoteParameters *params = track->Instruments[_mixer->State.currentTrackInstrument].adpars;
 
                     RenderAddSynth(params);
                 }
             }
             ImGui::EndChild();
         }
-        else if (_session->currentSynth == ActiveSynths::Pad)
+        else if (_mixer->State.currentSynth == ActiveSynths::Pad)
         {
             ImGui::BeginChild("pad-synth");
             {
-                if (track->Instruments[_session->currentTrackInstrument].Ppadenabled == 0)
+                if (track->Instruments[_mixer->State.currentTrackInstrument].Ppadenabled == 0)
                 {
                     ImGui::Text("PAD editor is disabled");
                     if (ImGui::Button("Enable PAD synth"))
                     {
-                        track->Instruments[_session->currentTrackInstrument].Ppadenabled = 1;
+                        track->Instruments[_mixer->State.currentTrackInstrument].Ppadenabled = 1;
                     }
                 }
                 else
                 {
-                    PADnoteParameters *params = track->Instruments[_session->currentTrackInstrument].padpars;
+                    PADnoteParameters *params = track->Instruments[_mixer->State.currentTrackInstrument].padpars;
 
                     RenderPadSynth(params);
                 }
             }
             ImGui::EndChild();
         }
-        else if (_session->currentSynth == ActiveSynths::Sub)
+        else if (_mixer->State.currentSynth == ActiveSynths::Sub)
         {
             ImGui::BeginChild("sub-synth");
             {
-                if (track->Instruments[_session->currentTrackInstrument].Psubenabled == 0)
+                if (track->Instruments[_mixer->State.currentTrackInstrument].Psubenabled == 0)
                 {
                     ImGui::Text("SUB editor is disabled");
                     if (ImGui::Button("Enable SUB synth"))
                     {
-                        track->Instruments[_session->currentTrackInstrument].Psubenabled = 1;
+                        track->Instruments[_mixer->State.currentTrackInstrument].Psubenabled = 1;
                     }
                 }
                 else
                 {
-                    SUBnoteParameters *params = track->Instruments[_session->currentTrackInstrument].subpars;
+                    SUBnoteParameters *params = track->Instruments[_mixer->State.currentTrackInstrument].subpars;
 
                     RenderSubSynth(params);
                 }
             }
             ImGui::EndChild();
         }
-        else if (_session->currentSynth == ActiveSynths::Smpl)
+        else if (_mixer->State.currentSynth == ActiveSynths::Smpl)
         {
             if (ImGui::BeginChild("SmplSynthEditorID", ImVec2(0, 0), false))
             {
-                if (track->Instruments[_session->currentTrackInstrument].Psmplenabled == 0)
+                if (track->Instruments[_mixer->State.currentTrackInstrument].Psmplenabled == 0)
                 {
                     ImGui::Text("SMPL editor is disabled");
                     if (ImGui::Button("Enable SMPL synth"))
                     {
-                        track->Instruments[_session->currentTrackInstrument].Psmplenabled = 1;
+                        track->Instruments[_mixer->State.currentTrackInstrument].Psmplenabled = 1;
                     }
                 }
                 else
                 {
-                    SampleNoteParameters *params = track->Instruments[_session->currentTrackInstrument].smplpars;
+                    SampleNoteParameters *params = track->Instruments[_mixer->State.currentTrackInstrument].smplpars;
 
                     RenderSmplSynth(params);
                 }
@@ -320,7 +325,8 @@ static char const *oscillator_type_icons[] = {
     ICON_FAD_MODRANDOM,
 };
 
-void SynthEditor::RenderAbstractSynth(AbstractNoteParameters *params)
+void SynthEditor::RenderAbstractSynth(
+    AbstractNoteParameters *params)
 {
     if (KnobUchar("Vol", &(params->PVolume), 0, 127, ImVec2(50, 40), "Volume"))
     {
@@ -351,7 +357,7 @@ void SynthEditor::RenderAbstractSynth(AbstractNoteParameters *params)
 void SynthEditor::RenderAddSynth(
     ADnoteParameters *addparams)
 {
-    if (_session->currentVoice >= NUM_VOICES)
+    if (_mixer->State.currentVoice >= NUM_VOICES)
     {
         RenderAbstractSynth(addparams);
 
@@ -437,7 +443,7 @@ void SynthEditor::RenderAddSynth(
     }
     else
     {
-        auto voiceparams = &addparams->VoicePar[_session->currentVoice];
+        auto voiceparams = &addparams->VoicePar[_mixer->State.currentVoice];
 
         auto enabled = voiceparams->Enabled != 0;
         if (ImGui::Checkbox("Enabled Voice", &enabled))
@@ -1146,7 +1152,7 @@ void SynthEditor::RenderSmplSynth(
             ImGui::SameLine();
             if (ImGui::Button("Play"))
             {
-                _session->_mixer->PreviewSample((*selectedWav).second->path);
+                _mixer->PreviewSample((*selectedWav).second->path);
             }
 
             ImGui::PlotConfig conf;
@@ -1499,7 +1505,8 @@ static char const *stvarf_filter_type_icons[] = {
     ICON_FAD_FILTER_NOTCH,
 };
 
-void SynthEditor::RenderFilter(FilterParams *filter)
+void SynthEditor::RenderFilter(
+    FilterParams *filter)
 {
     ImGui::BeginGroup();
     for (int i = 0; i < category_count; i++)
@@ -1610,7 +1617,10 @@ void SynthEditor::RenderFilter(FilterParams *filter)
     }
 }
 
-void SynthEditor::RenderDetune(unsigned char &detuneType, unsigned short int &coarseDetune, unsigned short int &detune)
+void SynthEditor::RenderDetune(
+    unsigned char &detuneType,
+    unsigned short int &coarseDetune,
+    unsigned short int &detune)
 {
     ImGui::Text("Detune");
 

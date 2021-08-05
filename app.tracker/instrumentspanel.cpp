@@ -47,16 +47,16 @@ void InstrumentsPanel::Render2d()
                 }
                 if (ImGui::IsItemClicked())
                 {
-                    _session->currentTrack = i;
+                    _session->_mixer->State.currentTrack = i;
                 }
                 ImGui::SameLine();
 
                 char buf[256] = {0};
                 sprintf_s(buf, 256, "%02d : %s", int(i + 1), track->Pname);
-                ImGui::Selectable(buf, i == _session->currentTrack);
+                ImGui::Selectable(buf, i == _session->_mixer->State.currentTrack);
                 if (ImGui::IsItemClicked())
                 {
-                    _session->currentTrack = i;
+                    _session->_mixer->State.currentTrack = i;
                 }
 
                 ImGui::PopID();
@@ -67,16 +67,16 @@ void InstrumentsPanel::Render2d()
             {
                 if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
                 {
-                    if (_session->currentTrack > 0)
+                    if (_session->_mixer->State.currentTrack > 0)
                     {
-                        _session->currentTrack--;
+                        _session->_mixer->State.currentTrack--;
                     }
                 }
                 if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
                 {
-                    if (_session->currentTrack < _session->_mixer->GetTrackCount() - 1)
+                    if (_session->_mixer->State.currentTrack < _session->_mixer->GetTrackCount() - 1)
                     {
-                        _session->currentTrack++;
+                        _session->_mixer->State.currentTrack++;
                     }
                 }
             }
@@ -85,9 +85,9 @@ void InstrumentsPanel::Render2d()
         if (ImGui::CollapsingHeader("Instrument Properties"))
         {
             ImGui::BeginChild("InstrumentProperties", ImVec2(0, 200));
-            if (_session->currentTrack < _session->_mixer->GetTrackCount())
+            if (_session->_mixer->State.currentTrack < _session->_mixer->GetTrackCount())
             {
-                auto track = _session->_mixer->GetTrack(_session->currentTrack);
+                auto track = _session->_mixer->GetTrack(_session->_mixer->State.currentTrack);
 
                 bool v = track->Penabled == 1;
                 if (ImGui::Checkbox("Enabled", &v))
@@ -132,7 +132,7 @@ void InstrumentsPanel::Render2d()
                 auto selection = LibraryTree(topLevel);
                 if (selection != nullptr)
                 {
-                    auto const &track = _session->_mixer->GetTrack(_session->currentTrack);
+                    auto const &track = _session->_mixer->GetTrack(_session->_mixer->State.currentTrack);
                     track->Lock();
                     _session->_library->LoadAsInstrument(selection, track);
                     track->Penabled = 1;

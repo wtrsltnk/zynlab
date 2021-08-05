@@ -10,11 +10,14 @@
 #include "playercontrolspanel.h"
 #include "syntheditor.h"
 #include <iapplication.h>
+#include <zyn.mixer/Mixer.h>
 
 class Application :
     public IApplication,
     public INoteSource
 {
+    std::unique_ptr<Mixer> _mixer;
+    std::unique_ptr<LibraryManager> _library;
     ApplicationSession _session;
 
     PlayerControlsPanel _playerControlsPanel;
@@ -25,11 +28,11 @@ class Application :
     AutomationEditor _automationEditor;
     SynthEditor _synthEditor;
 
-    unsigned int _sampleIndex;
+    unsigned int _sampleIndex = 0;
 
-    ImFont *_monofont;
-    ImFont *_fkFont;
-    ImFont *_fadFont;
+    ImFont *_monofont = nullptr;
+    ImFont *_fkFont = nullptr;
+    ImFont *_fadFont = nullptr;
 
 public:
     Application();

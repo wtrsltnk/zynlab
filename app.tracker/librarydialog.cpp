@@ -3,18 +3,19 @@
 #include <algorithm>
 #include <imgui.h>
 
-LibraryDialog::LibraryDialog()
-{}
+LibraryDialog::LibraryDialog() = default;
 
 void LibraryDialog::SetUp(
-    ApplicationSession *session)
+    IMixer *mixer,
+    ILibraryManager *library)
 {
-    _session = session;
+    _mixer = mixer;
+    _library = library;
 
     _selectSample.selectedLibrary = nullptr;
     _selectSample.selectedSample = nullptr;
     _selectSample.filter[0] = '\0';
-    _selectSample.filteredSamples = _session->_library->GetSamples();
+    _selectSample.filteredSamples = _library->GetSamples();
 }
 
 bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
@@ -29,7 +30,7 @@ bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
 void LibraryDialog::filterSamples()
 {
     _selectSample.filteredSamples.clear();
-    for (auto sample : _session->_library->GetSamples())
+    for (auto sample : _library->GetSamples())
     {
         if (!findStringIC(sample->GetName(), _selectSample.filter))
         {
@@ -67,7 +68,7 @@ void LibraryDialog::ShowDialog(bool open, std::function<void(ILibraryItem *)> co
                 bool selected = _selectSample.selectedSample != nullptr && sample->GetPath() == _selectSample.selectedSample->GetPath();
                 if (ImGui::Selectable(sample->GetName().c_str(), &selected))
                 {
-                    _session->_mixer->PreviewSample(sample->GetPath());
+                    _mixer->PreviewSample(sample->GetPath());
                     _selectSample.selectedSample = sample;
                 }
             }

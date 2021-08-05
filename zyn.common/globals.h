@@ -379,6 +379,14 @@ public:
     virtual std::vector<SimpleNote> GetNotes(unsigned int frameCount, unsigned int sampleRate) = 0;
 };
 
+enum class ActiveSynths
+{
+    Add,
+    Sub,
+    Pad,
+    Smpl,
+};
+
 class IMixer
 {
 public:
@@ -411,6 +419,17 @@ public:
 
     virtual INoteSource *GetNoteSource() const = 0;
     virtual void SetNoteSource(INoteSource *source) = 0;
+
+    virtual void PreviewSample(std::string const &filename) = 0;
+
+    // Synth state
+    struct
+    {
+        unsigned int currentTrack = 0;
+        unsigned int currentTrackInstrument = 0;
+        unsigned int currentVoice = NUM_VOICES;
+        ActiveSynths currentSynth = ActiveSynths::Add;
+    } State;
 };
 
 #endif

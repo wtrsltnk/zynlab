@@ -2,6 +2,7 @@
 #define LIBRARYDIALOG_H
 
 #include <functional>
+#include <memory>
 #include <set>
 #include <zyn.common/ILibraryManager.h>
 
@@ -9,12 +10,13 @@
 
 class LibraryDialog
 {
-    ApplicationSession *_session = nullptr;
+    IMixer *_mixer = nullptr;
+    ILibraryManager *_library = nullptr;
     struct
     {
-        ILibrary *selectedLibrary;
-        ILibraryItem *selectedSample;
-        char filter[64];
+        ILibrary *selectedLibrary = nullptr;
+        ILibraryItem *selectedSample = nullptr;
+        char filter[64] = {};
         std::set<ILibraryItem *> filteredSamples;
     } _selectSample;
 
@@ -23,7 +25,9 @@ class LibraryDialog
 public:
     LibraryDialog();
 
-    void SetUp(ApplicationSession *session);
+    void SetUp(
+        IMixer *mixer,
+        ILibraryManager *library);
 
     void ShowDialog(bool open, std::function<void(ILibraryItem *)> const &func);
 };

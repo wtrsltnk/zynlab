@@ -2,21 +2,14 @@
 #define APPLICATIONSESSION_H
 
 #include "song.h"
-#include <zyn.mixer/Mixer.h>
+#include <zyn.common/ILibraryManager.h>
+#include <zyn.common/globals.h>
 
 enum class PlayStates
 {
     Stopped,
     StartPlaying,
     Playing,
-};
-
-enum class ActiveSynths
-{
-    Add,
-    Sub,
-    Pad,
-    Smpl,
 };
 
 enum class SelectableTabs
@@ -32,7 +25,7 @@ class ApplicationSession
 public:
     ApplicationSession();
 
-    Mixer *_mixer = nullptr;
+    IMixer *_mixer = nullptr;
     ILibraryManager *_library = nullptr;
 
     PlayStates _playState = PlayStates::Stopped;
@@ -40,12 +33,6 @@ public:
     Song *_song = nullptr;
     unsigned int _bpm = 138;
     SelectableTabs selectedTab = SelectableTabs::Synth;
-
-    // Synth state
-    unsigned int currentTrack = 0;
-    unsigned int currentTrackInstrument = 0;
-    unsigned int currentVoice = NUM_VOICES;
-    ActiveSynths currentSynth = ActiveSynths::Add;
 
     // Pattern state
     unsigned int currentRow = 0;
