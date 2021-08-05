@@ -38,7 +38,7 @@ void zyn::ui::PadNote::Render()
 
         if (ImGui::Button("Apply settings"))
         {
-            parameters->ApplyParameters(_state->_mixer);
+            parameters->ApplyParameters(_state->_mixer->Mutex());
         }
 
         if (ImGui::BeginTabBar("PADnoteTab"))

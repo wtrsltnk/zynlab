@@ -17,6 +17,11 @@ void PlayerControlsPanel::SetUp(
 
 void PlayerControlsPanel::Render2d()
 {
+    if (_session == nullptr)
+    {
+        return;
+    }
+
     ImVec2 iconSize(30, 30);
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 

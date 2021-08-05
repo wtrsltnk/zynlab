@@ -24,6 +24,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <math.h>
 #include <mutex>
 #include <stdint.h>
 #include <string>

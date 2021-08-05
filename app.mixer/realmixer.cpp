@@ -18,12 +18,10 @@ RealMixer::RealMixer()
         i.synthNote = nullptr;
         i.time = 0;
     }
-    pthread_mutex_init(&_mutex, 0);
 }
 
 RealMixer::~RealMixer()
 {
-    pthread_mutex_destroy(&_mutex);
     if (_params != nullptr)
     {
         delete _params;
@@ -56,12 +54,12 @@ unsigned int RealMixer::BufferSizeInBytes() const
 
 void RealMixer::Lock()
 {
-    pthread_mutex_lock(&_mutex);
+    _mutex.lock();
 }
 
 void RealMixer::Unlock()
 {
-    pthread_mutex_unlock(&_mutex);
+    _mutex.unlock();
 }
 
 void RealMixer::AudioOut(

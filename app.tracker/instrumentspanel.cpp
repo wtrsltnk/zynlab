@@ -20,6 +20,11 @@ void InstrumentsPanel::SetUp(
 
 void InstrumentsPanel::Render2d()
 {
+    if (_session == nullptr)
+    {
+        return;
+    }
+
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin(

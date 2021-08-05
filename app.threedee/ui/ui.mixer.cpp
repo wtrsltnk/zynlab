@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <zyn.common/globals.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.nio/Nio.h>

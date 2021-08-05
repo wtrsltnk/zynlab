@@ -46,7 +46,7 @@ bool zyn::ui::SubNote::Setup() { return true; }
 void zyn::ui::SubNote::Render()
 {
     auto track = _state->_mixer->GetTrack(_state->_currentTrack);
-    if (ImGui::BeginChild(SubSynthEditorID, ImVec2(0,0), false) && track != nullptr)
+    if (ImGui::BeginChild(SubSynthEditorID, ImVec2(0, 0), false) && track != nullptr)
     {
         auto *parameters = track->Instruments[_state->_currentTrackInstrument].subpars;
 
@@ -224,11 +224,11 @@ void zyn::ui::SubNote::SUBNoteEditorBandwidth(SUBnoteParameters *parameters)
 {
     ImGui::Text("Bandwidth Parameters");
 
-    auto bandwidth = static_cast<int>(parameters->Pbandwidth);
+    auto bandwidth = static_cast<int>(parameters->PBandwidth);
     ImGui::PushItemWidth(250);
     if (ImGui::SliderInt("##Bandwidth", &bandwidth, 0, 127, "Bandwidth %d"))
     {
-        parameters->Pbandwidth = static_cast<unsigned char>(bandwidth);
+        parameters->PBandwidth = static_cast<unsigned char>(bandwidth);
     }
     ImGui::ShowTooltipOnHover("Bandwidth");
 
@@ -293,7 +293,7 @@ void zyn::ui::SubNote::SUBNoteEditorFilter(SUBnoteParameters *parameters)
 
         ImGui::Separator();
 
-        _FilterEnvelope.Render(parameters->GlobalFilterEnvelope);
+        _FilterEnvelope.Render(parameters->FilterEnvelope);
     }
 }
 

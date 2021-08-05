@@ -5,7 +5,6 @@
 #include "imgui_helpers.h"
 #include <imgui.h>
 #include <imgui_plot.h>
-#include <zyn.synth/ADnoteGlobalParam.h>
 #include <zyn.synth/ADnoteParams.h>
 
 char const *SynthEditor::ID = "SynthEditor";
@@ -753,7 +752,7 @@ void SynthEditor::RenderSubSynth(
 
             ImGui::Separator();
 
-            RenderEnvelope("Filter Envelope", params->GlobalFilterEnvelope, nullptr);
+            RenderEnvelope("Filter Envelope", params->FilterEnvelope, nullptr);
         }
         ImGui::PopID();
     }
@@ -791,11 +790,11 @@ void SynthEditor::RenderSubSynth(
 
     if (ImGui::CollapsingHeader("Bandwidth"))
     {
-        auto bandwidth = static_cast<int>(params->Pbandwidth);
+        auto bandwidth = static_cast<int>(params->PBandwidth);
         ImGui::PushItemWidth(250);
         if (ImGui::SliderInt("##Bandwidth", &bandwidth, 0, 127, "Bandwidth %d"))
         {
-            params->Pbandwidth = static_cast<unsigned char>(bandwidth);
+            params->PBandwidth = static_cast<unsigned char>(bandwidth);
         }
         ShowTooltipOnHover("Bandwidth");
 

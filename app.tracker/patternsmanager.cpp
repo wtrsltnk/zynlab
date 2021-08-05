@@ -19,6 +19,11 @@ void PatternsManager::SetUp(ApplicationSession *session)
 
 void PatternsManager::Render2d()
 {
+    if (_session == nullptr)
+    {
+        return;
+    }
+
     if (_selectedPattern != _session->_song->currentPattern)
     {
         SelectPattern(_session->_song->currentPattern);
