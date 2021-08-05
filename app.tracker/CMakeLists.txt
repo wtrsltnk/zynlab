@@ -11,27 +11,8 @@ add_executable(app.tracker
     automationeditor.h
     effectseditor.cpp
     effectseditor.h
-    glad.c
-    imgui/imgui.cpp
-    imgui/imgui.h
-    imgui/imgui_demo.cpp
-    imgui/imgui_draw.cpp
-    imgui/examples/imgui_impl_opengl3.cpp
-    imgui/examples/imgui_impl_opengl3.h
-    imgui/examples/imgui_impl_win32.cpp
-    imgui/examples/imgui_impl_win32.h
-    imgui/imgui_internal.h
-    imgui/imgui_widgets.cpp
-    imgui_helpers.cpp
-    imgui_helpers.h
-    imgui_plot.cpp
-    include/imgui_plot.h
     instrumentspanel.cpp
     instrumentspanel.h
-    knob.cpp
-    knob.h
-    librarydialog.cpp
-    librarydialog.h
     main.cpp
     note.cpp
     note.h
@@ -45,8 +26,6 @@ add_executable(app.tracker
     playercontrolspanel.h
     song.cpp
     song.h
-    syntheditor.cpp
-    syntheditor.h
     )
 
 target_include_directories(app.tracker
@@ -67,7 +46,8 @@ target_link_libraries(app.tracker
         zyn.mixer
         zyn.synth
         zyn.serialization
-        zyn.common)
+        zyn.common
+        zyn.ui)
 
 target_compile_options(app.tracker
     PUBLIC 

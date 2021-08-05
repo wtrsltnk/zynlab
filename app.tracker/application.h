@@ -8,7 +8,7 @@
 #include "patterneditor.h"
 #include "patternsmanager.h"
 #include "playercontrolspanel.h"
-#include "syntheditor.h"
+#include <zyn.ui/syntheditor.h>
 #include <iapplication.h>
 #include <zyn.mixer/Mixer.h>
 

@@ -5,8 +5,7 @@
 #include <memory>
 #include <set>
 #include <zyn.common/ILibraryManager.h>
-
-#include "applicationsession.h"
+#include <zyn.common/globals.h>
 
 class LibraryDialog
 {

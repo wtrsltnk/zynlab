@@ -8,7 +8,6 @@
 #include <iostream>
 #include <random>
 #include <stdio.h>
-#define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include <chrono>
 #include <examples/imgui_impl_opengl3.h>
 #include <iapplication.h>
