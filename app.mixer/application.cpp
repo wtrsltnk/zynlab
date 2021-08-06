@@ -66,8 +66,9 @@ public:
         int n = 0;
 
         // white keys first
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.1f, 1.0f, 1.0f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.1f, 1.0f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(255, 255, 255, 255));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.4f, 1.0f, 0.6f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.4f, 1.0f, 1.0f, 1.0f));
         ImVec2 note(10, 30), btnSize(40, 220);
         for (int i = 0; i < 28; i++)
         {
@@ -122,7 +123,7 @@ public:
 
             note.x += 42;
         }
-        ImGui::PopStyleColor(2);
+        ImGui::PopStyleColor(3);
 
         //black keys
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.1f, 0.0f, 0.0f, 1.0f));

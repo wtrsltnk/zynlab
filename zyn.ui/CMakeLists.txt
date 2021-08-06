@@ -20,6 +20,8 @@ add_library(zyn.ui
     include/imgui_plot.h
     librarydialog.cpp
     librarydialog.h
+    piano.cpp
+    piano.h
     syntheditor.cpp
     syntheditor.h
     )
