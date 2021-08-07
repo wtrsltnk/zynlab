@@ -44,9 +44,13 @@ bool CheckButton(
     return result;
 }
 
-void SynthEditor::Render2d()
+void SynthEditor::Render2d(
+    ImGuiWindowFlags flags)
 {
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
+    if (flags == 0)
+    {
+        flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
+    }
 
     ImGui::Begin(
         ID,

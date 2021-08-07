@@ -47,6 +47,7 @@ endif()
 
 if(BUILD_APP_MIXER)
     add_subdirectory("app.mixer")
+    add_subdirectory("app.synth")
 endif()
 
 if(BUILD_APP_TRACKER)

@@ -2,6 +2,7 @@
 #define SYNTHEDITOR_H
 
 #include "librarydialog.h"
+#include <imgui.h>
 #include <zyn.synth/ADnoteParams.h>
 #include <zyn.synth/EnvelopeParams.h>
 #include <zyn.synth/LFOParams.h>
@@ -21,7 +22,8 @@ public:
         IMixer *mixer,
         ILibraryManager *library);
 
-    void Render2d();
+    void Render2d(
+        ImGuiWindowFlags flags = 0);
 
     void RenderEnvelope(
         char const *label,
