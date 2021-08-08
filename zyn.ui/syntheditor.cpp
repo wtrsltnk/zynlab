@@ -19,6 +19,7 @@ void SynthEditor::SetUp(
     ILibraryManager *library)
 {
     _mixer = mixer;
+    _library = library;
 
     _libraryDialog.SetUp(mixer, library);
 }
@@ -57,9 +58,28 @@ void SynthEditor::Render2d(
         nullptr,
         flags);
     {
+        bool selectInstrument = false;
+
         auto track = _mixer->GetTrack(_mixer->State.currentTrack);
         ImGui::BeginChild("btns", ImVec2(121, 0));
         {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+            bool changeInstrument = false;
+            if (track->Pname[0] == '\0')
+            {
+                changeInstrument = ImGui::Button("< Default >", ImVec2(120, 0));
+            }
+            else
+            {
+                changeInstrument = ImGui::Button((const char *)track->Pname, ImVec2(120, 0));
+            }
+
+            if (changeInstrument)
+            {
+                selectInstrument = true;
+            }
+
             ImGui::Text("Tracks");
             for (unsigned int i = 0; i < _mixer->GetTrackCount(); i++)
             {
@@ -77,7 +97,7 @@ void SynthEditor::Render2d(
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_Separator));
                     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_TitleBg));
                 }
-                if (CheckButton(title, &active, ImVec2(24, 24)))
+                if (CheckButton(title, &active, ImVec2(27, 27)))
                 {
                     _mixer->State.currentTrack = i;
                 }
@@ -112,7 +132,7 @@ void SynthEditor::Render2d(
                     char title[8] = {0};
                     sprintf_s(title, 8, "%u", i + 1);
                     bool active = (_mixer->State.currentTrackInstrument == i);
-                    if (CheckButton(title, &active, ImVec2(24, 24)))
+                    if (CheckButton(title, &active, ImVec2(27, 27)))
                     {
                         _mixer->State.currentSynth = ActiveSynths::Add;
                         _mixer->State.currentTrackInstrument = i;
@@ -138,33 +158,36 @@ void SynthEditor::Render2d(
                 _mixer->State.currentVoice = NUM_VOICES;
             }
 
-            ImGui::PushID("VOICES");
-            for (unsigned int i = 0; i < NUM_VOICES; i++)
+            if (addChecked)
             {
-                if (i % 4 != 0)
+                ImGui::PushID("VOICES");
+                for (unsigned int i = 0; i < NUM_VOICES; i++)
                 {
-                    ImGui::SameLine();
+                    if (i % 4 != 0)
+                    {
+                        ImGui::SameLine();
+                    }
+                    char title[8] = {0};
+                    sprintf_s(title, 8, "%u", i + 1);
+                    voiceActive = (_mixer->State.currentVoice == i);
+                    auto voiceEnabled = instrument.adpars->VoicePar[i].Enabled && addChecked;
+                    if (!voiceEnabled)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_Separator));
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_TitleBg));
+                    }
+                    if (CheckButton(title, &voiceActive, ImVec2(27, 27)))
+                    {
+                        _mixer->State.currentSynth = ActiveSynths::Add;
+                        _mixer->State.currentVoice = i;
+                    }
+                    if (!voiceEnabled)
+                    {
+                        ImGui::PopStyleColor(2);
+                    }
                 }
-                char title[8] = {0};
-                sprintf_s(title, 8, "%u", i + 1);
-                voiceActive = (_mixer->State.currentVoice == i);
-                auto voiceEnabled = instrument.adpars->VoicePar[i].Enabled && addChecked;
-                if (!voiceEnabled)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_Separator));
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_TitleBg));
-                }
-                if (CheckButton(title, &voiceActive, ImVec2(24, 24)))
-                {
-                    _mixer->State.currentSynth = ActiveSynths::Add;
-                    _mixer->State.currentVoice = i;
-                }
-                if (!voiceEnabled)
-                {
-                    ImGui::PopStyleColor(2);
-                }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
             ImGui::Separator();
 
@@ -210,6 +233,7 @@ void SynthEditor::Render2d(
             {
                 _mixer->State.currentSynth = ActiveSynths::Smpl;
             }
+            ImGui::PopStyleVar(2);
         }
         ImGui::EndChild();
 
@@ -299,8 +323,15 @@ void SynthEditor::Render2d(
             }
             ImGui::EndChild();
         }
-    }
 
+        _libraryDialog.ShowInstrumentDialog(selectInstrument, [&](ILibraryItem *item) {
+            track->Lock();
+            _library->LoadAsInstrument(item, track);
+            track->Penabled = 1;
+            track->ApplyParameters();
+            track->Unlock();
+        });
+    }
     ImGui::End();
 }
 
@@ -849,6 +880,7 @@ void SynthEditor::RenderSubSynth(
 
     if (ImGui::CollapsingHeader("Harmonics"))
     {
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(3, 3));
         ImGui::BeginChild("Harmonics", ImVec2(), false, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
         for (int i = 0; i < MAX_SUB_HARMONICS; i++)
         {
@@ -880,6 +912,7 @@ void SynthEditor::RenderSubSynth(
             ImGui::PopID();
         }
         ImGui::EndChild();
+        ImGui::PopStyleVar();
     }
 }
 
@@ -1176,7 +1209,7 @@ void SynthEditor::RenderSmplSynth(
     }
     ImGui::EndChild();
 
-    _libraryDialog.ShowDialog(selectSample, [params](ILibraryItem *sample) {
+    _libraryDialog.ShowSampleDialog(selectSample, [params](ILibraryItem *sample) {
         if (sample != nullptr)
         {
             params->PwavData[selectingSampleForKey] = WavData::Load(sample->GetPath());

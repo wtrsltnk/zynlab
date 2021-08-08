@@ -1,6 +1,7 @@
 #include "librarydialog.h"
 
 #include <algorithm>
+#include <boolinq.h>
 #include <imgui.h>
 
 LibraryDialog::LibraryDialog() = default;
@@ -12,64 +13,104 @@ void LibraryDialog::SetUp(
     _mixer = mixer;
     _library = library;
 
-    _selectSample.selectedLibrary = nullptr;
-    _selectSample.selectedSample = nullptr;
-    _selectSample.filter[0] = '\0';
-    _selectSample.filteredSamples = _library->GetSamples();
+    _selectItem.selectedLibrary = nullptr;
+    _selectItem.selectedSample = nullptr;
+    _selectItem.filter[0] = '\0';
 }
 
-bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
+bool findStringIC(
+    const std::string &strHaystack,
+    const std::string &strNeedle)
 {
     auto it = std::search(
         strHaystack.begin(), strHaystack.end(),
         strNeedle.begin(), strNeedle.end(),
         [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); });
+
     return (it != strHaystack.end());
 }
 
 void LibraryDialog::filterSamples()
 {
-    _selectSample.filteredSamples.clear();
-    for (auto sample : _library->GetSamples())
-    {
-        if (!findStringIC(sample->GetName(), _selectSample.filter))
-        {
-            continue;
-        }
-        if (_selectSample.selectedLibrary != nullptr && !sample->GetLibrary()->IsParent(_selectSample.selectedLibrary))
-        {
-            continue;
-        }
-
-        _selectSample.filteredSamples.insert(sample);
-    }
+    _selectItem.filteredItems =
+        boolinq::from(_baseItemList)
+            .where([&](ILibraryItem *item) { return findStringIC(item->GetName(), _selectItem.filter); })
+            .where([&](ILibraryItem *item) { return _selectItem.selectedLibrary == nullptr || item->GetLibrary()->IsParent(_selectItem.selectedLibrary); })
+            .toStdSet();
 }
 
-void LibraryDialog::ShowDialog(bool open, std::function<void(ILibraryItem *)> const &func)
+void LibraryDialog::ShowSampleDialog(
+    bool open,
+    std::function<void(ILibraryItem *)> const &func)
+{
+    _baseItemList = _library->GetSamples();
+
+    ShowDialog("Select sample", open, func);
+}
+
+void LibraryDialog::ShowInstrumentDialog(
+    bool open,
+    std::function<void(ILibraryItem *)> const &func)
+{
+    _baseItemList = _library->GetInstruments();
+
+    ShowDialog("Select instrument", open, func);
+}
+
+void LibraryDialog::ShowDialog(
+    const char *title,
+    bool open,
+    const std::function<void(ILibraryItem *)> &func)
 {
     if (open)
     {
-        ImGui::OpenPopup("Select sample");
+        ImGui::OpenPopup(title);
+        _selectItem.filteredItems = _baseItemList;
     }
 
-    ImGui::SetNextWindowSize(ImVec2(650, 600));
-    if (ImGui::BeginPopupModal("Select sample", nullptr, ImGuiWindowFlags_NoResize))
+    ImGui::SetNextWindowSize(ImVec2(650 + ImGui::GetStyle().ItemSpacing.x * 2, 600));
+    if (ImGui::BeginPopupModal(title, nullptr, ImGuiWindowFlags_NoResize))
     {
-        ImGui::SetNextItemWidth(600);
-        if (ImGui::InputText("##Filter", _selectSample.filter, 64))
+        ImGui::SetNextItemWidth(600 + ImGui::GetStyle().ItemSpacing.x);
+        if (ImGui::InputText("##Filter", _selectItem.filter, 64))
         {
             filterSamples();
         }
 
-        if (ImGui::ListBoxHeader("##Samples", ImVec2(600, -40)))
+        if (ImGui::ListBoxHeader("##Libraries", ImVec2(300, -50)))
         {
-            for (auto sample : _selectSample.filteredSamples)
+            bool allSelected = _selectItem.selectedLibrary == nullptr;
+            if (ImGui::Selectable("All", &allSelected))
             {
-                bool selected = _selectSample.selectedSample != nullptr && sample->GetPath() == _selectSample.selectedSample->GetPath();
+                _selectItem.selectedLibrary = nullptr;
+                filterSamples();
+            }
+
+            auto banks = boolinq::from(_library->GetTopLevelLibraries())
+                             .firstOrDefault([&](ILibrary *l) { return l->GetName() == "banks"; });
+            for (auto library : banks->GetChildren())
+            {
+                bool selected = _selectItem.selectedLibrary != nullptr && library->GetPath() == _selectItem.selectedLibrary->GetPath();
+                if (ImGui::Selectable(library->GetName().c_str(), &selected))
+                {
+                    _selectItem.selectedLibrary = library;
+                    filterSamples();
+                }
+            }
+            ImGui::ListBoxFooter();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::ListBoxHeader("##Items", ImVec2(300, -50)))
+        {
+            for (auto sample : _selectItem.filteredItems)
+            {
+                bool selected = _selectItem.selectedSample != nullptr && sample->GetPath() == _selectItem.selectedSample->GetPath();
                 if (ImGui::Selectable(sample->GetName().c_str(), &selected))
                 {
                     _mixer->PreviewSample(sample->GetPath());
-                    _selectSample.selectedSample = sample;
+                    _selectItem.selectedSample = sample;
                 }
             }
             ImGui::ListBoxFooter();
@@ -77,7 +118,7 @@ void LibraryDialog::ShowDialog(bool open, std::function<void(ILibraryItem *)> co
 
         if (ImGui::Button("Ok", ImVec2(120, 0)))
         {
-            func(_selectSample.selectedSample);
+            func(_selectItem.selectedSample);
             ImGui::CloseCurrentPopup();
         }
 

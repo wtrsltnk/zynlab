@@ -109,7 +109,7 @@ bool Init(
 
     g_hwnd = CreateWindow(
         wc.lpszClassName,
-        L"IMGUI-all-in-one",
+        L"zyn.synth",
         WS_OVERLAPPEDWINDOW | WS_VISIBLE,
         CW_USEDEFAULT,
         CW_USEDEFAULT,

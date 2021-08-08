@@ -13,6 +13,7 @@
 class SynthEditor
 {
     IMixer *_mixer;
+    ILibraryManager *_library;
     LibraryDialog _libraryDialog;
 
 public:

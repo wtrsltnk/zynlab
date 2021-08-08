@@ -9,18 +9,6 @@
 
 class LibraryDialog
 {
-    IMixer *_mixer = nullptr;
-    ILibraryManager *_library = nullptr;
-    struct
-    {
-        ILibrary *selectedLibrary = nullptr;
-        ILibraryItem *selectedSample = nullptr;
-        char filter[64] = {};
-        std::set<ILibraryItem *> filteredSamples;
-    } _selectSample;
-
-    void filterSamples();
-
 public:
     LibraryDialog();
 
@@ -28,7 +16,32 @@ public:
         IMixer *mixer,
         ILibraryManager *library);
 
-    void ShowDialog(bool open, std::function<void(ILibraryItem *)> const &func);
+    void ShowSampleDialog(
+        bool open,
+        std::function<void(ILibraryItem *)> const &func);
+
+    void ShowInstrumentDialog(
+        bool open,
+        std::function<void(ILibraryItem *)> const &func);
+
+private:
+    IMixer *_mixer = nullptr;
+    ILibraryManager *_library = nullptr;
+    std::set<ILibraryItem *> _baseItemList;
+    struct
+    {
+        ILibrary *selectedLibrary = nullptr;
+        ILibraryItem *selectedSample = nullptr;
+        char filter[64] = {};
+        std::set<ILibraryItem *> filteredItems;
+        std::set<ILibrary *> filteredLibaries;
+    } _selectItem;
+
+    void filterSamples();
+    void ShowDialog(
+        const char *title,
+        bool open,
+        std::function<void(ILibraryItem *)> const &func);
 };
 
 #endif // LIBRARYDIALOG_H

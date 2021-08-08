@@ -19,6 +19,8 @@
 
 enum BarTypes
 {
+    OneBar = 1,
+    TwoBar = 2,
     FourBar = 4,
     EightBar = 8,
     SixteenBar = 16,
@@ -63,6 +65,9 @@ bool Application::Setup()
     style.WindowRounding = 0;
     style.Colors[ImGuiCol_Border] = ImVec4(30 / 255.0f, 30 / 255.0f, 30 / 255.0f, 240 / 255.0f);
     style.Colors[ImGuiCol_TitleBg] = ImVec4(21 / 255.0f, 37 / 255.0f, 61 / 255.0f, 240 / 255.0f);
+    style.FramePadding = ImVec2(8, 8);
+    style.ItemSpacing = ImVec2(8, 8);
+    style.ItemInnerSpacing = ImVec2(4, 4);
 
     ImGuiIO &io = ImGui::GetIO();
     io.Fonts->Clear();
@@ -89,6 +94,7 @@ bool Application::Setup()
     _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
 
     io.Fonts->Build();
+
     Config::init();
 
     SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
@@ -101,7 +107,7 @@ bool Application::Setup()
 
     _library = std::make_unique<LibraryManager>();
 
-    _library->AddLibraryLocation("C:\\Program Files (x86)\\ZynAddSubFX\\banks\\");
+    _library->AddLibraryLocation("C:\\Program Files (x86)\\zyn-fusion-windows-64bit-3.0.3-demo\\banks\\");
     //*
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
     {
@@ -111,8 +117,7 @@ bool Application::Setup()
         }
         _library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
     }
-    /*/
-    _session._library->RefreshLibraries();
+    _library->RefreshLibraries();
     //*/
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
@@ -134,6 +139,7 @@ void Application::Render2d()
 {
     _synthEditor.Render2d(ImGuiWindowFlags_NoCollapse);
 
+    ImGui::ShowDemoWindow();
     ImGui::Begin("PatternEditor");
 
     ImGui::End();
