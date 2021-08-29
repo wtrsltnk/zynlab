@@ -24,6 +24,13 @@ enum BarTypes
     FourBar = 4,
     EightBar = 8,
     SixteenBar = 16,
+    ThirtyTwoBar = 32,
+};
+
+struct PatternNote
+{
+    float start;
+    float length;
 };
 
 class TrackPattern
@@ -32,20 +39,26 @@ public:
     TrackPattern();
     virtual ~TrackPattern();
 
-private:
-    unsigned char _note;
     BarTypes _numberOfbars = BarTypes::FourBar;
 
     // a collection of start+end time tuples for when to hit a note.
     // All time values must be between 0.0f and 1.0f which is relative
     // to the size of the total pattern, determined by the number of bars.
-    std::vector<std::tuple<float, float>> _pattern;
+    std::vector<PatternNote> _pattern;
 
     // a collection of tuples containing the start and end of a region where
     // this pattern is active. These numbers represent the bar number a region
     // starts and ends.
     std::vector<std::tuple<long, long>> _activeRegions;
 };
+
+std::map<int, std::map<unsigned char, TrackPattern>> _trackPatterns;
+float _currentBar = 0;
+unsigned int bpm = 120;
+
+TrackPattern::TrackPattern() = default;
+
+TrackPattern::~TrackPattern() = default;
 
 Application::Application()
     : _mixer(std::make_unique<Mixer>())
@@ -132,6 +145,13 @@ bool Application::Setup()
 
     _synthEditor.SetUp(_mixer.get(), _library.get());
 
+    _trackPatterns.insert(std::make_pair(0, std::map<unsigned char, TrackPattern>()));
+    _trackPatterns[0].insert(std::make_pair(65, TrackPattern()));
+    _trackPatterns[0][65]._pattern.push_back({0.0f, 0.1f});
+    _trackPatterns[0][65]._pattern.push_back({0.25f, 0.1f});
+    _trackPatterns[0][65]._pattern.push_back({0.5f, 0.1f});
+    _trackPatterns[0][65]._pattern.push_back({0.75f, 0.1f});
+
     return true;
 }
 
@@ -141,6 +161,7 @@ void Application::Render2d()
 
     ImGui::ShowDemoWindow();
     ImGui::Begin("PatternEditor");
+    ImGui::Text("_currentBar = %f", _currentBar);
 
     ImGui::End();
 
@@ -159,13 +180,55 @@ void Application::Cleanup()
     Nio::Stop();
 }
 
+float ProgressInBars(
+    unsigned int frameCount,
+    unsigned int sampleRate)
+{
+    auto barsPerSecond = 1.0f / (bpm / (60.0f * 4.0f));
+    auto progressInSeconds = (1.0f / sampleRate) * frameCount;
+
+    auto progressInBars = barsPerSecond * progressInSeconds;
+
+    return progressInBars;
+}
+
 std::vector<SimpleNote> Application::GetNotes(
     unsigned int frameCount,
     unsigned int sampleRate)
 {
     PostRedraw();
 
+    auto progressInBars = ProgressInBars(frameCount, sampleRate);
+
     std::vector<SimpleNote> result;
+
+    for (auto &channel : _trackPatterns)
+    {
+        for (auto &note : channel.second)
+        {
+            // todo: quickly exit this iteration when not
+            // in an active region from note.second._activeRegions
+
+            auto floorCurrentBar = int(std::floor(_currentBar));
+            auto pastBars = (floorCurrentBar / note.second._numberOfbars) * note.second._numberOfbars;
+            auto offset = _currentBar - pastBars;
+            for (auto &patternEvent : note.second._pattern)
+            {
+                auto start = patternEvent.start * note.second._numberOfbars;
+                // check if the pattern event start is within this block of bars (of note.second._numberOfbars size), or the next
+                if ((start < offset || start > (offset + progressInBars)) && ((start + note.second._numberOfbars) < offset || (start + note.second._numberOfbars) > (offset + progressInBars)))
+                {
+                    continue;
+                }
+
+                std::cout << offset << std::endl;
+                std::cout << note.first << " - " << 100 << " - " << float(patternEvent.length * note.second._numberOfbars) << " - " << channel.first << std::endl;
+                result.push_back(SimpleNote(note.first, 100, float(patternEvent.length * note.second._numberOfbars), channel.first));
+            }
+        }
+    }
+
+    _currentBar += progressInBars;
 
     return result;
 }

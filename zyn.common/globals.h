@@ -361,13 +361,13 @@ public:
     SimpleNote();
     SimpleNote(unsigned int n,
                unsigned int v,
-               unsigned int l,
+               float l,
                unsigned int c);
     virtual ~SimpleNote();
 
     unsigned int note;
     unsigned int velocity;
-    unsigned int length;
+    float length;
     unsigned int channel;
 };
 

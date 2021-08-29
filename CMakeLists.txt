@@ -8,6 +8,7 @@ option(BUILD_APP_ZYNADSUBFX "enable building app project" ON)
 option(BUILD_APP_THREEDEE "enable building app.threedee project" ON)
 option(BUILD_APP_MIXER "enable building app.mixer project" ON)
 option(BUILD_APP_TRACKER "enable building app.tracker project" ON)
+option(BUILD_APP_SYNTH "enable building app.synth project" ON)
 option(BUILD_PINVOKE "enable building pinvoke project" OFF)
 
 include(cmake/CPM.cmake)
@@ -36,6 +37,10 @@ add_subdirectory("zyn.serialization")
 add_subdirectory("zyn.pinvoke")
 add_subdirectory("zyn.ui")
 
+if (BUILD_APP_SYNTH)
+    add_subdirectory("app.synth")
+endif(BUILD_APP_SYNTH)
+
 if(BUILD_APP_ZYNADSUBFX)
     add_subdirectory("app")
 endif()
@@ -47,7 +52,6 @@ endif()
 
 if(BUILD_APP_MIXER)
     add_subdirectory("app.mixer")
-    add_subdirectory("app.synth")
 endif()
 
 if(BUILD_APP_TRACKER)
