@@ -294,7 +294,7 @@ labelfont(1);
 labelsize(10);
 align(FL_ALIGN_TOP);
 
-value(master->GetSystemEffectSend(neff1, neff2));
+value(master->GetSystemSendEffectVolume(neff1, neff2));
 char tmp[20];snprintf(tmp,20,"%d->%d",neff1+1,neff2+1);
 this->copy_label(tmp);} {}
   }
@@ -304,7 +304,7 @@ this->copy_label(tmp);} {}
   Function {handle(int event)} {return_type int
   } {
     code {if ((event==FL_PUSH) || (event==FL_DRAG)){
-   master->SetSystemEffectSend(neff1,neff2,(int) value());
+   master->SetSystemSendEffectVolume(neff1,neff2,(int) value());
 };
 
 return(WidgetPDial::handle(event));} {}
@@ -350,7 +350,7 @@ bankui->show();}
           xywh {5 43 60 26} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
         }
         Fl_Slider partvolume {
-          callback {master->GetTrack(npart)->setPvolume((int) o->value());}
+          callback {master->GetTrack(npart)->SetVolume((int) o->value());}
           tooltip {Part volume} xywh {10 236 30 153} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
           code0 {o->value(master->GetTrack(npart)->Pvolume);}
         }
@@ -656,14 +656,14 @@ updatepanel();}
       }
       Fl_Dial mastervolumedial {
         label {Master Volume}
-        callback {master->setPvolume((int) o->value());}
+        callback {master->SetVolume((int) o->value());}
         tooltip {Master Volume} xywh {15 32 55 55} box ROUND_UP_BOX labelsize 9 align 130 maximum 127 step 1
         code0 {o->value(master->Pvolume);}
         class WidgetPDial
       }
       Fl_Counter masterkeyshiftcounter {
         label {Master KeyShift}
-        callback {master->setPkeyshift((int) o->value()+64);}
+        callback {master->SetKeyShift((int) o->value()+64);}
         xywh {150 97 120 23} type Simple labelsize 9 minimum -64 maximum 64 step 1
         code0 {o->lstep(12);}
         code1 {o->value(master->Pkeyshift-64);}
@@ -1155,7 +1155,7 @@ virkeys->midich=(int) o->value();} open
           code1 {o->value(master->GetTrack(npart)->Prcvchn);}
         } {}
         Fl_Dial partvolume {
-          callback {master->GetTrack(npart)->setPvolume((int) o->value());}
+          callback {master->GetTrack(npart)->SetVolume((int) o->value());}
           xywh {135 95 45 40} labelsize 9 maximum 127 step 1
           code0 {o->value(master->GetTrack(npart)->Pvolume);}
           class WidgetPDial
@@ -1217,7 +1217,7 @@ simplemaxkcounter->do_callback();}
           code1 {o->value(master->GetTrack(npart)->Pkeyshift-64);}
         }
         Fl_Dial simplesyseffsend {
-          callback {master->setPsysefxvol(npart,nsyseff,(int) o->value());}
+          callback {master->SetSystemEffectVolume(npart,nsyseff,(int) o->value());}
           xywh {300 160 30 30} maximum 127 step 1
           class WidgetPDial
         }
@@ -1462,14 +1462,14 @@ master->Unlock();}
       }
       Fl_Dial simplemastervolumedial {
         label {Master Volume}
-        callback {master->setPvolume((int) o->value());}
+        callback {master->SetVolume((int) o->value());}
         tooltip {Master Volume} xywh {10 35 40 40} box ROUND_UP_BOX labelfont 1 labelsize 11 align 130 maximum 127 step 1
         code0 {o->value(master->Pvolume);}
         class WidgetPDial
       }
       Fl_Counter simplemasterkeyshiftcounter {
         label {Master KeyShift}
-        callback {master->setPkeyshift((int) o->value()+64);}
+        callback {master->SetKeyShift((int) o->value()+64);}
         xywh {15 110 90 20} labelsize 11 minimum -64 maximum 64 step 1
         code0 {o->lstep(12);}
         code1 {o->value(master->Pkeyshift-64);}
@@ -1563,7 +1563,7 @@ Config::Current().cfg.UserInterfaceMode=2;}
   Function {updatesendwindow()} {} {
     code {for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
   for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)
-    syseffsend[neff1][neff2]->value(master->GetSystemEffectSend(neff1, neff2));} {}
+    syseffsend[neff1][neff2]->value(master->GetSystemSendEffectVolume(neff1, neff2));} {}
   }
   Function {updatepanel()} {} {
     code {for (int npart=0;npart<NUM_MIXER_TRACKS;npart++){

@@ -54,7 +54,7 @@ class PartSysEffSend {open : {public Fl_Group}
     } {
       Fl_Dial {} {
         label 01
-        callback {master->setPsysefxvol(npart,neff,(int) o->value());}
+        callback {master->SetSystemEffectVolume(npart,neff,(int) o->value());}
         xywh {10 0 23 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 132 maximum 127 step 1
         code0 {o->size(25,25);}
         code1 {o->value(master->Psysefxvol[neff][npart]);}
@@ -354,7 +354,7 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
         }
         Fl_Dial {} {
           label Volume
-          callback {part->setPvolume((int) o->value());}
+          callback {part->SetVolume((int) o->value());}
           tooltip {Part Volume} xywh {10 21 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
           code0 {o->value(part->Pvolume);}
           class WidgetPDial

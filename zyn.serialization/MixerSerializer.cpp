@@ -95,8 +95,8 @@ void MixerSerializer::Serialize(IPresetsSerializer *xml)
 
 void MixerSerializer::Deserialize(IPresetsSerializer *xml)
 {
-    _parameters->setPvolume(static_cast<unsigned char>(xml->getpar127("volume", _parameters->Pvolume)));
-    _parameters->setPkeyshift(static_cast<unsigned char>(xml->getpar127("key_shift", _parameters->Pkeyshift)));
+    _parameters->SetVolume(static_cast<unsigned char>(xml->getpar127("volume", _parameters->Pvolume)));
+    _parameters->SetKeyShift(static_cast<unsigned char>(xml->getpar127("key_shift", _parameters->Pkeyshift)));
     _parameters->ctl.NRPN.receive = static_cast<unsigned char>(xml->getparbool("nrpn_receive", _parameters->ctl.NRPN.receive));
 
     _parameters->_tracks[0].Penabled = 0;
@@ -137,7 +137,7 @@ void MixerSerializer::Deserialize(IPresetsSerializer *xml)
                 {
                     continue;
                 }
-                _parameters->setPsysefxvol(partefx, nefx, static_cast<unsigned char>(xml->getpar127("vol", _parameters->Psysefxvol[partefx][nefx])));
+                _parameters->SetSystemEffectVolume(partefx, nefx, static_cast<unsigned char>(xml->getpar127("vol", _parameters->Psysefxvol[partefx][nefx])));
                 xml->exitbranch();
             }
 
@@ -147,7 +147,7 @@ void MixerSerializer::Deserialize(IPresetsSerializer *xml)
                 {
                     continue;
                 }
-                _parameters->SetSystemEffectSend(nefx, tonefx, static_cast<unsigned char>(xml->getpar127("send_vol", _parameters->Psysefxsend[nefx][tonefx])));
+                _parameters->SetSystemSendEffectVolume(nefx, tonefx, static_cast<unsigned char>(xml->getpar127("send_vol", _parameters->Psysefxsend[nefx][tonefx])));
                 xml->exitbranch();
             }
             xml->exitbranch();

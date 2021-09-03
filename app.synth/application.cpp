@@ -41,7 +41,7 @@ public:
 
     BarTypes _numberOfbars = BarTypes::FourBar;
 
-    // a collection of start+end time tuples for when to hit a note.
+    // a collection of start+length time structs for when to hit a note.
     // All time values must be between 0.0f and 1.0f which is relative
     // to the size of the total pattern, determined by the number of bars.
     std::vector<PatternNote> _pattern;
@@ -54,7 +54,7 @@ public:
 
 std::map<int, std::map<unsigned char, TrackPattern>> _trackPatterns;
 float _currentBar = 0;
-unsigned int bpm = 120;
+int bpm = 138;
 
 TrackPattern::TrackPattern() = default;
 
@@ -146,13 +146,36 @@ bool Application::Setup()
     _synthEditor.SetUp(_mixer.get(), _library.get());
 
     _trackPatterns.insert(std::make_pair(0, std::map<unsigned char, TrackPattern>()));
-    _trackPatterns[0].insert(std::make_pair(65, TrackPattern()));
-    _trackPatterns[0][65]._pattern.push_back({0.0f, 0.1f});
-    _trackPatterns[0][65]._pattern.push_back({0.25f, 0.1f});
-    _trackPatterns[0][65]._pattern.push_back({0.5f, 0.1f});
-    _trackPatterns[0][65]._pattern.push_back({0.75f, 0.1f});
+    _trackPatterns[0].insert(std::make_pair(45, TrackPattern()));
+    _trackPatterns[0][45]._pattern.push_back({0.0f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.15f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.2f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.25f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.4f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.45f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.5f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.65f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.7f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.75f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.9f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.95f, 0.02f});
 
     return true;
+}
+
+ImVector<ImVec2> ConvertToPoints(
+    const TrackPattern &p,
+    int w)
+{
+    ImVector<ImVec2> points;
+
+    for (auto &t : p._pattern)
+    {
+        points.push_back(ImVec2(t.start * w, 10));
+        points.push_back(ImVec2((t.start + t.length) * w, 10));
+    }
+
+    return points;
 }
 
 void Application::Render2d()
@@ -160,9 +183,151 @@ void Application::Render2d()
     _synthEditor.Render2d(ImGuiWindowFlags_NoCollapse);
 
     ImGui::ShowDemoWindow();
+
     ImGui::Begin("PatternEditor");
     ImGui::Text("_currentBar = %f", _currentBar);
+    ImGui::SliderInt("bpm", &bpm, 50, 250);
 
+    static TrackPattern *selectedTrackPattern = nullptr;
+    static unsigned char deleteNote = 0;
+    bool openPopupClick = false;
+    auto &trackPattern = _trackPatterns[0];
+    {
+        static int nextPatternNote = 0;
+        static int lastNote = 0;
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
+        for (auto &p : trackPattern)
+        {
+            ImGui::PushID(p.first);
+            lastNote = p.first;
+            ImGui::Text("[%d]", p.first);
+            ImGui::SameLine();
+
+            ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
+            ImVec2 canvas_size = ImVec2(200, 21);            // ImGui::GetContentRegionAvail(); // Resize canvas to what's available
+            if (ImGui::InvisibleButton("Edit", canvas_size))
+            {
+                selectedTrackPattern = &(p.second);
+                openPopupClick = true;
+            }
+            if (ImGui::IsItemHovered())
+            {
+                draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), ImGui::GetColorU32(ImGuiCol_ButtonHovered));
+            }
+            else if (ImGui::IsItemActivated())
+            {
+                draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), ImGui::GetColorU32(ImGuiCol_ButtonActive));
+            }
+            else
+            {
+                draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), ImGui::GetColorU32(ImGuiCol_Button));
+            }
+
+            for (auto &pattern : p.second._pattern)
+            {
+                auto a = ImVec2(canvas_pos.x + (pattern.start * canvas_size.x), canvas_pos.y + 10);
+                auto b = ImVec2(canvas_pos.x + ((pattern.start + pattern.length) * canvas_size.x), canvas_pos.y + 10);
+                draw_list->AddLine(a, b, IM_COL32(255, 255, 0, 255), 18.0f);
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("x"))
+            {
+                deleteNote = p.first;
+            }
+            ImGui::PopID();
+        }
+
+        if (nextPatternNote < lastNote)
+        {
+            nextPatternNote = lastNote + 1;
+        }
+        if (nextPatternNote < 128)
+        {
+            ImGui::SliderInt("next pattern", &nextPatternNote, lastNote, 128);
+            ImGui::SameLine();
+            if (ImGui::Button("+"))
+            {
+                trackPattern.insert(std::make_pair(nextPatternNote, TrackPattern()));
+            }
+        }
+
+        if (deleteNote != 0)
+        {
+            trackPattern.erase(deleteNote);
+            deleteNote = 0;
+            selectedTrackPattern = nullptr;
+        }
+    }
+
+    if (openPopupClick)
+    {
+        ImGui::OpenPopup("Save?");
+    }
+    if (ImGui::BeginPopupModal("Save?") && selectedTrackPattern != nullptr)
+    {
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
+        static ImVector<ImVec2> points;
+        static bool adding_line = false;
+        if (ImGui::Button("Clear")) selectedTrackPattern->_pattern.clear();
+        ImGui::Text("Left-click and drag to add lines");
+
+        // Here we are using InvisibleButton() as a convenience to 1) advance the cursor and 2) allows us to use IsItemHovered()
+        // But you can also draw directly and poll mouse/keyboard by yourself. You can manipulate the cursor using GetCursorPos() and SetCursorPos().
+        // If you only use the ImDrawList API, you can notify the owner window of its extends by using SetCursorPos(max).
+        ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
+        ImVec2 canvas_size = ImVec2(500, 50);            // ImGui::GetContentRegionAvail(); // Resize canvas to what's available
+
+        draw_list->AddRectFilledMultiColor(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), IM_COL32(50, 50, 50, 255), IM_COL32(50, 50, 60, 255), IM_COL32(60, 60, 70, 255), IM_COL32(50, 50, 60, 255));
+        draw_list->AddRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), IM_COL32(255, 255, 255, 255));
+
+        ImGui::InvisibleButton("canvas", canvas_size);
+        ImVec2 mouse_pos_in_canvas = ImVec2(ImGui::GetIO().MousePos.x - canvas_pos.x, ImGui::GetIO().MousePos.y - canvas_pos.y);
+        if (adding_line)
+        {
+            if (!ImGui::IsMouseDown(0))
+            {
+                auto start = points.back().x / canvas_size.x;
+                auto len = (mouse_pos_in_canvas.x - points.back().x) / canvas_size.x;
+                std::cout << start << "->" << len << std::endl;
+                selectedTrackPattern->_pattern.push_back({start, len});
+
+                adding_line = false;
+                points.clear();
+            }
+        }
+        if (ImGui::IsItemHovered())
+        {
+            if (!adding_line && ImGui::IsMouseClicked(0))
+            {
+                points.push_back(mouse_pos_in_canvas);
+                adding_line = true;
+            }
+            if (ImGui::IsMouseClicked(1) && !points.empty())
+            {
+                adding_line = false;
+            }
+        }
+
+        draw_list->PushClipRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), true); // clip lines within the canvas (if we resize it, etc.)
+        for (auto &pattern : selectedTrackPattern->_pattern)
+        {
+            auto a = ImVec2(canvas_pos.x + (pattern.start * canvas_size.x), canvas_pos.y + (canvas_size.y / 2));
+            auto b = ImVec2(canvas_pos.x + ((pattern.start + pattern.length) * canvas_size.x), canvas_pos.y + (canvas_size.y / 2));
+            draw_list->AddLine(a, b, IM_COL32(255, 255, 0, 255), canvas_size.y);
+        }
+        if (!points.empty())
+        {
+            draw_list->AddLine(points.front(), mouse_pos_in_canvas, IM_COL32(255, 155, 0, 255), canvas_size.y);
+        }
+        draw_list->PopClipRect();
+        if (ImGui::Button("Close", ImVec2(80, 0)))
+        {
+            selectedTrackPattern = nullptr;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
     ImGui::End();
 
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
@@ -180,11 +345,13 @@ void Application::Cleanup()
     Nio::Stop();
 }
 
+float BarsPerSecond() { return (bpm / 60.0f); }
+
 float ProgressInBars(
     unsigned int frameCount,
     unsigned int sampleRate)
 {
-    auto barsPerSecond = 1.0f / (bpm / (60.0f * 4.0f));
+    auto barsPerSecond = BarsPerSecond();
     auto progressInSeconds = (1.0f / sampleRate) * frameCount;
 
     auto progressInBars = barsPerSecond * progressInSeconds;
@@ -221,9 +388,10 @@ std::vector<SimpleNote> Application::GetNotes(
                     continue;
                 }
 
-                std::cout << offset << std::endl;
-                std::cout << note.first << " - " << 100 << " - " << float(patternEvent.length * note.second._numberOfbars) << " - " << channel.first << std::endl;
-                result.push_back(SimpleNote(note.first, 100, float(patternEvent.length * note.second._numberOfbars), channel.first));
+                // length of the note is multiplied by number of number of bars to make relative to a single bar
+                // and then by barsPerSecond() to convert it seconds
+                auto len = float(patternEvent.length * BarsPerSecond());
+                result.push_back(SimpleNote(note.first, 100, len, channel.first));
             }
         }
     }

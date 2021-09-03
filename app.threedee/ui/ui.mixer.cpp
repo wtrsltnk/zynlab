@@ -366,7 +366,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
             auto v = _state->_mixer->Pvolume;
             if (ImGui::KnobUchar("volume", &v, 0, 127, ImVec2(width, 40), "Master Volume"))
             {
-                _state->_mixer->setPvolume(v);
+                _state->_mixer->SetVolume(v);
             }
         }
         else
@@ -438,7 +438,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
             int v = static_cast<int>(_state->_mixer->Pvolume);
             if (ImGui::Fader("##mastervol", ImVec2(20, faderHeight), &v, 0, 127, "%d", 100.0f / 127.0f))
             {
-                _state->_mixer->setPvolume(static_cast<unsigned char>(v));
+                _state->_mixer->SetVolume(static_cast<unsigned char>(v));
             }
             ImGui::SameLine();
             ImGui::Spacing();
@@ -650,7 +650,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 sprintf(tooltip, "Volume for send to system effect %d", (fx + 1));
                 if (ImGui::KnobUchar(label, &(_state->_mixer->Psysefxvol[fx][trackIndex]), 0, 127, ImVec2(square_sz + io.ItemInnerSpacing.x, square_sz), tooltip))
                 {
-                    _state->_mixer->setPsysefxvol(trackIndex, fx, _state->_mixer->Psysefxvol[fx][trackIndex]);
+                    _state->_mixer->SetSystemEffectVolume(trackIndex, fx, _state->_mixer->Psysefxvol[fx][trackIndex]);
                 }
                 if (ImGui::IsItemClicked())
                 {
@@ -884,7 +884,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
             auto v = track->Pvolume;
             if (ImGui::KnobUchar("volume", &v, 0, 127, ImVec2(width, 40), "Track volume"))
             {
-                track->setPvolume(v);
+                track->SetVolume(v);
                 _state->_currentTrack = trackIndex;
             }
         }
@@ -908,7 +908,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
             int v = static_cast<int>(track->Pvolume);
             if (ImGui::Fader("##vol", ImVec2(20, faderHeight), &v, 0, 127))
             {
-                track->setPvolume(static_cast<unsigned char>(v));
+                track->SetVolume(static_cast<unsigned char>(v));
                 _state->_currentTrack = trackIndex;
             }
             ImGui::ShowTooltipOnHover("Track volume");

@@ -251,7 +251,7 @@ void TrackSerializer::Deserialize(IPresetsSerializer *xml)
 {
     _parameters->Penabled = static_cast<unsigned char>(xml->getparbool("enabled", _parameters->Penabled));
 
-    _parameters->setPvolume(static_cast<unsigned char>(xml->getpar127("volume", _parameters->Pvolume)));
+    _parameters->SetVolume(static_cast<unsigned char>(xml->getpar127("volume", _parameters->Pvolume)));
     _parameters->setPpanning(static_cast<unsigned char>(xml->getpar127("panning", _parameters->Ppanning)));
 
     _parameters->Pminkey = static_cast<unsigned char>(xml->getpar127("min_key", _parameters->Pminkey));

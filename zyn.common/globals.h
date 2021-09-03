@@ -367,7 +367,7 @@ public:
 
     unsigned int note;
     unsigned int velocity;
-    float length;
+    float lengthInSec;
     unsigned int channel;
 };
 
@@ -400,8 +400,8 @@ public:
     virtual void EnableTrack(int index, bool enabled) = 0;
 
     // Effects
-    virtual unsigned char GetSystemEffectSend(int from, int to) = 0;
-    virtual void SetSystemEffectSend(int from, int to, unsigned char volume) = 0;
+    virtual unsigned char GetSystemSendEffectVolume(int from, int to) = 0;
+    virtual void SetSystemSendEffectVolume(int from, int to, unsigned char volume) = 0;
 
     // Mutex
     virtual void Lock() = 0;

@@ -171,7 +171,7 @@ void Track::Defaults()
     Pnoteon = 1;
     Ppolymode = 1;
     Plegatomode = 0;
-    setPvolume(96);
+    SetVolume(96);
     Pkeyshift = 64;
     Prcvchn = 0;
     setPpanning(64);
@@ -856,7 +856,7 @@ void Track::SetController(unsigned int type, int par)
         case C_expression:
         {
             ctl.setexpression(par);
-            setPvolume(Pvolume); //update the volume
+            SetVolume(Pvolume); //update the volume
             break;
         }
         case C_portamento:
@@ -904,7 +904,7 @@ void Track::SetController(unsigned int type, int par)
             }
             else
             {
-                setPvolume(Pvolume);
+                SetVolume(Pvolume);
             }
             break;
         }
@@ -932,9 +932,9 @@ void Track::SetController(unsigned int type, int par)
             }
             else
             {
-                setPvolume(Pvolume);
+                SetVolume(Pvolume);
             }
-            setPvolume(Pvolume);   //update the volume
+            SetVolume(Pvolume);   //update the volume
             setPpanning(Ppanning); //update the panning
 
             for (auto &item : Instruments)
@@ -1287,7 +1287,7 @@ void Track::ComputeInstrumentSamples()
 /*
  * Parameter control
  */
-void Track::setPvolume(unsigned char Pvolume_)
+void Track::SetVolume(unsigned char Pvolume_)
 {
     Pvolume = Pvolume_;
     volume = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;

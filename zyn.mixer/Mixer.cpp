@@ -99,8 +99,8 @@ IMeter *Mixer::GetMeter()
 void Mixer::Defaults()
 {
     _volume = 1.0f;
-    setPvolume(80);
-    setPkeyshift(64);
+    SetVolume(80);
+    SetKeyShift(64);
 
     Psolotrack = DISABLED_MIXER_SOLO;
 
@@ -123,12 +123,12 @@ void Mixer::Defaults()
         sysefx[nefx].Defaults();
         for (int npart = 0; npart < NUM_MIXER_TRACKS; ++npart)
         {
-            setPsysefxvol(npart, nefx, 0);
+            SetSystemEffectVolume(npart, nefx, 0);
         }
 
         for (int nefxto = 0; nefxto < NUM_SYS_EFX; ++nefxto)
         {
-            SetSystemEffectSend(nefx, nefxto, 0);
+            SetSystemSendEffectVolume(nefx, nefxto, 0);
         }
     }
 
@@ -172,7 +172,10 @@ std::mutex &Mixer::Mutex()
     return _mutex;
 }
 
-void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocity)
+void Mixer::NoteOn(
+    unsigned char chan,
+    unsigned char note,
+    unsigned char velocity)
 {
     if (!velocity)
     {
@@ -193,7 +196,9 @@ void Mixer::NoteOn(unsigned char chan, unsigned char note, unsigned char velocit
     }
 }
 
-void Mixer::NoteOff(unsigned char chan, unsigned char note)
+void Mixer::NoteOff(
+    unsigned char chan,
+    unsigned char note)
 {
     for (auto &npart : _tracks)
     {
@@ -204,7 +209,10 @@ void Mixer::NoteOff(unsigned char chan, unsigned char note)
     }
 }
 
-void Mixer::PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity)
+void Mixer::PolyphonicAftertouch(
+    unsigned char chan,
+    unsigned char note,
+    unsigned char velocity)
 {
     if (!velocity)
     {
@@ -224,7 +232,10 @@ void Mixer::PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigne
     }
 }
 
-void Mixer::SetController(unsigned char chan, int type, int par)
+void Mixer::SetController(
+    unsigned char chan,
+    int type,
+    int par)
 {
     if ((type == C_dataentryhi) || (type == C_dataentrylo) || (type == C_nrpnhi) || (type == C_nrpnlo))
     { //Process RPN and NRPN by the Master (ignore the chan)
@@ -283,8 +294,12 @@ void Mixer::SetController(unsigned char chan, int type, int par)
     }
 }
 
-void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
+void Mixer::SetProgram(
+    unsigned char chan,
+    unsigned int program)
 {
+    (void)program;
+
     if (Config::Current().cfg.IgnoreProgramChange)
     {
         return;
@@ -306,26 +321,32 @@ void Mixer::SetProgram(unsigned char chan, unsigned int pgm)
         }
     }
 }
-void Mixer::PreviewNote(unsigned int channel, unsigned int note, unsigned int length, unsigned int velocity)
+
+void Mixer::PreviewNote(
+    unsigned int channel,
+    unsigned int note,
+    unsigned int lengthInMs,
+    unsigned int velocity)
 {
     NoteOn(channel, note, velocity);
+
+    auto found = std::find_if(_instrumentsPreview.begin(), _instrumentsPreview.end(), [channel, note](InstrumentPreview p) {
+        return (p.note == note && p.channel == channel);
+    });
 
     std::chrono::milliseconds::rep currentTime =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
             .count();
 
-    auto found = std::find_if(_instrumentsPreview.begin(), _instrumentsPreview.end(), [channel, note](InstrumentPreview p) {
-        return (p.note == note && p.channel == channel);
-    });
     if (found != _instrumentsPreview.end())
     {
         (*found).done = false;
-        (*found).playUntil = currentTime + length;
+        (*found).playUntil = currentTime + lengthInMs;
         return;
     }
 
     InstrumentPreview n;
-    n.playUntil = currentTime + length;
+    n.playUntil = currentTime + lengthInMs;
     n.note = note;
     n.channel = channel;
     n.done = false;
@@ -338,12 +359,15 @@ INoteSource *Mixer::GetNoteSource() const
     return _noteSource;
 }
 
-void Mixer::SetNoteSource(INoteSource *source)
+void Mixer::SetNoteSource(
+    INoteSource *source)
 {
     _noteSource = source;
 }
 
-void Mixer::EnableTrack(int track, int enable)
+void Mixer::EnableTrack(
+    int track,
+    int enable)
 {
     if (track >= NUM_MIXER_TRACKS)
     {
@@ -369,7 +393,8 @@ void Mixer::EnableTrack(int track, int enable)
     }
 }
 
-void Mixer::PreviewSample(std::string const &filename)
+void Mixer::PreviewSample(
+    std::string const &filename)
 {
     if (_samplePreview.wavData != nullptr)
     {
@@ -386,14 +411,13 @@ void Mixer::PreviewSample(std::string const &filename)
     }
 }
 
-SamplePreview::SamplePreview()
-    : wavData(nullptr), done(true)
-{}
+SamplePreview::SamplePreview() = default;
 
-SamplePreview::~SamplePreview()
-{}
+SamplePreview::~SamplePreview() = default;
 
-void SamplePreview::noteout(float *outl, float *outr)
+void SamplePreview::noteout(
+    float *outl,
+    float *outr)
 {
     if (done || wavData == nullptr)
     {
@@ -419,7 +443,9 @@ void SamplePreview::noteout(float *outl, float *outr)
 /*
  * Master audio out (the final sound)
  */
-void Mixer::AudioOut(float *outl, float *outr)
+void Mixer::AudioOut(
+    float *outl,
+    float *outr)
 {
     std::chrono::milliseconds::rep currentTime =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
@@ -428,12 +454,13 @@ void Mixer::AudioOut(float *outl, float *outr)
     if (_noteSource != nullptr)
     {
         auto notes = _noteSource->GetNotes(BufferSize(), SampleRate());
-        for (auto n : notes)
+        for (auto &n : notes)
         {
-            PreviewNote(n.channel, n.note, n.length * 10, n.velocity);
+            PreviewNote(n.channel, n.note, n.lengthInSec * 1000.0f, n.velocity);
         }
     }
 
+    // check to turn off preview notes
     for (auto &tn : _instrumentsPreview)
     {
         if (tn.done) continue;
@@ -670,7 +697,8 @@ unsigned int Mixer::GetTrackCount() const
     return NUM_MIXER_TRACKS;
 }
 
-Track *Mixer::GetTrack(int index)
+Track *Mixer::GetTrack(
+    int index)
 {
     if (index >= 0 && index < NUM_MIXER_TRACKS)
     {
@@ -680,7 +708,9 @@ Track *Mixer::GetTrack(int index)
     return nullptr;
 }
 
-void Mixer::EnableTrack(int index, bool enabled)
+void Mixer::EnableTrack(
+    int index,
+    bool enabled)
 {
     if (index >= NUM_MIXER_TRACKS)
     {
@@ -709,33 +739,43 @@ void Mixer::EnableTrack(int index, bool enabled)
 /*
  * Parameter control
  */
-void Mixer::setPvolume(unsigned char Pvolume_)
+void Mixer::SetVolume(
+    unsigned char volume)
 {
-    Pvolume = Pvolume_;
+    Pvolume = volume;
     _volume = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
 }
 
-void Mixer::setPkeyshift(unsigned char Pkeyshift_)
+void Mixer::SetKeyShift(
+    unsigned char keyshift)
 {
-    Pkeyshift = Pkeyshift_;
+    Pkeyshift = keyshift;
     _keyshift = static_cast<int>(Pkeyshift) - 64;
 }
 
-void Mixer::setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol)
+void Mixer::SetSystemEffectVolume(
+    int Ppart,
+    int Pefx,
+    unsigned char volume)
 {
-    Psysefxvol[Pefx][Ppart] = Pvol;
-    _sysefxvol[Pefx][Ppart] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
+    Psysefxvol[Pefx][Ppart] = volume;
+    _sysefxvol[Pefx][Ppart] = powf(0.1f, (1.0f - volume / 96.0f) * 2.0f);
 }
 
-unsigned char Mixer::GetSystemEffectSend(int Pefxfrom, int Pefxto)
+unsigned char Mixer::GetSystemSendEffectVolume(
+    int Pefxfrom,
+    int Pefxto)
 {
     return Psysefxsend[Pefxfrom][Pefxto];
 }
 
-void Mixer::SetSystemEffectSend(int Pefxfrom, int Pefxto, unsigned char Pvol)
+void Mixer::SetSystemSendEffectVolume(
+    int Pefxfrom,
+    int Pefxto,
+    unsigned char volume)
 {
-    Psysefxsend[Pefxfrom][Pefxto] = Pvol;
-    _sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
+    Psysefxsend[Pefxfrom][Pefxto] = volume;
+    _sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - volume / 96.0f) * 2.0f);
 }
 
 void Mixer::ShutUp()

@@ -23,7 +23,7 @@
 
 #include "globals.h"
 
-SimpleNote::SimpleNote() : note(0), velocity(0), length(0), channel(0) {}
+SimpleNote::SimpleNote() : note(0), velocity(0), lengthInSec(0), channel(0) {}
 
 SimpleNote::SimpleNote(
     unsigned int n,
@@ -32,7 +32,7 @@ SimpleNote::SimpleNote(
     unsigned int c)
     : note(n),
       velocity(v),
-      length(l),
+      lengthInSec(l),
       channel(c)
 {}
 

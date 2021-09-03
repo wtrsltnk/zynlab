@@ -125,7 +125,7 @@ public:
 
     unsigned char Penabled = 0;
     unsigned char Pvolume = 0; /**<Track volume*/
-    void setPvolume(unsigned char Pvolume);
+    void SetVolume(unsigned char Pvolume);
     unsigned char Ppanning = 0; //Track panning
     void setPpanning(unsigned char Ppanning);
     unsigned char Pminkey = 0;   /**<the minimum key that the Track receives noteon messages*/

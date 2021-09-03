@@ -44,12 +44,16 @@ class SamplePreview
 {
 public:
     SamplePreview();
+
     virtual ~SamplePreview();
 
-    WavData *wavData;
-    size_t wavProgress;
-    bool done;
-    void noteout(float *outl, float *outr);
+    void noteout(
+        float *outl,
+        float *outr);
+
+    WavData *wavData = nullptr;
+    size_t wavProgress = 0;
+    bool done = true;
 };
 
 typedef std::chrono::milliseconds::rep timestep;
@@ -95,28 +99,87 @@ public:
     virtual std::mutex &Mutex();
 
     //Midi IN
-    virtual void NoteOn(unsigned char chan, unsigned char note, unsigned char velocity);
-    virtual void NoteOff(unsigned char chan, unsigned char note);
-    virtual void PolyphonicAftertouch(unsigned char chan, unsigned char note, unsigned char velocity);
-    virtual void SetController(unsigned char chan, int type, int par);
-    virtual void SetProgram(unsigned char chan, unsigned int pgm);
+    virtual void NoteOn(
+        unsigned char chan,
+        unsigned char note,
+        unsigned char velocity);
 
-    virtual void PreviewNote(unsigned int channel, unsigned int note, unsigned int length, unsigned int velocity = 100);
+    virtual void NoteOff(
+        unsigned char chan,
+        unsigned char note);
+
+    virtual void PolyphonicAftertouch(
+        unsigned char chan,
+        unsigned char note,
+        unsigned char velocity);
+
+    virtual void SetController(
+        unsigned char chan,
+        int type,
+        int par);
+
+    virtual void SetProgram(
+        unsigned char chan,
+        unsigned int pgm);
+
+    virtual void PreviewNote(
+        unsigned int channel,
+        unsigned int note,
+        unsigned int lengthInMs,
+        unsigned int velocity = 100);
 
     virtual INoteSource *GetNoteSource() const;
-    virtual void SetNoteSource(INoteSource *source);
+
+    virtual void SetNoteSource(
+        INoteSource *source);
 
     void ShutUp();
-    bool shutup = false;
 
     /**Audio Output*/
-    virtual void AudioOut(float *outl, float *outr);
+    virtual void AudioOut(
+        float *outl,
+        float *outr);
 
-    void EnableTrack(int npart, int what);
+    void EnableTrack(
+        int npart,
+        int what);
 
     virtual unsigned int GetTrackCount() const;
-    virtual Track *GetTrack(int index);
-    virtual void EnableTrack(int index, bool enabled);
+
+    virtual Track *GetTrack(
+        int index);
+
+    virtual void EnableTrack(
+        int index,
+        bool enabled);
+
+    //parameters control
+    void SetVolume(
+        unsigned char Pvolume_);
+
+    void SetKeyShift(
+        unsigned char Pkeyshift_);
+
+    void SetSystemEffectVolume(
+        int Ppart,
+        int Pefx,
+        unsigned char Pvol);
+
+    virtual unsigned char GetSystemSendEffectVolume(
+        int Pefxfrom,
+        int Pefxto);
+
+    virtual void SetSystemSendEffectVolume(
+        int Pefxfrom,
+        int Pefxto,
+        unsigned char Pvol);
+
+    void InitPresets();
+
+    void Defaults();
+
+    void PreviewSample(
+        std::string const &filename);
 
     //parameters
     unsigned char Pvolume = 0;
@@ -124,13 +187,6 @@ public:
     unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
     short int Psolotrack = 0;
-
-    //parameters control
-    void setPvolume(unsigned char Pvolume_);
-    void setPkeyshift(unsigned char Pkeyshift_);
-    void setPsysefxvol(int Ppart, int Pefx, unsigned char Pvol);
-    virtual unsigned char GetSystemEffectSend(int Pefxfrom, int Pefxto);
-    virtual void SetSystemEffectSend(int Pefxfrom, int Pefxto, unsigned char Pvol);
 
     EffectManager sysefx[NUM_SYS_EFX]; //system
     EffectManager insefx[NUM_INS_EFX]; //insertion
@@ -140,16 +196,12 @@ public:
 
     Meter meter;
     Controller ctl;
-    bool swaplr = false; //if L and R are swapped
+    bool swaplr= false; //if L and R are swapped
+
+    bool shutup = false;
 
     //other objects
     Microtonal microtonal;
-
-    void InitPresets();
-
-    void Defaults();
-
-    void PreviewSample(std::string const &filename);
 
 private:
     SamplePreview _samplePreview;
