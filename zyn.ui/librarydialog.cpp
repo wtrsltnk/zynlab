@@ -36,6 +36,7 @@ void LibraryDialog::filterSamples()
         boolinq::from(_baseItemList)
             .where([&](ILibraryItem *item) { return findStringIC(item->GetName(), _selectItem.filter); })
             .where([&](ILibraryItem *item) { return _selectItem.selectedLibrary == nullptr || item->GetLibrary()->IsParent(_selectItem.selectedLibrary); })
+            .orderBy([&](ILibraryItem *item) { return item->GetName(); })
             .toStdSet();
 }
 
@@ -65,7 +66,10 @@ void LibraryDialog::ShowDialog(
     if (open)
     {
         ImGui::OpenPopup(title);
-        _selectItem.filteredItems = _baseItemList;
+        _selectItem.selectedLibrary = nullptr;
+        _selectItem.selectedSample = nullptr;
+        _selectItem.filter[0] = '\0';
+        filterSamples();
     }
 
     ImGui::SetNextWindowSize(ImVec2(650 + ImGui::GetStyle().ItemSpacing.x * 2, 600));
@@ -88,6 +92,7 @@ void LibraryDialog::ShowDialog(
 
             auto banks = boolinq::from(_library->GetTopLevelLibraries())
                              .firstOrDefault([&](ILibrary *l) { return l->GetName() == "banks"; });
+
             for (auto library : banks->GetChildren())
             {
                 bool selected = _selectItem.selectedLibrary != nullptr && library->GetPath() == _selectItem.selectedLibrary->GetPath();

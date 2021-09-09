@@ -31,6 +31,8 @@ struct PatternNote
 {
     float start;
     float length;
+    unsigned char nodeOffset; // +/- 12 notes
+    unsigned char velocity;
 };
 
 class TrackPattern
@@ -55,6 +57,10 @@ public:
 std::map<int, std::map<unsigned char, TrackPattern>> _trackPatterns;
 float _currentBar = 0;
 int bpm = 138;
+bool playing = false;
+
+char const *NoteToString(
+    unsigned int note);
 
 TrackPattern::TrackPattern() = default;
 
@@ -97,10 +103,12 @@ bool Application::Setup()
     ImFontConfig config;
     config.MergeMode = true;
     config.GlyphMinAdvanceX = 13.0f;
+    config.GlyphOffset = ImVec2(0, 3.0f);
 
     static const ImWchar fontaudio_icon_ranges[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
     _fadFont = io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 18.0f, &config, fontaudio_icon_ranges);
 
+    config.GlyphOffset = ImVec2(0.0f, 0.0f);
     static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
     _fkFont = io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
 
@@ -147,18 +155,18 @@ bool Application::Setup()
 
     _trackPatterns.insert(std::make_pair(0, std::map<unsigned char, TrackPattern>()));
     _trackPatterns[0].insert(std::make_pair(45, TrackPattern()));
-    _trackPatterns[0][45]._pattern.push_back({0.0f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.15f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.2f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.25f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.4f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.45f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.5f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.65f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.7f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.75f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.9f, 0.02f});
-    _trackPatterns[0][45]._pattern.push_back({0.95f, 0.02f});
+    _trackPatterns[0][45]._pattern.push_back({0.0f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.15f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.2f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.25f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.4f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.45f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.5f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.65f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.7f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.75f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.9f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.push_back({0.95f, 0.02f, 0, 100});
 
     return true;
 }
@@ -185,26 +193,77 @@ void Application::Render2d()
     ImGui::ShowDemoWindow();
 
     ImGui::Begin("PatternEditor");
-    ImGui::Text("_currentBar = %f", _currentBar);
+
+    {
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+        if (!playing)
+        {
+            ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+            draw_list->AddRectFilled(
+                ImVec2(canvas_pos.x, canvas_pos.y),
+                ImVec2(canvas_pos.x + 34, canvas_pos.x + 34),
+                ImGui::GetColorU32(ImGuiCol_NavWindowingHighlight));
+        }
+
+        if (ImGui::Button(ICON_FAD_STOP))
+        {
+            playing = false;
+        }
+
+        ImGui::SameLine();
+
+        if (playing)
+        {
+            ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+            draw_list->AddRectFilled(
+                ImVec2(canvas_pos.x, canvas_pos.y),
+                ImVec2(canvas_pos.x + 34, canvas_pos.x + 34),
+                ImGui::GetColorU32(ImGuiCol_NavWindowingHighlight));
+        }
+
+        if (ImGui::Button(ICON_FAD_PLAY))
+        {
+            playing = true;
+        }
+    }
+
+    ImGui::SetNextItemWidth(160.0f);
     ImGui::SliderInt("bpm", &bpm, 50, 250);
 
     static TrackPattern *selectedTrackPattern = nullptr;
-    static unsigned char deleteNote = 0;
     bool openPopupClick = false;
-    auto &trackPattern = _trackPatterns[0];
+    for (unsigned int t = 0; t < _mixer->GetTrackCount(); t++)
     {
+        if (!_mixer->GetTrack(t)->Penabled)
+        {
+            continue;
+        }
+
         static int nextPatternNote = 0;
-        static int lastNote = 0;
+
+        if (_trackPatterns.find(t) == _trackPatterns.end())
+        {
+            _trackPatterns.insert(std::make_pair(t, std::map<unsigned char, TrackPattern>()));
+        }
+
+        ImGui::PushID(t);
+        static unsigned char deleteNote = 0;
+        auto &trackPattern = _trackPatterns[t];
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         for (auto &p : trackPattern)
         {
             ImGui::PushID(p.first);
-            lastNote = p.first;
-            ImGui::Text("[%d]", p.first);
-            ImGui::SameLine();
+            ImGui::BeginGroup();
 
-            ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
-            ImVec2 canvas_size = ImVec2(200, 21);            // ImGui::GetContentRegionAvail(); // Resize canvas to what's available
+            ImGui::Button(NoteToString(p.first));
+            ImGui::SameLine(60.0f);
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("%d", p.second._numberOfbars);
+            ImGui::SameLine(90.0f);
+
+            ImVec2 canvas_pos = ImGui::GetCursorScreenPos();                                                       // ImDrawList API uses screen coordinates!
+            ImVec2 canvas_size = ImVec2(200, ImGui::GetTextLineHeight() + (ImGui::GetStyle().FramePadding.y * 2)); // ImGui::GetContentRegionAvail(); // Resize canvas to what's available
             if (ImGui::InvisibleButton("Edit", canvas_size))
             {
                 selectedTrackPattern = &(p.second);
@@ -225,9 +284,11 @@ void Application::Render2d()
 
             for (auto &pattern : p.second._pattern)
             {
-                auto a = ImVec2(canvas_pos.x + (pattern.start * canvas_size.x), canvas_pos.y + 10);
-                auto b = ImVec2(canvas_pos.x + ((pattern.start + pattern.length) * canvas_size.x), canvas_pos.y + 10);
-                draw_list->AddLine(a, b, IM_COL32(255, 255, 0, 255), 18.0f);
+                draw_list->AddLine(
+                    ImVec2(canvas_pos.x + (pattern.start * canvas_size.x), canvas_pos.y + (canvas_size.y / 2)),
+                    ImVec2(canvas_pos.x + ((pattern.start + pattern.length) * canvas_size.x), canvas_pos.y + (canvas_size.y / 2)),
+                    IM_COL32(0, 255, 255, 55),
+                    canvas_size.y - 1);
             }
 
             ImGui::SameLine();
@@ -235,46 +296,43 @@ void Application::Render2d()
             {
                 deleteNote = p.first;
             }
+            ImGui::EndGroup();
             ImGui::PopID();
         }
 
-        if (nextPatternNote < lastNote)
+        ImGui::SliderInt("next pattern", &nextPatternNote, 21, 127);
+        ImGui::SameLine();
+        if (ImGui::Button("+"))
         {
-            nextPatternNote = lastNote + 1;
+            trackPattern.insert(std::make_pair(nextPatternNote, TrackPattern()));
         }
-        if (nextPatternNote < 128)
-        {
-            ImGui::SliderInt("next pattern", &nextPatternNote, lastNote, 128);
-            ImGui::SameLine();
-            if (ImGui::Button("+"))
-            {
-                trackPattern.insert(std::make_pair(nextPatternNote, TrackPattern()));
-            }
-        }
-
         if (deleteNote != 0)
         {
             trackPattern.erase(deleteNote);
             deleteNote = 0;
             selectedTrackPattern = nullptr;
         }
+        ImGui::PopID();
     }
 
     if (openPopupClick)
     {
-        ImGui::OpenPopup("Save?");
+        ImGui::OpenPopup("UpdatePattern");
     }
-    if (ImGui::BeginPopupModal("Save?") && selectedTrackPattern != nullptr)
+
+    if (ImGui::BeginPopupModal("UpdatePattern") && selectedTrackPattern != nullptr)
     {
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         static ImVector<ImVec2> points;
         static bool adding_line = false;
         if (ImGui::Button("Clear")) selectedTrackPattern->_pattern.clear();
-        ImGui::Text("Left-click and drag to add lines");
 
-        // Here we are using InvisibleButton() as a convenience to 1) advance the cursor and 2) allows us to use IsItemHovered()
-        // But you can also draw directly and poll mouse/keyboard by yourself. You can manipulate the cursor using GetCursorPos() and SetCursorPos().
-        // If you only use the ImDrawList API, you can notify the owner window of its extends by using SetCursorPos(max).
+        int item_current_2 = (static_cast<int>(selectedTrackPattern->_numberOfbars) / 4) - 1;
+        if (ImGui::Combo("Number of bars", &item_current_2, "4 \0 8 \0 16 \0 32 \0 64 \0 128 \0\0"))
+        {
+            selectedTrackPattern->_numberOfbars = static_cast<BarTypes>((1 + item_current_2) * 4);
+        }
+
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
         ImVec2 canvas_size = ImVec2(500, 50);            // ImGui::GetContentRegionAvail(); // Resize canvas to what's available
 
@@ -289,8 +347,8 @@ void Application::Render2d()
             {
                 auto start = points.back().x / canvas_size.x;
                 auto len = (mouse_pos_in_canvas.x - points.back().x) / canvas_size.x;
-                std::cout << start << "->" << len << std::endl;
-                selectedTrackPattern->_pattern.push_back({start, len});
+
+                selectedTrackPattern->_pattern.push_back({start, len, 0, 100});
 
                 adding_line = false;
                 points.clear();
@@ -312,14 +370,23 @@ void Application::Render2d()
         draw_list->PushClipRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), true); // clip lines within the canvas (if we resize it, etc.)
         for (auto &pattern : selectedTrackPattern->_pattern)
         {
-            auto a = ImVec2(canvas_pos.x + (pattern.start * canvas_size.x), canvas_pos.y + (canvas_size.y / 2));
-            auto b = ImVec2(canvas_pos.x + ((pattern.start + pattern.length) * canvas_size.x), canvas_pos.y + (canvas_size.y / 2));
-            draw_list->AddLine(a, b, IM_COL32(255, 255, 0, 255), canvas_size.y);
+            draw_list->AddLine(
+                ImVec2(canvas_pos.x + (pattern.start * canvas_size.x), canvas_pos.y + (canvas_size.y / 2)),
+                ImVec2(canvas_pos.x + ((pattern.start + pattern.length) * canvas_size.x), canvas_pos.y + (canvas_size.y / 2)),
+                IM_COL32(0, 255, 255, 55),
+                canvas_size.y);
         }
-        if (!points.empty())
+
+        auto step = int(canvas_size.x) / static_cast<int>(selectedTrackPattern->_numberOfbars);
+        for (int i = 0; i < int(canvas_size.x); i += step)
         {
-            draw_list->AddLine(points.front(), mouse_pos_in_canvas, IM_COL32(255, 155, 0, 255), canvas_size.y);
+            draw_list->AddLine(
+                ImVec2(canvas_pos.x + i, canvas_pos.y),
+                ImVec2(canvas_pos.x + i, canvas_pos.y + canvas_size.y),
+                IM_COL32(255, 55, 0, 255),
+                1.0f);
         }
+
         draw_list->PopClipRect();
         if (ImGui::Button("Close", ImVec2(80, 0)))
         {
@@ -363,6 +430,11 @@ std::vector<SimpleNote> Application::GetNotes(
     unsigned int frameCount,
     unsigned int sampleRate)
 {
+    if (!playing)
+    {
+        return std::vector<SimpleNote>();
+    }
+
     PostRedraw();
 
     auto progressInBars = ProgressInBars(frameCount, sampleRate);
@@ -406,4 +478,227 @@ extern IApplication *CreateApplication();
 IApplication *CreateApplication()
 {
     return new Application();
+}
+
+char const *NoteToString(
+    unsigned int note)
+{
+    switch (note)
+    {
+        case 127:
+            return "G-9";
+        case 126:
+            return "F#9";
+        case 125:
+            return "F-9";
+        case 124:
+            return "E-9";
+        case 123:
+            return "D#9";
+        case 122:
+            return "D-9";
+        case 121:
+            return "C#9";
+        case 120:
+            return "C-9";
+        case 119:
+            return "B-8";
+        case 118:
+            return "A#8";
+        case 117:
+            return "A-8";
+        case 116:
+            return "G#8";
+        case 115:
+            return "G-8";
+        case 114:
+            return "F#8";
+        case 113:
+            return "F-8";
+        case 112:
+            return "E-8";
+        case 111:
+            return "D#8";
+        case 110:
+            return "D-8";
+        case 109:
+            return "C#8";
+        case 108:
+            return "C-8";
+        case 107:
+            return "B-7";
+        case 106:
+            return "A#7";
+        case 105:
+            return "A-7";
+        case 104:
+            return "G#7";
+        case 103:
+            return "G-7";
+        case 102:
+            return "F#7";
+        case 101:
+            return "F-7";
+        case 100:
+            return "E-7";
+        case 99:
+            return "D#7";
+        case 98:
+            return "D-7";
+        case 97:
+            return "C#7";
+        case 96:
+            return "C-7";
+        case 95:
+            return "B-6";
+        case 94:
+            return "A#6";
+        case 93:
+            return "A-6";
+        case 92:
+            return "G#6";
+        case 91:
+            return "G-6";
+        case 90:
+            return "F#6";
+        case 89:
+            return "F-6";
+        case 88:
+            return "E-6";
+        case 87:
+            return "D#6";
+        case 86:
+            return "D-6";
+        case 85:
+            return "C#6";
+        case 84:
+            return "C-6";
+        case 83:
+            return "B-5";
+        case 82:
+            return "A#5";
+        case 81:
+            return "A-5";
+        case 80:
+            return "G#5";
+        case 79:
+            return "G-5";
+        case 78:
+            return "F#5";
+        case 77:
+            return "F-5";
+        case 76:
+            return "E-5";
+        case 75:
+            return "D#5";
+        case 74:
+            return "D-5";
+        case 73:
+            return "C#5";
+        case 72:
+            return "C-5";
+        case 71:
+            return "B-4";
+        case 70:
+            return "A#4";
+        case 69:
+            return "A-4";
+        case 68:
+            return "G#4";
+        case 67:
+            return "G-4";
+        case 66:
+            return "F#4";
+        case 65:
+            return "F-4";
+        case 64:
+            return "E-4";
+        case 63:
+            return "D#4";
+        case 62:
+            return "D-4";
+        case 61:
+            return "C#4";
+        case 60:
+            return "C-4";
+        case 59:
+            return "B-3";
+        case 58:
+            return "A#3";
+        case 57:
+            return "A-3";
+        case 56:
+            return "G#3";
+        case 55:
+            return "G-3";
+        case 54:
+            return "F#3";
+        case 53:
+            return "F-3";
+        case 52:
+            return "E-3";
+        case 51:
+            return "D#3";
+        case 50:
+            return "D-3";
+        case 49:
+            return "C#3";
+        case 48:
+            return "C-3";
+        case 47:
+            return "B-2";
+        case 46:
+            return "A#2";
+        case 45:
+            return "A-2";
+        case 44:
+            return "G#2";
+        case 43:
+            return "G-2";
+        case 42:
+            return "F#2";
+        case 41:
+            return "F-2";
+        case 40:
+            return "E-2";
+        case 39:
+            return "D#2";
+        case 38:
+            return "D-2";
+        case 37:
+            return "C#2";
+        case 36:
+            return "C-2";
+        case 35:
+            return "B-1";
+        case 34:
+            return "A#1";
+        case 33:
+            return "A-1";
+        case 32:
+            return "G#1";
+        case 31:
+            return "G-1";
+        case 30:
+            return "F#1";
+        case 29:
+            return "F-1";
+        case 28:
+            return "E-1";
+        case 27:
+            return "D#1";
+        case 26:
+            return "D-1";
+        case 25:
+            return "C#1";
+        case 24:
+            return "C-1";
+        case 23:
+            return "B-0";
+        case 22:
+            return "A#0";
+        case 21:
+            return "A-0";
+    }
+    return "---";
 }

@@ -60,19 +60,28 @@ void SynthEditor::Render2d(
     {
         bool selectInstrument = false;
 
+        auto &style = ImGui::GetStyle();
         auto track = _mixer->GetTrack(_mixer->State.currentTrack);
         ImGui::BeginChild("btns", ImVec2(121, 0));
         {
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+            bool trackEnabled = track->Penabled == 1;
+            if (ImGui::Checkbox("##enabled", &trackEnabled))
+            {
+                track->Penabled = trackEnabled ? 1 : 0;
+            }
+            ImGui::SameLine(27.0f + style.ItemSpacing.x);
+
             bool changeInstrument = false;
             if (track->Pname[0] == '\0')
             {
-                changeInstrument = ImGui::Button("< Default >", ImVec2(120, 0));
+                changeInstrument = ImGui::Button("< Default >", ImVec2(95 - style.ItemSpacing.x, 0));
             }
             else
             {
-                changeInstrument = ImGui::Button((const char *)track->Pname, ImVec2(120, 0));
+                changeInstrument = ImGui::Button((const char *)track->Pname, ImVec2(95 - style.ItemSpacing.x, 0));
             }
 
             if (changeInstrument)
@@ -148,6 +157,10 @@ void SynthEditor::Render2d(
             {
                 instrument.Padenabled = addChecked ? 1 : 0;
                 _mixer->State.currentSynth = ActiveSynths::Add;
+                if (addChecked)
+                {
+                    track->Penabled = 1;
+                }
             }
             ImGui::SameLine();
 
@@ -196,6 +209,10 @@ void SynthEditor::Render2d(
             {
                 instrument.Psubenabled = subChecked ? 1 : 0;
                 _mixer->State.currentSynth = ActiveSynths::Sub;
+                if (subChecked)
+                {
+                    track->Penabled = 1;
+                }
             }
             ImGui::SameLine();
             b = (_mixer->State.currentSynth == ActiveSynths::Sub);
@@ -211,6 +228,10 @@ void SynthEditor::Render2d(
             {
                 instrument.Ppadenabled = padChecked ? 1 : 0;
                 _mixer->State.currentSynth = ActiveSynths::Pad;
+                if (padChecked)
+                {
+                    track->Penabled = 1;
+                }
             }
             ImGui::SameLine();
             b = (_mixer->State.currentSynth == ActiveSynths::Pad);
@@ -226,6 +247,10 @@ void SynthEditor::Render2d(
             {
                 instrument.Psmplenabled = smplChecked ? 1 : 0;
                 _mixer->State.currentSynth = ActiveSynths::Smpl;
+                if (smplChecked)
+                {
+                    track->Penabled = instrument.Psmplenabled;
+                }
             }
             ImGui::SameLine();
             b = (_mixer->State.currentSynth == ActiveSynths::Smpl);
@@ -1124,7 +1149,10 @@ void SynthEditor::RenderSmplSynth(
     static unsigned char selectingSampleForKey = 0;
     static int selectedNote = SAMPLE_NOTE_MIN;
 
-    ImGui::BeginChild("samples", ImVec2(0, -200));
+    auto const &style = ImGui::GetStyle();
+    auto sampleWidgetheight = 190 + (style.FramePadding.y * 2);
+
+    ImGui::BeginChild("samples", ImVec2(0, -(sampleWidgetheight + style.ItemSpacing.y)));
     {
         if (ImGui::BeginTabBar("samplestabs"))
         {
@@ -1170,7 +1198,7 @@ void SynthEditor::RenderSmplSynth(
     }
     ImGui::EndChild();
 
-    ImGui::BeginChild("sample", ImVec2(0, 190));
+    ImGui::BeginChild("sample", ImVec2(0, sampleWidgetheight));
     {
         if (ImGui::Button("Change"))
         {
