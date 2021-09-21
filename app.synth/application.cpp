@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iapplication.h>
 #include <imgui.h>
+#include <imgui_helpers.h>
 #include <imgui_plot.h>
 #include <iostream>
 #include <map>
@@ -19,20 +20,20 @@
 
 enum BarTypes
 {
-    OneBar = 1,
-    TwoBar = 2,
     FourBar = 4,
     EightBar = 8,
     SixteenBar = 16,
     ThirtyTwoBar = 32,
+    SixtyFourBar = 64,
+    OneHunderedTwentyEightBar = 128,
 };
 
 struct PatternNote
 {
     float start;
     float length;
-    unsigned char nodeOffset; // +/- 12 notes
-    unsigned char velocity;
+    char noteOffset = 0; // +/- 12 notes
+    unsigned char velocity = 100;
 };
 
 class TrackPattern
@@ -65,6 +66,22 @@ char const *NoteToString(
 TrackPattern::TrackPattern() = default;
 
 TrackPattern::~TrackPattern() = default;
+
+void EnsurePatterns(
+    TrackPattern *trackPattern)
+{
+    if (trackPattern->_numberOfbars != trackPattern->_pattern.size())
+    {
+        trackPattern->_pattern.resize(trackPattern->_numberOfbars);
+    }
+
+    auto relativeBarLength = 1.0f / float(trackPattern->_numberOfbars);
+    for (int i = 0; i < trackPattern->_numberOfbars; i++)
+    {
+        trackPattern->_pattern[i].start = relativeBarLength * i;
+        trackPattern->_pattern[i].length = 0.5f / float(trackPattern->_numberOfbars);
+    }
+}
 
 Application::Application()
     : _mixer(std::make_unique<Mixer>())
@@ -331,7 +348,24 @@ void Application::Render2d()
         if (ImGui::Combo("Number of bars", &item_current_2, "4 \0 8 \0 16 \0 32 \0 64 \0 128 \0\0"))
         {
             selectedTrackPattern->_numberOfbars = static_cast<BarTypes>((1 + item_current_2) * 4);
+            EnsurePatterns(selectedTrackPattern);
         }
+
+        for (auto &p : selectedTrackPattern->_pattern)
+        {
+            ImGui::PushID((void *)&p);
+            ImGui::BeginGroup();
+            int v = p.noteOffset;
+            if (ImGui::VSliderInt("##noteOffset", ImVec2(18, 160), &v, -12, 12))
+            {
+                p.noteOffset = v;
+            }
+            KnobUchar("##velocity", &(p.velocity), 0, 127, ImVec2(20, 20), "Velocity");
+            ImGui::EndGroup();
+            ImGui::SameLine();
+            ImGui::PopID();
+        }
+        ImGui::Text("track");
 
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
         ImVec2 canvas_size = ImVec2(500, 50);            // ImGui::GetContentRegionAvail(); // Resize canvas to what's available
@@ -463,7 +497,7 @@ std::vector<SimpleNote> Application::GetNotes(
                 // length of the note is multiplied by number of number of bars to make relative to a single bar
                 // and then by barsPerSecond() to convert it seconds
                 auto len = float(patternEvent.length * BarsPerSecond());
-                result.push_back(SimpleNote(note.first, 100, len, channel.first));
+                result.push_back(SimpleNote(note.first + patternEvent.noteOffset, patternEvent.velocity, len, channel.first));
             }
         }
     }
