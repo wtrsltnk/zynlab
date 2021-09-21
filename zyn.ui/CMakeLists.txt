@@ -15,8 +15,8 @@ add_library(zyn.ui
     imgui/imgui_internal.h
     imgui/imgui_widgets.cpp
     imgui_helpers.cpp
-    imgui_helpers.h
     imgui_plot.cpp
+    include/imgui_helpers.h
     include/imgui_plot.h
     librarydialog.cpp
     librarydialog.h
