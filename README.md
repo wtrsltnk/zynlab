@@ -19,6 +19,14 @@ robocopy "zynaddsubfx-deps/mingw-32bit/bin" zynlab-build/app *.dll
 robocopy "zynaddsubfx-deps/mingw-32bit/bin" zynlab-build/app.threedee *.dll
 ```
 
+Build FLTK for vc++ ::
+
+```
+cmake -G "Visual Studio 16 2019" -D CMAKE_BUILD_TYPE=Release` -D FLTK_BUILD_TEST=OFF -D OPTION_BUILD_HTML_DOCUMENTATION=OFF -D OPTION_BUILD_PDF_DOCUMENTATION=OFF -D "CMAKE_INSTALL_PREFIX=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133" ..
+cmake --build .
+cmake --install .
+```
+
 Also added some UI ideas:
 
 ![Screenshot of zyn-studio](screenshots/20190124.png)

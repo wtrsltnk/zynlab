@@ -1,5 +1,15 @@
 
 CPMAddPackage(
+    NAME zlib
+    GITHUB_REPOSITORY "madler/zlib"
+    GIT_TAG v1.2.11
+    GIT_SHALLOW ON
+#    OPTIONS
+#        "ASM686 Off"
+#        "AMD64 On"
+)
+
+CPMAddPackage(
     NAME fftw3
     VERSION 3.3.5
     URL ftp://ftp.fftw.org/pub/fftw/fftw-3.3.5-dll64.zip
@@ -87,19 +97,38 @@ endif()
 #    CPMAddPackage(
 #        NAME fltk
 #        GITHUB_REPOSITORY "fltk/fltk"
-#        GIT_TAG release-1.3.5
+#        GIT_TAG release-1.3.7
 #        GIT_SHALLOW ON
 #        OPTIONS
-#            "FLTK_BUILD_TEST Off"
-#            "OPTION_BUILD_EXAMPLES Off"
-#            "OPTION_BUILD_HTML_DOCUMENTATION Off"
-#            "OPTION_INSTALL_HTML_DOCUMENTATION Off"
+#            "FLTK_BUILD_TEST OFF"
+#            "OPTION_BUILD_EXAMPLES OFF"
+#            "OPTION_BUILD_HTML_DOCUMENTATION OFF"
+#            "OPTION_INSTALL_HTML_DOCUMENTATION OFF"
 #    )
 
 #    if (fltk_ADDED)
-#        find_file(FLTK_FLUID_EXECUTABLE "fluid.exe" HINT ${fltk_BINARY_DIR} HINT ${fltk_BINARY_DIR}/bin)
-#        find_file(fltk_HEADER_FILE "FL/FL.h" HINT ${fltk_SOURCE_DIR} HINT ${fltk_SOURCE_DIR})
+#        find_file(fltk_FLUID_EXECUTABLE "fluid.exe"
+#            NO_DEFAULT_PATH
+#            NO_CMAKE_SYSTEM_PATH
+#            NO_CACHE
+#            PATHS
+#                ${fltk_BINARY_DIR}
+#                ${fltk_BINARY_DIR}/bin
+#            )
+
+#        message(STATUS "fltk_FLUID_EXECUTABLE = ${fltk_FLUID_EXECUTABLE}")
+
+#        find_file(fltk_HEADER_FILE "FL/FL.h"
+#            NO_DEFAULT_PATH
+#            NO_CMAKE_SYSTEM_PATH
+#            NO_CACHE
+#            PATHS
+#                ${fltk_SOURCE_DIR}
+#                ${fltk_SOURCE_DIR}/include
+#            )
 #        get_filename_component(fltk_HEADER_FILE_LOCATION ${fltk_HEADER_FILE} DIRECTORY)
+
+#        message(STATUS "fltk_HEADER_FILE = ${fltk_HEADER_FILE}")
 
 #        target_include_directories(fltk
 #            INTERFACE
@@ -115,16 +144,6 @@ CPMAddPackage(
     OPTIONS
         "PA_BUILD_TESTS Off"
         "PA_BUILD_EXAMPLES Off"
-)
-
-CPMAddPackage(
-    NAME zlib
-    GITHUB_REPOSITORY "madler/zlib"
-    GIT_TAG v1.2.11
-    GIT_SHALLOW ON
-    OPTIONS
-        "ASM686 Off"
-        "AMD64 On"
 )
 
 CPMAddPackage(

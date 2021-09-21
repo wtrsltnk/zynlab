@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(lib.sqlite)
     
 add_library(lib.sqlite3 STATIC
-    sqlite3.c)
+    src/sqlite3.c)
 
 install(
     TARGETS
@@ -17,7 +17,7 @@ install(
 
 install(
     FILES
-        ${sqlite3_SOURCE_DIR}/sqlite3.h
+        ${sqlite3_SOURCE_DIR}/include/sqlite3.h
     DESTINATION
         "include"
     )

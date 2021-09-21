@@ -385,11 +385,11 @@ void AnalogFilter::filterout(float *smp)
     if (needsinterpolation)
     {
         //Merge Filter at old coeff with new coeff
-        float ismp[SystemSettings::Instance().buffersize];
-        memcpy(ismp, smp, SystemSettings::Instance().bufferbytes);
+        auto ismp = std::vector<float>(SystemSettings::Instance().buffersize);
+        memcpy(ismp.data(), smp, SystemSettings::Instance().bufferbytes);
 
         for (int i = 0; i < stages + 1; ++i)
-            singlefilterout(ismp, oldHistory[i], oldCoeff);
+            singlefilterout(ismp.data(), oldHistory[i], oldCoeff);
 
         for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {

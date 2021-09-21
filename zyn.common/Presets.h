@@ -162,8 +162,6 @@ class WrappedPresets : public Presets, public Preset
 public:
     WrappedPresets();
     virtual ~WrappedPresets();
-
-    unsigned char randomByte();
 };
 
 #endif

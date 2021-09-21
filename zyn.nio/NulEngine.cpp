@@ -23,7 +23,12 @@
 #include "NulEngine.h"
 
 #include <iostream>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <windows.h>
+#endif
+
 #include <zyn.common/globals.h>
 
 NulEngine::NulEngine(
@@ -32,11 +37,10 @@ NulEngine::NulEngine(
     : AudioOutput(sampleRate, bufferSize)
 {
     _name = "NULL";
-    playing_until.tv_sec = 0;
-    playing_until.tv_usec = 0;
 }
 
-void *NulEngine::_AudioThread(void *arg)
+void *NulEngine::_AudioThread(
+    void *arg)
 {
     return (static_cast<NulEngine *>(arg))->AudioThread();
 }
@@ -47,34 +51,37 @@ void *NulEngine::AudioThread()
     {
         NextSample();
 
-        struct timeval now;
-        int remaining = 0;
-        gettimeofday(&now, nullptr);
-        if ((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0))
+        auto now = std::chrono::system_clock::now();
+        auto remaining = std::chrono::milliseconds();
+
+        if (playing_until.time_since_epoch().count() == 0)
         {
-            playing_until.tv_usec = now.tv_usec;
-            playing_until.tv_sec = now.tv_sec;
+            playing_until = now;
         }
         else
         {
-            remaining = (playing_until.tv_usec - now.tv_usec) + (playing_until.tv_sec - now.tv_sec) * 1000000;
-            if (remaining > 10000) //Don't sleep() less than 10ms.
+            remaining = std::chrono::duration_cast<std::chrono::milliseconds>(playing_until - now);
+            if (remaining.count() > 10000) //Don't sleep() less than 10ms.
                 //This will add latency...
             {
-                usleep(remaining - 10000);
+#ifndef _WIN32
+                usleep(remaining.count() - 10000);
+#else
+                Sleep(remaining.count() - 10000);
+#endif
             }
-            if (remaining < 0)
+
+            if (remaining.count() < 0)
             {
                 std::cerr << "WARNING - too late" << std::endl;
             }
         }
-        playing_until.tv_usec += this->BufferSize() * 1000000 / this->SampleRate();
-        if (remaining < 0)
+
+        playing_until += std::chrono::milliseconds(this->BufferSize() * 1000 / this->SampleRate());
+        if (remaining.count() < 0)
         {
-            playing_until.tv_usec -= remaining;
+            playing_until -= std::chrono::milliseconds(remaining);
         }
-        playing_until.tv_sec += playing_until.tv_usec / 1000000;
-        playing_until.tv_usec %= 1000000;
     }
 
     return nullptr;
@@ -93,7 +100,8 @@ void NulEngine::Stop()
     SetAudioEnabled(false);
 }
 
-void NulEngine::SetAudioEnabled(bool nval)
+void NulEngine::SetAudioEnabled(
+    bool nval)
 {
     if (nval)
     {

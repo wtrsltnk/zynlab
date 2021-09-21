@@ -24,6 +24,7 @@
 
 #include "../zyn.common/filesystemapi.h"
 #include "SaveToFileSerializer.h"
+#include <sqlite3.h>
 #include <zyn.mixer/Track.h>
 
 #define INSTRUMENT_EXTENSION ".xiz"

@@ -26,13 +26,12 @@
 
 #include "SaveToFileSerializer.h"
 #include <algorithm>
-#include <dirent.h>
 #include <fcntl.h>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <zyn.common/Config.h>
 #include <zyn.common/PresetsSerializer.h>
 #include <zyn.common/Util.h>
@@ -224,10 +223,10 @@ int BankManager::LoadBank(int index)
  */
 int BankManager::LoadBankByDirectoryName(std::string const &bankdirname)
 {
-    DIR *dir = opendir(bankdirname.c_str());
     ClearBank();
 
-    if (dir == nullptr)
+    auto dir = std::filesystem::path(bankdirname);
+    if (!std::filesystem::exists(dir))
     {
         return -1;
     }
@@ -236,14 +235,12 @@ int BankManager::LoadBankByDirectoryName(std::string const &bankdirname)
 
     _bankfiletitle = _dirname;
 
-    struct dirent *fn;
-
-    while ((fn = readdir(dir)))
+    for (auto const &dir_entry : std::filesystem::directory_iterator{dir})
     {
-        const char *filename = fn->d_name;
+        auto filename = dir_entry.path().filename().string();
 
         //check for extension
-        if (strstr(filename, INSTRUMENT_EXTENSION) == nullptr)
+        if (dir_entry.path().extension() != INSTRUMENT_EXTENSION)
         {
             continue;
         }
@@ -254,7 +251,7 @@ int BankManager::LoadBankByDirectoryName(std::string const &bankdirname)
 
         for (unsigned int i = 0; i < 4; ++i)
         {
-            if (strlen(filename) <= i)
+            if (filename.size() <= i)
             {
                 break;
             }
@@ -266,7 +263,7 @@ int BankManager::LoadBankByDirectoryName(std::string const &bankdirname)
             }
         }
 
-        if ((startname + 1) < strlen(filename))
+        if ((startname + 1) < filename.size())
         {
             startname++; //to take out the "-"
         }
@@ -293,8 +290,6 @@ int BankManager::LoadBankByDirectoryName(std::string const &bankdirname)
         }
     }
 
-    closedir(dir);
-
     if (!_dirname.empty())
     {
         Config::Current().cfg.currentBankDir = _dirname;
@@ -317,11 +312,8 @@ int BankManager::NewBank(std::string const &newbankdirname)
     }
 
     bankdir += newbankdirname;
-#ifndef _WIN32
-    if (mkdir(bankdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0)
-#else
-    if (mkdir(bankdir.c_str()) < 0)
-#endif
+
+    if (!std::filesystem::create_directory(bankdir))
     {
         return -1;
     }
@@ -464,55 +456,48 @@ void BankManager::RescanForBanks()
 
 // private stuff
 
-void BankManager::ScanRootDirectory(std::string const &rootdir)
+void BankManager::ScanRootDirectory(
+    std::string const &rootdir)
 {
-    DIR *dir = opendir(rootdir.c_str());
-    if (dir == nullptr)
+    auto dir = std::filesystem::path(rootdir);
+    if (!std::filesystem::exists(dir))
     {
         return;
     }
 
     InstrumentBank bank;
 
-    const char *separator = "/";
-    if (!rootdir.empty())
+    for (auto const &dir_entry : std::filesystem::directory_iterator{dir})
     {
-        char tmp = rootdir[rootdir.size() - 1];
-        if ((tmp == '/') || (tmp == '\\'))
-        {
-            separator = "";
-        }
-    }
-
-    struct dirent *fn;
-    while ((fn = readdir(dir)))
-    {
-        const char *dirname = fn->d_name;
+        auto dirname = dir_entry.path().filename().string();
         if (dirname[0] == '.')
         {
             continue;
         }
 
-        bank.dir = rootdir + separator + dirname + '/';
+        if (!std::filesystem::is_directory(dir_entry.path()))
+        {
+            continue;
+        }
+
+        bank.dir = (std::filesystem::path(rootdir) / dir_entry.path()).string();
         bank.name = dirname;
         bank.instrumentNames.clear();
         //find out if the directory contains at least 1 instrument
         bool isbank = false;
 
-        DIR *d = opendir(bank.dir.c_str());
-        if (d == nullptr)
+        auto d = std::filesystem::path(bank.dir.c_str());
+        if (!std::filesystem::exists(d))
         {
             continue;
         }
 
-        struct dirent *fname;
-
-        while ((fname = readdir(d)))
+        for (auto const &fname : std::filesystem::directory_iterator{d})
         {
-            if ((strstr(fname->d_name, INSTRUMENT_EXTENSION) != nullptr) || (strstr(fname->d_name, FORCE_BANK_DIR_FILE) != nullptr))
+            if ((fname.path().extension() == INSTRUMENT_EXTENSION) || (fname.path().filename().string() == FORCE_BANK_DIR_FILE))
             {
                 isbank = true;
-                std::string name(fname->d_name);
+                std::string name = fname.path().filename().string();
                 transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
                 bank.instrumentNames.push_back(name);
             }
@@ -522,10 +507,7 @@ void BankManager::ScanRootDirectory(std::string const &rootdir)
         {
             banks.push_back(bank);
         }
-        closedir(d);
     }
-
-    closedir(dir);
 }
 
 void BankManager::ClearBank()

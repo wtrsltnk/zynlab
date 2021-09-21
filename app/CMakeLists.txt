@@ -67,6 +67,7 @@ target_include_directories(app
         "${CMAKE_CURRENT_SOURCE_DIR}/.."
         "${CMAKE_CURRENT_SOURCE_DIR}/ui"
         "${CMAKE_CURRENT_BINARY_DIR}"
+        "../zyn.common"
     )
 
 target_compile_definitions(app

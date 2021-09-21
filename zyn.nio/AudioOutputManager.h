@@ -2,7 +2,6 @@
 #define AUDIOOUTPUTMANAGER_H
 
 #include <list>
-#include <semaphore.h>
 #include <string>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/Stereo.h>
@@ -42,8 +41,6 @@ private:
     void removeStaleSmps();
 
     AudioOutput *currentOut; /**<The current output driver*/
-
-    sem_t requested;
 
     /**Buffer*/
     Stereo<float *> priBuf;         //buffer for primary drivers

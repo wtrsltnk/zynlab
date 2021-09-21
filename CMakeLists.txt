@@ -34,16 +34,15 @@ add_subdirectory("zyn.nio")
 add_subdirectory("zyn.seq")
 add_subdirectory("zyn.synth")
 add_subdirectory("zyn.serialization")
-add_subdirectory("zyn.pinvoke")
 add_subdirectory("zyn.ui")
-
-if (BUILD_APP_SYNTH)
-    add_subdirectory("app.synth")
-endif(BUILD_APP_SYNTH)
 
 if(BUILD_APP_ZYNADSUBFX)
     add_subdirectory("app")
 endif()
+
+if (BUILD_APP_SYNTH)
+    add_subdirectory("app.synth")
+endif(BUILD_APP_SYNTH)
 
 if(BUILD_APP_THREEDEE)
     add_subdirectory("lib.imgui")
@@ -60,6 +59,10 @@ endif()
 
 if(BUILD_TESTS)
     add_subdirectory("tests")
+endif()
+
+if(BUILD_PINVOKE)
+    add_subdirectory("zyn.pinvoke")
 endif()
 
 if(WIN32 AND BUILD_VST)

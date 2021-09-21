@@ -45,10 +45,16 @@ target_sources(zyn.common
     )
 
 target_link_libraries(zyn.common
-    lib.mxml
-    ${ZLIB_LIBRARIES}
-    zlib
+    PUBLIC
+        lib.mxml
+        zlib
     )
+
+target_include_directories(zyn.common
+    PUBLIC
+        $<BUILD_INTERFACE:${zlib_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${zlib_BINARY_DIR}>
+)
 
 target_compile_features(zyn.common
     PRIVATE

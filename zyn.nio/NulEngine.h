@@ -25,31 +25,40 @@
 
 #include "AudioOutput.h"
 #include "MidiInput.h"
-#include <sys/time.h>
+#include <chrono>
 #include <thread>
 #include <zyn.common/globals.h>
 
 class NulEngine : public AudioOutput, MidiInput
 {
 public:
-    NulEngine(unsigned int sampleRate, unsigned int _bufferSize);
+    NulEngine(
+        unsigned int sampleRate,
+        unsigned int _bufferSize);
+
     virtual ~NulEngine();
 
     bool Start();
     void Stop();
 
-    void SetAudioEnabled(bool nval);
+    void SetAudioEnabled(
+        bool nval);
+
     bool IsAudioEnabled() const;
 
-    void SetMidiEnabled(bool) {}
+    void SetMidiEnabled(
+        bool) {}
+
     bool IsMidiEnabled() const { return true; }
 
 protected:
     void *AudioThread();
-    static void *_AudioThread(void *arg);
+
+    static void *_AudioThread(
+        void *arg);
 
 private:
-    struct timeval playing_until;
+    std::chrono::system_clock::time_point playing_until;
 
     std::thread *_thread = nullptr;
 };

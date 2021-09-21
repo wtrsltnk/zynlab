@@ -48,6 +48,7 @@ add_library(zyn.serialization STATIC
 target_include_directories(zyn.serialization
     PRIVATE
         ${CMAKE_SOURCE_DIR}
+        ../lib.sqlite3/include
     )
 
 target_link_libraries(zyn.serialization
@@ -62,6 +63,7 @@ target_compile_features(zyn.serialization
         cxx_auto_type
         cxx_nullptr
         cxx_thread_local
+        cxx_std_17
     )
 
 install(

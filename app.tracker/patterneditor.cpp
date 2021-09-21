@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <iostream>
 #include <zyn.mixer/Track.h>
-#include <zyn.ui/imgui_helpers.h>
+#include <zyn.ui/include/imgui_helpers.h>
 #include <zyn.ui/syntheditor.h>
 
 namespace ImGui

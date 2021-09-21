@@ -457,13 +457,3 @@ void Preset::ReadPresetsFromBlob(IPresetsSerializer *xml)
 WrappedPresets::WrappedPresets() : Preset("tbd") {}
 
 WrappedPresets::~WrappedPresets() {}
-
-#include <random>
-
-static std::default_random_engine generator;
-
-unsigned char WrappedPresets::randomByte()
-{
-    std::uniform_int_distribution<unsigned char> distribution(0, 127);
-    return distribution(generator);
-}

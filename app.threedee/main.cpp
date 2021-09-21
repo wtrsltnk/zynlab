@@ -4,6 +4,10 @@
 #include "examples/imgui_impl_opengl3.h"
 #include <zyn.serialization/LibraryManager.h>
 
+#ifdef _WIN32
+#include <signal.h>
+#endif
+
 static int Pexitprogram = 0;
 
 static LibraryManager libraryManager;

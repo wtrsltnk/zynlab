@@ -26,7 +26,6 @@
 #include <set>
 #include <string>
 #include <zyn.common/ILibraryManager.h>
-#include <sqlite3.h>
 
 class Track;
 

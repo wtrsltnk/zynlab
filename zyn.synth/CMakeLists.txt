@@ -41,8 +41,8 @@ add_library(zyn.synth STATIC
     SUBnoteParams.h
     SynthNote.cpp
     SynthNote.h
-    pffft.c
-    pffft.h
+#    pffft.c
+#    pffft.h
     )
 
 target_include_directories(zyn.synth

@@ -30,7 +30,10 @@
 class AudioOutput : public virtual Engine
 {
 public:
-    AudioOutput(unsigned int sampleRate, unsigned int _bufferSize);
+    AudioOutput(
+        unsigned int sampleRate,
+        unsigned int _bufferSize);
+
     virtual ~AudioOutput();
 
     /**Gets the Samples required per Out of this driver
@@ -40,7 +43,9 @@ public:
     /**Gets the Frame Size for output*/
     unsigned int BufferSize() const;
 
-    virtual void SetAudioEnabled(bool nval);
+    virtual void SetAudioEnabled(
+        bool nval);
+
     virtual bool IsAudioEnabled() const = 0;
 
 protected:
