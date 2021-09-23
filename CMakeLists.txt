@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(zynlab)
+project(zynlab VERSION "2.4.4")
 
 option(BUILD_VST "enable building all projects using VST" OFF)
 option(BUILD_TESTS "enable building all test projects" OFF)
@@ -14,13 +14,11 @@ option(BUILD_PINVOKE "enable building pinvoke project" OFF)
 include(cmake/CPM.cmake)
 include(cmake/Dependencies.cmake)
 
-# Add version information
-set(VERSION "2.4.4")
-add_definitions(-DVERSION="${VERSION}")
+add_definitions(-DVERSION="${CMAKE_PROJECT_VERSION}")
+add_definitions(-DENABLE_FLTKGUI)
 
 find_package(OpenGL) #for FLTK
 
-add_definitions(-DENABLE_FLTKGUI)
 
 add_subdirectory("lib.mxml")
 add_subdirectory("lib.sqlite3")

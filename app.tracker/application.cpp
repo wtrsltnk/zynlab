@@ -48,10 +48,12 @@ bool Application::Setup()
 
     ImFontConfig config;
     config.MergeMode = true;
-    config.GlyphMinAdvanceX = 13.0f;
+    config.GlyphOffset = ImVec2(0.0f, 3.0f);
 
     static const ImWchar fontaudio_icon_ranges[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
     _fadFont = io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 18.0f, &config, fontaudio_icon_ranges);
+
+    config.GlyphOffset = ImVec2(0.0f, -1.0f);
 
     static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
     _fkFont = io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
@@ -153,7 +155,7 @@ void Application::Render2d()
         char buf[256] = {0};
 
         sprintf_s(buf, 256, "%s EDIT", ICON_FK_PENCIL);
-        if (ImGui::Button(buf, ImVec2(120, 0)))
+        if (ImGui::Button(buf, ImVec2(120, 34)))
         {
             _session.selectedTab = SelectableTabs::PatternEditor;
             ImGui::SetWindowFocus(PatternEditor::ID);
@@ -162,7 +164,7 @@ void Application::Render2d()
         ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s MIXER", ICON_FK_SLIDERS);
-        if (ImGui::Button(buf, ImVec2(120, 0)))
+        if (ImGui::Button(buf, ImVec2(120, 34)))
         {
             _session.selectedTab = SelectableTabs::Mixer;
             ImGui::SetWindowFocus("Mixer");
@@ -171,7 +173,7 @@ void Application::Render2d()
         ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s SYNTH", ICON_FAD_KEYBOARD);
-        if (ImGui::Button(buf, ImVec2(120, 0)))
+        if (ImGui::Button(buf, ImVec2(120, 34)))
         {
             _session.selectedTab = SelectableTabs::Synth;
         }
@@ -179,7 +181,7 @@ void Application::Render2d()
         ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s AUTOMATION", ICON_FAD_AUTOMATION_3P);
-        if (ImGui::Button(buf, ImVec2(120, 0)))
+        if (ImGui::Button(buf, ImVec2(120, 34)))
         {
             _session.selectedTab = SelectableTabs::AutomationEditor;
         }
@@ -187,7 +189,7 @@ void Application::Render2d()
         ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s STATS", ICON_FAD_AUTOMATION_3P);
-        if (ImGui::Button(buf, ImVec2(120, 0)))
+        if (ImGui::Button(buf, ImVec2(120, 34)))
         {
             _showStats = true;
             ImGui::SetWindowFocus("Stats");

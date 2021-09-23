@@ -22,7 +22,7 @@ void PlayerControlsPanel::Render2d()
         return;
     }
 
-    ImVec2 iconSize(30, 30);
+    ImVec2 iconSize(34.0f, 34.0f);
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin(

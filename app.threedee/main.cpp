@@ -25,11 +25,11 @@ void initprogram()
     SystemSettings::Instance().samplerate = Config::Current().cfg.SampleRate;
     SystemSettings::Instance().buffersize = Config::Current().cfg.SoundBufferSize;
     SystemSettings::Instance().oscilsize = Config::Current().cfg.OscilSize;
+    SystemSettings::Instance().swaplr = Config::Current().cfg.SwapStereo;
     SystemSettings::Instance().alias();
 
     mixer = new Mixer();
     mixer->Init();
-    mixer->swaplr = Config::Current().cfg.SwapStereo;
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
 

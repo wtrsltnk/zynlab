@@ -69,8 +69,6 @@ void Mixer::Init()
     _tmpmixl = std::unique_ptr<float>(new float[this->BufferSize()]);
     _tmpmixr = std::unique_ptr<float>(new float[this->BufferSize()]);
 
-    swaplr = false;
-
     shutup = false;
 
     for (auto &track : _tracks)
@@ -472,7 +470,7 @@ void Mixer::AudioOut(
     }
 
     //Swaps the Left channel with Right Channel
-    if (swaplr)
+    if (SystemSettings::Instance().swaplr)
     {
         swap(outl, outr);
     }

@@ -1366,7 +1366,7 @@ void AppThreeDee::LoadToolbarIcons()
 
     _toolbarIconsAreLoaded = false;
 
-    _toolbarIcons.reserve(static_cast<size_t>(ToolbarTools::COUNT));
+    _toolbarIcons.resize(static_cast<size_t>(ToolbarTools::COUNT));
 
     for (size_t i = 0; i < static_cast<size_t>(ToolbarTools::COUNT); i++)
     {

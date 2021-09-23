@@ -279,6 +279,11 @@ public:
      */
     unsigned int oscilsize;
 
+    /**
+     * 1 for left-right swapping
+     */
+    bool swaplr = false;
+
     //Alias for above terms
     float samplerate_f;
     float halfsamplerate_f;

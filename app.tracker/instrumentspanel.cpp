@@ -52,7 +52,14 @@ void InstrumentsPanel::Render2d()
                 ImGui::SameLine();
 
                 char buf[256] = {0};
-                sprintf_s(buf, 256, "%02d : %s", int(i + 1), track->Pname);
+                if (track->Pname[0] == 0)
+                {
+                    sprintf_s(buf, 256, "%02d : <default>", int(i + 1));
+                }
+                else
+                {
+                    sprintf_s(buf, 256, "%02d : %s", int(i + 1), track->Pname);
+                }
                 ImGui::Selectable(buf, i == _session->_mixer->State.currentTrack);
                 if (ImGui::IsItemClicked())
                 {

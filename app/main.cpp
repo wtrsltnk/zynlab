@@ -53,8 +53,6 @@ static MasterUI *ui = nullptr;
 
 static Mixer mixer;
 
-static unsigned int swaplr = 0; //1 for left-right swapping
-
 static int Pexitprogram = 0; //if the UI set this to 1, the program will exit
 
 //cleanup on signaled exit
@@ -94,6 +92,7 @@ int main(
     std::cout << "\n"
               << "ZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others\n"
               << "              Copyright (c) 2009-2014 Mark McCurry [active maintainer]\n"
+              << "              Copyright (c) 2016-2021 Wouter Saaltink [zynlab maintainer]\n"
               << "Compiled: " << __DATE__ << " " << __TIME__ << "\n"
               << "This program is free software (GNU GPL v2 or later) and \n"
               << "it comes with ABSOLUTELY NO WARRANTY." << std::endl;
@@ -110,7 +109,7 @@ int main(
     settings.samplerate = config.cfg.SampleRate;
     settings.buffersize = config.cfg.SoundBufferSize;
     settings.oscilsize = config.cfg.OscilSize;
-    swaplr = config.cfg.SwapStereo;
+    settings.swaplr = config.cfg.SwapStereo;
 
     settings.alias();
 
@@ -165,7 +164,7 @@ int main(
 
     if (result["swap"].as<bool>())
     {
-        swaplr = 1;
+        settings.swaplr = 1;
     }
 
     if (result["sample-rate"].count() == 1)
@@ -215,13 +214,12 @@ int main(
               << "Sample Rate        = " << settings.samplerate << "\n"
               << "Sound Buffer Size  = " << settings.buffersize << " samples\n"
               << "Internal latency   = " << settings.buffersize_f * 1000.0f / settings.samplerate_f << " ms\n"
-              << "ADsynth Oscil.Size = " << settings.oscilsize << " samples" << std::endl;
+              << "ADsynth Oscil Size = " << settings.oscilsize << " samples" << std::endl;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
 
     mixer.Init();
-    mixer.swaplr = swaplr;
 
     SaveToFileSerializer serializer;
     if (result["l"].count() == 1)

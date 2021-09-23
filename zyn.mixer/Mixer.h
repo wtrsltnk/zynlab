@@ -196,7 +196,6 @@ public:
 
     Meter meter;
     Controller ctl;
-    bool swaplr= false; //if L and R are swapped
 
     bool shutup = false;
 

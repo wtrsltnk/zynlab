@@ -17,7 +17,7 @@ void AutomationEditor::Render2d()
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin(
-        "Autmation",
+        "Automation",
         nullptr,
         flags);
     {
