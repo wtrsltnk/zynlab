@@ -75,7 +75,7 @@ float Meter::GetOutPeak(int instrument)
 
 void Meter::Tick(const float *outl, const float *outr, Track *part, float volume)
 {
-    if (_vumutex.try_lock())
+    if (!_vumutex.try_lock())
     {
         return;
     }

@@ -46,8 +46,9 @@ FFTwrapper::FFTwrapper(unsigned int fftsize_)
 
 FFTwrapper::~FFTwrapper()
 {
-    fftw_destroy_plan(planfftw);
     fftw_destroy_plan(planfftw_inv);
+    fftw_destroy_plan(planfftw);
+    fftw_cleanup();
 
     delete[] time;
     delete[] fft;
@@ -85,9 +86,4 @@ void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
     {
         smps[i] = static_cast<float>(time[i]);
     }
-}
-
-void FFT_cleanup()
-{
-    fftw_cleanup();
 }

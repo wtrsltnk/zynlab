@@ -51,6 +51,4 @@ private:
     fftw_plan planfftw, planfftw_inv;
 };
 
-void FFT_cleanup();
-
 #endif

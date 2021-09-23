@@ -78,8 +78,6 @@ int exitprogram()
     delete ui;
 #endif // ENABLE_FLTKGUI
 
-    FFT_cleanup();
-
     return 0;
 }
 

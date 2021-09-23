@@ -53,7 +53,6 @@ int exitprogram()
     Nio::Stop();
 
     delete mixer;
-    FFT_cleanup();
 
     return 0;
 }
