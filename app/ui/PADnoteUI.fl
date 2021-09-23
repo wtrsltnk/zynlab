@@ -64,9 +64,9 @@ this->pars=pars;} {}
   Function {draw()} {} {
     code {int ox=x(),oy=y(),lx=w(),ly=h();
 if (!visible()) return;
-float smps[lx];
+std::vector<float> smps(lx);
 
-float realbw=pars->getprofile(smps,lx);
+float realbw=pars->getprofile(smps.data(),lx);
 bool active=active_r();
 
 //draw the equivalent bandwidth
@@ -165,11 +165,11 @@ for (int i=1;i<maxharmonic;i++){
 
 
 int n=SystemSettings::Instance().oscilsize/2;
-float spc[n];
+std::vector<float> spc(n);
 for (int i=0;i<n;i++) spc[i]=0.0;
 
 master->Lock();
-pars->oscilgen->getspectrum(n,spc,0);
+pars->oscilgen->getspectrum(n,spc.data(),0);
 master->Unlock();
 
 
@@ -182,7 +182,7 @@ for (int i=0;i<n;i++){
 if (max<0.000001) max=1.0;
 max=max*1.05;
 
-float spectrum[lx];
+std::vector<float> spectrum(lx);
 for (int i=0;i<lx;i++) spectrum[i]=0;
 
 

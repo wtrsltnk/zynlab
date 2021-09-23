@@ -189,10 +189,10 @@ master=master_;} {}
   Function {draw()} {open
   } {
     code {int ox=x(),oy=y(),lx=w(),ly=h()-1,i;
-float smps[SystemSettings::Instance().oscilsize];
+std::vector<float> smps(SystemSettings::Instance().oscilsize);
 master->Lock();
-if (oscbase==0) oscil->get(smps,-1.0);
-    else oscil->getcurrentbasefunction(smps);
+if (oscbase==0) oscil->get(smps.data(),-1.0);
+    else oscil->getcurrentbasefunction(smps.data());
 master->Unlock();
 
 if (damage()!=1){

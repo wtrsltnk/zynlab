@@ -41,7 +41,7 @@ TEST_CASE("Presets")
 
     SECTION("AD Synth Presets", "[zyn.synth]")
     {
-        auto sut = ADnoteParameters(&fft);
+        auto sut = ADnoteParameters();
         sut.Defaults();
         sut.InitPresets();
 
@@ -57,7 +57,7 @@ TEST_CASE("Presets")
 
     SECTION("PAD Synth Presets", "[zyn.synth]")
     {
-        auto sut = PADnoteParameters(&fft);
+        auto sut = PADnoteParameters();
         sut.Defaults();
         sut.InitPresets();
 
@@ -96,7 +96,7 @@ TEST_CASE("Presets")
         Microtonal micro;
         micro.Defaults();
 
-        auto sut = Track();
+        Track sut;
         sut.Init(&mixer, &micro);
         sut.Defaults();
         sut.InitPresets();
@@ -245,7 +245,7 @@ TEST_CASE("Presets")
         res.Defaults();
         res.InitPresets();
 
-        auto sut = OscilGen(&fft, &res);
+        auto sut = OscilGen(&res);
         sut.Defaults();
         sut.InitPresets();
         sut.Pcurrentbasefunc = 0;

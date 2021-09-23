@@ -76,6 +76,7 @@ target_compile_definitions(app
     )
 
 target_link_libraries(app
+    cxxopts
     ${FLTK_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
@@ -87,4 +88,5 @@ target_link_libraries(app
     zyn.dsp
     zyn.seq
     zyn.serialization
-    zyn.common)
+    zyn.common
+    )

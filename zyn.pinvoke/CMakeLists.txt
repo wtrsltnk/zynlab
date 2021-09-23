@@ -36,6 +36,8 @@ target_compile_features(zyn.pinvoke
     )
 
 add_executable(testpar
+    par.cpp
+    par.h
     test/testpar.cpp
     test/acutest.h
     )
@@ -53,7 +55,6 @@ target_link_libraries(testpar
     zyn.dsp
     zyn.serialization
     zyn.common
-    zyn.pinvoke
     )
 
 add_test(NAME testpar COMMAND testpar)

@@ -3,3 +3,4 @@ zyn.vst/VST3\ SDK/**
 build/*
 /.vs
 out/build/*
+.zynaddsubfxXML.cfg

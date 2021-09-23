@@ -26,11 +26,11 @@
 #include <memory>
 #include <zyn.common/globals.h>
 
+static FFTwrapper instance = FFTwrapper(SystemSettings::Instance().oscilsize);
+
 IFFTwrapper *IFFTwrapper::GlobalInstance()
 {
-    static std::unique_ptr<IFFTwrapper> instance(new FFTwrapper(SystemSettings::Instance().oscilsize));
-
-    return instance.get();
+    return &instance;
 }
 
 IFFTwrapper::~IFFTwrapper() = default;

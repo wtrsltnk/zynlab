@@ -8,8 +8,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <zyn.synth/pffft.h>
-
 std::vector<float> generateSamples(int sampleCount)
 {
     std::vector<float> result;
@@ -36,16 +34,4 @@ TEST_CASE("FFTW")
     auto freqs = new fft_t[oscilsize / 2];
 
     fftwWrapper.smps2freqs(oscil.data(), freqs);
-
-    auto pffft_setup = pffft_new_setup(oscilsize, PFFFT_REAL);
-    auto pffft_freqs = new float[oscilsize];
-    pffft_transform_ordered(pffft_setup, oscil.data(), pffft_freqs, nullptr, PFFFT_FORWARD);
-
-    for (int i = 0; i < oscilsize / 2; i++)
-    {
-        std::cout << std::fixed
-                  << i << " = " << freqs[i].real() << "(" << freqs[i].imag() << ")" << std::endl
-                  << i << " = " << pffft_freqs[i] << std::endl
-                  << std::endl;
-    }
 }

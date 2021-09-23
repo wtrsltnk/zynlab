@@ -62,10 +62,7 @@ if (fftw3_ADDED)
         INTERFACE
             "${fftw3_SOURCE_DIR}/libfftw3-3.lib"
             "${fftw3_SOURCE_DIR}/libfftw3f-3.lib"
-            "${fftw3_SOURCE_DIR}/libfftw3l-3.lib"
-            "${fftw3_SOURCE_DIR}/libfftw3-3.dll"
-            "${fftw3_SOURCE_DIR}/libfftw3f-3.dll"
-            "${fftw3_SOURCE_DIR}/libfftw3l-3.dll")
+            "${fftw3_SOURCE_DIR}/libfftw3l-3.lib")
 
     find_file(fftw3_HEADER_FILE_PATH "fftw3.h" HINT ${fftw3_SOURCE_DIR})
     get_filename_component(fftw3_HEADER_FILE_LOCATION ${fftw3_HEADER_FILE_PATH} DIRECTORY)
@@ -151,3 +148,12 @@ CPMAddPackage(
   GITHUB_REPOSITORY g-truc/glm
   GIT_TAG 0.9.9.7
 )
+
+CPMAddPackage(
+    NAME cxxopts
+    VERSION 2.2.0
+    GITHUB_REPOSITORY "jarro2783/cxxopts"
+    OPTIONS
+        "CXXOPTS_BUILD_EXAMPLES OFF"
+        "CXXOPTS_BUILD_TESTS OFF"
+    )

@@ -29,7 +29,7 @@
 #include <cmath>
 #include <csignal>
 #include <ctime>
-#include <getopt.h>
+#include <cxxopts.hpp>
 #include <iostream>
 #include <thread>
 
@@ -113,6 +113,8 @@ int exitwithhelp()
 
 int main(int argc, char *argv[])
 {
+    int noui = 0;
+
     Config::Current().init();
 
     std::cout << "\n"
@@ -143,163 +145,113 @@ int main(int argc, char *argv[])
 
     sprng(static_cast<unsigned int>(time(nullptr)));
 
+    cxxopts::Options options("ZynAddSubFX", "Copyright (c) 2002-2011 Nasca Octavian Paul and others\n              Copyright (c) 2009-2014 Mark McCurry [active maintainer]\nThis program is free software (GNU GPL v2 or later) and \nit comes with ABSOLUTELY NO WARRANTY.\n");
+
     /* Parse command-line options */
-    struct option opts[] = {
-        {"load", 2, nullptr, 'l'},
-        {"load-instrument", 2, nullptr, 'L'},
-        {"sample-rate", 2, nullptr, 'r'},
-        {"buffer-size", 2, nullptr, 'b'},
-        {"oscil-size", 2, nullptr, 'o'},
-        {"dump", 2, nullptr, 'D'},
-        {"swap", 2, nullptr, 'S'},
-        {"no-gui", 2, nullptr, 'U'},
-        {"dummy", 2, nullptr, 'Y'},
-        {"help", 2, nullptr, 'h'},
-        {"version", 2, nullptr, 'v'},
-        {"named", 1, nullptr, 'N'},
-        {"auto-connect", 0, nullptr, 'a'},
-        {"output", 1, nullptr, 'O'},
-        {"input", 1, nullptr, 'I'},
-        {"exec-after-init", 1, nullptr, 'e'},
-        {nullptr, 0, nullptr, 0}};
-    opterr = 0;
+    options.add_options()                                                                         //
+        ("l,load", "Load session", cxxopts::value<std::string>())                                 // Load a session from file
+        ("L,load-instrument", "Load instument", cxxopts::value<std::string>())                    //
+        ("r,sample-rate", "Set sampel rate", cxxopts::value<unsigned int>())                      //
+        ("b,buffer-size", "Set buffersize", cxxopts::value<unsigned int>())                       //
+        ("o,oscil-size", "Set oscil size", cxxopts::value<unsigned int>())                        //
+        ("D,dump", "Dump", cxxopts::value<bool>())                                                //
+        ("S,swap", "Swap left and right", cxxopts::value<bool>())                                 //
+        ("U,no-gui", "Open without ui", cxxopts::value<bool>())                                   //
+        ("Y,dummy", "Dummy", cxxopts::value<bool>())                                              //
+        ("h,help", "Show help", cxxopts::value<bool>())                                           //
+        ("v,version", "Show version", cxxopts::value<bool>())                                     //
+        ("N,named", "", cxxopts::value<bool>())                                                   //
+        ("a,auto-connect", "Auto-connect", cxxopts::value<bool>())                                //
+        ("O,output", "Auto-select output driver", cxxopts::value<std::string>())                  //
+        ("I,input", "Auto-select input driver", cxxopts::value<std::string>())                    //
+        ("e,exec-after-init", "Command-line to excute ater init", cxxopts::value<std::string>()); //
 
-    int option_index = 0;
+    auto result = options.parse(argc, argv);
+
     std::string loadfile, loadinstrument, execAfterInit;
-    int noui = 0;
 
-    while (true)
+    if (result["h"].as<bool>())
     {
-        /**\todo check this process for a small memory leak*/
-        int opt = getopt_long(argc,
-                              argv,
-                              "l:L:r:b:o:I:O:N:e:hvaSDUY",
-                              opts,
-                              &option_index);
-        char *optarguments = optarg;
+        return exitwithhelp();
+    }
 
-#define GETOP(x)      \
-    if (optarguments) \
-    (x) = optarguments
-#define GETOPNUM(x)   \
-    if (optarguments) \
-    (x) = static_cast<unsigned int>(atoi(optarguments))
+    if (result["v"].as<bool>())
+    {
+        return exitwithversion();
+    }
 
-        if (opt == -1)
+    if (result["no-gui"].as<bool>())
+    {
+        noui = 1;
+    }
+
+    if (result["swap"].as<bool>())
+    {
+        swaplr = 1;
+    }
+
+    if (result["I"].count() == 1)
+    {
+        Nio::SetDefaultSource(result["I"].as<std::string>());
+    }
+
+    if (result["O"].count() == 1)
+    {
+        Nio::SetDefaultSink(result["O"].as<std::string>());
+    }
+
+    if (result["l"].count() == 1)
+    {
+        loadfile = result["l"].as<std::string>();
+    }
+
+    if (result["L"].count() == 1)
+    {
+        loadinstrument = result["L"].as<std::string>();
+    }
+
+    if (result["e"].count() == 1)
+    {
+        execAfterInit = result["e"].as<std::string>();
+    }
+
+    if (result["sample-rate"].count() == 1)
+    {
+        settings.samplerate = result["sample-rate"].as<unsigned int>();
+        if (settings.samplerate < 4000)
         {
-            break;
+            std::cerr << "ERROR:Incorrect sample rate: " << settings.samplerate
+                      << std::endl;
+            return 1;
+        }
+    }
+
+    if (result["buffer-size"].count() == 1)
+    {
+        settings.buffersize = result["buffer-size"].as<unsigned int>();
+        if (settings.buffersize < 2)
+        {
+            std::cerr << "ERROR:Incorrect buffer size: " << settings.buffersize
+                      << std::endl;
+            return 1;
+        }
+    }
+
+    if (result["oscil-size"].count())
+    {
+        unsigned int tmp = 0;
+        settings.oscilsize = tmp = result["oscil-size"].as<unsigned int>();
+        if (settings.oscilsize < MAX_AD_HARMONICS * 2)
+        {
+            settings.oscilsize = MAX_AD_HARMONICS * 2;
         }
 
-        switch (opt)
+        settings.oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(settings.oscilsize - 1.0f) / logf(2.0f))));
+
+        if (tmp != settings.oscilsize)
         {
-            case 'h':
-            {
-                return exitwithhelp();
-            }
-            case 'v':
-            {
-                return exitwithversion();
-            }
-            case 'Y':
-            {
-                /* this command a dummy command (has NO effect)
-                 * and is used because I need for NSIS installer
-                 * (NSIS sometimes forces a command line for a
-                 * program, even if I don't need that; eg. when
-                 * I want to add a icon to a shortcut.
-                 */
-                break;
-            }
-            case 'U':
-            {
-                noui = 1;
-                break;
-            }
-            case 'l':
-            {
-                GETOP(loadfile);
-                break;
-            }
-            case 'L':
-            {
-                GETOP(loadinstrument);
-                break;
-            }
-            case 'r':
-            {
-                GETOPNUM(settings.samplerate);
-                if (settings.samplerate < 4000)
-                {
-                    std::cerr << "ERROR:Incorrect sample rate: " << optarguments
-                              << std::endl;
-                    return 1;
-                }
-                break;
-            }
-            case 'b':
-            {
-                GETOPNUM(settings.buffersize);
-                if (settings.buffersize < 2)
-                {
-                    std::cerr << "ERROR:Incorrect buffer size: " << optarguments
-                              << std::endl;
-                    return 1;
-                }
-                break;
-            }
-            case 'o':
-            {
-                unsigned int tmp = 0;
-
-                if (optarguments)
-                {
-                    settings.oscilsize = tmp = static_cast<unsigned int>(atoi(optarguments));
-                }
-                if (settings.oscilsize < MAX_AD_HARMONICS * 2)
-                {
-                    settings.oscilsize = MAX_AD_HARMONICS * 2;
-                }
-                settings.oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(settings.oscilsize - 1.0f) / logf(2.0f))));
-                if (tmp != settings.oscilsize)
-                {
-                    std::cerr << "synth.oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                              << settings.oscilsize << "." << std::endl;
-                }
-                break;
-            }
-            case 'S':
-            {
-                swaplr = 1;
-                break;
-            }
-            case 'I':
-            {
-                if (optarguments)
-                {
-                    Nio::SetDefaultSource(optarguments);
-                }
-                break;
-            }
-            case 'O':
-            {
-                if (optarguments)
-                {
-                    Nio::SetDefaultSink(optarguments);
-                }
-                break;
-            }
-            case 'e':
-            {
-                GETOP(execAfterInit);
-                break;
-            }
-            case '?':
-            {
-                std::cerr << "ERROR:Bad option or parameter.\n"
-                          << std::endl;
-
-                return exitwithhelp();
-            }
+            std::cerr << "synth.oscilsize is wrong (must be 2^n) or too small. Adjusting to "
+                      << settings.oscilsize << "." << std::endl;
         }
     }
 
