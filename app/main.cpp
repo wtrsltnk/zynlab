@@ -47,7 +47,7 @@
 #ifdef ENABLE_FLTKGUI
 #include "MasterUI.h"
 
-static MasterUI *ui;
+static MasterUI *ui = nullptr;
 
 #endif //ENABLE_FLTKGUI
 
@@ -75,44 +75,20 @@ int exitprogram()
     Nio::Stop();
 
 #ifdef ENABLE_FLTKGUI
-    delete ui;
+    if (ui != nullptr)
+    {
+        delete ui;
+        ui = nullptr;
+    }
 #endif // ENABLE_FLTKGUI
 
     return 0;
 }
 
-int exitwithversion()
+int main(
+    int argc,
+    char *argv[])
 {
-    std::cout << "Version: " << VERSION << std::endl;
-
-    return 0;
-}
-
-int exitwithhelp()
-{
-    std::cout << "Usage: zynaddsubfx [OPTION]\n\n"
-              << "  -h , --help \t\t\t\t Display command-line help and exit\n"
-              << "  -v , --version \t\t\t Display version and exit\n"
-              << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
-              << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
-              << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
-              << "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
-              << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
-              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
-              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
-              << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
-              << "  -O , --output\t\t\t\t Set Output Engine\n"
-              << "  -I , --input\t\t\t\t Set Input Engine\n"
-              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
-              << std::endl;
-
-    return 0;
-}
-
-int main(int argc, char *argv[])
-{
-    int noui = 0;
-
     Config::Current().init();
 
     std::cout << "\n"
@@ -120,8 +96,7 @@ int main(int argc, char *argv[])
               << "              Copyright (c) 2009-2014 Mark McCurry [active maintainer]\n"
               << "Compiled: " << __DATE__ << " " << __TIME__ << "\n"
               << "This program is free software (GNU GPL v2 or later) and \n"
-              << "it comes with ABSOLUTELY NO WARRANTY.\n"
-              << std::endl;
+              << "it comes with ABSOLUTELY NO WARRANTY." << std::endl;
 
     if (argc == 1)
     {
@@ -143,9 +118,8 @@ int main(int argc, char *argv[])
 
     sprng(static_cast<unsigned int>(time(nullptr)));
 
-    cxxopts::Options options("ZynAddSubFX", "Copyright (c) 2002-2011 Nasca Octavian Paul and others\n              Copyright (c) 2009-2014 Mark McCurry [active maintainer]\nThis program is free software (GNU GPL v2 or later) and \nit comes with ABSOLUTELY NO WARRANTY.\n");
+    cxxopts::Options options("ZynAddSubFX");
 
-    /* Parse command-line options */
     options.add_options()                                                                         //
         ("l,load", "Load session", cxxopts::value<std::string>())                                 // Load a session from file
         ("L,load-instrument", "Load instument", cxxopts::value<std::string>())                    //
@@ -159,33 +133,24 @@ int main(int argc, char *argv[])
         ("h,help", "Show help", cxxopts::value<bool>())                                           //
         ("v,version", "Show version", cxxopts::value<bool>())                                     //
         ("N,named", "", cxxopts::value<bool>())                                                   //
-        ("a,auto-connect", "Auto-connect", cxxopts::value<bool>())                                //
         ("O,output", "Auto-select output driver", cxxopts::value<std::string>())                  //
         ("I,input", "Auto-select input driver", cxxopts::value<std::string>())                    //
         ("e,exec-after-init", "Command-line to excute ater init", cxxopts::value<std::string>()); //
 
     auto result = options.parse(argc, argv);
 
-    std::string loadfile, loadinstrument, execAfterInit;
-
     if (result["h"].as<bool>())
     {
-        return exitwithhelp();
+        std::cout << options.help() << std::endl;
+
+        return 0;
     }
 
     if (result["v"].as<bool>())
     {
-        return exitwithversion();
-    }
+        std::cout << "Version: " << VERSION << std::endl;
 
-    if (result["no-gui"].as<bool>())
-    {
-        noui = 1;
-    }
-
-    if (result["swap"].as<bool>())
-    {
-        swaplr = 1;
+        return 0;
     }
 
     if (result["I"].count() == 1)
@@ -198,19 +163,9 @@ int main(int argc, char *argv[])
         Nio::SetDefaultSink(result["O"].as<std::string>());
     }
 
-    if (result["l"].count() == 1)
+    if (result["swap"].as<bool>())
     {
-        loadfile = result["l"].as<std::string>();
-    }
-
-    if (result["L"].count() == 1)
-    {
-        loadinstrument = result["L"].as<std::string>();
-    }
-
-    if (result["e"].count() == 1)
-    {
-        execAfterInit = result["e"].as<std::string>();
+        swaplr = 1;
     }
 
     if (result["sample-rate"].count() == 1)
@@ -269,8 +224,10 @@ int main(int argc, char *argv[])
     mixer.swaplr = swaplr;
 
     SaveToFileSerializer serializer;
-    if (!loadfile.empty())
+    if (result["l"].count() == 1)
     {
+        auto loadfile = result["l"].as<std::string>();
+
         int tmp = serializer.LoadMixer(&mixer, loadfile);
         if (tmp < 0)
         {
@@ -284,8 +241,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (!loadinstrument.empty())
+    if (result["L"].count() == 1)
     {
+        auto loadinstrument = result["L"].as<std::string>();
+
         int tmp = serializer.LoadTrack(mixer.GetTrack(0), loadinstrument);
         if (tmp < 0)
         {
@@ -300,7 +259,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    //Run the Nio system
     bool expectedEngineStarted = Nio::Start(&mixer, &mixer);
 
     if (!expectedEngineStarted)
@@ -309,8 +267,10 @@ int main(int argc, char *argv[])
     }
 
     // Run a system command after starting zynaddsubfx
-    if (!execAfterInit.empty())
+    if (result["e"].count() == 1)
     {
+        auto execAfterInit = result["e"].as<std::string>();
+
         std::cout << "Executing user supplied command: " << execAfterInit << std::endl;
         if (system(execAfterInit.c_str()) == -1)
         {
@@ -322,10 +282,9 @@ int main(int argc, char *argv[])
 
 #ifdef ENABLE_FLTKGUI
 
-    ui = new MasterUI(&mixer, &banks, &serializer, &Pexitprogram);
-
-    if (!noui)
+    if (!result["no-gui"].as<bool>())
     {
+        ui = new MasterUI(&mixer, &banks, &serializer, &Pexitprogram);
         ui->showUI();
 
         if (!expectedEngineStarted)
