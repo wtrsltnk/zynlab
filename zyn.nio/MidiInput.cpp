@@ -21,10 +21,13 @@
 */
 
 #include "MidiInput.h"
-#include <zyn.common/globals.h>
 #include "MidiInputManager.h"
+#include <zyn.common/globals.h>
 
-void MidiInput::SetMidiEnabled(bool nval)
+MidiInput::~MidiInput() = default;
+
+void MidiInput::SetMidiEnabled(
+    bool nval)
 {
     if (nval)
     {
@@ -36,7 +39,10 @@ void MidiInput::SetMidiEnabled(bool nval)
     }
 }
 
-void MidiInput::ProcessMidiEvent(unsigned char head, unsigned char num, unsigned char value)
+void MidiInput::ProcessMidiEvent(
+    unsigned char head,
+    unsigned char num,
+    unsigned char value)
 {
     MidiEvent ev;
     unsigned char chan = head & 0x0f;

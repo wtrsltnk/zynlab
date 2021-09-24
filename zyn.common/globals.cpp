@@ -22,6 +22,7 @@
 */
 
 #include "globals.h"
+#include <iostream>
 
 SimpleNote::SimpleNote() : note(0), velocity(0), lengthInSec(0), channel(0) {}
 
@@ -47,4 +48,51 @@ IBankManager::~IBankManager() = default;
 bool IBankManager::InstrumentBank::operator<(const InstrumentBank &b) const
 {
     return name < b.name;
+}
+
+bool SystemSettings::SetSampleRate(
+    unsigned int rate)
+{
+    samplerate = rate;
+    if (samplerate < 4000)
+    {
+        std::cerr << "ERROR:Incorrect sample rate: " << samplerate
+                  << std::endl;
+
+        return false;
+    }
+
+    return true;
+}
+
+bool SystemSettings::SetBufferSize(
+    unsigned int size)
+{
+    buffersize = size;
+
+    if (buffersize < 2)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void SystemSettings::SetOscilSize(
+    unsigned int size)
+{
+    unsigned int tmp = 0;
+    oscilsize = tmp = size;
+    if (oscilsize < MAX_AD_HARMONICS * 2)
+    {
+        oscilsize = MAX_AD_HARMONICS * 2;
+    }
+
+    oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(oscilsize - 1.0f) / logf(2.0f))));
+
+    if (tmp != oscilsize)
+    {
+        std::cerr << "synth.oscilsize is wrong (must be 2^n) or too small. Adjusting to "
+                  << oscilsize << "." << std::endl;
+    }
 }

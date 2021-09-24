@@ -34,14 +34,19 @@ public:
     virtual ~RtEngine();
 
     virtual bool IsMidiIn() { return true; }
+
     virtual bool IsAudioOut() { return false; }
 
     virtual bool Start();
+
     virtual void Stop();
 
     virtual bool IsMidiEnabled() const;
 
-    static void callback(double timeStamp, std::vector<unsigned char> *message, void *userData);
+    static void callback(
+        double timeStamp,
+        std::vector<unsigned char> *message,
+        void *userData);
 
 private:
     RtMidiIn *midiin;

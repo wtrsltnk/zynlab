@@ -14,6 +14,8 @@ add_executable(app.tracker
     instrumentspanel.cpp
     instrumentspanel.h
     main.cpp
+    mixereditor.cpp
+    mixereditor.h
     note.cpp
     note.h
     pattern.cpp
@@ -50,7 +52,7 @@ target_link_libraries(app.tracker
         zyn.ui)
 
 target_compile_options(app.tracker
-    PUBLIC 
+    PUBLIC
         -DUNICODE
         -D_UNICODE
         -DIMGUI_IMPL_WIN32_DISABLE_GAMEPAD)

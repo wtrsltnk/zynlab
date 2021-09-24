@@ -154,13 +154,19 @@ public:
         bool enabled);
 
     //parameters control
-    void SetVolume(
+    virtual unsigned char GetVolume() const;
+
+    virtual void SetVolume(
         unsigned char Pvolume_);
 
     void SetKeyShift(
         unsigned char Pkeyshift_);
 
-    void SetSystemEffectVolume(
+    virtual unsigned char GetSystemEffectVolume(
+        int Ppart,
+        int Pefx);
+
+    virtual void SetSystemEffectVolume(
         int Ppart,
         int Pefx,
         unsigned char Pvol);
@@ -173,6 +179,33 @@ public:
         int Pefxfrom,
         int Pefxto,
         unsigned char Pvol);
+
+    virtual short int GetTrackIndexForInsertEffect(
+        int fx);
+
+    virtual void SetTrackIndexForInsertEffect(
+        int fx,
+        short int trackIndex);
+
+    virtual int GetSystemEffectType(
+        int fx);
+
+    virtual void SetSystemEffectType(
+        int fx,
+        int type);
+
+    virtual const char *GetSystemEffectName(
+        int fx);
+
+    virtual int GetInsertEffectType(
+        int fx);
+
+    virtual void SetInsertEffectType(
+        int fx,
+        int type);
+
+    virtual const char *GetInsertEffectName(
+        int fx);
 
     void InitPresets();
 

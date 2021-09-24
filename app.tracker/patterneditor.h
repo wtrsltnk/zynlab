@@ -11,15 +11,12 @@
 
 class PatternEditor
 {
-    ApplicationSession *_session = nullptr;
-    ImFont *_monofont = nullptr;
-    unsigned int _columnsWidths[NUM_MIXER_TRACKS];
-    void UpdateValue(char pressedChar, unsigned int &inputValue);
-
 public:
     PatternEditor();
 
-    void SetUp(ApplicationSession *session, ImFont *font);
+    void SetUp(
+        ApplicationSession *session,
+        ImFont *font);
 
     float tracksScrollx = 0;
     float tracksScrolly = 0;
@@ -72,17 +69,32 @@ public:
         {'P', 88}, // E-6
     };
 
-    bool HandlePlayingNotes(bool repeat = false);
+    bool HandlePlayingNotes(
+        bool repeat = false);
 
     bool HandleKeyboardNotes();
+
     bool HandleKeyboardNavigation();
-    void MoveCurrentRowUp(bool largeStep);
-    void MoveCurrentRowDown(bool largeStep);
-    void ChangeCurrentTrack(bool moveLeft);
+
+    void MoveCurrentRowUp(
+        bool largeStep);
+
+    void MoveCurrentRowDown(
+        bool largeStep);
+
+    void ChangeCurrentTrack(
+        bool moveLeft);
     void MoveToPreviousProperty();
+
     void MoveToNextProperty();
 
     static char const *ID;
+
+private:
+    ApplicationSession *_session = nullptr;
+    ImFont *_monofont = nullptr;
+    unsigned int _columnsWidths[NUM_MIXER_TRACKS];
+    void UpdateValue(char pressedChar, unsigned int &inputValue);
 };
 
 #endif // PATTERNEDITOR_H

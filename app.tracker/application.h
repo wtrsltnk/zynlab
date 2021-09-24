@@ -5,12 +5,13 @@
 #include "automationeditor.h"
 #include "effectseditor.h"
 #include "instrumentspanel.h"
+#include "mixereditor.h"
 #include "patterneditor.h"
 #include "patternsmanager.h"
 #include "playercontrolspanel.h"
-#include <zyn.ui/syntheditor.h>
 #include <iapplication.h>
 #include <zyn.mixer/Mixer.h>
+#include <zyn.ui/syntheditor.h>
 
 class Application :
     public IApplication,
@@ -20,12 +21,13 @@ class Application :
     std::unique_ptr<LibraryManager> _library;
     ApplicationSession _session;
 
-    PlayerControlsPanel _playerControlsPanel;
-    PatternEditor _patternEditor;
-    InstrumentsPanel _instruments;
-    EffectsEditor _effectsEditor;
-    PatternsManager _patternsManager;
     AutomationEditor _automationEditor;
+    EffectsEditor _effectsEditor;
+    InstrumentsPanel _instruments;
+    MixerEditor _mixerEditor;
+    PatternEditor _patternEditor;
+    PatternsManager _patternsManager;
+    PlayerControlsPanel _playerControlsPanel;
     SynthEditor _synthEditor;
 
     unsigned int _sampleIndex = 0;

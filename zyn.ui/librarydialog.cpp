@@ -93,15 +93,19 @@ void LibraryDialog::ShowDialog(
             auto banks = boolinq::from(_library->GetTopLevelLibraries())
                              .firstOrDefault([&](ILibrary *l) { return l->GetName() == "banks"; });
 
-            for (auto library : banks->GetChildren())
+            if (banks != nullptr)
             {
-                bool selected = _selectItem.selectedLibrary != nullptr && library->GetPath() == _selectItem.selectedLibrary->GetPath();
-                if (ImGui::Selectable(library->GetName().c_str(), &selected))
+                for (auto library : banks->GetChildren())
                 {
-                    _selectItem.selectedLibrary = library;
-                    filterSamples();
+                    bool selected = _selectItem.selectedLibrary != nullptr && library->GetPath() == _selectItem.selectedLibrary->GetPath();
+                    if (ImGui::Selectable(library->GetName().c_str(), &selected))
+                    {
+                        _selectItem.selectedLibrary = library;
+                        filterSamples();
+                    }
                 }
             }
+
             ImGui::ListBoxFooter();
         }
 

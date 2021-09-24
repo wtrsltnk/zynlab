@@ -257,6 +257,15 @@ public:
     static SystemSettings &Instance();
     virtual ~SystemSettings();
 
+    bool SetSampleRate(
+        unsigned int rate);
+
+    bool SetBufferSize(
+        unsigned int size);
+
+    void SetOscilSize(
+        unsigned int size);
+
     float *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
 
     /**Sampling rate*/
@@ -401,12 +410,64 @@ public:
 
     // Instruments
     virtual unsigned int GetTrackCount() const = 0;
-    virtual Track *GetTrack(int index) = 0;
-    virtual void EnableTrack(int index, bool enabled) = 0;
+
+    virtual Track *GetTrack(
+        int index) = 0;
+
+    virtual void EnableTrack(
+        int index,
+        bool enabled) = 0;
+
+    virtual unsigned char GetVolume() const = 0;
+
+    virtual void SetVolume(
+        unsigned char Pvolume_) = 0;
 
     // Effects
-    virtual unsigned char GetSystemSendEffectVolume(int from, int to) = 0;
-    virtual void SetSystemSendEffectVolume(int from, int to, unsigned char volume) = 0;
+    virtual unsigned char GetSystemEffectVolume(
+        int Ppart,
+        int Pefx) = 0;
+
+    virtual void SetSystemEffectVolume(
+        int Ppart,
+        int Pefx,
+        unsigned char Pvol) = 0;
+
+    virtual unsigned char GetSystemSendEffectVolume(
+        int from,
+        int to) = 0;
+
+    virtual void SetSystemSendEffectVolume(
+        int from,
+        int to,
+        unsigned char volume) = 0;
+
+    virtual short int GetTrackIndexForInsertEffect(
+        int fx) = 0;
+
+    virtual void SetTrackIndexForInsertEffect(
+        int fx,
+        short int trackIndex) = 0;
+
+    virtual int GetSystemEffectType(
+        int fx) = 0;
+
+    virtual void SetSystemEffectType(
+        int fx,
+        int type) = 0;
+
+    virtual const char *GetSystemEffectName(
+        int fx) = 0;
+
+    virtual int GetInsertEffectType(
+        int fx) = 0;
+
+    virtual void SetInsertEffectType(
+        int fx,
+        int type) = 0;
+
+    virtual const char *GetInsertEffectName(
+        int fx) = 0;
 
     // Mutex
     virtual void Lock() = 0;

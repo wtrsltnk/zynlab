@@ -737,6 +737,11 @@ void Mixer::EnableTrack(
 /*
  * Parameter control
  */
+unsigned char Mixer::GetVolume() const
+{
+    return Pvolume;
+}
+
 void Mixer::SetVolume(
     unsigned char volume)
 {
@@ -749,6 +754,13 @@ void Mixer::SetKeyShift(
 {
     Pkeyshift = keyshift;
     _keyshift = static_cast<int>(Pkeyshift) - 64;
+}
+
+unsigned char Mixer::GetSystemEffectVolume(
+    int Ppart,
+    int Pefx)
+{
+    return Psysefxvol[Pefx][Ppart];
 }
 
 void Mixer::SetSystemEffectVolume(
@@ -774,6 +786,94 @@ void Mixer::SetSystemSendEffectVolume(
 {
     Psysefxsend[Pefxfrom][Pefxto] = volume;
     _sysefxsend[Pefxfrom][Pefxto] = powf(0.1f, (1.0f - volume / 96.0f) * 2.0f);
+}
+
+short int Mixer::GetTrackIndexForInsertEffect(
+    int fx)
+{
+    return Pinsparts[fx];
+}
+
+void Mixer::SetTrackIndexForInsertEffect(
+    int fx,
+    short int trackIndex)
+{
+    Pinsparts[fx] = trackIndex;
+}
+
+namespace mixer
+{
+
+    unsigned int EffectNameCount = 9;
+
+    char const *const EffectNames[] = {
+        "No effect",
+        "Reverb",
+        "Echo",
+        "Chorus",
+        "Phaser",
+        "AlienWah",
+        "Distortion",
+        "Equalizer",
+        "DynFilter",
+    };
+
+} // namespace mixer
+
+int Mixer::GetSystemEffectType(
+    int fx)
+{
+    if (fx < 0) return -1;
+    if (fx >= static_cast<int>(mixer::EffectNameCount)) return -1;
+
+    return sysefx[fx].geteffect();
+}
+
+void Mixer::SetSystemEffectType(
+    int fx,
+    int type)
+{
+    if (fx < 0) return;
+    if (fx >= static_cast<int>(mixer::EffectNameCount)) return;
+
+    sysefx[fx].changeeffect(type);
+}
+
+const char *Mixer::GetSystemEffectName(
+    int fx)
+{
+    if (fx < 0) return nullptr;
+    if (fx >= static_cast<int>(mixer::EffectNameCount)) return nullptr;
+
+    return mixer::EffectNames[sysefx[fx].geteffect()];
+}
+
+int Mixer::GetInsertEffectType(
+    int fx)
+{
+    if (fx < 0) return -1;
+    if (fx >= static_cast<int>(mixer::EffectNameCount)) return -1;
+
+    return insefx[fx].geteffect();
+}
+
+void Mixer::SetInsertEffectType(
+    int fx,
+    int type)
+{
+    if (fx < 0) return;
+    if (fx >= static_cast<int>(mixer::EffectNameCount)) return;
+
+    insefx[fx].changeeffect(type);
+}
+
+const char *Mixer::GetInsertEffectName(
+    int fx)
+{
+    if (fx < 0) return nullptr;
+    if (fx >= static_cast<int>(mixer::EffectNameCount)) return nullptr;
+
+    return mixer::EffectNames[insefx[fx].geteffect()];
 }
 
 void Mixer::ShutUp()

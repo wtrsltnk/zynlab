@@ -32,10 +32,7 @@ RtEngine::RtEngine()
     _name = "RT";
 }
 
-RtEngine::~RtEngine()
-{
-    Stop();
-}
+RtEngine::~RtEngine() = default;
 
 bool RtEngine::Start()
 {
@@ -84,7 +81,10 @@ bool RtEngine::IsMidiEnabled() const
     return (midiin != nullptr);
 }
 
-void RtEngine::callback(double /*timeStamp*/, std::vector<unsigned char> *message, void * /*userData*/)
+void RtEngine::callback(
+    double /*timeStamp*/,
+    std::vector<unsigned char> *message,
+    void * /*userData*/)
 {
     MidiEvent ev;
     unsigned char chan = message->at(0) & 0x0f;

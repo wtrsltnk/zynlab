@@ -31,13 +31,19 @@
 class MidiInput : public virtual Engine
 {
 public:
+    virtual ~MidiInput();
+
     /**Enables or disables driver based upon value*/
-    virtual void SetMidiEnabled(bool nval);
+    virtual void SetMidiEnabled(
+        bool nval);
 
     /**Returns if driver is initialized*/
     virtual bool IsMidiEnabled() const = 0;
 
-    static void ProcessMidiEvent(unsigned char head, unsigned char num, unsigned char value);
+    static void ProcessMidiEvent(
+        unsigned char head,
+        unsigned char num,
+        unsigned char value);
 };
 
 #endif // MIDIINPUT_H

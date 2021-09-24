@@ -117,6 +117,7 @@ bool Application::Setup()
 
     _playerControlsPanel.SetUp(&_session);
     _patternEditor.SetUp(&_session, _monofont);
+    _mixerEditor.SetUp(&_session);
     _instruments.SetUp(&_session);
     _effectsEditor.SetUp(&_session);
     _patternsManager.SetUp(&_session);
@@ -211,7 +212,7 @@ void Application::Render2d()
         }
         case SelectableTabs::Mixer:
         {
-            ImGui::ShowDemoWindow();
+            _mixerEditor.Render2d();
             break;
         }
         case SelectableTabs::Synth:

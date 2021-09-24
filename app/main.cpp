@@ -89,6 +89,8 @@ int main(
 {
     Config::Current().init();
 
+    mixer.Init();
+
     std::cout << "\n"
               << "ZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others\n"
               << "              Copyright (c) 2009-2014 Mark McCurry [active maintainer]\n"
@@ -112,8 +114,6 @@ int main(
     settings.swaplr = config.cfg.SwapStereo;
 
     settings.alias();
-
-    Nio::preferedSampleRate(settings.samplerate);
 
     sprng(static_cast<unsigned int>(time(nullptr)));
 
@@ -152,6 +152,36 @@ int main(
         return 0;
     }
 
+    if (result["swap"].as<bool>())
+    {
+        settings.swaplr = 1;
+    }
+
+    if (result["sample-rate"].count() == 1 && !settings.SetSampleRate(result["sample-rate"].as<unsigned int>()))
+    {
+        std::cerr << "ERROR:Incorrect sample rate: " << settings.samplerate
+                  << std::endl;
+
+        return 1;
+    }
+
+    if (result["buffer-size"].count() == 1 && !settings.SetBufferSize(result["buffer-size"].as<unsigned int>()))
+    {
+        std::cerr << "ERROR:Incorrect buffer size: " << result["buffer-size"].as<unsigned int>()
+                  << std::endl;
+
+        return 1;
+    }
+
+    if (result["oscil-size"].count())
+    {
+        settings.SetOscilSize(result["oscil-size"].as<unsigned int>());
+    }
+
+    settings.alias();
+
+    Nio::preferedSampleRate(settings.samplerate);
+
     if (result["I"].count() == 1)
     {
         Nio::SetDefaultSource(result["I"].as<std::string>());
@@ -162,52 +192,12 @@ int main(
         Nio::SetDefaultSink(result["O"].as<std::string>());
     }
 
-    if (result["swap"].as<bool>())
+    bool expectedEngineStarted = Nio::Start(&mixer, &mixer);
+
+    if (!expectedEngineStarted)
     {
-        settings.swaplr = 1;
+        std::cerr << "Failed to start default engine, Defaulting to NULL engine" << std::endl;
     }
-
-    if (result["sample-rate"].count() == 1)
-    {
-        settings.samplerate = result["sample-rate"].as<unsigned int>();
-        if (settings.samplerate < 4000)
-        {
-            std::cerr << "ERROR:Incorrect sample rate: " << settings.samplerate
-                      << std::endl;
-            return 1;
-        }
-    }
-
-    if (result["buffer-size"].count() == 1)
-    {
-        settings.buffersize = result["buffer-size"].as<unsigned int>();
-        if (settings.buffersize < 2)
-        {
-            std::cerr << "ERROR:Incorrect buffer size: " << settings.buffersize
-                      << std::endl;
-            return 1;
-        }
-    }
-
-    if (result["oscil-size"].count())
-    {
-        unsigned int tmp = 0;
-        settings.oscilsize = tmp = result["oscil-size"].as<unsigned int>();
-        if (settings.oscilsize < MAX_AD_HARMONICS * 2)
-        {
-            settings.oscilsize = MAX_AD_HARMONICS * 2;
-        }
-
-        settings.oscilsize = static_cast<unsigned int>(powf(2, ceil(logf(settings.oscilsize - 1.0f) / logf(2.0f))));
-
-        if (tmp != settings.oscilsize)
-        {
-            std::cerr << "synth.oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                      << settings.oscilsize << "." << std::endl;
-        }
-    }
-
-    settings.alias();
 
     std::cout.precision(1);
     std::cout << std::fixed << "\n"
@@ -218,8 +208,6 @@ int main(
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-
-    mixer.Init();
 
     SaveToFileSerializer serializer;
     if (result["l"].count() == 1)
@@ -255,13 +243,6 @@ int main(
             mixer.GetTrack(0)->ApplyParameters();
             std::cout << "Instrument file loaded." << std::endl;
         }
-    }
-
-    bool expectedEngineStarted = Nio::Start(&mixer, &mixer);
-
-    if (!expectedEngineStarted)
-    {
-        std::cerr << "Failed to start default engine, Defaulting to NULL engine" << std::endl;
     }
 
     // Run a system command after starting zynaddsubfx
