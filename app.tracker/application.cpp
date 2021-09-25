@@ -132,31 +132,32 @@ void Application::Render2d()
     static bool _showStats = false;
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
-    ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, playerControlsPanelHeight));
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(float(playerControlsPanelWidth), float(playerControlsPanelHeight)));
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     _playerControlsPanel.Render2d();
 
-    ImGui::SetNextWindowSize(ImVec2(playerControlsPanelWidth, Height() - playerControlsPanelHeight - effectsPanelHeight));
-    ImGui::SetNextWindowPos(ImVec2(0, playerControlsPanelHeight));
+    ImGui::SetNextWindowSize(ImVec2(float(playerControlsPanelWidth), float(Height() - playerControlsPanelHeight - effectsPanelHeight)));
+    ImGui::SetNextWindowPos(ImVec2(0, float(playerControlsPanelHeight)));
     _patternsManager.Render2d();
 
-    ImGui::SetNextWindowSize(ImVec2(instrumentPanelWidth, Height()));
-    ImGui::SetNextWindowPos(ImVec2(Width() - instrumentPanelWidth, 0));
+    ImGui::SetNextWindowSize(ImVec2(float(instrumentPanelWidth), float(Height())));
+    ImGui::SetNextWindowPos(ImVec2(float(Width() - instrumentPanelWidth), 0.0f));
     _instruments.Render2d();
 
-    ImGui::SetNextWindowSize(ImVec2(Width() - instrumentPanelWidth, effectsPanelHeight));
-    ImGui::SetNextWindowPos(ImVec2(0, Height() - effectsPanelHeight));
+    ImGui::SetNextWindowSize(ImVec2(float(Width() - instrumentPanelWidth), float(effectsPanelHeight)));
+    ImGui::SetNextWindowPos(ImVec2(0.0f, float(Height() - effectsPanelHeight)));
     _effectsEditor.Render2d();
 
-    ImGui::SetNextWindowSize(ImVec2(Width() - playerControlsPanelWidth - instrumentPanelWidth, tabbarPanelHeight));
-    ImGui::SetNextWindowPos(ImVec2(playerControlsPanelWidth, 0));
+    ImGui::SetNextWindowSize(ImVec2(float(Width() - playerControlsPanelWidth - instrumentPanelWidth), float(tabbarPanelHeight)));
+    ImGui::SetNextWindowPos(ImVec2(float(playerControlsPanelWidth), 0.0f));
 
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(15.0f, 0.0f));
     ImGui::Begin("tabbar", nullptr, flags | ImGuiWindowFlags_NoTitleBar);
     {
         char buf[256] = {0};
 
         sprintf_s(buf, 256, "%s EDIT", ICON_FK_PENCIL);
-        if (ImGui::Button(buf, ImVec2(120, 34)))
+        if (ImGui::Button(buf, ImVec2(0, 34)))
         {
             _session.selectedTab = SelectableTabs::PatternEditor;
             ImGui::SetWindowFocus(PatternEditor::ID);
@@ -165,7 +166,7 @@ void Application::Render2d()
         ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s MIXER", ICON_FK_SLIDERS);
-        if (ImGui::Button(buf, ImVec2(120, 34)))
+        if (ImGui::Button(buf, ImVec2(0, 34)))
         {
             _session.selectedTab = SelectableTabs::Mixer;
             ImGui::SetWindowFocus("Mixer");
@@ -174,34 +175,18 @@ void Application::Render2d()
         ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s SYNTH", ICON_FAD_KEYBOARD);
-        if (ImGui::Button(buf, ImVec2(120, 34)))
+        if (ImGui::Button(buf, ImVec2(0, 34)))
         {
             _session.selectedTab = SelectableTabs::Synth;
         }
-
-        ImGui::SameLine();
-
-        sprintf_s(buf, 256, "%s AUTOMATION", ICON_FAD_AUTOMATION_3P);
-        if (ImGui::Button(buf, ImVec2(120, 34)))
-        {
-            _session.selectedTab = SelectableTabs::AutomationEditor;
-        }
-
-        ImGui::SameLine();
-
-        sprintf_s(buf, 256, "%s STATS", ICON_FAD_AUTOMATION_3P);
-        if (ImGui::Button(buf, ImVec2(120, 34)))
-        {
-            _showStats = true;
-            ImGui::SetWindowFocus("Stats");
-        }
     }
     ImGui::End();
+    ImGui::PopStyleVar();
 
     ImGui::SetNextWindowSize(ImVec2(
-        Width() - playerControlsPanelWidth - instrumentPanelWidth,
-        Height() - effectsPanelHeight - tabbarPanelHeight));
-    ImGui::SetNextWindowPos(ImVec2(playerControlsPanelWidth, tabbarPanelHeight));
+        float(Width() - playerControlsPanelWidth - instrumentPanelWidth),
+        float(Height() - effectsPanelHeight - tabbarPanelHeight)));
+    ImGui::SetNextWindowPos(ImVec2(float(playerControlsPanelWidth), float(tabbarPanelHeight)));
 
     switch (_session.selectedTab)
     {
@@ -218,11 +203,6 @@ void Application::Render2d()
         case SelectableTabs::Synth:
         {
             _synthEditor.Render2d();
-            break;
-        }
-        case SelectableTabs::AutomationEditor:
-        {
-            _automationEditor.Render2d();
             break;
         }
         default:
@@ -333,7 +313,7 @@ std::vector<SimpleNote> Application::GetCurrentStepNotes()
 
     std::vector<SimpleNote> result;
 
-    for (int t = 0; t < _session._mixer->GetTrackCount(); t++)
+    for (unsigned int t = 0; t < _session._mixer->GetTrackCount(); t++)
     {
         auto notes = pattern->Notes(t);
         if (notes[_session.currentRow]._note != 0)
@@ -341,7 +321,7 @@ std::vector<SimpleNote> Application::GetCurrentStepNotes()
             SimpleNote n(
                 notes[_session.currentRow]._note,
                 notes[_session.currentRow]._velocity,
-                notes[_session.currentRow]._length,
+                float(notes[_session.currentRow]._length),
                 t);
             result.push_back(n);
         }

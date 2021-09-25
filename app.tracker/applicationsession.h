@@ -17,7 +17,6 @@ enum class SelectableTabs
     PatternEditor,
     Mixer,
     Synth,
-    AutomationEditor,
 };
 
 class ApplicationSession

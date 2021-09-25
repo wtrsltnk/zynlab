@@ -91,7 +91,8 @@ namespace ImGui
         }
     }
 
-    void ShowTooltipOnHover(char const *tooltip)
+    void ShowTooltipOnHover(
+        char const *tooltip)
     {
         if (ImGui::IsItemHovered())
         {
@@ -99,6 +100,12 @@ namespace ImGui
             ImGui::Text("%s", tooltip);
             ImGui::EndTooltip();
         }
+    }
+
+    void MoveCursorPos(
+        ImVec2 delta)
+    {
+        SetCursorPos(GetCursorPos() + delta);
     }
 
     bool Fader(const char *label, const ImVec2 &size, int *v, const int v_min, const int v_max, const char *format, float power)
@@ -266,6 +273,11 @@ void AddInsertFx(
     ApplicationSession *session,
     int track)
 {
+    if (session == nullptr || session->_mixer == nullptr)
+    {
+        return;
+    }
+
     for (int i = 0; i < NUM_INS_EFX; i++)
     {
         if (session->_mixer->GetTrackIndexForInsertEffect(i) == -1)
@@ -280,6 +292,11 @@ void RemoveInsertFxFromTrack(
     ApplicationSession *session,
     int fx)
 {
+    if (session == nullptr || session->_mixer == nullptr)
+    {
+        return;
+    }
+
     session->_mixer->SetTrackIndexForInsertEffect(fx, -1);
 }
 
@@ -287,6 +304,11 @@ void MixerEditor::RenderTrack(
     int trackIndex)
 {
     auto *track = _session->_mixer->GetTrack(trackIndex);
+    if (track == nullptr)
+    {
+        return;
+    }
+
     auto io = ImGui::GetStyle();
 
     if (ImGui::BeginChild("MixerTrack", trackSize))
@@ -320,26 +342,24 @@ void MixerEditor::RenderTrack(
         auto name = std::string(reinterpret_cast<char *>(track->Pname));
         if (ImGui::Button(name.empty() ? "<default>" : name.c_str(), ImVec2(width - 20 - io.ItemSpacing.x, 0)))
         {
-            //            ImGui::SetWindowFocus(LibraryID);
         }
 
         ImGui::PopStyleColor(8);
 
         // System effect
-        ImGui::TextCentered(ImVec2(width, 30), "Sys FX");
+        ImGui::TextCentered(ImVec2(width, 30), "System FX");
 
         for (int fx = 0; fx < NUM_SYS_EFX; fx++)
         {
             ImGui::PushID(fx);
             ImGui::PushStyleColor(ImGuiCol_Button, _session->_mixer->GetSystemEffectType(fx) == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
-            const float square_sz = ImGui::GetFrameHeight();
-            char label[64] = {'\0'};
-            sprintf(label, "##sysfx_%d", fx);
+            const float frameHeight = ImGui::GetFrameHeight();
             char tooltip[64] = {'\0'};
             sprintf(tooltip, "Volume for system effect %d", (fx + 1));
+
             auto value = _session->_mixer->GetSystemEffectVolume(trackIndex, fx);
-            if (ImGui::KnobUchar(label, &value, 0, 127, ImVec2(square_sz + io.ItemInnerSpacing.x, square_sz), tooltip))
+            if (ImGui::KnobUchar("##sysfx", &value, 0, 127, ImVec2(frameHeight + io.ItemInnerSpacing.x, frameHeight), tooltip))
             {
                 _session->_mixer->SetSystemEffectVolume(trackIndex, fx, value);
             }
@@ -348,10 +368,8 @@ void MixerEditor::RenderTrack(
 
             if (ImGui::Button(_session->_mixer->GetSystemEffectName(fx), ImVec2(width - lineHeight - 1, 0)))
             {
-                //                    _session->_currentTrack = trackIndex;
-                //                    _session->_currentSystemEffect = fx;
-                //                    ImGui::SetWindowFocus(SystemFxEditorID);
             }
+
             ImGui::OpenPopupOnItemClick("SystemEffectSelection", 0);
             if (ImGui::BeginPopupContextItem("SystemEffectSelection"))
             {
@@ -360,9 +378,6 @@ void MixerEditor::RenderTrack(
                     if (ImGui::Selectable(mixer_editor::EffectNames[i]))
                     {
                         _session->_mixer->SetSystemEffectType(fx, int(i));
-                        //                            _session->_currentTrack = trackIndex;
-                        //                            _session->_currentSystemEffect = fx;
-                        //                            ImGui::SetWindowFocus(SystemFxEditorID);
                     }
                 }
                 ImGui::PushItemWidth(-1);
@@ -411,11 +426,15 @@ void MixerEditor::RenderTrack(
             ImGui::PopID();
         }
 
-        if (ImGui::Button("+", ImVec2(width, 0)))
+        if (fillCount > 0)
         {
-            AddInsertFx(_session, trackIndex);
+            if (ImGui::Button("+", ImVec2(width, 0)))
+            {
+                AddInsertFx(_session, trackIndex);
+            }
+            ImGui::ShowTooltipOnHover("Add insert effect to track");
+            fillCount--;
         }
-        ImGui::ShowTooltipOnHover("Add insert effect to track");
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));

@@ -8,11 +8,11 @@
 
 namespace ImGui
 {
+    void ShowTooltipOnHover(
+        char const *tooltip);
+
     void MoveCursorPos(
-        ImVec2 delta)
-    {
-        SetCursorPos(GetCursorPos() + delta);
-    }
+        ImVec2 delta);
 } // namespace ImGui
 
 PatternEditor::PatternEditor()
@@ -46,7 +46,7 @@ void PatternEditor::Render2d()
         flags);
     {
         ImGui::PushFont(_monofont);
-        auto content = ImGui::GetContentRegionAvail() - ImVec2(rowIndexColumnWidth, 0);
+        auto content = ImGui::GetContentRegionAvail() - ImVec2(float(rowIndexColumnWidth), 0);
         float lineHeight = 30;
 
         auto spaceWidth = ImGui::CalcTextSize(" ");
@@ -60,10 +60,10 @@ void PatternEditor::Render2d()
         auto fullWidth = (columnWidth.x + 15) * NUM_MIXER_TRACKS;
 
         auto contentTop = ImGui::GetCursorPosY();
-        ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, headerHeight));
+        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth), float(headerHeight)));
         ImGui::BeginChild(
             "container",
-            ImVec2(content.x, -(footerHeight + scrollbarHeight)));
+            ImVec2(content.x, -float(footerHeight + scrollbarHeight)));
         {
             ImGui::SetScrollX(tracksScrollx);
 
@@ -109,8 +109,8 @@ void PatternEditor::Render2d()
                     ImGui::Columns(NUM_MIXER_TRACKS);
                     for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
                     {
-                        _columnsWidths[i] = columnWidth.x;
-                        ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
+                        _columnsWidths[i] = int(columnWidth.x);
+                        ImGui::SetColumnWidth(i, _columnsWidths[i] + 15.0f);
                     }
 
                     // ALL TRACKS AND CELLS
@@ -145,6 +145,26 @@ void PatternEditor::Render2d()
                                     min - ImVec2(4, 0),
                                     min + ImVec2(cursorWidth, lineHeight),
                                     selectionColor);
+
+                                auto resetToCursor = ImGui::GetCursorPos();
+
+                                ImGui::SetCursorScreenPos(min - ImVec2(4, 0));
+                                ImGui::InvisibleButton("##selection tooltip", ImVec2(cursorWidth, lineHeight));
+                                if (ImGui::IsItemHovered())
+                                {
+                                    ImGui::BeginTooltip();
+                                    if (_session->currentProperty == 0)
+                                        ImGui::Text("Note to play");
+                                    else if (_session->currentProperty == 1)
+                                        ImGui::Text("Length of note");
+                                    else if (_session->currentProperty == 2)
+                                        ImGui::Text("Veolcity of note");
+                                    else if (_session->currentProperty == 3)
+                                        ImGui::Text("FX value");
+                                    ImGui::EndTooltip();
+                                }
+
+                                ImGui::SetCursorPos(resetToCursor);
                             }
 
                             char const *cellNote = emptyCellNote;
@@ -202,16 +222,16 @@ void PatternEditor::Render2d()
 
         // FOOTERS
 
-        ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
+        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth), 0.0f));
         ImGui::BeginChild(
             "footerscontainer",
-            ImVec2(content.x, footerHeight));
+            ImVec2(content.x, float(footerHeight)));
         {
             ImGui::SetScrollX(tracksScrollx);
 
             ImGui::BeginChild(
                 "footers",
-                ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, footerHeight));
+                ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, float(footerHeight)));
             {
                 ImGui::Columns(NUM_MIXER_TRACKS);
                 for (unsigned int i = 0; i < NUM_MIXER_TRACKS; i++)
@@ -232,19 +252,19 @@ void PatternEditor::Render2d()
                             selectionColor,
                             3);
                         drawList->AddLine(
-                            markerPos + ImVec2(_columnsWidths[i] + 3, 2),
-                            markerPos + ImVec2(_columnsWidths[i] + 3, 16),
+                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, 2.0f),
+                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, 16.0f),
                             selectionColor,
                             2);
                         drawList->AddLine(
-                            markerPos + ImVec2(_columnsWidths[i] + 4, 16),
-                            markerPos + ImVec2(_columnsWidths[i] - 11, 16),
+                            markerPos + ImVec2(_columnsWidths[i] + 4.0f, 16.0f),
+                            markerPos + ImVec2(_columnsWidths[i] - 11.0f, 16.0f),
                             selectionColor,
                             3);
                     }
 
                     auto w = ImGui::CalcTextSize("footer 00").x;
-                    ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
+                    ImGui::SetColumnWidth(i, _columnsWidths[i] + 15.0f);
                     ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() - w) / 2.0f, 0));
                     ImGui::Text("footer %02d", i + 1);
                     ImGui::PopID();
@@ -258,7 +278,7 @@ void PatternEditor::Render2d()
 
         // SCROLLBAR
 
-        ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
+        ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0.0f));
         ImGui::BeginChild(
             "scrollbar",
             ImVec2(content.x, scrollbarHeight),
@@ -423,7 +443,8 @@ void PatternEditor::Render2d()
     ImGui::End();
 }
 
-bool PatternEditor::HandlePlayingNotes(bool repeat)
+bool PatternEditor::HandlePlayingNotes(
+    bool repeat)
 {
     for (auto p : _charToNoteMap)
     {
@@ -469,7 +490,9 @@ char GetByteCharPressed()
     return '\0';
 }
 
-void PatternEditor::UpdateValue(char pressedChar, unsigned int &inputValue)
+void PatternEditor::UpdateValue(
+    char pressedChar,
+    unsigned int &inputValue)
 {
     char newValue[64];
     std::fill(newValue, newValue + 64, '\0');
@@ -609,7 +632,8 @@ bool PatternEditor::HandleKeyboardNavigation()
     return result;
 }
 
-void PatternEditor::MoveCurrentRowUp(bool largeStep)
+void PatternEditor::MoveCurrentRowUp(
+    bool largeStep)
 {
     auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
 
@@ -629,7 +653,8 @@ void PatternEditor::MoveCurrentRowUp(bool largeStep)
     }
 }
 
-void PatternEditor::MoveCurrentRowDown(bool largeStep)
+void PatternEditor::MoveCurrentRowDown(
+    bool largeStep)
 {
     auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
 
@@ -648,7 +673,8 @@ void PatternEditor::MoveCurrentRowDown(bool largeStep)
     }
 }
 
-void PatternEditor::ChangeCurrentTrack(bool moveLeft)
+void PatternEditor::ChangeCurrentTrack(
+    bool moveLeft)
 {
     if (moveLeft)
     {
