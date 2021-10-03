@@ -60,51 +60,55 @@ void EffectsEditor::Render2d()
         nullptr,
         flags);
     {
+        static int selectedTab = 0;
         ImGui::BeginGroup();
-        ImGui::Button(ICON_FAD_PRESET_AB, ImVec2(30, 0));
+        if (ImGui::Selectable(ICON_FAD_PRESET_AB, selectedTab == 0, ImGuiSelectableFlags_None, ImVec2(20, 0))) selectedTab = 0;
         ImGui::ShowTooltipOnHover("Track FX editor");
-        ImGui::Button(ICON_FAD_AUTOMATION_4P, ImVec2(30, 0));
+        if (ImGui::Selectable(ICON_FAD_AUTOMATION_4P, selectedTab == 1, ImGuiSelectableFlags_None, ImVec2(20, 0))) selectedTab = 1;
         ImGui::ShowTooltipOnHover("Track automation editor");
         ImGui::EndGroup();
 
         ImGui::SameLine(40);
 
-        ImGui::BeginGroup();
-        auto track = _session->_mixer->GetTrack(_session->_mixer->State.currentTrack);
-        for (int e = 0; e < NUM_TRACK_EFX; e++)
+        if (selectedTab == 0)
         {
-            if (e > 0) ImGui::SameLine();
-            ImGui::PushID(e);
-
-            int item_current = track->partefx[e]->geteffect();
-            ImGui::BeginChild("fx", ImVec2(item_current == 0 ? 120 : 320, 120), true);
+            ImGui::BeginGroup();
+            auto track = _session->_mixer->GetTrack(_session->_mixer->State.currentTrack);
+            for (int e = 0; e < NUM_TRACK_EFX; e++)
             {
-                ImGui::SetNextItemWidth(100);
-                if (ImGui::Combo("##effect", &item_current, EffectNames, IM_ARRAYSIZE(EffectNames)))
-                {
-                    track->partefx[e]->changeeffect(item_current);
-                }
+                if (e > 0) ImGui::SameLine();
+                ImGui::PushID(e);
 
-                if (item_current == 0)
+                int item_current = track->partefx[e]->geteffect();
+                ImGui::BeginChild("fx", ImVec2(item_current == 0 ? 120 : 320, 120), true);
                 {
-                    ImGui::EndChild();
-                    ImGui::PopID();
-                    continue;
-                }
+                    ImGui::SetNextItemWidth(100);
+                    if (ImGui::Combo("##effect", &item_current, EffectNames, IM_ARRAYSIZE(EffectNames)))
+                    {
+                        track->partefx[e]->changeeffect(item_current);
+                    }
 
-                ImGui::SameLine();
+                    if (item_current == 0)
+                    {
+                        ImGui::EndChild();
+                        ImGui::PopID();
+                        continue;
+                    }
 
-                int preset_current = track->partefx[e]->getpreset();
-                ImGui::SetNextItemWidth(150);
-                if (ImGui::Combo("preset", &preset_current, reverbPresetNames, IM_ARRAYSIZE(reverbPresetNames)))
-                {
-                    track->partefx[e]->changepreset(preset_current);
+                    ImGui::SameLine();
+
+                    int preset_current = track->partefx[e]->getpreset();
+                    ImGui::SetNextItemWidth(150);
+                    if (ImGui::Combo("preset", &preset_current, reverbPresetNames, IM_ARRAYSIZE(reverbPresetNames)))
+                    {
+                        track->partefx[e]->changepreset(preset_current);
+                    }
                 }
+                ImGui::EndChild();
+                ImGui::PopID();
             }
-            ImGui::EndChild();
-            ImGui::PopID();
+            ImGui::EndGroup();
         }
-        ImGui::EndGroup();
     }
     ImGui::End();
 }

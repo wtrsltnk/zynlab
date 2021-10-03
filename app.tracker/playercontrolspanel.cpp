@@ -22,7 +22,7 @@ void PlayerControlsPanel::Render2d()
         return;
     }
 
-    ImVec2 iconSize(34.0f, 34.0f);
+    ImVec2 iconSize(20.0f, 20.0f);
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin(
@@ -31,38 +31,40 @@ void PlayerControlsPanel::Render2d()
         flags | ImGuiWindowFlags_NoTitleBar);
     {
         bool playing = _session->_playState != PlayStates::Stopped;
-        if (!playing)
+
+        if (ImGui::Selectable(ICON_FAD_PLAY, playing, ImGuiSelectableFlags_None, iconSize))
         {
-            if (ImGui::Button(ICON_FAD_PLAY, iconSize))
-            {
-                _session->StartPlaying();
-                ImGui::SetWindowFocus(PatternEditor::ID);
-            }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::BeginTooltip();
-                ImGui::Text("Start Playing");
-                ImGui::EndTooltip();
-            }
+            _session->StartPlaying();
+            ImGui::SetWindowFocus(PatternEditor::ID);
         }
-        else
+        if (ImGui::IsItemHovered())
         {
-            if (ImGui::Button(ICON_FAD_PAUSE, iconSize))
-            {
-                _session->StopPlaying();
-                ImGui::SetWindowFocus(PatternEditor::ID);
-            }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::BeginTooltip();
-                ImGui::Text("Pause Playing");
-                ImGui::EndTooltip();
-            }
+            ImGui::BeginTooltip();
+            ImGui::Text("Start Playing");
+            ImGui::EndTooltip();
         }
 
         ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
 
-        if (ImGui::Button(ICON_FAD_STOP, iconSize))
+        if (ImGui::Selectable(ICON_FAD_PAUSE, !playing && _session->currentRow > 0, ImGuiSelectableFlags_None, iconSize))
+        {
+            _session->PausePlaying();
+            ImGui::SetWindowFocus(PatternEditor::ID);
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("Pause Playing");
+            ImGui::EndTooltip();
+        }
+
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+
+        if (ImGui::Selectable(ICON_FAD_STOP, !playing && _session->currentRow == 0, ImGuiSelectableFlags_None, iconSize))
         {
             _session->StopPlaying();
             if (_session->IsRecording())
@@ -79,13 +81,15 @@ void PlayerControlsPanel::Render2d()
         }
 
         ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
 
         bool isRecording = _session->IsRecording();
         if (isRecording)
         {
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(255, 0, 0, 155));
         }
-        if (ImGui::Button(ICON_FAD_RECORD, iconSize))
+        if (ImGui::Selectable(ICON_FAD_RECORD, _session->IsRecording(), ImGuiSelectableFlags_None, iconSize))
         {
             ImGui::SetWindowFocus(PatternEditor::ID);
             _session->ToggleRecording();

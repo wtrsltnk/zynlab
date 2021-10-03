@@ -112,7 +112,7 @@ bool Init(
 
     g_hwnd = CreateWindow(
         wc.lpszClassName,
-        L"IMGUI-all-in-one",
+        L"Zyn Add Sub Fx Tracker",
         WS_OVERLAPPEDWINDOW | WS_VISIBLE,
         CW_USEDEFAULT,
         CW_USEDEFAULT,

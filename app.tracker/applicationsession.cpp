@@ -15,6 +15,16 @@ void ApplicationSession::StopPlaying()
     }
 }
 
+void ApplicationSession::PausePlaying()
+{
+    _playState = PlayStates::Stopped;
+
+    for (unsigned int t = 0; t < _mixer->GetTrackCount(); t++)
+    {
+        _mixer->GetTrack(t)->RelaseAllKeys();
+    }
+}
+
 void ApplicationSession::StartPlaying()
 {
     _playState = PlayStates::StartPlaying;

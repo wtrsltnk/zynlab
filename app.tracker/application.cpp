@@ -24,6 +24,8 @@ bool Application::Setup()
     auto &style = ImGui::GetStyle();
 
     ImGui::StyleColorsDark();
+    //    ImGui::StyleColorsLight();
+    //    ImGui::StyleColorsClassic();
 
     style.TabRounding = 4;
     style.GrabRounding = 0;
@@ -58,7 +60,7 @@ bool Application::Setup()
     static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
     _fkFont = io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
 
-    _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
+    _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 16.0f);
 
     io.Fonts->Build();
     Config::init();
@@ -148,34 +150,39 @@ void Application::Render2d()
     ImGui::SetNextWindowPos(ImVec2(0.0f, float(Height() - effectsPanelHeight)));
     _effectsEditor.Render2d();
 
-    ImGui::SetNextWindowSize(ImVec2(float(Width() - playerControlsPanelWidth - instrumentPanelWidth), float(tabbarPanelHeight)));
+    ImGui::SetNextWindowSize(ImVec2(float(Width() - playerControlsPanelWidth - instrumentPanelWidth), float(playerControlsPanelHeight)));
     ImGui::SetNextWindowPos(ImVec2(float(playerControlsPanelWidth), 0.0f));
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(15.0f, 0.0f));
     ImGui::Begin("tabbar", nullptr, flags | ImGuiWindowFlags_NoTitleBar);
     {
         char buf[256] = {0};
-
         sprintf_s(buf, 256, "%s EDIT", ICON_FK_PENCIL);
-        if (ImGui::Button(buf, ImVec2(0, 34)))
+
+        ImGui::AlignTextToFramePadding();
+        if (ImGui::Selectable(buf, _session.selectedTab == SelectableTabs::PatternEditor, ImGuiSelectableFlags_None, ImVec2(70, 20)))
         {
             _session.selectedTab = SelectableTabs::PatternEditor;
             ImGui::SetWindowFocus(PatternEditor::ID);
         }
 
         ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s MIXER", ICON_FK_SLIDERS);
-        if (ImGui::Button(buf, ImVec2(0, 34)))
+        if (ImGui::Selectable(buf, _session.selectedTab == SelectableTabs::Mixer, ImGuiSelectableFlags_None, ImVec2(70, 20)))
         {
             _session.selectedTab = SelectableTabs::Mixer;
             ImGui::SetWindowFocus("Mixer");
         }
 
         ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
 
         sprintf_s(buf, 256, "%s SYNTH", ICON_FAD_KEYBOARD);
-        if (ImGui::Button(buf, ImVec2(0, 34)))
+        if (ImGui::Selectable(buf, _session.selectedTab == SelectableTabs::Synth, ImGuiSelectableFlags_None, ImVec2(70, 20)))
         {
             _session.selectedTab = SelectableTabs::Synth;
         }
@@ -185,8 +192,8 @@ void Application::Render2d()
 
     ImGui::SetNextWindowSize(ImVec2(
         float(Width() - playerControlsPanelWidth - instrumentPanelWidth),
-        float(Height() - effectsPanelHeight - tabbarPanelHeight)));
-    ImGui::SetNextWindowPos(ImVec2(float(playerControlsPanelWidth), float(tabbarPanelHeight)));
+        float(Height() - effectsPanelHeight - playerControlsPanelHeight)));
+    ImGui::SetNextWindowPos(ImVec2(float(playerControlsPanelWidth), float(playerControlsPanelHeight)));
 
     switch (_session.selectedTab)
     {

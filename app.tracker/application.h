@@ -43,8 +43,7 @@ public:
 
     const int instrumentPanelWidth = 370;
     const int effectsPanelHeight = 160;
-    const int playerControlsPanelHeight = 50;
-    const int tabbarPanelHeight = 50;
+    const int playerControlsPanelHeight = 36;
     const int playerControlsPanelWidth = 168;
 
     virtual void Render2d();

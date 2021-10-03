@@ -39,6 +39,7 @@ public:
     unsigned int skipRowStepSize = 4;
 
     void StopPlaying();
+    void PausePlaying();
     void StartPlaying();
     void TogglePlaying();
 
