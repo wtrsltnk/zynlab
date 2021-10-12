@@ -332,6 +332,7 @@ void Mixer::PreviewNote(
         return (p.note == note && p.channel == channel);
     });
 
+    std::chrono::milliseconds::rep noteLength{lengthInMs};
     std::chrono::milliseconds::rep currentTime =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
             .count();
@@ -339,12 +340,12 @@ void Mixer::PreviewNote(
     if (found != _instrumentsPreview.end())
     {
         (*found).done = false;
-        (*found).playUntil = currentTime + lengthInMs;
+        (*found).playUntil = currentTime + noteLength;
         return;
     }
 
     InstrumentPreview n;
-    n.playUntil = currentTime + lengthInMs;
+    n.playUntil = currentTime + noteLength  ;
     n.note = note;
     n.channel = channel;
     n.done = false;
@@ -454,7 +455,7 @@ void Mixer::AudioOut(
         auto notes = _noteSource->GetNotes(BufferSize(), SampleRate());
         for (auto &n : notes)
         {
-            PreviewNote(n.channel, n.note, n.lengthInSec * 1000.0f, n.velocity);
+            PreviewNote(n.channel, n.note, n.lengthInSec, n.velocity);
         }
     }
 

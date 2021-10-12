@@ -271,20 +271,17 @@ namespace ImGui
 
 void AddInsertFx(
     ApplicationSession *session,
-    int track)
+    int track,
+    int fx)
 {
     if (session == nullptr || session->_mixer == nullptr)
     {
         return;
     }
 
-    for (int i = 0; i < NUM_INS_EFX; i++)
+    if (session->_mixer->GetTrackIndexForInsertEffect(fx) == -1)
     {
-        if (session->_mixer->GetTrackIndexForInsertEffect(i) == -1)
-        {
-            session->_mixer->SetTrackIndexForInsertEffect(i, static_cast<short>(track));
-            return;
-        }
+        session->_mixer->SetTrackIndexForInsertEffect(fx, static_cast<short>(track));
     }
 }
 
@@ -346,8 +343,11 @@ void MixerEditor::RenderTrack(
 
         ImGui::PopStyleColor(8);
 
+        ImGui::Spacing();
+        ImGui::SameLine(30);
+
         // System effect
-        ImGui::TextCentered(ImVec2(width, 30), "System FX");
+        ImGui::TextCentered(ImVec2(width - 30, 30), "System FX");
 
         for (int fx = 0; fx < NUM_SYS_EFX; fx++)
         {
@@ -389,16 +389,36 @@ void MixerEditor::RenderTrack(
             ImGui::PopID();
         }
 
+        ImGui::Spacing();
+        ImGui::SameLine(30);
+
         // Insertion effects
-        ImGui::TextCentered(ImVec2(width, 30), "Insert FX");
+        ImGui::TextCentered(ImVec2(width - 30, 30), "Insert FX");
 
         int fillCount = NUM_INS_EFX;
         for (int fx = 0; fx < NUM_INS_EFX; fx++)
         {
             ImGui::PushID(100 + fx);
+
+            bool insertEffectEnabled = _session->_mixer->GetTrackIndexForInsertEffect(fx) == trackIndex;
+            if (ImGui::Checkbox("##InsertEffectEnabled", &insertEffectEnabled))
+            {
+                if (insertEffectEnabled)
+                {
+                    AddInsertFx(_session, trackIndex, fx);
+                }
+                else
+                {
+                    RemoveInsertFxFromTrack(_session, fx);
+                }
+            }
+            ImGui::ShowTooltipOnHover("Add or remove insert effect from track");
+
+            ImGui::SameLine();
+
             if (_session->_mixer->GetTrackIndexForInsertEffect(fx) == trackIndex)
             {
-                ImGui::Button(_session->_mixer->GetInsertEffectName(fx), ImVec2(width - 22, 0));
+                ImGui::Button(_session->_mixer->GetInsertEffectName(fx), ImVec2(width - 30, 0));
                 ImGui::OpenPopupOnItemClick("InsertEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("InsertEffectSelection"))
                 {
@@ -413,39 +433,21 @@ void MixerEditor::RenderTrack(
                     ImGui::PopItemWidth();
                     ImGui::EndPopup();
                 }
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("x", ImVec2(20, 0)))
-                {
-                    RemoveInsertFxFromTrack(_session, fx);
-                }
-                ImGui::ShowTooltipOnHover("Remove insert effect from track");
                 fillCount--;
             }
-            ImGui::PopID();
-        }
-
-        if (fillCount > 0)
-        {
-            if (ImGui::Button("+", ImVec2(width, 0)))
+            else
             {
-                AddInsertFx(_session, trackIndex);
-            }
-            ImGui::ShowTooltipOnHover("Add insert effect to track");
-            fillCount--;
-        }
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));
+                ImGui::Spacing();
+                ImGui::SameLine(30);
 
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 0.5f, 0.5f, 0.1f));
-        for (int i = 0; i < fillCount; i++)
-        {
-            ImGui::PushID(i);
-            ImGui::Button("##empty", ImVec2(width, 0));
+                ImGui::Button(_session->_mixer->GetInsertEffectName(fx), ImVec2(width - 30, 0));
+                ImGui::PopStyleColor(3);
+            }
             ImGui::PopID();
         }
-        ImGui::PopStyleColor(3);
 
         ImGui::PopStyleVar(1);
 
