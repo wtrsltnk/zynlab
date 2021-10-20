@@ -38,7 +38,7 @@ void PatternsManager::Render2d()
     {
         ImGui::BeginChild("PatternsContainer");
         {
-            if (ImGui::Button(ICON_FK_PLUS, ImVec2(24,24)))
+            if (ImGui::Button(ICON_FK_PLUS, ImVec2(24.0f, 24.0f)))
             {
                 _session->_song->AddPattern();
             }
@@ -50,7 +50,7 @@ void PatternsManager::Render2d()
             }
 
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FK_MINUS, ImVec2(24,24)))
+            if (ImGui::Button(ICON_FK_MINUS, ImVec2(24.0f, 24.0f)))
             {
                 _session->_song->RemovePattern(_session->_song->currentPattern);
             }
@@ -62,7 +62,7 @@ void PatternsManager::Render2d()
             }
 
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FAD_CARET_UP, ImVec2(24,24)))
+            if (ImGui::Button(ICON_FAD_CARET_UP, ImVec2(24.0f, 24.0f)))
             {
                 _session->_song->MovePattern(_session->_song->currentPattern, -1);
             }
@@ -74,7 +74,7 @@ void PatternsManager::Render2d()
             }
 
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FAD_CARET_DOWN, ImVec2(24,24)))
+            if (ImGui::Button(ICON_FAD_CARET_DOWN, ImVec2(24.0f, 24.0f)))
             {
                 _session->_song->MovePattern(_session->_song->currentPattern, 1);
             }
@@ -86,7 +86,7 @@ void PatternsManager::Render2d()
             }
 
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FAD_DUPLICATE, ImVec2(24,24)))
+            if (ImGui::Button(ICON_FAD_DUPLICATE, ImVec2(24.0f, 24.0f)))
             {
                 _session->_song->DuplicatePattern(_session->_song->currentPattern);
             }
@@ -97,7 +97,7 @@ void PatternsManager::Render2d()
                 ImGui::EndTooltip();
             }
 
-            ImGui::BeginChild("patterns", ImVec2(0, -100));
+            ImGui::BeginChild("patterns", ImVec2(0.0f, -100.0f));
             {
                 for (unsigned int i = 0; i < _session->_song->GetPatternCount(); i++)
                 {

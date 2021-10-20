@@ -17,6 +17,17 @@
 #include "IconsFontaudio.h"
 #include "IconsForkAwesome.h"
 
+MixerAutomation::~MixerAutomation() = default;
+
+void MixerAutomation::Setup(
+    Mixer *mixer)
+{
+    _mixer = mixer;
+
+    _automationValues.insert({"/Pvolume", {"The overall volume", AutomationValueTypes::UnsignedChar, &_mixer->Pvolume}});
+    _automationValues.insert({"/Pkeyshift", {"The key-shift of all incoming notes", AutomationValueTypes::UnsignedChar, &_mixer->Pkeyshift}});
+}
+
 Application::Application() = default;
 
 bool Application::Setup()
@@ -112,14 +123,22 @@ bool Application::Setup()
 
     for (int i = 0; i < 16; i++)
     {
-        pattern->Notes(0)[i * 4]._note = 60 + i;
+        pattern->Notes(0)[i * 4]._note = 60;
         pattern->Notes(0)[i * 4]._length = 64;
         pattern->Notes(0)[i * 4]._velocity = 100;
+
+        pattern->Notes(0)[i * 4 + 1]._note = 60;
+        pattern->Notes(0)[i * 4 + 1]._length = 64;
+        pattern->Notes(0)[i * 4 + 1]._velocity = 100;
+
+        pattern->Notes(0)[i * 4 + 3]._note = 60;
+        pattern->Notes(0)[i * 4 + 3]._length = 64;
+        pattern->Notes(0)[i * 4 + 3]._velocity = 100;
     }
 
     _playerControlsPanel.SetUp(&_session);
     _patternEditor.SetUp(&_session, _monofont);
-    _mixerEditor.SetUp(&_session);
+    _mixerEditor.SetUp(&_session, _monofont);
     _instruments.SetUp(&_session);
     _effectsEditor.SetUp(&_session);
     _patternsManager.SetUp(&_session);

@@ -69,10 +69,12 @@ public:
         {'P', 88}, // E-6
     };
 
+    bool HandleEditingNotes();
+
     bool HandlePlayingNotes(
         bool repeat = false);
 
-    bool HandleKeyboardNotes();
+    bool HandleKeyboard();
 
     bool HandleKeyboardNavigation();
 

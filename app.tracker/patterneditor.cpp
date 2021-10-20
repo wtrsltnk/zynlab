@@ -33,10 +33,22 @@ void PatternEditor::SetUp(
 
 char const *PatternEditor::ID = "PatternEditor";
 
+void CurrentPropertyName(int currentProperty)
+{
+    if (currentProperty == 0)
+        ImGui::Text("Note to play");
+    else if (currentProperty == 1)
+        ImGui::Text("Length of note");
+    else if (currentProperty == 2)
+        ImGui::Text("Velocity of note");
+    else if (currentProperty == 3)
+        ImGui::Text("FX value");
+}
 void PatternEditor::Render2d()
 {
+    auto selectionColorEditmode = ImColor(180, 20, 20, 255);
     auto selectionColor = ImColor(20, 180, 20, 255);
-    auto selectedRowBackgroundColorEditmode = ImColor(20, 220, 20, 55);
+    auto selectedRowBackgroundColorEditmode = ImColor(220, 20, 20, 55);
     auto selectedRowBackgroundColor = ImColor(70, 120, 70, 70);
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
@@ -59,7 +71,14 @@ void PatternEditor::Render2d()
                            spaceWidth + cellFxWidth;
         auto fullWidth = (columnWidth.x + 15) * NUM_MIXER_TRACKS;
 
-        auto contentTop = ImGui::GetCursorPosY();
+        auto contentTop = ImGui::GetCursorPos();
+
+        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth) + ((columnWidth.x + 15.0f) * _session->_mixer->State.currentTrack) - tracksScrollx, float(headerHeight) - ImGui::GetTextLineHeightWithSpacing()));
+        CurrentPropertyName(_session->currentProperty);
+
+        // CELLS
+
+        ImGui::SetCursorPos(contentTop);
         ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth), float(headerHeight)));
         ImGui::BeginChild(
             "container",
@@ -144,7 +163,7 @@ void PatternEditor::Render2d()
                                 drawList->AddRectFilled(
                                     min - ImVec2(4, 0),
                                     min + ImVec2(cursorWidth, lineHeight),
-                                    selectionColor);
+                                    _session->IsRecording() ? selectionColorEditmode : selectionColor);
 
                                 auto resetToCursor = ImGui::GetCursorPos();
 
@@ -153,14 +172,7 @@ void PatternEditor::Render2d()
                                 if (ImGui::IsItemHovered())
                                 {
                                     ImGui::BeginTooltip();
-                                    if (_session->currentProperty == 0)
-                                        ImGui::Text("Note to play");
-                                    else if (_session->currentProperty == 1)
-                                        ImGui::Text("Length of note");
-                                    else if (_session->currentProperty == 2)
-                                        ImGui::Text("Veolcity of note");
-                                    else if (_session->currentProperty == 3)
-                                        ImGui::Text("FX value");
+                                    CurrentPropertyName(_session->currentProperty);
                                     ImGui::EndTooltip();
                                 }
 
@@ -195,7 +207,7 @@ void PatternEditor::Render2d()
 
             if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
             {
-                if (HandleKeyboardNotes())
+                if (HandleKeyboard())
                 {
                     ImGui::SetScrollY((_session->currentRow - (content.y / lineHeight) / 2 + 1) * lineHeight);
                 }
@@ -222,7 +234,8 @@ void PatternEditor::Render2d()
 
         // FOOTERS
 
-        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth), 0.0f));
+        ImGui::SetCursorPos(contentTop);
+        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth), content.y - float(footerHeight + scrollbarHeight)));
         ImGui::BeginChild(
             "footerscontainer",
             ImVec2(content.x, float(footerHeight)));
@@ -242,23 +255,23 @@ void PatternEditor::Render2d()
                     if (i == _session->_mixer->State.currentTrack)
                     {
                         drawList->AddLine(
-                            markerPos + ImVec2(-4, 2),
-                            markerPos + ImVec2(-4, 16),
-                            selectionColor,
-                            2);
-                        drawList->AddLine(
-                            markerPos + ImVec2(-4, 16),
-                            markerPos + ImVec2(10, 16),
+                            markerPos + ImVec2(-3.0f, 5.0f),
+                            markerPos + ImVec2(-3.0f, footerHeight - 2.0f),
                             selectionColor,
                             3);
                         drawList->AddLine(
-                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, 2.0f),
-                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, 16.0f),
+                            markerPos + ImVec2(-4.0f, footerHeight - 2.0f),
+                            markerPos + ImVec2(11.0f, footerHeight - 2.0f),
                             selectionColor,
-                            2);
+                            3);
                         drawList->AddLine(
-                            markerPos + ImVec2(_columnsWidths[i] + 4.0f, 16.0f),
-                            markerPos + ImVec2(_columnsWidths[i] - 11.0f, 16.0f),
+                            markerPos + ImVec2(_columnsWidths[i] + 1.0f, 5.0f),
+                            markerPos + ImVec2(_columnsWidths[i] + 1.0f, footerHeight - 2.0f),
+                            selectionColor,
+                            3);
+                        drawList->AddLine(
+                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, footerHeight - 2.0f),
+                            markerPos + ImVec2(_columnsWidths[i] - 12.0f, footerHeight - 2.0f),
                             selectionColor,
                             3);
                     }
@@ -278,10 +291,11 @@ void PatternEditor::Render2d()
 
         // SCROLLBAR
 
-        ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0.0f));
+        ImGui::SetCursorPos(contentTop);
+        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth), content.y - float(scrollbarHeight)));
         ImGui::BeginChild(
             "scrollbar",
-            ImVec2(content.x, scrollbarHeight),
+            ImVec2(content.x, float(scrollbarHeight)),
             false,
             ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         {
@@ -289,7 +303,7 @@ void PatternEditor::Render2d()
 
             ImGui::BeginChild(
                 "scrollbarcontent",
-                ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, scrollbarHeight));
+                ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, float(scrollbarHeight)));
             {
             }
             ImGui::EndChild();
@@ -298,11 +312,11 @@ void PatternEditor::Render2d()
 
         // ROWINDICES
 
-        ImGui::SetCursorPosY(contentTop);
-        ImGui::MoveCursorPos(ImVec2(0, headerHeight));
+        ImGui::SetCursorPos(contentTop);
+        ImGui::MoveCursorPos(ImVec2(0.0f, float(headerHeight)));
         ImGui::BeginChild(
             "rowinedicescontainer",
-            ImVec2(rowIndexColumnWidth, -(footerHeight + scrollbarHeight)),
+            ImVec2(float(rowIndexColumnWidth), -float(footerHeight + scrollbarHeight)),
             false,
             ImGuiWindowFlags_NoScrollbar);
         {
@@ -313,7 +327,7 @@ void PatternEditor::Render2d()
             {
                 ImGui::BeginChild(
                     "rowindices",
-                    ImVec2(rowIndexColumnWidth, lineHeight * pattern->Length()));
+                    ImVec2(float(rowIndexColumnWidth), lineHeight * pattern->Length()));
                 {
                     auto drawList = ImGui::GetWindowDrawList();
 
@@ -324,14 +338,14 @@ void PatternEditor::Render2d()
                         {
                             drawList->AddRectFilled(
                                 markerPos,
-                                markerPos + ImVec2(rowIndexColumnWidth, lineHeight),
+                                markerPos + ImVec2(float(rowIndexColumnWidth), lineHeight),
                                 ImColor(120, 120, 120, 55));
                         }
                         if (r == _session->currentRow)
                         {
                             drawList->AddRectFilled(
                                 markerPos,
-                                markerPos + ImVec2(rowIndexColumnWidth, lineHeight),
+                                markerPos + ImVec2(float(rowIndexColumnWidth), lineHeight),
                                 selectedRowBackgroundColor);
                         }
                         ImGui::Text("%02d", r);
@@ -344,16 +358,16 @@ void PatternEditor::Render2d()
 
         // HEADERS
 
-        ImGui::SetCursorPosY(contentTop);
-        ImGui::MoveCursorPos(ImVec2(rowIndexColumnWidth, 0));
+        ImGui::SetCursorPos(contentTop);
+        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth), 0));
         ImGui::BeginChild(
             "headerscontainer",
-            ImVec2(content.x, headerHeight));
+            ImVec2(content.x, float(headerHeight)));
         {
             ImGui::SetScrollX(tracksScrollx);
             ImGui::BeginChild(
                 "headers",
-                ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, headerHeight));
+                ImVec2(fullWidth + ImGui::GetStyle().ScrollbarSize, float(headerHeight)));
             {
                 ImGui::Columns(NUM_MIXER_TRACKS);
 
@@ -376,27 +390,27 @@ void PatternEditor::Render2d()
                             selectionColor,
                             3);
                         drawList->AddLine(
-                            markerPos + ImVec2(_columnsWidths[i] + 3, 0),
-                            markerPos + ImVec2(_columnsWidths[i] + 3, 14),
+                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, 0.0f),
+                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, 14.0f),
                             selectionColor,
                             2);
                         drawList->AddLine(
-                            markerPos + ImVec2(_columnsWidths[i] + 3, 0),
-                            markerPos + ImVec2(_columnsWidths[i] - 11, 0),
+                            markerPos + ImVec2(_columnsWidths[i] + 3.0f, 0.0f),
+                            markerPos + ImVec2(_columnsWidths[i] - 11.0f, 0.0f),
                             selectionColor,
                             3);
                     }
 
                     drawList->AddRectFilled(
                         markerPos + ImVec2(0, 4),
-                        markerPos + ImVec2(_columnsWidths[i], 8),
+                        markerPos + ImVec2(float(_columnsWidths[i]), 8.0f),
                         ImColor::HSV(i * 0.05f, 0.9f, 0.7f));
 
-                    ImGui::SetColumnWidth(i, _columnsWidths[i] + 15);
+                    ImGui::SetColumnWidth(i, _columnsWidths[i] + 15.0f);
 
                     auto w = ImGui::CalcTextSize("Track 00").x / 2.0f;
-                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 9));
-                    ImGui::SetNextWindowSize(ImVec2(_columnsWidths[i] + 15, headerHeight));
+                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 9.0f));
+                    ImGui::SetNextWindowSize(ImVec2(_columnsWidths[i] + 15.0f, float(headerHeight)));
                     ImGui::Text("Track %02d", i + 1);
 
                     bool v = _session->_mixer->GetTrack(i)->Penabled == 1;
@@ -410,7 +424,7 @@ void PatternEditor::Render2d()
                         }
                     }
                     ImGui::SameLine();
-                    if (ImGui::Button("edit", ImVec2(-1, 0)))
+                    if (ImGui::Button("synth", ImVec2(-1, 0)))
                     {
                         ImGui::SetWindowFocus(SynthEditor::ID);
                         _session->_mixer->State.currentTrack = i;
@@ -427,7 +441,7 @@ void PatternEditor::Render2d()
                             nullptr,
                             -0.5f,
                             0.5f,
-                            ImVec2(_columnsWidths[i], 40));
+                            ImVec2(float(_columnsWidths[i]), 40.0f));
                     }
                     ImGui::PopID();
                     ImGui::NextColumn();
@@ -441,21 +455,6 @@ void PatternEditor::Render2d()
         ImGui::PopFont();
     }
     ImGui::End();
-}
-
-bool PatternEditor::HandlePlayingNotes(
-    bool repeat)
-{
-    for (auto p : _charToNoteMap)
-    {
-        if (ImGui::IsKeyPressed((ImWchar)p.first, repeat))
-        {
-            _session->_mixer->PreviewNote(_session->_mixer->State.currentTrack, p.second, 400);
-            return true;
-        }
-    }
-
-    return false;
 }
 
 char GetByteCharPressed()
@@ -490,6 +489,30 @@ char GetByteCharPressed()
     return '\0';
 }
 
+bool PatternEditor::HandleKeyboard()
+{
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Insert)))
+    {
+        _session->ToggleRecording();
+
+        return false;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+    {
+        _session->currentRow = 0;
+
+        return false;
+    }
+
+    if (_session->IsRecording())
+    {
+        return HandleEditingNotes();
+    }
+
+    return HandlePlayingNotes();
+}
+
 void PatternEditor::UpdateValue(
     char pressedChar,
     unsigned int &inputValue)
@@ -515,73 +538,90 @@ void PatternEditor::UpdateValue(
     inputValue = Note::StringToValue(newValue);
 }
 
-bool PatternEditor::HandleKeyboardNotes()
+bool PatternEditor::HandleEditingNotes()
 {
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Insert)))
-    {
-        _session->ToggleRecording();
+    static Note noteInMemory;
 
+    auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
+    if (pattern == nullptr)
+    {
         return false;
     }
 
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && ImGui::GetIO().KeyCtrl)
     {
-        _session->currentRow = 0;
+        // Copy note
+        noteInMemory = pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow];
 
-        return false;
+        return true;
     }
 
-    if (!_session->IsRecording())
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_X)) && ImGui::GetIO().KeyCtrl)
     {
-        HandlePlayingNotes();
-        return false;
+        // Cut note
+        noteInMemory = pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow];
+        pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow].Clear();
+
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::GetIO().KeyCtrl)
+    {
+        // Paste note
+        pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow] = noteInMemory;
+
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+    {
+        pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow].Clear();
+
+        return true;
     }
 
     if (_session->currentProperty == 0)
     {
-        auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
-        if (pattern != nullptr)
+        for (auto p : _charToNoteMap)
         {
-            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+            if (ImGui::IsKeyPressed((ImWchar)p.first))
             {
-                pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow]._note = 0;
+                pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow].Set(p.second, 64, 100);
+                _session->_mixer->PreviewNote(_session->_mixer->State.currentTrack, p.second, 400);
                 MoveCurrentRowDown(true);
                 return true;
-            }
-            for (auto p : _charToNoteMap)
-            {
-                if (ImGui::IsKeyPressed((ImWchar)p.first))
-                {
-                    pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow]._note = p.second;
-                    _session->_mixer->PreviewNote(_session->_mixer->State.currentTrack, p.second, 400);
-                    MoveCurrentRowDown(true);
-                    return true;
-                }
             }
         }
     }
     else if (_session->currentProperty == 1)
     {
-        auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
-        if (pattern != nullptr)
+        char c = GetByteCharPressed();
+        if (c != '\0')
         {
-            char c = GetByteCharPressed();
-            if (c != '\0')
-            {
-                UpdateValue(c, pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow]._length);
-            }
+            UpdateValue(c, pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow]._length);
         }
     }
     else if (_session->currentProperty == 2)
     {
-        auto pattern = _session->_song->GetPattern(_session->_song->currentPattern);
-        if (pattern != nullptr)
+        char c = GetByteCharPressed();
+        if (c != '\0')
         {
-            char c = GetByteCharPressed();
-            if (c != '\0')
-            {
-                UpdateValue(c, pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow]._velocity);
-            }
+            UpdateValue(c, pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow]._velocity);
+        }
+    }
+
+    return false;
+}
+
+bool PatternEditor::HandlePlayingNotes(
+    bool repeat)
+{
+    for (auto p : _charToNoteMap)
+    {
+        if (ImGui::IsKeyPressed((ImWchar)p.first, repeat))
+        {
+            _session->_mixer->PreviewNote(_session->_mixer->State.currentTrack, p.second, 400);
+            return true;
         }
     }
 
@@ -697,11 +737,13 @@ void PatternEditor::ChangeCurrentTrack(
     }
 }
 
+const int notePropertyCount = 4;
+
 void PatternEditor::MoveToPreviousProperty()
 {
     if (_session->currentProperty == 0)
     {
-        _session->currentProperty = 4;
+        _session->currentProperty = (notePropertyCount - 1);
         if (_session->_mixer->State.currentTrack > 0)
         {
             _session->_mixer->State.currentTrack--;
@@ -720,7 +762,7 @@ void PatternEditor::MoveToPreviousProperty()
 void PatternEditor::MoveToNextProperty()
 {
     _session->currentProperty++;
-    if (_session->currentProperty >= 4)
+    if (_session->currentProperty > (notePropertyCount - 1))
     {
         _session->currentProperty = 0;
         _session->_mixer->State.currentTrack++;

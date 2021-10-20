@@ -13,6 +13,37 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.ui/syntheditor.h>
 
+class MixerAutomation
+{
+public:
+    enum AutomationValueTypes
+    {
+        UnsignedChar,
+        UnsignedChar_Array,
+        UnsignedChar_2dArray,
+        ShortInt,
+        ShortInt_Arrary,
+        ShortInt_2dArrary,
+        Float,
+    };
+    struct AutomationValue
+    {
+        const char *description;
+        AutomationValueTypes valueType = AutomationValueTypes::UnsignedChar;
+        void *value;
+    };
+
+public:
+    virtual ~MixerAutomation();
+
+    void Setup(
+        Mixer *mixer);
+
+private:
+    Mixer *_mixer = nullptr;
+    std::map<const char *, AutomationValue> _automationValues;
+};
+
 class Application :
     public IApplication,
     public INoteSource

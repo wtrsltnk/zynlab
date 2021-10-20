@@ -1,5 +1,20 @@
 #include "note.h"
 
+void Note::Clear()
+{
+    _note = _velocity = _length = 0;
+}
+
+void Note::Set(
+    int note,
+    int length,
+    int velocity)
+{
+    _note = note;
+    _velocity = velocity;
+    _length = length;
+}
+
 char const *Note::NoteToString(
     unsigned int note)
 {

@@ -32,9 +32,11 @@ namespace mixer_editor
 MixerEditor::MixerEditor() = default;
 
 void MixerEditor::SetUp(
-    ApplicationSession *session)
+    ApplicationSession *session,
+    ImFont *font)
 {
     _session = session;
+    _monofont = font;
 }
 
 namespace ImGui
@@ -308,6 +310,8 @@ void MixerEditor::RenderTrack(
 
     auto io = ImGui::GetStyle();
 
+    ImGui::PushFont(_monofont);
+
     if (ImGui::BeginChild("MixerTrack", trackSize))
     {
         auto trackEnabled = track->Penabled == 1;
@@ -502,6 +506,8 @@ void MixerEditor::RenderTrack(
         ImGui::TextCentered(ImVec2(width, 30), "stereo out");
     }
     ImGui::EndChild();
+
+    ImGui::PopFont();
 }
 
 void MixerEditor::Render2d()

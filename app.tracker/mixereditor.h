@@ -1,6 +1,8 @@
 #ifndef MIXEREDITOR_H
 #define MIXEREDITOR_H
 
+#include <imgui.h>
+
 #include "applicationsession.h"
 
 class MixerEditor
@@ -9,7 +11,8 @@ public:
     MixerEditor();
 
     void SetUp(
-        ApplicationSession *session);
+        ApplicationSession *session,
+        ImFont *font);
 
     void Render2d();
 
@@ -17,6 +20,7 @@ public:
 
 private:
     ApplicationSession *_session = nullptr;
+    ImFont *_monofont = nullptr;
 
     void RenderTrack(
         int trackIndex);

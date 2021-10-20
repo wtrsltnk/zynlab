@@ -4,11 +4,18 @@
 class Note
 {
 public:
-    unsigned int _note;
-    unsigned int _length;
-    unsigned int _velocity;
+    unsigned int _note = 0;
+    unsigned int _length = 0;
+    unsigned int _velocity = 0;
 
-    static char const *NoteToString(unsigned int note);
+    void Clear();
+
+    void Set(
+        int note,
+        int length,
+        int velocity);
+
+        static char const *NoteToString(unsigned int note);
 
     static char const *ValueToString(unsigned int note);
 
