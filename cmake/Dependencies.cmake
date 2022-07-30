@@ -10,6 +10,21 @@ CPMAddPackage(
 )
 
 CPMAddPackage(
+  NAME glm
+  GITHUB_REPOSITORY g-truc/glm
+  GIT_TAG 0.9.9.7
+)
+
+CPMAddPackage(
+    NAME cxxopts
+    VERSION 2.2.0
+    GITHUB_REPOSITORY "jarro2783/cxxopts"
+    OPTIONS
+        "CXXOPTS_BUILD_EXAMPLES OFF"
+        "CXXOPTS_BUILD_TESTS OFF"
+    )
+
+CPMAddPackage(
     NAME fftw3
     VERSION 3.3.5
     URL ftp://ftp.fftw.org/pub/fftw/fftw-3.3.5-dll64.zip
@@ -90,48 +105,24 @@ if(BUILD_APP_THREEDEE)
 
 endif()
 
-#if (BUILD_APP_ZYNADSUBFX)
-#    CPMAddPackage(
-#        NAME fltk
-#        GITHUB_REPOSITORY "fltk/fltk"
-#        GIT_TAG release-1.3.7
-#        GIT_SHALLOW ON
-#        OPTIONS
-#            "FLTK_BUILD_TEST OFF"
-#            "OPTION_BUILD_EXAMPLES OFF"
-#            "OPTION_BUILD_HTML_DOCUMENTATION OFF"
-#            "OPTION_INSTALL_HTML_DOCUMENTATION OFF"
-#    )
-
-#    if (fltk_ADDED)
-#        find_file(fltk_FLUID_EXECUTABLE "fluid.exe"
-#            NO_DEFAULT_PATH
-#            NO_CMAKE_SYSTEM_PATH
-#            NO_CACHE
-#            PATHS
-#                ${fltk_BINARY_DIR}
-#                ${fltk_BINARY_DIR}/bin
-#            )
-
-#        message(STATUS "fltk_FLUID_EXECUTABLE = ${fltk_FLUID_EXECUTABLE}")
-
-#        find_file(fltk_HEADER_FILE "FL/FL.h"
-#            NO_DEFAULT_PATH
-#            NO_CMAKE_SYSTEM_PATH
-#            NO_CACHE
-#            PATHS
-#                ${fltk_SOURCE_DIR}
-#                ${fltk_SOURCE_DIR}/include
-#            )
-#        get_filename_component(fltk_HEADER_FILE_LOCATION ${fltk_HEADER_FILE} DIRECTORY)
-
-#        message(STATUS "fltk_HEADER_FILE = ${fltk_HEADER_FILE}")
-
-#        target_include_directories(fltk
-#            INTERFACE
-#                $<BUILD_INTERFACE:${fltk_HEADER_FILE_LOCATION}>)
-#    endif()
-#endif(BUILD_APP_ZYNADSUBFX)
+if (BUILD_APP_ZYNADSUBFX)
+    CPMAddPackage(
+        NAME fltk
+        GITHUB_REPOSITORY "fltk/fltk"
+        GIT_TAG release-1.3.7
+        GIT_SHALLOW ON
+        OPTIONS
+            "FLTK_BUILD_TEST OFF"
+            "FLTK_BUILD_EXAMPLES OFF"
+            "OPTION_USE_SYSTEM_ZLIB OFF"
+            "OPTION_USE_SYSTEM_LIBJPEG OFF"
+            "OPTION_USE_SYSTEM_LIBPNG OFF"
+            "OPTION_USE_GDIPLUS OFF"
+            "OPTION_USE_GL OFF" # yac, this depends on GL/glu.h
+            "OPTION_BUILD_HTML_DOCUMENTATION OFF"
+            "OPTION_INSTALL_HTML_DOCUMENTATION OFF"
+    )
+endif(BUILD_APP_ZYNADSUBFX)
 
 CPMAddPackage(
     NAME portaudio
@@ -142,18 +133,3 @@ CPMAddPackage(
         "PA_BUILD_TESTS Off"
         "PA_BUILD_EXAMPLES Off"
 )
-
-CPMAddPackage(
-  NAME glm
-  GITHUB_REPOSITORY g-truc/glm
-  GIT_TAG 0.9.9.7
-)
-
-CPMAddPackage(
-    NAME cxxopts
-    VERSION 2.2.0
-    GITHUB_REPOSITORY "jarro2783/cxxopts"
-    OPTIONS
-        "CXXOPTS_BUILD_EXAMPLES OFF"
-        "CXXOPTS_BUILD_TESTS OFF"
-    )

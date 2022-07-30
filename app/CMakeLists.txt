@@ -4,6 +4,15 @@ project(app)
 
 find_package(FLTK)
 
+find_file(FLTK_FLUID_EXECUTABLE "fluid.exe"
+    NO_DEFAULT_PATH
+    NO_CMAKE_SYSTEM_PATH
+    NO_CACHE
+    PATHS
+        ${fltk_BINARY_DIR}
+        ${fltk_BINARY_DIR}/bin
+    )
+
 add_executable(app
     main.cpp
     ui/common.cpp
@@ -38,15 +47,15 @@ set_source_files_properties(ui/MasterUI.h PROPERTIES GENERATED 1)
 
 fltk_wrap_ui(app ${UI_fl_files})
 
-    find_program (FLTK_CONFIG fltk-config)
+find_program (FLTK_CONFIG fltk-config)
 
-    if (FLTK_CONFIG)
-        execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
+if (FLTK_CONFIG)
+    execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
 
-        if (FLTK_LDFLAGS)
-                string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
-        endif()
-    endif()
+    if (FLTK_LDFLAGS)
+        string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
+    endif(FLTK_LDFLAGS)
+endif(FLTK_CONFIG)
 
 target_sources(app
     PRIVATE ${app_FLTK_UI_SRCS}
@@ -63,10 +72,10 @@ target_compile_features(app
 
 target_include_directories(app
     PRIVATE
-        ${FLTK_INCLUDE_DIR}
         "${CMAKE_CURRENT_SOURCE_DIR}/.."
         "${CMAKE_CURRENT_SOURCE_DIR}/ui"
-        "${CMAKE_CURRENT_BINARY_DIR}"
+        "${fltk_SOURCE_DIR}"
+        "${fltk_SOURCE_DIR}/../fltk-build"
         "../zyn.common"
     )
 
@@ -77,7 +86,6 @@ target_compile_definitions(app
 
 target_link_libraries(app
     cxxopts
-    ${FLTK_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     zyn.nio
@@ -89,4 +97,5 @@ target_link_libraries(app
     zyn.seq
     zyn.serialization
     zyn.common
+    fltk
     )

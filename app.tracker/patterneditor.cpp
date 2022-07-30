@@ -44,6 +44,7 @@ void CurrentPropertyName(int currentProperty)
     else if (currentProperty == 3)
         ImGui::Text("FX value");
 }
+
 void PatternEditor::Render2d()
 {
     auto selectionColorEditmode = ImColor(180, 20, 20, 255);
@@ -73,7 +74,10 @@ void PatternEditor::Render2d()
 
         auto contentTop = ImGui::GetCursorPos();
 
-        ImGui::MoveCursorPos(ImVec2(float(rowIndexColumnWidth) + ((columnWidth.x + 15.0f) * _session->_mixer->State.currentTrack) - tracksScrollx, float(headerHeight) - ImGui::GetTextLineHeightWithSpacing()));
+        ImGui::MoveCursorPos(
+            ImVec2(
+                float(rowIndexColumnWidth) + ((columnWidth.x + 15.0f) * _session->_mixer->State.currentTrack) - tracksScrollx,
+                float(headerHeight) - ImGui::GetTextLineHeightWithSpacing()));
         CurrentPropertyName(_session->currentProperty);
 
         // CELLS
