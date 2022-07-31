@@ -22,6 +22,7 @@
 
 #include "Presets.h"
 #include "PresetsSerializer.h"
+#include "PresetsStore.h"
 #include <string>
 
 Presets::Presets() = default;
@@ -206,7 +207,7 @@ int Preset::Id() const { return _id; }
 
 void Preset::Id(int id) { _id = id; }
 
-Preset::operator char *const() const { return valueReference.string_v; }
+Preset::operator char * const() const { return valueReference.string_v; }
 Preset::operator unsigned char() const { return *valueReference.uchar_v; }
 Preset::operator unsigned short int() const { return *valueReference.ushort_v; }
 Preset::operator unsigned int() const { return *valueReference.uint_v; }

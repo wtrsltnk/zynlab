@@ -130,15 +130,20 @@ void PADnoteParameters::Defaults()
     deletesamples();
 }
 
-void PADnoteParameters::deletesample(int n)
+void PADnoteParameters::deletesample(
+    int n)
 {
     if ((n < 0) || (n >= PAD_MAX_SAMPLES))
+    {
         return;
+    }
+
     if (sample[n].smp != nullptr)
     {
         delete[] sample[n].smp;
         sample[n].smp = nullptr;
     }
+
     sample[n].size = 0;
     sample[n].basefreq = 440.0f;
 }
@@ -146,13 +151,17 @@ void PADnoteParameters::deletesample(int n)
 void PADnoteParameters::deletesamples()
 {
     for (int i = 0; i < PAD_MAX_SAMPLES; ++i)
+    {
         deletesample(i);
+    }
 }
 
 /*
  * Get the harmonic profile (i.e. the frequency distributio of a single harmonic)
  */
-float PADnoteParameters::getprofile(float *smp, int size)
+float PADnoteParameters::getprofile(
+    float *smp,
+    int size)
 {
     for (int i = 0; i < size; ++i)
     {
@@ -274,17 +283,27 @@ float PADnoteParameters::getprofile(float *smp, int size)
     for (int i = 0; i < size; ++i)
     {
         if (smp[i] < 0.0f)
+        {
             smp[i] = 0.0f;
+        }
         if (smp[i] > max)
+        {
             max = smp[i];
+        }
     }
     if (max < 0.00001f)
+    {
         max = 1.0f;
+    }
     for (int i = 0; i < size; ++i)
+    {
         smp[i] /= max;
+    }
 
     if (!Php.autoscale)
+    {
         return 0.5f;
+    }
 
     //compute the estimated perceived bandwidth
     float sum = 0.0f;
@@ -304,7 +323,8 @@ float PADnoteParameters::getprofile(float *smp, int size)
  * Compute the real bandwidth in cents and returns it
  * Also, sets the bandwidth parameter
  */
-float PADnoteParameters::setPBandwidth(int PBandwidth)
+float PADnoteParameters::setPBandwidth(
+    int PBandwidth)
 {
     this->PBandwidth = static_cast<unsigned char>(PBandwidth);
     float result = powf(PBandwidth / 1000.0f, 1.1f);
@@ -315,7 +335,8 @@ float PADnoteParameters::setPBandwidth(int PBandwidth)
 /*
  * Get the harmonic(overtone) position
  */
-float PADnoteParameters::getNhr(int n)
+float PADnoteParameters::getNhr(
+    int n)
 {
     float result = 1.0f;
     float par1 = powf(10.0f, -(1.0f - Phrpos.par1 / 255.0f) * 3.0f);
@@ -375,15 +396,18 @@ float PADnoteParameters::getNhr(int n)
 /*
  * Generates the long spectrum for Bandwidth mode (only amplitudes are generated; phases will be random)
  */
-void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
-                                                       int size,
-                                                       float basefreq,
-                                                       const float *profile,
-                                                       int profilesize,
-                                                       float bwadjust)
+void PADnoteParameters::generatespectrum_bandwidthMode(
+    float *spectrum,
+    int size,
+    float basefreq,
+    const float *profile,
+    int profilesize,
+    float bwadjust)
 {
     for (int i = 0; i < size; ++i)
+    {
         spectrum[i] = 0.0f;
+    }
 
     std::unique_ptr<float> harmonics(new float[SystemSettings::Instance().oscilsize / 2]);
     for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
@@ -397,27 +421,41 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
     //normalize
     float max = 0.0f;
     for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+    {
         if (harmonics.get()[i] > max)
+        {
             max = harmonics.get()[i];
+        }
+    }
+
     if (max < 0.000001f)
+    {
         max = 1;
+    }
     for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+    {
         harmonics.get()[i] /= max;
+    }
 
     for (unsigned int nh = 1; nh < SystemSettings::Instance().oscilsize / 2; ++nh)
     { //for each harmonic
         float realfreq = getNhr(nh) * basefreq;
         if (realfreq > SystemSettings::Instance().samplerate_f * 0.49999f)
+        {
             break;
+        }
         if (realfreq < 20.0f)
+        {
             break;
+        }
         if (harmonics.get()[nh - 1] < 1e-4f)
+        {
             continue;
+        }
 
         //compute the bandwidth of each harmonic
         float bandwidthcents = setPBandwidth(PBandwidth);
-        float bw =
-            (powf(2.0f, bandwidthcents / 1200.0f) - 1.0f) * basefreq / bwadjust;
+        float bw = (powf(2.0f, bandwidthcents / 1200.0f) - 1.0f) * basefreq / bwadjust;
         float power = 1.0f;
         switch (Pbwscale)
         {
@@ -451,7 +489,9 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
 
         float amp = harmonics.get()[nh - 1];
         if (resonance->Penabled)
+        {
             amp *= resonance->getfreqresponse(realfreq);
+        }
 
         if (ibw > profilesize)
         { //if the bandwidth is larger than the profilesize
@@ -492,7 +532,10 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
 /*
  * Generates the long spectrum for non-Bandwidth modes (only amplitudes are generated; phases will be random)
  */
-void PADnoteParameters::generatespectrum_otherModes(float *spectrum, int size, float basefreq)
+void PADnoteParameters::generatespectrum_otherModes(
+    float *spectrum,
+    int size,
+    float basefreq)
 {
     for (int i = 0; i < size; ++i)
         spectrum[i] = 0.0f;
@@ -643,23 +686,20 @@ void PADnoteParameters::ApplyParameters(
             newsample.smp[i + samplesize] = newsample.smp[i];
 
         //replace the current sample with the new computed sample
-        mutex.lock();
+
         deletesample(nsample);
         sample[nsample].smp = newsample.smp;
         sample[nsample].size = samplesize;
         sample[nsample].basefreq = basefreq * basefreqadjust;
-        mutex.unlock();
 
         newsample.smp = nullptr;
     }
 
     //delete the additional samples that might exists and are not useful
-    mutex.lock();
     for (int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
     {
         deletesample(i);
     }
-    mutex.unlock();
 }
 
 void PADnoteParameters::export2wav(

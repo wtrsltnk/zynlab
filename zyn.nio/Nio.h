@@ -1,8 +1,8 @@
 #ifndef NIO_H
 #define NIO_H
 
-#include <set>
 #include <string>
+#include <vector>
 #include <zyn.common/IAudioGenerator.h>
 #include <zyn.common/IMidiEventHandler.h>
 
@@ -21,8 +21,8 @@ public:
     static bool SelectSource(const std::string &name);
     static bool SelectSink(const std::string &name);
 
-    static std::set<std::string> GetSources();
-    static std::set<std::string> GetSinks();
+    static std::vector<std::string> GetSources();
+    static std::vector<std::string> GetSinks();
 
     static std::string GetSelectedSource();
     static std::string GetSelectedSink();

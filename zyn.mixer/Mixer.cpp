@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <tuple>
+#include <zyn.common/Config.h>
 #include <zyn.common/PresetsSerializer.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/FFTwrapper.h>
@@ -345,7 +346,7 @@ void Mixer::PreviewNote(
     }
 
     InstrumentPreview n;
-    n.playUntil = currentTime + noteLength  ;
+    n.playUntil = currentTime + noteLength;
     n.note = note;
     n.channel = channel;
     n.done = false;

@@ -4,8 +4,7 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.synth/SUBnoteParams.h>
 
-static const int overtone_position_count = 8;
-static char const *overtone_positions[] = {
+static std::vector<std::string> overtone_positions = {
     "Harmonic",
     "ShiftU",
     "ShiftL",
@@ -16,21 +15,19 @@ static char const *overtone_positions[] = {
     "Shift",
 };
 
-static char const *const mag_types[] = {
+static std::vector<std::string> mag_types = {
     "Linear",
     "-40dB",
     "-60dB",
     "-80dB",
     "-100dB",
 };
-static unsigned int mag_type_count = 5;
 
-static char const *const start_types[] = {
+static std::vector<std::string> start_types = {
     "Zero",
     "RND",
     "Max.",
 };
-static unsigned int start_type_count = 3;
 
 char const *const SubSynthEditorID = "SUB editor";
 
@@ -87,14 +84,14 @@ void zyn::ui::SubNote::Render()
                     ImGui::ShowTooltipOnHover("How many times the noise is filtered");
 
                     ImGui::PushItemWidth(100);
-                    if (ImGui::DropDown("##MagType", parameters->Phmagtype, mag_types, mag_type_count, "Mag type"))
+                    if (ImGui::DropDown("##MagType", parameters->Phmagtype, mag_types, "Mag type"))
                     {
                     }
 
                     ImGui::SameLine();
 
                     ImGui::PushItemWidth(100);
-                    if (ImGui::DropDown("##Start", parameters->Pstart, start_types, start_type_count, "Start"))
+                    if (ImGui::DropDown("##Start", parameters->Pstart, start_types, "Start"))
                     {
                     }
 
@@ -258,7 +255,7 @@ void zyn::ui::SubNote::SUBNoteEditorOvertones(SUBnoteParameters *parameters)
     ImGui::Text("Overtone Parameters");
 
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Overtone positions", parameters->POvertoneSpread.type, overtone_positions, overtone_position_count, "Overtone positions"))
+    if (ImGui::DropDown("Overtone positions", parameters->POvertoneSpread.type, overtone_positions, "Overtone positions"))
     {
     }
 

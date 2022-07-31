@@ -2,17 +2,15 @@
 
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.fx/Alienwah.h>
-#include <zyn.fx/EffectPresets.h>
 #include <zyn.fx/EffectMgr.h>
+#include <zyn.fx/EffectPresets.h>
 #include <zyn.mixer/Mixer.h>
 
 char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";
 char const *const TrackFxEditorID = "Track effect";
 
-unsigned int EffectNameCount = 9;
-
-char const *const EffectNames[] = {
+std::vector<std::string> EffectNames = {
     "No effect",
     "Reverb",
     "Echo",
@@ -24,7 +22,7 @@ char const *const EffectNames[] = {
     "DynFilter",
 };
 
-static char const *const reverbPresetNames[] = {
+static std::vector<std::string> reverbPresetNames = {
     "Cathedral 1",
     "Cathedral 2",
     "Cathedral 3",
@@ -40,7 +38,7 @@ static char const *const reverbPresetNames[] = {
     "Very Long 2",
 };
 
-static char const *const echoPresetNames[] = {
+static std::vector<std::string> echoPresetNames = {
     "Echo 1",
     "Echo 2",
     "Echo 3",
@@ -52,7 +50,7 @@ static char const *const echoPresetNames[] = {
     "Feedback Echo",
 };
 
-static char const *const chorusPresetNames[] = {
+static std::vector<std::string> chorusPresetNames = {
     "Chorus 1",
     "Chorus 2",
     "Chorus 3",
@@ -65,7 +63,7 @@ static char const *const chorusPresetNames[] = {
     "Flange 5",
 };
 
-static char const *const phaserPresetNames[] = {
+static std::vector<std::string> phaserPresetNames = {
     "Phaser 1",
     "Phaser 2",
     "Phaser 3",
@@ -80,14 +78,14 @@ static char const *const phaserPresetNames[] = {
     "APhaser 6",
 };
 
-static char const *const alienWahPresetNames[] = {
+static std::vector<std::string> alienWahPresetNames = {
     "Alien Wah 1",
     "Alien Wah 2",
     "Alien Wah 3",
     "Alien Wah 4",
 };
 
-static char const *const distortionPresetNames[] = {
+static std::vector<std::string> distortionPresetNames = {
     "Overdrive 1",
     "Overdrive 2",
     "A. Exciter 1",
@@ -96,7 +94,7 @@ static char const *const distortionPresetNames[] = {
     "Quantisize",
 };
 
-static char const *const dynFilterPresetNames[] = {
+static std::vector<std::string> dynFilterPresetNames = {
     "WahWah",
     "AutoWah",
     "Sweep",
@@ -104,21 +102,19 @@ static char const *const dynFilterPresetNames[] = {
     "VocalMorph 2",
 };
 
-static int const reverbTypeNameCount = 3;
-static char const *const reverbTypeNames[] = {
+static std::vector<std::string> reverbTypeNames = {
     "Random",
     "Freeverb",
     "Bandwidth",
 };
 
 static int const lfoTypeCount = 2;
-static char const *const lfoTypes[] = {
+static std::vector<std::string> lfoTypes = {
     "SINE",
     "TRI",
 };
 
-static const int distortionTypeCount = 14;
-static char const *const distortionTypes[] = {
+static std::vector<std::string> distortionTypes = {
     "Atan",
     "Asym1",
     "Pow",
@@ -135,8 +131,7 @@ static char const *const distortionTypes[] = {
     "Sign",
 };
 
-static const int eqBandTypeCount = 10;
-static char const *const eqBandTypes[] = {
+static std::vector<std::string> eqBandTypes = {
     "Off",
     "Lp1",
     "Hp1",
@@ -149,7 +144,8 @@ static char const *const eqBandTypes[] = {
     "HSh",
 };
 
-zyn::ui::Effect::Effect(AppState *state)
+zyn::ui::Effect::Effect(
+    AppState *state)
     : _state(state)
 {}
 
@@ -278,7 +274,7 @@ void LFOEditor(EffectManager *effectManager, char const *label)
 
     auto lfoType = effectManager->geteffectpar(EffectPresets::LFOFunction);
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("LFO type", lfoType, lfoTypes, lfoTypeCount, "LFO function"))
+    if (ImGui::DropDown("LFO type", lfoType, lfoTypes, "LFO function"))
     {
         effectManager->seteffectpar(EffectPresets::LFOFunction, lfoType);
     }
@@ -311,7 +307,7 @@ void zyn::ui::Effect::EffectEditor(EffectManager *effectManager)
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15, 10));
     auto effect = static_cast<unsigned char>(effectManager->geteffect());
     ImGui::PushItemWidth(250);
-    if (ImGui::DropDown("Effect", effect, EffectNames, EffectNameCount, "Selected Effect"))
+    if (ImGui::DropDown("Effect", effect, EffectNames, "Selected Effect"))
     {
         effectManager->changeeffect(effect);
     }
@@ -352,7 +348,7 @@ void zyn::ui::Effect::EffectReverbEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Preset", preset, reverbPresetNames, 13))
+    if (ImGui::DropDown("Preset", preset, reverbPresetNames))
     {
         effectManager->changepreset(preset);
     }
@@ -361,7 +357,7 @@ void zyn::ui::Effect::EffectReverbEditor(EffectManager *effectManager)
 
     auto type = static_cast<unsigned char>(effectManager->geteffectpar(ReverbPresets::ReverbType));
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Type", type, reverbTypeNames, reverbTypeNameCount))
+    if (ImGui::DropDown("Type", type, reverbTypeNames))
     {
         effectManager->seteffectpar(ReverbPresets::ReverbType, type);
     }
@@ -433,7 +429,7 @@ void zyn::ui::Effect::EffectEchoEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Preset", preset, echoPresetNames, 9))
+    if (ImGui::DropDown("Preset", preset, echoPresetNames))
     {
         effectManager->changepreset(preset);
     }
@@ -485,7 +481,7 @@ void zyn::ui::Effect::EffectChorusEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Preset", preset, chorusPresetNames, 10, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, chorusPresetNames, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -542,7 +538,7 @@ void zyn::ui::Effect::EffectPhaserEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Preset", preset, phaserPresetNames, 12, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, phaserPresetNames, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -615,7 +611,7 @@ void zyn::ui::Effect::EffectAlienWahEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Preset", preset, alienWahPresetNames, 4, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, alienWahPresetNames, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -671,7 +667,7 @@ void zyn::ui::Effect::EffectDistortionEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Preset", preset, distortionPresetNames, 6, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, distortionPresetNames, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }
@@ -680,7 +676,7 @@ void zyn::ui::Effect::EffectDistortionEditor(EffectManager *effectManager)
 
     auto type = static_cast<unsigned char>(effectManager->geteffectpar(DistorsionPresets::DistorsionType));
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Type", type, distortionTypes, distortionTypeCount, "Distortion Type"))
+    if (ImGui::DropDown("Type", type, distortionTypes, "Distortion Type"))
     {
         effectManager->changepreset(type);
     }
@@ -797,7 +793,7 @@ void zyn::ui::Effect::EffectEQEditor(EffectManager *effectManager)
             if (ImGui::BeginTabItem(label, nullptr, type != 0 ? ImGuiTabItemFlags_UnsavedDocument : ImGuiTabItemFlags_None))
             {
                 ImGui::PushItemWidth(100);
-                if (ImGui::DropDown("EQ Type", type, eqBandTypes, eqBandTypeCount, "Equalizer type"))
+                if (ImGui::DropDown("EQ Type", type, eqBandTypes, "Equalizer type"))
                 {
                     effectManager->seteffectpar(presetStart + EQPresets::EQBandType, type);
                 }
@@ -844,7 +840,7 @@ void zyn::ui::Effect::EffectDynFilterEditor(EffectManager *effectManager)
 {
     auto preset = static_cast<unsigned char>(effectManager->getpreset());
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("Preset", preset, dynFilterPresetNames, 5, "Effect presets"))
+    if (ImGui::DropDown("Preset", preset, dynFilterPresetNames, "Effect presets"))
     {
         effectManager->changepreset(preset);
     }

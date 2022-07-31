@@ -5,7 +5,7 @@
 #include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
 
-char const *const WaveShapingFunctions[] = {
+std::vector<std::string> WaveShapingFunctions = {
     "None",
     "Atan",
     "Asym1",
@@ -22,9 +22,8 @@ char const *const WaveShapingFunctions[] = {
     "Pow2",
     "Sgm",
 };
-unsigned int WaveShapingFunctionCount = 15;
 
-char const *const OscilFilterTypes[] = {
+std::vector<std::string> OscilFilterTypes = {
     "None",
     "LP1",
     "HP1a",
@@ -40,25 +39,22 @@ char const *const OscilFilterTypes[] = {
     "LSh",
     "S",
 };
-unsigned int OscilFilterTypeCount = 14;
 
-char const *const ModulationTypes[] = {
+std::vector<std::string> ModulationTypes = {
     "None",
     "Rev",
     "Sine",
     "Pow",
 };
-unsigned int ModulationTypeCount = 4;
 
-char const *const SpectrumAdjustmentTypes[] = {
+std::vector<std::string> SpectrumAdjustmentTypes = {
     "None",
     "Pow",
     "ThrsD",
     "ThrsU",
 };
-unsigned int SpectrumAdjustmentTypeCount = 4;
 
-char const *const AddaptiveHarmonicsTypes[] = {
+std::vector<std::string> AddaptiveHarmonicsTypes = {
     "OFF",
     "ON",
     "Square",
@@ -69,7 +65,6 @@ char const *const AddaptiveHarmonicsTypes[] = {
     "4xSub",
     "4xAdd",
 };
-unsigned int AddaptiveHarmonicsTypeCount = 9;
 
 zyn::ui::OscilGen::OscilGen(AppState *state)
     : _state(state)
@@ -88,7 +83,7 @@ void zyn::ui::OscilGen::Render()
 
     ImGui::Text("Oscillator");
 
-    if (ImGui::BeginChild(OscillatorEditorID, ImVec2(0,0), true) && track != nullptr && _state->_currentVoiceOscil >= 0)
+    if (ImGui::BeginChild(OscillatorEditorID, ImVec2(0, 0), true) && track != nullptr && _state->_currentVoiceOscil >= 0)
     {
         auto oscil = track->Instruments[0].adpars->VoicePar[_state->_currentVoiceOscil].OscilSmp;
 
@@ -98,7 +93,7 @@ void zyn::ui::OscilGen::Render()
             ImGui::Text("Waveshaping");
 
             ImGui::PushItemWidth(175);
-            ImGui::DropDown("##Waveshaping function", oscil->Pwaveshapingfunction, WaveShapingFunctions, WaveShapingFunctionCount, "Waveshaping function");
+            ImGui::DropDown("##Waveshaping function", oscil->Pwaveshapingfunction, WaveShapingFunctions, "Waveshaping function");
 
             ImGui::KnobUchar("##Waveshaping Parameter", &oscil->Pwaveshaping, 0, 127, ImVec2(30, 30), "Waveshaping Parameter");
         }
@@ -107,7 +102,7 @@ void zyn::ui::OscilGen::Render()
             ImGui::Text("Oscillator's filter");
 
             ImGui::PushItemWidth(175);
-            ImGui::DropDown("##OscillatorsFilter", oscil->Pfiltertype, OscilFilterTypes, OscilFilterTypeCount, "Oscillator's filter type");
+            ImGui::DropDown("##OscillatorsFilter", oscil->Pfiltertype, OscilFilterTypes, "Oscillator's filter type");
 
             ImGui::KnobUchar("##OscillatorsFilterParameter2", &oscil->Pfilterpar1, 0, 127, ImVec2(30, 30), "Oscillator's filter parameter 1");
 
@@ -120,7 +115,7 @@ void zyn::ui::OscilGen::Render()
             ImGui::Text("Modulation");
 
             ImGui::PushItemWidth(175);
-            ImGui::DropDown("##Modulation", oscil->Pmodulation, ModulationTypes, ModulationTypeCount, "Modulation");
+            ImGui::DropDown("##Modulation", oscil->Pmodulation, ModulationTypes, "Modulation");
 
             ImGui::KnobUchar("##Modulation Parameter1", &oscil->Pmodulationpar1, 0, 127, ImVec2(30, 30), "Modulation Parameter 1");
 
@@ -137,7 +132,7 @@ void zyn::ui::OscilGen::Render()
             ImGui::Text("Oscillator's spectrum adjust");
 
             ImGui::PushItemWidth(175);
-            ImGui::DropDown("##OscillatorSpectrum", oscil->Psatype, SpectrumAdjustmentTypes, SpectrumAdjustmentTypeCount, "Oscillator's spectrum adjust");
+            ImGui::DropDown("##OscillatorSpectrum", oscil->Psatype, SpectrumAdjustmentTypes, "Oscillator's spectrum adjust");
 
             ImGui::KnobUchar("##Oscillator Spectrum Parameter", &oscil->Psapar, 0, 127, ImVec2(30, 30), "Oscillator's spectrum adjust Parameter");
         }
@@ -146,7 +141,7 @@ void zyn::ui::OscilGen::Render()
             ImGui::Text("Addaptive Harmonics");
 
             ImGui::PushItemWidth(175);
-            ImGui::DropDown("##AddaptiveHarmonics", oscil->Padaptiveharmonics, AddaptiveHarmonicsTypes, AddaptiveHarmonicsTypeCount, "Addaptive Harmonics");
+            ImGui::DropDown("##AddaptiveHarmonics", oscil->Padaptiveharmonics, AddaptiveHarmonicsTypes, "Addaptive Harmonics");
 
             ImGui::KnobUchar("##AdaptiveHarmonicsPower", &oscil->Padaptiveharmonicspower, 0, 200, ImVec2(30, 30), "Adaptive harmonics power");
 

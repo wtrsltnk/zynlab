@@ -7,7 +7,9 @@
 
 char const *SaveToFileSerializer::WORKSPACE_BRANCH_NAME = "WORKSPACE";
 
-int SaveToFileSerializer::LoadTrack(Track *track, const std::string &filename)
+int SaveToFileSerializer::LoadTrack(
+    Track *track,
+    const std::string &filename)
 {
     PresetsSerializer xml;
     if (xml.loadXMLfile(filename) < 0)
@@ -26,10 +28,12 @@ int SaveToFileSerializer::LoadTrack(Track *track, const std::string &filename)
     return 0;
 }
 
-int SaveToFileSerializer::LoadTrackFromData(class Track *track, const char* data)
+int SaveToFileSerializer::LoadTrackFromData(
+    class Track *track,
+    const char *data)
 {
     PresetsSerializer xml;
-    if (xml.putXMLdata(data) < 0)
+    if (!xml.putXMLdata(data))
     {
         return -1;
     }
@@ -45,7 +49,9 @@ int SaveToFileSerializer::LoadTrackFromData(class Track *track, const char* data
     return 0;
 }
 
-int SaveToFileSerializer::SaveTrack(Track *track, const std::string &filename)
+int SaveToFileSerializer::SaveTrack(
+    Track *track,
+    const std::string &filename)
 {
     PresetsSerializer xml;
 
@@ -56,7 +62,9 @@ int SaveToFileSerializer::SaveTrack(Track *track, const std::string &filename)
     return xml.saveXMLfile(filename);
 }
 
-int SaveToFileSerializer::SaveMixer(class Mixer *mixer, std::string const &filename)
+int SaveToFileSerializer::SaveMixer(
+    class Mixer *mixer,
+    std::string const &filename)
 {
     PresetsSerializer xml;
 
@@ -67,7 +75,9 @@ int SaveToFileSerializer::SaveMixer(class Mixer *mixer, std::string const &filen
     return xml.saveXMLfile(filename);
 }
 
-int SaveToFileSerializer::LoadMixer(class Mixer *mixer, std::string const &filename)
+int SaveToFileSerializer::LoadMixer(
+    class Mixer *mixer,
+    std::string const &filename)
 {
     PresetsSerializer xml;
     if (xml.loadXMLfile(filename) < 0)
@@ -86,7 +96,10 @@ int SaveToFileSerializer::LoadMixer(class Mixer *mixer, std::string const &filen
     return 0;
 }
 
-int SaveToFileSerializer::SaveWorkspace(class Mixer *mixer, class RegionsManager *regions, std::string const &filename)
+int SaveToFileSerializer::SaveWorkspace(
+    class Mixer *mixer,
+    class RegionsManager *regions,
+    std::string const &filename)
 {
     PresetsSerializer xml;
 
@@ -105,7 +118,10 @@ int SaveToFileSerializer::SaveWorkspace(class Mixer *mixer, class RegionsManager
     return xml.saveXMLfile(filename);
 }
 
-int SaveToFileSerializer::LoadWorkspace(class Mixer *mixer, class RegionsManager *regions, std::string const &filename)
+int SaveToFileSerializer::LoadWorkspace(
+    class Mixer *mixer,
+    class RegionsManager *regions,
+    std::string const &filename)
 {
     PresetsSerializer xml;
     if (xml.loadXMLfile(filename) < 0)

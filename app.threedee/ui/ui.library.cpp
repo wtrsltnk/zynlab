@@ -35,6 +35,11 @@ void zyn::ui::Library::Render()
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5, 10));
     if (ImGui::BeginChild(LibraryID, ImVec2(LIBRARY_WIDTH, 0)))
     {
+        if (ImGui::Button("Close Library"))
+        {
+            _state->selectingFromLibrary = false;
+        }
+
         if (ImGui::BeginTabBar("LibraryTabs"))
         {
             if (ImGui::BeginTabItem("Instruments"))
@@ -62,24 +67,31 @@ ILibraryItem *zyn::ui::Library::GetSelectedSample()
     return _selectSample.selectedSample;
 }
 
-bool findStringIC(const std::string &strHaystack, const std::string &strNeedle)
+bool findStringIC(
+    const std::string &strHaystack,
+    const std::string &strNeedle)
 {
     auto it = std::search(
         strHaystack.begin(), strHaystack.end(),
         strNeedle.begin(), strNeedle.end(),
-        [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); });
+        [](char ch1, char ch2) {
+            return std::toupper(ch1) == std::toupper(ch2);
+        });
+
     return (it != strHaystack.end());
 }
 
 void zyn::ui::Library::filterSamples()
 {
     _selectSample.filteredSamples.clear();
+
     for (auto sample : _state->_library->GetSamples())
     {
         if (!findStringIC(sample->GetName(), _selectSample.filter))
         {
             continue;
         }
+
         if (_selectSample.selectedLibrary != nullptr && !sample->GetLibrary()->IsParent(_selectSample.selectedLibrary))
         {
             continue;
@@ -141,7 +153,8 @@ void zyn::ui::Library::RenderSelectSample()
     ImGui::EndChild();
 }
 
-ILibrary *zyn::ui::Library::libraryTree(ILibrary *library)
+ILibrary *zyn::ui::Library::libraryTree(
+    ILibrary *library)
 {
     ILibrary *result = nullptr;
 

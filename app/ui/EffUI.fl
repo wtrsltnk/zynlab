@@ -18,7 +18,7 @@ decl {\#include <stdio.h>} {public
 decl {\#include <string.h>} {public
 } 
 
-decl {\#include "zyn.common/globals.h"} {public
+decl {\#include <zyn.common/globals.h>} {public
 } 
 
 decl {\#include "WidgetPDial.h"} {public
@@ -30,16 +30,16 @@ decl {\#include "EnvelopeUI.h"} {public
 decl {\#include "FilterUI.h"} {public
 } 
 
-decl {\#include "zyn.common/Util.h"} {public
+decl {\#include <zyn.common/Util.h>} {public
 } 
 
-decl {\#include "zyn.fx/EffectMgr.h"} {public
+decl {\#include <zyn.fx/EffectMgr.h>} {public
 }
 
-decl {\#include "zyn.fx/AlienWah.h"} {public
+decl {\#include <zyn.fx/AlienWah.h>} {public
 }
 
-decl {\#include "zyn.fx/Phaser.h"} {public
+decl {\#include <zyn.fx/Phaser.h>} {public
 }
 
 decl {\#include "PresetsUI.h"} {public
@@ -92,24 +92,24 @@ fl_color(fl_lighter( FL_GRAY));
 fl_line_style(FL_SOLID);
 fl_line(ox+2,oy+ly/2,ox+lx-2,oy+ly/2);
 
-freqx=getfreqpos(1000.0);
+freqx=getfreqpos(1000.0f);
 if ((freqx>0.0)&&(freqx<1.0))
    fl_line(ox+(int) (freqx*lx),oy,
     ox+(int) (freqx*lx),oy+ly);
 
 for (i=1;i<10;i++){
    if(i==1){
-     draw_freq_line(i*100.0,0);
-     draw_freq_line(i*1000.0,0);
+     draw_freq_line(i*100.0f,0);
+     draw_freq_line(i*1000.0f,0);
    }else 
     if (i==5){
-      draw_freq_line(i*10.0,2);
-      draw_freq_line(i*100.0,2);
-      draw_freq_line(i*1000.0,2);
+      draw_freq_line(i*10.0f,2);
+      draw_freq_line(i*100.0f,2);
+      draw_freq_line(i*1000.0f,2);
     }else{
-      draw_freq_line(i*10.0,1);
-      draw_freq_line(i*100.0,1);
-      draw_freq_line(i*1000.0,1);
+      draw_freq_line(i*10.0f,1);
+      draw_freq_line(i*100.0f,1);
+      draw_freq_line(i*1000.0f,1);
     };
 };
 
@@ -158,12 +158,12 @@ return(idbresp);} {}
   Function {getfreqx(float x)} {return_type float
   } {
     code {if (x>1.0) x=1.0;
-return(20.0*pow((float)1000.0,x));} {}
+return(20.0*pow(1000.0f,x));} {}
   }
   Function {getfreqpos(float freq)} {return_type float
   } {
-    code {if (freq<0.00001) freq=0.00001;
-return(log(freq/20.0)/log(1000.0));} {}
+    code {if (freq<0.00001f) freq=0.00001f;
+return(log(freq/20.0f)/log(1000.0f));} {}
   }
   decl {int oldx,oldy;} {}
   decl {float khzval;} {public

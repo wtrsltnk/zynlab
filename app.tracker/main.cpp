@@ -183,7 +183,11 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(
     WPARAM wParam,
     LPARAM lParam);
 
-LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT WINAPI WndProc(
+    HWND hWnd,
+    UINT msg,
+    WPARAM wParam,
+    LPARAM lParam)
 {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
     {

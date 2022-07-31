@@ -338,7 +338,7 @@ void Config::getConfigFileName(char *name, int namesize)
     name[0] = 0;
 #ifdef _WIN32
     char temp[FILENAME_MAX];
-    snprintf(name, static_cast<size_t>(namesize), "%s%s", getcwd(temp, FILENAME_MAX), "\\.zynaddsubfxXML.cfg");
+    snprintf(name, static_cast<size_t>(namesize), "%s%s", _getcwd(temp, FILENAME_MAX), "\\.zynaddsubfxXML.cfg");
 #else
     snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
 #endif

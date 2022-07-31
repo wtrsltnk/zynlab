@@ -3,34 +3,31 @@
 
 #include "../appstate.h"
 
-extern char const *const WaveShapingFunctions[];
-extern unsigned int WaveShapingFunctionCount;
-extern char const *const OscilFilterTypes[];
-extern unsigned int OscilFilterTypeCount;
-extern char const *const ModulationTypes[];
-extern unsigned int ModulationTypeCount;
-extern char const *const SpectrumAdjustmentTypes[];
-extern unsigned int SpectrumAdjustmentTypeCount;
-extern char const *const AddaptiveHarmonicsTypes[];
-extern unsigned int AddaptiveHarmonicsTypeCount;
+extern std::vector<std::string> WaveShapingFunctions;
+extern std::vector<std::string> OscilFilterTypes;
+extern std::vector<std::string> ModulationTypes;
+extern std::vector<std::string> SpectrumAdjustmentTypes;
+extern std::vector<std::string> AddaptiveHarmonicsTypes;
 
-namespace zyn {
-namespace ui {
-
-class OscilGen
+namespace zyn
 {
-private:
-    AppState *_state;
+    namespace ui
+    {
 
-public:
-    OscilGen(AppState *state);
-    virtual ~OscilGen();
+        class OscilGen
+        {
+        private:
+            AppState *_state;
 
-    bool Setup();
-    void Render();
-};
+        public:
+            OscilGen(AppState *state);
+            virtual ~OscilGen();
 
-} // namespace ui
+            bool Setup();
+            void Render();
+        };
+
+    } // namespace ui
 } // namespace zyn
 
 #endif // UI_OSCILGEN_H

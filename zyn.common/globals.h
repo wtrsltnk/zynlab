@@ -302,10 +302,10 @@ public:
 
     inline void alias()
     {
-        halfsamplerate_f = (samplerate_f = samplerate) / 2.0f;
-        buffersize_f = buffersize;
+        halfsamplerate_f = (samplerate_f = float(samplerate)) / 2.0f;
+        buffersize_f = float(buffersize);
         bufferbytes = buffersize * sizeof(float);
-        oscilsize_f = oscilsize;
+        oscilsize_f = float(oscilsize);
     }
     static float numRandom(); //defined in Util.cpp for now
 };

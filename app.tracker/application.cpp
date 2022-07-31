@@ -91,8 +91,8 @@ bool Application::Setup()
 
     _session._library = _library.get();
 
-    _session._library->AddLibraryLocation("C:\\Program Files (x86)\\ZynAddSubFX\\banks\\");
-    //*
+    _session._library->AddLibraryLocation("C:\\Code\\synthdev\\zynaddsubfx-instruments\\banks");
+
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
     {
         if (Config::Current().cfg.bankRootDirList[i].size() == 0)
@@ -101,9 +101,8 @@ bool Application::Setup()
         }
         _session._library->AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
     }
-    /*/
+
     _session._library->RefreshLibraries();
-    //*/
 
     Nio::preferedSampleRate(SystemSettings::Instance().samplerate);
 

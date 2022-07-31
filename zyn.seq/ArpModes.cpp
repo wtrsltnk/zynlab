@@ -45,7 +45,7 @@ ArpModes::Enum ArpModes::ToEnum(unsigned int value)
     return static_cast<ArpModes::Enum>(value);
 }
 
-char const *const ArpModes::Names[] = {
+std::vector<std::string> ArpModes::Names = {
     ARP_MODE_NAME_ONLY_ONE_NOTE,
     ARP_MODE_NAME_ONLY_CHORDS,
     ARP_MODE_NAME_UP,

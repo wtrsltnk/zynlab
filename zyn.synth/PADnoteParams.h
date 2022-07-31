@@ -24,7 +24,6 @@
 #define PAD_NOTE_PARAMETERS_H
 
 #include "AbstractNoteParameters.h"
-#include "EnvelopeParams.h"
 #include "LFOParams.h"
 #include "OscilGen.h"
 #include "Resonance.h"

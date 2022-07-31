@@ -94,12 +94,21 @@ static char const *const toolbarIconFileNames[] = {
     "piano.png",
     "effect.png"};
 
-AppThreeDee::AppThreeDee(GLFWwindow *window, Mixer *mixer, ILibraryManager *library)
-    : _state(mixer, library), _adNoteUI(&_state), _effectUi(&_state), _libraryUi(&_state),
-      _mixerUi(&_state), _padNoteUi(&_state), _subNoteUi(&_state), _smplNoteUi(&_state), _oscilGenUi(&_state), _dialogs(&_state),
-      _window(window),
-      _toolbarIconsAreLoaded(false),
-      _display_w(800), _display_h(600)
+AppThreeDee::AppThreeDee(
+    GLFWwindow *window,
+    Mixer *mixer,
+    ILibraryManager *library)
+    : _state(mixer, library),
+      _adNoteUI(&_state),
+      _effectUi(&_state),
+      _libraryUi(&_state),
+      _mixerUi(&_state),
+      _padNoteUi(&_state),
+      _subNoteUi(&_state),
+      _smplNoteUi(&_state),
+      _oscilGenUi(&_state),
+      _dialogs(&_state),
+      _window(window)
 {
     glfwSetWindowUserPointer(this->_window, static_cast<void *>(this));
 }
@@ -109,7 +118,12 @@ AppThreeDee::~AppThreeDee()
     glfwSetWindowUserPointer(this->_window, nullptr);
 }
 
-void AppThreeDee::KeyActionCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void AppThreeDee::KeyActionCallback(
+    GLFWwindow *window,
+    int key,
+    int scancode,
+    int action,
+    int mods)
 {
     auto app = static_cast<AppThreeDee *>(glfwGetWindowUserPointer(window));
 
@@ -120,14 +134,19 @@ void AppThreeDee::KeyActionCallback(GLFWwindow *window, int key, int scancode, i
     }
 }
 
-void AppThreeDee::ResizeCallback(GLFWwindow *window, int width, int height)
+void AppThreeDee::ResizeCallback(
+    GLFWwindow *window,
+    int width,
+    int height)
 {
     auto app = static_cast<AppThreeDee *>(glfwGetWindowUserPointer(window));
 
     if (app != nullptr) app->onResize(width, height);
 }
 
-void AppThreeDee::onResize(int width, int height)
+void AppThreeDee::onResize(
+    int width,
+    int height)
 {
     this->_display_w = width;
     this->_display_h = height;
@@ -178,32 +197,23 @@ bool AppThreeDee::Setup()
 
     LoadToolbarIcons();
 
-    _state._playTime = 0.0f;
+    _state._playTime = 0;
 
     TrackRegion region;
     region.startAndEnd[0] = std::chrono::milliseconds(0).count();
-    region.startAndEnd[1] = std::chrono::milliseconds(1200).count();
-
-    TrackRegionEvent a, b;
-
-    a.note = 65;
-    a.values[0] = std::chrono::milliseconds(200).count();
-    a.values[1] = std::chrono::milliseconds(600).count();
-    a.velocity = 100;
-    region.eventsByNote->push_back(a);
-
-    b.note = 75;
-    b.values[0] = std::chrono::milliseconds(400).count();
-    b.values[1] = std::chrono::milliseconds(800).count();
-    b.velocity = 100;
-    region.eventsByNote->push_back(b);
+    region.startAndEnd[1] = std::chrono::milliseconds(2000).count();
 
     _state._regions.AddRegion(0, region);
 
     return true;
 }
 
-void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, float prevPlayTime, float currentPlayTime, int repeat)
+void AppThreeDee::TickRegion(
+    TrackRegion &region,
+    unsigned char trackIndex,
+    float prevPlayTime,
+    float currentPlayTime,
+    int repeat)
 {
     auto track = _state._mixer->GetTrack(trackIndex);
     auto regionSize = region.startAndEnd[1] - region.startAndEnd[0];
@@ -244,7 +254,10 @@ void AppThreeDee::TickRegion(TrackRegion &region, unsigned char trackIndex, floa
     }
 }
 
-void AppThreeDee::TempNoteOn(unsigned int channel, unsigned int note, unsigned int length)
+void AppThreeDee::TempNoteOn(
+    unsigned int channel,
+    unsigned int note,
+    unsigned int length)
 {
     MidiEvent ev;
     ev.type = MidiEventTypes::M_NOTE;
@@ -407,7 +420,7 @@ void AppThreeDee::PianoRollEditor()
                     {
                         sprintf(id, "%4s%d", NoteNames[(107 - c) % NoteNameCount], (107 - c) / NoteNameCount - 1);
                     }
-                    ImGui::TimelineStart(id, drumMode);
+                    ImGui::TimelineStart(id);
                     if (ImGui::IsItemClicked())
                     {
                         TempNoteOn(track->Prcvchn, c, 400);
@@ -423,6 +436,7 @@ void AppThreeDee::PianoRollEditor()
                             _baseNote = c;
                         }
                     }
+
                     timestep new_values[2];
                     if (ImGui::TimelineEnd(new_values))
                     {
@@ -495,12 +509,12 @@ void AppThreeDee::PianoRollEditor()
         ImGui::SameLine();
 
         ImGui::PushItemWidth(200);
-        ImGui::DropDown("##ArpMode", selectedArpMode, &(ArpModes::Names[0]), ArpModes::Enum::Count, "Arpeggio Mode");
+        ImGui::DropDown("##ArpMode", selectedArpMode, ArpModes::Names, "Arpeggio Mode");
 
         ImGui::SameLine();
 
         ImGui::PushItemWidth(200);
-        ImGui::DropDown("##Chord", selectedChord, &(Chords::Names[0]), (Chords::Enum::Count), "Chord");
+        ImGui::DropDown("##Chord", selectedChord, Chords::Names, "Chord");
 
         ImGui::SameLine();
 
@@ -695,7 +709,7 @@ void AppThreeDee::RegionEditor()
     //                    sprintf(id, "Track %d", trackIndex);
     //                    bool muted = !track->Penabled;
     //                    bool solo = trackIndex == _state._mixer->Psolotrack;
-    //                    ImGui::TimelineStart(id, false, &muted, &solo);
+    //                    ImGui::TimelineStart(id, &muted, &solo);
     //                    if (solo)
     //                    {
     //                        _state._mixer->Psolotrack = trackIndex;
@@ -807,7 +821,8 @@ void AppThreeDee::RenderDialogs()
     }
 }
 
-void AppThreeDee::ChangeAppMode(AppMode appMode)
+void AppThreeDee::ChangeAppMode(
+    AppMode appMode)
 {
     _state._uiState._activeMode = appMode;
 }
@@ -911,7 +926,6 @@ void AppThreeDee::ActivityBar()
     }
 }
 
-
 void AppThreeDee::HitKey(
     int octave,
     int key)
@@ -925,7 +939,7 @@ void AppThreeDee::HitKey(
     TempNoteOn(0, (octave * 12) + key, 400);
 }
 
-static int keyDown = 0;
+static unsigned int keyDown = 0;
 
 void KeyUp(
     unsigned int channel,
@@ -1035,6 +1049,7 @@ int BlackKeyToNote(
 
     return -1;
 }
+
 enum class KeyTypes
 {
     Black,
@@ -1290,6 +1305,8 @@ void AppThreeDee::Render()
     {
         Menu();
 
+        ImGuiPlayback();
+
         ActivityBar();
 
         ImGui::SameLine();
@@ -1347,16 +1364,24 @@ void AppThreeDee::Render()
         ImGui::RenderPlatformWindowsDefault();
     }
 
-    int display_w, display_h;
     glfwMakeContextCurrent(_window);
+
+    int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);
+
     glViewport(0, 0, display_w, display_h);
+
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
+
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void AppThreeDee::onKeyAction(int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/)
+void AppThreeDee::onKeyAction(
+    int /*key*/,
+    int /*scancode*/,
+    int /*action*/,
+    int /*mods*/)
 {
 }
 
@@ -1394,7 +1419,9 @@ void AppThreeDee::LoadToolbarIcons()
     }
 }
 
-void gen_random(char *s, const int len)
+void gen_random(
+    char *s,
+    const int len)
 {
     static const char alphanum[] =
         "0123456789"
@@ -1411,7 +1438,7 @@ void gen_random(char *s, const int len)
 
 void AppThreeDee::ImGuiPlayback()
 {
-    /*    auto width = ImGui::GetWindowContentRegionWidth();
+    auto width = ImGui::GetWindowContentRegionWidth();
 
     ImGui::BeginChild("Playback", ImVec2(0, 60));
     {
@@ -1419,35 +1446,35 @@ void AppThreeDee::ImGuiPlayback()
 
         ImGui::BeginChild("Playback_Left", ImVec2(480, 60));
         {
-            ImGui::ImageToggleButton("toolbar_library", &_state._showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Library");
+            // ImGui::ImageToggleButton("toolbar_library", &_state._showLibrary, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Library)]), ImVec2(32, 32));
+            // ImGui::ShowTooltipOnHover("Show/Hide Library");
 
-            ImGui::SameLine();
+            // ImGui::SameLine();
 
-            ImGui::ImageToggleButton("toolbar_inspector", &_state._showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Inspector");
+            // ImGui::ImageToggleButton("toolbar_inspector", &_state._showInspector, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Inspector)]), ImVec2(32, 32));
+            // ImGui::ShowTooltipOnHover("Show/Hide Inspector");
 
-            ImGui::SameLine();
+            // ImGui::SameLine();
 
-            ImGui::ImageToggleButton("toolbar_quick_help", &_state._showQuickHelp, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::QuickHelp)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Quick Help");
+            // ImGui::ImageToggleButton("toolbar_quick_help", &_state._showQuickHelp, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::QuickHelp)]), ImVec2(32, 32));
+            // ImGui::ShowTooltipOnHover("Show/Hide Quick Help");
 
-            ImGui::SameLine(0.0f, 8.0f);
+            // ImGui::SameLine(0.0f, 8.0f);
 
-            ImGui::ImageToggleButton("toolbar_mixer", &_state._showMixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Mixer");
+            // ImGui::ImageToggleButton("toolbar_mixer", &_state._showMixer, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Mixer)]), ImVec2(32, 32));
+            // ImGui::ShowTooltipOnHover("Show/Hide Mixer");
 
-            ImGui::SameLine();
+            // ImGui::SameLine();
 
-            ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Editor");
+            // ImGui::ImageToggleButton("toolbar_editor", &_state._showEditor, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Editor)]), ImVec2(32, 32));
+            // ImGui::ShowTooltipOnHover("Show/Hide Editor");
 
-            ImGui::SameLine();
+            // ImGui::SameLine();
 
-            ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
-            ImGui::ShowTooltipOnHover("Show/Hide Smart Controls");
+            // ImGui::ImageToggleButton("toolbar_smart_controls", &_state._showSmartControls, reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::SmartControls)]), ImVec2(32, 32));
+            // ImGui::ShowTooltipOnHover("Show/Hide Smart Controls");
 
-            ImGui::SameLine(0.0f, 8.0f);
+            // ImGui::SameLine(0.0f, 8.0f);
 
             if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(_toolbarIcons[int(ToolbarTools::Rewind)]), ImVec2(32, 32)))
             {
@@ -1496,7 +1523,11 @@ void AppThreeDee::ImGuiPlayback()
         ImGui::PopStyleVar();
     }
     ImGui::EndChild();
-*/
+
+    if (_state.selectingFromLibrary)
+    {
+        _libraryUi.Render();
+    }
 }
 
 void AppThreeDee::Cleanup()

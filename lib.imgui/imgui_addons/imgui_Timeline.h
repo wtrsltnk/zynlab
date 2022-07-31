@@ -26,7 +26,7 @@ enum class TimelineVars
 IMGUI_API void TimelineSetVar(TimelineVars var, unsigned char value);
 IMGUI_API bool BeginTimelines(const char *str_id, timestep *max_value, int row_height = 30, float horizontal_zoom = 50.f, int opt_exact_num_rows = 0, timestep snapping = 100); // last arg, when !=0, enables item culling
 IMGUI_API void EmptyTimeline(const char *str_id);
-IMGUI_API void TimelineStart(const char *str_id, bool drumMode, bool *muted = nullptr, bool *solo = nullptr);
+IMGUI_API void TimelineStart(const char *str_id, bool *muted = nullptr, bool *solo = nullptr);
 IMGUI_API void TimelineReadOnlyEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200));
 IMGUI_API bool TimelineEvent(timestep *values, unsigned int image = 0, ImU32 const tintColor = IM_COL32(255, 255, 255, 200), bool *selected = nullptr);
 IMGUI_API bool TimelineEnd(timestep *new_values = nullptr);
@@ -35,7 +35,7 @@ IMGUI_API bool EndTimelines(timestep *current_time, ImU32 timeline_running_color
 
 namespace ImGui {
 // Timeline implementation (cpp file) from: https://github.com/nem0/LumixEngine/blob/timeline_gui/external/imgui/imgui_user.inl
-static timestep s_max_timeline_value = 0.f;
+static timestep s_max_timeline_value = 0;
 static int s_timeline_num_rows = 0;
 static int s_timeline_display_start = 0;
 static int s_timeline_display_end = 0;
@@ -65,7 +65,9 @@ IMGUI_API void TimelineSetVar(TimelineVars var, unsigned char value)
 #define TEST(expr) \
     if (!(expr)) std::cout << "TEST FAILED @ " << __LINE__ << std::endl;
 
-timestep snap(timestep value, timestep step = s_snapping)
+timestep snap(
+    timestep value,
+    timestep step = s_snapping)
 {
     auto rounded = std::round(double(value / 1024.0) / double(step / 1024.0));
     return timestep(rounded * step);
@@ -83,7 +85,9 @@ void TestSnap()
     TEST(snap3 == 0);
 }
 
-timestep snapFloor(timestep value, timestep step = s_snapping)
+timestep snapFloor(
+    timestep value,
+    timestep step = s_snapping)
 {
     auto floored = std::floor(double(value / 1024.0) / double(step / 1024.0));
     return timestep(floored * step);
@@ -106,12 +110,14 @@ bool CullTimeLine()
     return s_timeline_num_rows > 0 && (s_timeline_display_index < s_timeline_display_start || s_timeline_display_index >= s_timeline_display_end);
 }
 
-float timeToScreenX(timestep time)
+float timeToScreenX(
+    timestep time)
 {
     return float(s_column_width * float(time) / s_max_timeline_value) + TIMELINE_RADIUS;
 }
 
-timestep screenXToTime(float screenX)
+timestep screenXToTime(
+    float screenX)
 {
     return timestep(((screenX - TIMELINE_RADIUS) / s_column_width) * s_max_timeline_value);
 }
@@ -126,7 +132,13 @@ timestep snappedFlooredValueFromMouse()
     return snapFloor(screenXToTime(GetIO().MousePos.x - s_cursor_pos.x));
 }
 
-bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, float horizontal_zoom, int opt_exact_num_rows, timestep snapping)
+bool BeginTimelines(
+    const char *str_id,
+    timestep *max_value,
+    int row_height,
+    float horizontal_zoom,
+    int opt_exact_num_rows,
+    timestep snapping)
 {
     TestSnap();
     TestSnapFloor();
@@ -135,7 +147,7 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
 
     // reset global variables
     s_var_values[int(TimelineVars::ShowAddRemoveButtons)] = 0;
-    s_max_timeline_value = 0.f;
+    s_max_timeline_value = 0;
     s_timeline_num_rows = s_timeline_display_start = s_timeline_display_end = 0;
     s_timeline_display_index = -1;
     s_max_value = max_value;
@@ -146,7 +158,7 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
 
     float const timeline_length = timestep((*s_max_value) * horizontal_zoom) / 1024.0f;
 
-    SetNextWindowContentSize(ImVec2(label_column_width + GetStyle().ItemInnerSpacing.x + timeline_length, s_row_height * opt_exact_num_rows));
+    SetNextWindowContentSize(ImVec2(label_column_width + GetStyle().ItemInnerSpacing.x + timeline_length, float(s_row_height * opt_exact_num_rows)));
 
     ImVec2 const contentSize = ImVec2(0, GetWindowContentRegionMax().y - (GetTextLineHeightWithSpacing() * 2));
     if (!BeginChild(str_id, contentSize, false, ImGuiWindowFlags_HorizontalScrollbar))
@@ -164,14 +176,15 @@ bool BeginTimelines(const char *str_id, timestep *max_value, int row_height, flo
     {
         // Item culling
         s_timeline_num_rows = opt_exact_num_rows;
-        CalcListClipping(s_timeline_num_rows, row_height, &s_timeline_display_start, &s_timeline_display_end);
+        CalcListClipping(s_timeline_num_rows, float(row_height), &s_timeline_display_start, &s_timeline_display_end);
         SetCursorPosY(GetCursorPosY() + (s_timeline_display_start * s_row_height));
     }
 
     return true;
 }
 
-void EmptyTimeline(const char *str_id)
+void EmptyTimeline(
+    const char *str_id)
 {
     ++s_timeline_display_index;
 
@@ -185,7 +198,10 @@ void EmptyTimeline(const char *str_id)
     NextColumn();
 }
 
-void TimelineStart(const char *str_id, bool drumMode, bool *enabled, bool *solo)
+void TimelineStart(
+    const char *str_id,
+    bool *enabled,
+    bool *solo)
 {
     ++s_timeline_display_index;
 
@@ -207,7 +223,7 @@ void TimelineStart(const char *str_id, bool drumMode, bool *enabled, bool *solo)
         assert(enabled != nullptr);
         assert(solo != nullptr);
 
-        BeginChild("##trackinfo", ImVec2(0, s_row_height));
+        BeginChild("##trackinfo", ImVec2(0.0f, float(s_row_height)));
         Text("%s", str_id);
         ToggleButton("m", enabled, ImVec2(20, 20));
         SameLine();
@@ -222,13 +238,14 @@ void TimelineStart(const char *str_id, bool drumMode, bool *enabled, bool *solo)
     s_column_width = (GetColumnWidth(1) - GImGui->Style.ScrollbarSize);
 
     ImVec2 const start = s_cursor_pos + ImVec2(timeToScreenX(0), 0);
-    ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(*s_max_value), s_row_height);
+    ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(*s_max_value), float(s_row_height));
     ImU32 const active_color = s_timeline_display_index % 2 ? ColorConvertFloat4ToU32(color1) : ColorConvertFloat4ToU32(color2);
 
     win->DrawList->AddRectFilled(start, end, active_color);
 }
 
-bool TimelineEnd(timestep *newValues)
+bool TimelineEnd(
+    timestep *newValues)
 {
     if (CullTimeLine()) return false; // item culling
 
@@ -238,7 +255,7 @@ bool TimelineEnd(timestep *newValues)
     timestep const end_new_value = snappedValueFromMouse();
 
     SetCursorScreenPos(s_cursor_pos);
-    if (InvisibleButton(s_str_id, ImVec2(GetWindowContentRegionWidth(), s_row_height)) && newValues != nullptr)
+    if (InvisibleButton(s_str_id, ImVec2(GetWindowContentRegionWidth(), float(s_row_height))) && newValues != nullptr)
     {
         newValues[0] = s_start_new_value < end_new_value ? s_start_new_value : end_new_value;
         newValues[1] = end_new_value > s_start_new_value ? end_new_value : s_start_new_value;
@@ -263,7 +280,7 @@ bool TimelineEnd(timestep *newValues)
     if (IsItemHovered() && IsItemActive() && IsMouseDragging(0))
     {
         ImVec2 const start = s_cursor_pos + ImVec2(timeToScreenX(s_start_new_value), 0);
-        ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(end_new_value), s_row_height);
+        ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(end_new_value), float(s_row_height));
 
         win->DrawList->AddRectFilled(start, end, active_color);
 
@@ -272,14 +289,17 @@ bool TimelineEnd(timestep *newValues)
         EndTooltip();
     }
 
-    SetCursorScreenPos(s_cursor_pos + ImVec2(0, s_row_height));
+    SetCursorScreenPos(s_cursor_pos + ImVec2(0.0f, float(s_row_height)));
 
     NextColumn();
 
     return result;
 }
 
-void TimelineReadOnlyEvent(timestep *values, unsigned int image, ImU32 const tintColor)
+void TimelineReadOnlyEvent(
+    timestep *values,
+    unsigned int image,
+    ImU32 const tintColor)
 {
     if (CullTimeLine())
     {
@@ -311,7 +331,11 @@ void TimelineReadOnlyEvent(timestep *values, unsigned int image, ImU32 const tin
     PopID();
 }
 
-bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, bool *selected)
+bool TimelineEvent(
+    timestep *values,
+    unsigned int image,
+    ImU32 const tintColor,
+    bool *selected)
 {
     if (CullTimeLine())
     {
@@ -330,7 +354,7 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
     timestep newValues[2]{values[0], values[1]};
 
     ImVec2 const start = s_cursor_pos + ImVec2(timeToScreenX(values[0]), 0);
-    ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(values[1]), s_row_height);
+    ImVec2 const end = s_cursor_pos + ImVec2(timeToScreenX(values[1]), float(s_row_height));
 
     PushID(s_event_counter++);
 
@@ -472,7 +496,9 @@ bool TimelineEvent(timestep *values, unsigned int image, ImU32 const tintColor, 
     return changed;
 }
 
-bool EndTimelines(timestep *current_time, ImU32 timeline_running_color)
+bool EndTimelines(
+    timestep *current_time,
+    ImU32 timeline_running_color)
 {
     bool changed = false;
     if (s_timeline_num_rows > 0)

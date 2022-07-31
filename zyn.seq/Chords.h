@@ -1,6 +1,9 @@
 #ifndef CHORDS_H
 #define CHORDS_H
 
+#include <string>
+#include <vector>
+
 struct Chords
 {
     enum Enum
@@ -20,7 +23,7 @@ struct Chords
     static char const *ToString(Chords::Enum chord);
     static Chords::Enum ToEnum(unsigned char value);
     static Chords::Enum ToEnum(unsigned int value);
-    static char const *const Names[];
+    static std::vector<std::string> Names;
 };
 
 #endif // CHORDS_H

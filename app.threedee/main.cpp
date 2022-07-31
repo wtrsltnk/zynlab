@@ -57,7 +57,7 @@ int exitprogram()
     return 0;
 }
 
-int main(int /*argc*/, char * /*argv*/ [])
+int main(int /*argc*/, char * /*argv*/[])
 {
     initprogram();
 
@@ -70,13 +70,13 @@ int main(int /*argc*/, char * /*argv*/ [])
         libraryManager.AddLibraryLocation(Config::Current().cfg.bankRootDirList[i]);
     }
 
+    Nio::defaultSink = "PA";
+    Nio::defaultSource = "RT";
+
     if (!Nio::Start(mixer, mixer))
     {
         return -1;
     }
-
-    Nio::SelectSink("PA");
-    Nio::SelectSource("RT");
 
     Config::Current().init();
 

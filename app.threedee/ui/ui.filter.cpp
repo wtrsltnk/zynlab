@@ -3,15 +3,13 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.dsp/FilterParams.h>
 
-static const int category_count = 3;
-static char const *categories[] = {
+static std::vector<std::string> categories = {
     "Analog",
     "Formant",
     "StVarF",
 };
 
-static const int filter_type_count = 9;
-static char const *filter_types[] = {
+static std::vector<std::string> filter_types = {
     "LPF1",
     "HPF1",
     "LPF2",
@@ -23,8 +21,7 @@ static char const *filter_types[] = {
     "HSh2",
 };
 
-static const int stvarf_filter_type_count = 4;
-static char const *stvarf_filter_types[] = {
+static std::vector<std::string> stvarf_filter_types = {
     "1LPDF",
     "1HPF",
     "1BPF",
@@ -36,7 +33,7 @@ zyn::ui::Filter::Filter() = default;
 void zyn::ui::Filter::Render(FilterParams *parameters)
 {
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("##category", parameters->Pcategory, categories, category_count, "The Category of the Filter (Analog/Formantic/etc.)"))
+    if (ImGui::DropDown("##category", parameters->Pcategory, categories, "The Category of the Filter (Analog/Formantic/etc.)"))
     {
     }
 
@@ -47,7 +44,7 @@ void zyn::ui::Filter::Render(FilterParams *parameters)
         default:
         {
             ImGui::PushItemWidth(100);
-            if (ImGui::DropDown("##filter_type", parameters->Ptype, filter_types, filter_type_count, "Filter type"))
+            if (ImGui::DropDown("##filter_type", parameters->Ptype, filter_types, "Filter type"))
             {
             }
             break;
@@ -60,7 +57,7 @@ void zyn::ui::Filter::Render(FilterParams *parameters)
         case 2:
         {
             ImGui::PushItemWidth(100);
-            if (ImGui::DropDown("##stvarf_filter_type", parameters->Ptype, stvarf_filter_types, stvarf_filter_type_count, "Filter type"))
+            if (ImGui::DropDown("##stvarf_filter_type", parameters->Ptype, stvarf_filter_types, "Filter type"))
             {
             }
             break;

@@ -24,7 +24,6 @@
 #define PRESETS_H
 
 #include "IPresetsSerializer.h"
-#include "PresetsStore.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -91,7 +90,7 @@ public:
     Preset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
     Preset(std::string const &name, unsigned int *value, unsigned int min = 0, unsigned int max = 4294967295);
-    Preset(std::string const &name, int *value, int min = -2147483648, int max = 2147483647);
+    Preset(std::string const &name, int *value, int min = -2147483647, int max = 2147483647);
     Preset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
     Preset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
 
@@ -122,7 +121,7 @@ public:
     Preset &AddPreset(std::string const &name, unsigned char *value, unsigned char min = 0, unsigned char max = 127);
     Preset &AddPreset(std::string const &name, unsigned short int *value, unsigned short int min = 0, unsigned short int max = 16383);
     Preset &AddPreset(std::string const &name, unsigned int *value, unsigned int min = 0, unsigned int max = 4294967295);
-    Preset &AddPreset(std::string const &name, int *value, int min = -2147483648, int max = 2147483647);
+    Preset &AddPreset(std::string const &name, int *value, int min = -2147483647, int max = 2147483647);
     Preset &AddPreset(std::string const &name, short int *value, short int min = 0, short int max = 16383);
     Preset &AddPreset(std::string const &name, float *value, float min = 0.0f, float max = 1.0f);
     Preset &AddPresetAsBool(std::string const &name, unsigned char *value);

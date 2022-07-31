@@ -8,15 +8,12 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-AppState::AppState(class Mixer *mixer, class ILibraryManager *library)
-    : _mixer(mixer), _library(library),
-      _currentInsertEffect(0), _currentSystemEffect(0), _currentTrackEffect(0), _currentLibrary(nullptr),
-      _currentTrack(0), _currentTrackInstrument(0), _currentPattern(-1), _currentVoiceOscil(-1),
-      _sequencerVerticalZoom(50), _sequencerHorizontalZoom(50), _pianoRollEditorHorizontalZoom(150), _showTrackTypeChanger(-1),
-      _bpm(138), _isPlaying(false), _isRecording(false), _playTime(0), _maxPlayTime(4 * 1024)
-{
-    _currentPattern = 0;
-}
+AppState::AppState(
+    class Mixer *mixer,
+    class ILibraryManager *library)
+    : _mixer(mixer),
+      _library(library)
+{ }
 
 AppState::~AppState() = default;
 
@@ -49,7 +46,8 @@ void CleanupPreviewImage(unsigned int previewImage)
     }
 }
 
-void UpdatePreviewImage(TrackRegion &region)
+void UpdatePreviewImage(
+    TrackRegion &region)
 {
     int minNote = 999;
     int maxNote = -999;
@@ -96,6 +94,12 @@ void UpdatePreviewImage(TrackRegion &region)
         {
             continue;
         }
+
+        if (i + minNote < 0)
+        {
+            continue;
+        }
+
         if (region.eventsByNote[i + minNote].empty())
         {
             continue;

@@ -48,7 +48,7 @@ Chords::Enum Chords::ToEnum(unsigned int value)
     return static_cast<Chords::Enum>(value);
 }
 
-char const *const Chords::Names[] = {
+std::vector<std::string> Chords::Names = {
     CHORD_MAJOR,
     CHORD_MINOR,
     CHORD_DIMINISHED,

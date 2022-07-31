@@ -7,8 +7,14 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <stdio.h>
+#include <vector>
 
-void ImGui::UvMeter(char const *label, ImVec2 const &size, int *value, int v_min, int v_max)
+void ImGui::UvMeter(
+    char const *label,
+    ImVec2 const &size,
+    int *value,
+    int v_min,
+    int v_max)
 {
     ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
@@ -29,7 +35,13 @@ void ImGui::UvMeter(char const *label, ImVec2 const &size, int *value, int v_min
     }
 }
 
-bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, ImVec2 const &size, char const *tooltip)
+bool ImGui::Knob(
+    char const *label,
+    float *p_value,
+    float v_min,
+    float v_max,
+    ImVec2 const &size,
+    char const *tooltip)
 {
     bool showLabel = label[0] != '#' && label[1] != '#' && label[0] != '\0';
 
@@ -114,7 +126,13 @@ bool ImGui::Knob(char const *label, float *p_value, float v_min, float v_max, Im
     return value_changed;
 }
 
-bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v_min, unsigned char v_max, ImVec2 const &size, char const *tooltip)
+bool ImGui::KnobUchar(
+    char const *label,
+    unsigned char *p_value,
+    unsigned char v_min,
+    unsigned char v_max,
+    ImVec2 const &size,
+    char const *tooltip)
 {
     bool showLabel = label[0] != '#' && label[1] != '#' && label[0] != '\0';
 
@@ -208,20 +226,24 @@ bool ImGui::KnobUchar(char const *label, unsigned char *p_value, unsigned char v
     return value_changed;
 }
 
-bool ImGui::DropDown(char const *label, unsigned char &value, char const *const names[], unsigned int nameCount, char const *tooltip)
+bool ImGui::DropDown(
+    char const *label,
+    size_t currentValue,
+    std::vector<std::string> const names,
+    char const *tooltip)
 {
     bool value_changed = false;
 
-    auto current_effect_item = names[value];
-    if (ImGui::BeginCombo(label, current_effect_item, ImGuiComboFlags_HeightLarge))
+    auto current_effect_item = names[currentValue];
+    if (ImGui::BeginCombo(label, current_effect_item.c_str(), ImGuiComboFlags_HeightLarge))
     {
-        for (unsigned char n = 0; n < nameCount; n++)
+        for (size_t n = 0; n < names.size(); n++)
         {
             bool is_selected = (current_effect_item == names[n]);
-            if (ImGui::Selectable(names[n], is_selected))
+            if (ImGui::Selectable(names[n].c_str(), is_selected))
             {
                 current_effect_item = names[n];
-                value = n;
+                currentValue = n;
                 value_changed = true;
             }
         }
@@ -233,7 +255,11 @@ bool ImGui::DropDown(char const *label, unsigned char &value, char const *const 
     return value_changed;
 }
 
-bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_texture_id, const ImVec2 &size)
+bool ImGui::ImageToggleButton(
+    const char *str_id,
+    bool *v,
+    ImTextureID user_texture_id,
+    const ImVec2 &size)
 {
     bool valueChange = false;
 
@@ -268,7 +294,11 @@ bool ImGui::ImageToggleButton(const char *str_id, bool *v, ImTextureID user_text
     return valueChange;
 }
 
-bool ImGui::ToggleButtonWithCheckbox(const char *str_id, bool *v, bool *checked, const ImVec2 &size)
+bool ImGui::ToggleButtonWithCheckbox(
+    const char *str_id,
+    bool *v,
+    bool *checked,
+    const ImVec2 &size)
 {
     bool valueChange = false;
 
@@ -314,7 +344,10 @@ bool ImGui::ToggleButtonWithCheckbox(const char *str_id, bool *v, bool *checked,
     return valueChange;
 }
 
-bool ImGui::ToggleButton(const char *str_id, bool *v, const ImVec2 &size)
+bool ImGui::ToggleButton(
+    const char *str_id,
+    bool *v,
+    const ImVec2 &size)
 {
     bool valueChange = false;
 
@@ -347,7 +380,9 @@ bool ImGui::ToggleButton(const char *str_id, bool *v, const ImVec2 &size)
     return valueChange;
 }
 
-bool ImGui::TextCentered(ImVec2 const &size, char const *label)
+bool ImGui::TextCentered(
+    ImVec2 const &size,
+    char const *label)
 {
     ImGuiStyle &style = ImGui::GetStyle();
 
@@ -363,7 +398,8 @@ bool ImGui::TextCentered(ImVec2 const &size, char const *label)
     return result;
 }
 
-void ImGui::ShowTooltipOnHover(char const *tooltip)
+void ImGui::ShowTooltipOnHover(
+    char const *tooltip)
 {
     if (ImGui::IsItemHovered())
     {
@@ -373,7 +409,14 @@ void ImGui::ShowTooltipOnHover(char const *tooltip)
     }
 }
 
-bool ImGui::Fader(const char *label, const ImVec2 &size, int *v, const int v_min, const int v_max, const char *format, float power)
+bool ImGui::Fader(
+    const char *label,
+    const ImVec2 &size,
+    int *v,
+    const int v_min,
+    const int v_max,
+    const char *format,
+    float power)
 {
     ImGuiDataType data_type = ImGuiDataType_S32;
     ImGuiWindow *window = GetCurrentWindow();
@@ -406,7 +449,8 @@ bool ImGui::Fader(const char *label, const ImVec2 &size, int *v, const int v_min
     }
 
     // Draw frame
-    const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+    const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered
+                                                                                                      : ImGuiCol_FrameBg);
     RenderNavHighlight(frame_bb, id);
     RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 

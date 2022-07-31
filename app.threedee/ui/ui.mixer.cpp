@@ -12,8 +12,11 @@
 #include <zyn.nio/Nio.h>
 #include <zyn.serialization/SaveToFileSerializer.h>
 
-zyn::ui::Mixer::Mixer(AppState *appstate)
-    : _state(appstate), _dialogs(appstate), _iconImagesAreLoaded(false)
+zyn::ui::Mixer::Mixer(
+    AppState *appstate)
+    : _state(appstate),
+      _dialogs(appstate),
+      _iconImagesAreLoaded(false)
 {}
 
 zyn::ui::Mixer::~Mixer() = default;
@@ -39,7 +42,7 @@ static float sliderBaseHeight = 140.0f;
 static float const largeModeTreshold = 4.5f;
 static int mostInsertEffectsPerTrack = 0;
 
-static char const *const trackNames[] = {
+static std::vector<std::string> trackNames = {
     "1",
     "2",
     "3",
@@ -130,7 +133,8 @@ void zyn::ui::Mixer::LoadInstrumentIcons()
     }
 }
 
-std::vector<char const *> toCharVector(std::set<std::string> const &strings)
+std::vector<char const *> toCharVector(
+    std::set<std::string> const &strings)
 {
     std::vector<char const *> result;
     for (auto &s : strings)
@@ -175,7 +179,8 @@ void zyn::ui::Mixer::ImGuiMixer()
     ImGui::EndChild();
 }
 
-void zyn::ui::Mixer::RenderTrack(int track)
+void zyn::ui::Mixer::RenderTrack(
+    int track)
 {
     auto highlightTrack = _state->_currentTrack == track;
     ImGui::PushID(track);
@@ -230,7 +235,9 @@ void zyn::ui::Mixer::RenderInspector()
     ImGui::SameLine();
 }
 
-unsigned char indexOf(std::vector<char const *> const &values, std::string const &selectedValue)
+unsigned char indexOf(
+    std::vector<std::string> const &values,
+    std::string const &selectedValue)
 {
     for (size_t i = 0; i < values.size(); i++)
     {
@@ -260,19 +267,19 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
         }
 
         // Output devices
-        auto sinks = toCharVector(Nio::GetSinks());
+        auto sinks = Nio::GetSinks();
         auto selectedSink = indexOf(sinks, Nio::GetSelectedSink());
         ImGui::PushItemWidth(width);
-        if (ImGui::DropDown("##Sinks", selectedSink, &sinks[0], sinks.size(), "Ouput device"))
+        if (ImGui::DropDown("##Sinks", selectedSink, sinks, "Ouput device"))
         {
             Nio::SelectSink(sinks[static_cast<size_t>(selectedSink)]);
         }
 
         // Input devices
-        auto sources = toCharVector(Nio::GetSources());
+        auto sources = Nio::GetSources();
         auto selectedSource = indexOf(sources, Nio::GetSelectedSource());
         ImGui::PushItemWidth(width);
-        if (ImGui::DropDown("##Sources", selectedSource, &sources[0], sources.size(), "Midi device"))
+        if (ImGui::DropDown("##Sources", selectedSource, sources, "Midi device"))
         {
             Nio::SelectSource(sources[static_cast<size_t>(selectedSource)]);
         }
@@ -310,7 +317,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                 ImGui::PushID(fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, _state->_mixer->sysefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
-                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : lineHeight), 0)))
+                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()].c_str(), ImVec2(width - (_state->_mixer->sysefx[fx].geteffect() == 0 ? 0 : lineHeight), 0)))
                 {
                     _state->_currentSystemEffect = fx;
                     ImGui::SetWindowFocus(SystemFxEditorID);
@@ -318,9 +325,9 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
                 ImGui::OpenPopupOnItemClick("MasterSystemEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("MasterSystemEffectSelection"))
                 {
-                    for (unsigned int i = 0; i < EffectNameCount; i++)
+                    for (size_t i = 0; i < EffectNames.size(); i++)
                     {
-                        if (ImGui::Selectable(EffectNames[i]))
+                        if (ImGui::Selectable(EffectNames[i].c_str()))
                         {
                             _state->_mixer->sysefx[fx].changeeffect(i);
                             _state->_currentSystemEffect = fx;
@@ -453,7 +460,9 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
     ImGui::EndChild();
 }
 
-void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
+void zyn::ui::Mixer::ImGuiTrack(
+    int trackIndex,
+    bool highlightTrack)
 {
     if (trackIndex < 0 || trackIndex >= _state->_mixer->GetTrackCount())
     {
@@ -523,7 +532,8 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         if (ImGui::Button(name.size() == 0 ? "default" : name.c_str(), ImVec2(width - 20 - io.ItemSpacing.x, 0)))
         {
             _state->_currentTrack = trackIndex;
-            ImGui::SetWindowFocus(LibraryID);
+            _state->selectingFromLibrary = true;
+            //ImGui::SetWindowFocus(LibraryID);
         }
         ImGui::ShowTooltipOnHover("Change Track preset");
 
@@ -537,7 +547,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
         // Select midi channel
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         ImGui::PushItemWidth(width);
-        if (ImGui::DropDown("##MidiChannel", track->Prcvchn, trackNames, _state->_mixer->GetTrackCount(), "Midi channel"))
+        if (ImGui::DropDown("##MidiChannel", track->Prcvchn, trackNames, "Midi channel"))
         {
             _state->_currentTrack = trackIndex;
         }
@@ -659,7 +669,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
 
                 ImGui::SameLine();
 
-                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()], ImVec2(width - lineHeight - 1, 0)))
+                if (ImGui::Button(EffectNames[_state->_mixer->sysefx[fx].geteffect()].c_str(), ImVec2(width - lineHeight - 1, 0)))
                 {
                     _state->_currentTrack = trackIndex;
                     _state->_currentSystemEffect = fx;
@@ -668,9 +678,9 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 ImGui::OpenPopupOnItemClick("SystemEffectSelection", 0);
                 if (ImGui::BeginPopupContextItem("SystemEffectSelection"))
                 {
-                    for (unsigned int i = 0; i < EffectNameCount; i++)
+                    for (unsigned int i = 0; i < EffectNames.size(); i++)
                     {
-                        if (ImGui::Selectable(EffectNames[i]))
+                        if (ImGui::Selectable(EffectNames[i].c_str()))
                         {
                             _state->_mixer->sysefx[fx].changeeffect(int(i));
                             _state->_currentTrack = trackIndex;
@@ -709,7 +719,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 ImGui::PushID(100 + fx);
                 if (_state->_mixer->Pinsparts[fx] == trackIndex)
                 {
-                    if (ImGui::Button(EffectNames[_state->_mixer->insefx[fx].geteffect()], ImVec2(width - 22, 0)))
+                    if (ImGui::Button(EffectNames[_state->_mixer->insefx[fx].geteffect()].c_str(), ImVec2(width - 22, 0)))
                     {
                         _state->_currentInsertEffect = fx;
                         _state->_currentTrack = trackIndex;
@@ -718,9 +728,9 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                     ImGui::OpenPopupOnItemClick("InsertEffectSelection", 0);
                     if (ImGui::BeginPopupContextItem("InsertEffectSelection"))
                     {
-                        for (unsigned int i = 0; i < EffectNameCount; i++)
+                        for (unsigned int i = 0; i < EffectNames.size(); i++)
                         {
-                            if (ImGui::Selectable(EffectNames[i]))
+                            if (ImGui::Selectable(EffectNames[i].c_str()))
                             {
                                 _state->_mixer->insefx[fx].changeeffect(int(i));
                                 _state->_currentInsertEffect = fx;
@@ -784,7 +794,7 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 ImGui::PushID(200 + fx);
                 ImGui::PushStyleColor(ImGuiCol_Button, track->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
-                if (ImGui::Button(EffectNames[track->partefx[fx]->geteffect()], ImVec2(width - (track->partefx[fx]->geteffect() == 0 ? 0 : 22), 0)))
+                if (ImGui::Button(EffectNames[track->partefx[fx]->geteffect()].c_str(), ImVec2(width - (track->partefx[fx]->geteffect() == 0 ? 0 : 22), 0)))
                 {
                     _state->_currentTrack = trackIndex;
                     _state->_currentTrackEffect = fx;
@@ -793,9 +803,9 @@ void zyn::ui::Mixer::ImGuiTrack(int trackIndex, bool highlightTrack)
                 ImGui::OpenPopupOnItemClick("TrackEffectSelection", track->partefx[fx]->geteffect() == 0 ? 0 : 1);
                 if (ImGui::BeginPopupContextItem("TrackEffectSelection"))
                 {
-                    for (unsigned int i = 0; i < EffectNameCount; i++)
+                    for (unsigned int i = 0; i < EffectNames.size(); i++)
                     {
-                        if (ImGui::Selectable(EffectNames[i]))
+                        if (ImGui::Selectable(EffectNames[i].c_str()))
                         {
                             track->partefx[fx]->changeeffect(int(i));
                             _state->_currentTrack = trackIndex;
@@ -987,7 +997,8 @@ void zyn::ui::Mixer::ImGuiChangeInstrumentTypePopup()
     }
 }
 
-void zyn::ui::Mixer::AddInsertFx(int track)
+void zyn::ui::Mixer::AddInsertFx(
+    int track)
 {
     for (int i = 0; i < NUM_INS_EFX; i++)
     {
@@ -999,7 +1010,8 @@ void zyn::ui::Mixer::AddInsertFx(int track)
     }
 }
 
-void zyn::ui::Mixer::RemoveInsertFxFromTrack(int fx)
+void zyn::ui::Mixer::RemoveInsertFxFromTrack(
+    int fx)
 {
     _state->_mixer->Pinsparts[fx] = -1;
 }

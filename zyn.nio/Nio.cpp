@@ -71,30 +71,30 @@ bool Nio::SelectSink(const std::string &name)
     return _audioOutpuManager->SetSink(name);
 }
 
-std::set<std::string> Nio::GetSources()
+std::vector<std::string> Nio::GetSources()
 {
-    std::set<std::string> sources;
+    std::vector<std::string> sources;
 
     for (Engine *e : _engineManager->engines)
     {
         if (dynamic_cast<MidiInput *>(e) != nullptr)
         {
-            sources.insert(e->_name);
+            sources.push_back(e->_name);
         }
     }
 
     return sources;
 }
 
-std::set<std::string> Nio::GetSinks()
+std::vector<std::string> Nio::GetSinks()
 {
-    std::set<std::string> sinks;
+    std::vector<std::string> sinks;
 
     for (Engine *e : _engineManager->engines)
     {
         if (dynamic_cast<AudioOutput *>(e) != nullptr)
         {
-            sinks.insert(e->_name);
+            sinks.push_back(e->_name);
         }
     }
 

@@ -24,14 +24,20 @@
 #include <zyn.common/Config.h>
 #include <zyn.dsp/Filter.h>
 
-PADnote::PADnote(PADnoteParameters *parameters,
-                 Controller *ctl_,
-                 float freq,
-                 float velocity,
-                 int portamento_,
-                 int midinote,
-                 bool besilent)
-    : SynthNote(freq, velocity, portamento_, midinote, besilent)
+PADnote::PADnote(
+    PADnoteParameters *parameters,
+    Controller *ctl_,
+    float freq,
+    float velocity,
+    int portamento_,
+    int midinote,
+    bool besilent)
+    : SynthNote(
+          freq,
+          velocity,
+          portamento_,
+          midinote,
+          besilent)
 {
     pars = parameters;
 
@@ -40,11 +46,24 @@ PADnote::PADnote(PADnoteParameters *parameters,
     setup(freq, velocity, portamento_, midinote);
 }
 
-void PADnote::setup(float freq,
-                    float velocity,
-                    int portamento_,
-                    int midinote,
-                    bool legato)
+PADnote::~PADnote()
+{
+    delete (NoteGlobalPar.FreqEnvelope);
+    delete (NoteGlobalPar.FreqLfo);
+    delete (NoteGlobalPar.AmpEnvelope);
+    delete (NoteGlobalPar.AmpLfo);
+    delete (NoteGlobalPar.GlobalFilterL);
+    delete (NoteGlobalPar.GlobalFilterR);
+    delete (NoteGlobalPar.FilterEnvelope);
+    delete (NoteGlobalPar.FilterLfo);
+}
+
+void PADnote::setup(
+    float freq,
+    float velocity,
+    int portamento_,
+    int midinote,
+    bool legato)
 {
     portamento = portamento_;
     this->velocity = velocity;
@@ -165,11 +184,12 @@ void PADnote::setup(float freq,
     }
 }
 
-void PADnote::legatonote(float freq,
-                         float velocity,
-                         int portamento_,
-                         int midinote,
-                         bool externcall)
+void PADnote::legatonote(
+    float freq,
+    float velocity,
+    int portamento_,
+    int midinote,
+    bool externcall)
 {
     // Manage legato stuff
     if (legato.update(freq, velocity, portamento_, midinote, externcall))
@@ -178,19 +198,8 @@ void PADnote::legatonote(float freq,
     setup(freq, velocity, portamento_, midinote, true);
 }
 
-PADnote::~PADnote()
-{
-    delete (NoteGlobalPar.FreqEnvelope);
-    delete (NoteGlobalPar.FreqLfo);
-    delete (NoteGlobalPar.AmpEnvelope);
-    delete (NoteGlobalPar.AmpLfo);
-    delete (NoteGlobalPar.GlobalFilterL);
-    delete (NoteGlobalPar.GlobalFilterR);
-    delete (NoteGlobalPar.FilterEnvelope);
-    delete (NoteGlobalPar.FilterLfo);
-}
-
-inline void PADnote::fadein(float *smps)
+inline void PADnote::fadein(
+    float *smps)
 {
     int zerocrossings = 0;
     for (int i = 1; i < static_cast<int>(SystemSettings::Instance().buffersize); ++i)
@@ -242,10 +251,11 @@ void PADnote::computecurrentparameters()
     realfreq = basefreq * portamentofreqrap * powf(2.0f, globalpitch / 12.0f) * ctl->pitchwheel.relfreq;
 }
 
-int PADnote::Compute_Linear(float *outl,
-                            float *outr,
-                            int freqhi,
-                            float freqlo)
+int PADnote::Compute_Linear(
+    float *outl,
+    float *outr,
+    int freqhi,
+    float freqlo)
 {
     float *smps = pars->sample[nsample].smp;
     if (smps == nullptr)
@@ -275,10 +285,12 @@ int PADnote::Compute_Linear(float *outl,
     }
     return 1;
 }
-int PADnote::Compute_Cubic(float *outl,
-                           float *outr,
-                           int freqhi,
-                           float freqlo)
+
+int PADnote::Compute_Cubic(
+    float *outl,
+    float *outr,
+    int freqhi,
+    float freqlo)
 {
     float *smps = pars->sample[nsample].smp;
     if (smps == nullptr)
@@ -326,7 +338,9 @@ int PADnote::Compute_Cubic(float *outl,
     return 1;
 }
 
-int PADnote::noteout(float *outl, float *outr)
+int PADnote::noteout(
+    float *outl,
+    float *outr)
 {
     computecurrentparameters();
     float *smps = pars->sample[nsample].smp;

@@ -18,8 +18,7 @@ extern char const *const TrackFxEditorID;
 extern char const *const OscillatorEditorID;
 extern char const *const LibraryID;
 extern char const *const StepPatternEditorID;
-extern char const *const EffectNames[];
-extern unsigned int EffectNameCount;
+extern std::vector<std::string> EffectNames;
 extern char const *const NoteNames[];
 extern unsigned int NoteNameCount;
 extern char const *const SnappingModes[];
@@ -32,14 +31,17 @@ extern unsigned int ChordCount;
 
 struct tempnote
 {
-    timestep playUntil;
-    unsigned int channel;
-    unsigned int note;
-    bool done;
+    timestep playUntil = 0;
+    unsigned int channel = 0;
+    unsigned int note = 0;
+    bool done = false;
 };
 
-void CleanupPreviewImage(unsigned int previewImage);
-void UpdatePreviewImage(TrackRegion &region);
+void CleanupPreviewImage(
+    unsigned int previewImage);
+
+void UpdatePreviewImage(
+    TrackRegion &region);
 
 enum class AppMode
 {
@@ -53,29 +55,33 @@ enum class AppMode
 class AppState
 {
 public:
-    AppState(class Mixer *mixer, ILibraryManager *library);
+    AppState(
+        class Mixer *mixer,
+        ILibraryManager *library);
+
     virtual ~AppState();
 
-    class Mixer *_mixer;
-    ILibraryManager *_library;
-    int _currentInsertEffect;
-    int _currentSystemEffect;
-    int _currentTrackEffect;
-    ILibrary *_currentLibrary;
-    int _currentTrack;
-    int _currentTrackInstrument;
-    int _currentPattern;
-    int _currentVoiceOscil;
-    int _sequencerVerticalZoom;
-    int _sequencerHorizontalZoom;
-    int _pianoRollEditorHorizontalZoom;
-    int _showTrackTypeChanger;
+    class Mixer *_mixer = nullptr;
+    ILibraryManager *_library = nullptr;
+    int _currentInsertEffect = 0;
+    int _currentSystemEffect = 0;
+    int _currentTrackEffect = 0;
+    ILibrary *_currentLibrary = nullptr;
+    int _currentTrack = 0;
+    int _currentTrackInstrument = 0;
+    int _currentPattern = 0;
+    int _currentVoiceOscil = -1;
+    int _sequencerVerticalZoom = 50;
+    int _sequencerHorizontalZoom = 50;
+    int _pianoRollEditorHorizontalZoom = 150;
+    int _showTrackTypeChanger = -1;
+    bool selectingFromLibrary = false;
 
-    int _bpm;
-    bool _isPlaying;
-    bool _isRecording;
-    std::chrono::milliseconds::rep _playTime;
-    std::chrono::milliseconds::rep _maxPlayTime;
+    int _bpm = 138;
+    bool _isPlaying = false;
+    bool _isRecording = false;
+    std::chrono::milliseconds::rep _playTime = 0;
+    std::chrono::milliseconds::rep _maxPlayTime = 4 * 1024;
     RegionsManager _regions;
 
     std::vector<tempnote> _tempnotes;
@@ -85,7 +91,7 @@ public:
     public:
         UiState();
 
-        AppMode _activeMode;
+        AppMode _activeMode = AppMode::Regions;
     } _uiState;
 };
 

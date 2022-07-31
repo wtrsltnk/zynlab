@@ -38,7 +38,7 @@ static char const *modulation_types[] = {
     "FM",
 };
 
-static char const *voice_types[] = {
+static std::vector<std::string> voice_types = {
     "Sound",
     "Noise",
 };
@@ -131,7 +131,7 @@ void zyn::ui::AdNote::ADNoteVoiceEditorOscillator(ADnoteVoiceParam *parameters)
     ImGui::Text("Voice Oscillator Parameters");
 
     ImGui::PushItemWidth(150);
-    if (ImGui::DropDown("##OscillatoType", parameters->Type, voice_types, voice_type_count, "Voice Type"))
+    if (ImGui::DropDown("##OscillatoType", parameters->Type, voice_types, "Voice Type"))
     {
     }
 

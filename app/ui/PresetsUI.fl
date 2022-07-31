@@ -14,6 +14,9 @@ decl {\#include <stdlib.h>} {public
 decl {\#include "zyn.common/Presets.h"} {public
 } 
 
+decl {\#include "zyn.common/PresetsStore.h"} {public
+}
+
 class PresetsUI_ {} {
   Function {refresh()} {open return_type {virtual void}
   } {

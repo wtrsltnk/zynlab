@@ -3,8 +3,7 @@
 #include "../imgui_addons/imgui_knob.h"
 #include <zyn.synth/LFOParams.h>
 
-static int lfo_type_count = 7;
-static char const *lfo_types[] = {
+static std::vector<std::string> lfo_types = {
     "SINE",
     "TRI",
     "SQR",
@@ -44,7 +43,7 @@ void zyn::ui::Lfo::Render(LFOParams *params, unsigned char *enabled)
     }
 
     ImGui::PushItemWidth(100);
-    if (ImGui::DropDown("##lfotype", params->PLFOtype, lfo_types, lfo_type_count, "LFO Type"))
+    if (ImGui::DropDown("##lfotype", params->PLFOtype, lfo_types, "LFO Type"))
     {
     }
 

@@ -201,19 +201,30 @@ void FormantFilter::filterout(float *smp)
     for (int j = 0; j < numformants; ++j)
     {
         std::vector<float> tmpbuf(SystemSettings::Instance().buffersize);
-        for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+        for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+        {
             tmpbuf[i] = inbuffer[i] * outgain;
+        }
         formant[j]->filterout(tmpbuf.data());
 
         if (ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+        {
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+            {
                 smp[i] += tmpbuf[i] * INTERPOLATE_AMPLITUDE(oldformantamp[j],
                                                             currentformants[j].amp,
                                                             i,
                                                             SystemSettings::Instance().buffersize);
+            }
+        }
         else
-            for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+        {
+            for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+            {
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
+            }
+        }
+
         oldformantamp[j] = currentformants[j].amp;
     }
 }

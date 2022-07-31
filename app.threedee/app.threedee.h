@@ -44,7 +44,7 @@ private:
 
     GLFWwindow *_window;
     std::vector<unsigned int> _toolbarIcons;
-    bool _toolbarIconsAreLoaded;
+    bool _toolbarIconsAreLoaded = false;
     std::chrono::milliseconds::rep _lastSequencerTimeInMs;
 
     std::string _currentFileName;
@@ -54,7 +54,8 @@ public:
     static void ResizeCallback(GLFWwindow *window, int width, int height);
 
 protected:
-    int _display_w, _display_h;
+    int _display_w = 800;
+    int _display_h = 600;
 
     void onKeyAction(int key, int scancode, int action, int mods);
     void onResize(int width, int height);
