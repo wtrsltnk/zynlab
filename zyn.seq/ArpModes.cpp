@@ -35,12 +35,14 @@ char const *ArpModes::ToString(ArpModes::Enum arpMode)
     return "";
 }
 
-ArpModes::Enum ArpModes::ToEnum(unsigned char value)
+ArpModes::Enum ArpModes::ToEnum(
+    unsigned char value)
 {
     return static_cast<ArpModes::Enum>(value);
 }
 
-ArpModes::Enum ArpModes::ToEnum(unsigned int value)
+ArpModes::Enum ArpModes::ToEnum(
+    unsigned int value)
 {
     return static_cast<ArpModes::Enum>(value);
 }

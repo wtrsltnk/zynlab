@@ -20,9 +20,15 @@ struct Chords
         Count,
     };
 
-    static char const *ToString(Chords::Enum chord);
-    static Chords::Enum ToEnum(unsigned char value);
-    static Chords::Enum ToEnum(unsigned int value);
+    static char const *ToString(
+        Chords::Enum chord);
+
+    static Chords::Enum ToEnum(
+        unsigned char value);
+
+    static Chords::Enum ToEnum(
+        unsigned int value);
+
     static std::vector<std::string> Names;
 };
 

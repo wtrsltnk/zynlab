@@ -19,9 +19,15 @@ struct ArpModes
         Count,
     };
 
-    static char const *ToString(ArpModes::Enum arpMode);
-    static ArpModes::Enum ToEnum(unsigned char value);
-    static ArpModes::Enum ToEnum(unsigned int value);
+    static char const *ToString(
+        ArpModes::Enum arpMode);
+
+    static ArpModes::Enum ToEnum(
+        unsigned char value);
+
+    static ArpModes::Enum ToEnum(
+        unsigned int value);
+
     static std::vector<std::string> Names;
 };
 

@@ -38,12 +38,14 @@ char const *Chords::ToString(Chords::Enum chord)
     return "";
 }
 
-Chords::Enum Chords::ToEnum(unsigned char value)
+Chords::Enum Chords::ToEnum(
+    unsigned char value)
 {
     return static_cast<Chords::Enum>(value);
 }
 
-Chords::Enum Chords::ToEnum(unsigned int value)
+Chords::Enum Chords::ToEnum(
+    unsigned int value)
 {
     return static_cast<Chords::Enum>(value);
 }
