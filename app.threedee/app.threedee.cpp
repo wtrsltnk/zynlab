@@ -201,7 +201,7 @@ bool AppThreeDee::Setup()
 
     TrackRegion region;
     region.startAndEnd[0] = std::chrono::milliseconds(0).count();
-    region.startAndEnd[1] = std::chrono::milliseconds(2000).count();
+    region.startAndEnd[1] = std::chrono::milliseconds(4000).count();
 
     _state._regions.AddRegion(0, region);
 
@@ -1289,7 +1289,7 @@ void AppThreeDee::Render()
     ImGui::NewFrame();
     ImGuiIO &io = ImGui::GetIO();
 
-    Piano();
+    //Piano();
 
     ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);

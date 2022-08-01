@@ -15,11 +15,14 @@ public:
         int length,
         int velocity);
 
-        static char const *NoteToString(unsigned int note);
+    static char const *NoteToString(
+        unsigned int note);
 
-    static char const *ValueToString(unsigned int note);
+    static char const *ValueToString(
+        unsigned int note);
 
-    static unsigned int StringToValue(char const str[2]);
+    static unsigned int StringToValue(
+        char const str[2]);
 };
 
 #endif // NOTE_H

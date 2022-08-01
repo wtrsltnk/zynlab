@@ -5,7 +5,7 @@ Pattern::Pattern(
     std::string const &name,
     unsigned int length)
     : _name(name),
-    _length(length)
+      _length(length)
 {
     for (unsigned int t = 0; t < NUM_MIXER_TRACKS; t++)
     {
@@ -21,9 +21,7 @@ std::string const &Pattern::Name() const
 void Pattern::Rename(
     std::string const &name)
 {
-    std::cout << _name << "" << name << std::endl;
     _name = name;
-    std::cout << _name << "" << name << std::endl;
 }
 
 unsigned int Pattern::Length() const
