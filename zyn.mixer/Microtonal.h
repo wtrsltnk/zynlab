@@ -39,11 +39,14 @@ class Microtonal : public WrappedPresets
 public:
     /**Constructor*/
     Microtonal();
+
     /**Destructor*/
     ~Microtonal();
 
     /**Calculates the frequency for a given note*/
-    float getnotefreq(int note, int keyshift) const;
+    float getnotefreq(
+        int note,
+        int keyshift) const;
 
 public: //Parameters
     /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
@@ -104,20 +107,37 @@ public: //Parameters
 public: // Serialization
     void InitPresets();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
     void Defaults();
 
-    int saveXML(const char *filename);
-    int loadXML(const char *filename);
+    int saveXML(
+        const char *filename);
+
+    int loadXML(
+        const char *filename);
 
     //simple operators primarily for debug
-    bool operator==(const Microtonal &micro) const;
-    bool operator!=(const Microtonal &micro) const;
+    bool operator==(
+        const Microtonal &micro) const;
+
+    bool operator!=(
+        const Microtonal &micro) const;
 
 private:
-    int linetotunings(unsigned int nline, const char *line);
-    int loadline(FILE *file, char *line); //loads a line from the text file, while ignoring the lines beggining with "!"
+    int linetotunings(
+        unsigned int nline,
+        const char *line);
+
+    //loads a line from the text file, while ignoring the lines beggining with "!"
+    int loadline(
+        FILE *file,
+        char *line);
+
     unsigned char octavesize;
     struct
     {

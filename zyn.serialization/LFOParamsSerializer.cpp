@@ -22,14 +22,16 @@
 
 #include "LFOParamsSerializer.h"
 
-LFOParamsSerializer::LFOParamsSerializer(LFOParams *parameters)
+LFOParamsSerializer::LFOParamsSerializer(
+    LFOParams *parameters)
     : _parameters(parameters)
 {
 }
 
 LFOParamsSerializer::~LFOParamsSerializer() = default;
 
-void LFOParamsSerializer::Serialize(IPresetsSerializer *xml)
+void LFOParamsSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addparreal("freq", _parameters->Pfreq);
     xml->addpar("intensity", _parameters->Pintensity);
@@ -42,7 +44,8 @@ void LFOParamsSerializer::Serialize(IPresetsSerializer *xml)
     xml->addparbool("continous", _parameters->Pcontinous);
 }
 
-void LFOParamsSerializer::Deserialize(IPresetsSerializer *xml)
+void LFOParamsSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->Pfreq = xml->getparreal("freq", _parameters->Pfreq, 0.0f, 1.0f);
     _parameters->Pintensity = xml->getpar127("intensity", _parameters->Pintensity);

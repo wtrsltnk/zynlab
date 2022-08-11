@@ -28,19 +28,28 @@
 
 class TrackSerializer
 {
-    Track *_parameters;
-
 public:
-    TrackSerializer(Track *parameters);
+    TrackSerializer(
+        Track *parameters);
+
     virtual ~TrackSerializer();
 
-    void SerializeInstrument(IPresetsSerializer *xml);
-    void DeserializeInstrument(IPresetsSerializer *xml);
+    void SerializeInstrument(
+        IPresetsSerializer *xml);
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void DeserializeInstrument(
+        IPresetsSerializer *xml);
+
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
 
     static char const *BRANCH_NAME;
+
+private:
+    Track *_parameters;
 };
 
 #endif // TRACK_SERIALIZER_H

@@ -22,15 +22,17 @@
 
 #include "AudioOutput.h"
 #include "AudioOutputManager.h"
-#include "SafeQueue.h"
 
 #include <cstring>
 #include <iostream>
 
 using namespace std;
 
-AudioOutput::AudioOutput(unsigned int sampleRate, unsigned int bufferSize)
-    : _sampleRate(sampleRate), _bufferSize(bufferSize)
+AudioOutput::AudioOutput(
+    unsigned int sampleRate,
+    unsigned int bufferSize)
+    : _sampleRate(sampleRate),
+      _bufferSize(bufferSize)
 {}
 
 AudioOutput::~AudioOutput() = default;
@@ -51,7 +53,8 @@ const Stereo<float *> AudioOutput::NextSample()
         .NextSample(_bufferSize);
 }
 
-void AudioOutput::SetAudioEnabled(bool nval)
+void AudioOutput::SetAudioEnabled(
+    bool nval)
 {
     if (nval)
     {

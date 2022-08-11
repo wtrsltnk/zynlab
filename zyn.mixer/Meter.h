@@ -8,18 +8,30 @@ class Meter : public IMeter
 {
 public:
     Meter();
+
     virtual ~Meter();
 
     void Setup();
 
-    void Tick(const float *outl, const float *outr, class Track *part, float volume);
+    void Tick(
+        const float *outl,
+        const float *outr,
+        class Track *part,
+        float volume);
 
-    virtual void SetFakePeak(int instrument, unsigned char velocity);
-    virtual unsigned char GetFakePeak(int instrument);
-    virtual float GetOutPeak(int instrument);
+    virtual void SetFakePeak(
+        int instrument,
+        unsigned char velocity);
+
+    virtual unsigned char GetFakePeak(
+        int instrument);
+
+    virtual float GetOutPeak(
+        int instrument);
 
     //peaks for VU-meter
     virtual void ResetPeaks();
+
     //get VU-meter data
     virtual vuData GetVuData();
 

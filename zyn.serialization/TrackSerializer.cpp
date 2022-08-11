@@ -32,7 +32,8 @@
 
 char const *TrackSerializer::BRANCH_NAME = "INSTRUMENT";
 
-TrackSerializer::TrackSerializer(Track *parameters)
+TrackSerializer::TrackSerializer(
+    Track *parameters)
     : _parameters(parameters)
 {}
 
@@ -40,7 +41,8 @@ TrackSerializer::~TrackSerializer() = default;
 
 #define INSTRUMENT_5_KIT_1_VALUE
 
-void TrackSerializer::SerializeInstrument(IPresetsSerializer *xml)
+void TrackSerializer::SerializeInstrument(
+    IPresetsSerializer *xml)
 {
     xml->beginbranch("INFO");
     xml->addparstr("name", reinterpret_cast<char *>(_parameters->Pname));
@@ -119,7 +121,8 @@ void TrackSerializer::SerializeInstrument(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void TrackSerializer::Serialize(IPresetsSerializer *xml)
+void TrackSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     //parameters
     xml->addparbool("enabled", _parameters->Penabled);
@@ -153,7 +156,8 @@ void TrackSerializer::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void TrackSerializer::DeserializeInstrument(IPresetsSerializer *xml)
+void TrackSerializer::DeserializeInstrument(
+    IPresetsSerializer *xml)
 {
     if (xml->enterbranch("INFO"))
     {
@@ -247,7 +251,8 @@ void TrackSerializer::DeserializeInstrument(IPresetsSerializer *xml)
     }
 }
 
-void TrackSerializer::Deserialize(IPresetsSerializer *xml)
+void TrackSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->Penabled = static_cast<unsigned char>(xml->getparbool("enabled", _parameters->Penabled));
 

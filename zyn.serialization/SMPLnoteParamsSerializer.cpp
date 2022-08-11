@@ -24,13 +24,15 @@
 
 char const *SMPLnoteParametersSerializer::BRANCH_NAME = "SMPL_SYNTH_PARAMETERS";
 
-SMPLnoteParametersSerializer::SMPLnoteParametersSerializer(SampleNoteParameters *parameters)
+SMPLnoteParametersSerializer::SMPLnoteParametersSerializer(
+    SampleNoteParameters *parameters)
     : _parameters(parameters)
 {}
 
 SMPLnoteParametersSerializer::~SMPLnoteParametersSerializer() = default;
 
-void SMPLnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
+void SMPLnoteParametersSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->beginbranch("AMPLITUDE_PARAMETERS");
     {
@@ -59,7 +61,8 @@ void SMPLnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void SMPLnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
+void SMPLnoteParametersSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     if (xml->enterbranch("AMPLITUDE_PARAMETERS"))
     {

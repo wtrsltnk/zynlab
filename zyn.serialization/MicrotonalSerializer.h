@@ -28,14 +28,20 @@
 
 class MicrotonalSerializer
 {
-    Microtonal *_parameters;
-
 public:
-    MicrotonalSerializer(Microtonal *parameters);
+    MicrotonalSerializer(
+        Microtonal *parameters);
+
     virtual ~MicrotonalSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    Microtonal *_parameters;
 };
 
 #endif // MICROTONAL_SERIALIZER_H

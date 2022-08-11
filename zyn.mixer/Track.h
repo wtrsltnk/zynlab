@@ -84,9 +84,6 @@ public:
 /** Track implementation*/
 class Track : public WrappedPresets
 {
-    float *_tmpoutr = nullptr;
-    float *_tmpoutl = nullptr;
-
 public:
     Track();
     virtual ~Track();
@@ -216,6 +213,8 @@ private:
     IMixer *_mixer = nullptr;
     Microtonal *_microtonal = nullptr;
     std::mutex _instrumentMutex;
+    float *_tmpoutr = nullptr;
+    float *_tmpoutl = nullptr;
 };
 
 #endif // TRACK_H

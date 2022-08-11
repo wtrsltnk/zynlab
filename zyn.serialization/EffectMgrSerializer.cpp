@@ -25,13 +25,15 @@
 #include "FilterParamsSerializer.h"
 #include <zyn.fx/Effect.h>
 
-EffectManagerSerializer::EffectManagerSerializer(EffectManager *parameters)
+EffectManagerSerializer::EffectManagerSerializer(
+    EffectManager *parameters)
     : _parameters(parameters)
 {}
 
 EffectManagerSerializer::~EffectManagerSerializer() = default;
 
-void EffectManagerSerializer::Serialize(IPresetsSerializer *xml)
+void EffectManagerSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addpar("type", _parameters->geteffect());
 
@@ -62,7 +64,8 @@ void EffectManagerSerializer::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void EffectManagerSerializer::Deserialize(IPresetsSerializer *xml)
+void EffectManagerSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->changeeffect(xml->getpar127("type", _parameters->geteffect()));
 

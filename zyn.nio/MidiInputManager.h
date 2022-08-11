@@ -3,8 +3,8 @@
 
 #include "SafeQueue.h"
 #include "ZynSema.h"
-#include <string>
 #include <set>
+#include <string>
 #include <zyn.common/IMidiEventHandler.h>
 #include <zyn.common/globals.h>
 
@@ -28,27 +28,41 @@ struct MidiEvent
 
 class MidiInputManager
 {
-    static MidiInputManager *_instance;
-
-    MidiInputManager(IMidiEventHandler *midiEventHandler);
-    class MidiInput *GetMidiInput(std::string const &name);
-
 public:
-    static MidiInputManager &CreateInstance(IMidiEventHandler *midiEventHandler);
+    static MidiInputManager &CreateInstance(
+        IMidiEventHandler *midiEventHandler);
+
     static MidiInputManager &Instance();
+
     static void DestroyInstance();
+
     virtual ~MidiInputManager();
 
-    void PutEvent(MidiEvent ev);
-    void Flush(unsigned int frameStart, unsigned int frameStop);
+    void PutEvent(
+        MidiEvent ev);
+
+    void Flush(
+        unsigned int frameStart,
+        unsigned int frameStop);
+
     bool Empty() const;
 
-    bool SetSource(std::string const &name);
+    bool SetSource(
+        std::string const &name);
+
     std::string GetSource() const;
 
     friend class EngineManager;
 
 private:
+    static MidiInputManager *_instance;
+
+    MidiInputManager(
+        IMidiEventHandler *midiEventHandler);
+
+    class MidiInput *GetMidiInput(
+        std::string const &name);
+
     SafeQueue<MidiEvent> _queue;
     mutable ZynSema _work;
     class MidiInput *_current;

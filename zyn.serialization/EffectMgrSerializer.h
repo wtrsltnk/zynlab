@@ -27,14 +27,20 @@
 
 class EffectManagerSerializer
 {
-    EffectManager *_parameters;
-
 public:
-    EffectManagerSerializer(EffectManager *parameters);
+    EffectManagerSerializer(
+        EffectManager *parameters);
+
     virtual ~EffectManagerSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    EffectManager *_parameters;
 };
 
 #endif // EFFECT_MANAGER_SERIALIZER_H

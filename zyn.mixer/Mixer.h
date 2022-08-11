@@ -79,6 +79,7 @@ class Mixer :
 
 public:
     Mixer();
+
     virtual ~Mixer();
 
     void Init();
@@ -87,15 +88,18 @@ public:
 
     void ApplyParameters();
 
-    // Synth settings
     virtual unsigned int SampleRate() const;
+
     virtual unsigned int BufferSize() const;
+
     virtual unsigned int BufferSizeInBytes() const;
+
     virtual float BufferSizeFloat() const;
 
-    // Mutex
     virtual void Lock();
+
     virtual void Unlock();
+
     virtual std::mutex &Mutex();
 
     //Midi IN

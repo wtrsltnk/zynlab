@@ -16,7 +16,9 @@ static MidiInputManager *_midiInputManager = nullptr;
 std::string Nio::defaultSink;
 std::string Nio::defaultSource;
 
-bool Nio::Start(IAudioGenerator *audioGenerator, IMidiEventHandler *midiEventHandler)
+bool Nio::Start(
+    IAudioGenerator *audioGenerator,
+    IMidiEventHandler *midiEventHandler)
 {
     _midiInputManager = &MidiInputManager::CreateInstance(midiEventHandler);                                     //Enable input wrapper
     _audioOutpuManager = &AudioOutputManager::createInstance(audioGenerator);                                    //Initialize the Output Systems
@@ -49,24 +51,28 @@ void Nio::Stop()
     EngineManager::DestroyInstance(); //DestroyThe Engines
 }
 
-void Nio::SetDefaultSource(const std::string &name)
+void Nio::SetDefaultSource(
+    const std::string &name)
 {
     defaultSource = name;
     std::transform(defaultSource.begin(), defaultSource.end(), defaultSource.begin(), ::toupper);
 }
 
-void Nio::SetDefaultSink(const std::string &name)
+void Nio::SetDefaultSink(
+    const std::string &name)
 {
     defaultSink = name;
     std::transform(defaultSink.begin(), defaultSink.end(), defaultSink.begin(), ::toupper);
 }
 
-bool Nio::SelectSource(const std::string &name)
+bool Nio::SelectSource(
+    const std::string &name)
 {
     return _midiInputManager->SetSource(name);
 }
 
-bool Nio::SelectSink(const std::string &name)
+bool Nio::SelectSink(
+    const std::string &name)
 {
     return _audioOutpuManager->SetSink(name);
 }
@@ -113,7 +119,8 @@ std::string Nio::GetSelectedSink()
 
 #ifdef JACK
 #include <jack/jack.h>
-void Nio::preferedSampleRate(unsigned int &rate)
+void Nio::preferedSampleRate(
+    unsigned int &rate)
 {
     jack_client_t *client = jack_client_open("temp-client",
                                              JackNoStartServer, 0);

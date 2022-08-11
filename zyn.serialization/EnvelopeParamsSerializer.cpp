@@ -22,13 +22,15 @@
 
 #include "EnvelopeParamsSerializer.h"
 
-EnvelopeParamsSerializer::EnvelopeParamsSerializer(EnvelopeParams *parameters)
+EnvelopeParamsSerializer::EnvelopeParamsSerializer(
+    EnvelopeParams *parameters)
     : _parameters(parameters)
 {}
 
 EnvelopeParamsSerializer::~EnvelopeParamsSerializer() = default;
 
-void EnvelopeParamsSerializer::Serialize(IPresetsSerializer *xml)
+void EnvelopeParamsSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addparbool("free_mode", _parameters->Pfreemode);
     xml->addpar("env_points", _parameters->Penvpoints);
@@ -59,7 +61,8 @@ void EnvelopeParamsSerializer::Serialize(IPresetsSerializer *xml)
     }
 }
 
-void EnvelopeParamsSerializer::Deserialize(IPresetsSerializer *xml)
+void EnvelopeParamsSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->Pfreemode = xml->getparbool("free_mode", _parameters->Pfreemode);
     _parameters->Penvpoints = xml->getpar127("env_points", _parameters->Penvpoints);

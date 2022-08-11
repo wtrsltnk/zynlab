@@ -29,16 +29,22 @@
 
 class MixerSerializer
 {
-    Mixer *_parameters;
-
 public:
-    MixerSerializer(Mixer *parameters);
+    MixerSerializer(
+        Mixer *parameters);
+
     virtual ~MixerSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
 
     static char const *BRANCH_NAME;
+
+private:
+    Mixer *_parameters;
 };
 
 #endif // MIXER_SERIALIZER_H

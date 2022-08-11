@@ -34,23 +34,34 @@ class WavFileWriter;
 class WavEngine : public AudioOutput
 {
 public:
-    WavEngine(unsigned int sampleRate, unsigned int bufferSize);
+    WavEngine(
+        unsigned int sampleRate,
+        unsigned int bufferSize);
+
     virtual ~WavEngine();
 
     bool openAudio();
+
     bool Start();
+
     void Stop();
 
     bool IsAudioEnabled() const { return true; }
 
-    void push(Stereo<float *> smps, size_t len);
+    void push(
+        Stereo<float *> smps,
+        size_t len);
 
-    void newFile(WavFileWriter *_file);
+    void newFile(
+        WavFileWriter *_file);
+
     void destroyFile();
 
 protected:
     void *AudioThread();
-    static void *_AudioThread(void *arg);
+
+    static void *_AudioThread(
+        void *arg);
 
 private:
     WavFileWriter *file;

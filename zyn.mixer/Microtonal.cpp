@@ -88,7 +88,9 @@ unsigned char Microtonal::getoctavesize() const
 /*
  * Get the frequency according the note number
  */
-float Microtonal::getnotefreq(int note, int keyshift) const
+float Microtonal::getnotefreq(
+    int note,
+    int keyshift) const
 {
     // in this function will appears many times things like this:
     // var=(a+b*100)%b
@@ -205,12 +207,14 @@ float Microtonal::getnotefreq(int note, int keyshift) const
     return freq * rap_keyshift;
 }
 
-bool Microtonal::operator==(const Microtonal &micro) const
+bool Microtonal::operator==(
+    const Microtonal &micro) const
 {
     return !(*this != micro);
 }
 
-bool Microtonal::operator!=(const Microtonal &micro) const
+bool Microtonal::operator!=(
+    const Microtonal &micro) const
 {
 //A simple macro to test equality MiCRotonal EQuals (not the perfect
 //approach, but good enough)
@@ -271,7 +275,9 @@ bool Microtonal::operator!=(const Microtonal &micro) const
 /*
  * Convert a line to tunings; returns -1 if it ok
  */
-int Microtonal::linetotunings(unsigned int nline, const char *line)
+int Microtonal::linetotunings(
+    unsigned int nline,
+    const char *line)
 {
     int x1 = -1, x2 = -1, type = -1;
     float x = -1.0f, tmp, tuning = 1.0f;
@@ -345,7 +351,8 @@ int Microtonal::linetotunings(unsigned int nline, const char *line)
 /*
  * Convert the text to tunnings
  */
-int Microtonal::texttotunings(const char *text)
+int Microtonal::texttotunings(
+    const char *text)
 {
     unsigned int i, k = 0, nl = 0;
     char *lin;
@@ -396,7 +403,8 @@ int Microtonal::texttotunings(const char *text)
 /*
  * Convert the text to mapping
  */
-void Microtonal::texttomapping(const char *text)
+void Microtonal::texttomapping(
+    const char *text)
 {
     unsigned int i, k = 0;
     char *lin;
@@ -447,7 +455,10 @@ void Microtonal::texttomapping(const char *text)
 /*
  * Convert tunning to text line
  */
-void Microtonal::tuningtoline(int n, char *line, int maxn)
+void Microtonal::tuningtoline(
+    int n,
+    char *line,
+    int maxn)
 {
     if ((n > octavesize) || (n > MAX_OCTAVE_SIZE))
     {
@@ -466,7 +477,9 @@ void Microtonal::tuningtoline(int n, char *line, int maxn)
     }
 }
 
-int Microtonal::loadline(FILE *file, char *line)
+int Microtonal::loadline(
+    FILE *file,
+    char *line)
 {
     do
     {
@@ -481,7 +494,8 @@ int Microtonal::loadline(FILE *file, char *line)
 /*
  * Loads the tunnings from a scl file
  */
-int Microtonal::loadscl(const char *filename)
+int Microtonal::loadscl(
+    const char *filename)
 {
     FILE *file = fopen(filename, "r");
     char tmp[500];
@@ -541,7 +555,8 @@ int Microtonal::loadscl(const char *filename)
 /*
  * Loads the mapping from a kbm file
  */
-int Microtonal::loadkbm(const char *filename)
+int Microtonal::loadkbm(
+    const char *filename)
 {
     FILE *file = fopen(filename, "r");
     int x;
@@ -749,7 +764,8 @@ void Microtonal::InitPresets()
     }
 }
 
-void Microtonal::Serialize(IPresetsSerializer *xml)
+void Microtonal::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addparstr("name", (char *)Pname);
     xml->addparstr("comment", (char *)Pcomment);
@@ -806,7 +822,8 @@ void Microtonal::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void Microtonal::Deserialize(IPresetsSerializer *xml)
+void Microtonal::Deserialize(
+    IPresetsSerializer *xml)
 {
     xml->getparstr("name", (char *)Pname, MICROTONAL_MAX_NAME_LEN);
     xml->getparstr("comment", (char *)Pcomment, MICROTONAL_MAX_NAME_LEN);
@@ -878,7 +895,8 @@ void Microtonal::Deserialize(IPresetsSerializer *xml)
     }
 }
 
-int Microtonal::saveXML(const char *filename)
+int Microtonal::saveXML(
+    const char *filename)
 {
     PresetsSerializer xml;
 
@@ -889,7 +907,8 @@ int Microtonal::saveXML(const char *filename)
     return xml.saveXMLfile(filename);
 }
 
-int Microtonal::loadXML(const char *filename)
+int Microtonal::loadXML(
+    const char *filename)
 {
     PresetsSerializer xml;
 

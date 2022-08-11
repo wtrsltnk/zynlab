@@ -28,16 +28,22 @@
 
 class PADnoteParametersSerializer
 {
-    PADnoteParameters *_parameters;
-
 public:
-    PADnoteParametersSerializer(PADnoteParameters *parameters);
+    PADnoteParametersSerializer(
+        PADnoteParameters *parameters);
+
     virtual ~PADnoteParametersSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
 
     static char const *BRANCH_NAME;
+
+private:
+    PADnoteParameters *_parameters;
 };
 
 #endif // PAD_NOTE_PARAMETERS_SERIALIZER_H

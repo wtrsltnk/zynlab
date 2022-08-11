@@ -28,16 +28,22 @@
 
 class SMPLnoteParametersSerializer
 {
-    SampleNoteParameters *_parameters;
-
 public:
-    SMPLnoteParametersSerializer(SampleNoteParameters *parameters);
+    SMPLnoteParametersSerializer(
+        SampleNoteParameters *parameters);
+
     virtual ~SMPLnoteParametersSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
 
     static char const *BRANCH_NAME;
+
+private:
+    SampleNoteParameters *_parameters;
 };
 
 #endif // SMPLNOTEPARAMSSERIALIZER_H

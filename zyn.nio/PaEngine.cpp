@@ -26,8 +26,11 @@
 
 using namespace std;
 
-PaEngine::PaEngine(unsigned int sampleRate, unsigned int bufferSize)
-    : AudioOutput(sampleRate, bufferSize), stream(nullptr)
+PaEngine::PaEngine(
+    unsigned int sampleRate,
+    unsigned int bufferSize)
+    : AudioOutput(sampleRate, bufferSize),
+      stream(nullptr)
 {
     _name = "PA";
 }
@@ -76,19 +79,22 @@ bool PaEngine::IsAudioEnabled() const
     return stream;
 }
 
-int PaEngine::PAprocess(const void * /*inputBuffer*/,
-                        void *outputBuffer,
-                        unsigned long framesPerBuffer,
-                        const PaStreamCallbackTimeInfo * /*outTime*/,
-                        PaStreamCallbackFlags /*flags*/,
-                        void *userData)
+int PaEngine::PAprocess(
+    const void * /*inputBuffer*/,
+    void *outputBuffer,
+    unsigned long framesPerBuffer,
+    const PaStreamCallbackTimeInfo * /*outTime*/,
+    PaStreamCallbackFlags /*flags*/,
+    void *userData)
 {
     auto engine = static_cast<PaEngine *>(userData);
 
     return engine->process(reinterpret_cast<float *>(outputBuffer), framesPerBuffer);
 }
 
-int PaEngine::process(float *out, unsigned long framesPerBuffer)
+int PaEngine::process(
+    float *out,
+    unsigned long framesPerBuffer)
 {
     auto smp = NextSample();
 

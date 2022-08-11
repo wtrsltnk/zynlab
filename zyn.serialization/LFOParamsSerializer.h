@@ -28,14 +28,20 @@
 
 class LFOParamsSerializer
 {
-    LFOParams *_parameters;
-
 public:
-    LFOParamsSerializer(LFOParams *parameters);
+    LFOParamsSerializer(
+        LFOParams *parameters);
+
     virtual ~LFOParamsSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    LFOParams *_parameters;
 };
 
 #endif // LFO_PARAMS_SERIALIZER_H

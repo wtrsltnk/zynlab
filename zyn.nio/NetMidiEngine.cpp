@@ -70,7 +70,8 @@ bool NetMidiEngine::IsMidiEnabled() const
     return _server.IsStarted();
 }
 
-std::map<std::string, std::string> ParseFormData(const std::string &query)
+std::map<std::string, std::string> ParseFormData(
+    const std::string &query)
 {
     std::map<std::string, std::string> data;
     std::regex pattern("([\\w+%]+)=([^&]*)");
@@ -87,7 +88,9 @@ std::map<std::string, std::string> ParseFormData(const std::string &query)
     return data;
 }
 
-int NetMidiEngine::onRecieveRequest(const net::Request &request, net::Response &response)
+int NetMidiEngine::onRecieveRequest(
+    const net::Request &request,
+    net::Response &response)
 {
     auto formData = ParseFormData(request._payload);
 

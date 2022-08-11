@@ -27,13 +27,15 @@
 
 char const *SUBnoteParametersSerializer::BRANCH_NAME = "SUB_SYNTH_PARAMETERS";
 
-SUBnoteParametersSerializer::SUBnoteParametersSerializer(SUBnoteParameters *parameters)
+SUBnoteParametersSerializer::SUBnoteParametersSerializer(
+    SUBnoteParameters *parameters)
     : _parameters(parameters)
 {}
 
 SUBnoteParametersSerializer::~SUBnoteParametersSerializer() = default;
 
-void SUBnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
+void SUBnoteParametersSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addpar("num_stages", _parameters->Pnumstages);
     xml->addpar("harmonic_mag_type", _parameters->Phmagtype);
@@ -129,7 +131,8 @@ void SUBnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void SUBnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
+void SUBnoteParametersSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->Pnumstages = xml->getpar127("num_stages", _parameters->Pnumstages);
     _parameters->Phmagtype = xml->getpar127("harmonic_mag_type", _parameters->Phmagtype);

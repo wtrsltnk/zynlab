@@ -28,14 +28,20 @@
 
 class ResonanceSerializer
 {
-    Resonance *_parameters;
-
 public:
-    ResonanceSerializer(Resonance *parameters);
+    ResonanceSerializer(
+        Resonance *parameters);
+
     virtual ~ResonanceSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    Resonance *_parameters;
 };
 
 #endif // RESONANCE_SERIALIZER_H

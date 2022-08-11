@@ -3,7 +3,6 @@
 #include "Engine.h"
 #include "EngineManager.h"
 #include "MidiInputManager.h"
-#include "WavEngine.h"
 #include <zyn.common/Util.h>
 #include <zyn.common/WavFileWriter.h>
 
@@ -14,7 +13,8 @@
 
 AudioOutputManager *AudioOutputManager::_instance = nullptr;
 
-AudioOutputManager &AudioOutputManager::createInstance(IAudioGenerator *audioGenerator)
+AudioOutputManager &AudioOutputManager::createInstance(
+    IAudioGenerator *audioGenerator)
 {
     if (AudioOutputManager::_instance == nullptr)
     {
@@ -36,7 +36,8 @@ void AudioOutputManager::destroyInstance()
     AudioOutputManager::_instance = nullptr;
 }
 
-AudioOutputManager::AudioOutputManager(IAudioGenerator *audioGenerator)
+AudioOutputManager::AudioOutputManager(
+    IAudioGenerator *audioGenerator)
     : priBuf(new float[4096], new float[4096]),
       priBuffCurrent(priBuf),
       _audioGenerator(audioGenerator)
@@ -62,11 +63,12 @@ AudioOutputManager::~AudioOutputManager()
 //perform a cheap linear interpolation for resampling
 //This will result in some distortion at frame boundries
 //returns number of samples produced
-static size_t resample(float *dest,
-                       const float *src,
-                       float s_in,
-                       float s_out,
-                       size_t elms)
+static size_t resample(
+    float *dest,
+    const float *src,
+    float s_in,
+    float s_out,
+    size_t elms)
 {
     auto out_elms = static_cast<size_t>(elms * s_out / s_in);
     float r_pos = 0.0f;
@@ -88,7 +90,8 @@ static size_t resample(float *dest,
  * 6) Lets return those samples to the primary and secondary outputs
  * 7) Lets wait for another tick
  */
-const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
+const Stereo<float *> AudioOutputManager::NextSample(
+    unsigned int frameSize)
 {
     removeStaleSmps();
     unsigned int i = 0;
@@ -132,12 +135,14 @@ const Stereo<float *> AudioOutputManager::NextSample(unsigned int frameSize)
     return priBuf;
 }
 
-AudioOutput *AudioOutputManager::GetAudioOutput(std::string const &name)
+AudioOutput *AudioOutputManager::GetAudioOutput(
+    std::string const &name)
 {
     return dynamic_cast<AudioOutput *>(EngineManager::Instance().GetEngine(name));
 }
 
-bool AudioOutputManager::SetSink(std::string const &name)
+bool AudioOutputManager::SetSink(
+    std::string const &name)
 {
     AudioOutput *sink = GetAudioOutput(name);
 

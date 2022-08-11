@@ -28,8 +28,11 @@
 
 using namespace std;
 
-AudioInput::AudioInput(unsigned int sampleRate, unsigned int bufferSize)
-    : _sampleRate(sampleRate), _bufferSize(bufferSize)
+AudioInput::AudioInput(
+    unsigned int sampleRate,
+    unsigned int bufferSize)
+    : _sampleRate(sampleRate),
+      _bufferSize(bufferSize)
 {}
 
 AudioInput::~AudioInput() = default;
@@ -44,7 +47,8 @@ unsigned int AudioInput::BufferSize() const
     return _bufferSize;
 }
 
-void AudioInput::SetAudioEnabled(bool nval)
+void AudioInput::SetAudioEnabled(
+    bool nval)
 {
     if (nval)
     {

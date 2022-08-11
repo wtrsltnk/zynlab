@@ -28,16 +28,22 @@
 
 class SUBnoteParametersSerializer
 {
-    SUBnoteParameters *_parameters;
-
 public:
-    SUBnoteParametersSerializer(SUBnoteParameters *parameters);
+    SUBnoteParametersSerializer(
+        SUBnoteParameters *parameters);
+
     virtual ~SUBnoteParametersSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
 
     static char const *BRANCH_NAME;
+
+private:
+    SUBnoteParameters *_parameters;
 };
 
 #endif // SUB_NOTE_PARAMETERS_SERIALIZER_H

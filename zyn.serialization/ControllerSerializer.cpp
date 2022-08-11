@@ -23,13 +23,15 @@
 #include "ControllerSerializer.h"
 #include <cmath>
 
-ControllerSerializer::ControllerSerializer(Controller *parameters)
+ControllerSerializer::ControllerSerializer(
+    Controller *parameters)
     : _parameters(parameters)
 {}
 
 ControllerSerializer::~ControllerSerializer() = default;
 
-void ControllerSerializer::Serialize(IPresetsSerializer *xml)
+void ControllerSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addpar("pitchwheel_bendrange", _parameters->pitchwheel.bendrange);
 
@@ -58,7 +60,8 @@ void ControllerSerializer::Serialize(IPresetsSerializer *xml)
     xml->addpar("resonance_bandwidth_depth", _parameters->resonancebandwidth.depth);
 }
 
-void ControllerSerializer::Deserialize(IPresetsSerializer *xml)
+void ControllerSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->pitchwheel.bendrange = xml->getpar("pitchwheel_bendrange", _parameters->pitchwheel.bendrange, -6400, 6400);
 

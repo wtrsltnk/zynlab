@@ -4,8 +4,13 @@
 #include <cmath>
 
 vuData::vuData()
-    : outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
-      rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
+    : outpeakl(0.0f),
+      outpeakr(0.0f),
+      maxoutpeakl(0.0f),
+      maxoutpeakr(0.0f),
+      rmspeakl(0.0f),
+      rmspeakr(0.0f),
+      clipped(0)
 {}
 
 Meter::Meter() = default;
@@ -50,12 +55,15 @@ vuData Meter::GetVuData()
     return tmp;
 }
 
-void Meter::SetFakePeak(int instrument, unsigned char velocity)
+void Meter::SetFakePeak(
+    int instrument,
+    unsigned char velocity)
 {
     _fakepeakpart[instrument] = velocity;
 }
 
-unsigned char Meter::GetFakePeak(int instrument)
+unsigned char Meter::GetFakePeak(
+    int instrument)
 {
     std::lock_guard<std::mutex> guard(_vumutex);
 
@@ -64,7 +72,8 @@ unsigned char Meter::GetFakePeak(int instrument)
     return peak;
 }
 
-float Meter::GetOutPeak(int instrument)
+float Meter::GetOutPeak(
+    int instrument)
 {
     std::lock_guard<std::mutex> guard(_vumutex);
 
@@ -73,7 +82,11 @@ float Meter::GetOutPeak(int instrument)
     return db;
 }
 
-void Meter::Tick(const float *outl, const float *outr, Track *part, float volume)
+void Meter::Tick(
+    const float *outl,
+    const float *outr,
+    Track *part,
+    float volume)
 {
     if (!_vumutex.try_lock())
     {

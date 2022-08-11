@@ -25,7 +25,9 @@
 
 EngineManager *EngineManager::_instance = nullptr;
 
-EngineManager &EngineManager::CreateInstance(unsigned int sampleRate, unsigned int bufferSize)
+EngineManager &EngineManager::CreateInstance(
+    unsigned int sampleRate,
+    unsigned int bufferSize)
 {
     if (EngineManager::_instance == nullptr)
     {
@@ -46,7 +48,9 @@ void EngineManager::DestroyInstance()
     EngineManager::_instance = nullptr;
 }
 
-EngineManager::EngineManager(unsigned int sampleRate, unsigned int bufferSize)
+EngineManager::EngineManager(
+    unsigned int sampleRate,
+    unsigned int bufferSize)
 {
     Engine *defaultEng = new NulEngine(sampleRate, bufferSize);
 
@@ -82,7 +86,8 @@ EngineManager::~EngineManager()
     }
 }
 
-Engine *EngineManager::GetEngine(std::string const &name)
+Engine *EngineManager::GetEngine(
+    std::string const &name)
 {
     std::string upperName = name;
     transform(upperName.begin(), upperName.end(), upperName.begin(), ::toupper);
@@ -153,7 +158,8 @@ void EngineManager::Stop()
     }
 }
 
-bool EngineManager::SetDefaultAudioOutput(std::string const &name)
+bool EngineManager::SetDefaultAudioOutput(
+    std::string const &name)
 {
     auto chosen = dynamic_cast<MidiInput *>(GetEngine(name));
 
@@ -170,7 +176,8 @@ bool EngineManager::SetDefaultAudioOutput(std::string const &name)
     return false;
 }
 
-bool EngineManager::SetDefaultMidiInput(std::string const &name)
+bool EngineManager::SetDefaultMidiInput(
+    std::string const &name)
 {
     auto chosen = dynamic_cast<AudioOutput *>(GetEngine(name));
 

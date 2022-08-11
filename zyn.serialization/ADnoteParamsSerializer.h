@@ -28,16 +28,22 @@
 
 class ADnoteParametersSerializer
 {
-    ADnoteParameters *_parameters;
-
 public:
-    ADnoteParametersSerializer(ADnoteParameters *parameters);
+    ADnoteParametersSerializer(
+        ADnoteParameters *parameters);
+
     virtual ~ADnoteParametersSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
 
     static char const *BRANCH_NAME;
+
+private:
+    ADnoteParameters *_parameters;
 };
 
 #endif // AD_NOTE_PARAMETERS_SERIALIZER_H

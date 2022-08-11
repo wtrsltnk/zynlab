@@ -22,13 +22,15 @@
 #include "ResonanceSerializer.h"
 #include <cmath>
 
-ResonanceSerializer::ResonanceSerializer(Resonance *parameters)
+ResonanceSerializer::ResonanceSerializer(
+    Resonance *parameters)
     : _parameters(parameters)
 {}
 
 ResonanceSerializer::~ResonanceSerializer() = default;
 
-void ResonanceSerializer::Serialize(IPresetsSerializer *xml)
+void ResonanceSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addparbool("enabled", _parameters->Penabled);
 
@@ -50,7 +52,8 @@ void ResonanceSerializer::Serialize(IPresetsSerializer *xml)
     }
 }
 
-void ResonanceSerializer::Deserialize(IPresetsSerializer *xml)
+void ResonanceSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->Penabled = xml->getparbool("enabled", _parameters->Penabled);
 

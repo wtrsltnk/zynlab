@@ -28,14 +28,20 @@
 
 class EnvelopeParamsSerializer
 {
-    EnvelopeParams *_parameters;
-
 public:
-    EnvelopeParamsSerializer(EnvelopeParams *parameters);
+    EnvelopeParamsSerializer(
+        EnvelopeParams *parameters);
+
     virtual ~EnvelopeParamsSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    EnvelopeParams *_parameters;
 };
 
 #endif // ENVELOPE_PARAMS_SERIALIZER_H

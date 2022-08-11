@@ -28,14 +28,20 @@
 
 class FilterParamsSerializer
 {
-    FilterParams *_parameters;
-
 public:
-    FilterParamsSerializer(FilterParams *parameters);
+    FilterParamsSerializer(
+        FilterParams *parameters);
+
     virtual ~FilterParamsSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    FilterParams *_parameters;
 };
 
 #endif // FILTER_PARAMS_SERIALIZER_H

@@ -23,13 +23,15 @@
 #include "MicrotonalSerializer.h"
 #include <cmath>
 
-MicrotonalSerializer::MicrotonalSerializer(Microtonal *parameters)
+MicrotonalSerializer::MicrotonalSerializer(
+    Microtonal *parameters)
     : _parameters(parameters)
 {}
 
 MicrotonalSerializer::~MicrotonalSerializer() = default;
 
-void MicrotonalSerializer::Serialize(IPresetsSerializer *xml)
+void MicrotonalSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addparstr("name", (char *)_parameters->Pname);
     xml->addparstr("comment", (char *)_parameters->Pcomment);
@@ -86,7 +88,8 @@ void MicrotonalSerializer::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void MicrotonalSerializer::Deserialize(IPresetsSerializer *xml)
+void MicrotonalSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     xml->getparstr("name", (char *)_parameters->Pname, MICROTONAL_MAX_NAME_LEN);
     xml->getparstr("comment", (char *)_parameters->Pcomment, MICROTONAL_MAX_NAME_LEN);

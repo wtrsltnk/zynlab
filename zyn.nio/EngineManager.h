@@ -11,21 +11,23 @@ class AudioOutputManager;
 /**Container/Owner of the long lived Engines*/
 class EngineManager
 {
-    friend class Nio;
-    static EngineManager *_instance;
-    EngineManager(unsigned int sampleRate, unsigned int bufferSize);
-
 public:
-    static EngineManager &CreateInstance(unsigned int sampleRate, unsigned int bufferSize);
+    static EngineManager &CreateInstance(
+        unsigned int sampleRate,
+        unsigned int bufferSize);
+
     static EngineManager &Instance();
+
     static void DestroyInstance();
+
     virtual ~EngineManager();
 
     /**Gets requested engine
          * @param name case unsensitive name of engine
          * @return pointer to Engine or NULL
          */
-    Engine *GetEngine(std::string const &name);
+    Engine *GetEngine(
+        std::string const &name);
 
     /**Start up defaults*/
     bool Start();
@@ -36,12 +38,24 @@ public:
     std::list<Engine *> engines;
 
     //return false on failure
-    bool SetDefaultAudioOutput(std::string const &name);
-    bool SetDefaultMidiInput(std::string const &name);
+    bool SetDefaultAudioOutput(
+        std::string const &name);
+
+    bool SetDefaultMidiInput(
+        std::string const &name);
 
     //default I/O
     AudioOutput *defaultOut;
     MidiInput *defaultIn;
+
+private:
+    friend class Nio;
+
+    static EngineManager *_instance;
+
+    EngineManager(
+        unsigned int sampleRate,
+        unsigned int bufferSize);
 };
 
 #endif // ENGINEMANAGER_H

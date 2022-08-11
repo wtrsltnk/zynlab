@@ -22,13 +22,15 @@
 
 #include "FilterParamsSerializer.h"
 
-FilterParamsSerializer::FilterParamsSerializer(FilterParams *parameters)
+FilterParamsSerializer::FilterParamsSerializer(
+    FilterParams *parameters)
     : _parameters(parameters)
 {}
 
 FilterParamsSerializer::~FilterParamsSerializer() = default;
 
-void FilterParamsSerializer::Serialize(IPresetsSerializer *xml)
+void FilterParamsSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     //filter parameters
     xml->addpar("category", _parameters->Pcategory);
@@ -74,7 +76,8 @@ void FilterParamsSerializer::Serialize(IPresetsSerializer *xml)
     }
 }
 
-void FilterParamsSerializer::Deserialize(IPresetsSerializer *xml)
+void FilterParamsSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     //filter parameters
     _parameters->Pcategory = xml->getpar127("category", _parameters->Pcategory);

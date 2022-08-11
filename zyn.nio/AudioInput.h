@@ -30,13 +30,19 @@
 class AudioInput : public virtual Engine
 {
 public:
-    AudioInput(unsigned int sampleRate, unsigned int _bufferSize);
+    AudioInput(
+        unsigned int sampleRate,
+        unsigned int _bufferSize);
+
     virtual ~AudioInput();
 
     unsigned int SampleRate() const;
+
     unsigned int BufferSize() const;
 
-    virtual void SetAudioEnabled(bool nval);
+    virtual void SetAudioEnabled(
+        bool nval);
+
     virtual bool IsAudioEnabled() const = 0;
 
 protected:

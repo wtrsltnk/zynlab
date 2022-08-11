@@ -22,66 +22,74 @@
 
 #include "OscilGenSerializer.h"
 
-OscilGenSerializer::OscilGenSerializer(OscilGen *parameters)
+OscilGenSerializer::OscilGenSerializer(
+    OscilGen *parameters)
     : _parameters(parameters)
 {}
 
 OscilGenSerializer::~OscilGenSerializer() = default;
 
-namespace Serialization {
-
-inline void clearDC(fft_t *freqs)
+namespace Serialization
 {
-    freqs[0] = fft_t(0.0, 0.0);
-}
 
-//return magnitude squared
-inline float normal(const fft_t *freqs, off_t x)
-{
-    return norm(freqs[x]);
-}
+    inline void clearDC(fft_t *freqs)
+    {
+        freqs[0] = fft_t(0.0, 0.0);
+    }
 
-/**
+    //return magnitude squared
+    inline float normal(
+        const fft_t *freqs,
+        off_t x)
+    {
+        return norm(freqs[x]);
+    }
+
+    /**
  * Take frequency spectrum and ensure values are normalized based upon
  * magnitude to 0<=x<=1
  */
-void normalize(fft_t *freqs)
-{
-    float normMax = 0.0f;
-    for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+    void normalize(
+        fft_t *freqs)
     {
-        //magnitude squared
-        const float norm = normal(freqs, i);
-        if (normMax < norm)
-            normMax = norm;
+        float normMax = 0.0f;
+        for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+        {
+            //magnitude squared
+            const float norm = normal(freqs, i);
+            if (normMax < norm)
+                normMax = norm;
+        }
+
+        const float max = std::sqrt(normMax);
+        if (max < 1e-8) //data is all ~zero, do not amplify noise
+            return;
+
+        for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
+            freqs[i] /= max;
     }
 
-    const float max = std::sqrt(normMax);
-    if (max < 1e-8) //data is all ~zero, do not amplify noise
-        return;
+    inline void normalize(
+        float *smps,
+        size_t N)
+    {
+        //Find max
+        float max = 0.0f;
+        for (size_t i = 0; i < N; ++i)
+            if (max < std::fabs(smps[i]))
+                max = std::fabs(smps[i]);
+        if (max < 0.00001f)
+            max = 1.0f;
 
-    for (unsigned int i = 0; i < SystemSettings::Instance().oscilsize / 2; ++i)
-        freqs[i] /= max;
-}
-
-inline void normalize(float *smps, size_t N)
-{
-    //Find max
-    float max = 0.0f;
-    for (size_t i = 0; i < N; ++i)
-        if (max < std::fabs(smps[i]))
-            max = std::fabs(smps[i]);
-    if (max < 0.00001f)
-        max = 1.0f;
-
-    //Normalize to +-1
-    for (size_t i = 0; i < N; ++i)
-        smps[i] /= max;
-}
+        //Normalize to +-1
+        for (size_t i = 0; i < N; ++i)
+            smps[i] /= max;
+    }
 
 } // namespace Serialization
 
-void OscilGenSerializer::Serialize(IPresetsSerializer *xml)
+void OscilGenSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addpar("harmonic_mag_type", _parameters->Phmagtype);
 
@@ -155,7 +163,8 @@ void OscilGenSerializer::Serialize(IPresetsSerializer *xml)
     }
 }
 
-void OscilGenSerializer::Deserialize(IPresetsSerializer *xml)
+void OscilGenSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->Phmagtype = xml->getpar127("harmonic_mag_type", _parameters->Phmagtype);
 

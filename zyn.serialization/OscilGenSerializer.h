@@ -28,13 +28,20 @@
 
 class OscilGenSerializer
 {
-    OscilGen *_parameters;
 public:
-    OscilGenSerializer(OscilGen *parameters);
+    OscilGenSerializer(
+        OscilGen *parameters);
+
     virtual ~OscilGenSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    OscilGen *_parameters;
 };
 
 #endif // OSCIL_GEN_SERIALIZER_H

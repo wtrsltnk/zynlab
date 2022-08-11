@@ -28,14 +28,20 @@
 
 class ControllerSerializer
 {
-    Controller *_parameters;
-
 public:
-    ControllerSerializer(Controller *parameters);
+    ControllerSerializer(
+        Controller *parameters);
+
     virtual ~ControllerSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
+
+private:
+    Controller *_parameters;
 };
 
 #endif // CONTROLLER_SERIALIZER_H

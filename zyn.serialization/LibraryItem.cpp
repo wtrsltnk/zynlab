@@ -22,8 +22,13 @@
 
 #include "LibraryManager.h"
 
-LibraryItem::LibraryItem(std::string const &name, std::string const &path, ILibrary *library)
-    : _name(name), _path(path), _library(library)
+LibraryItem::LibraryItem(
+    std::string const &name,
+    std::string const &path,
+    ILibrary *library)
+    : _name(name),
+      _path(path),
+      _library(library)
 {}
 
 LibraryItem::~LibraryItem() = default;

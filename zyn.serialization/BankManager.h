@@ -37,29 +37,56 @@ public:
     BankManager();
     virtual ~BankManager();
 
-    virtual std::string GetName(unsigned int ninstrument);
-    virtual std::string GetNameNumbered(unsigned int ninstrument);
-    //if newslot==-1 then this is ignored, else it will be put on that slot
-    virtual void SetName(unsigned int ninstrument, const std::string &newname, int newslot);
+    virtual std::string GetName(
+        unsigned int ninstrument);
 
-    virtual bool isPADsynth_used(unsigned int ninstrument);
+    virtual std::string GetNameNumbered(
+        unsigned int ninstrument);
+
+    //if newslot==-1 then this is ignored, else it will be put on that slot
+    virtual void SetName(
+        unsigned int ninstrument,
+        const std::string &newname,
+        int newslot);
+
+    virtual bool isPADsynth_used(
+        unsigned int ninstrument);
 
     /**returns true when slot is empty*/
-    virtual bool EmptySlot(unsigned int ninstrument);
-    /**Empties out the selected slot*/
-    virtual void ClearSlot(unsigned int ninstrument);
-    /**Saves the given Part to slot*/
-    virtual void SaveToSlot(unsigned int ninstrument, Track *track);
-    /**Loads the given slot into a Part*/
-    virtual void LoadFromSlot(unsigned int ninstrument, Track *track);
-    /**Swaps Slots*/
-    virtual void SwapSlot(unsigned int n1, unsigned int n2);
+    virtual bool EmptySlot(
+        unsigned int ninstrument);
 
-    virtual int LoadBank(int index);
-    virtual int NewBank(std::string const &newbankdirname);
+    /**Empties out the selected slot*/
+    virtual void ClearSlot(
+        unsigned int ninstrument);
+
+    /**Saves the given Part to slot*/
+    virtual void SaveToSlot(
+        unsigned int ninstrument,
+        Track *track);
+
+    /**Loads the given slot into a Part*/
+    virtual void LoadFromSlot(
+        unsigned int ninstrument,
+        Track *track);
+
+    /**Swaps Slots*/
+    virtual void SwapSlot(
+        unsigned int n1,
+        unsigned int n2);
+
+    virtual int LoadBank(
+        int index);
+
+    virtual int NewBank(
+        std::string const &newbankdirname);
+
     virtual int GetBankCount();
+
     virtual std::vector<char const *> const &GetBankNames();
-    virtual InstrumentBank &GetBank(int index);
+
+    virtual InstrumentBank &GetBank(
+        int index);
 
     virtual std::string const &GetBankFileTitle();
 
@@ -73,11 +100,22 @@ private:
     //it adds a filename to the bank
     //if pos is -1 it try to find a position
     //returns -1 if the bank is full, or 0 if the instrument was added
-    int AddToBank(unsigned int pos, std::string const &filename, std::string const &name);
-    int LoadBankByDirectoryName(std::string const &bankdirname);
-    void DeleteFromBank(unsigned int pos);
+    int AddToBank(
+        unsigned int pos,
+        std::string const &filename,
+        std::string const &name);
+
+    int LoadBankByDirectoryName(
+        std::string const &bankdirname);
+
+    void DeleteFromBank(
+        unsigned int pos);
+
     void ClearBank();
-    void ScanRootDirectory(std::string const &rootdir); //scans a root dir for banks
+
+    //scans a root dir for banks
+    void ScanRootDirectory(
+        std::string const &rootdir);
 
     std::string _defaultinsname;
     std::string _bankfiletitle; //this is shown on the UI of the bank (the title of the window)

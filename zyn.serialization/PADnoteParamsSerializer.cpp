@@ -30,13 +30,15 @@
 
 char const *PADnoteParametersSerializer::BRANCH_NAME = "PAD_SYNTH_PARAMETERS";
 
-PADnoteParametersSerializer::PADnoteParametersSerializer(PADnoteParameters *parameters)
+PADnoteParametersSerializer::PADnoteParametersSerializer(
+    PADnoteParameters *parameters)
     : _parameters(parameters)
 {}
 
 PADnoteParametersSerializer::~PADnoteParametersSerializer() = default;
 
-void PADnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
+void PADnoteParametersSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->setPadSynth(true);
 
@@ -164,7 +166,8 @@ void PADnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
     xml->endbranch();
 }
 
-void PADnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
+void PADnoteParametersSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->PStereo = xml->getparbool("stereo", _parameters->PStereo);
     _parameters->Pmode = xml->getpar127("mode", 0);

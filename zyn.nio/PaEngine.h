@@ -29,22 +29,30 @@
 class PaEngine : public AudioOutput
 {
 public:
-    PaEngine(unsigned int sampleRate, unsigned int bufferSize);
+    PaEngine(
+        unsigned int sampleRate,
+        unsigned int bufferSize);
+
     virtual ~PaEngine();
 
     bool Start();
+
     void Stop();
 
     bool IsAudioEnabled() const;
 
 protected:
-    static int PAprocess(const void *inputBuffer,
-                         void *outputBuffer,
-                         unsigned long framesPerBuffer,
-                         const PaStreamCallbackTimeInfo *outTime,
-                         PaStreamCallbackFlags flags,
-                         void *userData);
-    int process(float *out, unsigned long framesPerBuffer);
+    static int PAprocess(
+        const void *inputBuffer,
+        void *outputBuffer,
+        unsigned long framesPerBuffer,
+        const PaStreamCallbackTimeInfo *outTime,
+        PaStreamCallbackFlags flags,
+        void *userData);
+
+    int process(
+        float *out,
+        unsigned long framesPerBuffer);
 
 private:
     PaStream *stream;

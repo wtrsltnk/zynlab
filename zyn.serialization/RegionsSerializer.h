@@ -6,16 +6,22 @@
 
 class RegionsSerializer
 {
-    RegionsManager *_regions;
-
 public:
-    RegionsSerializer(RegionsManager *regions);
+    RegionsSerializer(
+        RegionsManager *regions);
+
     virtual ~RegionsSerializer();
 
-    void Serialize(IPresetsSerializer *xml);
-    void Deserialize(IPresetsSerializer *xml);
+    void Serialize(
+        IPresetsSerializer *xml);
+
+    void Deserialize(
+        IPresetsSerializer *xml);
 
     static char const *BRANCH_NAME;
+
+private:
+    RegionsManager *_regions;
 };
 
 #endif // REGIONSSERIALIZER_H

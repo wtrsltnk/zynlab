@@ -15,29 +15,42 @@ class AudioOutputManager
     static AudioOutputManager *_instance;
 
 public:
-    static AudioOutputManager &createInstance(IAudioGenerator *audioGenerator);
+    static AudioOutputManager &createInstance(
+        IAudioGenerator *audioGenerator);
+
     static AudioOutputManager &getInstance();
+
     static void destroyInstance();
+
     virtual ~AudioOutputManager();
 
     /**Execute a tick*/
-    const Stereo<float *> NextSample(unsigned int frameSize);
+    const Stereo<float *> NextSample(
+        unsigned int frameSize);
 
     /**Gets requested driver
          * @param name case unsensitive name of driver
          * @return pointer to Audio Out or NULL
          */
-    AudioOutput *GetAudioOutput(std::string const &name);
+    AudioOutput *GetAudioOutput(
+        std::string const &name);
 
-    bool SetSink(std::string const &name);
+    bool SetSink(
+        std::string const &name);
 
     std::string GetSink() const;
 
     friend class EngineManager;
 
 private:
-    AudioOutputManager(IAudioGenerator *audioGenerator);
-    unsigned int storedSmps() const { return static_cast<unsigned int>(priBuffCurrent._left - priBuf._left); }
+    AudioOutputManager(
+        IAudioGenerator *audioGenerator);
+
+    unsigned int storedSmps() const
+    {
+        return static_cast<unsigned int>(priBuffCurrent._left - priBuf._left);
+    }
+
     void removeStaleSmps();
 
     AudioOutput *currentOut; /**<The current output driver*/

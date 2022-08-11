@@ -31,67 +31,103 @@ class Track;
 
 class Library : public ILibrary
 {
+public:
+    Library(
+        std::string const &name,
+        std::string const &path,
+        ILibrary *parent);
+
+    virtual ~Library();
+
+    std::set<ILibraryItem *> _items;
+
+    virtual std::string const &GetName() const;
+
+    virtual std::string const &GetPath() const;
+
+    virtual ILibrary *GetParent();
+
+    virtual std::set<ILibrary *> &GetChildren();
+
+    virtual bool IsParent(
+        ILibrary *library);
+
+    virtual void AddLibraryItem(
+        class ILibraryItem *item);
+
+    virtual std::set<class ILibraryItem *> &GetItems();
+
+private:
     std::string _name;
     std::string _path;
     ILibrary *_parent;
     std::set<ILibrary *> _children;
-
-public:
-    Library(std::string const &name, std::string const &path, ILibrary *parent);
-    virtual ~Library();
-
-    std::set<ILibraryItem *> _items;
-    virtual std::string const &GetName() const;
-    virtual std::string const &GetPath() const;
-    virtual ILibrary *GetParent();
-    virtual std::set<ILibrary *> &GetChildren();
-    virtual bool IsParent(ILibrary *library);
-    virtual void AddLibraryItem(class ILibraryItem *item);
-    virtual std::set<class ILibraryItem *> &GetItems();
 };
 
 class LibraryItem : public ILibraryItem
 {
+public:
+    LibraryItem(
+        std::string const &name,
+        std::string const &path,
+        ILibrary *parent);
+
+    virtual ~LibraryItem();
+
+    virtual std::string const &GetName() const;
+
+    virtual std::string const &GetPath() const;
+
+    virtual ILibrary *GetLibrary();
+
+private:
     std::string _name;
     std::string _path;
     std::set<std::string> _tags;
     ILibrary *_library;
-
-public:
-    LibraryItem(std::string const &name, std::string const &path, ILibrary *parent);
-    virtual ~LibraryItem();
-
-    virtual std::string const &GetName() const;
-    virtual std::string const &GetPath() const;
-    virtual ILibrary *GetLibrary();
 };
 
 class LibraryManager : public ILibraryManager
 {
+public:
+    LibraryManager();
+
+    LibraryManager(
+        std::set<std::string> const &libraryLocations);
+
+    virtual ~LibraryManager();
+
+    void Cleanup();
+
+    virtual void RefreshLibraries();
+
+    virtual void AddLibraryLocation(
+        std::string const &location);
+
+    virtual void RemoveLibraryLocation(
+        std::string const &location);
+
+    virtual std::set<std::string> const &GetLibraryLocations() const;
+
+    virtual std::set<ILibrary *> const &GetTopLevelLibraries() const;
+
+    virtual std::set<ILibraryItem *> const &GetInstruments() const;
+
+    virtual std::set<ILibraryItem *> const &GetSamples() const;
+
+    virtual bool LoadAsInstrument(
+        ILibraryItem *item,
+        Track *track);
+
+private:
     std::set<std::string> _libraryLocations;
     std::set<ILibrary *> _topLevelLibraries;
     std::set<ILibraryItem *> _instruments;
     std::set<ILibraryItem *> _samples;
 
-    ILibrary *scanLocation(std::string const &location, ILibrary *library);
-
-public:
-    LibraryManager();
-    LibraryManager(std::set<std::string> const &libraryLocations);
-    virtual ~LibraryManager();
-
-    void Cleanup();
-    virtual void RefreshLibraries();
-
-    virtual void AddLibraryLocation(std::string const &location);
-    virtual void RemoveLibraryLocation(std::string const &location);
-    virtual std::set<std::string> const &GetLibraryLocations() const;
-
-    virtual std::set<ILibrary *> const &GetTopLevelLibraries() const;
-    virtual std::set<ILibraryItem *> const &GetInstruments() const;
-    virtual std::set<ILibraryItem *> const &GetSamples() const;
-
-    virtual bool LoadAsInstrument(ILibraryItem *item, Track *track);
+    ILibrary *scanLocation(
+        std::string const &location,
+        ILibrary *library);
 };
 
 #endif // ILIBRARYMANAGER_H

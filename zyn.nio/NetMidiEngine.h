@@ -30,17 +30,22 @@ class NetMidiEngine : public MidiInput
 {
 public:
     NetMidiEngine();
+
     virtual ~NetMidiEngine();
 
     virtual bool IsMidiIn() { return true; }
+
     virtual bool IsAudioOut() { return false; }
 
     virtual bool Start();
+
     virtual void Stop();
 
     virtual bool IsMidiEnabled() const;
 
-    static int onRecieveRequest(const net::Request &request, net::Response &response);
+    static int onRecieveRequest(
+        const net::Request &request,
+        net::Response &response);
 
 private:
     net::HttpServer _server;

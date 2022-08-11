@@ -34,13 +34,16 @@ using namespace FilesystemApi;
 
 LibraryManager::LibraryManager() {}
 
-LibraryManager::LibraryManager(std::set<std::string> const &libraryLocations)
+LibraryManager::LibraryManager(
+    std::set<std::string> const &libraryLocations)
     : _libraryLocations(libraryLocations)
 {}
 
 LibraryManager::~LibraryManager() = default;
 
-ILibrary *LibraryManager::scanLocation(std::string const &location, ILibrary *parent)
+ILibrary *LibraryManager::scanLocation(
+    std::string const &location,
+    ILibrary *parent)
 {
     if (!DirectoryExists(location))
     {
@@ -130,7 +133,9 @@ void LibraryManager::RefreshLibraries()
     }
 }
 
-bool LibraryManager::LoadAsInstrument(ILibraryItem *item, Track *track)
+bool LibraryManager::LoadAsInstrument(
+    ILibraryItem *item,
+    Track *track)
 {
     if (_instruments.find(item) == _instruments.end())
     {
@@ -143,12 +148,14 @@ bool LibraryManager::LoadAsInstrument(ILibraryItem *item, Track *track)
     return SaveToFileSerializer().LoadTrack(track, item->GetPath()) == 0;
 }
 
-void LibraryManager::AddLibraryLocation(std::string const &location)
+void LibraryManager::AddLibraryLocation(
+    std::string const &location)
 {
     _libraryLocations.insert(location);
 }
 
-void LibraryManager::RemoveLibraryLocation(std::string const &location)
+void LibraryManager::RemoveLibraryLocation(
+    std::string const &location)
 {
     _libraryLocations.erase(location);
 }

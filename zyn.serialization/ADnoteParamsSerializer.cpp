@@ -30,13 +30,15 @@
 
 char const *ADnoteParametersSerializer::BRANCH_NAME = "ADD_SYNTH_PARAMETERS";
 
-ADnoteParametersSerializer::ADnoteParametersSerializer(ADnoteParameters *parameters)
+ADnoteParametersSerializer::ADnoteParametersSerializer(
+    ADnoteParameters *parameters)
     : _parameters(parameters)
 {}
 
 ADnoteParametersSerializer::~ADnoteParametersSerializer() = default;
 
-void ADnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
+void ADnoteParametersSerializer::Serialize(
+    IPresetsSerializer *xml)
 {
     xml->addparbool("stereo", _parameters->PStereo);
 
@@ -131,7 +133,8 @@ void ADnoteParametersSerializer::Serialize(IPresetsSerializer *xml)
     }
 }
 
-void ADnoteParametersSerializer::Deserialize(IPresetsSerializer *xml)
+void ADnoteParametersSerializer::Deserialize(
+    IPresetsSerializer *xml)
 {
     _parameters->PStereo = xml->getparbool("stereo", _parameters->PStereo);
 
