@@ -24,18 +24,19 @@ add_library(zyn.ui
     piano.h
     syntheditor.cpp
     syntheditor.h
-    )
+)
 
 target_include_directories(zyn.ui
     PUBLIC include
     PUBLIC imgui
-    PRIVATE ${CMAKE_SOURCE_DIR})
+    PRIVATE ${CMAKE_SOURCE_DIR}
+)
 
 target_compile_features(zyn.ui
     PRIVATE cxx_auto_type
     PRIVATE cxx_nullptr
     PRIVATE cxx_range_for
-    )
+)
 
 target_link_libraries(zyn.ui
     PRIVATE
@@ -44,11 +45,14 @@ target_link_libraries(zyn.ui
         zyn.mixer
         zyn.synth
         zyn.serialization
-        zyn.common)
+        zyn.common
+        fltk
+)
 
 target_compile_options(zyn.ui
     PUBLIC 
         -DUNICODE
         -D_UNICODE
         -DIMGUI_IMPL_WIN32_DISABLE_GAMEPAD
-        -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
+        -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+)
