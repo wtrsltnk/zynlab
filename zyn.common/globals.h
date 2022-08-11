@@ -491,7 +491,7 @@ public:
     // Synth state
     struct
     {
-        unsigned int currentTrack = 0;
+        short int currentTrack = 0;
         unsigned int currentTrackInstrument = 0;
         unsigned int currentVoice = NUM_VOICES;
         ActiveSynths currentSynth = ActiveSynths::Add;

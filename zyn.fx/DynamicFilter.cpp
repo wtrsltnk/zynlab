@@ -63,13 +63,13 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     const float freq = filterpars->getfreq();
     const float q = filterpars->getq();
 
-    for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         efxoutl[i] = smp._left[i];
         efxoutr[i] = smp._right[i];
 
         const float x = (fabsf(smp._left[i]) + fabsf(smp._right[i])) * 0.5f;
-        ms1 = ms1 * (1.0f - ampsmooth) + x * ampsmooth + 1e-10;
+        ms1 = ms1 * (1.0f - ampsmooth) + x * ampsmooth + 1e-10f;
     }
 
     const float ampsmooth2 = powf(ampsmooth, 0.2f) * 0.3f;
@@ -88,7 +88,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     filterr->filterout(efxoutr);
 
     //panning
-    for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
+    for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         efxoutl[i] *= pangainL;
         efxoutr[i] *= pangainR;
@@ -247,12 +247,13 @@ void DynamicFilter::SetPreset(unsigned char npreset)
     //		printf("freq=%d  amp=%d  q=%d\n",filterpars->Pvowels[0].formants[i].freq,filterpars->Pvowels[0].formants[i].amp,filterpars->Pvowels[0].formants[i].q);
     //	    };
     if (insertion == 0) //lower the volume if this is system effect
-        ChangeParameter(0, presets[npreset][0] * 0.5f);
+        ChangeParameter(0, (unsigned char)(presets[npreset][0] * 0.5f));
     Ppreset = npreset;
     reinitfilter();
 }
 
-void DynamicFilter::ChangeParameter(int npar, unsigned char value)
+void DynamicFilter::ChangeParameter(
+    int npar, unsigned char value)
 {
     switch (npar)
     {
