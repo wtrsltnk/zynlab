@@ -3,6 +3,7 @@
 
 #include "note.h"
 
+#include <map>
 #include <string>
 #include <vector>
 #include <zyn.common/globals.h>
@@ -10,8 +11,12 @@
 class AutomatedParameter
 {
 public:
-private:
+    float GetValue(
+        unsigned int step);
+
+//private:
     int _paramIndex;
+    std::map<unsigned int, float> _keyFrames;
 };
 
 class Pattern
@@ -34,11 +39,14 @@ public:
     std::vector<Note> &Notes(
         unsigned int trackIndex);
 
+    std::vector<AutomatedParameter> &AutomatedTrackParameters(
+        unsigned int trackIndex);
+
 private:
     std::string _name;
     unsigned int _length;
     std::vector<Note> _notes[NUM_MIXER_TRACKS];
-    std::vector<AutomatedParameter> _automatedParameters;
+    std::vector<AutomatedParameter> _automatedTrackParameters[NUM_MIXER_TRACKS];
 };
 
 #endif // PATTERN_H

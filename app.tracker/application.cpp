@@ -135,6 +135,15 @@ bool Application::Setup()
         pattern->Notes(0)[i * 4 + 3]._velocity = 100;
     }
 
+    auto & params = pattern->AutomatedTrackParameters(0);
+    AutomatedParameter param;
+    param._paramIndex = ParamIndices::SystemFX_1_Volume;
+    param._keyFrames.insert(std::make_pair<unsigned int, float>(0, 0.0f));
+    param._keyFrames.insert(std::make_pair<unsigned int, float>(24, 0.2f));
+    param._keyFrames.insert(std::make_pair<unsigned int, float>(32, 0.8f));
+    param._keyFrames.insert(std::make_pair<unsigned int, float>(64, 1.0f));
+    params.push_back(param);
+
     _playerControlsPanel.SetUp(&_session);
     _patternEditor.SetUp(&_session, _monofont);
     _mixerEditor.SetUp(&_session, _monofont);
@@ -292,6 +301,9 @@ std::vector<SimpleNote> Application::GetNotes(
 
     auto samplesPerBeat = (unsigned int)((sampleRate * 60) / _session._bpm);
     auto samplesPerStep = samplesPerBeat / 4;
+
+    UpdateAutomatedParams();
+
     if (_sampleIndex > samplesPerStep)
     {
         _sampleIndex -= samplesPerStep;
@@ -301,6 +313,12 @@ std::vector<SimpleNote> Application::GetNotes(
     }
 
     return result;
+}
+
+void Application::UpdateAutomatedParams()
+{
+    auto song = _session._song;
+    auto pattern = song->GetPattern(song->currentPattern);
 }
 
 void Application::NextStep()

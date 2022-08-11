@@ -162,287 +162,24 @@ void EffectsEditor::Render2d()
 
             if (showInsertFx && ImGui::CollapsingHeader("Insert FX"))
             {
+                for (int i = 0; i < NUM_INS_EFX; i++)
+                {
+                    if ((_session->_mixer->GetTrackIndexForInsertEffect(i) == _session->_mixer->State.currentTrack && _session->_mixer->GetInsertEffectType(i) > 0))
+                    {
+                        RenderEffect(ParamIndices::InsertFX_1 + (100 * i), i, _session->_mixer->GetInsertEffectType(i), selectedParams);
+                    }
+                }
             }
 
             auto showTrackFx = track->partefx[0]->geteffect() > 0 || track->partefx[1]->geteffect() > 0 || track->partefx[2]->geteffect() > 0;
 
             if (showTrackFx && ImGui::CollapsingHeader("Track FX"))
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < NUM_TRACK_EFX; i++)
                 {
-                    auto effect = track->partefx[i]->geteffect();
-                    if (effect > 0)
+                    if (track->partefx[i]->geteffect() > 0)
                     {
-                        if (ImGui::TreeNode(EffectNames[effect]))
-                        {
-                            if (effect == 1) // Reverb
-                            {
-                                if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_Volume) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_Volume) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_Pan) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_Pan) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Time", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_Time) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_Time) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Initial delay", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_InitialDelay) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_InitialDelay) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Initial delay feedback", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_InitialDelayFeedback) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_InitialDelayFeedback) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LowPass", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_LowPass) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_LowPass) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("HighPass", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_HighPass) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Reverb_HighPass) + i * 100);
-                                }
-                            }
-
-                            if (effect == 2) // Echo
-                            {
-                                if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Volume) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Volume) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Pan) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Pan) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LeftRightDelay", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_LeftRightDelay) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_LeftRightDelay) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("CrossingDelay", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_CrossingDelay) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_CrossingDelay) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Feedback) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Feedback) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Damp", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Damp) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Echo_Damp) + i * 100);
-                                }
-                            }
-
-                            if (effect == 3) // Chorus
-                            {
-                                if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Volume) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Volume) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Pan) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Pan) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFOFrequency", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LFOFrequency) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LFOFrequency) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFORandomness", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LFORandomness) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LFORandomness) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LeftRightPhaseDifference", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LeftRightPhaseDifference) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LeftRightPhaseDifference) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFODepth", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LFODepth) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_LFODepth) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Delay", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Delay) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Delay) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Feedback) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Feedback) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Subtract", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Subtract) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Chorus_Subtract) + i * 100);
-                                }
-                            }
-
-                            if (effect == 4) // Phaser
-                            {
-                                if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Volume) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Volume) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Pan) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Pan) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFOFrequency", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LFOFrequency) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LFOFrequency) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFORandomness", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LFORandomness) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LFORandomness) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LeftRightPhaseDifference", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LeftRightPhaseDifference) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LeftRightPhaseDifference) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFODepth", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LFODepth) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_LFODepth) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Stages", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Stages) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Stages) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Feedback) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Feedback) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Subtract", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Subtract) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Phaser_Subtract) + i * 100);
-                                }
-                            }
-
-                            if (effect == 5) // AlienWah
-                            {
-                                if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Volume) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Volume) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Pan) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Pan) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFOFrequency", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LFOFrequency) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LFOFrequency) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFORandomness", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LFORandomness) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LFORandomness) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LeftRightPhaseDifference", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LeftRightPhaseDifference) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LeftRightPhaseDifference) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LFODepth", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LFODepth) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_LFODepth) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Delay", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Delay) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Delay) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Feedback) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Feedback) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Subtract", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Subtract) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Subtract) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Phase", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Phase) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_AlienWah_Phase) + i * 100);
-                                }
-                            }
-
-                            if (effect == 6) // Distorsion
-                            {
-                                if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Volume) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Volume) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Pan) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Pan) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Drive", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Drive) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Drive) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("Level", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Level) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_Level) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("LowPass", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_LowPass) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_LowPass) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("HighPass", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_HighPass) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_HighPass) + i * 100);
-                                }
-
-                                if (ImGui::Selectable("DryWetMix", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_DryWetMix) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_Distorsion_DryWetMix) + i * 100);
-                                }
-                            }
-
-                            if (effect == 7) // EQ
-                            {
-                                if (ImGui::Selectable("Gain", selectedParams == (ParamIndices)(int(ParamIndices::TrackFX_1_EQ_Gain) + i * 100)))
-                                {
-                                    selectedParams = (ParamIndices)(int(ParamIndices::TrackFX_1_EQ_Gain) + i * 100);
-                                }
-                            }
-
-                            ImGui::TreePop();
-                        }
+                        RenderEffect(ParamIndices::TrackFX_1 + (100 * i), i, track->partefx[i]->geteffect(), selectedParams);
                     }
                 }
             }
@@ -452,4 +189,282 @@ void EffectsEditor::Render2d()
         }
     }
     ImGui::End();
+}
+
+void EffectsEditor::RenderEffect(
+    int group,
+    int index,
+    int effect,
+    ParamIndices &selectedParams)
+{
+    if (ImGui::TreeNode(EffectNames[effect]))
+    {
+        if (effect == 1) // Reverb
+        {
+            if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(group + (index * 100) + Reverb_Volume)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Reverb_Volume);
+            }
+
+            if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(group + (index * 100) + Reverb_Pan)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Reverb_Pan);
+            }
+
+            if (ImGui::Selectable("Time", selectedParams == (ParamIndices)(group + (index * 100) + Reverb_Time)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Reverb_Time);
+            }
+
+            if (ImGui::Selectable("Initial delay", selectedParams == (ParamIndices)(group + (index * 100) + Reverb_InitialDelay)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Reverb_InitialDelay);
+            }
+
+            if (ImGui::Selectable("Initial delay feedback", selectedParams == (ParamIndices)(group + (index * 100) + Reverb_InitialDelayFeedback)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Reverb_InitialDelayFeedback);
+            }
+
+            if (ImGui::Selectable("LowPass", selectedParams == (ParamIndices)(group + (index * 100) + Reverb_LowPass)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Reverb_LowPass);
+            }
+
+            if (ImGui::Selectable("HighPass", selectedParams == (ParamIndices)(group + (index * 100) + Reverb_HighPass)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Reverb_HighPass);
+            }
+        }
+
+        if (effect == 2) // Echo
+        {
+            if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(group + (index * 100) + Echo_Volume)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Echo_Volume);
+            }
+
+            if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(group + (index * 100) + Echo_Pan)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Echo_Pan);
+            }
+
+            if (ImGui::Selectable("LeftRightDelay", selectedParams == (ParamIndices)(group + (index * 100) + Echo_LeftRightDelay)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Echo_LeftRightDelay);
+            }
+
+            if (ImGui::Selectable("CrossingDelay", selectedParams == (ParamIndices)(group + (index * 100) + Echo_CrossingDelay)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Echo_CrossingDelay);
+            }
+
+            if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(group + (index * 100) + Echo_Feedback)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Echo_Feedback);
+            }
+
+            if (ImGui::Selectable("Damp", selectedParams == (ParamIndices)(group + (index * 100) + Echo_Damp)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Echo_Damp);
+            }
+        }
+
+        if (effect == 3) // Chorus
+        {
+            if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_Volume)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_Volume);
+            }
+
+            if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_Pan)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_Pan);
+            }
+
+            if (ImGui::Selectable("LFOFrequency", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_LFOFrequency)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_LFOFrequency);
+            }
+
+            if (ImGui::Selectable("LFORandomness", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_LFORandomness)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_LFORandomness);
+            }
+
+            if (ImGui::Selectable("LeftRightPhaseDifference", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_LeftRightPhaseDifference)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_LeftRightPhaseDifference);
+            }
+
+            if (ImGui::Selectable("LFODepth", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_LFODepth)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_LFODepth);
+            }
+
+            if (ImGui::Selectable("Delay", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_Delay)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_Delay);
+            }
+
+            if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_Feedback)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_Feedback);
+            }
+
+            if (ImGui::Selectable("Subtract", selectedParams == (ParamIndices)(group + (index * 100) + Chorus_Subtract)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Chorus_Subtract);
+            }
+        }
+
+        if (effect == 4) // Phaser
+        {
+            if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_Volume)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_Volume);
+            }
+
+            if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_Pan)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_Pan);
+            }
+
+            if (ImGui::Selectable("LFOFrequency", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_LFOFrequency)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_LFOFrequency);
+            }
+
+            if (ImGui::Selectable("LFORandomness", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_LFORandomness)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_LFORandomness);
+            }
+
+            if (ImGui::Selectable("LeftRightPhaseDifference", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_LeftRightPhaseDifference)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_LeftRightPhaseDifference);
+            }
+
+            if (ImGui::Selectable("LFODepth", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_LFODepth)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_LFODepth);
+            }
+
+            if (ImGui::Selectable("Stages", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_Stages)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_Stages);
+            }
+
+            if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_Feedback)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_Feedback);
+            }
+
+            if (ImGui::Selectable("Subtract", selectedParams == (ParamIndices)(group + (index * 100) + Phaser_Subtract)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Phaser_Subtract);
+            }
+        }
+
+        if (effect == 5) // AlienWah
+        {
+            if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_Volume)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_Volume);
+            }
+
+            if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_Pan)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_Pan);
+            }
+
+            if (ImGui::Selectable("LFOFrequency", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_LFOFrequency)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_LFOFrequency);
+            }
+
+            if (ImGui::Selectable("LFORandomness", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_LFORandomness)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_LFORandomness);
+            }
+
+            if (ImGui::Selectable("LeftRightPhaseDifference", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_LeftRightPhaseDifference)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_LeftRightPhaseDifference);
+            }
+
+            if (ImGui::Selectable("LFODepth", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_LFODepth)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_LFODepth);
+            }
+
+            if (ImGui::Selectable("Delay", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_Delay)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_Delay);
+            }
+
+            if (ImGui::Selectable("Feedback", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_Feedback)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_Feedback);
+            }
+
+            if (ImGui::Selectable("Subtract", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_Subtract)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_Subtract);
+            }
+
+            if (ImGui::Selectable("Phase", selectedParams == (ParamIndices)(group + (index * 100) + AlienWah_Phase)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + AlienWah_Phase);
+            }
+        }
+
+        if (effect == 6) // Distorsion
+        {
+            if (ImGui::Selectable("Volume", selectedParams == (ParamIndices)(group + (index * 100) + Distorsion_Volume)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Distorsion_Volume);
+            }
+
+            if (ImGui::Selectable("Panning", selectedParams == (ParamIndices)(group + (index * 100) + Distorsion_Pan)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Distorsion_Pan);
+            }
+
+            if (ImGui::Selectable("Drive", selectedParams == (ParamIndices)(group + (index * 100) + Distorsion_Drive)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Distorsion_Drive);
+            }
+
+            if (ImGui::Selectable("Level", selectedParams == (ParamIndices)(group + (index * 100) + Distorsion_Level)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Distorsion_Level);
+            }
+
+            if (ImGui::Selectable("LowPass", selectedParams == (ParamIndices)(group + (index * 100) + Distorsion_LowPass)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Distorsion_LowPass);
+            }
+
+            if (ImGui::Selectable("HighPass", selectedParams == (ParamIndices)(group + (index * 100) + Distorsion_HighPass)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Distorsion_HighPass);
+            }
+
+            if (ImGui::Selectable("DryWetMix", selectedParams == (ParamIndices)(group + (index * 100) + Distorsion_DryWetMix)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + Distorsion_DryWetMix);
+            }
+        }
+
+        if (effect == 7) // EQ
+        {
+            if (ImGui::Selectable("Gain", selectedParams == (ParamIndices)(group + (index * 100) + EQ_Gain)))
+            {
+                selectedParams = (ParamIndices)(group + (index * 100) + EQ_Gain);
+            }
+        }
+
+        ImGui::TreePop();
+    }
 }

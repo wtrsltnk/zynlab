@@ -1,6 +1,28 @@
 #include "pattern.h"
 #include <iostream>
 
+// TODO: make this work linear from the previous and the next keyframe
+float AutomatedParameter::GetValue(
+    unsigned int step)
+{
+    if (_keyFrames.empty())
+    {
+        return -1;
+    }
+
+    std::pair<unsigned int, float> prevValue;
+    std::pair<unsigned int, float> nextValue;
+    for (auto &pair : _keyFrames)
+    {
+        if (pair.first == step)
+        {
+            return pair.second;
+        }
+    }
+
+    return -1;
+}
+
 Pattern::Pattern(
     std::string const &name,
     unsigned int length)
@@ -47,4 +69,10 @@ std::vector<Note> &Pattern::Notes(
     unsigned int trackIndex)
 {
     return _notes[trackIndex];
+}
+
+std::vector<AutomatedParameter> &Pattern::AutomatedTrackParameters(
+    unsigned int trackIndex)
+{
+    return _automatedTrackParameters[trackIndex];
 }

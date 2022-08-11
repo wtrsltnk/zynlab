@@ -87,6 +87,7 @@ public:
 
     void NextStep();
 
+    void UpdateAutomatedParams();
     std::vector<SimpleNote> GetCurrentStepNotes();
 };
 
