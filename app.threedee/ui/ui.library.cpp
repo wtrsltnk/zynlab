@@ -111,7 +111,7 @@ void zyn::ui::Library::RenderSelectSample()
 
     ImGui::Columns(2);
 
-    auto width = ImGui::GetContentRegionAvailWidth();
+    auto width = ImGui::GetContentRegionAvail().x ;
     ImGui::Text("Libraries");
 
     ImGui::BeginChild("##TopLevelLibraries", ImVec2(width, -ImGui::GetTextLineHeightWithSpacing()));
@@ -128,7 +128,7 @@ void zyn::ui::Library::RenderSelectSample()
 
     ImGui::NextColumn();
 
-    width = ImGui::GetContentRegionAvailWidth();
+    width = ImGui::GetContentRegionAvail().x ;
     ImGui::Text("Samples");
 
     if (ImGui::InputText("##Filter", _selectSample.filter, 64))

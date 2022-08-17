@@ -57,7 +57,7 @@ zyn::ui::DialogResults zyn::ui::Dialogs::RenderSaveFileDialog()
 
         ImGui::BeginChild("Save File Dialog", ImVec2(0, -80));
 
-        auto width = ImGui::GetContentRegionAvailWidth();
+        auto width = ImGui::GetContentRegionAvail().x;
 
         if (ImGui::ListBoxHeader("Path", ImVec2(width, -ImGui::GetTextLineHeightWithSpacing())))
         {
@@ -141,7 +141,7 @@ zyn::ui::DialogResults zyn::ui::Dialogs::RenderOpenFileDialog()
 
         ImGui::BeginChild("Open File Dialog", ImVec2(0, -80));
 
-        auto width = ImGui::GetContentRegionAvailWidth();
+        auto width = ImGui::GetContentRegionAvail().x;
 
         if (ImGui::ListBoxHeader("Path", ImVec2(width, -ImGui::GetTextLineHeightWithSpacing())))
         {

@@ -1,7 +1,7 @@
 
 #include "app.threedee.h"
 
-#include "examples/imgui_impl_opengl3.h"
+#include <backends/imgui_impl_opengl3.h>
 #include <zyn.serialization/LibraryManager.h>
 
 #ifdef _WIN32

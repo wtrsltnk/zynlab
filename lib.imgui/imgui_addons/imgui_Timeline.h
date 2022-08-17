@@ -542,20 +542,20 @@ bool EndTimelines(
 
     ImVec2 const buttonstart = GetCursorScreenPos();
     ImVec2 const start = ImVec2(s_cursor_pos.x + timeToScreenX(0), GetCursorScreenPos().y);
-    ImVec2 const end = ImVec2(s_cursor_pos.x + timeToScreenX(*s_max_value), GetCursorScreenPos().y + GetItemsLineHeightWithSpacing());
+    ImVec2 const end = ImVec2(s_cursor_pos.x + timeToScreenX(*s_max_value), GetCursorScreenPos().y + ImGui::GetFrameHeightWithSpacing());
 
     SetCursorScreenPos(buttonstart);
     if (s_var_values[int(TimelineVars::ShowAddRemoveButtons)] != 0)
     {
         PushID(-101);
         PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0));
-        if (Button("+", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
+        if (Button("+", ImVec2(GetFrameHeightWithSpacing(), GetFrameHeightWithSpacing())))
         {
             *s_max_value += 4 * 1024;
             changed = true;
         }
         SameLine();
-        if (Button("-", ImVec2(GetItemsLineHeightWithSpacing(), GetItemsLineHeightWithSpacing())))
+        if (Button("-", ImVec2(GetFrameHeightWithSpacing(), GetFrameHeightWithSpacing())))
         {
             *s_max_value -= 4 * 1024;
             changed = true;
