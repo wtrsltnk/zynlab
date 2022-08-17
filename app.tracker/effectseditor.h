@@ -749,10 +749,10 @@ enum ParamIndices
     TrackFX_3_EQ_Gain = TrackFX_3 + EQ_Gain,
 };
 
-class EffectsEditor
+class EffectsAndAutomationEditor
 {
 public:
-    EffectsEditor();
+    EffectsAndAutomationEditor();
 
     void SetUp(ApplicationSession *session);
     void Render2d();
@@ -765,6 +765,9 @@ private:
         int index,
         int effect,
         ParamIndices &selectedParams);
+
+    void RenderAutomatedParam(
+        int selectedParam);
 };
 
 #endif // EFFECTSEDITOR_H

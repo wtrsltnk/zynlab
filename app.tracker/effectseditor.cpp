@@ -8,11 +8,11 @@
 #include "IconsFontaudio.h"
 #include "IconsForkAwesome.h"
 
-EffectsEditor::EffectsEditor()
+EffectsAndAutomationEditor::EffectsAndAutomationEditor()
     : _session(nullptr)
 {}
 
-void EffectsEditor::SetUp(
+void EffectsAndAutomationEditor::SetUp(
     ApplicationSession *session)
 {
     _session = session;
@@ -52,7 +52,7 @@ namespace ImGui
         char const *tooltip);
 }
 
-void EffectsEditor::Render2d()
+void EffectsAndAutomationEditor::Render2d()
 {
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
@@ -81,7 +81,7 @@ void EffectsEditor::Render2d()
                 ImGui::PushID(e);
 
                 int item_current = track->partefx[e]->geteffect();
-                ImGui::BeginChild("fx", ImVec2(item_current == 0 ? 120 : 320, 120), true);
+                ImGui::BeginChild("fx", ImVec2(item_current == 0 ? 120.0f : 320.0f, 120.0f), true);
                 {
                     ImGui::SetNextItemWidth(100);
                     if (ImGui::Combo("##effect", &item_current, EffectNames, IM_ARRAYSIZE(EffectNames)))
@@ -113,18 +113,18 @@ void EffectsEditor::Render2d()
 
         if (selectedTab == 1)
         {
-            static ParamIndices selectedParams = ParamIndices::None;
+            static ParamIndices selectedParam = ParamIndices::None;
 
             ImGui::BeginChild("params", ImVec2(260, 0), true);
             if (ImGui::CollapsingHeader("Mixer"))
             {
-                if (ImGui::Selectable("Volume", selectedParams == ParamIndices::Mixer_Volume))
+                if (ImGui::Selectable("Volume", selectedParam == ParamIndices::Mixer_Volume))
                 {
-                    selectedParams = ParamIndices::Mixer_Volume;
+                    selectedParam = ParamIndices::Mixer_Volume;
                 }
-                if (ImGui::Selectable("Panning", selectedParams == ParamIndices::Mixer_Panning))
+                if (ImGui::Selectable("Panning", selectedParam == ParamIndices::Mixer_Panning))
                 {
-                    selectedParams = ParamIndices::Mixer_Panning;
+                    selectedParam = ParamIndices::Mixer_Panning;
                 }
             }
 
@@ -143,9 +143,9 @@ void EffectsEditor::Render2d()
                         auto paramIndex = (ParamIndices)(int(ParamIndices::SystemFX_1_Volume) + i);
                         std::stringstream paramName;
                         paramName << EffectNames[effect] << " volume";
-                        if (ImGui::Selectable(paramName.str().c_str(), selectedParams == paramIndex))
+                        if (ImGui::Selectable(paramName.str().c_str(), selectedParam == paramIndex))
                         {
-                            selectedParams = paramIndex;
+                            selectedParam = paramIndex;
                         }
                     }
                 }
@@ -166,7 +166,7 @@ void EffectsEditor::Render2d()
                 {
                     if ((_session->_mixer->GetTrackIndexForInsertEffect(i) == _session->_mixer->State.currentTrack && _session->_mixer->GetInsertEffectType(i) > 0))
                     {
-                        RenderEffect(ParamIndices::InsertFX_1 + (100 * i), i, _session->_mixer->GetInsertEffectType(i), selectedParams);
+                        RenderEffect(ParamIndices::InsertFX_1 + (100 * i), i, _session->_mixer->GetInsertEffectType(i), selectedParam);
                     }
                 }
             }
@@ -179,19 +179,42 @@ void EffectsEditor::Render2d()
                 {
                     if (track->partefx[i]->geteffect() > 0)
                     {
-                        RenderEffect(ParamIndices::TrackFX_1 + (100 * i), i, track->partefx[i]->geteffect(), selectedParams);
+                        RenderEffect(ParamIndices::TrackFX_1 + (100 * i), i, track->partefx[i]->geteffect(), selectedParam);
                     }
                 }
             }
             ImGui::EndChild();
 
             ImGui::SameLine();
+
+            RenderAutomatedParam(selectedParam);
         }
     }
     ImGui::End();
 }
 
-void EffectsEditor::RenderEffect(
+void EffectsAndAutomationEditor::RenderAutomatedParam(
+    int selectedParam)
+{
+    auto song = _session->_song;
+    auto pattern = song->GetPattern(song->currentPattern);
+    auto params = pattern->AutomatedTrackParameters(_session->_mixer->State.currentTrack);
+    auto param = params.find(selectedParam);
+
+    if (param == params.end())
+    {
+        return;
+    }
+
+    auto keyFrames = param->second._keyFrames;
+
+    float arr[5] = {0, 0.3f, 0.4f, 0.1f, 0.9f};
+    ImGui::BeginChild("paramCurve");
+
+    ImGui::EndChild();
+}
+
+void EffectsAndAutomationEditor::RenderEffect(
     int group,
     int index,
     int effect,

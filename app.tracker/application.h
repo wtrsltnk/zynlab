@@ -53,7 +53,7 @@ class Application :
     ApplicationSession _session;
 
     AutomationEditor _automationEditor;
-    EffectsEditor _effectsEditor;
+    EffectsAndAutomationEditor _effectsEditor;
     InstrumentsPanel _instruments;
     MixerEditor _mixerEditor;
     PatternEditor _patternEditor;

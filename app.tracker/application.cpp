@@ -142,7 +142,7 @@ bool Application::Setup()
     param._keyFrames.insert(std::make_pair<unsigned int, float>(24, 0.2f));
     param._keyFrames.insert(std::make_pair<unsigned int, float>(32, 0.8f));
     param._keyFrames.insert(std::make_pair<unsigned int, float>(64, 1.0f));
-    params.push_back(param);
+    params.insert(std::make_pair(ParamIndices::SystemFX_1_Volume, param));
 
     _playerControlsPanel.SetUp(&_session);
     _patternEditor.SetUp(&_session, _monofont);

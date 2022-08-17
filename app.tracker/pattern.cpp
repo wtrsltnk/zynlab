@@ -71,7 +71,7 @@ std::vector<Note> &Pattern::Notes(
     return _notes[trackIndex];
 }
 
-std::vector<AutomatedParameter> &Pattern::AutomatedTrackParameters(
+std::map<int, AutomatedParameter> &Pattern::AutomatedTrackParameters(
     unsigned int trackIndex)
 {
     return _automatedTrackParameters[trackIndex];

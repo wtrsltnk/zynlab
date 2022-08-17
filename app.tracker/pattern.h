@@ -14,7 +14,7 @@ public:
     float GetValue(
         unsigned int step);
 
-//private:
+    //private:
     int _paramIndex;
     std::map<unsigned int, float> _keyFrames;
 };
@@ -39,14 +39,14 @@ public:
     std::vector<Note> &Notes(
         unsigned int trackIndex);
 
-    std::vector<AutomatedParameter> &AutomatedTrackParameters(
+    std::map<int, AutomatedParameter> &AutomatedTrackParameters(
         unsigned int trackIndex);
 
 private:
     std::string _name;
     unsigned int _length;
     std::vector<Note> _notes[NUM_MIXER_TRACKS];
-    std::vector<AutomatedParameter> _automatedTrackParameters[NUM_MIXER_TRACKS];
+    std::map<int, AutomatedParameter> _automatedTrackParameters[NUM_MIXER_TRACKS];
 };
 
 #endif // PATTERN_H
