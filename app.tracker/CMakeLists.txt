@@ -49,7 +49,8 @@ target_link_libraries(app.tracker
         zyn.synth
         zyn.serialization
         zyn.common
-        zyn.ui)
+        zyn.ui
+)
 
 target_compile_options(app.tracker
     PUBLIC

@@ -229,6 +229,14 @@ bool ImGui::KnobUchar(
 bool ImGui::DropDown(
     char const *label,
     unsigned char& currentValue,
+    std::vector<std::string> const names)
+{
+    return DropDown(label, currentValue, names, nullptr);
+}
+
+bool ImGui::DropDown(
+    char const *label,
+    unsigned char& currentValue,
     std::vector<std::string> const names,
     char const *tooltip)
 {

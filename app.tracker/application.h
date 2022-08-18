@@ -72,8 +72,8 @@ public:
 
     virtual bool Setup();
 
-    const int instrumentPanelWidth = 370;
-    const int effectsPanelHeight = 210;
+    int instrumentPanelWidth = 370;
+    int effectsPanelHeight = 210;
     const int playerControlsPanelHeight = 36;
     const int playerControlsPanelWidth = 168;
 

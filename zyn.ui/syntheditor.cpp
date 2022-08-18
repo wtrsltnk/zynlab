@@ -740,8 +740,7 @@ void SynthEditor::RenderAddSynth(
     }
 }
 
-static const int overtone_position_count = 8;
-static char const *overtone_positions[] = {
+static std::vector<std::string> overtone_positions = {
     "Harmonic",
     "ShiftU",
     "ShiftL",
@@ -752,8 +751,7 @@ static char const *overtone_positions[] = {
     "Shift",
 };
 
-static unsigned int mag_type_count = 5;
-static char const *const mag_types[] = {
+static std::vector<std::string> mag_types = {
     "Linear",
     "-40dB",
     "-60dB",
@@ -761,8 +759,7 @@ static char const *const mag_types[] = {
     "-100dB",
 };
 
-static unsigned int start_type_count = 3;
-static char const *const start_types[] = {
+static std::vector<std::string> start_types = {
     "Zero",
     "RND",
     "Max.",
@@ -774,7 +771,7 @@ void SynthEditor::RenderSubSynth(
     RenderAbstractSynth(params);
 
     ImGui::PushItemWidth(100);
-    if (DropDown("##MagType", params->Phmagtype, mag_types, mag_type_count, "Mag type"))
+    if (DropDown("##MagType", params->Phmagtype, mag_types, "Mag type"))
     {
     }
     ShowTooltipOnHover("How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)");
@@ -782,7 +779,7 @@ void SynthEditor::RenderSubSynth(
     ImGui::SameLine();
 
     ImGui::PushItemWidth(100);
-    if (DropDown("##Start", params->Pstart, start_types, start_type_count, "Start"))
+    if (DropDown("##Start", params->Pstart, start_types, "Start"))
     {
     }
     ShowTooltipOnHover("How the harmonics start(\"0\"=0,\"1\"=random,\"2\"=1)");
@@ -882,7 +879,7 @@ void SynthEditor::RenderSubSynth(
         ImGui::Text("Overtone Parameters");
 
         ImGui::PushItemWidth(100);
-        if (DropDown("Overtone positions", params->POvertoneSpread.type, overtone_positions, overtone_position_count, "Overtone positions"))
+        if (DropDown("Overtone positions", params->POvertoneSpread.type, overtone_positions, "Overtone positions"))
         {
         }
 
@@ -1245,8 +1242,7 @@ void SynthEditor::RenderSmplSynth(
     });
 }
 
-static int lfo_type_count = 7;
-static char const *lfo_types[] = {
+static std::vector<std::string> lfo_types = {
     "SINE",
     "TRI",
     "SQR",
@@ -1256,8 +1252,7 @@ static char const *lfo_types[] = {
     "E2dn",
 };
 
-static int detune_types_count = 4;
-static char const *detune_types[] = {
+static std::vector<std::string> detune_types = {
     "L35cents",
     "L10cents",
     "E100cents",
@@ -1295,7 +1290,7 @@ void SynthEditor::RenderLfo(
     }
 
     ImGui::PushItemWidth(100);
-    if (DropDown("##lfotype", params->PLFOtype, lfo_types, lfo_type_count, "LFO Type"))
+    if (DropDown("##lfotype", params->PLFOtype, lfo_types, "LFO Type"))
     {
     }
 
@@ -1691,16 +1686,16 @@ void SynthEditor::RenderDetune(
 
     static char const *current_detune_types_item = nullptr;
     auto detune_type = static_cast<int>(detuneType);
-    current_detune_types_item = detune_types[detune_type];
+    current_detune_types_item = detune_types[detune_type].c_str();
     ImGui::PushItemWidth(114);
     if (ImGui::BeginCombo("type", current_detune_types_item))
     {
-        for (int n = 0; n < detune_types_count; n++)
+        for (size_t n = 0; n < detune_types.size(); n++)
         {
             bool is_selected = (current_detune_types_item == detune_types[n]);
-            if (ImGui::Selectable(detune_types[n], is_selected))
+            if (ImGui::Selectable(detune_types[n].c_str(), is_selected))
             {
-                current_detune_types_item = detune_types[n];
+                current_detune_types_item = detune_types[n].c_str();
                 detuneType = static_cast<unsigned char>(n);
             }
         }

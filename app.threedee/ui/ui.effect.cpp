@@ -5,6 +5,7 @@
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.fx/EffectPresets.h>
 #include <zyn.mixer/Mixer.h>
+#include <zyn.fx/Alienwah.h>
 
 char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";

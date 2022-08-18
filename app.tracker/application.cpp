@@ -135,7 +135,7 @@ bool Application::Setup()
         pattern->Notes(0)[i * 4 + 3]._velocity = 100;
     }
 
-    auto & params = pattern->AutomatedTrackParameters(0);
+    auto &params = pattern->AutomatedTrackParameters(0);
     AutomatedParameter param;
     param._paramIndex = ParamIndices::SystemFX_1_Volume;
     param._keyFrames.insert(std::make_pair<unsigned int, float>(0, 0.0f));
@@ -169,12 +169,12 @@ void Application::Render2d()
     ImGui::SetNextWindowPos(ImVec2(0, float(playerControlsPanelHeight)));
     _patternsManager.Render2d();
 
-    ImGui::SetNextWindowSize(ImVec2(float(instrumentPanelWidth), float(Height())));
-    ImGui::SetNextWindowPos(ImVec2(float(Width() - instrumentPanelWidth), 0.0f));
+    ImGui::SetNextWindowSize(ImVec2(float(instrumentPanelWidth - 5), float(Height())));
+    ImGui::SetNextWindowPos(ImVec2(float(Width() - instrumentPanelWidth + 5), 0.0f));
     _instruments.Render2d();
 
-    ImGui::SetNextWindowSize(ImVec2(float(Width() - instrumentPanelWidth), float(effectsPanelHeight)));
-    ImGui::SetNextWindowPos(ImVec2(0.0f, float(Height() - effectsPanelHeight)));
+    ImGui::SetNextWindowSize(ImVec2(float(Width() - instrumentPanelWidth), float(effectsPanelHeight - 5)));
+    ImGui::SetNextWindowPos(ImVec2(0.0f, float(Height() - effectsPanelHeight + 5)));
     _effectsEditor.Render2d();
 
     ImGui::SetNextWindowSize(ImVec2(float(Width() - playerControlsPanelWidth - instrumentPanelWidth), float(playerControlsPanelHeight)));
@@ -246,6 +246,54 @@ void Application::Render2d()
             break;
         }
     }
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(5, 5));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(float(Width() - instrumentPanelWidth), 5));
+    ImGui::SetNextWindowPos(ImVec2(0.0f, float(Height() - effectsPanelHeight)));
+    ImGui::Begin("SplitterA", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    ImGui::Button("##SplitterButtonA", ImVec2(float(Width() - instrumentPanelWidth), 5));
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+    }
+    static float mousPosY = ImGui::GetIO().MousePos.y;
+    if (ImGui::IsItemActivated())
+    {
+        mousPosY = ImGui::GetIO().MousePos.y;
+    }
+    if (ImGui::IsItemActive())
+    {
+        effectsPanelHeight -= (ImGui::GetIO().MousePos.y - mousPosY);
+        mousPosY = ImGui::GetIO().MousePos.y;
+
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+    }
+    ImGui::End();
+
+    ImGui::SetNextWindowSize(ImVec2(5.0f, float(Height())));
+    ImGui::SetNextWindowPos(ImVec2(float(Width() - instrumentPanelWidth), 0.0f));
+    ImGui::Begin("SplitterB", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    ImGui::Button("##SplitterButtonB", ImVec2(5, float(Height())));
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    }
+    static float mousPosX = ImGui::GetIO().MousePos.x;
+    if (ImGui::IsItemActivated())
+    {
+        mousPosX = ImGui::GetIO().MousePos.x;
+    }
+    if (ImGui::IsItemActive())
+    {
+        instrumentPanelWidth -= (ImGui::GetIO().MousePos.x - mousPosX);
+        mousPosX = ImGui::GetIO().MousePos.x;
+
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    }
+    ImGui::End();
+    ImGui::PopStyleVar(2);
+
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
     {
         _session.TogglePlaying();

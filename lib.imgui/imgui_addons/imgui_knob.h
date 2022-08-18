@@ -35,8 +35,13 @@ namespace ImGui
     IMGUI_API bool DropDown(
         char const *label,
         unsigned char& currentValue,
+        std::vector<std::string> const names);
+
+    IMGUI_API bool DropDown(
+        char const *label,
+        unsigned char& currentValue,
         std::vector<std::string> const names,
-        char const *tooltip = nullptr);
+        char const *tooltip);
 
     IMGUI_API bool ImageToggleButton(
         const char *str_id,

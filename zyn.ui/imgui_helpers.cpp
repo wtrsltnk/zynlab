@@ -213,21 +213,20 @@ void ShowTooltipOnHover(
 bool DropDown(
     char const *label,
     unsigned char &value,
-    char const *const names[],
-    unsigned int nameCount,
+    const std::vector<std::string> &names,
     char const *tooltip)
 {
     bool value_changed = false;
 
-    auto current_effect_item = names[value];
+    auto current_effect_item = names[value].c_str();
     if (ImGui::BeginCombo(label, current_effect_item, ImGuiComboFlags_HeightLarge))
     {
-        for (unsigned char n = 0; n < nameCount; n++)
+        for (size_t n = 0; n < names.size(); n++)
         {
             bool is_selected = (current_effect_item == names[n]);
-            if (ImGui::Selectable(names[n], is_selected))
+            if (ImGui::Selectable(names[n].c_str(), is_selected))
             {
-                current_effect_item = names[n];
+                current_effect_item = names[n].c_str();
                 value = n;
                 value_changed = true;
             }
