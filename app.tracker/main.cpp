@@ -2,9 +2,9 @@
 //                                  INCLUDES
 // =============================================================================
 #include <Windows.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_win32.h>
 #include <chrono>
-#include <examples/imgui_impl_opengl3.h>
-#include <examples/imgui_impl_win32.h>
 #include <glad/glad.h>
 #include <iapplication.h>
 #include <imgui.h>
@@ -163,12 +163,12 @@ void Cleanup(
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
 
-    wglDeleteContext(
-        g_GLRenderContext);
+    ImGui_ImplWin32_Shutdown();
 
     ImGui::DestroyContext();
 
-    ImGui_ImplWin32_Shutdown();
+    wglDeleteContext(
+        g_GLRenderContext);
 
     DestroyWindow(g_hwnd);
 

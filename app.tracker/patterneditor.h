@@ -35,6 +35,7 @@ public:
     const int rowIndexColumnWidth = 30;
     const int scrollbarHeight = 20;
 
+    unsigned int _octaveOffset = 0;
     std::map<char, unsigned int> _charToNoteMap{
         {'Z', 60}, // C-4
         {'S', 61}, // C#4

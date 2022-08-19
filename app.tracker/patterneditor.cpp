@@ -282,7 +282,7 @@ void PatternEditor::Render2d()
 
                     auto w = ImGui::CalcTextSize("footer 00").x;
                     ImGui::SetColumnWidth(i, _columnsWidths[i] + 15.0f);
-                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() - w) / 2.0f, 0));
+                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvail().x - w) / 2.0f, 0));
                     ImGui::Text("footer %02d", i + 1);
                     ImGui::PopID();
                     ImGui::NextColumn();
@@ -413,7 +413,7 @@ void PatternEditor::Render2d()
                     ImGui::SetColumnWidth(i, _columnsWidths[i] + 15.0f);
 
                     auto w = ImGui::CalcTextSize("Track 00").x / 2.0f;
-                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvailWidth() / 2.0f) - w, 9.0f));
+                    ImGui::MoveCursorPos(ImVec2((ImGui::GetContentRegionAvail().x / 2.0f) - w, 9.0f));
                     ImGui::SetNextWindowSize(ImVec2(_columnsWidths[i] + 15.0f, float(headerHeight)));
                     ImGui::Text("Track %02d", i + 1);
 
@@ -584,14 +584,57 @@ bool PatternEditor::HandleEditingNotes()
         return true;
     }
 
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F1)))
+    {
+        _octaveOffset = -3;
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F2)))
+    {
+        _octaveOffset = -2;
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F3)))
+    {
+        _octaveOffset = -1;
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F4)))
+    {
+        _octaveOffset = 0;
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F5)))
+    {
+        _octaveOffset = 1;
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F6)))
+    {
+        _octaveOffset = 2;
+        return true;
+    }
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F7)))
+    {
+        _octaveOffset = 3;
+        return true;
+    }
+
     if (_session->currentProperty == 0)
     {
         for (auto p : _charToNoteMap)
         {
             if (ImGui::IsKeyPressed((ImWchar)p.first))
             {
-                pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow].Set(p.second, 64, 100);
-                _session->_mixer->PreviewNote(_session->_mixer->State.currentTrack, p.second, 400);
+                auto note = p.second + (_octaveOffset * 12);
+                pattern->Notes(_session->_mixer->State.currentTrack)[_session->currentRow].Set(note, 64, 100);
+                _session->_mixer->PreviewNote(_session->_mixer->State.currentTrack, note, 400);
                 MoveCurrentRowDown(true);
                 return true;
             }

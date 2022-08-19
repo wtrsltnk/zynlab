@@ -2,16 +2,18 @@
 //                                  INCLUDES
 // =============================================================================
 #include <Windows.h>
-#include <examples/imgui_impl_win32.h>
+
 #include <glad/glad.h>
+
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_win32.h>
+#include <chrono>
+#include <iapplication.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <iostream>
 #include <random>
 #include <stdio.h>
-#include <chrono>
-#include <examples/imgui_impl_opengl3.h>
-#include <iapplication.h>
-#include <imgui_internal.h>
 #include <wchar.h>
 
 IApplication::~IApplication() = default;

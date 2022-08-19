@@ -97,7 +97,7 @@ void PatternsManager::Render2d()
                 ImGui::EndTooltip();
             }
 
-            ImGui::BeginChild("patterns", ImVec2(0.0f, -100.0f));
+            ImGui::BeginChild("patterns", ImVec2(0.0f, -120.0f));
             {
                 for (unsigned int i = 0; i < _session->_song->GetPatternCount(); i++)
                 {
@@ -128,12 +128,30 @@ void PatternsManager::Render2d()
                         ->Rename(_patternPropertiesNameBuffer);
                 }
 
-                ImGui::Text("Length");
+                ImGui::Text("Len");
+                ImGui::SameLine(40);
                 int len = _session->_song->GetPattern(_session->_song->currentPattern)->Length();
-                ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
+                ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - 40);
                 if (ImGui::InputInt("##length", &len, 4))
                 {
                     _session->_song->GetPattern(_session->_song->currentPattern)->Resize(len);
+                }
+
+                ImGui::Text("Add");
+                ImGui::SameLine(40);
+                ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - 40);
+                int add = _session->skipRowStepSize;
+                if (ImGui::InputInt("##add", &add, 1))
+                {
+                    _session->skipRowStepSize = add;
+                }
+                if (_session->skipRowStepSize < 0)
+                {
+                    _session->skipRowStepSize = 0;
+                }
+                if (_session->skipRowStepSize >= static_cast<unsigned int>(len))
+                {
+                    _session->skipRowStepSize = len - 1;
                 }
             }
             ImGui::EndChild();

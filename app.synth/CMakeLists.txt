@@ -10,7 +10,6 @@ add_executable(app.synth
 
 target_include_directories(app.synth
     PUBLIC include
-    PUBLIC imgui
     PRIVATE ${CMAKE_SOURCE_DIR})
 
 target_compile_features(app.synth

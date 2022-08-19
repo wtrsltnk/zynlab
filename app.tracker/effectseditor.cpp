@@ -729,7 +729,8 @@ float getEQPlotValue(EffectManager *effectManager, int x, int maxX, int maxY)
     return ((dbresp / maxdB + 1.0f) * maxY / 2.0f);
 }
 
-void EffectEQEditor(EffectManager *effectManager)
+void EffectEQEditor(
+    EffectManager *effectManager)
 {
     auto volume = effectManager->geteffectpar(EffectPresets::Volume);
     if (KnobUchar("Vol", &volume, 0, 127, ImVec2(30, 30), "Effect Volume"))

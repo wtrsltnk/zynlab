@@ -134,7 +134,7 @@ namespace ImGui
             format = "%d";
 
         const bool hovered = ItemHoverable(frame_bb, id);
-        if ((hovered && g.IO.MouseClicked[0]) || g.NavActivateId == id || g.NavInputId == id)
+        if ((hovered && g.IO.MouseClicked[0]) || g.NavActivateId == id || g.NavInputSource == id)
         {
             SetActiveID(id, window);
             SetFocusID(id, window);
@@ -149,7 +149,7 @@ namespace ImGui
 
         // Slider behavior
         ImRect grab_bb;
-        const bool value_changed = SliderBehavior(frame_bb, id, data_type, v, &v_min, &v_max, format, power, ImGuiSliderFlags_Vertical, &grab_bb);
+        const bool value_changed = SliderBehavior(frame_bb, id, data_type, v, &v_min, &v_max, format, ImGuiSliderFlags_Vertical, &grab_bb);
         if (value_changed)
             MarkItemEdited(id);
 

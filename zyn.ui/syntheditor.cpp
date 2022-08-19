@@ -1039,15 +1039,15 @@ std::string NoteToString(unsigned char note)
     switch (note)
     {
         case 35:
-            return "Acoustic Bass Drum [35]";
+            return "Acoustic Bass Drum [B-1/35]";
         case 36:
-            return "Bass Drum 1 [36]";
+            return "Bass Drum 1 [C-2/36]";
         case 37:
-            return "Side Stick [37]";
+            return "Side Stick [C#2/37]";
         case 38:
-            return "Acoustic Snare [38]";
+            return "Acoustic Snare [D-2/38]";
         case 39:
-            return "Hand Clap [39]";
+            return "Hand Clap [D#2/39]";
         case 40:
             return "Electric Snare [40]";
         case 41:
@@ -1226,7 +1226,7 @@ void SynthEditor::RenderSmplSynth(
             conf.tooltip.format = "x=%.2f, y=%.2f";
             conf.grid_x.show = false;
             conf.grid_y.show = false;
-            conf.frame_size = ImVec2(ImGui::GetContentRegionAvailWidth(), 160);
+            conf.frame_size = ImVec2(ImGui::GetContentRegionAvail().x, 160);
             conf.line_thickness = 2.f;
 
             ImGui::Plot("plot", conf);
