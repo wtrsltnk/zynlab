@@ -1,5 +1,8 @@
 # zynlab
+
 Rearrangement of the zynaddsubfx classes and seperated into libraries.
+
+First run cmake, then build the "fluid" target (so fluid.exe is available) then re-run cmake. 
 
 ```
 set root_dir=%CD%
