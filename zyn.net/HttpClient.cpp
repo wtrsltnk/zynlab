@@ -9,7 +9,11 @@ using namespace net;
 
 HttpClient::~HttpClient() {}
 
-bool HttpClientRequest(std::string const &site, std::string const &param, std::string const &method, std::string &response)
+bool HttpClientRequest(
+    std::string const &site,
+    std::string const &param,
+    std::string const &method,
+    std::string &response)
 {
     HINTERNET hInternet = InternetOpen("YourUserAgent", INTERNET_OPEN_TYPE_DIRECT, nullptr, nullptr, 0); //you should perhaps edit your useragent ? :p
 
@@ -78,7 +82,8 @@ bool HttpClientRequest(std::string const &site, std::string const &param, std::s
     return true;
 }
 
-std::string HttpClient::get(std::string const &url)
+std::string HttpClient::get(
+    std::string const &url)
 {
     std::string response;
 
@@ -90,7 +95,10 @@ std::string HttpClient::get(std::string const &url)
     return "";
 }
 
-std::string HttpClient::post(std::string const &url, std::map<std::string, std::string> const &data)
+std::string HttpClient::post(
+    std::string const &url,
+    std::map<std::string,
+             std::string> const &data)
 {
     std::string response;
     std::stringstream ss;

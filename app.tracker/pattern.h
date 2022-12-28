@@ -39,14 +39,22 @@ public:
     std::vector<Note> &Notes(
         unsigned int trackIndex);
 
-    std::map<int, AutomatedParameter> &AutomatedTrackParameters(
+    std::map<int, AutomatedParameter *> *AutomatedTrackParameters(
         unsigned int trackIndex);
 
-private:
+    void AddParam(
+        unsigned int trackIndex,
+        AutomatedParameter *param);
+
+    void RemoveParam(
+        unsigned int trackIndex,
+        AutomatedParameter *param);
+
+    //private:
     std::string _name;
     unsigned int _length;
     std::vector<Note> _notes[NUM_MIXER_TRACKS];
-    std::map<int, AutomatedParameter> _automatedTrackParameters[NUM_MIXER_TRACKS];
+    std::map<int, AutomatedParameter *> _automatedTrackParameters[NUM_MIXER_TRACKS];
 };
 
 #endif // PATTERN_H

@@ -120,7 +120,6 @@ static std::vector<std::string> reverbTypeNames = {
     "Bandwidth",
 };
 
-static int const lfoTypeCount = 2;
 static std::vector<std::string> lfoTypes = {
     "SINE",
     "TRI",
@@ -1031,18 +1030,95 @@ void EffectsAndAutomationEditor::RenderAutomatedParam(
 {
     auto song = _session->_song;
     auto pattern = song->GetPattern(song->currentPattern);
-    auto params = pattern->AutomatedTrackParameters(_session->_mixer->State.currentTrack);
-    auto param = params.find(selectedParam);
+    auto params = pattern->_automatedTrackParameters[_session->_mixer->State.currentTrack];
+    auto param = params[selectedParam];
 
-    if (param == params.end())
+    ImGui::BeginChild("paramCurve");
+
+    bool enabled = params.find(selectedParam) != params.end();
+    if (ImGui::Checkbox("Enabled", &enabled))
     {
-        return;
+        if (enabled)
+        {
+            auto p = new AutomatedParameter({
+                selectedParam,
+                std::map<unsigned int, float>(),
+            });
+            pattern->AddParam(
+                _session->_mixer->State.currentTrack,
+                p);
+        }
+        else
+        {
+            pattern->RemoveParam(_session->_mixer->State.currentTrack, param);
+            delete param;
+            param = nullptr;
+        }
     }
 
-    auto keyFrames = param->second._keyFrames;
+    if (enabled)
+    {
+        ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+        ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+        vMin.x += ImGui::GetWindowPos().x;
+        vMin.y += ImGui::GetItemRectMax().y;
+        vMax.x += ImGui::GetWindowPos().x;
+        vMax.y += ImGui::GetWindowPos().y;
 
-    float arr[5] = {0, 0.3f, 0.4f, 0.1f, 0.9f};
-    ImGui::BeginChild("paramCurve");
+        auto width = vMax.x - vMin.x;
+        auto height = vMax.y - vMin.y - 10.0f;
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+        auto stepWidth = width / (pattern->Length() + 2);
+        for (unsigned int i = 1; i <= pattern->Length(); i++)
+        {
+            draw_list->AddLine(
+                ImVec2(vMin.x + (i * stepWidth), vMin.y),
+                ImVec2(vMin.x + (i * stepWidth), vMax.y),
+                IM_COL32(55, 55, 55, 255));
+        }
+
+        if (param != nullptr && params.find(selectedParam) != params.end())
+        {
+            for (auto &f : param->_keyFrames)
+            {
+                ImGui::PushID(f.first);
+                draw_list->AddLine(
+                    ImVec2(vMin.x + ((f.first + 1) * stepWidth), vMin.y),
+                    ImVec2(vMin.x + ((f.first + 1) * stepWidth), vMax.y),
+                    IM_COL32(55, 155, 155, 255),
+                    3.0f);
+
+                auto center = ImVec2(vMin.x + ((f.first + 1) * stepWidth), vMin.y + 5.0f + (height * (1.0f - f.second)));
+                draw_list->AddCircleFilled(
+                    center,
+                    5.0f,
+                    IM_COL32(100, 200, 200, 255));
+                ImGui::SetCursorScreenPos(ImVec2(center.x - 5.0f, center.y - 5.0f));
+                ImGui::InvisibleButton("handle", ImVec2(10.0f, 10.0f));
+                static ImVec2 movePos;
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                }
+                if (ImGui::IsItemActivated())
+                {
+                    movePos = ImGui::GetMousePos();
+                }
+                if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+                {
+                    auto curMovePos = ImGui::GetMousePos();
+                    auto diff = curMovePos.y - movePos.y;
+
+                    f.second -= (diff / height);
+                    if (f.second < 0.0f) f.second = 0.0f;
+                    if (f.second >= 1.0f) f.second = 1.0f;
+                    movePos = curMovePos;
+                }
+                ImGui::PopID();
+            }
+        }
+    }
 
     ImGui::EndChild();
 }

@@ -19,6 +19,9 @@ add_definitions(-DENABLE_FLTKGUI)
 
 find_package(OpenGL) #for FLTK
 
+
+add_library(_docs INTERFACE README.md)
+
 add_subdirectory("lib.mxml")
 add_subdirectory("lib.sqlite3")
 

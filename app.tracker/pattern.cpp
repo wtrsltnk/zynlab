@@ -71,8 +71,22 @@ std::vector<Note> &Pattern::Notes(
     return _notes[trackIndex];
 }
 
-std::map<int, AutomatedParameter> &Pattern::AutomatedTrackParameters(
+std::map<int, AutomatedParameter*> *Pattern::AutomatedTrackParameters(
     unsigned int trackIndex)
 {
-    return _automatedTrackParameters[trackIndex];
+    return &_automatedTrackParameters[trackIndex];
+}
+
+void Pattern::AddParam(
+    unsigned int trackIndex,
+    AutomatedParameter *param)
+{
+    _automatedTrackParameters[trackIndex].insert(std::make_pair(param->_paramIndex, param));
+}
+
+void Pattern::RemoveParam(
+    unsigned int trackIndex,
+    AutomatedParameter* param)
+{
+    _automatedTrackParameters[trackIndex].erase(param->_paramIndex);
 }

@@ -1,79 +1,88 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include <algorithm>
-#include <sstream>
-#include <iostream>
-#include <fstream>
 #include <cctype>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 using namespace net;
 
 static std::map<int, std::string> responseCodes = std::map<int, std::string>(
-{
-    { 100, "Continue" },
-    { 101, "Switching Protocols" },
-    { 200, "OK" },
-    { 201, "Created" },
-    { 202, "Accepted" },
-    { 203, "Non-Authoritative Information" },
-    { 204, "No Content" },
-    { 205, "Reset Content" },
-    { 206, "Partial Content" },
-    { 300, "Multiple Choices" },
-    { 301, "Moved Permanently" },
-    { 302, "Found" },
-    { 303, "See Other" },
-    { 304, "Not Modified" },
-    { 305, "Use Proxy" },
-    { 306, "(Unused)" },
-    { 307, "Temporary Redirect" },
-    { 400, "Bad Request" },
-    { 401, "Unauthorized" },
-    { 402, "Payment Required" },
-    { 403, "Forbidden" },
-    { 404, "Not Found" },
-    { 405, "Method Not Allowed" },
-    { 406, "Not Acceptable" },
-    { 407, "Proxy Authentication Required" },
-    { 408, "Request Timeout" },
-    { 409, "Conflict" },
-    { 410, "Gone" },
-    { 411, "Length Required" },
-    { 412, "Precondition Failed" },
-    { 413, "Request Entity Too Large" },
-    { 414, "Request-URI Too Long" },
-    { 415, "Unsupported Media Type" },
-    { 416, "Requested Range Not Satisfiable" },
-    { 417, "Expectation Failed" },
-    { 500, "Internal Server Error" },
-    { 501, "Not Implemented" },
-    { 502, "Bad Gateway" },
-    { 503, "Service Unavailable" },
-    { 504, "Gateway Timeout" },
-    { 505, "HTTP Version Not Supported" }
-});
+    {{100, "Continue"},
+     {101, "Switching Protocols"},
+     {200, "OK"},
+     {201, "Created"},
+     {202, "Accepted"},
+     {203, "Non-Authoritative Information"},
+     {204, "No Content"},
+     {205, "Reset Content"},
+     {206, "Partial Content"},
+     {300, "Multiple Choices"},
+     {301, "Moved Permanently"},
+     {302, "Found"},
+     {303, "See Other"},
+     {304, "Not Modified"},
+     {305, "Use Proxy"},
+     {306, "(Unused)"},
+     {307, "Temporary Redirect"},
+     {400, "Bad Request"},
+     {401, "Unauthorized"},
+     {402, "Payment Required"},
+     {403, "Forbidden"},
+     {404, "Not Found"},
+     {405, "Method Not Allowed"},
+     {406, "Not Acceptable"},
+     {407, "Proxy Authentication Required"},
+     {408, "Request Timeout"},
+     {409, "Conflict"},
+     {410, "Gone"},
+     {411, "Length Required"},
+     {412, "Precondition Failed"},
+     {413, "Request Entity Too Large"},
+     {414, "Request-URI Too Long"},
+     {415, "Unsupported Media Type"},
+     {416, "Requested Range Not Satisfiable"},
+     {417, "Expectation Failed"},
+     {500, "Internal Server Error"},
+     {501, "Not Implemented"},
+     {502, "Bad Gateway"},
+     {503, "Service Unavailable"},
+     {504, "Gateway Timeout"},
+     {505, "HTTP Version Not Supported"}});
 
 // trim from start
-static inline std::string &ltrim(std::string &s) {
+static inline std::string &ltrim(
+    std::string &s)
+{
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
                                     std::not1(std::ptr_fun<int, int>(std::isspace))));
     return s;
 }
 
 // trim from end
-static inline std::string &rtrim(std::string &s) {
+static inline std::string &rtrim(
+    std::string &s)
+{
     s.erase(std::find_if(s.rbegin(), s.rend(),
-                         std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+                         std::not1(std::ptr_fun<int, int>(std::isspace)))
+                .base(),
+            s.end());
     return s;
 }
 
 // trim from both ends
-static inline std::string &trim(std::string &s) {
+static inline std::string &trim(
+    std::string &s)
+{
     return ltrim(rtrim(s));
 }
 
-Request::Request(SOCKET socket, sockaddr_in clientInfo)
-    : _socket(socket), _clientInfo(clientInfo)
+Request::Request(
+    SOCKET socket,
+    sockaddr_in clientInfo)
+    : _socket(socket),
+      _clientInfo(clientInfo)
 {
     std::string allData = getMessage();
     auto pos = allData.find("\r\n\r\n");
@@ -97,7 +106,7 @@ Request::Request(SOCKET socket, sockaddr_in clientInfo)
                 auto method = line.substr(0, first);
                 this->_method = trim(method);
 
-                auto uri = line.substr(first, last-first);
+                auto uri = line.substr(first, last - first);
                 this->_uri = trim(uri);
             }
         }
@@ -121,7 +130,7 @@ Request::Request(SOCKET socket, sockaddr_in clientInfo)
 
 std::string Request::getMessage()
 {
-    char buffer[BUFFER_SIZE+1];
+    char buffer[BUFFER_SIZE + 1];
     int bytes;
 
     bytes = recv(this->_socket, buffer, BUFFER_SIZE, 0);
@@ -141,7 +150,9 @@ std::string Request::getMessage()
 #define STREAMING_TRESHOLD 1024
 
 // The function we want to execute on the new thread.
-void Request::handleRequest(std::function<int (const Request&, Response &)> onConnection, Request request)
+void Request::handleRequest(
+    std::function<int(const Request &, Response &)> onConnection,
+    Request request)
 {
     if (request._method == "")
     {

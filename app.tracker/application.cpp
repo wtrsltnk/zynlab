@@ -135,14 +135,13 @@ bool Application::Setup()
         pattern->Notes(0)[i * 4 + 3]._velocity = 100;
     }
 
-    auto &params = pattern->AutomatedTrackParameters(0);
-    AutomatedParameter param;
-    param._paramIndex = ParamIndices::SystemFX_1_Volume;
-    param._keyFrames.insert(std::make_pair<unsigned int, float>(0, 0.0f));
-    param._keyFrames.insert(std::make_pair<unsigned int, float>(24, 0.2f));
-    param._keyFrames.insert(std::make_pair<unsigned int, float>(32, 0.8f));
-    param._keyFrames.insert(std::make_pair<unsigned int, float>(64, 1.0f));
-    params.insert(std::make_pair(ParamIndices::SystemFX_1_Volume, param));
+    auto param = new AutomatedParameter();
+    param->_paramIndex = ParamIndices::SystemFX_1_Volume;
+    param->_keyFrames.insert(std::make_pair<unsigned int, float>(0, 0.0f));
+    param->_keyFrames.insert(std::make_pair<unsigned int, float>(24, 0.2f));
+    param->_keyFrames.insert(std::make_pair<unsigned int, float>(32, 0.8f));
+    param->_keyFrames.insert(std::make_pair<unsigned int, float>(64, 1.0f));
+    pattern->AddParam(0, param);
 
     _playerControlsPanel.SetUp(&_session);
     _patternEditor.SetUp(&_session, _monofont);
