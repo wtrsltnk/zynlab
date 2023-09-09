@@ -1,56 +1,80 @@
-#include "par.h"
+
 #include <fstream>
 #include <iostream>
 #include <memory.h>
+#include <zyn.common/Config.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.serialization/SaveToFileSerializer.h>
+#include <zyn.serialization/BankManager.h>
 
-extern "C" Mixer *CreateMixer();
+extern "C" {
+__declspec(dllexport) Mixer *CreateMixer();
 
-extern "C" void DestroyMixer(
+__declspec(dllexport)  void DestroyMixer(
     Mixer *mixer);
 
-extern "C" void AudioOut(
+__declspec(dllexport)  void EnableChannel(
+    Mixer *mixer,
+    unsigned char chan);
+
+__declspec(dllexport)  void DisableChannel(
+    Mixer *mixer,
+    unsigned char chan);
+
+__declspec(dllexport)  void AudioOut(
     Mixer *mixer,
     float outl[],
     float outr[]);
 
-extern "C" void LoadPresets(
+__declspec(dllexport) void LoadPresets(
     Mixer *mixer,
     unsigned char chan,
-    const char *xmldata,
-    int size);
+    const char *xmldata);
 
-extern "C" void NoteOn(
+__declspec(dllexport)  void LoadPresetsFromFile(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *filePath);
+
+__declspec(dllexport)  void LoadPresetFromBank(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *library,
+    int slot);
+
+__declspec(dllexport)  void NoteOn(
     Mixer *mixer,
     unsigned char chan,
     unsigned char note,
     unsigned char velocity);
 
-extern "C" void NoteOff(
+__declspec(dllexport)  void NoteOff(
     Mixer *mixer,
     unsigned char chan,
     unsigned char note);
 
-extern "C" void SetPar(
+__declspec(dllexport)  void SetPar(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
     unsigned char par);
 
-extern "C" void SetParBool(
+__declspec(dllexport)  void SetParBool(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
     bool value);
 
-extern "C" void SetParReal(
+__declspec(dllexport)  void SetParReal(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
     float value);
+}
 
-static std::ofstream logfile;
+extern std::ofstream logfile;
+
+//static BankManager banks;
 
 Mixer *CreateMixer()
 {
@@ -72,28 +96,119 @@ Mixer *CreateMixer()
     return m;
 }
 
+void DestroyMixer(
+    Mixer *mixer)
+{
+    logfile << "DestroyMixer" << std::endl;
+    if (logfile.is_open())
+    {
+        logfile.close();
+    }
+
+    if (mixer != nullptr)
+    {
+        delete mixer;
+    }
+
+    Config::Current().save();
+}
+
+void EnableChannel(
+    Mixer *mixer,
+    unsigned char chan)
+{
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        return;
+    }
+
+    if (!track->Penabled)
+    {
+        mixer->EnableTrack(chan, true);
+    }
+}
+
+void DisableChannel(
+    Mixer *mixer,
+    unsigned char chan)
+{
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        return;
+    }
+
+    if (track->Penabled)
+    {
+        track->Lock();
+        track->AllNotesOff();
+        mixer->Unlock();
+
+        mixer->EnableTrack(chan, false);
+    }
+}
+
 void AudioOut(
     Mixer *mixer,
     float outl[],
     float outr[])
 {
-    if (mixer != nullptr)
+    if (mixer == nullptr)
     {
-        mixer->Lock();
-        mixer->AudioOut(outl, outr);
-        mixer->Unlock();
+        return;
     }
+
+    mixer->Lock();
+    mixer->AudioOut(outl, outr);
+    mixer->Unlock();
 }
 
-extern "C" void LoadPresets(
+void LoadPresetsFromFile(
     Mixer *mixer,
     unsigned char chan,
-    const char *xmldata,
-    int size)
+    const char *filePath)
 {
-    (void)size;
+    if (mixer == nullptr)
+    {
+        return;
+    }
 
-    logfile << "LoadPresets: " << std::endl;
+    auto track = mixer->GetTrack(int(chan));
+
+    if (track == nullptr)
+    {
+        return;
+    }
+
+    track->Lock();
+
+    SaveToFileSerializer().LoadTrack(track, filePath);
+
+    track->Unlock();
+
+    track->ApplyParameters();
+}
+
+void LoadPresets(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *xmldata)
+{
+    logfile << "LoadPresets[" << short(chan) << "]  : " << std::endl;
+
     if (mixer == nullptr)
     {
         return;
@@ -113,17 +228,78 @@ extern "C" void LoadPresets(
 
     track->Lock();
 
-    track->AllNotesOff();
-
-    track->InstrumentDefaults();
-
-    auto result = SaveToFileSerializer().LoadTrackFromData(track, xmldata);
-
-    track->ApplyParameters();
+    SaveToFileSerializer().LoadTrackFromData(track, xmldata);
 
     track->Unlock();
 
-    logfile << "loading done with result == " << result << std::endl;
+    track->ApplyParameters();
+}
+
+bool SwitchBankAndLoadSlot(
+    const char *bankName,
+    int slotIndex,
+    Track *track)
+{
+    static BankManager banks;
+
+    banks.RescanForBanks();
+
+    const int bankCount = banks.GetBankCount();
+
+    logfile << "bankCount = " << bankCount << std::endl;
+
+    for (int i = 0; i < bankCount; i++)
+    {
+        const auto bank = banks.GetBank(i);
+        logfile << "bank[" << i << "] = " << bank.name << std::endl;
+
+        if (std::string(bankName) == bank.name)
+        {
+            track->Lock();
+
+            banks.LoadBank(i);
+            banks.LoadFromSlot(slotIndex, track);
+
+            track->Unlock();
+
+            track->ApplyParameters();
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void LoadPresetFromBank(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *library,
+    int slot)
+{
+    logfile << "LoadPresetFromBank[" << short(chan) << "]  : " << library << ", " << slot << std::endl;
+
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        return;
+    }
+
+    if (track->Penabled == false)
+    {
+        mixer->EnableTrack(chan, true);
+    }
+
+    if (!SwitchBankAndLoadSlot(library, slot, track))
+    {
+        logfile << "Failed to switch to " << library << " and load slot " << slot << std::endl;
+    }
 }
 
 void NoteOn(
@@ -132,7 +308,7 @@ void NoteOn(
     unsigned char note,
     unsigned char velocity)
 {
-    logfile << "NoteOn  : " << (int)note << std::endl;
+    logfile << "NoteOn[" << short(chan) << "]  : " << (int)note << std::endl;
     if (mixer == nullptr)
     {
         return;
@@ -146,7 +322,7 @@ void NoteOff(
     unsigned char chan,
     unsigned char note)
 {
-    logfile << "NoteOff : " << (int)note << std::endl;
+    logfile << "NoteOff[" << short(chan) << "] : " << (int)note << std::endl;
     if (mixer == nullptr)
     {
         return;
@@ -159,8 +335,12 @@ void SetPar(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
-    unsigned char par)
+    unsigned char value)
 {
+    logfile << "SetPar[" << short(chan) << "] : " << id  << ", " << value << std::endl;
+    (void)id;
+    (void)value;
+
     auto track = mixer->GetTrack(chan);
 
     if (track == nullptr)
@@ -175,6 +355,10 @@ void SetParBool(
     const char *id,
     bool value)
 {
+    logfile << "SetParBool[" << short(chan) << "] : " << id  << ", " << value << std::endl;
+    (void)id;
+    (void)value;
+
     auto track = mixer->GetTrack(chan);
 
     if (track == nullptr)
@@ -189,25 +373,14 @@ void SetParReal(
     const char *id,
     float value)
 {
+    logfile << "SetParReal[" << short(chan) << "] : " << id  << ", " << value << std::endl;
+    (void)id;
+    (void)value;
+
     auto track = mixer->GetTrack(chan);
 
     if (track == nullptr)
     {
         return;
-    }
-}
-
-void DestroyMixer(
-    Mixer *mixer)
-{
-    logfile << "DestroyMixer" << std::endl;
-    if (logfile.is_open())
-    {
-        logfile.close();
-    }
-
-    if (mixer != nullptr)
-    {
-        delete mixer;
     }
 }

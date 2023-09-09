@@ -33,7 +33,7 @@ int SaveToFileSerializer::LoadTrackFromData(
     const char *data)
 {
     PresetsSerializer xml;
-    if (!xml.putXMLdata(data))
+    if (xml.putXMLdata(data) < 0)
     {
         return -1;
     }

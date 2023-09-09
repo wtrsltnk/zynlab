@@ -23,6 +23,9 @@
 
 #include "globals.h"
 #include <iostream>
+#include <fstream>
+
+std::ofstream logfile;
 
 SimpleNote::SimpleNote() : note(0), velocity(0), lengthInSec(0), channel(0) {}
 
