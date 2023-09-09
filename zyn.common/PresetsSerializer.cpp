@@ -33,7 +33,9 @@ using namespace std;
 int xml_k = 0;
 bool verbose = false;
 
-const char *XMLwrapper_whitespace_callback(mxml_node_t *node, int where)
+const char *XMLwrapper_whitespace_callback(
+    mxml_node_t *node,
+    int where)
 {
     const char *name = node->value.element.name;
 
@@ -69,12 +71,13 @@ const char *XMLwrapper_whitespace_callback(mxml_node_t *node, int where)
 }
 
 //temporary const overload of mxmlFindElement
-const mxml_node_t *mxmlFindElement(const mxml_node_t *node,
-                                   const mxml_node_t *top,
-                                   const char *name,
-                                   const char *attr,
-                                   const char *value,
-                                   int descend)
+const mxml_node_t *mxmlFindElement(
+    const mxml_node_t *node,
+    const mxml_node_t *top,
+    const char *name,
+    const char *attr,
+    const char *value,
+    int descend)
 {
     return const_cast<const mxml_node_t *>(mxmlFindElement(
         const_cast<mxml_node_t *>(node),
@@ -83,7 +86,9 @@ const mxml_node_t *mxmlFindElement(const mxml_node_t *node,
 }
 
 //temporary const overload of mxmlElementGetAttr
-const char *mxmlElementGetAttr(const mxml_node_t *node, const char *name)
+const char *mxmlElementGetAttr(
+    const mxml_node_t *node,
+    const char *name)
 {
     return mxmlElementGetAttr(const_cast<mxml_node_t *>(node), name);
 }
@@ -101,12 +106,12 @@ PresetsSerializer::PresetsSerializer()
     mxml_node_t *doctype = mxmlNewElement(tree, "!DOCTYPE");
     mxmlElementSetAttr(doctype, "ZynAddSubFX-data", nullptr);
 
-    node = root = addparams("ZynAddSubFX-data", 4,
-                            "version-major", stringFrom<int>(version.Major).c_str(),
-                            "version-minor", stringFrom<int>(version.Minor).c_str(),
-                            "version-revision",
-                            stringFrom<int>(version.Revision).c_str(),
-                            "ZynAddSubFX-author", "Nasca Octavian Paul");
+    node = root = addparams(
+        "ZynAddSubFX-data", 4,
+        "version-major", stringFrom<int>(version.Major).c_str(),
+        "version-minor", stringFrom<int>(version.Minor).c_str(),
+        "version-revision", stringFrom<int>(version.Revision).c_str(),
+        "ZynAddSubFX-author", "Nasca Octavian Paul");
 
     //make the empty branch that will contain the information parameters
     info = addparams("INFORMATION", 0);
@@ -146,19 +151,22 @@ bool PresetsSerializer::hasPadSynth() const
 {
     /**Right now this has a copied implementation of setparbool, so this should
      * be reworked as XMLwrapper evolves*/
-    mxml_node_t *tmp = mxmlFindElement(tree,
-                                       tree,
-                                       "INFORMATION",
-                                       nullptr,
-                                       nullptr,
-                                       MXML_DESCEND);
+    mxml_node_t *tmp = mxmlFindElement(
+        tree,
+        tree,
+        "INFORMATION",
+        nullptr,
+        nullptr,
+        MXML_DESCEND);
 
-    mxml_node_t *parameter = mxmlFindElement(tmp,
-                                             tmp,
-                                             "par_bool",
-                                             "name",
-                                             "PADsynth_used",
-                                             MXML_DESCEND_FIRST);
+    mxml_node_t *parameter = mxmlFindElement(
+        tmp,
+        tmp,
+        "par_bool",
+        "name",
+        "PADsynth_used",
+        MXML_DESCEND_FIRST);
+
     if (parameter == nullptr) //no information availiable
     {
         return false;
@@ -197,9 +205,10 @@ char *PresetsSerializer::getXMLdata() const
     return xmldata;
 }
 
-int PresetsSerializer::dosavefile(const char *filename,
-                                  int compression,
-                                  const char *xmldata) const
+int PresetsSerializer::dosavefile(
+    const char *filename,
+    int compression,
+    const char *xmldata) const
 {
     if (compression == 0)
     {
@@ -230,23 +239,31 @@ int PresetsSerializer::dosavefile(const char *filename,
     return 0;
 }
 
-void PresetsSerializer::addpar(const string &name, int val)
+void PresetsSerializer::addpar(
+    const string &name,
+    int val)
 {
     addparams("par", 2, "name", name.c_str(), "value", stringFrom<int>(val).c_str());
 }
 
-void PresetsSerializer::addparunsigned(const string &name, unsigned int val)
+void PresetsSerializer::addparunsigned(
+    const string &name,
+    unsigned int val)
 {
     addparams("par", 2, "name", name.c_str(), "value", stringFrom<unsigned int>(val).c_str());
 }
 
-void PresetsSerializer::addparreal(const string &name, float val)
+void PresetsSerializer::addparreal(
+    const string &name,
+    float val)
 {
     addparams("par_real", 2, "name", name.c_str(), "value",
               stringFrom<float>(val).c_str());
 }
 
-void PresetsSerializer::addparbool(const string &name, int val)
+void PresetsSerializer::addparbool(
+    const string &name,
+    int val)
 {
     if (val != 0)
         addparams("par_bool", 2, "name", name.c_str(), "value", "yes");
@@ -254,21 +271,26 @@ void PresetsSerializer::addparbool(const string &name, int val)
         addparams("par_bool", 2, "name", name.c_str(), "value", "no");
 }
 
-void PresetsSerializer::addparstr(const string &name, const string &val)
+void PresetsSerializer::addparstr(
+    const string &name,
+    const string &val)
 {
     mxml_node_t *element = mxmlNewElement(node, "string");
     mxmlElementSetAttr(element, "name", name.c_str());
     mxmlNewText(element, 0, val.c_str());
 }
 
-void PresetsSerializer::beginbranch(const string &name)
+void PresetsSerializer::beginbranch(
+    const string &name)
 {
     if (verbose)
         cout << "beginbranch()" << name << endl;
     node = addparams(name.c_str(), 0);
 }
 
-void PresetsSerializer::beginbranch(const string &name, int id)
+void PresetsSerializer::beginbranch(
+    const string &name,
+    int id)
 {
     if (verbose)
         cout << "beginbranch(" << id << ")" << name << endl;
@@ -285,7 +307,8 @@ void PresetsSerializer::endbranch()
 }
 
 //workaround for memory leak
-const char *trimLeadingWhite(const char *c)
+const char *trimLeadingWhite(
+    const char *c)
 {
     while (isspace(*c))
         ++c;
@@ -293,47 +316,60 @@ const char *trimLeadingWhite(const char *c)
 }
 
 /* LOAD XML members */
-
-int PresetsSerializer::loadXMLfile(const string &filename)
+int PresetsSerializer::loadXMLfile(
+    const string &filename)
 {
     if (tree != nullptr)
+    {
         mxmlDelete(tree);
+    }
+
     tree = nullptr;
 
     const char *xmldata = doloadfile(filename);
     if (xmldata == nullptr)
-        return -1; //the file could not be loaded or uncompressed
+    {
+        return -1; // the file could not be loaded or uncompressed
+    }
 
-    root = tree = mxmlLoadString(nullptr, trimLeadingWhite(xmldata), MXML_OPAQUE_CALLBACK);
+    root = tree = mxmlLoadString(nullptr, xmldata, MXML_OPAQUE_CALLBACK);
 
     delete[] xmldata;
 
     if (tree == nullptr)
-        return -2; //this is not XML
+    {
+        return -2; // this is not XML
+    }
 
-    node = root = mxmlFindElement(tree,
-                                  tree,
-                                  "ZynAddSubFX-data",
-                                  nullptr,
-                                  nullptr,
-                                  MXML_DESCEND);
+    node = root = mxmlFindElement(
+        tree,
+        tree,
+        "ZynAddSubFX-data",
+        nullptr,
+        nullptr,
+        MXML_DESCEND);
+
     if (root == nullptr)
-        return -3; //the XML doesnt embbed zynaddsubfx data
+    {
+        return -3; // the XML doesnt embbed zynaddsubfx data
+    }
 
     //fetch version information
     version.Major = stringTo<int>(mxmlElementGetAttr(root, "version-major"));
     version.Minor = stringTo<int>(mxmlElementGetAttr(root, "version-minor"));
-    version.Revision =
-        stringTo<int>(mxmlElementGetAttr(root, "version-revision"));
+    version.Revision = stringTo<int>(mxmlElementGetAttr(root, "version-revision"));
 
     if (verbose)
+    {
         cout << "loadXMLfile() version: " << version.Major << '.'
              << version.Minor << '.' << version.Revision << endl;
+    }
 
     return 0;
 }
 
-char *PresetsSerializer::doloadfile(const string &filename) const
+char *PresetsSerializer::doloadfile(
+    const string &filename) const
 {
     char *xmldata = nullptr;
     gzFile gzfile = gzopen(filename.c_str(), "rb");
@@ -364,35 +400,47 @@ char *PresetsSerializer::doloadfile(const string &filename) const
     return xmldata;
 }
 
-bool PresetsSerializer::putXMLdata(const char *xmldata)
+bool PresetsSerializer::putXMLdata(
+    const char *xmldata)
 {
     if (tree != nullptr)
+    {
         mxmlDelete(tree);
+    }
 
     tree = nullptr;
     if (xmldata == nullptr)
+    {
         return false;
+    }
 
     root = tree = mxmlLoadString(nullptr, trimLeadingWhite(xmldata), MXML_OPAQUE_CALLBACK);
     if (tree == nullptr)
+    {
         return false;
+    }
 
-    node = root = mxmlFindElement(tree,
-                                  tree,
-                                  "ZynAddSubFX-data",
-                                  nullptr,
-                                  nullptr,
-                                  MXML_DESCEND);
+    node = root = mxmlFindElement(
+        tree,
+        tree,
+        "ZynAddSubFX-data",
+        nullptr,
+        nullptr,
+        MXML_DESCEND);
+
     return (root == nullptr);
 }
 
-int PresetsSerializer::enterbranch(const string &name)
+int PresetsSerializer::enterbranch(
+    const string &name)
 {
     if (verbose)
         cout << "enterbranch() " << name << endl;
-    mxml_node_t *tmp = mxmlFindElement(node, node,
-                                       name.c_str(), nullptr, nullptr,
-                                       MXML_DESCEND_FIRST);
+    mxml_node_t *tmp = mxmlFindElement(
+        node,
+        node,
+        name.c_str(), nullptr, nullptr,
+        MXML_DESCEND_FIRST);
     if (tmp == nullptr)
         return 0;
 
@@ -400,7 +448,9 @@ int PresetsSerializer::enterbranch(const string &name)
     return 1;
 }
 
-int PresetsSerializer::enterbranch(const string &name, int id)
+int PresetsSerializer::enterbranch(
+    const string &name,
+    int id)
 {
     if (verbose)
         cout << "enterbranch(" << id << ") " << name << endl;
@@ -422,7 +472,9 @@ void PresetsSerializer::exitbranch()
     node = node->parent;
 }
 
-int PresetsSerializer::getbranchid(int min, int max) const
+int PresetsSerializer::getbranchid(
+    int min,
+    int max) const
 {
     auto id = stringTo<int>(mxmlElementGetAttr(node, "id"));
     if ((min == 0) && (max == 0))
@@ -436,15 +488,19 @@ int PresetsSerializer::getbranchid(int min, int max) const
     return id;
 }
 
-int PresetsSerializer::getpar(const string &name, int defaultpar, int min,
-                              int max) const
+int PresetsSerializer::getpar(
+    const string &name,
+    int defaultpar,
+    int min,
+    int max) const
 {
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "par",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    const mxml_node_t *tmp = mxmlFindElement(
+        node,
+        node,
+        "par",
+        "name",
+        name.c_str(),
+        MXML_DESCEND_FIRST);
 
     if (tmp == nullptr)
         return defaultpar;
@@ -462,15 +518,19 @@ int PresetsSerializer::getpar(const string &name, int defaultpar, int min,
     return val;
 }
 
-unsigned int PresetsSerializer::getparunsigned(const string &name, unsigned int defaultpar, unsigned int min,
-                                               unsigned int max) const
+unsigned int PresetsSerializer::getparunsigned(
+    const string &name,
+    unsigned int defaultpar,
+    unsigned int min,
+    unsigned int max) const
 {
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "par",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    const mxml_node_t *tmp = mxmlFindElement(
+        node,
+        node,
+        "par",
+        "name",
+        name.c_str(),
+        MXML_DESCEND_FIRST);
 
     if (tmp == nullptr)
         return defaultpar;
@@ -488,19 +548,24 @@ unsigned int PresetsSerializer::getparunsigned(const string &name, unsigned int 
     return val;
 }
 
-unsigned char PresetsSerializer::getpar127(const string &name, int defaultpar) const
+unsigned char PresetsSerializer::getpar127(
+    const string &name,
+    int defaultpar) const
 {
     return static_cast<unsigned char>(getpar(name, defaultpar, 0, 127));
 }
 
-int PresetsSerializer::getparbool(const string &name, int defaultpar) const
+int PresetsSerializer::getparbool(
+    const string &name,
+    int defaultpar) const
 {
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "par_bool",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    const mxml_node_t *tmp = mxmlFindElement(
+        node,
+        node,
+        "par_bool",
+        "name",
+        name.c_str(),
+        MXML_DESCEND_FIRST);
 
     if (tmp == nullptr)
         return defaultpar;
@@ -515,15 +580,19 @@ int PresetsSerializer::getparbool(const string &name, int defaultpar) const
     return 0;
 }
 
-void PresetsSerializer::getparstr(const string &name, char *par, int maxstrlen) const
+void PresetsSerializer::getparstr(
+    const string &name,
+    char *par,
+    int maxstrlen) const
 {
     ZERO(par, maxstrlen);
-    auto tmp = mxmlFindElement(node,
-                               node,
-                               "string",
-                               "name",
-                               name.c_str(),
-                               MXML_DESCEND_FIRST);
+    auto tmp = mxmlFindElement(
+        node,
+        node,
+        "string",
+        "name",
+        name.c_str(),
+        MXML_DESCEND_FIRST);
 
     if (tmp == nullptr || tmp->child == nullptr)
     {
@@ -543,15 +612,17 @@ void PresetsSerializer::getparstr(const string &name, char *par, int maxstrlen) 
     }
 }
 
-string PresetsSerializer::getparstr(const string &name,
-                                    const std::string &defaultpar) const
+string PresetsSerializer::getparstr(
+    const string &name,
+    const std::string &defaultpar) const
 {
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "string",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    const mxml_node_t *tmp = mxmlFindElement(
+        node,
+        node,
+        "string",
+        "name",
+        name.c_str(),
+        MXML_DESCEND_FIRST);
 
     if ((tmp == nullptr) || (tmp->child == nullptr))
         return defaultpar;
@@ -565,14 +636,17 @@ string PresetsSerializer::getparstr(const string &name,
     return defaultpar;
 }
 
-float PresetsSerializer::getparreal(const std::string &name, float defaultpar) const
+float PresetsSerializer::getparreal(
+    const std::string &name,
+    float defaultpar) const
 {
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "par_real",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    const mxml_node_t *tmp = mxmlFindElement(
+        node,
+        node,
+        "par_real",
+        "name",
+        name.c_str(),
+        MXML_DESCEND_FIRST);
     if (tmp == nullptr)
         return defaultpar;
 
@@ -583,10 +657,11 @@ float PresetsSerializer::getparreal(const std::string &name, float defaultpar) c
     return stringTo<float>(strval);
 }
 
-float PresetsSerializer::getparreal(const std::string &name,
-                                    float defaultpar,
-                                    float min,
-                                    float max) const
+float PresetsSerializer::getparreal(
+    const std::string &name,
+    float defaultpar,
+    float min,
+    float max) const
 {
     float result = getparreal(name, defaultpar);
 
@@ -599,8 +674,10 @@ float PresetsSerializer::getparreal(const std::string &name,
 
 /** Private members **/
 
-mxml_node_t *PresetsSerializer::addparams(const char *name, unsigned int params,
-                                          ...) const
+mxml_node_t *PresetsSerializer::addparams(
+    const char *name,
+    unsigned int params,
+    ...) const
 {
     /**@todo make this function send out a good error message if something goes
      * wrong**/
