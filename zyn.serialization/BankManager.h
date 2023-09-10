@@ -43,6 +43,9 @@ public:
     virtual std::string GetNameNumbered(
         unsigned int ninstrument);
 
+    virtual std::string GetInstrumentPath(
+        unsigned int ninstrument);
+
     //if newslot==-1 then this is ignored, else it will be put on that slot
     virtual void SetName(
         unsigned int ninstrument,

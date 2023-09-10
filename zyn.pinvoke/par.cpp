@@ -4,17 +4,26 @@
 #include <zyn.mixer/Track.h>
 #include <zyn.synth/ADnoteParams.h>
 
-bool operator==(const Par &p1, const Par &p2)
+bool operator==(
+    const Par &p1,
+    const Par &p2)
 {
     return p1.id == p2.id;
 }
 
-bool operator!=(const Par &p1, const Par &p2)
+bool operator!=(
+    const Par &p1,
+    const Par &p2)
 {
     return !(p1 == p2);
 }
 
-bool CheckId(const char *id, const std::string &relativeid, const char *checkid, unsigned char *value, Par &p)
+bool CheckId(
+    const char *id,
+    const std::string &relativeid,
+    const char *checkid,
+    unsigned char *value,
+    Par &p)
 {
     if (relativeid == checkid)
     {
@@ -29,7 +38,12 @@ bool CheckId(const char *id, const std::string &relativeid, const char *checkid,
     return false;
 }
 
-bool CheckId(const char *id, const std::string &relativeid, const char *checkid, unsigned short *value, Par &p)
+bool CheckId(
+    const char *id,
+    const std::string &relativeid,
+    const char *checkid,
+    unsigned short *value,
+    Par &p)
 {
     if (relativeid == checkid)
     {
@@ -44,7 +58,12 @@ bool CheckId(const char *id, const std::string &relativeid, const char *checkid,
     return false;
 }
 
-bool CheckId(const char *id, const std::string &relativeid, const char *checkid, float *value, Par &p)
+bool CheckId(
+    const char *id,
+    const std::string &relativeid,
+    const char *checkid,
+    float *value,
+    Par &p)
 {
     if (relativeid == checkid)
     {
@@ -59,7 +78,12 @@ bool CheckId(const char *id, const std::string &relativeid, const char *checkid,
     return false;
 }
 
-bool CheckId(const char *id, const std::string &relativeid, const char *checkid, bool *value, Par &p)
+bool CheckId(
+    const char *id,
+    const std::string &relativeid,
+    const char *checkid,
+    bool *value,
+    Par &p)
 {
     if (relativeid == checkid)
     {
@@ -121,7 +145,10 @@ Par Par::Empty()
     return i;
 }
 
-Par Par::GetPar(FilterParams *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    FilterParams *pars,
+    const char *id,
+    const char *relativeid)
 {
     if (pars == nullptr)
     {
@@ -131,7 +158,10 @@ Par Par::GetPar(FilterParams *pars, const char *id, const char *relativeid)
     return Empty();
 }
 
-Par Par::GetPar(LFOParams *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    LFOParams *pars,
+    const char *id,
+    const char *relativeid)
 {
     if (pars == nullptr)
     {
@@ -141,7 +171,10 @@ Par Par::GetPar(LFOParams *pars, const char *id, const char *relativeid)
     return Empty();
 }
 
-Par Par::GetPar(EnvelopeParams *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    EnvelopeParams *pars,
+    const char *id,
+    const char *relativeid)
 {
     if (pars == nullptr)
     {
@@ -151,7 +184,10 @@ Par Par::GetPar(EnvelopeParams *pars, const char *id, const char *relativeid)
     return Empty();
 }
 
-Par Par::GetPar(Resonance *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    Resonance *pars,
+    const char *id,
+    const char *relativeid)
 {
     if (pars == nullptr)
     {
@@ -161,7 +197,10 @@ Par Par::GetPar(Resonance *pars, const char *id, const char *relativeid)
     return Empty();
 }
 
-Par Par::GetPar(ADnoteParameters *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    ADnoteParameters *pars,
+    const char *id,
+    const char *relativeid)
 {
     if (pars == nullptr)
     {
@@ -223,27 +262,42 @@ Par Par::GetPar(ADnoteParameters *pars, const char *id, const char *relativeid)
     return Empty();
 }
 
-Par Par::GetPar(ADnoteVoiceParam *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    ADnoteVoiceParam *pars,
+    const char *id,
+    const char *relativeid)
 {
     return Empty();
 }
 
-Par Par::GetPar(SUBnoteParameters *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    SUBnoteParameters *pars,
+    const char *id,
+    const char *relativeid)
 {
     return Empty();
 }
 
-Par Par::GetPar(PADnoteParameters *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    PADnoteParameters *pars,
+    const char *id,
+    const char *relativeid)
 {
     return Empty();
 }
 
-Par Par::GetPar(SampleNoteParameters *pars, const char *id, const char *relativeid)
+Par Par::GetPar(
+    SampleNoteParameters *pars,
+    const char *id,
+    const char *relativeid)
 {
     return Empty();
 }
 
-Par Par::GetPar(Instrument *instrument, const char *id, const char *relativeid)
+Par Par::GetPar(
+    Instrument *instrument,
+    const char *id,
+    const char *relativeid)
 {
     if (std::string(relativeid).substr(0, sizeof("/ADD_SYNTH_PARAMETERS")) == "/ADD_SYNTH_PARAMETERS")
     {
@@ -265,7 +319,9 @@ Par Par::GetPar(Instrument *instrument, const char *id, const char *relativeid)
     return Empty();
 }
 
-Par Par::GetPar(Track *track, const char *id)
+Par Par::GetPar(
+    Track *track,
+    const char *id)
 {
     std::cmatch m;
     std::regex_search(id, m, std::regex("(\\/INSTRUMENT_KIT_ITEM\\[([0-9]+)\\])\\/"));

@@ -83,6 +83,17 @@ std::string BankManager::GetNameNumbered(
     return stringFrom(ninstrument + 1) + ". " + GetName(ninstrument);
 }
 
+std::string BankManager::GetInstrumentPath(
+    unsigned int ninstrument)
+{
+    if (EmptySlot(ninstrument))
+    {
+        return _defaultinsname;
+    }
+
+    return _instrumentsInCurrentBank[ninstrument].filename;
+}
+
 /*
  * Changes the name of an instrument (and the filename)
  */

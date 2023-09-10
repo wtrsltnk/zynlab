@@ -2,26 +2,31 @@
 #include <fstream>
 #include <iostream>
 #include <memory.h>
+#include <regex>
 #include <zyn.common/Config.h>
 #include <zyn.mixer/Mixer.h>
-#include <zyn.serialization/SaveToFileSerializer.h>
 #include <zyn.serialization/BankManager.h>
+#include <zyn.serialization/SaveToFileSerializer.h>
+#include <zyn.synth/ADnoteParams.h>
+#include <zyn.synth/PADnoteParams.h>
+#include <zyn.synth/SUBnoteParams.h>
+#include <zyn.synth/SampleNoteParams.h>
 
 extern "C" {
 __declspec(dllexport) Mixer *CreateMixer();
 
-__declspec(dllexport)  void DestroyMixer(
+__declspec(dllexport) void DestroyMixer(
     Mixer *mixer);
 
-__declspec(dllexport)  void EnableChannel(
+__declspec(dllexport) void EnableChannel(
     Mixer *mixer,
     unsigned char chan);
 
-__declspec(dllexport)  void DisableChannel(
+__declspec(dllexport) void DisableChannel(
     Mixer *mixer,
     unsigned char chan);
 
-__declspec(dllexport)  void AudioOut(
+__declspec(dllexport) void AudioOut(
     Mixer *mixer,
     float outl[],
     float outr[]);
@@ -31,50 +36,77 @@ __declspec(dllexport) void LoadPresets(
     unsigned char chan,
     const char *xmldata);
 
-__declspec(dllexport)  void LoadPresetsFromFile(
+__declspec(dllexport) void LoadPresetsFromFile(
     Mixer *mixer,
     unsigned char chan,
     const char *filePath);
 
-__declspec(dllexport)  void LoadPresetFromBank(
+__declspec(dllexport) void LoadPresetFromBank(
     Mixer *mixer,
     unsigned char chan,
     const char *library,
     int slot);
 
-__declspec(dllexport)  void NoteOn(
+__declspec(dllexport) void NoteOn(
     Mixer *mixer,
     unsigned char chan,
     unsigned char note,
     unsigned char velocity);
 
-__declspec(dllexport)  void NoteOff(
+__declspec(dllexport) void NoteOff(
     Mixer *mixer,
     unsigned char chan,
     unsigned char note);
 
-__declspec(dllexport)  void SetPar(
+__declspec(dllexport) void SetPar(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
     unsigned char par);
 
-__declspec(dllexport)  void SetParBool(
+__declspec(dllexport) void SetParBool(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
     bool value);
 
-__declspec(dllexport)  void SetParReal(
+__declspec(dllexport) void SetParReal(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
     float value);
+
+__declspec(dllexport) int GetBankCount();
+
+__declspec(dllexport) int GetBankName(
+    int bankIndex,
+    char *buffer,
+    int bufferSize);
+
+__declspec(dllexport) int GetBankPath(
+    int bankIndex,
+    char *buffer,
+    int bufferSize);
+
+__declspec(dllexport) int GetInstrumentCount(
+    int bankIndex);
+
+__declspec(dllexport) int GetInstrumentName(
+    int bankIndex,
+    int instrumentIndex,
+    char *buffer,
+    int bufferSize);
+
+__declspec(dllexport) int GetInstrumentPath(
+    int bankIndex,
+    int instrumentIndex,
+    char *buffer,
+    int bufferSize);
 }
 
 extern std::ofstream logfile;
 
-//static BankManager banks;
+// static BankManager banks;
 
 Mixer *CreateMixer()
 {
@@ -235,30 +267,41 @@ void LoadPresets(
     track->ApplyParameters();
 }
 
+IBankManager *GetBanks()
+{
+    static bool banksAreScanned = false;
+    static BankManager banks;
+
+    if (!banksAreScanned)
+    {
+        banks.RescanForBanks();
+    }
+
+    return &banks;
+}
+
 bool SwitchBankAndLoadSlot(
     const char *bankName,
     int slotIndex,
     Track *track)
 {
-    static BankManager banks;
+    auto banks = GetBanks();
 
-    banks.RescanForBanks();
-
-    const int bankCount = banks.GetBankCount();
+    const int bankCount = banks->GetBankCount();
 
     logfile << "bankCount = " << bankCount << std::endl;
 
     for (int i = 0; i < bankCount; i++)
     {
-        const auto bank = banks.GetBank(i);
+        const auto bank = banks->GetBank(i);
         logfile << "bank[" << i << "] = " << bank.name << std::endl;
 
         if (std::string(bankName) == bank.name)
         {
             track->Lock();
 
-            banks.LoadBank(i);
-            banks.LoadFromSlot(slotIndex, track);
+            banks->LoadBank(i);
+            banks->LoadFromSlot(slotIndex, track);
 
             track->Unlock();
 
@@ -331,15 +374,156 @@ void NoteOff(
     mixer->NoteOff(chan, note);
 }
 
+#define IS_PAR(id, name) std::string(id).substr(0, sizeof(#name) - 1) == #name
+
+const char *TRACK_ID = "Track.";
+const char *INSTRUMENTS_ID = "Instruments";
+
+bool SetAbstractSynthPar(
+    AbstractNoteParameters *params,
+    const char *id,
+    unsigned char value)
+{
+    if (IS_PAR(id, Pvolume))
+    {
+        params->PVolume = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, Ppanning))
+    {
+        params->PPanning = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PAmpVelocityScaleFunction))
+    {
+        params->PAmpVelocityScaleFunction = value;
+
+        return true;
+    }
+
+    return false;
+}
+
+void SetAddSynthPar(
+    ADnoteParameters *params,
+    const char *id,
+    unsigned char value)
+{
+    if (SetAbstractSynthPar(params, id, value))
+    {
+        return;
+    }
+}
+
+void SetSubSynthPar(
+    SUBnoteParameters *params,
+    const char *id,
+    unsigned char value)
+{
+    if (SetAbstractSynthPar(params, id, value))
+    {
+        return;
+    }
+}
+
+void SetPadSynthPar(
+    PADnoteParameters *params,
+    const char *id,
+    unsigned char value)
+{
+    if (SetAbstractSynthPar(params, id, value))
+    {
+        return;
+    }
+}
+
+void SetSampleSynthPar(
+    SampleNoteParameters *params,
+    const char *id,
+    unsigned char value)
+{
+    if (SetAbstractSynthPar(params, id, value))
+    {
+        return;
+    }
+}
+
+void SetInstrumentPar(
+    Track *track,
+    const char *id,
+    unsigned char value)
+{
+    std::cmatch m;
+    std::regex_search(id, m, std::regex("^(\\[([0-9]+)\\]\\.)"));
+
+    if (m.empty())
+    {
+        return;
+    }
+
+    auto index = std::atoi(m[2].str().c_str());
+
+    if (index < 0 || index >= NUM_TRACK_INSTRUMENTS)
+    {
+        return;
+    }
+
+    auto relativeId = id + m[1].str().size();
+
+    if (IS_PAR(relativeId, AddSynth))
+    {
+        SetAddSynthPar(track->Instruments[index].adpars, id, value);
+    }
+    else if (IS_PAR(relativeId, SubSynth))
+    {
+        SetSubSynthPar(track->Instruments[index].subpars, id, value);
+    }
+    else if (IS_PAR(relativeId, PadSynth))
+    {
+        SetPadSynthPar(track->Instruments[index].padpars, id, value);
+    }
+    else if (IS_PAR(relativeId, SampleSynth))
+    {
+        SetSampleSynthPar(track->Instruments[index].smplpars, id, value);
+    }
+}
+
+void SetTrackPar(
+    Track *track,
+    const char *id,
+    unsigned char value)
+{
+    if (IS_PAR(id, Pvolume))
+    {
+        track->SetVolume(value);
+    }
+    else if (IS_PAR(id, Ppanning))
+    {
+        track->setPpanning(value);
+    }
+    else if (IS_PAR(id, Pvelsns))
+    {
+        track->Pvelsns = value;
+    }
+    else if (IS_PAR(id, Pveloffs))
+    {
+        track->Pveloffs = value;
+    }
+    else if (IS_PAR(id, Instruments))
+    {
+        SetInstrumentPar(track, id + sizeof(INSTRUMENTS_ID), value);
+    }
+}
+
 void SetPar(
     Mixer *mixer,
     unsigned char chan,
     const char *id,
     unsigned char value)
 {
-    logfile << "SetPar[" << short(chan) << "] : " << id  << ", " << value << std::endl;
-    (void)id;
-    (void)value;
+    logfile << "SetPar[" << short(chan) << "] : " << id << ", " << value << std::endl;
 
     auto track = mixer->GetTrack(chan);
 
@@ -347,6 +531,15 @@ void SetPar(
     {
         return;
     }
+
+    if (std::string(id).substr(0, sizeof(TRACK_ID)) != TRACK_ID)
+    {
+        logfile << "id not valid : " << id << " (" << std::string(id).substr(0, sizeof(TRACK_ID)) << ")" << std::endl;
+
+        return;
+    }
+
+    SetTrackPar(track, id + sizeof(TRACK_ID), value);
 }
 
 void SetParBool(
@@ -355,7 +548,7 @@ void SetParBool(
     const char *id,
     bool value)
 {
-    logfile << "SetParBool[" << short(chan) << "] : " << id  << ", " << value << std::endl;
+    logfile << "SetParBool[" << short(chan) << "] : " << id << ", " << value << std::endl;
     (void)id;
     (void)value;
 
@@ -373,7 +566,7 @@ void SetParReal(
     const char *id,
     float value)
 {
-    logfile << "SetParReal[" << short(chan) << "] : " << id  << ", " << value << std::endl;
+    logfile << "SetParReal[" << short(chan) << "] : " << id << ", " << value << std::endl;
     (void)id;
     (void)value;
 
@@ -383,4 +576,180 @@ void SetParReal(
     {
         return;
     }
+
+    if (std::string(id).substr(0, sizeof(TRACK_ID)) != TRACK_ID)
+    {
+        logfile << "id not valid : " << id << std::endl;
+
+        return;
+    }
+
+    auto relativeId = id + sizeof(TRACK_ID) - 1;
+
+    auto floatValue = (unsigned char)(127 * value);
+    if (IS_PAR(relativeId, Pvolume))
+    {
+        track->SetVolume(floatValue);
+    }
+    else if (IS_PAR(relativeId, Ppanning))
+    {
+        track->setPpanning(floatValue);
+    }
+    else if (IS_PAR(relativeId, Pvelsns))
+    {
+        track->Pvelsns = floatValue;
+    }
+    else if (IS_PAR(relativeId, Pveloffs))
+    {
+        track->Pveloffs = floatValue;
+    }
+}
+
+int GetBankCount()
+{
+    auto banks = GetBanks();
+
+    return banks->GetBankCount();
+}
+
+const char *emptyBankName = "";
+
+int GetBankName(
+    int bankIndex,
+    char *buffer,
+    int bufferSize)
+{
+    auto banks = GetBanks();
+
+    if (bankIndex < 0)
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    if (bankIndex >= banks->GetBankCount())
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    auto name = banks->GetBank(bankIndex).name;
+
+    return strcpy_s(buffer, bufferSize, name.c_str());
+}
+
+int GetBankPath(
+    int bankIndex,
+    char *buffer,
+    int bufferSize)
+{
+    auto banks = GetBanks();
+
+    if (bankIndex < 0)
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    if (bankIndex >= banks->GetBankCount())
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    auto dir = banks->GetBank(bankIndex).dir;
+
+    return strcpy_s(buffer, bufferSize, dir.c_str());
+}
+
+int GetInstrumentCount(
+    int bankIndex)
+{
+    auto banks = GetBanks();
+
+    if (bankIndex < 0)
+    {
+        return 0;
+    }
+
+    if (bankIndex >= banks->GetBankCount())
+    {
+        return 0;
+    }
+
+    return BANK_SIZE;
+}
+
+int GetInstrumentName(
+    int bankIndex,
+    int instrumentIndex,
+    char *buffer,
+    int bufferSize)
+{
+    auto banks = GetBanks();
+
+    if (bankIndex < 0)
+    {
+        return 0;
+    }
+
+    if (bankIndex >= banks->GetBankCount())
+    {
+        return 0;
+    }
+
+    auto bank = banks->GetBank(bankIndex);
+
+    if (instrumentIndex < 0)
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    if (instrumentIndex >= BANK_SIZE)
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    logfile << "getting instrumentName[" << bankIndex << "][" << instrumentIndex << "]" << std::endl;
+
+    banks->LoadBank(bankIndex);
+
+    auto name = banks->GetName(instrumentIndex);
+
+    return strcpy_s(buffer, bufferSize, name.c_str());
+}
+
+int GetInstrumentPath(
+    int bankIndex,
+    int instrumentIndex,
+    char *buffer,
+    int bufferSize)
+{
+    auto banks = GetBanks();
+
+    if (bankIndex < 0)
+    {
+        return 0;
+    }
+
+    if (bankIndex >= banks->GetBankCount())
+    {
+        return 0;
+    }
+
+    auto bank = banks->GetBank(bankIndex);
+
+    if (instrumentIndex < 0)
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    if (instrumentIndex >= bank.instrumentNames.size())
+    {
+        return strcpy_s(buffer, bufferSize, emptyBankName);
+    }
+
+    logfile << "getting instrumentPath[" << bankIndex << "][" << instrumentIndex << "]" << std::endl;
+
+    banks->LoadBank(bankIndex);
+
+    auto path = banks->GetInstrumentPath(instrumentIndex);
+
+    return strcpy_s(buffer, bufferSize, path.c_str());
 }

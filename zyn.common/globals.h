@@ -336,6 +336,7 @@ public:
 
     virtual std::string GetName(unsigned int ninstrument) = 0;
     virtual std::string GetNameNumbered(unsigned int ninstrument) = 0;
+    virtual std::string GetInstrumentPath(unsigned int ninstrument) = 0;
     virtual void SetName(unsigned int ninstrument, const std::string &newname, int newslot) = 0;
     virtual bool isPADsynth_used(unsigned int ninstrument) = 0;
 
