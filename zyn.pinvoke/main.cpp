@@ -374,9 +374,9 @@ void NoteOff(
     mixer->NoteOff(chan, note);
 }
 
-#define IS_PAR(id, name) std::string(id).substr(0, sizeof(#name) - 1) == #name
+#define IS_PAR(id, name) std::string(id).substr(0, std::string(#name).length()) == #name
 
-const char *TRACK_ID = "Track.";
+const char *TRACK_ID = "Track";
 const char *INSTRUMENTS_ID = "Instruments";
 
 bool SetAbstractSynthPar(
@@ -495,6 +495,8 @@ void SetTrackPar(
     const char *id,
     unsigned char value)
 {
+    logfile << "setting " << id << " to  : " << int(value) << std::endl;
+
     if (IS_PAR(id, Pvolume))
     {
         track->SetVolume(value);
@@ -532,14 +534,16 @@ void SetPar(
         return;
     }
 
-    if (std::string(id).substr(0, sizeof(TRACK_ID)) != TRACK_ID)
+    auto const trackId = std::string(id).substr(0, std::string(TRACK_ID).length());
+
+    if (trackId != TRACK_ID)
     {
-        logfile << "id not valid : " << id << " (" << std::string(id).substr(0, sizeof(TRACK_ID)) << ")" << std::endl;
+        logfile << "id not valid : " << id << " (" << trackId << ")" << std::endl;
 
         return;
     }
 
-    SetTrackPar(track, id + sizeof(TRACK_ID), value);
+    SetTrackPar(track, id + trackId.length() + 1, value); // the +1 is for the dot
 }
 
 void SetParBool(

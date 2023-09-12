@@ -257,39 +257,39 @@ void DynamicFilter::ChangeParameter(
 {
     switch (npar)
     {
-        case 0:
+        case EffectPresets::Volume:
             setvolume(value);
             break;
-        case 1:
+        case EffectPresets::Panning:
             SetPanning(value);
             break;
-        case 2:
+        case EffectPresets::LFOFrequency:
             lfo.Pfreq = value;
             lfo.updateparams();
             break;
-        case 3:
+        case EffectPresets::LFORandomness:
             lfo.Prandomness = value;
             lfo.updateparams();
             break;
-        case 4:
+        case EffectPresets::LFOFunction:
             lfo.PLFOtype = value;
             lfo.updateparams();
             break;
-        case 5:
+        case EffectPresets::LFOStereo:
             lfo.Pstereo = value;
             lfo.updateparams();
             break;
-        case 6:
+        case DynFilterPresets::DynFilterDepth:
             setdepth(value);
             break;
-        case 7:
+        case DynFilterPresets::DynFilterAmplitudeSense:
             setampsns(value);
             break;
-        case 8:
+        case DynFilterPresets::DynFilterAmplitudeSenseInvert:
             Pampsnsinv = value;
             setampsns(Pampsns);
             break;
-        case 9:
+        case DynFilterPresets::DynFilterAmplitudeSmooth:
             Pampsmooth = value;
             setampsns(Pampsns);
             break;
@@ -300,25 +300,25 @@ unsigned char DynamicFilter::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case EffectPresets::Volume:
             return Pvolume;
-        case 1:
-            return Ppanning;
-        case 2:
+        case EffectPresets::Panning:
+            return static_cast<unsigned char>(Ppanning);
+        case EffectPresets::LFOFrequency:
             return lfo.Pfreq;
-        case 3:
+        case EffectPresets::LFORandomness:
             return lfo.Prandomness;
-        case 4:
+        case EffectPresets::LFOFunction:
             return lfo.PLFOtype;
-        case 5:
+        case EffectPresets::LFOStereo:
             return lfo.Pstereo;
-        case 6:
+        case DynFilterPresets::DynFilterDepth:
             return Pdepth;
-        case 7:
+        case DynFilterPresets::DynFilterAmplitudeSense:
             return Pampsns;
-        case 8:
+        case DynFilterPresets::DynFilterAmplitudeSenseInvert:
             return Pampsnsinv;
-        case 9:
+        case DynFilterPresets::DynFilterAmplitudeSmooth:
             return Pampsmooth;
         default:
             return 0;

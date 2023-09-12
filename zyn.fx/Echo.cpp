@@ -196,25 +196,25 @@ void Echo::ChangeParameter(int npar, unsigned char value)
 {
     switch (npar)
     {
-        case 0:
+        case EffectPresets::Volume:
             setvolume(value);
             break;
-        case 1:
+        case EffectPresets::Panning:
             SetPanning(value);
             break;
-        case 2:
+        case EchoPresets::EchoDelay:
             setdelay(value);
             break;
-        case 3:
+        case EchoPresets::EchoDelayBetweenLR:
             setlrdelay(value);
             break;
-        case 4:
+        case EchoPresets::EchoChannelRouting:
             SetLRCross(value);
             break;
-        case 5:
+        case EchoPresets::EchoFeedback:
             setfb(value);
             break;
-        case 6:
+        case EchoPresets::EchoDampening:
             sethidamp(value);
             break;
     }
@@ -224,19 +224,19 @@ unsigned char Echo::GetParameter(int npar) const
 {
     switch (npar)
     {
-        case 0:
+        case EffectPresets::Volume:
             return Pvolume;
-        case 1:
+        case EffectPresets::Panning:
             return Ppanning;
-        case 2:
+        case EchoPresets::EchoDelay:
             return Pdelay;
-        case 3:
+        case EchoPresets::EchoDelayBetweenLR:
             return Plrdelay;
-        case 4:
+        case EchoPresets::EchoChannelRouting:
             return Plrcross;
-        case 5:
+        case EchoPresets::EchoFeedback:
             return Pfb;
-        case 6:
+        case EchoPresets::EchoDampening:
             return Phidamp;
         default:
             return 0; // in case of bogus parameter number

@@ -50,25 +50,25 @@ Chorus::~Chorus()
     delete[] delaySample._right;
 }
 
-//get the delay value in samples; xlfo is the current lfo value
-float Chorus::getdelay(float xlfo)
+// get the delay value in samples; xlfo is the current lfo value
+float Chorus::getdelay(
+    float xlfo)
 {
-    float result =
-        (Pflangemode) ? 0 : (delay + xlfo * depth) * SystemSettings::Instance().samplerate_f;
+    float result = (Pflangemode) ? 0 : (delay + xlfo * depth) * SystemSettings::Instance().samplerate_f;
 
-    //check if delay is too big (caused by bad setdelay() and setdepth()
+    // check if delay is too big (caused by bad setdelay() and setdepth()
     if ((result + 0.5f) >= maxdelay)
     {
-        cerr
-            << "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)"
-            << endl;
+        cerr << "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)"
+             << endl;
         result = maxdelay - 1.0f;
     }
     return result;
 }
 
-//Apply the effect
-void Chorus::out(const Stereo<float *> &input)
+// Apply the effect
+void Chorus::out(
+    const Stereo<float *> &input)
 {
     const float one = 1.0f;
     dl1 = dl2;
@@ -82,21 +82,20 @@ void Chorus::out(const Stereo<float *> &input)
     {
         float inL = input._left[i];
         float inR = input._right[i];
-        //LRcross
+        // LRcross
         Stereo<float> tmpc(inL, inR);
         inL = tmpc._left * (1.0f - lrcross) + tmpc._right * lrcross;
         inR = tmpc._right * (1.0f - lrcross) + tmpc._left * lrcross;
 
-        //Left channel
+        // Left channel
 
-        //compute the delay in samples using linear interpolation between the lfo delays
-        float mdel =
-            (dl1 * (SystemSettings::Instance().buffersize - i) + dl2 * i) / SystemSettings::Instance().buffersize_f;
+        // compute the delay in samples using linear interpolation between the lfo delays
+        float mdel = (dl1 * (SystemSettings::Instance().buffersize - i) + dl2 * i) / SystemSettings::Instance().buffersize_f;
         if (++dlk >= maxdelay)
         {
             dlk = 0;
         }
-        float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
+        float tmp = dlk - mdel + maxdelay * 2.0f; // where should I get the sample from
 
         dlhi = static_cast<int>(tmp);
         dlhi %= maxdelay;
@@ -108,15 +107,15 @@ void Chorus::out(const Stereo<float *> &input)
                                                                                    (1.0f - dllo);
         delaySample._left[dlk] = inL + efxoutl[i] * fb;
 
-        //Right channel
+        // Right channel
 
-        //compute the delay in samples using linear interpolation between the lfo delays
+        // compute the delay in samples using linear interpolation between the lfo delays
         mdel = (dr1 * (SystemSettings::Instance().buffersize - i) + dr2 * i) / SystemSettings::Instance().buffersize_f;
         if (++drk >= maxdelay)
         {
             drk = 0;
         }
-        tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
+        tmp = drk * 1.0f - mdel + maxdelay * 2.0f; // where should I get the sample from
 
         dlhi = (int)tmp;
         dlhi %= maxdelay;
@@ -130,11 +129,13 @@ void Chorus::out(const Stereo<float *> &input)
     }
 
     if (Poutsub)
+    {
         for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
         {
             efxoutl[i] *= -1.0f;
             efxoutr[i] *= -1.0f;
         }
+    }
 
     for (int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
@@ -143,63 +144,68 @@ void Chorus::out(const Stereo<float *> &input)
     }
 }
 
-//Cleanup the effect
+// Cleanup the effect
 void Chorus::Cleanup()
 {
     memset(delaySample._left, 0, maxdelay * sizeof(float));
     memset(delaySample._right, 0, maxdelay * sizeof(float));
 }
 
-//Parameter control
-void Chorus::setdepth(unsigned char _Pdepth)
+// Parameter control
+void Chorus::setdepth(
+    unsigned char _Pdepth)
 {
     Pdepth = _Pdepth;
-    depth = (powf(8.0f, (Pdepth / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
+    depth = (powf(8.0f, (Pdepth / 127.0f) * 2.0f) - 1.0f) / 1000.0f; // seconds
 }
 
-void Chorus::setdelay(unsigned char _Pdelay)
+void Chorus::setdelay(
+    unsigned char _Pdelay)
 {
     Pdelay = _Pdelay;
-    delay = (powf(10.0f, (Pdelay / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
+    delay = (powf(10.0f, (Pdelay / 127.0f) * 2.0f) - 1.0f) / 1000.0f; // seconds
 }
 
-void Chorus::setfb(unsigned char _Pfb)
+void Chorus::setfb(
+    unsigned char _Pfb)
 {
     Pfb = _Pfb;
     fb = (Pfb - 64.0f) / 64.1f;
 }
 
-void Chorus::setvolume(unsigned char _Pvolume)
+void Chorus::setvolume(
+    unsigned char _Pvolume)
 {
     Pvolume = _Pvolume;
     outvolume = Pvolume / 127.0f;
     volume = (!insertion) ? 1.0f : outvolume;
 }
 
-void Chorus::SetPreset(unsigned char npreset)
+void Chorus::SetPreset(
+    unsigned char npreset)
 {
     const int PRESET_SIZE = 12;
     const int NUM_PRESETS = 10;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
-        //Chorus1
+        // Chorus1
         {64, 64, 50, 0, 0, 90, 40, 85, 64, 119, 0, 0},
-        //Chorus2
+        // Chorus2
         {64, 64, 45, 0, 0, 98, 56, 90, 64, 19, 0, 0},
-        //Chorus3
+        // Chorus3
         {64, 64, 29, 0, 1, 42, 97, 95, 90, 127, 0, 0},
-        //Celeste1
+        // Celeste1
         {64, 64, 26, 0, 0, 42, 115, 18, 90, 127, 0, 0},
-        //Celeste2
+        // Celeste2
         {64, 64, 29, 117, 0, 50, 115, 9, 31, 127, 0, 1},
-        //Flange1
+        // Flange1
         {64, 64, 57, 0, 0, 60, 23, 3, 62, 0, 0, 0},
-        //Flange2
+        // Flange2
         {64, 64, 33, 34, 1, 40, 35, 3, 109, 0, 0, 0},
-        //Flange3
+        // Flange3
         {64, 64, 53, 34, 1, 94, 35, 3, 54, 0, 0, 1},
-        //Flange4
+        // Flange4
         {64, 64, 40, 0, 1, 62, 12, 19, 97, 0, 0, 0},
-        //Flange5
+        // Flange5
         {64, 64, 55, 105, 0, 24, 39, 19, 17, 0, 0, 1}};
 
     if (npreset >= NUM_PRESETS)
@@ -213,7 +219,9 @@ void Chorus::SetPreset(unsigned char npreset)
     Ppreset = npreset;
 }
 
-void Chorus::ChangeParameter(int npar, unsigned char value)
+void Chorus::ChangeParameter(
+    int npar,
+    unsigned char value)
 {
     switch (npar)
     {
@@ -260,7 +268,8 @@ void Chorus::ChangeParameter(int npar, unsigned char value)
     }
 }
 
-unsigned char Chorus::GetParameter(int npar) const
+unsigned char Chorus::GetParameter(
+    int npar) const
 {
     switch (npar)
     {

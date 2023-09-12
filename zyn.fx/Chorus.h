@@ -27,7 +27,7 @@
 #include "EffectLFO.h"
 #include <zyn.common/Stereo.h>
 
-#define MAX_CHORUS_DELAY 250.0f //ms
+#define MAX_CHORUS_DELAY 250.0f // ms
 
 /**Chorus and Flange effects*/
 class Chorus : public Effect
@@ -39,67 +39,67 @@ public:
     void out(const Stereo<float *> &input);
     void SetPreset(unsigned char npreset);
     /**
-         * Sets the value of the chosen variable
-         *
-         * The possible parameters are:
-         *   -# Volume
-         *   -# Panning
-         *   -# LFO Frequency
-         *   -# LFO Randomness
-         *   -# LFO Type
-         *   -# LFO stereo
-         *   -# Depth
-         *   -# Delay
-         *   -# Feedback
-         *   -# Flange Mode
-         *   -# Subtractive
-         * @param npar number of chosen parameter
-         * @param value the new value
-         */
+     * Sets the value of the chosen variable
+     *
+     * The possible parameters are:
+     *   -# Volume
+     *   -# Panning
+     *   -# LFO Frequency
+     *   -# LFO Randomness
+     *   -# LFO Type
+     *   -# LFO stereo
+     *   -# Depth
+     *   -# Delay
+     *   -# Feedback
+     *   -# Flange Mode
+     *   -# Subtractive
+     * @param npar number of chosen parameter
+     * @param value the new value
+     */
     void ChangeParameter(int npar, unsigned char value);
     /**
-         * Gets the value of the chosen variable
-         *
-         * The possible parameters are:
-         *   -# Volume
-         *   -# Panning
-         *   -# LFO Frequency
-         *   -# LFO Randomness
-         *   -# LFO Type
-         *   -# LFO stereo
-         *   -# Depth
-         *   -# Delay
-         *   -# Feedback
-         *   -# Flange Mode
-         *   -# Subtractive
-         * @param npar number of chosen parameter
-         * @return the value of the parameter
-         */
+     * Gets the value of the chosen variable
+     *
+     * The possible parameters are:
+     *   -# Volume
+     *   -# Panning
+     *   -# LFO Frequency
+     *   -# LFO Randomness
+     *   -# LFO Type
+     *   -# LFO stereo
+     *   -# Depth
+     *   -# Delay
+     *   -# Feedback
+     *   -# Flange Mode
+     *   -# Subtractive
+     * @param npar number of chosen parameter
+     * @return the value of the parameter
+     */
     unsigned char GetParameter(int npar) const;
     void Cleanup(void);
 
 private:
-    //Chorus Parameters
+    // Chorus Parameters
     unsigned char Pvolume;
-    unsigned char Pdepth;      //the depth of the Chorus(ms)
-    unsigned char Pdelay;      //the delay (ms)
-    unsigned char Pfb;         //feedback
-    unsigned char Pflangemode; //how the LFO is scaled, to result chorus or flange
-    unsigned char Poutsub;     //if I wish to substract the output instead of the adding it
-    EffectLFO lfo;             //lfo-ul chorus
+    unsigned char Pdepth;      // the depth of the Chorus(ms)
+    unsigned char Pdelay;      // the delay (ms)
+    unsigned char Pfb;         // feedback
+    unsigned char Pflangemode; // how the LFO is scaled, to result chorus or flange
+    unsigned char Poutsub;     // if I wish to substract the output instead of the adding it
+    EffectLFO lfo;             // lfo-ul chorus
 
-    //Parameter Controls
+    // Parameter Controls
     void setvolume(unsigned char _Pvolume);
     void setdepth(unsigned char _Pdepth);
     void setdelay(unsigned char _Pdelay);
     void setfb(unsigned char _Pfb);
 
-    //Internal Values
+    // Internal Values
     float depth, delay, fb;
     float dl1, dl2, dr1, dr2, lfol, lfor;
     int maxdelay;
     Stereo<float *> delaySample;
-    int dlk, drk, dlhi;
+    int dlk = 0, drk = 0, dlhi;
     float getdelay(float xlfo);
 };
 
