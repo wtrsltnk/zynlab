@@ -378,6 +378,154 @@ void NoteOff(
 
 const char *TRACK_ID = "Track";
 const char *INSTRUMENTS_ID = "Instruments";
+const char *EFFECTS_ID = "Effects";
+
+struct sPar
+{
+    unsigned char *byteValue = nullptr;
+    char *charValue = nullptr;
+    float *floatValue = nullptr;
+    bool *boolValue = nullptr;
+};
+
+void SetLfoParametersPar(
+    LFOParams *params,
+    const char *id,
+    unsigned char value)
+{
+    logfile << "SetLfoParametersPar " << id << std::endl;
+
+    if (IS_PAR(id, Pfreq))
+    {
+        params->Pfreq = value;
+    }
+    else if (IS_PAR(id, Pintensity))
+    {
+        params->Pintensity = value;
+    }
+    else if (IS_PAR(id, Pstartphase))
+    {
+        params->Pstartphase = value;
+    }
+    else if (IS_PAR(id, PLFOtype))
+    {
+        params->PLFOtype = value;
+    }
+    else if (IS_PAR(id, Prandomness))
+    {
+        params->Prandomness = value;
+    }
+    else if (IS_PAR(id, Pfreqrand))
+    {
+        params->Pfreqrand = value;
+    }
+    else if (IS_PAR(id, Pdelay))
+    {
+        params->Pdelay = value;
+    }
+    else if (IS_PAR(id, Pcontinous))
+    {
+        params->Pcontinous = value;
+    }
+    else if (IS_PAR(id, Pstretch))
+    {
+        params->Pstretch = value;
+    }
+}
+
+void SetEnvelopePar(
+    EnvelopeParams *params,
+    const char *id,
+    unsigned char value)
+{
+    logfile << "SetEnvelopePar " << id << std::endl;
+
+    if (IS_PAR(id, PAttackTime))
+    {
+        params->PA_dt = value;
+    }
+    else if (IS_PAR(id, PAttackValue))
+    {
+        params->PA_val = value;
+    }
+    else if (IS_PAR(id, PDecayTime))
+    {
+        params->PD_dt = value;
+    }
+    else if (IS_PAR(id, PDecayValue))
+    {
+        params->PD_val = value;
+    }
+    else if (IS_PAR(id, PSustainValue))
+    {
+        params->PS_val = value;
+    }
+    else if (IS_PAR(id, PReleaseTime))
+    {
+        params->PR_dt = value;
+    }
+    else if (IS_PAR(id, PReleaseValue))
+    {
+        params->PR_val = value;
+    }
+}
+
+void SetFilterPar(
+    FilterParams *params,
+    const char *id,
+    unsigned char value)
+{
+    logfile << "SetFilterPar " << id << std::endl;
+
+    if (IS_PAR(id, Pcategory))
+    {
+        params->Pcategory = value;
+    }
+    else if (IS_PAR(id, Pcenterfreq))
+    {
+        params->Pcenterfreq = value;
+    }
+    else if (IS_PAR(id, Pformantslowness))
+    {
+        params->Pformantslowness = value;
+    }
+    else if (IS_PAR(id, Pfreq))
+    {
+        params->Pfreq = value;
+    }
+    else if (IS_PAR(id, Pfreqtrack))
+    {
+        params->Pfreqtrack = value;
+    }
+    else if (IS_PAR(id, Pgain))
+    {
+        params->Pgain = value;
+    }
+    else if (IS_PAR(id, Pnumformants))
+    {
+        params->Pnumformants = value;
+    }
+    else if (IS_PAR(id, Poctavesfreq))
+    {
+        params->Poctavesfreq = value;
+    }
+    else if (IS_PAR(id, Pq))
+    {
+        params->Pq = value;
+    }
+    else if (IS_PAR(id, Pstages))
+    {
+        params->Pstages = value;
+    }
+    else if (IS_PAR(id, Ptype))
+    {
+        params->Ptype = value;
+    }
+    else if (IS_PAR(id, Pvowelclearness))
+    {
+        params->Pvowelclearness = value;
+    }
+}
 
 bool SetAbstractSynthPar(
     AbstractNoteParameters *params,
@@ -402,6 +550,102 @@ bool SetAbstractSynthPar(
 
         return true;
     }
+    else if (IS_PAR(id, Pfixedfreq))
+    {
+        params->Pfixedfreq = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PfixedfreqET))
+    {
+        params->PfixedfreqET = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PDetune))
+    {
+        params->PDetune = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PCoarseDetune))
+    {
+        params->PCoarseDetune = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PDetuneType))
+    {
+        params->PDetuneType = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PFreqEnvelopeEnabled))
+    {
+        params->PFreqEnvelopeEnabled = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, FrequencyEnvelope))
+    {
+        SetEnvelopePar(params->FreqEnvelope, id, value);
+
+        return true;
+    }
+    else if (IS_PAR(id, PFreqLfoEnabled))
+    {
+        params->PFreqLfoEnabled = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, FrequencyLfo))
+    {
+        SetLfoParametersPar(params->FreqLfo, id, value);
+
+        return true;
+    }
+    else if (IS_PAR(id, PBandwidth))
+    {
+        params->PBandwidth = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PAmpEnvelopeEnabled))
+    {
+        params->PAmpEnvelopeEnabled = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, AmpEnvelope))
+    {
+        SetEnvelopePar(params->AmpEnvelope, id, value);
+
+        return true;
+    }
+    else if (IS_PAR(id, GlobalFilter))
+    {
+        SetFilterPar(params->GlobalFilter, id, value);
+
+        return true;
+    }
+    else if (IS_PAR(id, PFilterVelocityScale))
+    {
+        params->PFilterVelocityScale = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, PFilterVelocityScaleFunction))
+    {
+        params->PFilterVelocityScaleFunction = value;
+
+        return true;
+    }
+    else if (IS_PAR(id, FilterEnvelope))
+    {
+        SetEnvelopePar(params->FilterEnvelope, id, value);
+
+        return true;
+    }
 
     return false;
 }
@@ -415,6 +659,52 @@ void SetAddSynthPar(
     {
         return;
     }
+
+    logfile << "SetAddSynthPar " << id << std::endl;
+
+    if (IS_PAR(id, PPunchStrength))
+    {
+        params->PPunchStrength = value;
+    }
+    else if (IS_PAR(id, PPunchTime))
+    {
+        params->PPunchTime = value;
+    }
+    else if (IS_PAR(id, PPunchStretch))
+    {
+        params->PPunchStretch = value;
+    }
+    else if (IS_PAR(id, PPunchVelocitySensing))
+    {
+        params->PPunchVelocitySensing = value;
+    }
+    else if (IS_PAR(id, AmpLfo))
+    {
+        SetLfoParametersPar(params->AmpLfo, id, value);
+    }
+    else if (IS_PAR(id, AmpEnvelope))
+    {
+        SetEnvelopePar(params->AmpEnvelope, id, value);
+    }
+    else if (IS_PAR(id, FilterLfo))
+    {
+        SetLfoParametersPar(params->FilterLfo, id, value);
+    }
+    else if (IS_PAR(id, FilterEnvelope))
+    {
+        SetEnvelopePar(params->FilterEnvelope, id, value);
+    }
+    else if (IS_PAR(id, FreqLfo))
+    {
+        SetLfoParametersPar(params->FreqLfo, id, value);
+    }
+    else if (IS_PAR(id, FreqEnvelope))
+    {
+        SetEnvelopePar(params->FreqEnvelope, id, value);
+    }
+    else if (IS_PAR(id, Voices))
+    {
+    }
 }
 
 void SetSubSynthPar(
@@ -425,6 +715,108 @@ void SetSubSynthPar(
     if (SetAbstractSynthPar(params, id, value))
     {
         return;
+    }
+
+    if (IS_PAR(id, PBandWidthEnvelopeEnabled))
+    {
+        params->PBandWidthEnvelopeEnabled = value;
+    }
+    else if (IS_PAR(id, BandWidthEnvelope))
+    {
+        SetEnvelopePar(params->BandWidthEnvelope, id, value);
+    }
+    else if (IS_PAR(id, PGlobalFilterEnabled))
+    {
+        params->PGlobalFilterEnabled = value;
+    }
+    else if (IS_PAR(id, POvertoneSpread.type))
+    {
+        params->POvertoneSpread.type = value;
+    }
+    else if (IS_PAR(id, POvertoneSpread.par1))
+    {
+        params->POvertoneSpread.par1 = value;
+    }
+    else if (IS_PAR(id, POvertoneSpread.par2))
+    {
+        params->POvertoneSpread.par2 = value;
+    }
+    else if (IS_PAR(id, POvertoneSpread.par3))
+    {
+        params->POvertoneSpread.par3 = value;
+    }
+    else if (IS_PAR(id, Pnumstages))
+    {
+        params->Pnumstages = value;
+    }
+    else if (IS_PAR(id, Phmagtype))
+    {
+        params->Phmagtype = value;
+    }
+    else if (IS_PAR(id, Pbwscale))
+    {
+        params->Pbwscale = value;
+    }
+    else if (IS_PAR(id, Pstart))
+    {
+        params->Pstart = value;
+    }
+    else if (IS_PAR(id, POvertoneFreqMult))
+    {
+        std::cmatch m;
+        std::regex_search(id, m, std::regex("POvertoneFreqMult(\\[([0-9]+)\\]\\)"));
+
+        if (m.empty())
+        {
+            return;
+        }
+
+        auto index = std::atoi(m[2].str().c_str());
+
+        if (index < 0 || index >= MAX_SUB_HARMONICS)
+        {
+            return;
+        }
+
+        params->POvertoneFreqMult[index] = value / 127.0f;
+    }
+    else if (IS_PAR(id, Phmag))
+    {
+        std::cmatch m;
+        std::regex_search(id, m, std::regex("Phmag(\\[([0-9]+)\\]\\)"));
+
+        if (m.empty())
+        {
+            return;
+        }
+
+        auto index = std::atoi(m[2].str().c_str());
+
+        if (index < 0 || index >= MAX_SUB_HARMONICS)
+        {
+            return;
+        }
+
+        params->Phmag[index] = value;
+    }
+    else if (IS_PAR(id, Phrelbw))
+    {
+        std::cmatch m;
+        std::regex_search(id, m, std::regex("Phrelbw(\\[([0-9]+)\\]\\)"));
+
+        if (m.empty())
+        {
+            return;
+        }
+
+        auto index = std::atoi(m[2].str().c_str());
+
+        if (index < 0 || index >= MAX_SUB_HARMONICS)
+        {
+            return;
+        }
+
+        params->Phrelbw[index] = value;
     }
 }
 
@@ -474,20 +866,61 @@ void SetInstrumentPar(
 
     if (IS_PAR(relativeId, AddSynth))
     {
-        SetAddSynthPar(track->Instruments[index].adpars, id, value);
+        SetAddSynthPar(track->Instruments[index].adpars, relativeId + std::string("AddSynth.").length(), value);
     }
     else if (IS_PAR(relativeId, SubSynth))
     {
-        SetSubSynthPar(track->Instruments[index].subpars, id, value);
+        SetSubSynthPar(track->Instruments[index].subpars, relativeId + std::string("SubSynth.").length(), value);
     }
     else if (IS_PAR(relativeId, PadSynth))
     {
-        SetPadSynthPar(track->Instruments[index].padpars, id, value);
+        SetPadSynthPar(track->Instruments[index].padpars, relativeId + std::string("PadSynth.").length(), value);
     }
     else if (IS_PAR(relativeId, SampleSynth))
     {
-        SetSampleSynthPar(track->Instruments[index].smplpars, id, value);
+        SetSampleSynthPar(track->Instruments[index].smplpars, relativeId + std::string("SmplSynth.").length(), value);
     }
+}
+
+void SetEffectPar(
+    Track *track,
+    const char *id,
+    unsigned char value)
+{
+    std::cmatch m;
+    std::regex_search(id, m, std::regex("^(\\[([0-9]+)\\]\\.)"));
+
+    if (m.empty())
+    {
+        return;
+    }
+
+    auto effectIndex = std::atoi(m[2].str().c_str());
+
+    if (effectIndex < 0 || effectIndex >= NUM_TRACK_EFX)
+    {
+        return;
+    }
+
+    auto effect = track->partefx[effectIndex];
+
+    auto relativeId = id + m[1].str().size();
+
+    std::regex_search(relativeId, m, std::regex("^Parameters(\\[([0-9]+)\\])$"));
+
+    if (m.empty())
+    {
+        return;
+    }
+
+    auto parameterIndex = std::atoi(m[2].str().c_str());
+
+    if (parameterIndex < 0)
+    {
+        return;
+    }
+
+    effect->seteffectpar(parameterIndex, value);
 }
 
 void SetTrackPar(
@@ -515,7 +948,11 @@ void SetTrackPar(
     }
     else if (IS_PAR(id, Instruments))
     {
-        SetInstrumentPar(track, id + sizeof(INSTRUMENTS_ID), value);
+        SetInstrumentPar(track, id + std::string(INSTRUMENTS_ID).length(), value);
+    }
+    else if (IS_PAR(id, Effects))
+    {
+        SetEffectPar(track, id + std::string(EFFECTS_ID).length(), value);
     }
 }
 

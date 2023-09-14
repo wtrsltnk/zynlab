@@ -25,14 +25,15 @@
 
 int LFOParams::time;
 
-LFOParams::LFOParams(unsigned char freq,
-                     unsigned char intensity,
-                     unsigned char startphase,
-                     unsigned char LFOtype,
-                     unsigned char randomness,
-                     unsigned char delay,
-                     unsigned char continous,
-                     unsigned char fel)
+LFOParams::LFOParams(
+    unsigned char freq,
+    unsigned char intensity,
+    unsigned char startphase,
+    unsigned char LFOtype,
+    unsigned char randomness,
+    unsigned char delay,
+    unsigned char continous,
+    unsigned char fel)
 {
     switch (fel)
     {
