@@ -51,7 +51,7 @@ void zyn::ui::AdNote::Render()
             {
                 track->Instruments[_state->_currentTrackInstrument].Padenabled = 1;
             }
-            ImGui::End();
+            ImGui::EndChild();
             return;
         }
 

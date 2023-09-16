@@ -83,7 +83,7 @@ void zyn::ui::SampleNote::Render()
             {
                 track->Instruments[_state->_currentTrackInstrument].Psmplenabled = 1;
             }
-            ImGui::End();
+            ImGui::EndChild();
             return;
         }
 

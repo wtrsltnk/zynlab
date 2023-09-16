@@ -54,7 +54,7 @@ void zyn::ui::SubNote::Render()
             {
                 track->Instruments[_state->_currentTrackInstrument].Psubenabled = 1;
             }
-            ImGui::End();
+            ImGui::EndChild();
             return;
         }
 

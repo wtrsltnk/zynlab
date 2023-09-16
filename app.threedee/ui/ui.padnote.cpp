@@ -32,7 +32,7 @@ void zyn::ui::PadNote::Render()
             {
                 track->Instruments[_state->_currentTrackInstrument].Ppadenabled = 1;
             }
-            ImGui::End();
+            ImGui::EndChild();
             return;
         }
 
