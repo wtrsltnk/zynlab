@@ -95,8 +95,7 @@ void Track::Init(
     //Part's Insertion Effects init
     for (auto &nefx : partefx)
     {
-        nefx = new EffectManager();
-        nefx->Init(mixer, true);
+        nefx.Init(mixer, true);
     }
 
     std::fill(Pefxbypass, Pefxbypass + NUM_TRACK_EFX, false);
@@ -217,7 +216,7 @@ void Track::InstrumentDefaults()
 
     for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
-        if (partefx[nefx] != nullptr) partefx[nefx]->Defaults();
+        if (partefx[nefx] != nullptr) partefx[nefx].Defaults();
         Pefxroute[nefx] = 0; //route to next effect
     }
 }
@@ -288,7 +287,7 @@ void Track::Cleanup(
     ctl.resetall();
     for (auto &nefx : partefx)
     {
-        if (nefx != nullptr) nefx->cleanup();
+        nefx.cleanup();
     }
 
     for (int n = 0; n < NUM_TRACK_EFX + 1; ++n)
@@ -1235,12 +1234,12 @@ void Track::ComputeInstrumentSamples()
     {
         if (!Pefxbypass[nefx])
         {
-            partefx[nefx]->out(partfxinputl[nefx], partfxinputr[nefx]);
+            partefx[nefx].out(partfxinputl[nefx], partfxinputr[nefx]);
             if (Pefxroute[nefx] == 2)
                 for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
                 {
-                    partfxinputl[nefx + 1][i] += partefx[nefx]->_effectOutL[i];
-                    partfxinputr[nefx + 1][i] += partefx[nefx]->_effectOutR[i];
+                    partfxinputl[nefx + 1][i] += partefx[nefx]._effectOutL[i];
+                    partfxinputr[nefx + 1][i] += partefx[nefx]._effectOutR[i];
                 }
         }
         int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_TRACK_EFX);
@@ -1272,7 +1271,7 @@ void Track::ComputeInstrumentSamples()
         _killallnotes = 0;
         for (auto &nefx : partefx)
         {
-            nefx->cleanup();
+            nefx.cleanup();
         }
     }
     ctl.updateportamento();
@@ -1386,7 +1385,7 @@ void Track::InitPresets()
     {
         Preset instrumentEffect("INSTRUMENT_EFFECT", nefx);
         {
-            partefx[nefx]->InitPresets();
+            partefx[nefx].InitPresets();
             instrumentEffect.AddContainer(Preset("EFFECT", *partefx[nefx]));
 
             instrumentEffect.AddPreset("route", &Pefxroute[nefx]);

@@ -792,22 +792,22 @@ void zyn::ui::Mixer::ImGuiTrack(
             for (int fx = 0; fx < NUM_TRACK_EFX; fx++)
             {
                 ImGui::PushID(200 + fx);
-                ImGui::PushStyleColor(ImGuiCol_Button, track->partefx[fx]->geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
+                ImGui::PushStyleColor(ImGuiCol_Button, track->partefx[fx].geteffect() == 0 ? ImVec4(0.5f, 0.5f, 0.5f, 0.2f) : io.Colors[ImGuiCol_Button]);
 
-                if (ImGui::Button(EffectNames[track->partefx[fx]->geteffect()].c_str(), ImVec2(width - (track->partefx[fx]->geteffect() == 0 ? 0 : 22), 0)))
+                if (ImGui::Button(EffectNames[track->partefx[fx].geteffect()].c_str(), ImVec2(width - (track->partefx[fx].geteffect() == 0 ? 0 : 22), 0)))
                 {
                     _state->_currentTrack = trackIndex;
                     _state->_currentTrackEffect = fx;
                     ImGui::SetWindowFocus(TrackFxEditorID);
                 }
-                ImGui::OpenPopupOnItemClick("TrackEffectSelection", track->partefx[fx]->geteffect() == 0 ? 0 : 1);
+                ImGui::OpenPopupOnItemClick("TrackEffectSelection", track->partefx[fx].geteffect() == 0 ? 0 : 1);
                 if (ImGui::BeginPopupContextItem("TrackEffectSelection"))
                 {
                     for (unsigned int i = 0; i < EffectNames.size(); i++)
                     {
                         if (ImGui::Selectable(EffectNames[i].c_str()))
                         {
-                            track->partefx[fx]->changeeffect(int(i));
+                            track->partefx[fx].changeeffect(int(i));
                             _state->_currentTrack = trackIndex;
                             _state->_currentTrackEffect = fx;
                             ImGui::SetWindowFocus(TrackFxEditorID);
@@ -818,14 +818,14 @@ void zyn::ui::Mixer::ImGuiTrack(
                     ImGui::EndPopup();
                 }
 
-                if (track->partefx[fx]->geteffect() != 0)
+                if (track->partefx[fx].geteffect() != 0)
                 {
                     ImGui::SameLine();
                     if (ImGui::Button("x", ImVec2(20, 0)))
                     {
                         _state->_currentTrack = trackIndex;
                         _state->_currentTrackEffect = fx;
-                        track->partefx[fx]->changeeffect(0);
+                        track->partefx[fx].changeeffect(0);
                     }
                     ImGui::ShowTooltipOnHover("Remove effect from track");
                 }

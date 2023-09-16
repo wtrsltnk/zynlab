@@ -237,7 +237,7 @@ void zyn::ui::Effect::Render()
 
                 if (ImGui::BeginTabItem(trackEffectNames[fx]))
                 {
-                    EffectEditor(track->partefx[fx]);
+                    EffectEditor(&track->partefx[fx]);
                     ImGui::EndTabItem();
                 }
                 ImGui::PopStyleColor(1);

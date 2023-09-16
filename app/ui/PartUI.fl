@@ -648,9 +648,9 @@ else {propta->deactivate();proptb->deactivate();}}
       Fl_Counter inseffnocounter {
         label {FX No.}
         callback {ninseff=(int) o->value()-1;
-insefftype->value(part->partefx[ninseff]->geteffect());
+insefftype->value(part->partefx[ninseff].geteffect());
 //insefftype->do_callback();
-inseffectui->refresh(part->partefx[ninseff]);
+inseffectui->refresh(&part->partefx[ninseff]);
 int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
 bypasseff->value(part->Pefxbypass[ninseff]);
@@ -663,11 +663,11 @@ sendtochoice->value(x);}
       Fl_Choice insefftype {
         label EffType
         callback {master->Lock();
-part->partefx[ninseff]->changeeffect((int) o->value());
+part->partefx[ninseff].changeeffect((int) o->value());
 master->Unlock();
-inseffectui->refresh(part->partefx[ninseff]);}
+inseffectui->refresh(&part->partefx[ninseff]);}
         xywh {155 110 70 15} down_box BORDER_BOX labelsize 10 align 6
-        code0 {o->value(part->partefx[ninseff]->geteffect());}
+        code0 {o->value(part->partefx[ninseff].geteffect());}
       } {
         MenuItem {} {
           label {No Effect}
@@ -711,7 +711,7 @@ inseffectui->refresh(part->partefx[ninseff]);}
       } {
         Fl_Group inseffectui {
           xywh {5 5 380 95}
-          code0 {o->init(part->partefx[ninseff]);}
+          code0 {o->init(&part->partefx[ninseff]);}
           class EffUI
         } {}
       }
@@ -724,8 +724,8 @@ inseffectui->refresh(part->partefx[ninseff]);}
         label {Send To.}
         callback {int x=(int) o->value();
 part->Pefxroute[ninseff]=x;
-if (x==2) part->partefx[ninseff]->setdryonly(true);
-	else part->partefx[ninseff]->setdryonly(false);}
+if (x==2) part->partefx[ninseff].setdryonly(true);
+    else part->partefx[ninseff].setdryonly(false);}
         xywh {235 110 80 15} down_box BORDER_BOX labelsize 10 align 6
         code0 {int x=part->Pefxroute[ninseff]; if (x==127) x=1;}
         code1 {o->value(x);}
@@ -751,13 +751,13 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       }
       Fl_Button {} {
         label C
-        callback {presetsui->copy(part->partefx[ninseff]);}
+        callback {presetsui->copy(&part->partefx[ninseff]);}
         xywh {90 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
         callback {master->Lock();
-presetsui->paste(part->partefx[ninseff],inseffectui);
+presetsui->paste(&part->partefx[ninseff],inseffectui);
 master->Unlock();}
         xywh {120 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }

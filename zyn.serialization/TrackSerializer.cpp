@@ -110,11 +110,11 @@ void TrackSerializer::SerializeInstrument(
     {
         xml->beginbranch("INSTRUMENT_EFFECT", nefx);
         xml->beginbranch("EFFECT");
-        EffectManagerSerializer(_parameters->partefx[nefx]).Serialize(xml);
+        EffectManagerSerializer(&_parameters->partefx[nefx]).Serialize(xml);
         xml->endbranch();
 
         xml->addpar("route", _parameters->Pefxroute[nefx]);
-        _parameters->partefx[nefx]->setdryonly(_parameters->Pefxroute[nefx] == 2);
+        _parameters->partefx[nefx].setdryonly(_parameters->Pefxroute[nefx] == 2);
         xml->addparbool("bypass", _parameters->Pefxbypass[nefx]);
         xml->endbranch();
     }
@@ -124,7 +124,7 @@ void TrackSerializer::SerializeInstrument(
 void TrackSerializer::Serialize(
     IPresetsSerializer *xml)
 {
-    //parameters
+    // parameters
     xml->addparbool("enabled", _parameters->Penabled);
     if ((_parameters->Penabled == 0) && (xml->minimal))
     {
@@ -238,12 +238,12 @@ void TrackSerializer::DeserializeInstrument(
                 continue;
             if (xml->enterbranch("EFFECT"))
             {
-                EffectManagerSerializer(_parameters->partefx[nefx]).Deserialize(xml);
+                EffectManagerSerializer(&_parameters->partefx[nefx]).Deserialize(xml);
                 xml->exitbranch();
             }
 
             _parameters->Pefxroute[nefx] = static_cast<unsigned char>(xml->getpar("route", _parameters->Pefxroute[nefx], 0, NUM_TRACK_EFX));
-            _parameters->partefx[nefx]->setdryonly(_parameters->Pefxroute[nefx] == 2);
+            _parameters->partefx[nefx].setdryonly(_parameters->Pefxroute[nefx] == 2);
             _parameters->Pefxbypass[nefx] = xml->getparbool("bypass", _parameters->Pefxbypass[nefx]);
             xml->exitbranch();
         }
@@ -269,7 +269,7 @@ void TrackSerializer::Deserialize(
 
     _parameters->Pnoteon = static_cast<unsigned char>(xml->getparbool("note_on", _parameters->Pnoteon));
     _parameters->Ppolymode = static_cast<unsigned char>(xml->getparbool("poly_mode", _parameters->Ppolymode));
-    _parameters->Plegatomode = static_cast<unsigned char>(xml->getparbool("legato_mode", _parameters->Plegatomode)); //older versions
+    _parameters->Plegatomode = static_cast<unsigned char>(xml->getparbool("legato_mode", _parameters->Plegatomode)); // older versions
     if (!_parameters->Plegatomode)
     {
         _parameters->Plegatomode = static_cast<unsigned char>(xml->getpar127("legato_mode", _parameters->Plegatomode));

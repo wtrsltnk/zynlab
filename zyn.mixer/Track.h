@@ -26,15 +26,14 @@
 #define MAX_INFO_TEXT_SIZE 1000
 
 #include "Microtonal.h"
+#include <list> // For the monomemnotes list.
+#include <mutex>
 #include <zyn.common/ILibraryManager.h>
 #include <zyn.common/circularbuffer.h>
 #include <zyn.common/globals.h>
+#include <zyn.fx/EffectMgr.h>
 #include <zyn.synth/Controller.h>
 
-#include <list> // For the monomemnotes list.
-#include <mutex>
-
-class EffectManager;
 class ADnoteParameters;
 class SUBnoteParameters;
 class PADnoteParameters;
@@ -53,7 +52,7 @@ enum NoteStatus
 struct TrackNotes
 {
     NoteStatus status = NoteStatus::KEY_OFF;
-    int note = 0; //if there is no note playing, the "note"=-1
+    int note = 0; // if there is no note playing, the "note"=-1
     int itemsplaying = 0;
     struct
     {
@@ -66,7 +65,7 @@ struct TrackNotes
     int time = 0;
 };
 
-//the Track's instrument
+// the Track's instrument
 class Instrument
 {
 public:
@@ -102,9 +101,9 @@ public:
     void NoteOn(unsigned char note, unsigned char velocity, int masterkeyshift);
     void NoteOff(unsigned char note);
     void PolyphonicAftertouch(unsigned char note, unsigned char velocity, int masterkeyshift);
-    void AllNotesOff(); //panic
+    void AllNotesOff(); // panic
     void SetController(unsigned int type, int par);
-    void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
+    void RelaseSustainedKeys(); // this is called when the sustain pedal is relased
 
     virtual void ComputeInstrumentSamples(); // compute Track output
 
@@ -113,7 +112,7 @@ public:
     void Cleanup(bool final = false);
     int GetActiveNotes();
 
-    //the Track's instruments
+    // the Track's instruments
     Instrument Instruments[NUM_TRACK_INSTRUMENTS];
 
     // Track parameters
@@ -123,25 +122,25 @@ public:
     unsigned char Penabled = 0;
     unsigned char Pvolume = 0; /**<Track volume*/
     void SetVolume(unsigned char Pvolume);
-    unsigned char Ppanning = 0; //Track panning
+    unsigned char Ppanning = 0; // Track panning
     void setPpanning(unsigned char Ppanning);
     unsigned char Pminkey = 0;   /**<the minimum key that the Track receives noteon messages*/
-    unsigned char Pmaxkey = 0;   //the maximum key that the Track receives noteon messages
-    unsigned char Pkeyshift = 0; //Track keyshift
-    unsigned char Prcvchn = 0;   //from what midi channel it receive commnads
-    unsigned char Pvelsns = 0;   //velocity sensing (amplitude velocity scale)
-    unsigned char Pveloffs = 0;  //velocity offset
-    unsigned char Pnoteon = 0;   //if the Track receives NoteOn messages
-    unsigned char Pkitmode = 0;  //if the kitmode is enabled
-    unsigned char Pdrummode = 0; //if all keys are mapped and the system is 12tET (used for drums)
+    unsigned char Pmaxkey = 0;   // the maximum key that the Track receives noteon messages
+    unsigned char Pkeyshift = 0; // Track keyshift
+    unsigned char Prcvchn = 0;   // from what midi channel it receive commnads
+    unsigned char Pvelsns = 0;   // velocity sensing (amplitude velocity scale)
+    unsigned char Pveloffs = 0;  // velocity offset
+    unsigned char Pnoteon = 0;   // if the Track receives NoteOn messages
+    unsigned char Pkitmode = 0;  // if the kitmode is enabled
+    unsigned char Pdrummode = 0; // if all keys are mapped and the system is 12tET (used for drums)
 
-    unsigned char Ppolymode = 0;   //Track mode - 0=monophonic , 1=polyphonic
+    unsigned char Ppolymode = 0;   // Track mode - 0=monophonic , 1=polyphonic
     unsigned char Plegatomode = 0; // 0=normal, 1=legato
-    unsigned char Pkeylimit = 0;   //how many keys are alowed to be played same time (0=off), the older will be relased
+    unsigned char Pkeylimit = 0;   // how many keys are alowed to be played same time (0=off), the older will be relased
 
-    unsigned char Pname[TRACK_MAX_NAME_LEN + 1]; //name of the instrument
+    unsigned char Pname[TRACK_MAX_NAME_LEN + 1]; // name of the instrument
     struct
-    { //instrument additional information
+    { // instrument additional information
         unsigned char Ptype;
         unsigned char Pauthor[MAX_INFO_TEXT_SIZE + 1];
         unsigned char Pcomments[MAX_INFO_TEXT_SIZE + 1];
@@ -157,22 +156,22 @@ public:
     void ComputePeakLeftAndRight(float volume, float &peakl, float &peakr);
 
 public:
-    float *partoutl = nullptr; //Left channel output of the Track
-    float *partoutr = nullptr; //Right channel output of the Track
+    float *partoutl = nullptr; // Left channel output of the Track
+    float *partoutr = nullptr; // Right channel output of the Track
 
-    float *partfxinputl[NUM_TRACK_EFX + 1]; //Left and right signal that pass thru part effects;
-    float *partfxinputr[NUM_TRACK_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
+    float *partfxinputl[NUM_TRACK_EFX + 1]; // Left and right signal that pass thru part effects;
+    float *partfxinputr[NUM_TRACK_EFX + 1]; // partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
     float volume = 0;
     float oldvolumel = 0;
-    float oldvolumer = 0; //this is applied by Master
-    float panning = 0;    //this is applied by Master, too
+    float oldvolumer = 0; // this is applied by Master
+    float panning = 0;    // this is applied by Master, too
 
     Controller ctl;
 
-    EffectManager *partefx[NUM_TRACK_EFX];   //insertion part effects (they are part of the instrument)
-    unsigned char Pefxroute[NUM_TRACK_EFX];  //how the effect's output is routed(to next effect/to out)
-    unsigned char Pefxbypass[NUM_TRACK_EFX]; //if the effects are bypassed
+    EffectManager partefx[NUM_TRACK_EFX];    // insertion part effects (they are part of the instrument)
+    unsigned char Pefxroute[NUM_TRACK_EFX];  // how the effect's output is routed(to next effect/to out)
+    unsigned char Pefxbypass[NUM_TRACK_EFX]; // if the effects are bypassed
 
     int lastnote = 0;
 
@@ -182,14 +181,14 @@ public:
         std::string instrumentName;
     } loadedInstrument;
 
-    void RelaseAllKeys(); //this is called on AllNotesOff controller
+    void RelaseAllKeys(); // this is called on AllNotesOff controller
 private:
     void RunNote(unsigned int k);
     void KillNotePos(unsigned int pos);
     void RelaseNotePos(unsigned int pos);
     void MonoMemRenote(); // MonoMem stuff.
 
-    int _killallnotes; //is set to 1 if I want to kill all notes
+    int _killallnotes; // is set to 1 if I want to kill all notes
 
     unsigned int _lastpos = 0, _lastposb = 0; // To keep track of previously used pos and posb.
     bool _lastlegatomodevalid = false;        // To keep track of previous legatomodevalid.
@@ -209,7 +208,7 @@ private:
 
     TrackNotes _trackNotes[POLIPHONY];
 
-    float _oldfreq = 0; //this is used for portamento
+    float _oldfreq = 0; // this is used for portamento
     IMixer *_mixer = nullptr;
     Microtonal *_microtonal = nullptr;
     std::mutex _instrumentMutex;

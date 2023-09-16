@@ -932,10 +932,10 @@ void EffectsAndAutomationEditor::Render2d()
                 if (e > 0) ImGui::SameLine();
                 ImGui::PushID(e);
 
-                unsigned char item_current = track->partefx[e]->geteffect();
+                unsigned char item_current = track->partefx[e].geteffect();
                 ImGui::BeginChild("fx", ImVec2(item_current == 0 ? 120.0f : effectWidth, 0.0f), true);
                 {
-                    EffectEditor(track->partefx[e]);
+                    EffectEditor(&track->partefx[e]);
                 }
                 ImGui::EndChild();
                 ImGui::PopID();
@@ -1003,15 +1003,15 @@ void EffectsAndAutomationEditor::Render2d()
                 }
             }
 
-            auto showTrackFx = track->partefx[0]->geteffect() > 0 || track->partefx[1]->geteffect() > 0 || track->partefx[2]->geteffect() > 0;
+            auto showTrackFx = track->partefx[0].geteffect() > 0 || track->partefx[1].geteffect() > 0 || track->partefx[2].geteffect() > 0;
 
             if (showTrackFx && ImGui::CollapsingHeader("Track FX"))
             {
                 for (int i = 0; i < NUM_TRACK_EFX; i++)
                 {
-                    if (track->partefx[i]->geteffect() > 0)
+                    if (track->partefx[i].geteffect() > 0)
                     {
-                        RenderEffect(ParamIndices::TrackFX_1 + (100 * i), i, track->partefx[i]->geteffect(), selectedParam);
+                        RenderEffect(ParamIndices::TrackFX_1 + (100 * i), i, track->partefx[i].geteffect(), selectedParam);
                     }
                 }
             }
