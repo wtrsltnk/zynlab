@@ -24,7 +24,6 @@
 #define SAMPLE_NOTE_PARAMETERS_H
 
 #include "AbstractNoteParameters.h"
-#include "EnvelopeParams.h"
 #include <map>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>

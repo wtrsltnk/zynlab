@@ -27,14 +27,30 @@
 #include <cstdlib>
 #include <zyn.common/Util.h>
 
-SampleNote::SampleNote(SampleNoteParameters *parameters, Controller *ctl_, float freq, float velocity, int midinote)
-    : SynthNote(freq, velocity, false, midinote, false), _parameters(parameters), wavProgress(0), ctl(ctl_)
+SampleNote::SampleNote(
+    SampleNoteParameters *parameters,
+    Controller *ctl_,
+    float freq,
+    float velocity,
+    int midinote)
+    : SynthNote(
+          freq,
+          velocity,
+          false,
+          midinote,
+          false),
+      _parameters(parameters),
+      wavProgress(0),
+      ctl(ctl_)
 {
     NoteEnabled = ON;
     setup(freq, velocity, midinote);
 }
 
-void SampleNote::setup(float /*freq*/, float velocity, int /*midinote*/)
+void SampleNote::setup(
+    float /*freq*/,
+    float velocity,
+    int /*midinote*/)
 {
     NoteEnabled = ON;
     volume = powf(0.1f, 3.0f * (1.0f - _parameters->PVolume / 96.0f)); //-60 dB .. 0 dB
@@ -49,7 +65,12 @@ void SampleNote::setup(float /*freq*/, float velocity, int /*midinote*/)
     }
 }
 
-void SampleNote::legatonote(float freq, float velocity, int portamento_, int midinote, bool externcall)
+void SampleNote::legatonote(
+    float freq,
+    float velocity,
+    int portamento_,
+    int midinote,
+    bool externcall)
 {
     // Manage legato stuff
     if (legato.update(freq, velocity, portamento_, midinote, externcall))
@@ -84,7 +105,9 @@ void SampleNote::KillNote()
 /*
  * Note Output
  */
-int SampleNote::noteout(float *outl, float *outr)
+int SampleNote::noteout(
+    float *outl,
+    float *outr)
 {
     memcpy(outl, SystemSettings::Instance().denormalkillbuf, SystemSettings::Instance().bufferbytes);
     memcpy(outr, SystemSettings::Instance().denormalkillbuf, SystemSettings::Instance().bufferbytes);
@@ -104,8 +127,8 @@ int SampleNote::noteout(float *outl, float *outr)
     {
         if (wavProgress < (wavData->samplesPerChannel * wavData->channels))
         {
-            outl[i] += (wavData->PwavData[wavProgress++] * panning);
-            outr[i] += (wavData->PwavData[wavProgress++] * (1.0f - panning));
+            outl[i] += (wavData->PwavData[wavProgress++] * volume * panning);
+            outr[i] += (wavData->PwavData[wavProgress++] * volume * (1.0f - panning));
         }
         else
         {

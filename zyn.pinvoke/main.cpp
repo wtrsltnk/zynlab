@@ -1,4 +1,4 @@
-
+#include "par.h"
 #include <fstream>
 #include <iostream>
 #include <memory.h>
@@ -7,9 +7,6 @@
 #include <zyn.mixer/Mixer.h>
 #include <zyn.serialization/BankManager.h>
 #include <zyn.serialization/SaveToFileSerializer.h>
-#include <zyn.synth/ADnoteParams.h>
-#include <zyn.synth/PADnoteParams.h>
-#include <zyn.synth/SUBnoteParams.h>
 #include <zyn.synth/SampleNoteParams.h>
 
 extern "C" {
@@ -23,6 +20,10 @@ __declspec(dllexport) void EnableChannel(
     unsigned char chan);
 
 __declspec(dllexport) void DisableChannel(
+    Mixer *mixer,
+    unsigned char chan);
+
+__declspec(dllexport) bool IsChannelEnabled(
     Mixer *mixer,
     unsigned char chan);
 
@@ -58,6 +59,21 @@ __declspec(dllexport) void NoteOff(
     unsigned char chan,
     unsigned char note);
 
+__declspec(dllexport) unsigned char GetPar(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id);
+
+__declspec(dllexport) bool GetParBool(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id);
+
+__declspec(dllexport) float GetParReal(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id);
+
 __declspec(dllexport) void SetPar(
     Mixer *mixer,
     unsigned char chan,
@@ -75,6 +91,22 @@ __declspec(dllexport) void SetParReal(
     unsigned char chan,
     const char *id,
     float value);
+
+__declspec(dllexport) void SetSample(
+    Mixer *mixer,
+    unsigned char chan,
+    unsigned char instrumentIndex,
+    unsigned char sampleIndex,
+    const char *samplePath);
+
+__declspec(dllexport) void SetSampleData(
+    Mixer *mixer,
+    unsigned char chan,
+    unsigned char instrumentIndex,
+    unsigned char sampleIndex,
+    unsigned int channels,
+    unsigned int samplesPerChannel,
+    const char *sampleData);
 
 __declspec(dllexport) int GetBankCount();
 
@@ -191,6 +223,25 @@ void DisableChannel(
 
         mixer->EnableTrack(chan, false);
     }
+}
+
+bool IsChannelEnabled(
+    Mixer *mixer,
+    unsigned char chan)
+{
+    if (mixer == nullptr)
+    {
+        return false;
+    }
+
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        return false;
+    }
+
+    return track->Penabled;
 }
 
 void AudioOut(
@@ -351,7 +402,8 @@ void NoteOn(
     unsigned char note,
     unsigned char velocity)
 {
-    logfile << "NoteOn[" << short(chan) << "]  : " << (int)note << std::endl;
+    // logfile << "NoteOn[" << short(chan) << "]  : " << (int)note << std::endl;
+
     if (mixer == nullptr)
     {
         return;
@@ -365,7 +417,8 @@ void NoteOff(
     unsigned char chan,
     unsigned char note)
 {
-    logfile << "NoteOff[" << short(chan) << "] : " << (int)note << std::endl;
+    // logfile << "NoteOff[" << short(chan) << "] : " << (int)note << std::endl;
+
     if (mixer == nullptr)
     {
         return;
@@ -374,586 +427,82 @@ void NoteOff(
     mixer->NoteOff(chan, note);
 }
 
-#define IS_PAR(id, name) std::string(id).substr(0, std::string(#name).length()) == #name
-
-const char *TRACK_ID = "Track";
-const char *INSTRUMENTS_ID = "Instruments";
-const char *EFFECTS_ID = "Effects";
-
-struct sPar
+unsigned char GetPar(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id)
 {
-    unsigned char *byteValue = nullptr;
-    char *charValue = nullptr;
-    float *floatValue = nullptr;
-    bool *boolValue = nullptr;
-};
+    if (mixer == nullptr)
+    {
+        return 0;
+    }
 
-void SetLfoParametersPar(
-    LFOParams *params,
-    const char *id,
-    unsigned char value)
-{
-    logfile << "SetLfoParametersPar " << id << std::endl;
+    auto par = GetParById(mixer, chan, id);
 
-    if (IS_PAR(id, Pfreq))
+    unsigned char value = '\0';
+
+    if (par.byteValue != nullptr)
     {
-        params->Pfreq = value;
+        return (*par.byteValue);
     }
-    else if (IS_PAR(id, Pintensity))
+    else
     {
-        params->Pintensity = value;
+        logfile << id << " not found as unsigned char" << std::endl;
     }
-    else if (IS_PAR(id, Pstartphase))
-    {
-        params->Pstartphase = value;
-    }
-    else if (IS_PAR(id, PLFOtype))
-    {
-        params->PLFOtype = value;
-    }
-    else if (IS_PAR(id, Prandomness))
-    {
-        params->Prandomness = value;
-    }
-    else if (IS_PAR(id, Pfreqrand))
-    {
-        params->Pfreqrand = value;
-    }
-    else if (IS_PAR(id, Pdelay))
-    {
-        params->Pdelay = value;
-    }
-    else if (IS_PAR(id, Pcontinous))
-    {
-        params->Pcontinous = value;
-    }
-    else if (IS_PAR(id, Pstretch))
-    {
-        params->Pstretch = value;
-    }
+
+    return value;
 }
 
-void SetEnvelopePar(
-    EnvelopeParams *params,
-    const char *id,
-    unsigned char value)
+bool GetParBool(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id)
 {
-    logfile << "SetEnvelopePar " << id << std::endl;
+    if (mixer == nullptr)
+    {
+        return false;
+    }
 
-    if (IS_PAR(id, PAttackTime))
+    auto par = GetParById(mixer, chan, id);
+
+    bool value = false;
+
+    if (par.boolValue != nullptr)
     {
-        params->PA_dt = value;
+        return (*par.boolValue);
     }
-    else if (IS_PAR(id, PAttackValue))
+    else
     {
-        params->PA_val = value;
+        logfile << id << " not found as bool" << std::endl;
     }
-    else if (IS_PAR(id, PDecayTime))
-    {
-        params->PD_dt = value;
-    }
-    else if (IS_PAR(id, PDecayValue))
-    {
-        params->PD_val = value;
-    }
-    else if (IS_PAR(id, PSustainValue))
-    {
-        params->PS_val = value;
-    }
-    else if (IS_PAR(id, PReleaseTime))
-    {
-        params->PR_dt = value;
-    }
-    else if (IS_PAR(id, PReleaseValue))
-    {
-        params->PR_val = value;
-    }
+
+    return value;
 }
 
-void SetFilterPar(
-    FilterParams *params,
-    const char *id,
-    unsigned char value)
+float GetParReal(
+    Mixer *mixer,
+    unsigned char chan,
+    const char *id)
 {
-    logfile << "SetFilterPar " << id << std::endl;
-
-    if (IS_PAR(id, Pcategory))
+    if (mixer == nullptr)
     {
-        params->Pcategory = value;
-    }
-    else if (IS_PAR(id, Pcenterfreq))
-    {
-        params->Pcenterfreq = value;
-    }
-    else if (IS_PAR(id, Pformantslowness))
-    {
-        params->Pformantslowness = value;
-    }
-    else if (IS_PAR(id, Pfreq))
-    {
-        params->Pfreq = value;
-    }
-    else if (IS_PAR(id, Pfreqtrack))
-    {
-        params->Pfreqtrack = value;
-    }
-    else if (IS_PAR(id, Pgain))
-    {
-        params->Pgain = value;
-    }
-    else if (IS_PAR(id, Pnumformants))
-    {
-        params->Pnumformants = value;
-    }
-    else if (IS_PAR(id, Poctavesfreq))
-    {
-        params->Poctavesfreq = value;
-    }
-    else if (IS_PAR(id, Pq))
-    {
-        params->Pq = value;
-    }
-    else if (IS_PAR(id, Pstages))
-    {
-        params->Pstages = value;
-    }
-    else if (IS_PAR(id, Ptype))
-    {
-        params->Ptype = value;
-    }
-    else if (IS_PAR(id, Pvowelclearness))
-    {
-        params->Pvowelclearness = value;
-    }
-}
-
-bool SetAbstractSynthPar(
-    AbstractNoteParameters *params,
-    const char *id,
-    unsigned char value)
-{
-    if (IS_PAR(id, Pvolume))
-    {
-        params->PVolume = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, Ppanning))
-    {
-        params->PPanning = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PAmpVelocityScaleFunction))
-    {
-        params->PAmpVelocityScaleFunction = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, Pfixedfreq))
-    {
-        params->Pfixedfreq = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PfixedfreqET))
-    {
-        params->PfixedfreqET = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PDetune))
-    {
-        params->PDetune = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PCoarseDetune))
-    {
-        params->PCoarseDetune = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PDetuneType))
-    {
-        params->PDetuneType = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PFreqEnvelopeEnabled))
-    {
-        params->PFreqEnvelopeEnabled = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, FrequencyEnvelope))
-    {
-        SetEnvelopePar(params->FreqEnvelope, id, value);
-
-        return true;
-    }
-    else if (IS_PAR(id, PFreqLfoEnabled))
-    {
-        params->PFreqLfoEnabled = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, FrequencyLfo))
-    {
-        SetLfoParametersPar(params->FreqLfo, id, value);
-
-        return true;
-    }
-    else if (IS_PAR(id, PBandwidth))
-    {
-        params->PBandwidth = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PAmpEnvelopeEnabled))
-    {
-        params->PAmpEnvelopeEnabled = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, AmpEnvelope))
-    {
-        SetEnvelopePar(params->AmpEnvelope, id, value);
-
-        return true;
-    }
-    else if (IS_PAR(id, GlobalFilter))
-    {
-        SetFilterPar(params->GlobalFilter, id, value);
-
-        return true;
-    }
-    else if (IS_PAR(id, PFilterVelocityScale))
-    {
-        params->PFilterVelocityScale = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, PFilterVelocityScaleFunction))
-    {
-        params->PFilterVelocityScaleFunction = value;
-
-        return true;
-    }
-    else if (IS_PAR(id, FilterEnvelope))
-    {
-        SetEnvelopePar(params->FilterEnvelope, id, value);
-
-        return true;
+        return 0.0f;
     }
 
-    return false;
-}
+    auto par = GetParById(mixer, chan, id);
 
-void SetAddSynthPar(
-    ADnoteParameters *params,
-    const char *id,
-    unsigned char value)
-{
-    if (SetAbstractSynthPar(params, id, value))
-    {
-        return;
-    }
+    float value = 0.0f;
 
-    logfile << "SetAddSynthPar " << id << std::endl;
-
-    if (IS_PAR(id, PPunchStrength))
+    if (par.floatValue != nullptr)
     {
-        params->PPunchStrength = value;
+        return (*par.floatValue);
     }
-    else if (IS_PAR(id, PPunchTime))
+    else
     {
-        params->PPunchTime = value;
-    }
-    else if (IS_PAR(id, PPunchStretch))
-    {
-        params->PPunchStretch = value;
-    }
-    else if (IS_PAR(id, PPunchVelocitySensing))
-    {
-        params->PPunchVelocitySensing = value;
-    }
-    else if (IS_PAR(id, AmpLfo))
-    {
-        SetLfoParametersPar(params->AmpLfo, id, value);
-    }
-    else if (IS_PAR(id, AmpEnvelope))
-    {
-        SetEnvelopePar(params->AmpEnvelope, id, value);
-    }
-    else if (IS_PAR(id, FilterLfo))
-    {
-        SetLfoParametersPar(params->FilterLfo, id, value);
-    }
-    else if (IS_PAR(id, FilterEnvelope))
-    {
-        SetEnvelopePar(params->FilterEnvelope, id, value);
-    }
-    else if (IS_PAR(id, FreqLfo))
-    {
-        SetLfoParametersPar(params->FreqLfo, id, value);
-    }
-    else if (IS_PAR(id, FreqEnvelope))
-    {
-        SetEnvelopePar(params->FreqEnvelope, id, value);
-    }
-    else if (IS_PAR(id, Voices))
-    {
-    }
-}
-
-void SetSubSynthPar(
-    SUBnoteParameters *params,
-    const char *id,
-    unsigned char value)
-{
-    if (SetAbstractSynthPar(params, id, value))
-    {
-        return;
+        logfile << id << " not found as float" << std::endl;
     }
 
-    if (IS_PAR(id, PBandWidthEnvelopeEnabled))
-    {
-        params->PBandWidthEnvelopeEnabled = value;
-    }
-    else if (IS_PAR(id, BandWidthEnvelope))
-    {
-        SetEnvelopePar(params->BandWidthEnvelope, id, value);
-    }
-    else if (IS_PAR(id, PGlobalFilterEnabled))
-    {
-        params->PGlobalFilterEnabled = value;
-    }
-    else if (IS_PAR(id, POvertoneSpread.type))
-    {
-        params->POvertoneSpread.type = value;
-    }
-    else if (IS_PAR(id, POvertoneSpread.par1))
-    {
-        params->POvertoneSpread.par1 = value;
-    }
-    else if (IS_PAR(id, POvertoneSpread.par2))
-    {
-        params->POvertoneSpread.par2 = value;
-    }
-    else if (IS_PAR(id, POvertoneSpread.par3))
-    {
-        params->POvertoneSpread.par3 = value;
-    }
-    else if (IS_PAR(id, Pnumstages))
-    {
-        params->Pnumstages = value;
-    }
-    else if (IS_PAR(id, Phmagtype))
-    {
-        params->Phmagtype = value;
-    }
-    else if (IS_PAR(id, Pbwscale))
-    {
-        params->Pbwscale = value;
-    }
-    else if (IS_PAR(id, Pstart))
-    {
-        params->Pstart = value;
-    }
-    else if (IS_PAR(id, POvertoneFreqMult))
-    {
-        std::cmatch m;
-        std::regex_search(id, m, std::regex("POvertoneFreqMult(\\[([0-9]+)\\]\\)"));
-
-        if (m.empty())
-        {
-            return;
-        }
-
-        auto index = std::atoi(m[2].str().c_str());
-
-        if (index < 0 || index >= MAX_SUB_HARMONICS)
-        {
-            return;
-        }
-
-        params->POvertoneFreqMult[index] = value / 127.0f;
-    }
-    else if (IS_PAR(id, Phmag))
-    {
-        std::cmatch m;
-        std::regex_search(id, m, std::regex("Phmag(\\[([0-9]+)\\]\\)"));
-
-        if (m.empty())
-        {
-            return;
-        }
-
-        auto index = std::atoi(m[2].str().c_str());
-
-        if (index < 0 || index >= MAX_SUB_HARMONICS)
-        {
-            return;
-        }
-
-        params->Phmag[index] = value;
-    }
-    else if (IS_PAR(id, Phrelbw))
-    {
-        std::cmatch m;
-        std::regex_search(id, m, std::regex("Phrelbw(\\[([0-9]+)\\]\\)"));
-
-        if (m.empty())
-        {
-            return;
-        }
-
-        auto index = std::atoi(m[2].str().c_str());
-
-        if (index < 0 || index >= MAX_SUB_HARMONICS)
-        {
-            return;
-        }
-
-        params->Phrelbw[index] = value;
-    }
-}
-
-void SetPadSynthPar(
-    PADnoteParameters *params,
-    const char *id,
-    unsigned char value)
-{
-    if (SetAbstractSynthPar(params, id, value))
-    {
-        return;
-    }
-}
-
-void SetSampleSynthPar(
-    SampleNoteParameters *params,
-    const char *id,
-    unsigned char value)
-{
-    if (SetAbstractSynthPar(params, id, value))
-    {
-        return;
-    }
-}
-
-void SetInstrumentPar(
-    Track *track,
-    const char *id,
-    unsigned char value)
-{
-    std::cmatch m;
-    std::regex_search(id, m, std::regex("^(\\[([0-9]+)\\]\\.)"));
-
-    if (m.empty())
-    {
-        return;
-    }
-
-    auto index = std::atoi(m[2].str().c_str());
-
-    if (index < 0 || index >= NUM_TRACK_INSTRUMENTS)
-    {
-        return;
-    }
-
-    auto relativeId = id + m[1].str().size();
-
-    if (IS_PAR(relativeId, AddSynth))
-    {
-        SetAddSynthPar(track->Instruments[index].adpars, relativeId + std::string("AddSynth.").length(), value);
-    }
-    else if (IS_PAR(relativeId, SubSynth))
-    {
-        SetSubSynthPar(track->Instruments[index].subpars, relativeId + std::string("SubSynth.").length(), value);
-    }
-    else if (IS_PAR(relativeId, PadSynth))
-    {
-        SetPadSynthPar(track->Instruments[index].padpars, relativeId + std::string("PadSynth.").length(), value);
-    }
-    else if (IS_PAR(relativeId, SampleSynth))
-    {
-        SetSampleSynthPar(track->Instruments[index].smplpars, relativeId + std::string("SmplSynth.").length(), value);
-    }
-}
-
-void SetEffectPar(
-    Track *track,
-    const char *id,
-    unsigned char value)
-{
-    std::cmatch m;
-    std::regex_search(id, m, std::regex("^(\\[([0-9]+)\\]\\.)"));
-
-    if (m.empty())
-    {
-        return;
-    }
-
-    auto effectIndex = std::atoi(m[2].str().c_str());
-
-    if (effectIndex < 0 || effectIndex >= NUM_TRACK_EFX)
-    {
-        return;
-    }
-
-    auto effect = track->partefx[effectIndex];
-
-    auto relativeId = id + m[1].str().size();
-
-    std::regex_search(relativeId, m, std::regex("^Parameters(\\[([0-9]+)\\])$"));
-
-    if (m.empty())
-    {
-        return;
-    }
-
-    auto parameterIndex = std::atoi(m[2].str().c_str());
-
-    if (parameterIndex < 0)
-    {
-        return;
-    }
-
-    effect->seteffectpar(parameterIndex, value);
-}
-
-void SetTrackPar(
-    Track *track,
-    const char *id,
-    unsigned char value)
-{
-    logfile << "setting " << id << " to  : " << int(value) << std::endl;
-
-    if (IS_PAR(id, Pvolume))
-    {
-        track->SetVolume(value);
-    }
-    else if (IS_PAR(id, Ppanning))
-    {
-        track->setPpanning(value);
-    }
-    else if (IS_PAR(id, Pvelsns))
-    {
-        track->Pvelsns = value;
-    }
-    else if (IS_PAR(id, Pveloffs))
-    {
-        track->Pveloffs = value;
-    }
-    else if (IS_PAR(id, Instruments))
-    {
-        SetInstrumentPar(track, id + std::string(INSTRUMENTS_ID).length(), value);
-    }
-    else if (IS_PAR(id, Effects))
-    {
-        SetEffectPar(track, id + std::string(EFFECTS_ID).length(), value);
-    }
+    return value;
 }
 
 void SetPar(
@@ -962,25 +511,29 @@ void SetPar(
     const char *id,
     unsigned char value)
 {
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
     logfile << "SetPar[" << short(chan) << "] : " << id << ", " << value << std::endl;
 
-    auto track = mixer->GetTrack(chan);
+    auto par = GetParById(mixer, chan, id);
 
-    if (track == nullptr)
+    if (par.setByteIsSet)
     {
-        return;
+        logfile << "calling setByte function " << std::endl;
+
+        par.setByte(value);
     }
-
-    auto const trackId = std::string(id).substr(0, std::string(TRACK_ID).length());
-
-    if (trackId != TRACK_ID)
+    else if (par.byteValue != nullptr)
     {
-        logfile << "id not valid : " << id << " (" << trackId << ")" << std::endl;
-
-        return;
+        (*par.byteValue) = value;
     }
-
-    SetTrackPar(track, id + trackId.length() + 1, value); // the +1 is for the dot
+    else
+    {
+        logfile << id << " not found as unsigned char" << std::endl;
+    }
 }
 
 void SetParBool(
@@ -989,15 +542,26 @@ void SetParBool(
     const char *id,
     bool value)
 {
-    logfile << "SetParBool[" << short(chan) << "] : " << id << ", " << value << std::endl;
-    (void)id;
-    (void)value;
-
-    auto track = mixer->GetTrack(chan);
-
-    if (track == nullptr)
+    if (mixer == nullptr)
     {
         return;
+    }
+
+    logfile << "SetParBool[" << short(chan) << "] : " << id << ", " << value << std::endl;
+
+    auto par = GetParById(mixer, chan, id);
+
+    if (par.setBoolIsSet)
+    {
+        par.setBool(value);
+    }
+    else if (par.boolValue != nullptr)
+    {
+        (*par.boolValue) = value;
+    }
+    else
+    {
+        logfile << id << " not found as float" << std::endl;
     }
 }
 
@@ -1007,43 +571,147 @@ void SetParReal(
     const char *id,
     float value)
 {
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
     logfile << "SetParReal[" << short(chan) << "] : " << id << ", " << value << std::endl;
-    (void)id;
-    (void)value;
+
+    auto par = GetParById(mixer, chan, id);
+
+    if (par.setFloatIsSet)
+    {
+        par.setFloat(value);
+    }
+    else if (par.floatValue != nullptr)
+    {
+        (*par.floatValue) = value;
+    }
+    else
+    {
+        logfile << id << " not found as float" << std::endl;
+    }
+}
+
+void SetSample(
+    Mixer *mixer,
+    unsigned char chan,
+    unsigned char instrumentIndex,
+    unsigned char sampleIndex,
+    const char *samplePath)
+{
+    logfile << "SetSample[" << int(chan) << "," << int(instrumentIndex) << "," << int(sampleIndex) << "] " << samplePath << std::endl;
+
+    if (mixer == nullptr)
+    {
+        logfile << "mixer == nullptr" << std::endl;
+
+        return;
+    }
+
+    if (instrumentIndex < 0 || instrumentIndex >= NUM_TRACK_INSTRUMENTS)
+    {
+        logfile << "instrumentIndex < 0 || instrumentIndex >= " << NUM_TRACK_INSTRUMENTS << std::endl;
+
+        return;
+    }
 
     auto track = mixer->GetTrack(chan);
 
     if (track == nullptr)
     {
-        return;
-    }
-
-    if (std::string(id).substr(0, sizeof(TRACK_ID)) != TRACK_ID)
-    {
-        logfile << "id not valid : " << id << std::endl;
+        logfile << "track == nullptr" << std::endl;
 
         return;
     }
 
-    auto relativeId = id + sizeof(TRACK_ID) - 1;
+    if (!track->Instruments[instrumentIndex].Psmplenabled)
+    {
+        logfile << "!track->Instruments[instrumentIndex].Psmplenabled" << std::endl;
 
-    auto floatValue = (unsigned char)(127 * value);
-    if (IS_PAR(relativeId, Pvolume))
-    {
-        track->SetVolume(floatValue);
+        return;
     }
-    else if (IS_PAR(relativeId, Ppanning))
+
+    auto newWavData = WavData::Load(samplePath);
+
+    if (newWavData == nullptr)
     {
-        track->setPpanning(floatValue);
+        logfile << "newWavData == nullptr" << std::endl;
+
+        return;
     }
-    else if (IS_PAR(relativeId, Pvelsns))
+
+    auto sample = track->Instruments[instrumentIndex].smplpars->PwavData.find(sampleIndex);
+    if (sample != track->Instruments[instrumentIndex].smplpars->PwavData.end())
     {
-        track->Pvelsns = floatValue;
+        delete sample->second;
+        track->Instruments[instrumentIndex].smplpars->PwavData.erase(sample);
     }
-    else if (IS_PAR(relativeId, Pveloffs))
+
+    track->Instruments[instrumentIndex].smplpars->PwavData.insert(std::make_pair(sampleIndex, newWavData));
+}
+
+void SetSampleData(
+    Mixer *mixer,
+    unsigned char chan,
+    unsigned char instrumentIndex,
+    unsigned char sampleIndex,
+    unsigned int channels,
+    unsigned int samplesPerChannel,
+    const char *sampleData)
+{
+    logfile << "SetSample[" << int(chan) << "," << int(instrumentIndex) << "," << int(sampleIndex) << "] " << std::endl;
+
+    if (mixer == nullptr)
     {
-        track->Pveloffs = floatValue;
+        logfile << "mixer == nullptr" << std::endl;
+
+        return;
     }
+
+    if (instrumentIndex < 0 || instrumentIndex >= NUM_TRACK_INSTRUMENTS)
+    {
+        logfile << "instrumentIndex < 0 || instrumentIndex >= " << NUM_TRACK_INSTRUMENTS << std::endl;
+
+        return;
+    }
+
+    auto track = mixer->GetTrack(chan);
+
+    if (track == nullptr)
+    {
+        logfile << "track == nullptr" << std::endl;
+
+        return;
+    }
+
+    if (!track->Instruments[instrumentIndex].Psmplenabled)
+    {
+        logfile << "!track->Instruments[instrumentIndex].Psmplenabled" << std::endl;
+
+        return;
+    }
+
+    auto newWavData = new WavData();
+    newWavData->channels = channels;
+    newWavData->samplesPerChannel = samplesPerChannel;
+
+    if (!WavData::fromBase64(sampleData, newWavData))
+    {
+        logfile << "WavData::fromBase64 failed" << std::endl;
+
+        return;
+    }
+
+    auto sample = track->Instruments[instrumentIndex].smplpars->PwavData.find(sampleIndex);
+    if (sample != track->Instruments[instrumentIndex].smplpars->PwavData.end())
+    {
+        delete sample->second;
+        track->Instruments[instrumentIndex].smplpars->PwavData.erase(sample);
+    }
+
+    track->Instruments[instrumentIndex].smplpars->PwavData.insert(std::make_pair(sampleIndex, newWavData));
 }
 
 int GetBankCount()
@@ -1166,11 +834,15 @@ int GetInstrumentPath(
 
     if (bankIndex < 0)
     {
+        logfile << "bankIndex not valid " << bankIndex << std::endl;
+
         return 0;
     }
 
     if (bankIndex >= banks->GetBankCount())
     {
+        logfile << "bankIndex not valid " << bankIndex << std::endl;
+
         return 0;
     }
 
@@ -1178,11 +850,15 @@ int GetInstrumentPath(
 
     if (instrumentIndex < 0)
     {
+        logfile << "instrumentIndex not valid " << instrumentIndex << std::endl;
+
         return strcpy_s(buffer, bufferSize, emptyBankName);
     }
 
-    if (instrumentIndex >= bank.instrumentNames.size())
+    if (instrumentIndex >= BANK_SIZE)
     {
+        logfile << "instrumentIndex not valid " << instrumentIndex << std::endl;
+
         return strcpy_s(buffer, bufferSize, emptyBankName);
     }
 

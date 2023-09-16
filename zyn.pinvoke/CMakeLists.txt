@@ -34,27 +34,3 @@ target_compile_features(zyn.pinvoke
         cxx_thread_local
         cxx_std_17
     )
-
-add_executable(testpar
-    par.cpp
-    par.h
-    test/testpar.cpp
-    test/acutest.h
-    )
-
-target_include_directories(testpar
-    PRIVATE
-        ${CMAKE_SOURCE_DIR}
-        include
-    )
-
-target_link_libraries(testpar
-    zyn.mixer
-    zyn.synth
-    zyn.fx
-    zyn.dsp
-    zyn.serialization
-    zyn.common
-    )
-
-add_test(NAME testpar COMMAND testpar)

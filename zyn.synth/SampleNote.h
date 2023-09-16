@@ -31,30 +31,44 @@
 class SampleNote : public SynthNote
 {
 public:
-    SampleNote(SampleNoteParameters *parameters, Controller *ctl_, float freq,
-               float velocity, int midinote);
+    SampleNote(
+        SampleNoteParameters *parameters,
+        Controller *ctl_,
+        float freq,
+        float velocity,
+        int midinote);
     virtual ~SampleNote();
 
-    void legatonote(float freq, float velocity, int portamento_,
-                    int midinote, bool externcall);
+    void legatonote(
+        float freq,
+        float velocity,
+        int portamento_,
+        int midinote,
+        bool externcall);
 
-    int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
+    int noteout(
+        float *outl,
+        float *outr); // note output,return 0 if the note is finished
+
     void relasekey();
+
     bool finished() const;
 
 private:
-    void setup(float freq,
-               float velocity,
-               int midinote);
+    void setup(
+        float freq,
+        float velocity,
+        int midinote);
+
     void KillNote();
 
     SampleNoteParameters *_parameters;
     unsigned int wavProgress;
 
-    //parameters
+    // parameters
     float panning;
 
-    //internal values
+    // internal values
     ONOFFTYPE NoteEnabled;
     float volume;
 
