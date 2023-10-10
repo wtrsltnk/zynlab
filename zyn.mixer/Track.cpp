@@ -92,7 +92,7 @@ void Track::Init(
         n.smplpars = new SampleNoteParameters();
     }
 
-    //Part's Insertion Effects init
+    // Part's Insertion Effects init
     for (auto &nefx : partefx)
     {
         nefx.Init(mixer, true);
@@ -217,7 +217,7 @@ void Track::InstrumentDefaults()
     for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
         if (partefx[nefx] != nullptr) partefx[nefx].Defaults();
-        Pefxroute[nefx] = 0; //route to next effect
+        Pefxroute[nefx] = 0; // route to next effect
     }
 }
 
@@ -327,11 +327,11 @@ void Track::NoteOn(
 
     // Legato and MonoMem used vars:
     int posb = POLIPHONY - 1;     // Just a dummy initial value.
-    bool legatomodevalid = false; //true when legato mode is determined applicable.
+    bool legatomodevalid = false; // true when legato mode is determined applicable.
     bool doinglegato = false;     // true when we determined we do a legato note.
     bool ismonofirstnote = false; /*(In Mono/Legato) true when we determined
                   no other notes are held down or sustained.*/
-    int lastnotecopy = lastnote;  //Useful after lastnote has been changed.
+    int lastnotecopy = lastnote;  // Useful after lastnote has been changed.
 
     if (Pnoteon == 0)
     {
@@ -404,7 +404,7 @@ void Track::NoteOn(
                 }
 
                 // Set posb
-                posb = (pos + 1) % POLIPHONY; //We really want it (if the following fails)
+                posb = (pos + 1) % POLIPHONY; // We really want it (if the following fails)
                 for (i = 0; i < POLIPHONY; ++i)
                 {
                     if ((_trackNotes[i].status == KEY_OFF) && (pos != static_cast<int>(i)))
@@ -420,7 +420,7 @@ void Track::NoteOn(
     else if (Ppolymode == 0)
     {
         // Legato mode is either off or non-applicable.
-        //if the mode is 'mono' turn off all other notes
+        // if the mode is 'mono' turn off all other notes
         for (i = 0; i < POLIPHONY; ++i)
         {
             if (_trackNotes[i].status == KEY_PLAYING)
@@ -434,12 +434,12 @@ void Track::NoteOn(
 
     if (pos == -1)
     {
-        //test
+        // test
         fprintf(stderr, "%s", "NOTES TOO MANY (> POLIPHONY) - (Part.cpp::NoteOn(..))\n");
     }
     else
     {
-        //start the note
+        // start the note
         _trackNotes[pos].status = KEY_PLAYING;
         _trackNotes[pos].note = note;
         if (legatomodevalid)
@@ -448,37 +448,37 @@ void Track::NoteOn(
             _trackNotes[posb].note = note;
         }
 
-        //this computes the velocity sensing of the part
+        // this computes the velocity sensing of the part
         float vel = VelF(velocity / 127.0f, Pvelsns);
 
-        //compute the velocity offset
+        // compute the velocity offset
         vel += (Pveloffs - 64.0f) / 64.0f;
         if (vel < 0.0f)
             vel = 0.0f;
         else if (vel > 1.0f)
             vel = 1.0f;
 
-        //compute the keyshift
+        // compute the keyshift
         auto partkeyshift = static_cast<int>(Pkeyshift - 64);
         int keyshift = masterkeyshift + partkeyshift;
 
-        //initialise note frequency
+        // initialise note frequency
         float notebasefreq;
         if (Pdrummode == 0)
         {
             notebasefreq = _microtonal->getnotefreq(note, keyshift);
             if (notebasefreq < 0.0f)
-                return; //the key is no mapped
+                return; // the key is no mapped
         }
         else
         {
             notebasefreq = 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
         }
 
-        //Portamento
+        // Portamento
         if (_oldfreq < 1.0f)
         {
-            _oldfreq = notebasefreq; //this is only the first note is played
+            _oldfreq = notebasefreq; // this is only the first note is played
         }
 
         // For Mono/Legato: Force Portamento Off on first
@@ -551,7 +551,7 @@ void Track::NoteOn(
                         continue; // We will not perform legato across 2 key regions.
                     }
 
-                    //if this parameter is 127 for "unprocessed"
+                    // if this parameter is 127 for "unprocessed"
                     _trackNotes[pos].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
                     _trackNotes[posb].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
 
@@ -602,7 +602,7 @@ void Track::NoteOn(
         }
 
         if (Pkitmode == 0)
-        { //init the notes for the "normal mode"
+        { // init the notes for the "normal mode"
             _trackNotes[pos].instumentNotes[0].sendtoparteffect = 0;
 
             if (Instruments[0].Padenabled != 0)
@@ -636,7 +636,7 @@ void Track::NoteOn(
                 _trackNotes[posb].instumentNotes[0].sendtoparteffect = 0;
                 if (Instruments[0].Padenabled != 0)
                 {
-                    //true for silent.
+                    // true for silent.
                     _trackNotes[posb].instumentNotes[0].adnote = new ADnote(Instruments[0].adpars, &ctl, notebasefreq, vel, portamento, note, true);
                 }
 
@@ -661,7 +661,7 @@ void Track::NoteOn(
                 }
             }
         }
-        else //init the notes for the "kit mode"
+        else // init the notes for the "kit mode"
         {
             for (auto &item : Instruments)
             {
@@ -674,9 +674,9 @@ void Track::NoteOn(
                     continue;
                 }
 
-                int ci = _trackNotes[pos].itemsplaying; //ci=current item
+                int ci = _trackNotes[pos].itemsplaying; // ci=current item
 
-                //if this parameter is 127 for "unprocessed"
+                // if this parameter is 127 for "unprocessed"
                 _trackNotes[pos].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
 
                 if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
@@ -699,12 +699,12 @@ void Track::NoteOn(
                 // Spawn another note (but silent) if legatomodevalid==true
                 if (legatomodevalid)
                 {
-                    //if this parameter is 127 for "unprocessed"
+                    // if this parameter is 127 for "unprocessed"
                     _trackNotes[posb].instumentNotes[ci].sendtoparteffect = (item.Psendtoparteffect < NUM_TRACK_EFX ? item.Psendtoparteffect : NUM_TRACK_EFX);
 
                     if ((item.adpars != nullptr) && ((item.Padenabled) != 0))
                     {
-                        //true for silent.
+                        // true for silent.
                         _trackNotes[posb].instumentNotes[ci].adnote = new ADnote(item.adpars, &ctl, notebasefreq, vel, portamento, note, true);
                     }
                     if ((item.subpars != nullptr) && ((item.Psubenabled) != 0))
@@ -738,14 +738,15 @@ void Track::NoteOn(
         }
     }
 
-    //this only relase the keys if there is maximum number of keys allowed
+    // this only relase the keys if there is maximum number of keys allowed
     setkeylimit(Pkeylimit);
 }
 
 /*
  * Note Off Messages
  */
-void Track::NoteOff(unsigned char note) //relase the key
+void Track::NoteOff(
+    unsigned char note) // relase the key
 {
     // This note is released, so we remove it from the list.
     if (!_monomemnotes.empty())
@@ -753,12 +754,12 @@ void Track::NoteOff(unsigned char note) //relase the key
         _monomemnotes.remove(note);
     }
 
-    for (int i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
+    for (int i = POLIPHONY - 1; i >= 0; i--) // first note in, is first out if there are same note multiple times
     {
         if ((_trackNotes[i].status == KEY_PLAYING) && (_trackNotes[i].note == note))
         {
             if (ctl.sustain.sustain == 0)
-            { //the sustain pedal is not pushed
+            { // the sustain pedal is not pushed
                 if ((Ppolymode == 0) && (!_monomemnotes.empty()))
                 {
                     MonoMemRenote(); // To play most recent still held note.
@@ -768,7 +769,7 @@ void Track::NoteOff(unsigned char note) //relase the key
                     RelaseNotePos(static_cast<unsigned int>(i));
                 }
             }
-            else //the sustain pedal is pushed
+            else // the sustain pedal is pushed
             {
                 _trackNotes[i].status = KEY_RELASED_AND_SUSTAINED;
             }
@@ -776,9 +777,10 @@ void Track::NoteOff(unsigned char note) //relase the key
     }
 }
 
-void Track::PolyphonicAftertouch(unsigned char note,
-                                 unsigned char velocity,
-                                 int masterkeyshift)
+void Track::PolyphonicAftertouch(
+    unsigned char note,
+    unsigned char velocity,
+    int masterkeyshift)
 {
     (void)masterkeyshift;
     if (!Pnoteon || (note < Pminkey) || (note > Pmaxkey))
@@ -855,7 +857,7 @@ void Track::SetController(unsigned int type, int par)
         case C_expression:
         {
             ctl.setexpression(par);
-            SetVolume(Pvolume); //update the volume
+            SetVolume(Pvolume); // update the volume
             break;
         }
         case C_portamento:
@@ -866,7 +868,7 @@ void Track::SetController(unsigned int type, int par)
         case C_panning:
         {
             ctl.setpanning(par);
-            setPpanning(Ppanning); //update the panning
+            setPpanning(Ppanning); // update the panning
             break;
         }
         case C_filtercutoff:
@@ -918,7 +920,7 @@ void Track::SetController(unsigned int type, int par)
         }
         case C_allsoundsoff:
         {
-            AllNotesOff(); //Panic
+            AllNotesOff(); // Panic
             break;
         }
         case C_resetallcontrollers:
@@ -933,8 +935,8 @@ void Track::SetController(unsigned int type, int par)
             {
                 SetVolume(Pvolume);
             }
-            SetVolume(Pvolume);   //update the volume
-            setPpanning(Ppanning); //update the panning
+            SetVolume(Pvolume);    // update the volume
+            setPpanning(Ppanning); // update the panning
 
             for (auto &item : Instruments)
             {
@@ -944,7 +946,7 @@ void Track::SetController(unsigned int type, int par)
 
                 item.adpars->Reson->sendcontroller(C_resonance_bandwidth, 1.0f);
             }
-            //more update to add here if I add controllers
+            // more update to add here if I add controllers
             break;
         }
         case C_allnotesoff:
@@ -1004,7 +1006,7 @@ void Track::RelaseAllKeys()
 {
     for (unsigned int i = 0; i < POLIPHONY; ++i)
     {
-        if ((_trackNotes[i].status != KEY_RELASED) && (_trackNotes[i].status != KEY_OFF)) //thanks to Frank Neumann
+        if ((_trackNotes[i].status != KEY_RELASED) && (_trackNotes[i].status != KEY_OFF)) // thanks to Frank Neumann
         {
             RelaseNotePos(i);
         }
@@ -1105,7 +1107,7 @@ void Track::setkeylimit(unsigned char Pkeylimit)
         keylimit = POLIPHONY - 5;
     }
 
-    //release old keys if the number of notes>keylimit
+    // release old keys if the number of notes>keylimit
     if (Ppolymode != 0)
     {
         int notecount = 0;
@@ -1117,7 +1119,7 @@ void Track::setkeylimit(unsigned char Pkeylimit)
             }
         }
         int oldestnotepos = -1;
-        if (notecount > keylimit) //find out the oldest note
+        if (notecount > keylimit) // find out the oldest note
         {
             for (int i = 0; i < POLIPHONY; ++i)
             {
@@ -1154,7 +1156,7 @@ void Track::RunNote(unsigned int k)
 
         for (unsigned type = 0; type < 4; ++type)
         {
-            //Select a note
+            // Select a note
             SynthNote **note = nullptr;
             if (type == 0)
             {
@@ -1173,7 +1175,7 @@ void Track::RunNote(unsigned int k)
                 note = &_trackNotes[k].instumentNotes[item].smplnote;
             }
 
-            //Process if it exists
+            // Process if it exists
             if (!(*note))
             {
                 continue;
@@ -1188,14 +1190,14 @@ void Track::RunNote(unsigned int k)
                 (*note) = nullptr;
             }
             for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
-            { //add the note to part(mix)
+            { // add the note to part(mix)
                 partfxinputl[sendcurrenttofx][i] += _tmpoutl[i];
                 partfxinputr[sendcurrenttofx][i] += _tmpoutr[i];
             }
         }
     }
 
-    //Kill note if there is no synth on that note
+    // Kill note if there is no synth on that note
     if (noteplay == 0)
     {
         KillNotePos(k);
@@ -1225,11 +1227,11 @@ void Track::ComputeInstrumentSamples()
             continue;
         }
         _trackNotes[k].time++;
-        //get the sampledata of the note and kill it if it's finished
+        // get the sampledata of the note and kill it if it's finished
         RunNote(k);
     }
 
-    //Apply part's effects and mix them
+    // Apply part's effects and mix them
     for (int nefx = 0; nefx < NUM_TRACK_EFX; ++nefx)
     {
         if (!Pefxbypass[nefx])
@@ -1255,7 +1257,7 @@ void Track::ComputeInstrumentSamples()
         partoutr[i] = partfxinputr[NUM_TRACK_EFX][i];
     }
 
-    //Kill All Notes if killallnotes!=0
+    // Kill All Notes if killallnotes!=0
     if (_killallnotes != 0)
     {
         for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
@@ -1313,7 +1315,7 @@ void Track::setkititemstatus(int kititem, int Penabled_)
 {
     if ((kititem == 0) || (kititem >= NUM_TRACK_INSTRUMENTS))
     {
-        return; //nonexistent kit item and the first kit item is always enabled
+        return; // nonexistent kit item and the first kit item is always enabled
     }
     Instruments[kititem].Penabled = static_cast<unsigned char>(Penabled_);
 

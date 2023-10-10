@@ -176,6 +176,7 @@ void Mixer::NoteOn(
     unsigned char note,
     unsigned char velocity)
 {
+    std::cout << int(note) << std::endl;
     if (!velocity)
     {
         this->NoteOff(chan, note);

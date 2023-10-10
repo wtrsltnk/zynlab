@@ -117,12 +117,7 @@ int SampleNote::noteout(
         return 0;
     }
 
-    if (_parameters->PwavData.find(legato.getMidinote()) == _parameters->PwavData.end())
-    {
-        return 0;
-    }
-
-    auto wavData = _parameters->PwavData.find(legato.getMidinote())->second;
+    auto wavData = _parameters->PwavData;
     for (unsigned int i = 0; i < SystemSettings::Instance().buffersize; ++i)
     {
         if (wavProgress < (wavData->samplesPerChannel * wavData->channels))

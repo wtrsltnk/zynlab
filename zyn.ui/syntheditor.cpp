@@ -1169,9 +1169,9 @@ void SynthEditor::RenderSmplSynth(
                     }
 
                     ImGui::NextColumn();
-                    if (params->PwavData.find(i) != params->PwavData.end())
+                    if (params->PwavData != nullptr)
                     {
-                        ImGui::Text("%s", params->PwavData[i]->name.c_str());
+                        ImGui::Text("%s", params->PwavData->name.c_str());
                     }
                     else
                     {
@@ -1202,24 +1202,24 @@ void SynthEditor::RenderSmplSynth(
             selectSample = true;
             selectingSampleForKey = selectedNote;
         }
-        auto selectedWav = params->PwavData.find(selectedNote);
-        if (selectedWav != params->PwavData.end())
+        if (params->PwavData != nullptr)
         {
             ImGui::SameLine();
             if (ImGui::Button("Clear"))
             {
-                params->PwavData.erase(selectedNote);
+                delete params->PwavData;
+                params->PwavData = nullptr;
             }
 
             ImGui::SameLine();
             if (ImGui::Button("Play"))
             {
-                _mixer->PreviewSample((*selectedWav).second->path);
+                _mixer->PreviewSample(params->PwavData->path);
             }
 
             ImGui::PlotConfig conf;
-            conf.values.ys = (*selectedWav).second->PwavData;
-            conf.values.count = (*selectedWav).second->samplesPerChannel * (*selectedWav).second->channels;
+            conf.values.ys = params->PwavData->PwavData;
+            conf.values.count = params->PwavData->samplesPerChannel * params->PwavData->channels;
             conf.scale.min = -1;
             conf.scale.max = 1;
             conf.tooltip.show = true;
@@ -1237,7 +1237,7 @@ void SynthEditor::RenderSmplSynth(
     _libraryDialog.ShowSampleDialog(selectSample, [params](ILibraryItem *sample) {
         if (sample != nullptr)
         {
-            params->PwavData[selectingSampleForKey] = WavData::Load(sample->GetPath());
+            params->PwavData = WavData::Load(sample->GetPath());
         }
     });
 }
@@ -1347,7 +1347,7 @@ int getpointx(
     for (int i = 1; i < npoints; i++)
         sum += env->getdt(i) + 1;
 
-    float sumbefore = 0; //the sum of all points before the computed point
+    float sumbefore = 0; // the sum of all points before the computed point
     for (int i = 1; i <= n; i++)
         sumbefore += env->getdt(i) + 1;
 

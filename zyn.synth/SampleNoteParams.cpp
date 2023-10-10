@@ -38,6 +38,7 @@ void SampleNoteParameters::Defaults()
     PVolume = 96;
     PPanning = 64;
     PAmpVelocityScaleFunction = 90;
+    PwavData = nullptr;
 }
 
 void SampleNoteParameters::InitPresets()

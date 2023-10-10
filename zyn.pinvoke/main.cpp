@@ -15,17 +15,23 @@ __declspec(dllexport) Mixer *CreateMixer();
 __declspec(dllexport) void DestroyMixer(
     Mixer *mixer);
 
-__declspec(dllexport) void EnableChannel(
+__declspec(dllexport) void EnableTrack(
     Mixer *mixer,
-    unsigned char chan);
+    unsigned char trackIndex);
 
-__declspec(dllexport) void DisableChannel(
+__declspec(dllexport) void DisableTrack(
     Mixer *mixer,
-    unsigned char chan);
+    unsigned char trackIndex);
 
-__declspec(dllexport) bool IsChannelEnabled(
+__declspec(dllexport) bool IsTrackEnabled(
     Mixer *mixer,
-    unsigned char chan);
+    unsigned char trackIndex);
+
+__declspec(dllexport) int GetTrackName(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    char *buffer,
+    int bufferSize);
 
 __declspec(dllexport) void AudioOut(
     Mixer *mixer,
@@ -34,81 +40,82 @@ __declspec(dllexport) void AudioOut(
 
 __declspec(dllexport) void LoadPresets(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *xmldata);
 
 __declspec(dllexport) void LoadPresetsFromFile(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *filePath);
 
 __declspec(dllexport) void LoadPresetFromBank(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *library,
     int slot);
 
 __declspec(dllexport) void NoteOn(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char note,
     unsigned char velocity);
 
 __declspec(dllexport) void NoteOff(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char note);
 
 __declspec(dllexport) unsigned char GetPar(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id);
 
 __declspec(dllexport) bool GetParBool(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id);
 
 __declspec(dllexport) float GetParReal(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id);
 
 __declspec(dllexport) void SetPar(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id,
     unsigned char par);
 
 __declspec(dllexport) void SetParBool(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id,
     bool value);
 
 __declspec(dllexport) void SetParReal(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id,
     float value);
 
 __declspec(dllexport) void SetSample(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char instrumentIndex,
-    unsigned char sampleIndex,
     const char *samplePath);
 
 __declspec(dllexport) void SetSampleData(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char instrumentIndex,
-    unsigned char sampleIndex,
     unsigned int channels,
     unsigned int samplesPerChannel,
     const char *sampleData);
 
 __declspec(dllexport) int GetBankCount();
+
+__declspec(dllexport) int GetBankIndex(
+    const char *bankName);
 
 __declspec(dllexport) int GetBankName(
     int bankIndex,
@@ -177,16 +184,17 @@ void DestroyMixer(
     Config::Current().save();
 }
 
-void EnableChannel(
+void EnableTrack(
     Mixer *mixer,
-    unsigned char chan)
+    unsigned char trackIndex)
 {
+    logfile << "EnableTrack " << trackIndex << std::endl;
     if (mixer == nullptr)
     {
         return;
     }
 
-    auto track = mixer->GetTrack(chan);
+    auto track = mixer->GetTrack(trackIndex);
 
     if (track == nullptr)
     {
@@ -195,23 +203,26 @@ void EnableChannel(
 
     if (!track->Penabled)
     {
-        mixer->EnableTrack(chan, true);
+        mixer->EnableTrack(trackIndex, true);
     }
 }
 
-void DisableChannel(
+void DisableTrack(
     Mixer *mixer,
-    unsigned char chan)
+    unsigned char trackIndex)
 {
+    logfile << "DisableTrack " << trackIndex << std::endl;
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr " << trackIndex << std::endl;
         return;
     }
 
-    auto track = mixer->GetTrack(chan);
+    auto track = mixer->GetTrack(trackIndex);
 
     if (track == nullptr)
     {
+        logfile << "track == nullptr " << trackIndex << std::endl;
         return;
     }
 
@@ -219,29 +230,53 @@ void DisableChannel(
     {
         track->Lock();
         track->AllNotesOff();
-        mixer->Unlock();
+        track->Unlock();
 
-        mixer->EnableTrack(chan, false);
+        mixer->EnableTrack(trackIndex, false);
     }
 }
 
-bool IsChannelEnabled(
+bool IsTrackEnabled(
     Mixer *mixer,
-    unsigned char chan)
+    unsigned char trackIndex)
+{
+    logfile << "IsTrackEnabled " << trackIndex << std::endl;
+    if (mixer == nullptr)
+    {
+        logfile << "mixer == nullptr " << trackIndex << std::endl;
+        return false;
+    }
+
+    auto track = mixer->GetTrack(trackIndex);
+
+    if (track == nullptr)
+    {
+        logfile << "track == nullptr " << trackIndex << std::endl;
+        return false;
+    }
+
+    return track->Penabled;
+}
+
+int GetTrackName(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    char *buffer,
+    int bufferSize)
 {
     if (mixer == nullptr)
     {
         return false;
     }
 
-    auto track = mixer->GetTrack(chan);
+    auto track = mixer->GetTrack(trackIndex);
 
     if (track == nullptr)
     {
         return false;
     }
 
-    return track->Penabled;
+    return strcpy_s(buffer, bufferSize, (const char *)track->Pname);
 }
 
 void AudioOut(
@@ -257,65 +292,6 @@ void AudioOut(
     mixer->Lock();
     mixer->AudioOut(outl, outr);
     mixer->Unlock();
-}
-
-void LoadPresetsFromFile(
-    Mixer *mixer,
-    unsigned char chan,
-    const char *filePath)
-{
-    if (mixer == nullptr)
-    {
-        return;
-    }
-
-    auto track = mixer->GetTrack(int(chan));
-
-    if (track == nullptr)
-    {
-        return;
-    }
-
-    track->Lock();
-
-    SaveToFileSerializer().LoadTrack(track, filePath);
-
-    track->Unlock();
-
-    track->ApplyParameters();
-}
-
-void LoadPresets(
-    Mixer *mixer,
-    unsigned char chan,
-    const char *xmldata)
-{
-    logfile << "LoadPresets[" << short(chan) << "]  : " << std::endl;
-
-    if (mixer == nullptr)
-    {
-        return;
-    }
-
-    auto track = mixer->GetTrack(chan);
-
-    if (track == nullptr)
-    {
-        return;
-    }
-
-    if (track->Penabled == false)
-    {
-        mixer->EnableTrack(chan, true);
-    }
-
-    track->Lock();
-
-    SaveToFileSerializer().LoadTrackFromData(track, xmldata);
-
-    track->Unlock();
-
-    track->ApplyParameters();
 }
 
 IBankManager *GetBanks()
@@ -365,20 +341,45 @@ bool SwitchBankAndLoadSlot(
     return false;
 }
 
-void LoadPresetFromBank(
+void LoadPresetsFromFile(
     Mixer *mixer,
-    unsigned char chan,
-    const char *library,
-    int slot)
+    unsigned char trackIndex,
+    const char *filePath)
 {
-    logfile << "LoadPresetFromBank[" << short(chan) << "]  : " << library << ", " << slot << std::endl;
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
+    auto track = mixer->GetTrack(int(trackIndex));
+
+    if (track == nullptr)
+    {
+        return;
+    }
+
+    track->Lock();
+
+    SaveToFileSerializer().LoadTrack(track, filePath);
+
+    track->Unlock();
+
+    track->ApplyParameters();
+}
+
+void LoadPresets(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *xmldata)
+{
+    logfile << "LoadPresets[" << short(trackIndex) << "]  : " << std::endl;
 
     if (mixer == nullptr)
     {
         return;
     }
 
-    auto track = mixer->GetTrack(chan);
+    auto track = mixer->GetTrack(trackIndex);
 
     if (track == nullptr)
     {
@@ -387,7 +388,41 @@ void LoadPresetFromBank(
 
     if (track->Penabled == false)
     {
-        mixer->EnableTrack(chan, true);
+        mixer->EnableTrack(trackIndex, true);
+    }
+
+    track->Lock();
+
+    SaveToFileSerializer().LoadTrackFromData(track, xmldata);
+
+    track->Unlock();
+
+    track->ApplyParameters();
+}
+
+void LoadPresetFromBank(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *library,
+    int slot)
+{
+    logfile << "LoadPresetFromBank[" << short(trackIndex) << "]  : " << library << ", " << slot << std::endl;
+
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
+    auto track = mixer->GetTrack(trackIndex);
+
+    if (track == nullptr)
+    {
+        return;
+    }
+
+    if (track->Penabled == false)
+    {
+        mixer->EnableTrack(trackIndex, true);
     }
 
     if (!SwitchBankAndLoadSlot(library, slot, track))
@@ -398,38 +433,38 @@ void LoadPresetFromBank(
 
 void NoteOn(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char note,
     unsigned char velocity)
 {
-    // logfile << "NoteOn[" << short(chan) << "]  : " << (int)note << std::endl;
+    // logfile << "NoteOn[" << short(trackIndex) << "]  : " << (int)note << std::endl;
 
     if (mixer == nullptr)
     {
         return;
     }
 
-    mixer->NoteOn(chan, note, velocity);
+    mixer->NoteOn(trackIndex, note, velocity);
 }
 
 void NoteOff(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char note)
 {
-    // logfile << "NoteOff[" << short(chan) << "] : " << (int)note << std::endl;
+    // logfile << "NoteOff[" << short(trackIndex) << "] : " << (int)note << std::endl;
 
     if (mixer == nullptr)
     {
         return;
     }
 
-    mixer->NoteOff(chan, note);
+    mixer->NoteOff(trackIndex, note);
 }
 
 unsigned char GetPar(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id)
 {
     if (mixer == nullptr)
@@ -437,7 +472,7 @@ unsigned char GetPar(
         return 0;
     }
 
-    auto par = GetParById(mixer, chan, id);
+    auto par = GetParById(mixer, trackIndex, id);
 
     unsigned char value = '\0';
 
@@ -455,7 +490,7 @@ unsigned char GetPar(
 
 bool GetParBool(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id)
 {
     if (mixer == nullptr)
@@ -463,7 +498,7 @@ bool GetParBool(
         return false;
     }
 
-    auto par = GetParById(mixer, chan, id);
+    auto par = GetParById(mixer, trackIndex, id);
 
     bool value = false;
 
@@ -481,7 +516,7 @@ bool GetParBool(
 
 float GetParReal(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id)
 {
     if (mixer == nullptr)
@@ -489,7 +524,7 @@ float GetParReal(
         return 0.0f;
     }
 
-    auto par = GetParById(mixer, chan, id);
+    auto par = GetParById(mixer, trackIndex, id);
 
     float value = 0.0f;
 
@@ -507,7 +542,7 @@ float GetParReal(
 
 void SetPar(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id,
     unsigned char value)
 {
@@ -516,9 +551,9 @@ void SetPar(
         return;
     }
 
-    logfile << "SetPar[" << short(chan) << "] : " << id << ", " << value << std::endl;
+    logfile << "SetPar[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
 
-    auto par = GetParById(mixer, chan, id);
+    auto par = GetParById(mixer, trackIndex, id);
 
     if (par.setByteIsSet)
     {
@@ -538,7 +573,7 @@ void SetPar(
 
 void SetParBool(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id,
     bool value)
 {
@@ -547,9 +582,9 @@ void SetParBool(
         return;
     }
 
-    logfile << "SetParBool[" << short(chan) << "] : " << id << ", " << value << std::endl;
+    logfile << "SetParBool[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
 
-    auto par = GetParById(mixer, chan, id);
+    auto par = GetParById(mixer, trackIndex, id);
 
     if (par.setBoolIsSet)
     {
@@ -567,7 +602,7 @@ void SetParBool(
 
 void SetParReal(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id,
     float value)
 {
@@ -576,9 +611,9 @@ void SetParReal(
         return;
     }
 
-    logfile << "SetParReal[" << short(chan) << "] : " << id << ", " << value << std::endl;
+    logfile << "SetParReal[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
 
-    auto par = GetParById(mixer, chan, id);
+    auto par = GetParById(mixer, trackIndex, id);
 
     if (par.setFloatIsSet)
     {
@@ -596,12 +631,11 @@ void SetParReal(
 
 void SetSample(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char instrumentIndex,
-    unsigned char sampleIndex,
     const char *samplePath)
 {
-    logfile << "SetSample[" << int(chan) << "," << int(instrumentIndex) << "," << int(sampleIndex) << "] " << samplePath << std::endl;
+    logfile << "SetSample[" << int(trackIndex) << "," << int(instrumentIndex) << "] " << samplePath << std::endl;
 
     if (mixer == nullptr)
     {
@@ -617,7 +651,7 @@ void SetSample(
         return;
     }
 
-    auto track = mixer->GetTrack(chan);
+    auto track = mixer->GetTrack(trackIndex);
 
     if (track == nullptr)
     {
@@ -642,26 +676,24 @@ void SetSample(
         return;
     }
 
-    auto sample = track->Instruments[instrumentIndex].smplpars->PwavData.find(sampleIndex);
-    if (sample != track->Instruments[instrumentIndex].smplpars->PwavData.end())
+    if (track->Instruments[instrumentIndex].smplpars->PwavData != nullptr)
     {
-        delete sample->second;
-        track->Instruments[instrumentIndex].smplpars->PwavData.erase(sample);
+        delete track->Instruments[instrumentIndex].smplpars->PwavData;
+        track->Instruments[instrumentIndex].smplpars->PwavData = nullptr;
     }
 
-    track->Instruments[instrumentIndex].smplpars->PwavData.insert(std::make_pair(sampleIndex, newWavData));
+    track->Instruments[instrumentIndex].smplpars->PwavData = newWavData;
 }
 
 void SetSampleData(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     unsigned char instrumentIndex,
-    unsigned char sampleIndex,
     unsigned int channels,
     unsigned int samplesPerChannel,
     const char *sampleData)
 {
-    logfile << "SetSample[" << int(chan) << "," << int(instrumentIndex) << "," << int(sampleIndex) << "] " << std::endl;
+    logfile << "SetSample[" << int(trackIndex) << "," << int(instrumentIndex) << "] " << std::endl;
 
     if (mixer == nullptr)
     {
@@ -677,7 +709,7 @@ void SetSampleData(
         return;
     }
 
-    auto track = mixer->GetTrack(chan);
+    auto track = mixer->GetTrack(trackIndex);
 
     if (track == nullptr)
     {
@@ -704,14 +736,13 @@ void SetSampleData(
         return;
     }
 
-    auto sample = track->Instruments[instrumentIndex].smplpars->PwavData.find(sampleIndex);
-    if (sample != track->Instruments[instrumentIndex].smplpars->PwavData.end())
+    if (track->Instruments[instrumentIndex].smplpars->PwavData != nullptr)
     {
-        delete sample->second;
-        track->Instruments[instrumentIndex].smplpars->PwavData.erase(sample);
+        delete track->Instruments[instrumentIndex].smplpars->PwavData;
+        track->Instruments[instrumentIndex].smplpars->PwavData = nullptr;
     }
 
-    track->Instruments[instrumentIndex].smplpars->PwavData.insert(std::make_pair(sampleIndex, newWavData));
+    track->Instruments[instrumentIndex].smplpars->PwavData = newWavData;
 }
 
 int GetBankCount()
@@ -722,6 +753,29 @@ int GetBankCount()
 }
 
 const char *emptyBankName = "";
+
+int GetBankIndex(
+    const char *bankName)
+{
+    logfile << "GetBankIndex(" << bankName << ")" << std::endl;
+
+    auto bankNames = GetBanks()->GetBankNames();
+
+    int i = 0;
+    for (auto &bank : bankNames)
+    {
+        if (std::string(bankName) == bank)
+        {
+            return i;
+        }
+
+        logfile << "    not " << i << " = " << bank << std::endl;
+
+        i++;
+    }
+
+    return -1;
+}
 
 int GetBankName(
     int bankIndex,
@@ -820,6 +874,8 @@ int GetInstrumentName(
     banks->LoadBank(bankIndex);
 
     auto name = banks->GetName(instrumentIndex);
+
+    logfile << "    " << name << std::endl;
 
     return strcpy_s(buffer, bufferSize, name.c_str());
 }

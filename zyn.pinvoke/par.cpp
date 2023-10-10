@@ -17,7 +17,7 @@ const char *EFFECTS_ID = "Effects";
 const char *ADDSYNTH_ID = "AddSynth";
 const char *SUBSYNTH_ID = "SubSynth";
 const char *PADSYNTH_ID = "PadSynth";
-const char *SMPLSYNTH_ID = "SmplSynth";
+const char *SMPLSYNTH_ID = "SampleSynth";
 
 sPar sPar::emptyPar = sPar();
 
@@ -78,6 +78,7 @@ bool GetAbstractSynthPar(
     const char *id,
     sPar &par)
 {
+    logfile << "GetAbstractSynthPar" << id << std::endl;
     if (IS_PAR(id, Pvolume))
     {
         par.byteValue = &(params->PVolume);
@@ -383,6 +384,8 @@ struct sPar GetInstrumentPar(
     if (IS_PAR(relativeId, Ppadenabled)) return sPar(track->Instruments[index].Ppadenabled);
     if (IS_PAR(relativeId, Psmplenabled)) return sPar(track->Instruments[index].Psmplenabled);
     if (IS_PAR(relativeId, Psendtoparteffect)) return sPar(track->Instruments[index].Psendtoparteffect);
+    if (IS_PAR(relativeId, Pminkey)) return sPar(track->Instruments[index].Pminkey);
+    if (IS_PAR(relativeId, Pmaxkey)) return sPar(track->Instruments[index].Pmaxkey);
 
     if (IS_PAR(relativeId, AddSynth))
     {
@@ -490,6 +493,9 @@ struct sPar GetTrackPar(
     if (IS_PAR(id, Pmaxkey)) return sPar(track->Pmaxkey);
     if (IS_PAR(id, Pkeyshift)) return sPar(track->Pkeyshift);
     if (IS_PAR(id, Prcvchn)) return sPar(track->Prcvchn);
+    if (IS_PAR(id, Pkitmode)) return sPar(track->Pkitmode);
+    if (IS_PAR(id, Pminkey)) return sPar(track->Pminkey);
+    if (IS_PAR(id, Pmaxkey)) return sPar(track->Pmaxkey);
 
     if (IS_PAR(id, Instruments))
     {
@@ -506,7 +512,7 @@ struct sPar GetTrackPar(
 
 sPar GetParById(
     Mixer *mixer,
-    unsigned char chan,
+    unsigned char trackIndex,
     const char *id)
 {
     logfile << "GetParById : " << id << std::endl;
@@ -523,6 +529,8 @@ sPar GetParById(
         return par;
     }
 
+    if (IS_PAR(id, Pkeyshift)) return sPar(mixer->Pkeyshift);
+
     if (IS_PAR(id, SystemEffects))
     {
         logfile << "SystemEffects : " << id << std::endl;
@@ -537,7 +545,7 @@ sPar GetParById(
         return GetEffectPar(mixer->insefx, id + std::string("InsertEffects").length() + 1);
     }
 
-    auto track = mixer->GetTrack(chan);
+    auto track = mixer->GetTrack(trackIndex);
 
     if (track == nullptr)
     {
@@ -552,6 +560,11 @@ sPar GetParById(
 
         return sPar::emptyPar;
     }
+
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend1)) return sPar(mixer->Psysefxvol[0][trackIndex]);
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend2)) return sPar(mixer->Psysefxvol[1][trackIndex]);
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend3)) return sPar(mixer->Psysefxvol[2][trackIndex]);
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend4)) return sPar(mixer->Psysefxvol[3][trackIndex]);
 
     return GetTrackPar(track, id + trackId.length() + 1); // the +1 is for the dot
 }

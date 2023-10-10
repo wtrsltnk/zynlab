@@ -111,8 +111,8 @@ void Unison::updateParameters()
     float max_speed = powf(2.0f, unison_bandwidth_cents / 1200.0f);
     unison_amplitude_samples = 0.125f * (max_speed - 1.0f) * samplerate_f / base_freq;
 
-    //If functions exceed this limit, they should have requested a bigguer delay
-    //and thus are buggy
+    // If functions exceed this limit, they should have requested a bigguer delay
+    // and thus are buggy
     if (unison_amplitude_samples >= max_delay - 1)
     {
         std::cout << "BUG: Unison amplitude samples too big" << std::endl;
@@ -151,10 +151,10 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf)
         float sign = 1.0f;
         for (int k = 0; k < unison_size; ++k)
         {
-            float vpos = uv[k].realpos1 * (1.0f - xpos) + uv[k].realpos2 * xpos; //optimize
+            float vpos = uv[k].realpos1 * (1.0f - xpos) + uv[k].realpos2 * xpos; // optimize
             float pos = static_cast<float>(delay_k + max_delay) - vpos - 1.0f;
-            int posi;
-            F2I(pos, posi); //optimize!
+            int posi = 0;
+            F2I(pos, posi); // optimize!
             int posi_next = posi + 1;
             if (posi >= max_delay)
                 posi -= max_delay;
@@ -193,11 +193,11 @@ void Unison::updateUnisonData()
             pos = 1.0f;
             step = -step;
         }
-        float vibratto_val = (pos - 0.333333333f * pos * pos * pos) * 1.5f; //make the vibratto lfo smoother
+        float vibratto_val = (pos - 0.333333333f * pos * pos * pos) * 1.5f; // make the vibratto lfo smoother
 
-        //Relative amplitude is utilized, so the delay may be larger than the
-        //whole buffer, if the buffer is too small, this indicates a buggy call
-        //to Unison()
+        // Relative amplitude is utilized, so the delay may be larger than the
+        // whole buffer, if the buffer is too small, this indicates a buggy call
+        // to Unison()
         float newval = 1.0f + 0.5f * (vibratto_val + 1.0f) * unison_amplitude_samples * uv[k].relative_amplitude;
 
         if (first_time)

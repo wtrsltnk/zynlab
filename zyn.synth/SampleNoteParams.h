@@ -24,7 +24,6 @@
 #define SAMPLE_NOTE_PARAMETERS_H
 
 #include "AbstractNoteParameters.h"
-#include <map>
 #include <zyn.common/IPresetsSerializer.h>
 #include <zyn.common/Presets.h>
 #include <zyn.common/WavData.h>
@@ -45,7 +44,7 @@ public:
 
     void Defaults();
 
-    std::map<int, WavData *> PwavData;
+    WavData *PwavData = nullptr;
 };
 
 #endif // SAMPLE_NOTE_PARAMETERS_H
