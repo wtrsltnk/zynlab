@@ -65,6 +65,29 @@ __declspec(dllexport) void NoteOff(
     unsigned char trackIndex,
     unsigned char note);
 
+__declspec(dllexport) float GetFrequencyResponse(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id,
+    float frequency);
+
+__declspec(dllexport) int GetEffect(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id);
+
+__declspec(dllexport) void ChangeEffect(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id,
+    int effectType);
+
+__declspec(dllexport) void ChangeEffectPreset(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id,
+    int presetIndex);
+
 __declspec(dllexport) unsigned char GetPar(
     Mixer *mixer,
     unsigned char trackIndex,
@@ -462,6 +485,89 @@ void NoteOff(
     mixer->NoteOff(trackIndex, note);
 }
 
+float GetFrequencyResponse(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id,
+    float frequency)
+{
+    if (mixer == nullptr)
+    {
+        return 0.0f;
+    }
+
+    auto effect = GetEffectManagerById(mixer,trackIndex,id);
+
+    if (effect != nullptr)
+    {
+        return effect->getEQfreqresponse(frequency);
+    }
+
+    return 1.0f;
+}
+
+int GetEffect(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id)
+{
+    if (mixer == nullptr)
+    {
+        return 0;
+    }
+
+    auto effect = GetEffectManagerById(mixer, trackIndex, id);
+
+    if (effect == nullptr)
+    {
+        return 0;
+    }
+
+    return effect->geteffect();
+}
+
+void ChangeEffect(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id,
+    int effectType)
+{
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
+    auto effect = GetEffectManagerById(mixer, trackIndex, id);
+
+    if (effect == nullptr)
+    {
+        return;
+    }
+
+    effect->changeeffect(effectType);
+}
+
+void ChangeEffectPreset(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id,
+    int presetIndex)
+{
+    if (mixer == nullptr)
+    {
+        return;
+    }
+
+    auto effect = GetEffectManagerById(mixer, trackIndex, id);
+
+    if (effect == nullptr)
+    {
+        return;
+    }
+
+    effect->changepreset(presetIndex);
+}
+
 unsigned char GetPar(
     Mixer *mixer,
     unsigned char trackIndex,
@@ -479,6 +585,10 @@ unsigned char GetPar(
     if (par.byteValue != nullptr)
     {
         return (*par.byteValue);
+    }
+    else if (par.getByteIsSet)
+    {
+        return par.getByte();
     }
     else
     {

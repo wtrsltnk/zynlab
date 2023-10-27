@@ -22,6 +22,9 @@ struct sPar
     bool setByteIsSet = false;
     std::function<void(unsigned char)> setByte;
 
+    bool getByteIsSet = false;
+    std::function<unsigned char()> getByte;
+
     bool setCharIsSet = false;
     std::function<void(char)> setChar;
 
@@ -37,6 +40,11 @@ struct sPar
 sPar GetParById(
     Mixer *mixer,
     unsigned char chan,
+    const char *id);
+
+EffectManager *GetEffectManagerById(
+    Mixer *mixer,
+    unsigned char trackIndex,
     const char *id);
 
 #endif // PAR_H

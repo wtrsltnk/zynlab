@@ -49,6 +49,9 @@ struct sPar GetEnvelopePar(
     if (IS_PAR(id, PSustainValue)) return sPar(params->PS_val);
     if (IS_PAR(id, PReleaseTime)) return sPar(params->PR_dt);
     if (IS_PAR(id, PReleaseValue)) return sPar(params->PR_val);
+    if (IS_PAR(id, Pforcedrelease)) return sPar(params->Pforcedrelease);
+    if (IS_PAR(id, Plinearenvelope)) return sPar(params->Plinearenvelope);
+    if (IS_PAR(id, PStretch)) return sPar(params->Penvstretch);
 
     return sPar::emptyPar;
 }
@@ -144,7 +147,7 @@ bool GetAbstractSynthPar(
 
     if (IS_PAR(id, FrequencyEnvelope))
     {
-        par = GetEnvelopePar(params->FreqEnvelope, id);
+        par = GetEnvelopePar(params->FreqEnvelope, id + std::string("FrequencyEnvelope").length() + 1);
 
         return true;
     }
@@ -158,7 +161,7 @@ bool GetAbstractSynthPar(
 
     if (IS_PAR(id, FrequencyLfo))
     {
-        par = GetLfoParametersPar(params->FreqLfo, id);
+        par = GetLfoParametersPar(params->FreqLfo, id + std::string("FrequencyLfo").length() + 1);
 
         return true;
     }
@@ -179,14 +182,14 @@ bool GetAbstractSynthPar(
 
     if (IS_PAR(id, AmpEnvelope))
     {
-        par = GetEnvelopePar(params->AmpEnvelope, id);
+        par = GetEnvelopePar(params->AmpEnvelope, id + std::string("AmpEnvelope").length() + 1);
 
         return true;
     }
 
     if (IS_PAR(id, GlobalFilter))
     {
-        par = GetFilterPar(params->GlobalFilter, id);
+        par = GetFilterPar(params->GlobalFilter, id + std::string("GlobalFilter").length() + 1);
 
         return true;
     }
@@ -207,7 +210,7 @@ bool GetAbstractSynthPar(
 
     if (IS_PAR(id, FilterEnvelope))
     {
-        par = GetEnvelopePar(params->FilterEnvelope, id);
+        par = GetEnvelopePar(params->FilterEnvelope, id + std::string("FilterEnvelope").length() + 1);
 
         return true;
     }
@@ -230,12 +233,12 @@ struct sPar GetAddSynthPar(
     if (IS_PAR(id, PPunchTime)) return sPar(params->PPunchTime);
     if (IS_PAR(id, PPunchStretch)) return sPar(params->PPunchStretch);
     if (IS_PAR(id, PPunchVelocitySensing)) return sPar(params->PPunchVelocitySensing);
-    if (IS_PAR(id, AmpLfo)) return GetLfoParametersPar(params->AmpLfo, id);
-    if (IS_PAR(id, AmpEnvelope)) return GetEnvelopePar(params->AmpEnvelope, id);
-    if (IS_PAR(id, FilterLfo)) return GetLfoParametersPar(params->FilterLfo, id);
-    if (IS_PAR(id, FilterEnvelope)) return GetEnvelopePar(params->FilterEnvelope, id);
-    if (IS_PAR(id, FreqLfo)) return GetLfoParametersPar(params->FreqLfo, id);
-    if (IS_PAR(id, FreqEnvelope)) return GetEnvelopePar(params->FreqEnvelope, id);
+    if (IS_PAR(id, AmpLfo)) return GetLfoParametersPar(params->AmpLfo, id + std::string("AmpLfo").length() + 1);
+    if (IS_PAR(id, AmpEnvelope)) return GetEnvelopePar(params->AmpEnvelope, id + std::string("AmpEnvelope").length() + 1);
+    if (IS_PAR(id, FilterLfo)) return GetLfoParametersPar(params->FilterLfo, id + std::string("FilterLfo").length() + 1);
+    if (IS_PAR(id, FilterEnvelope)) return GetEnvelopePar(params->FilterEnvelope, id + std::string("FilterEnvelope").length() + 1);
+    if (IS_PAR(id, FreqLfo)) return GetLfoParametersPar(params->FreqLfo, id + std::string("FreqLfo").length() + 1);
+    if (IS_PAR(id, FreqEnvelope)) return GetEnvelopePar(params->FreqEnvelope, id + std::string("FreqEnvelope").length() + 1);
 
     if (IS_PAR(id, Voices))
     {
@@ -256,7 +259,7 @@ struct sPar GetSubSynthPar(
     }
 
     if (IS_PAR(id, PBandWidthEnvelopeEnabled)) return sPar(params->PBandWidthEnvelopeEnabled);
-    if (IS_PAR(id, BandWidthEnvelope)) return GetEnvelopePar(params->BandWidthEnvelope, id);
+    if (IS_PAR(id, BandWidthEnvelope)) return GetEnvelopePar(params->BandWidthEnvelope, id + std::string("BandWidthEnvelope").length() + 1);
     if (IS_PAR(id, PGlobalFilterEnabled)) return sPar(params->PGlobalFilterEnabled);
     if (IS_PAR(id, POvertoneSpread.type)) return sPar(params->POvertoneSpread.type);
     if (IS_PAR(id, POvertoneSpread.par1)) return sPar(params->POvertoneSpread.par1);
@@ -341,6 +344,10 @@ struct sPar GetPadSynthPar(
         return par;
     }
 
+    if (IS_PAR(id, AmpLfo)) return GetLfoParametersPar(params->AmpLfo, id + std::string("AmpLfo").length() + 1);
+    if (IS_PAR(id, FilterLfo)) return GetLfoParametersPar(params->FilterLfo, id + std::string("FilterLfo").length() + 1);
+    if (IS_PAR(id, FreqLfo)) return GetLfoParametersPar(params->FreqLfo, id + std::string("FreqLfo").length() + 1);
+
     return sPar::emptyPar;
 }
 
@@ -412,6 +419,7 @@ struct sPar GetInstrumentPar(
 
 struct sPar GetEffectPar(
     EffectManager partefx[],
+    int maxEffects,
     const char *id)
 {
     logfile << "GetEffectPar() : " << id << std::endl;
@@ -426,12 +434,10 @@ struct sPar GetEffectPar(
 
     auto effectIndex = std::atoi(m[2].str().c_str());
 
-    if (effectIndex < 0 || effectIndex >= NUM_TRACK_EFX)
+    if (effectIndex < 0 || effectIndex >= maxEffects)
     {
         return sPar::emptyPar;
     }
-
-    EffectManager &effect = partefx[effectIndex];
 
     auto relativeId = id + m[1].str().size();
 
@@ -453,7 +459,12 @@ struct sPar GetEffectPar(
 
     par.setByteIsSet = true;
     par.setByte = [partefx, effectIndex, parameterIndex](unsigned char value) {
+        logfile << "seteffectpar(" << parameterIndex << ", " << value << ")" << std::endl;
         partefx[effectIndex].seteffectpar(parameterIndex, value);
+    };
+    par.getByteIsSet = true;
+    par.getByte = [partefx, effectIndex, parameterIndex]() -> unsigned char {
+        return partefx[effectIndex].geteffectpar(parameterIndex);
     };
 
     return par;
@@ -487,6 +498,18 @@ struct sPar GetTrackPar(
         return par;
     }
 
+    if (IS_PAR(id, Pkeylimit))
+    {
+        sPar par(track->Pkeylimit);
+
+        par.setByteIsSet = true;
+        par.setByte = [track](unsigned char value) {
+            track->setkeylimit(value);
+        };
+
+        return par;
+    }
+
     if (IS_PAR(id, Pvelsns)) return sPar(track->Pvelsns);
     if (IS_PAR(id, Pveloffs)) return sPar(track->Pveloffs);
     if (IS_PAR(id, Pminkey)) return sPar(track->Pminkey);
@@ -504,7 +527,7 @@ struct sPar GetTrackPar(
 
     if (IS_PAR(id, Effects))
     {
-        return GetEffectPar(track->partefx, id + std::string(EFFECTS_ID).length());
+        return GetEffectPar(track->partefx, NUM_TRACK_EFX, id + std::string(EFFECTS_ID).length());
     }
 
     return sPar::emptyPar;
@@ -533,16 +556,12 @@ sPar GetParById(
 
     if (IS_PAR(id, SystemEffects))
     {
-        logfile << "SystemEffects : " << id << std::endl;
-
-        return GetEffectPar(mixer->sysefx, id + std::string("SystemEffects").length() + 1);
+        return GetEffectPar(mixer->sysefx, NUM_SYS_EFX, id + std::string("SystemEffects").length());
     }
 
     if (IS_PAR(id, InsertEffects))
     {
-        logfile << "InsertEffects : " << id << std::endl;
-
-        return GetEffectPar(mixer->insefx, id + std::string("InsertEffects").length() + 1);
+        return GetEffectPar(mixer->insefx, NUM_INS_EFX, id + std::string("InsertEffects").length());
     }
 
     auto track = mixer->GetTrack(trackIndex);
@@ -561,10 +580,105 @@ sPar GetParById(
         return sPar::emptyPar;
     }
 
-    if (IS_PAR(id + trackId.length() + 1, Pfxsend1)) return sPar(mixer->Psysefxvol[0][trackIndex]);
-    if (IS_PAR(id + trackId.length() + 1, Pfxsend2)) return sPar(mixer->Psysefxvol[1][trackIndex]);
-    if (IS_PAR(id + trackId.length() + 1, Pfxsend3)) return sPar(mixer->Psysefxvol[2][trackIndex]);
-    if (IS_PAR(id + trackId.length() + 1, Pfxsend4)) return sPar(mixer->Psysefxvol[3][trackIndex]);
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend1))
+    {
+        sPar par(mixer->Psysefxvol[0][trackIndex]);
+
+        par.setByteIsSet = true;
+        par.setByte = [mixer, trackIndex](unsigned char value) {
+            mixer->SetSystemEffectVolume(trackIndex, 0, value);
+        };
+
+        return par;
+    }
+
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend2))
+    {
+        sPar par(mixer->Psysefxvol[1][trackIndex]);
+
+        par.setByteIsSet = true;
+        par.setByte = [mixer, trackIndex](unsigned char value) {
+            mixer->SetSystemEffectVolume(trackIndex, 1, value);
+        };
+
+    }
+
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend3))
+    {
+        sPar par(mixer->Psysefxvol[2][trackIndex]);
+
+        par.setByteIsSet = true;
+        par.setByte = [mixer, trackIndex](unsigned char value) {
+            mixer->SetSystemEffectVolume(trackIndex, 2, value);
+        };
+
+    }
+
+    if (IS_PAR(id + trackId.length() + 1, Pfxsend4))
+    {
+        sPar par(mixer->Psysefxvol[3][trackIndex]);
+
+        par.setByteIsSet = true;
+        par.setByte = [mixer, trackIndex](unsigned char value) {
+            mixer->SetSystemEffectVolume(trackIndex, 3, value);
+        };
+
+    }
 
     return GetTrackPar(track, id + trackId.length() + 1); // the +1 is for the dot
+}
+
+EffectManager *GetEffectManagerById(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    const char *id)
+{
+    std::cmatch m;
+    std::regex_search(id, m, std::regex("(\\[([0-9]+)\\])$"));
+
+    if (m.empty())
+    {
+        return nullptr;
+    }
+
+    auto effectIndex = std::atoi(m[2].str().c_str());
+
+    if (IS_PAR(id, SystemEffects))
+    {
+        if (effectIndex < 0 || effectIndex >= NUM_SYS_EFX)
+        {
+            return nullptr;
+        }
+
+        return &mixer->sysefx[effectIndex];
+    }
+
+    if (IS_PAR(id, InsertEffects))
+    {
+        if (effectIndex < 0 || effectIndex >= NUM_INS_EFX)
+        {
+            return nullptr;
+        }
+
+        return &mixer->insefx[effectIndex];
+    }
+
+    if (IS_PAR(id, Track.Effects))
+    {
+        if (effectIndex < 0 || effectIndex >= NUM_TRACK_EFX)
+        {
+            return nullptr;
+        }
+
+        auto track = mixer->GetTrack(trackIndex);
+
+        if (track == nullptr)
+        {
+            return nullptr;
+        }
+
+        return &track->partefx[effectIndex];
+    }
+
+    return nullptr;
 }
