@@ -129,7 +129,7 @@ bool Application::Setup()
     static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
     _fkFont = io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
 
-    _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\SourceCodePro-Bold.ttf", 14.0f);
+    _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\consola.ttf", 14.0f);
 
     io.Fonts->Build();
 
@@ -439,7 +439,7 @@ void Application::Render2d()
 
 void Application::Cleanup()
 {
-    //ensure that everything has stopped with the mutex wait
+    // ensure that everything has stopped with the mutex wait
     _mixer->Lock();
     _mixer->Unlock();
 
