@@ -79,7 +79,7 @@ ILibrary *LibraryManager::scanLocation(
 
     auto banks = DirectoryGetDirectories(location, "*");
 
-    for (auto bank : banks)
+    for (auto &bank : banks)
     {
         auto bankDir = PathCombine(location, bank);
         auto res = scanLocation(PathCombine(location, bank), lib);
@@ -122,7 +122,7 @@ void LibraryManager::RefreshLibraries()
 {
     Cleanup();
 
-    for (auto location : _libraryLocations)
+    for (auto &location : _libraryLocations)
     {
         auto lib = scanLocation(location, nullptr);
 

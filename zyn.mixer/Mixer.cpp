@@ -238,15 +238,15 @@ void Mixer::SetController(
     int par)
 {
     if ((type == C_dataentryhi) || (type == C_dataentrylo) || (type == C_nrpnhi) || (type == C_nrpnlo))
-    { //Process RPN and NRPN by the Master (ignore the chan)
+    { // Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(static_cast<unsigned int>(type), par);
 
         int parhi = -1, parlo = -1, valhi = -1, vallo = -1;
-        if (ctl.getnrpn(&parhi, &parlo, &valhi, &vallo) == 0) //this is NRPN
-        {                                                     //fprintf(stderr,"rcv. NRPN: %d %d %d %d\n",parhi,parlo,valhi,vallo);
+        if (ctl.getnrpn(&parhi, &parlo, &valhi, &vallo) == 0) // this is NRPN
+        {                                                     // fprintf(stderr,"rcv. NRPN: %d %d %d %d\n",parhi,parlo,valhi,vallo);
             switch (parhi)
             {
-                case 0x04: //System Effects
+                case 0x04: // System Effects
                 {
                     if (parlo < NUM_SYS_EFX)
                     {
@@ -254,7 +254,7 @@ void Mixer::SetController(
                     }
                     break;
                 }
-                case 0x08: //Insertion Effects
+                case 0x08: // Insertion Effects
                 {
                     if (parlo < NUM_INS_EFX)
                     {
@@ -271,8 +271,8 @@ void Mixer::SetController(
         // _bankManager->LoadBank(par);
     }
     else
-    {                               //other controllers
-        for (auto &track : _tracks) //Send the controller to all part assigned to the track
+    {                               // other controllers
+        for (auto &track : _tracks) // Send the controller to all part assigned to the track
         {
             if ((chan == track.Prcvchn) && (track.Penabled != 0))
             {
@@ -281,7 +281,7 @@ void Mixer::SetController(
         }
 
         if (type == C_allsoundsoff)
-        { //cleanup insertion/system FX
+        { // cleanup insertion/system FX
             for (auto &nefx : sysefx)
             {
                 nefx.cleanup();
@@ -312,9 +312,9 @@ void Mixer::SetProgram(
             // TODO reinstate this MIDI command
             // _bankManager->LoadFromSlot(pgm, &npart);
 
-            //Hack to get pad note parameters to update
-            //this is not real time safe and makes assumptions about the calling
-            //convention of this function...
+            // Hack to get pad note parameters to update
+            // this is not real time safe and makes assumptions about the calling
+            // convention of this function...
             Unlock();
             npart.ApplyParameters();
             Lock();
@@ -346,13 +346,7 @@ void Mixer::PreviewNote(
         return;
     }
 
-    InstrumentPreview n;
-    n.playUntil = currentTime + noteLength;
-    n.note = note;
-    n.channel = channel;
-    n.done = false;
-
-    _instrumentsPreview.push_back(n);
+    _instrumentsPreview.emplace_back(currentTime + noteLength, channel, note, false);
 }
 
 INoteSource *Mixer::GetNoteSource() const
@@ -378,7 +372,7 @@ void Mixer::EnableTrack(
     meter.SetFakePeak(track, 0);
 
     if (enable != 0)
-    { //enabled
+    { // enabled
         _tracks[track].Penabled = 1;
         return;
     }
@@ -472,26 +466,26 @@ void Mixer::AudioOut(
         }
     }
 
-    //Swaps the Left channel with Right Channel
+    // Swaps the Left channel with Right Channel
     if (SystemSettings::Instance().swaplr)
     {
         swap(outl, outr);
     }
 
-    //clean up the output samples (should not be needed?)
+    // clean up the output samples (should not be needed?)
     memset(outl, 0, this->BufferSizeInBytes());
     memset(outr, 0, this->BufferSizeInBytes());
 
-    //Compute part samples and store them _tracks[trackIndex].partoutl,partoutr
+    // Compute part samples and store them _tracks[trackIndex].partoutl,partoutr
     for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
     {
-        //skip if the part is disabled
+        // skip if the part is disabled
         if (_tracks[trackIndex].Penabled == 0)
         {
             continue;
         }
 
-        //skip if the part is not the solo track
+        // skip if the part is not the solo track
         if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
         {
             continue;
@@ -500,7 +494,7 @@ void Mixer::AudioOut(
         _tracks[trackIndex].ComputeInstrumentSamples();
     }
 
-    //Insertion effects
+    // Insertion effects
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
         int trackIndex = Pinsparts[nefx];
@@ -509,13 +503,13 @@ void Mixer::AudioOut(
             continue;
         }
 
-        //skip if the part is disabled
+        // skip if the part is disabled
         if (_tracks[trackIndex].Penabled == 0)
         {
             continue;
         }
 
-        //skip if the part is not the solo track
+        // skip if the part is not the solo track
         if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
         {
             continue;
@@ -524,7 +518,7 @@ void Mixer::AudioOut(
         insefx[nefx].out(_tracks[trackIndex].partoutl, _tracks[trackIndex].partoutr);
     }
 
-    //Apply the part volumes and pannings (after insertion effects)
+    // Apply the part volumes and pannings (after insertion effects)
     for (auto &track : _tracks)
     {
         if (track.Penabled == 0)
@@ -545,7 +539,7 @@ void Mixer::AudioOut(
             newvol._right *= (1.0f - pan) * 2.0f;
         }
 
-        //the volume or the panning has changed and needs interpolation
+        // the volume or the panning has changed and needs interpolation
         if (ABOVE_AMPLITUDE_THRESHOLD(oldvol._left, newvol._left) || ABOVE_AMPLITUDE_THRESHOLD(oldvol._right, newvol._right))
         {
             for (unsigned int i = 0; i < this->BufferSize(); ++i)
@@ -561,47 +555,47 @@ void Mixer::AudioOut(
         else
         {
             for (unsigned int i = 0; i < this->BufferSize(); ++i)
-            { //the volume did not changed
+            { // the volume did not changed
                 track.partoutl[i] *= newvol._left;
                 track.partoutr[i] *= newvol._right;
             }
         }
     }
 
-    //System effects
+    // System effects
     for (int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
     {
         if (sysefx[nefx].geteffect() == 0)
         {
-            continue; //the effect is disabled
+            continue; // the effect is disabled
         }
 
-        //Clean up the samples used by the system effects
+        // Clean up the samples used by the system effects
         memset(_tmpmixl.get(), 0, this->BufferSizeInBytes());
         memset(_tmpmixr.get(), 0, this->BufferSizeInBytes());
 
-        //Mix the tracks according to the track settings about System Effect
+        // Mix the tracks according to the track settings about System Effect
         for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
         {
-            //skip if the part has no output to effect
+            // skip if the part has no output to effect
             if (Psysefxvol[nefx][trackIndex] == 0)
             {
                 continue;
             }
 
-            //skip if the part is disabled
+            // skip if the part is disabled
             if (_tracks[trackIndex].Penabled == 0)
             {
                 continue;
             }
 
-            //skip if the part is not the solo track
+            // skip if the part is not the solo track
             if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
             {
                 continue;
             }
 
-            //the output volume of each part to system effect
+            // the output volume of each part to system effect
             const float vol = _sysefxvol[nefx][trackIndex];
             for (unsigned int i = 0; i < this->BufferSize(); ++i)
             {
@@ -626,7 +620,7 @@ void Mixer::AudioOut(
 
         sysefx[nefx].out(_tmpmixl.get(), _tmpmixr.get());
 
-        //Add the System Effect to sound output
+        // Add the System Effect to sound output
         const float outvol = sysefx[nefx].sysefxgetvolume();
         for (unsigned int i = 0; i < this->BufferSize(); ++i)
         {
@@ -635,23 +629,23 @@ void Mixer::AudioOut(
         }
     }
 
-    //Mix all parts
+    // Mix all parts
     for (int trackIndex = 0; trackIndex < NUM_MIXER_TRACKS; ++trackIndex)
     {
-        //skip if the part is disabled
+        // skip if the part is disabled
         if (_tracks[trackIndex].Penabled == 0)
         {
             continue;
         }
 
-        //skip if the part is not the solo track
+        // skip if the part is not the solo track
         if (Psolotrack != DISABLED_MIXER_SOLO && Psolotrack != trackIndex)
         {
             continue;
         }
 
         for (unsigned int i = 0; i < this->BufferSize(); ++i)
-        { //the volume did not changed
+        { // the volume did not changed
             outl[i] += _tracks[trackIndex].partoutl[i];
             outr[i] += _tracks[trackIndex].partoutr[i];
         }
@@ -659,7 +653,7 @@ void Mixer::AudioOut(
 
     _samplePreview.noteout(outl, outr);
 
-    //Insertion effects for Master Out
+    // Insertion effects for Master Out
     for (int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
     {
         if (Pinsparts[nefx] == -2)
@@ -668,7 +662,7 @@ void Mixer::AudioOut(
         }
     }
 
-    //Master Volume
+    // Master Volume
     for (unsigned int i = 0; i < this->BufferSize(); ++i)
     {
         outl[i] *= _volume;
@@ -677,7 +671,7 @@ void Mixer::AudioOut(
 
     meter.Tick(outl, outr, _tracks, _volume);
 
-    //Shutup if it is asked (with fade-out)
+    // Shutup if it is asked (with fade-out)
     if (shutup)
     {
         for (unsigned int i = 0; i < this->BufferSize(); ++i)
@@ -689,7 +683,7 @@ void Mixer::AudioOut(
         ShutUp();
     }
 
-    //update the LFO's time
+    // update the LFO's time
     LFOParams::time++;
 }
 
@@ -721,7 +715,7 @@ void Mixer::EnableTrack(
     meter.SetFakePeak(index, 0);
 
     if (enabled)
-    { //enabled
+    { // enabled
         _tracks[index].Penabled = 1;
         return;
     }

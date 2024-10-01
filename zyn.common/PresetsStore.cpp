@@ -49,7 +49,7 @@ PresetsStore::~PresetsStore()
     ClearPresets();
 }
 
-//Clipboard management
+// Clipboard management
 
 void PresetsStore::CopyClipboard(IPresetsSerializer *xml, char const *type)
 {
@@ -74,7 +74,7 @@ bool PresetsStore::PasteClipboard(IPresetsSerializer *xml)
 
 bool PresetsStore::CheckClipboardType(const char *type)
 {
-    //makes LFO's compatible
+    // makes LFO's compatible
     if ((strstr(type, "Plfo") != nullptr) && (strstr(clipboard.type, "Plfo") != nullptr))
     {
         return true;
@@ -83,13 +83,13 @@ bool PresetsStore::CheckClipboardType(const char *type)
     return strcmp(type, clipboard.type) == 0;
 }
 
-//Presets management
+// Presets management
 void PresetsStore::ClearPresets()
 {
     presets.clear();
 }
 
-//a helper function that compares 2 presets[]
+// a helper function that compares 2 presets[]
 bool PresetsStore::presetstruct::operator<(const presetstruct &b) const
 {
     return name < b.name;
@@ -123,52 +123,52 @@ void PresetsStore::RescaneForPresets(const string &type)
 
             auto name = p.path().stem().string();
 
-            presets.push_back(presetstruct(p.path().string(), name));
+            presets.emplace_back(p.path().string(), name);
         }
 
-//        //open directory
-//        string dirname = i;
-//        DIR *dir = opendir(dirname.c_str());
-//        if (dir == nullptr)
-//        {
-//            continue;
-//        }
-//        struct dirent *fn;
+        //        //open directory
+        //        string dirname = i;
+        //        DIR *dir = opendir(dirname.c_str());
+        //        if (dir == nullptr)
+        //        {
+        //            continue;
+        //        }
+        //        struct dirent *fn;
 
-//        //check all files in directory
-//        while ((fn = readdir(dir)))
-//        {
-//            string filename = fn->d_name;
-//            if (filename.find(ftype) == string::npos)
-//            {
-//                continue;
-//            }
+        //        //check all files in directory
+        //        while ((fn = readdir(dir)))
+        //        {
+        //            string filename = fn->d_name;
+        //            if (filename.find(ftype) == string::npos)
+        //            {
+        //                continue;
+        //            }
 
-//            //ensure proper path is formed
-//            char tmpc = dirname[dirname.size() - 1];
-//            const char *tmps;
-//            if ((tmpc == '/') || (tmpc == '\\'))
-//            {
-//                tmps = "";
-//            }
-//            else
-//            {
-//                tmps = "/";
-//            }
+        //            //ensure proper path is formed
+        //            char tmpc = dirname[dirname.size() - 1];
+        //            const char *tmps;
+        //            if ((tmpc == '/') || (tmpc == '\\'))
+        //            {
+        //                tmps = "";
+        //            }
+        //            else
+        //            {
+        //                tmps = "/";
+        //            }
 
-//            string location = "" + dirname + tmps + filename;
+        //            string location = "" + dirname + tmps + filename;
 
-//            //trim file type off of name
-//            string name = filename.substr(0, filename.find(ftype));
+        //            //trim file type off of name
+        //            string name = filename.substr(0, filename.find(ftype));
 
-//            //put on list
-//            presets.push_back(presetstruct(location, name));
-//        }
+        //            //put on list
+        //            presets.emplace_back(location, name);
+        //        }
 
-//        closedir(dir);
+        //        closedir(dir);
     }
 
-    //sort the presets
+    // sort the presets
     sort(presets.begin(), presets.end());
 }
 
@@ -179,10 +179,10 @@ void PresetsStore::CopyPreset(IPresetsSerializer *xml, char const *type, string 
         return;
     }
 
-    //make the filenames legal
+    // make the filenames legal
     name = legalizeFilename(name);
 
-    //make path legal
+    // make path legal
     const string dirname = Config::Current().cfg.presetsDirList[0];
     char tmpc = dirname[dirname.size() - 1];
     const char *tmps;

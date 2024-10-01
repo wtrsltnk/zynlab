@@ -3,7 +3,6 @@
 #include <cmath>
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <iostream>
 #include <zyn.mixer/Track.h>
 
 char const *MixerEditor::ID = "MixerEditor";

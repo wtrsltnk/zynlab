@@ -162,20 +162,26 @@ void Stepper::PlayPause()
     }
 }
 
-std::vector<Note> Sequencer::GetNote(unsigned char trackIndex, int patternIndex, int stepIndex)
+std::vector<Note> Sequencer::GetNote(
+    unsigned char trackIndex,
+    int patternIndex,
+    int stepIndex)
 {
+    auto track = tracksOfPatterns[trackIndex];
+
+    if (track.find(patternIndex) == track.end())
+    {
+        return {};
+    }
+
     std::vector<Note> result;
 
-    auto track = tracksOfPatterns[trackIndex];
-    if (track.find(patternIndex) != track.end())
+    auto pattern = track[patternIndex];
+    for (auto note : pattern._notes)
     {
-        auto pattern = track[patternIndex];
-        for (auto note : pattern._notes)
+        if (note._step == stepIndex)
         {
-            if (note._step == stepIndex)
-            {
-                result.push_back(Note(note._note, 200, 0.2f));
-            }
+            result.emplace_back(note._note, 200, 0.2f);
         }
     }
 

@@ -2,10 +2,10 @@
 
 #include "stb_image.h"
 #include <algorithm>
-#include <cmath>
-#include <cstdlib>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <cmath>
+#include <cstdlib>
 #include <imgui_Timeline.h>
 #include <imgui_checkbutton.h>
 #include <imgui_knob.h>
@@ -274,12 +274,7 @@ void AppThreeDee::TempNoteOn(
         }
     }
 
-    tempnote n;
-    n.playUntil = _lastSequencerTimeInMs + length;
-    n.note = note;
-    n.channel = channel;
-    n.done = false;
-    _state._tempnotes.push_back(n);
+    _state._tempnotes.emplace_back(_lastSequencerTimeInMs + length, channel, note, false);
 }
 
 void AppThreeDee::Tick()
@@ -438,16 +433,13 @@ void AppThreeDee::PianoRollEditor()
                     if (ImGui::TimelineEnd(new_values))
                     {
                         regionIsModified = true;
-                        TrackRegionEvent e{
-                            {
-                                std::min(new_values[0], new_values[1]),
-                                std::max(new_values[0], new_values[1]),
-                            },
-                            static_cast<unsigned char>(c),
-                            100,
-                        };
 
-                        region.eventsByNote[c].push_back(e);
+                        region.eventsByNote[c].emplace_back(
+                            std::min(new_values[0], new_values[1]),
+                            std::max(new_values[0], new_values[1]),
+                            static_cast<unsigned char>(c),
+                            100);
+
                         selectedEvent = &(region.eventsByNote[c].back());
                         _baseNote = c;
                     }
@@ -1187,7 +1179,7 @@ void AppThreeDee::Piano()
     ImGui::PopStyleVar();
     ImGui::PopStyleColor(2);
 
-    //black keys
+    // black keys
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.1f, 0.0f, 0.5f, 0.5f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f, 0.5f));
     ImVec2 note1 = ImVec2(35, 30);
@@ -1286,7 +1278,7 @@ void AppThreeDee::Render()
     ImGui::NewFrame();
     ImGuiIO &io = ImGui::GetIO();
 
-    //Piano();
+    // Piano();
 
     ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);

@@ -38,7 +38,7 @@ void Presets::copy(const char *name)
 {
     PresetsSerializer xml;
 
-    //used only for the clipboard
+    // used only for the clipboard
     if (name == nullptr)
     {
         xml.minimal = false;
@@ -225,74 +225,74 @@ void Preset::set(float v) { *valueReference.float_v = v; }
 
 Preset &Preset::AddPreset(Preset const &preset)
 {
-    _presets.push_back(Preset(preset));
+    _presets.emplace_back(preset);
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, char *value, int max)
 {
-    _presets.push_back(Preset(name, value, max));
+    _presets.emplace_back(name, value, max);
     return *this;
 }
 Preset &Preset::AddPresetAsString(std::string const &name, unsigned char *value, int max)
 {
-    _presets.push_back(Preset(name, (char *)value, max));
+    _presets.emplace_back(name, (char *)value, max);
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, unsigned char *value, unsigned char min, unsigned char max)
 {
-    _presets.push_back(Preset(name, value, min, max));
+    _presets.emplace_back(name, value, min, max);
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, unsigned short int *value, unsigned short int min, unsigned short int max)
 {
-    _presets.push_back(Preset(name, value, min, max));
+    _presets.emplace_back(name, value, min, max);
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, unsigned int *value, unsigned int min, unsigned int max)
 {
-    _presets.push_back(Preset(name, value, min, max));
+    _presets.emplace_back(name, value, min, max);
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, int *value, int min, int max)
 {
-    _presets.push_back(Preset(name, value, min, max));
+    _presets.emplace_back(name, value, min, max);
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, short int *value, short int min, short int max)
 {
-    _presets.push_back(Preset(name, value, min, max));
+    _presets.emplace_back(name, value, min, max);
     return *this;
 }
 Preset &Preset::AddPreset(std::string const &name, float *value, float min, float max)
 {
-    _presets.push_back(Preset(name, value, min, max));
+    _presets.emplace_back(name, value, min, max);
     return *this;
 }
 Preset &Preset::AddPresetAsBool(std::string const &name, unsigned char *value)
 {
-    _presets.push_back(Preset(name, value, 0, 1));
+    _presets.emplace_back(name, value, 0, 1);
     return *this;
 }
 Preset &Preset::AddContainer(Preset const &container)
 {
-    _presets.push_back(Preset(container));
+    _presets.emplace_back(container);
     return *this;
 }
 Preset &Preset::AddContainer(int index, Preset const &container)
 {
-    _presets.push_back(Preset(container));
+    _presets.emplace_back(container);
     _presets.back().Id(index);
     return *this;
 }
 Preset &Preset::AddContainer(std::string const &name, int index, Preset const &container)
 {
-    _presets.push_back(Preset(name, container));
+    _presets.emplace_back(name, container);
     _presets.back().Id(index);
     return *this;
 }
 Preset &Preset::AddContainer(std::string const &name, Preset const &container)
 {
-    _presets.push_back(Preset(name, container));
+    _presets.emplace_back(name, container);
     return *this;
 }
 

@@ -742,10 +742,13 @@ void EffectEQEditor(
     int lx = 200;
     int ly = 50;
     std::vector<float> values;
+    values.reserve(lx);
+
     for (int i = 0; i < lx; i++)
     {
         values.push_back(getEQPlotValue(effectManager, i, lx, ly));
     }
+
     ImGui::PlotLines("EQ", &(values[0]), static_cast<int>(values.size()), 0, nullptr, 0, ly, ImVec2(lx, ly));
 
     if (ImGui::BeginTabBar("EQ bands"))

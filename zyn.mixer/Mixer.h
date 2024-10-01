@@ -61,6 +61,19 @@ typedef std::chrono::milliseconds::rep timestep;
 class InstrumentPreview
 {
 public:
+    InstrumentPreview() = default;
+    InstrumentPreview(
+        timestep pu,
+        unsigned int c,
+        unsigned int n,
+        bool d)
+    {
+        playUntil = pu;
+        channel = c;
+        note = n;
+        done = d;
+    }
+
     timestep playUntil;
     unsigned int channel;
     unsigned int note;
@@ -102,7 +115,7 @@ public:
 
     virtual std::mutex &Mutex();
 
-    //Midi IN
+    // Midi IN
     virtual void NoteOn(
         unsigned char chan,
         unsigned char note,
@@ -157,7 +170,7 @@ public:
         int index,
         bool enabled);
 
-    //parameters control
+    // parameters control
     virtual unsigned char GetVolume() const;
 
     virtual void SetVolume(
@@ -218,17 +231,17 @@ public:
     void PreviewSample(
         std::string const &filename);
 
-    //parameters
+    // parameters
     unsigned char Pvolume = 0;
     unsigned char Pkeyshift = 0;
     unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIXER_TRACKS];
     unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
     short int Psolotrack = 0;
 
-    EffectManager sysefx[NUM_SYS_EFX]; //system
-    EffectManager insefx[NUM_INS_EFX]; //insertion
+    EffectManager sysefx[NUM_SYS_EFX]; // system
+    EffectManager insefx[NUM_INS_EFX]; // insertion
 
-    //part that's apply the insertion effect; -1 to disable
+    // part that's apply the insertion effect; -1 to disable
     short int Pinsparts[NUM_INS_EFX];
 
     Meter meter;
@@ -236,7 +249,7 @@ public:
 
     bool shutup = false;
 
-    //other objects
+    // other objects
     Microtonal microtonal;
 
 private:

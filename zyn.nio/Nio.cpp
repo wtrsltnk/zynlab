@@ -7,7 +7,6 @@
 #include "MidiInputManager.h"
 
 #include <algorithm>
-#include <iostream>
 
 static AudioOutputManager *_audioOutpuManager = nullptr;
 static EngineManager *_engineManager = nullptr;
@@ -20,9 +19,9 @@ bool Nio::Start(
     IAudioGenerator *audioGenerator,
     IMidiEventHandler *midiEventHandler)
 {
-    _midiInputManager = &MidiInputManager::CreateInstance(midiEventHandler);                                     //Enable input wrapper
-    _audioOutpuManager = &AudioOutputManager::createInstance(audioGenerator);                                    //Initialize the Output Systems
-    _engineManager = &EngineManager::CreateInstance(audioGenerator->SampleRate(), audioGenerator->BufferSize()); //Initialize The Engines
+    _midiInputManager = &MidiInputManager::CreateInstance(midiEventHandler);                                     // Enable input wrapper
+    _audioOutpuManager = &AudioOutputManager::createInstance(audioGenerator);                                    // Initialize the Output Systems
+    _engineManager = &EngineManager::CreateInstance(audioGenerator->SampleRate(), audioGenerator->BufferSize()); // Initialize The Engines
 
     if (!Nio::defaultSink.empty())
     {
@@ -46,9 +45,9 @@ void Nio::Stop()
     _midiInputManager = nullptr;
     MidiInputManager::DestroyInstance(); // Disable input wrapper
     _audioOutpuManager = nullptr;
-    AudioOutputManager::destroyInstance(); //Destroy the Output Systems
+    AudioOutputManager::destroyInstance(); // Destroy the Output Systems
     _engineManager = nullptr;
-    EngineManager::DestroyInstance(); //DestroyThe Engines
+    EngineManager::DestroyInstance(); // DestroyThe Engines
 }
 
 void Nio::SetDefaultSource(
@@ -80,6 +79,7 @@ bool Nio::SelectSink(
 std::vector<std::string> Nio::GetSources()
 {
     std::vector<std::string> sources;
+    sources.reserve(_engineManager->engines.size());
 
     for (Engine *e : _engineManager->engines)
     {
@@ -95,6 +95,7 @@ std::vector<std::string> Nio::GetSources()
 std::vector<std::string> Nio::GetSinks()
 {
     std::vector<std::string> sinks;
+    sinks.reserve(_engineManager->engines.size());
 
     for (Engine *e : _engineManager->engines)
     {

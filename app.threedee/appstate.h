@@ -31,6 +31,19 @@ extern unsigned int ChordCount;
 
 struct tempnote
 {
+    tempnote() = default;
+    tempnote(
+        timestep pu,
+        unsigned int c,
+        unsigned int n,
+        bool d)
+    {
+        playUntil = pu;
+        channel = c;
+        note = n;
+        done = d;
+    }
+
     timestep playUntil = 0;
     unsigned int channel = 0;
     unsigned int note = 0;

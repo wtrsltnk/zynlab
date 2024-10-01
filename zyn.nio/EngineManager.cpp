@@ -54,7 +54,7 @@ EngineManager::EngineManager(
 {
     Engine *defaultEng = new NulEngine(sampleRate, bufferSize);
 
-    //conditional compiling mess (but contained)
+    // conditional compiling mess (but contained)
     engines.push_back(defaultEng);
     engines.push_back(new RtEngine());
     engines.push_back(new NetMidiEngine());
@@ -118,7 +118,7 @@ bool EngineManager::Start()
     AudioOutputManager::getInstance().currentOut = defaultOut;
     MidiInputManager::Instance()._current = defaultIn;
 
-    //open up the default output(s)
+    // open up the default output(s)
     std::cout << "Starting Audio: " << defaultOut->_name << std::endl;
     defaultOut->SetAudioEnabled(true);
     if (defaultOut->IsAudioEnabled())
@@ -169,7 +169,7 @@ bool EngineManager::SetDefaultAudioOutput(
         return true;
     }
 
-    //Warn user
+    // Warn user
     std::cerr << "Error: " << name << " is not a recognized MIDI input source" << std::endl;
     std::cerr << "       Defaulting to the NULL input source" << std::endl;
 
@@ -187,7 +187,7 @@ bool EngineManager::SetDefaultMidiInput(
         return true;
     }
 
-    //Warn user
+    // Warn user
     std::cerr << "Error: " << name << " is not a recognized audio backend" << std::endl;
     std::cerr << "       Defaulting to the NULL audio backend" << std::endl;
 

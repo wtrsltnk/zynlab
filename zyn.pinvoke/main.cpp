@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <memory.h>
-#include <regex>
 #include <zyn.common/Config.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.serialization/BankManager.h>

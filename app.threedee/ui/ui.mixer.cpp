@@ -137,6 +137,8 @@ std::vector<char const *> toCharVector(
     std::set<std::string> const &strings)
 {
     std::vector<char const *> result;
+    result.reserve(strings.size());
+
     for (auto &s : strings)
     {
         result.push_back(s.c_str());
@@ -408,7 +410,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
             olddbl = dbl;
             olddbr = dbr;
 
-            //compute RMS - start
+            // compute RMS - start
             rmsdbl = (MIN_DB - rmsdbl) / MIN_DB;
             if (rmsdbl < 0.0f)
                 rmsdbl = 0.0f;
@@ -432,7 +434,7 @@ void zyn::ui::Mixer::ImGuiMasterTrack()
 
             int irmsdbl = static_cast<int>(rmsdbl);
             int irmsdbr = static_cast<int>(rmsdbr);
-            //compute RMS - end
+            // compute RMS - end
 
             ImGui::Spacing();
             ImGui::SameLine(0.0f, (width - (60.0f + (4 * io.ItemSpacing.x))) / 2.0f);
@@ -533,7 +535,7 @@ void zyn::ui::Mixer::ImGuiTrack(
         {
             _state->_currentTrack = trackIndex;
             _state->selectingFromLibrary = true;
-            //ImGui::SetWindowFocus(LibraryID);
+            // ImGui::SetWindowFocus(LibraryID);
         }
         ImGui::ShowTooltipOnHover("Change Track preset");
 

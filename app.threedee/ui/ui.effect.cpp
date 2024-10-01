@@ -5,7 +5,6 @@
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.fx/EffectPresets.h>
 #include <zyn.mixer/Mixer.h>
-#include <zyn.fx/Alienwah.h>
 
 char const *const InsertionFxEditorID = "Insert effect";
 char const *const SystemFxEditorID = "System effect";
@@ -776,6 +775,7 @@ void zyn::ui::Effect::EffectEQEditor(EffectManager *effectManager)
     int lx = 200;
     int ly = 50;
     std::vector<float> values;
+    values.reserve(lx);
     for (int i = 0; i < lx; i++)
     {
         values.push_back(getEQPlotValue(effectManager, i, lx, ly));

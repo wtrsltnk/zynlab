@@ -91,7 +91,7 @@ bool Application::Setup()
 
     _session._library = _library.get();
 
-    _session._library->AddLibraryLocation("C:\\Code\\synthdev\\zynaddsubfx-instruments\\banks");
+    _session._library->AddLibraryLocation("C:\\wtr\\Code\\cpp\\instruments-master\\banks");
 
     for (int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
     {
@@ -406,14 +406,14 @@ std::vector<SimpleNote> Application::GetCurrentStepNotes()
     for (unsigned int t = 0; t < _session._mixer->GetTrackCount(); t++)
     {
         auto notes = pattern->Notes(t);
+
         if (notes[_session.currentRow]._note != 0)
         {
-            SimpleNote n(
+            result.emplace_back(
                 notes[_session.currentRow]._note,
                 notes[_session.currentRow]._velocity,
                 float(notes[_session.currentRow]._length),
                 t);
-            result.push_back(n);
         }
     }
 

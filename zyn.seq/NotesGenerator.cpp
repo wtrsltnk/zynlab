@@ -103,12 +103,11 @@ void NotesGenerator::Generate(
         {
             case ArpModes::Enum::OneNote:
             {
-                TrackRegionEvent a = {
-                    {start, start + length},
+                region.eventsByNote[baseEvent.note].emplace_back(
+                    start,
+                    start + length,
                     baseEvent.note,
-                    velocity,
-                };
-                region.eventsByNote[baseEvent.note].push_back(a);
+                    velocity);
 
                 start += (length + _options.Space * length);
                 break;
@@ -117,12 +116,11 @@ void NotesGenerator::Generate(
             {
                 for (auto n : notes)
                 {
-                    TrackRegionEvent a = {
-                        {start, start + length},
+                    region.eventsByNote[n].emplace_back(
+                        start,
+                        start + length,
                         n,
-                        velocity,
-                    };
-                    region.eventsByNote[n].push_back(a);
+                        velocity);
                 }
 
                 start += (length + _options.Space * length);
@@ -132,12 +130,11 @@ void NotesGenerator::Generate(
             {
                 for (auto n : notes)
                 {
-                    TrackRegionEvent a = {
-                        {start, start + length},
+                    region.eventsByNote[n].emplace_back(
+                        start,
+                        start + length,
                         n,
-                        velocity,
-                    };
-                    region.eventsByNote[n].push_back(a);
+                        velocity);
 
                     start += (length + _options.Space * length);
                 }
@@ -147,12 +144,11 @@ void NotesGenerator::Generate(
             {
                 for (auto n : reverseNotes)
                 {
-                    TrackRegionEvent a = {
-                        {start, start + length},
+                    region.eventsByNote[n].emplace_back(
+                        start,
+                        start + length,
                         n,
-                        velocity,
-                    };
-                    region.eventsByNote[n].push_back(a);
+                        velocity);
 
                     start += (length + _options.Space * length);
                 }
@@ -163,12 +159,11 @@ void NotesGenerator::Generate(
                 std::reverse(std::begin(reverseNotes), std::end(reverseNotes));
                 for (auto n : reverseNotes)
                 {
-                    TrackRegionEvent a = {
-                        {start, start + length},
+                    region.eventsByNote[n].emplace_back(
+                        start,
+                        start + length,
                         n,
-                        velocity,
-                    };
-                    region.eventsByNote[n].push_back(a);
+                        velocity);
 
                     start += (length + _options.Space * length);
                 }
@@ -179,12 +174,11 @@ void NotesGenerator::Generate(
                 std::reverse(std::begin(notes), std::end(notes));
                 for (auto n : notes)
                 {
-                    TrackRegionEvent a = {
-                        {start, start + length},
+                    region.eventsByNote[n].emplace_back(
+                        start,
+                        start + length,
                         n,
-                        velocity,
-                    };
-                    region.eventsByNote[n].push_back(a);
+                        velocity);
 
                     start += (length + _options.Space * length);
                 }
@@ -196,15 +190,15 @@ void NotesGenerator::Generate(
                 for (auto n : reverseNotes)
                 {
                     if (n == lastNote.note) continue;
-                    TrackRegionEvent a = {
-                        {start, start + length},
+
+                    region.eventsByNote[n].emplace_back(
+                        start,
+                        start + length,
                         n,
-                        velocity,
-                    };
-                    region.eventsByNote[n].push_back(a);
+                        velocity);
 
                     start += (length + _options.Space * length);
-                    lastNote = a;
+                    lastNote = region.eventsByNote[n].back();
                 }
                 break;
             }
@@ -214,15 +208,15 @@ void NotesGenerator::Generate(
                 for (auto n : notes)
                 {
                     if (n == lastNote.note) continue;
-                    TrackRegionEvent a = {
-                        {start, start + length},
+
+                    region.eventsByNote[n].emplace_back(
+                        start,
+                        start + length,
                         n,
-                        velocity,
-                    };
-                    region.eventsByNote[n].push_back(a);
+                        velocity);
 
                     start += (length + _options.Space * length);
-                    lastNote = a;
+                    lastNote = region.eventsByNote[n].back();
                 }
                 break;
             }

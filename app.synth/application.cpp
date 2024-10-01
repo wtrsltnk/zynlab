@@ -30,6 +30,19 @@ enum BarTypes
 
 struct PatternNote
 {
+    PatternNote() = default;
+    PatternNote(
+        float s,
+        float l,
+        char no,
+        unsigned char v)
+    {
+        start = s;
+        length = l;
+        noteOffset = no;
+        velocity = v;
+    }
+
     float start;
     float length;
     char noteOffset = 0; // +/- 12 notes
@@ -172,18 +185,18 @@ bool Application::Setup()
 
     _trackPatterns.insert(std::make_pair(0, std::map<unsigned char, TrackPattern>()));
     _trackPatterns[0].insert(std::make_pair(45, TrackPattern()));
-    _trackPatterns[0][45]._pattern.push_back({0.0f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.15f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.2f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.25f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.4f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.45f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.5f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.65f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.7f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.75f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.9f, 0.02f, 0, 100});
-    _trackPatterns[0][45]._pattern.push_back({0.95f, 0.02f, 0, 100});
+    _trackPatterns[0][45]._pattern.emplace_back(0.0f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.15f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.2f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.25f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.4f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.45f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.5f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.65f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.7f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.75f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.9f, 0.02f, 0, 100);
+    _trackPatterns[0][45]._pattern.emplace_back(0.95f, 0.02f, 0, 100);
 
     return true;
 }
@@ -497,7 +510,7 @@ std::vector<SimpleNote> Application::GetNotes(
                 // length of the note is multiplied by number of number of bars to make relative to a single bar
                 // and then by barsPerSecond() to convert it seconds
                 auto len = float(patternEvent.length * BarsPerSecond());
-                result.push_back(SimpleNote(note.first + patternEvent.noteOffset, patternEvent.velocity, len, channel.first));
+                result.emplace_back(note.first + patternEvent.noteOffset, patternEvent.velocity, len, channel.first);
             }
         }
     }
