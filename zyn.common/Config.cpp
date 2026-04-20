@@ -57,8 +57,8 @@ void Config::init()
 
     _instance = new Config();
 
-    _instance->maxstringsize = MAX_STRING_SIZE; //for ui
-    //defaults
+    _instance->maxstringsize = MAX_STRING_SIZE; // for ui
+    // defaults
     _instance->cfg.SampleRate = 44100;
     _instance->cfg.SoundBufferSize = 256;
     _instance->cfg.OscilSize = 1024;
@@ -87,7 +87,7 @@ void Config::init()
     _instance->cfg.UserInterfaceMode = 0;
     _instance->cfg.VirKeybLayout = 1;
 
-    //get the midi input devices name
+    // get the midi input devices name
     _instance->cfg.currentBankDir = "./testbnk";
 
     char filename[MAX_STRING_SIZE];
@@ -97,7 +97,7 @@ void Config::init()
     if (_instance->cfg.bankRootDirList[0].empty())
     {
         int b = 0;
-        //banks
+        // banks
         _instance->cfg.bankRootDirList[b++] = "~/banks";
         _instance->cfg.bankRootDirList[b++] = "./";
         _instance->cfg.bankRootDirList[b++] = "/usr/share/zynaddsubfx/banks";
@@ -109,6 +109,7 @@ void Config::init()
 #endif
         _instance->cfg.bankRootDirList[b++] = "banks";
 #ifdef _WIN32
+        _instance->cfg.bankRootDirList[b++] = R"(C:\wtr\Musik\zynaddsubfx-instruments\banks)";
         _instance->cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\zynaddsubfx-instruments\banks)";
         _instance->cfg.bankRootDirList[b++] = R"(C:\Code\synthdev\samples)";
 #endif // _WIN32
@@ -116,7 +117,7 @@ void Config::init()
 
     if (_instance->cfg.presetsDirList[0].empty())
     {
-        //presets
+        // presets
         _instance->cfg.presetsDirList[0] = "./";
 #ifdef __APPLE__
         _instance->cfg.presetsDirList[1] = "../Resources/presets";
@@ -225,7 +226,7 @@ void Config::readConfig(const char *filename)
                                           0,
                                           10);
 
-        //get bankroot dirs
+        // get bankroot dirs
         for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         {
             if (xmlcfg.enterbranch("BANKROOT", i))
@@ -235,7 +236,7 @@ void Config::readConfig(const char *filename)
             }
         }
 
-        //get preset root dirs
+        // get preset root dirs
         for (int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         {
             if (xmlcfg.enterbranch("PRESETSROOT", i))
@@ -245,7 +246,7 @@ void Config::readConfig(const char *filename)
             }
         }
 
-        //linux stuff
+        // linux stuff
         xmlcfg.getparstr("linux_oss_wave_out_dev",
                          cfg.LinuxOSSWaveOutDev,
                          MAX_STRING_SIZE);
@@ -253,7 +254,7 @@ void Config::readConfig(const char *filename)
                          cfg.LinuxOSSSeqInDev,
                          MAX_STRING_SIZE);
 
-        //windows stuff
+        // windows stuff
         cfg.WindowsWaveOutId = xmlcfg.getpar("windows_wave_out_id",
                                              cfg.WindowsWaveOutId,
                                              0,
@@ -317,11 +318,11 @@ void Config::saveConfig(const char *filename)
 
     xmlcfg.addpar("interpolation", cfg.Interpolation);
 
-    //linux stuff
+    // linux stuff
     xmlcfg.addparstr("linux_oss_wave_out_dev", cfg.LinuxOSSWaveOutDev);
     xmlcfg.addparstr("linux_oss_seq_in_dev", cfg.LinuxOSSSeqInDev);
 
-    //windows stuff
+    // windows stuff
     xmlcfg.addpar("windows_wave_out_id", cfg.WindowsWaveOutId);
     xmlcfg.addpar("windows_midi_in_id", cfg.WindowsMidiInId);
 

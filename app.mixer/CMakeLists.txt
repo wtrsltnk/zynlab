@@ -7,22 +7,11 @@ add_executable(app.mixer
     realmixer.cpp
     realmixer.h
     glad.c
-    imgui/imgui.cpp
-    imgui/imgui.h
-    imgui/imgui_demo.cpp
-    imgui/imgui_draw.cpp
-    imgui/imgui_impl_opengl3.cpp
-    imgui/imgui_impl_opengl3.h
-    imgui/imgui_impl_win32.cpp
-    imgui/imgui_impl_win32.h
-    imgui/imgui_internal.h
-    imgui/imgui_widgets.cpp
     main.cpp
     )
 
 target_include_directories(app.mixer
     PUBLIC include
-    PUBLIC imgui
     PRIVATE ${CMAKE_SOURCE_DIR})
 
 target_compile_features(app.mixer
@@ -36,9 +25,15 @@ target_link_libraries(app.mixer
     PRIVATE
         ${OPENGL_LIBRARIES}
         zyn.nio
+        zyn.net
         zyn.mixer
         zyn.synth
-        zyn.common)
+        zyn.fx
+        zyn.dsp
+        zyn.seq
+        zyn.serialization
+        zyn.common
+        zyn.ui)
 
 target_compile_options(app.mixer
     PUBLIC 

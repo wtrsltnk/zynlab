@@ -176,7 +176,6 @@ void Mixer::NoteOn(
     unsigned char note,
     unsigned char velocity)
 {
-    std::cout << int(note) << std::endl;
     if (!velocity)
     {
         this->NoteOff(chan, note);
@@ -187,6 +186,7 @@ void Mixer::NoteOn(
     {
         if (chan == track.Prcvchn)
         {
+            std::cout << int(note) << " @ " << int(track.Prcvchn) << std::endl;
             //            meter.SetFakePeak(npart, velocity * 2);
             if (track.Penabled)
             {

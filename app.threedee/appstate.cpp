@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 #include <imgui_common.h>
-#include <iostream>
 #include <memory>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION

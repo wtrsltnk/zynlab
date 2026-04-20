@@ -161,7 +161,7 @@
 /*
  * dB
  */
-#define dB2rap(dB) ((expf((dB)*LOG_10 / 20.0f)))
+#define dB2rap(dB) ((expf((dB) * LOG_10 / 20.0f)))
 #define rap2dB(rap) ((20 * logf(rap) / LOG_10))
 
 #define ZERO(data, size)                         \
@@ -232,7 +232,7 @@ enum LegatoMsg
     LM_ToNorm
 };
 
-//is like i=(int)(floor(f))
+// is like i=(int)(floor(f))
 #ifdef ASM_F2I_YES
 #define F2I(f,                                         \
             i) __asm__ __volatile__("fistpl %0"        \
@@ -248,7 +248,7 @@ enum LegatoMsg
 #define O_BINARY 0
 #endif
 
-//temporary include for synth->{samplerate/buffersize} members
+// temporary include for synth->{samplerate/buffersize} members
 class SystemSettings
 {
     SystemSettings();
@@ -293,7 +293,7 @@ public:
      */
     bool swaplr = false;
 
-    //Alias for above terms
+    // Alias for above terms
     float samplerate_f;
     float halfsamplerate_f;
     float buffersize_f;
@@ -307,10 +307,10 @@ public:
         bufferbytes = buffersize * sizeof(float);
         oscilsize_f = float(oscilsize);
     }
-    static float numRandom(); //defined in Util.cpp for now
+    static float numRandom(); // defined in Util.cpp for now
 };
 
-//entries in a bank
+// entries in a bank
 #define BANK_SIZE 160
 
 class Track;

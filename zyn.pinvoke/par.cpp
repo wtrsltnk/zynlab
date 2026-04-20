@@ -18,6 +18,7 @@ const char *ADDSYNTH_ID = "AddSynth";
 const char *SUBSYNTH_ID = "SubSynth";
 const char *PADSYNTH_ID = "PadSynth";
 const char *SMPLSYNTH_ID = "SampleSynth";
+const char *VOICES_ID = "Voices";
 
 sPar sPar::emptyPar = sPar();
 
@@ -76,20 +77,20 @@ struct sPar GetFilterPar(
     return sPar::emptyPar;
 }
 
-bool GetAbstractSynthPar(
+bool GetAbstractNoteParameters(
     AbstractNoteParameters *params,
     const char *id,
     sPar &par)
 {
-    logfile << "GetAbstractSynthPar" << id << std::endl;
-    if (IS_PAR(id, Pvolume))
+    logfile << "GetAbstractNoteParameters" << id << std::endl;
+    if (IS_PAR(id, PVolume))
     {
         par.byteValue = &(params->PVolume);
 
         return true;
     }
 
-    if (IS_PAR(id, Ppanning))
+    if (IS_PAR(id, PPanning))
     {
         par.byteValue = &(params->PPanning);
 
@@ -119,14 +120,14 @@ bool GetAbstractSynthPar(
 
     if (IS_PAR(id, PDetune))
     {
-        par.shortIntValue = &(params->PDetune);
+        par.unsignedShortIntValue = &(params->PDetune);
 
         return true;
     }
 
     if (IS_PAR(id, PCoarseDetune))
     {
-        par.shortIntValue = &(params->PCoarseDetune);
+        par.unsignedShortIntValue = &(params->PCoarseDetune);
 
         return true;
     }
@@ -218,30 +219,166 @@ bool GetAbstractSynthPar(
     return false;
 }
 
+struct sPar GetAddVoiceParam(
+    ADnoteParameters *params,
+    const char *id)
+{
+    std::cmatch m;
+    std::regex_search(id, m, std::regex("^(\\[([0-9]+)\\]\\.)"));
+
+    if (m.empty())
+    {
+        return sPar::emptyPar;
+    }
+
+    auto index = std::atoi(m[2].str().c_str());
+
+    if (index < 0 || index >= NUM_VOICES)
+    {
+        return sPar::emptyPar;
+    }
+
+    auto relativeId = id + m[1].str().size();
+
+    /*************************************
+     *     ABSTRACTNOTEPARAMETERS        *
+     *************************************/
+    {
+        if (IS_PAR(relativeId, PStereo)) return sPar(params->VoicePar[index].PStereo);
+        if (IS_PAR(relativeId, PPanning)) return sPar(params->VoicePar[index].PPanning);
+        if (IS_PAR(relativeId, PVolume)) return sPar(params->VoicePar[index].PVolume);
+        if (IS_PAR(relativeId, PAmpVelocityScaleFunction)) return sPar(params->VoicePar[index].PAmpVelocityScaleFunction);
+
+        /******************************************
+         *     FREQUENCY GLOBAL PARAMETERS        *
+         ******************************************/
+        if (IS_PAR(relativeId, Pfixedfreq)) return sPar(params->VoicePar[index].Pfixedfreq);
+        if (IS_PAR(relativeId, PfixedfreqET)) return sPar(params->VoicePar[index].PfixedfreqET);
+        if (IS_PAR(relativeId, PDetune)) return sPar(params->VoicePar[index].PDetune);
+        if (IS_PAR(relativeId, PCoarseDetune)) return sPar(params->VoicePar[index].PCoarseDetune);
+        if (IS_PAR(relativeId, PDetuneType)) return sPar(params->VoicePar[index].PDetuneType);
+
+        if (IS_PAR(relativeId, PFreqEnvelopeEnabled)) return sPar(params->VoicePar[index].PFreqEnvelopeEnabled);
+        if (IS_PAR(relativeId, FreqEnvelope)) return GetEnvelopePar(params->VoicePar[index].FreqEnvelope, id + std::string("FreqEnvelope").length() + 1);
+
+        if (IS_PAR(relativeId, PFreqLfoEnabled)) return sPar(params->VoicePar[index].PFreqLfoEnabled);
+        if (IS_PAR(relativeId, FreqLfo)) return GetLfoParametersPar(params->VoicePar[index].FreqLfo, id + std::string("FreqLfo").length() + 1);
+
+        if (IS_PAR(relativeId, PBandwidth)) return sPar(params->VoicePar[index].PBandwidth);
+
+        /****************************
+         *   AMPLITUDE PARAMETERS   *
+         ***************************/
+        if (IS_PAR(relativeId, PAmpEnvelopeEnabled)) return sPar(params->VoicePar[index].PAmpEnvelopeEnabled);
+        if (IS_PAR(relativeId, AmpEnvelope)) return GetEnvelopePar(params->VoicePar[index].AmpEnvelope, id + std::string("AmpEnvelope").length() + 1);
+
+        /******************************************
+         *        FILTER GLOBAL PARAMETERS        *
+         ******************************************/
+        if (IS_PAR(relativeId, GlobalFilter)) return GetFilterPar(params->VoicePar[index].GlobalFilter, id + std::string("GlobalFilter").length() + 1);
+        if (IS_PAR(relativeId, PFilterVelocityScale)) return sPar(params->VoicePar[index].PFilterVelocityScale);
+        if (IS_PAR(relativeId, PFilterVelocityScaleFunction)) return sPar(params->VoicePar[index].PFilterVelocityScaleFunction);
+        if (IS_PAR(relativeId, FilterEnvelope)) return GetEnvelopePar(params->VoicePar[index].FilterEnvelope, id + std::string("FilterEnvelope").length() + 1);
+    }
+
+    /***********************************************************
+     *                    VOICE PARAMETERS                     *
+     ***********************************************************/
+    {
+        if (IS_PAR(relativeId, Enabled)) return sPar(params->VoicePar[index].Enabled);
+        if (IS_PAR(relativeId, Unison_size)) return sPar(params->VoicePar[index].Unison_size);
+        if (IS_PAR(relativeId, Unison_frequency_spread)) return sPar(params->VoicePar[index].Unison_frequency_spread);
+        if (IS_PAR(relativeId, Unison_phase_randomness)) return sPar(params->VoicePar[index].Unison_phase_randomness);
+        if (IS_PAR(relativeId, Unison_stereo_spread)) return sPar(params->VoicePar[index].Unison_stereo_spread);
+        if (IS_PAR(relativeId, Unison_vibratto)) return sPar(params->VoicePar[index].Unison_vibratto);
+        if (IS_PAR(relativeId, Unison_vibratto_speed)) return sPar(params->VoicePar[index].Unison_vibratto_speed);
+        if (IS_PAR(relativeId, Unison_invert_phase)) return sPar(params->VoicePar[index].Unison_invert_phase);
+        if (IS_PAR(relativeId, Type)) return sPar(params->VoicePar[index].Type);
+        if (IS_PAR(relativeId, PDelay)) return sPar(params->VoicePar[index].PDelay);
+        if (IS_PAR(relativeId, Presonance)) return sPar(params->VoicePar[index].Presonance);
+        if (IS_PAR(relativeId, Pextoscil)) return sPar(params->VoicePar[index].Pextoscil);
+        if (IS_PAR(relativeId, PextFMoscil)) return sPar(params->VoicePar[index].PextFMoscil);
+        if (IS_PAR(relativeId, Poscilphase)) return sPar(params->VoicePar[index].Poscilphase);
+        if (IS_PAR(relativeId, PFMoscilphase)) return sPar(params->VoicePar[index].PFMoscilphase);
+        if (IS_PAR(relativeId, Pfilterbypass)) return sPar(params->VoicePar[index].Pfilterbypass);
+        // TODO : OscilSmp
+
+        /****************************
+         *   AMPLITUDE PARAMETERS   *
+         ***************************/
+        if (IS_PAR(relativeId, PVolumeminus)) return sPar(params->VoicePar[index].PVolumeminus);
+
+        if (IS_PAR(relativeId, PAmpLfoEnabled)) return sPar(params->VoicePar[index].PAmpLfoEnabled);
+        if (IS_PAR(relativeId, AmpLfo)) return GetLfoParametersPar(params->VoicePar[index].AmpLfo, id + std::string("AmpLfo").length() + 1);
+
+        /**************************
+         *   FILTER PARAMETERS    *
+         *************************/
+        if (IS_PAR(relativeId, PFilterEnabled)) return sPar(params->VoicePar[index].PFilterEnabled);
+        if (IS_PAR(relativeId, VoiceFilter)) return GetFilterPar(params->VoicePar[index].VoiceFilter, id + std::string("VoiceFilter").length() + 1);
+
+        if (IS_PAR(relativeId, PFilterEnvelopeEnabled)) return sPar(params->VoicePar[index].PFilterEnvelopeEnabled);
+
+        if (IS_PAR(relativeId, PFilterLfoEnabled)) return sPar(params->VoicePar[index].PFilterLfoEnabled);
+        if (IS_PAR(relativeId, FilterLfo)) return GetLfoParametersPar(params->VoicePar[index].FilterLfo, id + std::string("FilterLfo").length() + 1);
+
+        /*****************************
+         *   MODULLATOR PARAMETERS   *
+         ****************************/
+        if (IS_PAR(relativeId, PFMEnabled)) return sPar(params->VoicePar[index].PFMEnabled);
+        if (IS_PAR(relativeId, PFMVoice)) return sPar(params->VoicePar[index].PFMVoice);
+        // TODO : FMSmp
+        if (IS_PAR(relativeId, PFMVolume)) return sPar(params->VoicePar[index].PFMVolume);
+        if (IS_PAR(relativeId, PFMVolumeDamp)) return sPar(params->VoicePar[index].PFMVolumeDamp);
+        if (IS_PAR(relativeId, PFMVelocityScaleFunction)) return sPar(params->VoicePar[index].PFMVelocityScaleFunction);
+        if (IS_PAR(relativeId, PFMDetune)) return sPar(params->VoicePar[index].PFMDetune);
+        if (IS_PAR(relativeId, PFMCoarseDetune)) return sPar(params->VoicePar[index].PFMCoarseDetune);
+        if (IS_PAR(relativeId, PFMDetuneType)) return sPar(params->VoicePar[index].PFMDetuneType);
+
+        if (IS_PAR(relativeId, PFMFreqEnvelopeEnabled)) return sPar(params->VoicePar[index].PFMFreqEnvelopeEnabled);
+        if (IS_PAR(relativeId, FMFreqEnvelope)) return GetEnvelopePar(params->VoicePar[index].FMFreqEnvelope, id + std::string("FMFreqEnvelope").length() + 1);
+
+        if (IS_PAR(relativeId, PFMAmpEnvelopeEnabled)) return sPar(params->VoicePar[index].PFMAmpEnvelopeEnabled);
+        if (IS_PAR(relativeId, FMAmpEnvelope)) return GetEnvelopePar(params->VoicePar[index].FMAmpEnvelope, id + std::string("FMAmpEnvelope").length() + 1);
+    }
+
+    return sPar::emptyPar;
+}
+
 struct sPar GetAddSynthPar(
     ADnoteParameters *params,
     const char *id)
 {
     sPar par;
 
-    if (GetAbstractSynthPar(params, id, par))
+    if (GetAbstractNoteParameters(params, id, par))
     {
         return par;
     }
 
+    /********************************************
+     *     AMPLITUDE GLOBAL PARAMETERS          *
+     ********************************************/
+    if (IS_PAR(id, AmpLfo)) return GetLfoParametersPar(params->AmpLfo, id + std::string("AmpLfo").length() + 1);
     if (IS_PAR(id, PPunchStrength)) return sPar(params->PPunchStrength);
     if (IS_PAR(id, PPunchTime)) return sPar(params->PPunchTime);
     if (IS_PAR(id, PPunchStretch)) return sPar(params->PPunchStretch);
     if (IS_PAR(id, PPunchVelocitySensing)) return sPar(params->PPunchVelocitySensing);
-    if (IS_PAR(id, AmpLfo)) return GetLfoParametersPar(params->AmpLfo, id + std::string("AmpLfo").length() + 1);
-    if (IS_PAR(id, AmpEnvelope)) return GetEnvelopePar(params->AmpEnvelope, id + std::string("AmpEnvelope").length() + 1);
+
+    /******************************************
+     *        FILTER GLOBAL PARAMETERS        *
+     ******************************************/
     if (IS_PAR(id, FilterLfo)) return GetLfoParametersPar(params->FilterLfo, id + std::string("FilterLfo").length() + 1);
-    if (IS_PAR(id, FilterEnvelope)) return GetEnvelopePar(params->FilterEnvelope, id + std::string("FilterEnvelope").length() + 1);
-    if (IS_PAR(id, FreqLfo)) return GetLfoParametersPar(params->FreqLfo, id + std::string("FreqLfo").length() + 1);
-    if (IS_PAR(id, FreqEnvelope)) return GetEnvelopePar(params->FreqEnvelope, id + std::string("FreqEnvelope").length() + 1);
+
+    /*******************************************
+     *            OTHER PARAMETERS             *
+     ******************************************/
+    // TODO Reson
+    if (IS_PAR(id, Hrandgrouping)) return sPar(params->Hrandgrouping);
 
     if (IS_PAR(id, Voices))
     {
+        return GetAddVoiceParam(params, id + std::string(VOICES_ID).length());
     }
 
     return sPar::emptyPar;
@@ -253,14 +390,25 @@ struct sPar GetSubSynthPar(
 {
     sPar par;
 
-    if (GetAbstractSynthPar(params, id, par))
+    if (GetAbstractNoteParameters(params, id, par))
     {
         return par;
     }
 
+    /******************************************
+     *     FREQUENCY GLOBAL PARAMETERS        *
+     ******************************************/
     if (IS_PAR(id, PBandWidthEnvelopeEnabled)) return sPar(params->PBandWidthEnvelopeEnabled);
     if (IS_PAR(id, BandWidthEnvelope)) return GetEnvelopePar(params->BandWidthEnvelope, id + std::string("BandWidthEnvelope").length() + 1);
+
+    /******************************************
+     *        FILTER GLOBAL PARAMETERS        *
+     ******************************************/
     if (IS_PAR(id, PGlobalFilterEnabled)) return sPar(params->PGlobalFilterEnabled);
+
+    /*******************************************
+     *            OTHER PARAMETERS             *
+     ******************************************/
     if (IS_PAR(id, POvertoneSpread.type)) return sPar(params->POvertoneSpread.type);
     if (IS_PAR(id, POvertoneSpread.par1)) return sPar(params->POvertoneSpread.par1);
     if (IS_PAR(id, POvertoneSpread.par2)) return sPar(params->POvertoneSpread.par2);
@@ -339,14 +487,29 @@ struct sPar GetPadSynthPar(
 {
     sPar par;
 
-    if (GetAbstractSynthPar(params, id, par))
+    if (GetAbstractNoteParameters(params, id, par))
     {
         return par;
     }
 
+    // if (IS_PAR(id, PBandwidth)) return sPar(params->PBandwidth);
+    if (IS_PAR(id, Pbwscale)) return sPar(params->Pbwscale);
+
+    /****************************
+     *   AMPLITUDE PARAMETERS   *
+     ***************************/
     if (IS_PAR(id, AmpLfo)) return GetLfoParametersPar(params->AmpLfo, id + std::string("AmpLfo").length() + 1);
+    if (IS_PAR(id, PPunchStrength)) return sPar(params->PPunchStrength);
+    if (IS_PAR(id, PPunchTime)) return sPar(params->PPunchTime);
+    if (IS_PAR(id, PPunchStretch)) return sPar(params->PPunchStretch);
+    if (IS_PAR(id, PPunchVelocitySensing)) return sPar(params->PPunchVelocitySensing);
+
+    /**************************
+     *   FILTER PARAMETERS    *
+     *************************/
     if (IS_PAR(id, FilterLfo)) return GetLfoParametersPar(params->FilterLfo, id + std::string("FilterLfo").length() + 1);
-    if (IS_PAR(id, FreqLfo)) return GetLfoParametersPar(params->FreqLfo, id + std::string("FreqLfo").length() + 1);
+    // TODO oscilgen
+    // TODO resonance
 
     return sPar::emptyPar;
 }
@@ -357,7 +520,7 @@ struct sPar GetSampleSynthPar(
 {
     sPar par;
 
-    if (GetAbstractSynthPar(params, id, par))
+    if (GetAbstractNoteParameters(params, id, par))
     {
         return par;
     }
@@ -600,7 +763,6 @@ sPar GetParById(
         par.setByte = [mixer, trackIndex](unsigned char value) {
             mixer->SetSystemEffectVolume(trackIndex, 1, value);
         };
-
     }
 
     if (IS_PAR(id + trackId.length() + 1, Pfxsend3))
@@ -611,7 +773,6 @@ sPar GetParById(
         par.setByte = [mixer, trackIndex](unsigned char value) {
             mixer->SetSystemEffectVolume(trackIndex, 2, value);
         };
-
     }
 
     if (IS_PAR(id + trackId.length() + 1, Pfxsend4))
@@ -622,7 +783,6 @@ sPar GetParById(
         par.setByte = [mixer, trackIndex](unsigned char value) {
             mixer->SetSystemEffectVolume(trackIndex, 3, value);
         };
-
     }
 
     return GetTrackPar(track, id + trackId.length() + 1); // the +1 is for the dot

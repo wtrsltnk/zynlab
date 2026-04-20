@@ -175,7 +175,7 @@ Mixer *CreateMixer()
 
     if (!logfile.is_open())
     {
-        logfile.open("c:\\temp\\log.txt", std::ios::out);
+        logfile.open("C:\\Users\\woute\\AppData\\Local\\Temp\\mixer-log.txt", std::ios::out);
     }
 
     auto m = new Mixer();
@@ -213,6 +213,8 @@ void EnableTrack(
     logfile << "EnableTrack " << trackIndex << std::endl;
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -236,7 +238,8 @@ void DisableTrack(
     logfile << "DisableTrack " << trackIndex << std::endl;
     if (mixer == nullptr)
     {
-        logfile << "mixer == nullptr " << trackIndex << std::endl;
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -265,7 +268,8 @@ bool IsTrackEnabled(
     logfile << "IsTrackEnabled " << trackIndex << std::endl;
     if (mixer == nullptr)
     {
-        logfile << "mixer == nullptr " << trackIndex << std::endl;
+        logfile << "mixer == nullptr" << std::endl;
+
         return false;
     }
 
@@ -274,6 +278,7 @@ bool IsTrackEnabled(
     if (track == nullptr)
     {
         logfile << "track == nullptr " << trackIndex << std::endl;
+
         return false;
     }
 
@@ -288,6 +293,8 @@ int GetTrackName(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return false;
     }
 
@@ -295,6 +302,8 @@ int GetTrackName(
 
     if (track == nullptr)
     {
+        logfile << "track == nullptr" << std::endl;
+
         return false;
     }
 
@@ -308,6 +317,8 @@ void AudioOut(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -370,6 +381,8 @@ void LoadPresetsFromFile(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -377,6 +390,8 @@ void LoadPresetsFromFile(
 
     if (track == nullptr)
     {
+        logfile << "track == nullptr" << std::endl;
+
         return;
     }
 
@@ -398,6 +413,8 @@ void LoadPresets(
 
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -405,6 +422,8 @@ void LoadPresets(
 
     if (track == nullptr)
     {
+        logfile << "track == nullptr" << std::endl;
+
         return;
     }
 
@@ -432,6 +451,8 @@ void LoadPresetFromBank(
 
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -439,6 +460,8 @@ void LoadPresetFromBank(
 
     if (track == nullptr)
     {
+        logfile << "track == nullptr" << std::endl;
+
         return;
     }
 
@@ -459,10 +482,12 @@ void NoteOn(
     unsigned char note,
     unsigned char velocity)
 {
-    // logfile << "NoteOn[" << short(trackIndex) << "]  : " << (int)note << std::endl;
+    logfile << "NoteOn[" << short(trackIndex) << "]  : " << (int)note << std::endl;
 
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -474,10 +499,12 @@ void NoteOff(
     unsigned char trackIndex,
     unsigned char note)
 {
-    // logfile << "NoteOff[" << short(trackIndex) << "] : " << (int)note << std::endl;
+    logfile << "NoteOff[" << short(trackIndex) << "] : " << (int)note << std::endl;
 
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -492,15 +519,19 @@ float GetFrequencyResponse(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return 0.0f;
     }
 
-    auto effect = GetEffectManagerById(mixer,trackIndex,id);
+    auto effect = GetEffectManagerById(mixer, trackIndex, id);
 
     if (effect != nullptr)
     {
         return effect->getEQfreqresponse(frequency);
     }
+
+    logfile << "effect == nullptr" << std::endl;
 
     return 1.0f;
 }
@@ -512,6 +543,8 @@ int GetEffect(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return 0;
     }
 
@@ -519,6 +552,8 @@ int GetEffect(
 
     if (effect == nullptr)
     {
+        logfile << "effect == nullptr" << std::endl;
+
         return 0;
     }
 
@@ -533,6 +568,8 @@ void ChangeEffect(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -540,6 +577,8 @@ void ChangeEffect(
 
     if (effect == nullptr)
     {
+        logfile << "effect == nullptr" << std::endl;
+
         return;
     }
 
@@ -554,6 +593,8 @@ void ChangeEffectPreset(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
 
@@ -561,6 +602,8 @@ void ChangeEffectPreset(
 
     if (effect == nullptr)
     {
+        logfile << "effect == nullptr" << std::endl;
+
         return;
     }
 
@@ -574,6 +617,8 @@ unsigned char GetPar(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return 0;
     }
 
@@ -604,6 +649,8 @@ bool GetParBool(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return false;
     }
 
@@ -630,6 +677,8 @@ float GetParReal(
 {
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return 0.0f;
     }
 
@@ -655,12 +704,14 @@ void SetPar(
     const char *id,
     unsigned char value)
 {
+    logfile << "SetPar[" << short(trackIndex) << "] : " << id << ", " << (int)value << std::endl;
+
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
-
-    logfile << "SetPar[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
 
     auto par = GetParById(mixer, trackIndex, id);
 
@@ -686,12 +737,14 @@ void SetParBool(
     const char *id,
     bool value)
 {
+    logfile << "SetParBool[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
+
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
-
-    logfile << "SetParBool[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
 
     auto par = GetParById(mixer, trackIndex, id);
 
@@ -715,12 +768,14 @@ void SetParReal(
     const char *id,
     float value)
 {
+    logfile << "SetParReal[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
+
     if (mixer == nullptr)
     {
+        logfile << "mixer == nullptr" << std::endl;
+
         return;
     }
-
-    logfile << "SetParReal[" << short(trackIndex) << "] : " << id << ", " << value << std::endl;
 
     auto par = GetParById(mixer, trackIndex, id);
 

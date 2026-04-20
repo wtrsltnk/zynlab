@@ -21,7 +21,7 @@ enum NoteStatus
 struct TrackNote
 {
     NoteStatus status;
-    int note; //if there is no note playing, the "note"=-1
+    int note; // if there is no note playing, the "note"=-1
     int itemsplaying;
     SynthNote *synthNote;
     int time;
@@ -35,7 +35,7 @@ class RealMixer :
     std::unique_ptr<float> _tmpoutr;
 
     std::mutex _mutex;
-    SUBnoteParameters *_params;
+    SUBnoteParameters *_params = nullptr;
     TrackNote _trackNotes[POLIPHONY];
     Controller ctl;
 

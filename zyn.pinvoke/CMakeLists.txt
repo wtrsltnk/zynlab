@@ -34,3 +34,11 @@ target_compile_features(zyn.pinvoke
         cxx_thread_local
         cxx_std_17
     )
+
+file(COPY "${fftw3_SOURCE_DIR}/libfftw3-3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+if (EXISTS "${zlib_BINARY_DIR}/zlibd.dll")
+    file(COPY "${zlib_BINARY_DIR}/zlibd.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+else()
+    file(COPY "${zlib_BINARY_DIR}/zlib.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif ()

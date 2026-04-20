@@ -11,13 +11,15 @@ struct sPar
     sPar(char &value) : charValue(&value) {}
     sPar(float &value) : floatValue(&value) {}
     sPar(bool &value) : boolValue(&value) {}
-    sPar(unsigned short int &value) : shortIntValue(&value) {}
+    sPar(short int &value) : shortIntValue(&value) {}
+    sPar(unsigned short int &value) : unsignedShortIntValue(&value) {}
 
     unsigned char *byteValue = nullptr;
     char *charValue = nullptr;
     float *floatValue = nullptr;
     bool *boolValue = nullptr;
-    unsigned short int *shortIntValue = nullptr;
+    short int *shortIntValue = nullptr;
+    unsigned short int *unsignedShortIntValue = nullptr;
 
     bool setByteIsSet = false;
     std::function<void(unsigned char)> setByte;

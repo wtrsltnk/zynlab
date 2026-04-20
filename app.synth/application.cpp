@@ -1,11 +1,9 @@
 ﻿#include "application.h"
 
-#include <algorithm>
 #include <iapplication.h>
 #include <imgui.h>
 #include <imgui_helpers.h>
 #include <imgui_plot.h>
-#include <iostream>
 #include <map>
 #include <zyn.common/Config.h>
 #include <zyn.common/IAudioGenerator.h>
@@ -136,11 +134,11 @@ bool Application::Setup()
     config.GlyphOffset = ImVec2(0, 3.0f);
 
     static const ImWchar fontaudio_icon_ranges[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
-    _fadFont = io.Fonts->AddFontFromFileTTF("fonts/fontaudio.ttf", 18.0f, &config, fontaudio_icon_ranges);
+    _fadFont = io.Fonts->AddFontFromFileTTF("app.synth/fonts/fontaudio.ttf", 18.0f, &config, fontaudio_icon_ranges);
 
     config.GlyphOffset = ImVec2(0.0f, 0.0f);
     static const ImWchar forkawesome_icon_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
-    _fkFont = io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
+    _fkFont = io.Fonts->AddFontFromFileTTF("app.synth/fonts/forkawesome-webfont.ttf", 12.0f, &config, forkawesome_icon_ranges);
 
     _monofont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\consola.ttf", 14.0f);
 

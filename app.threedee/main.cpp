@@ -46,7 +46,7 @@ void initprogram()
 
 int exitprogram()
 {
-    //ensure that everything has stopped with the mutex wait
+    // ensure that everything has stopped with the mutex wait
     mixer->Lock();
     mixer->Unlock();
 

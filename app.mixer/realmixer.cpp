@@ -3,6 +3,7 @@
 #include <cmath>
 #include <memory.h>
 #include <zyn.common/Util.h>
+#include <zyn.synth/ADnote.h>
 #include <zyn.synth/SUBnote.h>
 
 RealMixer::RealMixer()
@@ -148,15 +149,15 @@ void RealMixer::NoteOff(
     unsigned char chan,
     unsigned char note)
 {
-    for (int i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
+    for (int i = POLIPHONY - 1; i >= 0; i--) // first note in, is first out if there are same note multiple times
     {
         if ((_trackNotes[i].status == KEY_PLAYING) && (_trackNotes[i].note == note))
         {
             if (ctl.sustain.sustain == 0)
-            { //the sustain pedal is not pushed
+            { // the sustain pedal is not pushed
                 _trackNotes[i].status = KEY_RELASED;
             }
-            else //the sustain pedal is pushed
+            else // the sustain pedal is pushed
             {
                 _trackNotes[i].status = KEY_RELASED_AND_SUSTAINED;
             }
