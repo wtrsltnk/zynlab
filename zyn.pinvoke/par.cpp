@@ -29,12 +29,13 @@ struct sPar GetLfoParametersPar(
     LFOParams *params,
     const char *id)
 {
+    // IS_PAR compares prefixes: longer names first (Pfreqrand before Pfreq)
+    if (IS_PAR(id, Pfreqrand)) return sPar(params->Pfreqrand);
     if (IS_PAR(id, Pfreq)) return sPar(params->Pfreq);
     if (IS_PAR(id, Pintensity)) return sPar(params->Pintensity);
     if (IS_PAR(id, Pstartphase)) return sPar(params->Pstartphase);
     if (IS_PAR(id, PLFOtype)) return sPar(params->PLFOtype);
     if (IS_PAR(id, Prandomness)) return sPar(params->Prandomness);
-    if (IS_PAR(id, Pfreqrand)) return sPar(params->Pfreqrand);
     if (IS_PAR(id, Pdelay)) return sPar(params->Pdelay);
     if (IS_PAR(id, Pcontinous)) return sPar(params->Pcontinous);
     if (IS_PAR(id, Pstretch)) return sPar(params->Pstretch);
@@ -67,8 +68,9 @@ struct sPar GetFilterPar(
     if (IS_PAR(id, Pcategory)) return sPar(params->Pcategory);
     if (IS_PAR(id, Pcenterfreq)) return sPar(params->Pcenterfreq);
     if (IS_PAR(id, Pformantslowness)) return sPar(params->Pformantslowness);
-    if (IS_PAR(id, Pfreq)) return sPar(params->Pfreq);
+    // IS_PAR compares prefixes: longer names first (Pfreqtrack before Pfreq)
     if (IS_PAR(id, Pfreqtrack)) return sPar(params->Pfreqtrack);
+    if (IS_PAR(id, Pfreq)) return sPar(params->Pfreq);
     if (IS_PAR(id, Pgain)) return sPar(params->Pgain);
     if (IS_PAR(id, Pnumformants)) return sPar(params->Pnumformants);
     if (IS_PAR(id, Poctavesfreq)) return sPar(params->Poctavesfreq);
@@ -331,6 +333,7 @@ struct sPar GetAddVoiceParam(
     {
         if (IS_PAR(relativeId, PStereo)) return sPar(params->VoicePar[index].PStereo);
         if (IS_PAR(relativeId, PPanning)) return sPar(params->VoicePar[index].PPanning);
+        if (IS_PAR(relativeId, PVolumeminus)) return sPar(params->VoicePar[index].PVolumeminus); // before PVolume: IS_PAR compares prefixes
         if (IS_PAR(relativeId, PVolume)) return sPar(params->VoicePar[index].PVolume);
         if (IS_PAR(relativeId, PAmpVelocityScaleFunction)) return sPar(params->VoicePar[index].PAmpVelocityScaleFunction);
 
@@ -787,6 +790,12 @@ struct sPar GetTrackPar(
     if (IS_PAR(id, Pkitmode)) return sPar(track->Pkitmode);
     if (IS_PAR(id, Pminkey)) return sPar(track->Pminkey);
     if (IS_PAR(id, Pmaxkey)) return sPar(track->Pmaxkey);
+    if (IS_PAR(id, Ppolymode)) return sPar(track->Ppolymode);
+    if (IS_PAR(id, Plegatomode)) return sPar(track->Plegatomode);
+    if (IS_PAR(id, ctl.portamento.portamento)) return sPar(track->ctl.portamento.portamento);
+    if (IS_PAR(id, ctl.portamento.time)) return sPar(track->ctl.portamento.time);
+    if (IS_PAR(id, ctl.portamento.updowntimestretch)) return sPar(track->ctl.portamento.updowntimestretch);
+    if (IS_PAR(id, ctl.portamento.proportional)) return sPar(track->ctl.portamento.proportional);
 
     if (IS_PAR(id, Instruments))
     {

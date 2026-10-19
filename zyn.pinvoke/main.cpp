@@ -64,6 +64,12 @@ __declspec(dllexport) void NoteOff(
     unsigned char trackIndex,
     unsigned char note);
 
+__declspec(dllexport) void SetController(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    int type,
+    int value);
+
 __declspec(dllexport) float GetFrequencyResponse(
     Mixer *mixer,
     unsigned char trackIndex,
@@ -510,6 +516,36 @@ void NoteOff(
     }
 
     mixer->NoteOff(trackIndex, note);
+}
+
+void SetController(
+    Mixer *mixer,
+    unsigned char trackIndex,
+    int type,
+    int value)
+{
+    logfile << "SetController[" << short(trackIndex) << "] : " << type << ", " << value << std::endl;
+
+    if (mixer == nullptr)
+    {
+        logfile << "mixer == nullptr" << std::endl;
+
+        return;
+    }
+
+    auto track = mixer->GetTrack(trackIndex);
+
+    if (track == nullptr)
+    {
+        logfile << "track == nullptr" << std::endl;
+
+        return;
+    }
+
+    // straight to the track, not via Mixer::SetController: that routes on the receive channel, which is 0 for all tracks
+    mixer->Lock();
+    track->SetController(static_cast<unsigned int>(type), value);
+    mixer->Unlock();
 }
 
 float GetFrequencyResponse(
