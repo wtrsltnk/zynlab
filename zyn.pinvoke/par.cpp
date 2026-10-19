@@ -3,7 +3,10 @@
 #include <fstream>
 #include <regex>
 #include <zyn.synth/ADnoteParams.h>
+#include <zyn.synth/ADnoteVoiceParam.h>
+#include <zyn.synth/OscilGen.h>
 #include <zyn.synth/PADnoteParams.h>
+#include <zyn.synth/Resonance.h>
 #include <zyn.synth/SUBnoteParams.h>
 #include <zyn.synth/SampleNoteParams.h>
 
@@ -73,6 +76,88 @@ struct sPar GetFilterPar(
     if (IS_PAR(id, Pstages)) return sPar(params->Pstages);
     if (IS_PAR(id, Ptype)) return sPar(params->Ptype);
     if (IS_PAR(id, Pvowelclearness)) return sPar(params->Pvowelclearness);
+
+    return sPar::emptyPar;
+}
+
+struct sPar GetOscilGenPar(
+    OscilGen *oscil,
+    const char *id)
+{
+    if (oscil == nullptr) return sPar::emptyPar;
+
+    if (IS_PAR(id, Phmagtype)) return sPar(oscil->Phmagtype);
+    if (IS_PAR(id, Pcurrentbasefunc)) return sPar(oscil->Pcurrentbasefunc);
+    if (IS_PAR(id, Pbasefuncpar)) return sPar(oscil->Pbasefuncpar);
+    if (IS_PAR(id, Pbasefuncmodulationpar1)) return sPar(oscil->Pbasefuncmodulationpar1);
+    if (IS_PAR(id, Pbasefuncmodulationpar2)) return sPar(oscil->Pbasefuncmodulationpar2);
+    if (IS_PAR(id, Pbasefuncmodulationpar3)) return sPar(oscil->Pbasefuncmodulationpar3);
+    if (IS_PAR(id, Pbasefuncmodulation)) return sPar(oscil->Pbasefuncmodulation);
+    if (IS_PAR(id, Prand)) return sPar(oscil->Prand);
+    if (IS_PAR(id, Pwaveshapingfunction)) return sPar(oscil->Pwaveshapingfunction);
+    if (IS_PAR(id, Pwaveshaping)) return sPar(oscil->Pwaveshaping);
+    if (IS_PAR(id, Pfiltertype)) return sPar(oscil->Pfiltertype);
+    if (IS_PAR(id, Pfilterpar1)) return sPar(oscil->Pfilterpar1);
+    if (IS_PAR(id, Pfilterpar2)) return sPar(oscil->Pfilterpar2);
+    if (IS_PAR(id, Pfilterbeforews)) return sPar(oscil->Pfilterbeforews);
+    if (IS_PAR(id, Psatype)) return sPar(oscil->Psatype);
+    if (IS_PAR(id, Psapar)) return sPar(oscil->Psapar);
+    if (IS_PAR(id, Pamprandpower)) return sPar(oscil->Pamprandpower);
+    if (IS_PAR(id, Pamprandtype)) return sPar(oscil->Pamprandtype);
+    if (IS_PAR(id, Pharmonicshiftfirst)) return sPar(oscil->Pharmonicshiftfirst);
+    if (IS_PAR(id, Padaptiveharmonics)) return sPar(oscil->Padaptiveharmonics);
+    if (IS_PAR(id, Padaptiveharmonicsbasefreq)) return sPar(oscil->Padaptiveharmonicsbasefreq);
+    if (IS_PAR(id, Padaptiveharmonicspower)) return sPar(oscil->Padaptiveharmonicspower);
+    if (IS_PAR(id, Padaptiveharmonicspar)) return sPar(oscil->Padaptiveharmonicspar);
+    if (IS_PAR(id, Pmodulationpar1)) return sPar(oscil->Pmodulationpar1);
+    if (IS_PAR(id, Pmodulationpar2)) return sPar(oscil->Pmodulationpar2);
+    if (IS_PAR(id, Pmodulationpar3)) return sPar(oscil->Pmodulationpar3);
+    if (IS_PAR(id, Pmodulation)) return sPar(oscil->Pmodulation);
+
+    if (IS_PAR(id, Phmag))
+    {
+        std::cmatch m;
+        std::regex_search(id, m, std::regex("^Phmag\\[([0-9]+)\\]"));
+        if (m.empty()) return sPar::emptyPar;
+        auto index = std::atoi(m[1].str().c_str());
+        if (index < 0 || index >= MAX_AD_HARMONICS) return sPar::emptyPar;
+        return sPar(oscil->Phmag[index]);
+    }
+
+    if (IS_PAR(id, Phphase))
+    {
+        std::cmatch m;
+        std::regex_search(id, m, std::regex("^Phphase\\[([0-9]+)\\]"));
+        if (m.empty()) return sPar::emptyPar;
+        auto index = std::atoi(m[1].str().c_str());
+        if (index < 0 || index >= MAX_AD_HARMONICS) return sPar::emptyPar;
+        return sPar(oscil->Phphase[index]);
+    }
+
+    return sPar::emptyPar;
+}
+
+struct sPar GetResonancePar(
+    Resonance *res,
+    const char *id)
+{
+    if (res == nullptr) return sPar::emptyPar;
+
+    if (IS_PAR(id, Penabled)) return sPar(res->Penabled);
+    if (IS_PAR(id, PmaxdB)) return sPar(res->PmaxdB);
+    if (IS_PAR(id, Pcenterfreq)) return sPar(res->Pcenterfreq);
+    if (IS_PAR(id, Poctavesfreq)) return sPar(res->Poctavesfreq);
+    if (IS_PAR(id, Pprotectthefundamental)) return sPar(res->Pprotectthefundamental);
+
+    if (IS_PAR(id, Prespoints))
+    {
+        std::cmatch m;
+        std::regex_search(id, m, std::regex("^Prespoints\\[([0-9]+)\\]"));
+        if (m.empty()) return sPar::emptyPar;
+        auto index = std::atoi(m[1].str().c_str());
+        if (index < 0 || index >= N_RES_POINTS) return sPar::emptyPar;
+        return sPar(res->Prespoints[index]);
+    }
 
     return sPar::emptyPar;
 }
@@ -301,7 +386,11 @@ struct sPar GetAddVoiceParam(
         if (IS_PAR(relativeId, Poscilphase)) return sPar(params->VoicePar[index].Poscilphase);
         if (IS_PAR(relativeId, PFMoscilphase)) return sPar(params->VoicePar[index].PFMoscilphase);
         if (IS_PAR(relativeId, Pfilterbypass)) return sPar(params->VoicePar[index].Pfilterbypass);
-        // TODO : OscilSmp
+
+        if (IS_PAR(relativeId, OscilSmp))
+        {
+            return GetOscilGenPar(params->VoicePar[index].OscilSmp, relativeId + std::string("OscilSmp").length() + 1);
+        }
 
         /****************************
          *   AMPLITUDE PARAMETERS   *
@@ -327,7 +416,11 @@ struct sPar GetAddVoiceParam(
          ****************************/
         if (IS_PAR(relativeId, PFMEnabled)) return sPar(params->VoicePar[index].PFMEnabled);
         if (IS_PAR(relativeId, PFMVoice)) return sPar(params->VoicePar[index].PFMVoice);
-        // TODO : FMSmp
+
+        if (IS_PAR(relativeId, FMSmp))
+        {
+            return GetOscilGenPar(params->VoicePar[index].FMSmp, relativeId + std::string("FMSmp").length() + 1);
+        }
         if (IS_PAR(relativeId, PFMVolume)) return sPar(params->VoicePar[index].PFMVolume);
         if (IS_PAR(relativeId, PFMVolumeDamp)) return sPar(params->VoicePar[index].PFMVolumeDamp);
         if (IS_PAR(relativeId, PFMVelocityScaleFunction)) return sPar(params->VoicePar[index].PFMVelocityScaleFunction);
@@ -373,7 +466,11 @@ struct sPar GetAddSynthPar(
     /*******************************************
      *            OTHER PARAMETERS             *
      ******************************************/
-    // TODO Reson
+    if (IS_PAR(id, Reson))
+    {
+        return GetResonancePar(params->Reson, id + std::string("Reson").length() + 1);
+    }
+
     if (IS_PAR(id, Hrandgrouping)) return sPar(params->Hrandgrouping);
 
     if (IS_PAR(id, Voices))
@@ -508,8 +605,16 @@ struct sPar GetPadSynthPar(
      *   FILTER PARAMETERS    *
      *************************/
     if (IS_PAR(id, FilterLfo)) return GetLfoParametersPar(params->FilterLfo, id + std::string("FilterLfo").length() + 1);
-    // TODO oscilgen
-    // TODO resonance
+
+    if (IS_PAR(id, oscilgen))
+    {
+        return GetOscilGenPar(params->oscilgen, id + std::string("oscilgen").length() + 1);
+    }
+
+    if (IS_PAR(id, resonance))
+    {
+        return GetResonancePar(params->resonance, id + std::string("resonance").length() + 1);
+    }
 
     return sPar::emptyPar;
 }

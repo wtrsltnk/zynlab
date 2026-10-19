@@ -335,6 +335,7 @@ IBankManager *GetBanks()
     if (!banksAreScanned)
     {
         banks.RescanForBanks();
+        banksAreScanned = true;
     }
 
     return &banks;
