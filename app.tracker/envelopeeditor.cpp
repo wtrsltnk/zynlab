@@ -52,13 +52,22 @@ void EnvelopeEditor::Render2d()
             draw_list->AddRectFilled(p, p + plotSize, bg);
             EnvelopeParams::ConvertToFree(_params);
 
+            // a fixed stretch after the sustain point shows the sustain (not a point of the envelope)
+            auto plateau = _params->Pfreemode == 0 && _params->Penvsustain > 0 ? plotSize.x / 6 : 0.0f;
+            auto width = static_cast<int>(plotSize.x - plateau);
             ImVec2 start = {
-                x + getpointx(_params, 0, plotSize.x),
+                x + getpointx(_params, 0, width),
                 y + getpointy(_params, 0, plotSize.y),
             };
             for (int i = 1; i < _params->Penvpoints; i++)
             {
-                auto xx = getpointx(_params, i, plotSize.x);
+                if (plateau > 0 && i == _params->Penvsustain + 1)
+                {
+                    ImVec2 held = {start.x + plateau, start.y};
+                    draw_list->AddLine(start, held, col, th);
+                    start = held;
+                }
+                auto xx = getpointx(_params, i, width) + (plateau > 0 && i > _params->Penvsustain ? plateau : 0);
                 auto yy = getpointy(_params, i, plotSize.y);
                 ImVec2 end = {
                     x + xx,

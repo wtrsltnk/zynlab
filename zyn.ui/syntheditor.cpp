@@ -1411,13 +1411,22 @@ void SynthEditor::RenderEnvelope(
         draw_list->AddRectFilled(p, p + plotSize, bg);
         EnvelopeParams::ConvertToFree(params);
 
+        // a fixed stretch after the sustain point shows the sustain (not a point of the envelope)
+        auto plateau = params->Pfreemode == 0 && params->Penvsustain > 0 ? plotSize.x / 6 : 0.0f;
+        auto width = static_cast<int>(plotSize.x - plateau);
         ImVec2 start = {
-            x + getpointx(params, 0, plotSize.x),
+            x + getpointx(params, 0, width),
             y + getpointy(params, 0, plotSize.y),
         };
         for (int i = 1; i < params->Penvpoints; i++)
         {
-            auto xx = getpointx(params, i, plotSize.x);
+            if (plateau > 0 && i == params->Penvsustain + 1)
+            {
+                ImVec2 held = {start.x + plateau, start.y};
+                draw_list->AddLine(start, held, col, th);
+                start = held;
+            }
+            auto xx = getpointx(params, i, width) + (plateau > 0 && i > params->Penvsustain ? plateau : 0);
             auto yy = getpointy(params, i, plotSize.y);
             ImVec2 end = {
                 x + xx,
