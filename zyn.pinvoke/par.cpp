@@ -877,6 +877,8 @@ sPar GetParById(
         par.setByte = [mixer, trackIndex](unsigned char value) {
             mixer->SetSystemEffectVolume(trackIndex, 1, value);
         };
+
+        return par;
     }
 
     if (IS_PAR(id + trackId.length() + 1, Pfxsend3))
@@ -887,6 +889,8 @@ sPar GetParById(
         par.setByte = [mixer, trackIndex](unsigned char value) {
             mixer->SetSystemEffectVolume(trackIndex, 2, value);
         };
+
+        return par;
     }
 
     if (IS_PAR(id + trackId.length() + 1, Pfxsend4))
@@ -897,6 +901,8 @@ sPar GetParById(
         par.setByte = [mixer, trackIndex](unsigned char value) {
             mixer->SetSystemEffectVolume(trackIndex, 3, value);
         };
+
+        return par;
     }
 
     return GetTrackPar(track, id + trackId.length() + 1); // the +1 is for the dot
