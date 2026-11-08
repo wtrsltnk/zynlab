@@ -13,7 +13,7 @@ static ImVec2 trackSize = ImVec2(TRACK_WIDTH, 0);
 
 namespace mixer_editor
 {
-    unsigned int EffectNameCount = 10;
+    unsigned int EffectNameCount = 11;
 
     char const *const EffectNames[] = {
         "No effect",
@@ -26,6 +26,7 @@ namespace mixer_editor
         "Equalizer",
         "DynFilter",
         "Compressor",
+        "Limiter",
     };
 } // namespace mixer_editor
 

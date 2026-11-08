@@ -22,6 +22,7 @@ std::vector<std::string> EffectNames = {
     "Equalizer",
     "DynFilter",
     "Compressor",
+    "Limiter",
 };
 
 static std::vector<std::string> reverbPresetNames = {
@@ -111,6 +112,13 @@ static std::vector<std::string> compressorPresetNames = {
     "Bass",
     "Mix bus",
     "Parallel",
+};
+
+static std::vector<std::string> limiterPresetNames = {
+    "Safe",
+    "Gentle",
+    "Loud",
+    "Very loud",
 };
 
 static std::vector<std::string> reverbTypeNames = {
@@ -353,6 +361,9 @@ void zyn::ui::Effect::EffectEditor(EffectManager *effectManager)
             break;
         case 9:
             EffectCompressorEditor(effectManager);
+            break;
+        case 10:
+            EffectLimiterEditor(effectManager);
             break;
     }
     ImGui::PopStyleVar();
@@ -938,6 +949,58 @@ void zyn::ui::Effect::EffectCompressorEditor(EffectManager *effectManager)
         {CompressorPresets::CompressorKnee, "Knee", "A soft start around the threshold (0..24 dB)"},
         {CompressorPresets::CompressorMakeUp, "Make-up", "Turns the result up again (0..30 dB)"},
         {CompressorPresets::CompressorStereoLink, "Link", "Left and right turned down together, on the louder side"},
+    };
+    for (size_t i = 0; i < sizeof(knobs) / sizeof(knobs[0]); i++)
+    {
+        if (i > 0)
+        {
+            ImGui::SameLine();
+        }
+        auto value = effectManager->geteffectpar(knobs[i].par);
+        if (ImGui::KnobUchar(knobs[i].label, &value, 0, 127, ImVec2(40, 40), knobs[i].tooltip))
+        {
+            effectManager->seteffectpar(knobs[i].par, value);
+        }
+    }
+
+    ImGui::Separator();
+
+    auto reduction = effectManager->getgainreduction();
+    char text[32];
+    snprintf(text, sizeof(text), "-%.1f dB", reduction);
+    ImGui::Text("Gain reduction");
+    ImGui::SameLine();
+    ImGui::ProgressBar(reduction / 24.0f, ImVec2(200, 0), text);
+}
+
+void zyn::ui::Effect::EffectLimiterEditor(EffectManager *effectManager)
+{
+    auto preset = static_cast<unsigned char>(effectManager->getpreset());
+    ImGui::PushItemWidth(100);
+    if (ImGui::DropDown("Preset", preset, limiterPresetNames, "Effect presets"))
+    {
+        effectManager->changepreset(preset);
+    }
+
+    auto volume = effectManager->geteffectpar(EffectPresets::Volume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40), "Dry/wet: all the way up is only the limited sound"))
+    {
+        effectManager->seteffectpar(EffectPresets::Volume, volume);
+    }
+
+    ImGui::Separator();
+
+    struct
+    {
+        int par;
+        char const *label;
+        char const *tooltip;
+    } knobs[] = {
+        {LimiterPresets::LimiterDrive, "Drive", "Turns the sound up into the limiter (0..24 dB)"},
+        {LimiterPresets::LimiterCeiling, "Ceiling", "The peaks never go over this (-12..0 dB)"},
+        {LimiterPresets::LimiterAttack, "Attack", "How fast it turns down (0.05..5 ms); what slips through is soft clipped"},
+        {LimiterPresets::LimiterRelease, "Release", "How fast it lets go again (10 ms..1 s)"},
+        {LimiterPresets::LimiterStereoLink, "Link", "Left and right turned down together, on the louder side"},
     };
     for (size_t i = 0; i < sizeof(knobs) / sizeof(knobs[0]); i++)
     {

@@ -801,7 +801,7 @@ void Mixer::SetTrackIndexForInsertEffect(
 namespace mixer
 {
 
-    unsigned int EffectNameCount = 10;
+    unsigned int EffectNameCount = 11;
 
     char const *const EffectNames[] = {
         "No effect",
@@ -814,6 +814,7 @@ namespace mixer
         "Equalizer",
         "DynFilter",
         "Compressor",
+        "Limiter",
     };
 
 } // namespace mixer

@@ -13,6 +13,7 @@ add_library(zyn.fx STATIC
     EffectLFO.cpp
     EffectMgr.cpp
     EQ.cpp
+    Limiter.cpp
     Phaser.cpp
     Reverb.cpp
     Alienwah.h
@@ -26,6 +27,7 @@ add_library(zyn.fx STATIC
     EffectMgr.h
     EffectPresets.h
     EQ.h
+    Limiter.h
     Phaser.h
     Reverb.h
     )
@@ -67,6 +69,7 @@ install(
         ${zyn.fx_SOURCE_DIR}/EffectLFO.h
         ${zyn.fx_SOURCE_DIR}/EffectMgr.h
         ${zyn.fx_SOURCE_DIR}/EQ.h
+        ${zyn.fx_SOURCE_DIR}/Limiter.h
         ${zyn.fx_SOURCE_DIR}/Phaser.h
         ${zyn.fx_SOURCE_DIR}/Reverb.h
     DESTINATION

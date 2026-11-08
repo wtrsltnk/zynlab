@@ -108,4 +108,13 @@ enum CompressorPresets
     CompressorStereoLink = 8,
 };
 
+enum LimiterPresets
+{
+    LimiterDrive = 2,
+    LimiterCeiling = 3,
+    LimiterAttack = 4,
+    LimiterRelease = 5,
+    LimiterStereoLink = 6,
+};
+
 #endif // EFFECTPRESETS_H

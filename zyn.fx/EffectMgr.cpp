@@ -27,6 +27,7 @@
 #include "Distorsion.h"
 #include "DynamicFilter.h"
 #include "EQ.h"
+#include "Limiter.h"
 #include "Echo.h"
 #include "Effect.h"
 #include "Phaser.h"
@@ -128,6 +129,11 @@ void EffectManager::changeeffect(int _nefx)
         case 9:
         {
             _effect = new Compressor(_insertion, _effectOutL, _effectOutR);
+            break;
+        }
+        case 10:
+        {
+            _effect = new Limiter(_insertion, _effectOutL, _effectOutR);
             break;
         }
         //put more effect here
