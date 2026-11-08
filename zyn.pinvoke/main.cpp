@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory.h>
 #include <zyn.common/Config.h>
+#include <zyn.fx/EffectMgr.h>
 #include <zyn.mixer/Mixer.h>
 #include <zyn.serialization/BankManager.h>
 #include <zyn.serialization/SaveToFileSerializer.h>
@@ -93,6 +94,16 @@ __declspec(dllexport) void ChangeEffectPreset(
     const char *id,
     int presetIndex);
 
+// The track an insertion effect (0 - NUM_INS_EFX-1) works on: 0 - NUM_MIXER_TRACKS-1, -1 = off, -2 = master out
+__declspec(dllexport) int GetInsertEffectTrack(
+    Mixer *mixer,
+    int effectIndex);
+
+__declspec(dllexport) void SetInsertEffectTrack(
+    Mixer *mixer,
+    int effectIndex,
+    int trackIndex);
+
 __declspec(dllexport) unsigned char GetPar(
     Mixer *mixer,
     unsigned char trackIndex,
@@ -169,6 +180,41 @@ __declspec(dllexport) int GetInstrumentPath(
     int instrumentIndex,
     char *buffer,
     int bufferSize);
+
+// Standalone effects, without a mixer: run audio from elsewhere (e.g. Tracks) through a Zyn effect.
+// All of them share the global sample rate, so set it before creating any, and don't combine them with
+// a mixer in the same process. The caller serialises calls per effect; nothing here locks.
+__declspec(dllexport) void SetEffectSampleRate(
+    unsigned int sampleRate);
+
+__declspec(dllexport) unsigned int GetEffectBufferSize();
+
+__declspec(dllexport) EffectManager *CreateEffect(
+    int effectType);
+
+__declspec(dllexport) void DestroyEffect(
+    EffectManager *effect);
+
+__declspec(dllexport) void SetEffectPreset(
+    EffectManager *effect,
+    int presetIndex);
+
+__declspec(dllexport) unsigned char GetEffectPar(
+    EffectManager *effect,
+    int par);
+
+__declspec(dllexport) void SetEffectPar(
+    EffectManager *effect,
+    int par,
+    unsigned char value);
+
+__declspec(dllexport) void CleanupEffect(
+    EffectManager *effect);
+
+__declspec(dllexport) void ProcessEffect(
+    EffectManager *effect,
+    float left[],
+    float right[]);
 }
 
 extern std::ofstream logfile;
@@ -335,6 +381,9 @@ void AudioOut(
 
 IBankManager *GetBanks()
 {
+    // the bank functions can be called before CreateMixer; the scan reads the bank folders from the config
+    Config::init();
+
     static bool banksAreScanned = false;
     static BankManager banks;
 
@@ -645,6 +694,41 @@ void ChangeEffectPreset(
     }
 
     effect->changepreset(presetIndex);
+}
+
+int GetInsertEffectTrack(
+    Mixer *mixer,
+    int effectIndex)
+{
+    if (mixer == nullptr || effectIndex < 0 || effectIndex >= NUM_INS_EFX)
+    {
+        return -1;
+    }
+
+    return mixer->GetTrackIndexForInsertEffect(effectIndex);
+}
+
+void SetInsertEffectTrack(
+    Mixer *mixer,
+    int effectIndex,
+    int trackIndex)
+{
+    logfile << "SetInsertEffectTrack[" << effectIndex << "] : " << trackIndex << std::endl;
+
+    if (mixer == nullptr || effectIndex < 0 || effectIndex >= NUM_INS_EFX)
+    {
+        return;
+    }
+
+    if (trackIndex < -2 || trackIndex >= NUM_MIXER_TRACKS)
+    {
+        trackIndex = -1;
+    }
+
+    mixer->Lock();
+    mixer->insefx[effectIndex].cleanup(); // no tail of what it did on its previous track
+    mixer->SetTrackIndexForInsertEffect(effectIndex, static_cast<short int>(trackIndex));
+    mixer->Unlock();
 }
 
 unsigned char GetPar(
@@ -1126,4 +1210,80 @@ int GetInstrumentPath(
     auto path = banks->GetInstrumentPath(instrumentIndex);
 
     return strcpy_s(buffer, bufferSize, path.c_str());
+}
+
+// ---------------------------------------------------------------- standalone effects
+
+void SetEffectSampleRate(
+    unsigned int sampleRate)
+{
+    if (SystemSettings::Instance().SetSampleRate(sampleRate))
+    {
+        SystemSettings::Instance().alias(); // samplerate_f and friends, which the effects read
+    }
+}
+
+unsigned int GetEffectBufferSize()
+{
+    return SystemSettings::Instance().buffersize;
+}
+
+EffectManager *CreateEffect(
+    int effectType)
+{
+    auto effect = new EffectManager();
+    effect->Init(nullptr, true); // insertion: parameter 0 is the dry/wet balance
+    effect->changeeffect(effectType);
+
+    return effect;
+}
+
+void DestroyEffect(
+    EffectManager *effect)
+{
+    delete effect;
+}
+
+void SetEffectPreset(
+    EffectManager *effect,
+    int presetIndex)
+{
+    if (effect == nullptr) return;
+
+    effect->changepreset_nolock(static_cast<unsigned char>(presetIndex)); // the locking variant needs a mixer
+}
+
+unsigned char GetEffectPar(
+    EffectManager *effect,
+    int par)
+{
+    return effect == nullptr ? 0 : effect->geteffectpar(par);
+}
+
+void SetEffectPar(
+    EffectManager *effect,
+    int par,
+    unsigned char value)
+{
+    if (effect == nullptr) return;
+
+    effect->seteffectpar_nolock(par, value);
+}
+
+void CleanupEffect(
+    EffectManager *effect)
+{
+    if (effect == nullptr) return;
+
+    effect->cleanup();
+}
+
+void ProcessEffect(
+    EffectManager *effect,
+    float left[],
+    float right[])
+{
+    if (effect == nullptr) return;
+
+    effect->out(left, right);
 }

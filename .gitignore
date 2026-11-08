@@ -4,3 +4,5 @@ build/*
 /.vs
 out/build/*
 .zynaddsubfxXML.cfg
+.claude/*
+.qtcreator/*
