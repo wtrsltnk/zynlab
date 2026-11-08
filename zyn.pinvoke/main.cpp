@@ -215,6 +215,10 @@ __declspec(dllexport) void ProcessEffect(
     EffectManager *effect,
     float left[],
     float right[]);
+
+// How many dB the last ProcessEffect turned the sound down (0 for effects other than the dynamics ones).
+__declspec(dllexport) float GetEffectGainReduction(
+    EffectManager *effect);
 }
 
 extern std::ofstream logfile;
@@ -1286,4 +1290,10 @@ void ProcessEffect(
     if (effect == nullptr) return;
 
     effect->out(left, right);
+}
+
+float GetEffectGainReduction(
+    EffectManager *effect)
+{
+    return effect == nullptr ? 0.0f : effect->getgainreduction();
 }

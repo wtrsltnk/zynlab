@@ -70,6 +70,7 @@ public:
 
     // used by UI
     float getEQfreqresponse(float freq);
+    float getgainreduction();
 
     FilterParams *_filterpars;
     IMixer *_mixer;

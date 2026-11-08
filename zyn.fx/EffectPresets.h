@@ -97,4 +97,15 @@ enum DynFilterPresets
     DynFilterAmplitudeSmooth = 9,
 };
 
+enum CompressorPresets
+{
+    CompressorThreshold = 2,
+    CompressorRatio = 3,
+    CompressorAttack = 4,
+    CompressorRelease = 5,
+    CompressorKnee = 6,
+    CompressorMakeUp = 7,
+    CompressorStereoLink = 8,
+};
+
 #endif // EFFECTPRESETS_H

@@ -23,6 +23,7 @@
 #include "EffectMgr.h"
 #include "Alienwah.h"
 #include "Chorus.h"
+#include "Compressor.h"
 #include "Distorsion.h"
 #include "DynamicFilter.h"
 #include "EQ.h"
@@ -122,6 +123,11 @@ void EffectManager::changeeffect(int _nefx)
         case 8:
         {
             _effect = new DynamicFilter(_insertion, _effectOutL, _effectOutR);
+            break;
+        }
+        case 9:
+        {
+            _effect = new Compressor(_insertion, _effectOutL, _effectOutR);
             break;
         }
         //put more effect here
@@ -295,6 +301,12 @@ float EffectManager::sysefxgetvolume()
 float EffectManager::getEQfreqresponse(float freq)
 {
     return (_effectType == 7) ? _effect->GetFrequencyResponse(freq) : 0.0f;
+}
+
+// Get the gain reduction of the last buffer, in dB
+float EffectManager::getgainreduction()
+{
+    return (_effect == nullptr) ? 0.0f : _effect->GetGainReduction();
 }
 
 void EffectManager::setdryonly(bool value)

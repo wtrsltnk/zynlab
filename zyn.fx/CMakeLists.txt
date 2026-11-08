@@ -5,6 +5,7 @@ project(zyn.fx)
 add_library(zyn.fx STATIC
     Alienwah.cpp
     Chorus.cpp
+    Compressor.cpp
     Distorsion.cpp
     DynamicFilter.cpp
     Echo.cpp
@@ -16,6 +17,7 @@ add_library(zyn.fx STATIC
     Reverb.cpp
     Alienwah.h
     Chorus.h
+    Compressor.h
     Distorsion.h
     DynamicFilter.h
     Echo.h
@@ -57,6 +59,7 @@ install(
     FILES
         ${zyn.fx_SOURCE_DIR}/Alienwah.h
         ${zyn.fx_SOURCE_DIR}/Chorus.h
+        ${zyn.fx_SOURCE_DIR}/Compressor.h
         ${zyn.fx_SOURCE_DIR}/Distorsion.h
         ${zyn.fx_SOURCE_DIR}/DynamicFilter.h
         ${zyn.fx_SOURCE_DIR}/Echo.h

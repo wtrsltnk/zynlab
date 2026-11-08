@@ -71,6 +71,8 @@ public:
     /**Reset the state of the effect*/
     virtual void Cleanup(void) {}
     virtual float GetFrequencyResponse(float freq) { return freq; }
+    /**How many dB the last buffer was turned down, for a gain reduction meter (dynamics effects only)*/
+    virtual float GetGainReduction(void) { return 0.0f; }
 
     unsigned char Ppreset; /**<Currently used preset*/
     float *const efxoutl;  /**<Effect out Left Channel*/
