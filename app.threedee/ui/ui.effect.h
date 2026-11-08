@@ -24,6 +24,7 @@ private:
     void EffectDistortionEditor(EffectManager *effectManager);
     void EffectEQEditor(EffectManager *effectManager);
     void EffectDynFilterEditor(EffectManager *effectManager);
+    void EffectCompressorEditor(EffectManager *effectManager);
 
 public:
     Effect(AppState *state);

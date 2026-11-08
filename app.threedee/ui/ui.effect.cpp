@@ -1,6 +1,7 @@
 #include "ui.effect.h"
 
 #include "../imgui_addons/imgui_knob.h"
+#include <cstdio>
 #include <zyn.fx/Alienwah.h>
 #include <zyn.fx/EffectMgr.h>
 #include <zyn.fx/EffectPresets.h>
@@ -20,6 +21,7 @@ std::vector<std::string> EffectNames = {
     "Distortion",
     "Equalizer",
     "DynFilter",
+    "Compressor",
 };
 
 static std::vector<std::string> reverbPresetNames = {
@@ -100,6 +102,15 @@ static std::vector<std::string> dynFilterPresetNames = {
     "Sweep",
     "VocalMorph 1",
     "VocalMorph 2",
+};
+
+static std::vector<std::string> compressorPresetNames = {
+    "Gentle",
+    "Vocal",
+    "Drums",
+    "Bass",
+    "Mix bus",
+    "Parallel",
 };
 
 static std::vector<std::string> reverbTypeNames = {
@@ -339,6 +350,9 @@ void zyn::ui::Effect::EffectEditor(EffectManager *effectManager)
             break;
         case 8:
             EffectDynFilterEditor(effectManager);
+            break;
+        case 9:
+            EffectCompressorEditor(effectManager);
             break;
     }
     ImGui::PopStyleVar();
@@ -892,4 +906,58 @@ void zyn::ui::Effect::EffectDynFilterEditor(EffectManager *effectManager)
     ImGui::Text("Filter");
 
     _Filter.Render(effectManager->_filterpars);
+}
+
+void zyn::ui::Effect::EffectCompressorEditor(EffectManager *effectManager)
+{
+    auto preset = static_cast<unsigned char>(effectManager->getpreset());
+    ImGui::PushItemWidth(100);
+    if (ImGui::DropDown("Preset", preset, compressorPresetNames, "Effect presets"))
+    {
+        effectManager->changepreset(preset);
+    }
+
+    auto volume = effectManager->geteffectpar(EffectPresets::Volume);
+    if (ImGui::KnobUchar("Vol", &volume, 0, 127, ImVec2(40, 40), "Dry/wet: all the way up is only the compressed sound"))
+    {
+        effectManager->seteffectpar(EffectPresets::Volume, volume);
+    }
+
+    ImGui::Separator();
+
+    struct
+    {
+        int par;
+        char const *label;
+        char const *tooltip;
+    } knobs[] = {
+        {CompressorPresets::CompressorThreshold, "Threshold", "Above this level (-60..0 dB) it turns the sound down"},
+        {CompressorPresets::CompressorRatio, "Ratio", "How hard: 1:1..20:1, all the way up is infinite"},
+        {CompressorPresets::CompressorAttack, "Attack", "How fast it turns down (0.1..100 ms)"},
+        {CompressorPresets::CompressorRelease, "Release", "How fast it lets go again (10 ms..2 s)"},
+        {CompressorPresets::CompressorKnee, "Knee", "A soft start around the threshold (0..24 dB)"},
+        {CompressorPresets::CompressorMakeUp, "Make-up", "Turns the result up again (0..30 dB)"},
+        {CompressorPresets::CompressorStereoLink, "Link", "Left and right turned down together, on the louder side"},
+    };
+    for (size_t i = 0; i < sizeof(knobs) / sizeof(knobs[0]); i++)
+    {
+        if (i > 0)
+        {
+            ImGui::SameLine();
+        }
+        auto value = effectManager->geteffectpar(knobs[i].par);
+        if (ImGui::KnobUchar(knobs[i].label, &value, 0, 127, ImVec2(40, 40), knobs[i].tooltip))
+        {
+            effectManager->seteffectpar(knobs[i].par, value);
+        }
+    }
+
+    ImGui::Separator();
+
+    auto reduction = effectManager->getgainreduction();
+    char text[32];
+    snprintf(text, sizeof(text), "-%.1f dB", reduction);
+    ImGui::Text("Gain reduction");
+    ImGui::SameLine();
+    ImGui::ProgressBar(reduction / 24.0f, ImVec2(200, 0), text);
 }
